@@ -1,0 +1,248 @@
+@namespace PublisherStudio.Components.Editor
+
+<DxRibbon CssClass="publication-ribbon" AdaptivityAutoCollapseItemsToGroups="true">
+    <DxRibbonApplicationTab Text="File">
+        <DxRibbonApplicationTabItem Text="New publication" Click="RequestNew" />
+        <DxRibbonApplicationTabItem Text="Open publication" Click="RequestOpen" />
+        <DxRibbonApplicationTabItem Text="Save a copy" Click="RequestSave" />
+        <DxRibbonApplicationTabItem Text="Print" Click="RequestPrint" />
+    </DxRibbonApplicationTab>
+    <DxRibbonTab Text="Home">
+        <DxRibbonGroup Text="History">
+            <DxRibbonItem Text="Undo" Enabled="State.CanUndo" Click="Undo" />
+            <DxRibbonItem Text="Redo" Enabled="State.CanRedo" Click="Redo" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Clipboard">
+            <DxRibbonItem Text="Duplicate" Enabled="HasSelection" Click="Duplicate" />
+            <DxRibbonItem Text="Delete" Enabled="HasSelection" Click="Delete" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Arrange">
+            <DxRibbonItem Text="To front" Enabled="HasSelection" Click="BringToFront" />
+            <DxRibbonItem Text="Forward" Enabled="HasSelection" Click="BringForward" />
+            <DxRibbonItem Text="Backward" Enabled="HasSelection" Click="SendBackward" />
+            <DxRibbonItem Text="To back" Enabled="HasSelection" Click="SendToBack" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Align to page">
+            <DxRibbonItem Text="Left" Enabled="HasSelection" Click="AlignLeft" />
+            <DxRibbonItem Text="Center" Enabled="HasSelection" Click="AlignCenter" />
+            <DxRibbonItem Text="Right" Enabled="HasSelection" Click="AlignRight" />
+            <DxRibbonItem Text="Top" Enabled="HasSelection" Click="AlignTop" />
+            <DxRibbonItem Text="Middle" Enabled="HasSelection" Click="AlignMiddle" />
+            <DxRibbonItem Text="Bottom" Enabled="HasSelection" Click="AlignBottom" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+    <DxRibbonTab Text="Insert">
+        <DxRibbonGroup Text="Objects">
+            <DxRibbonItem Text="Text box" Click="AddText" />
+            <DxRibbonItem Text="Picture" Click="RequestPicture" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Shapes">
+            <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
+            <DxRibbonItem Text="Rounded rectangle" Click="AddRoundedRectangle" />
+            <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
+            <DxRibbonItem Text="Line" Click="AddLine" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Pages">
+            <DxRibbonItem Text="New page" Click="AddPage" />
+            <DxRibbonItem Text="Duplicate page" Click="DuplicatePage" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+    <DxRibbonTab Text="Page Design">
+        <DxRibbonGroup Text="Page size">
+            <DxRibbonItem Text="A4 portrait" Click="SetA4Portrait" />
+            <DxRibbonItem Text="A4 landscape" Click="SetA4Landscape" />
+            <DxRibbonItem Text="Letter portrait" Click="SetLetterPortrait" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Background">
+            <DxRibbonColorPaletteItem Text="Page color" Value="@State.CurrentPage.Background" ValueChanged="OnPageColorChanged">
+                <Groups>
+                    <DxRibbonColorGroup Header="Publication" Colors="@PageColors" />
+                </Groups>
+            </DxRibbonColorPaletteItem>
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Guides">
+            <DxRibbonItem Text="Vertical center guide" Click="AddVerticalGuide" />
+            <DxRibbonItem Text="Horizontal center guide" Click="AddHorizontalGuide" />
+            <DxRibbonItem Text="Clear guides" Click="ClearGuides" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+    <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsImageSelected">
+        <DxRibbonGroup Text="Picture">
+            <DxRibbonItem Text="Replace" Click="RequestPicture" />
+            <DxRibbonItem Text="@CropCommandText" Click="ToggleCrop" />
+            <DxRibbonItem Text="Fit" Click="PictureFit" />
+            <DxRibbonItem Text="Fill" Click="PictureFill" />
+            <DxRibbonItem Text="Reset" Click="ResetPicture" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Adjust">
+            <DxRibbonItem Text="Brighten" Click="BrightenPicture" />
+            <DxRibbonItem Text="High contrast" Click="ContrastPicture" />
+            <DxRibbonItem Text="More color" Click="SaturatePicture" />
+            <DxRibbonItem Text="Grayscale" Click="ToggleGrayscale" />
+            <DxRibbonItem Text="Sepia" Click="ToggleSepia" />
+            <DxRibbonItem Text="Invert" Click="ToggleInvert" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Picture styles">
+            <DxRibbonItem Text="Rectangle" Click="MaskRectangle" />
+            <DxRibbonItem Text="Rounded" Click="MaskRounded" />
+            <DxRibbonItem Text="Ellipse" Click="MaskEllipse" />
+            <DxRibbonItem Text="Shadow" Click="ToggleShadow" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Frame ratio">
+            <DxRibbonItem Text="1:1" Click="RatioSquare" />
+            <DxRibbonItem Text="4:3" Click="RatioFourThree" />
+            <DxRibbonItem Text="16:9" Click="RatioSixteenNine" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Rotate">
+            <DxRibbonItem Text="Rotate left" Click="RotateLeft" />
+            <DxRibbonItem Text="Rotate right" Click="RotateRight" />
+            <DxRibbonItem Text="Flip horizontal" Click="FlipHorizontal" />
+            <DxRibbonItem Text="Flip vertical" Click="FlipVertical" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+    <DxRibbonTab Text="Text Box Tools" Contextual="true" Visible="IsTextSelected">
+        <DxRibbonGroup Text="Text">
+            <DxRibbonItem Text="Edit story" Click="RequestStoryEditor" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Frame">
+            <DxRibbonItem Text="No fill" Click="TextNoFill" />
+            <DxRibbonItem Text="White fill" Click="TextWhiteFill" />
+            <DxRibbonItem Text="Rotate left" Click="RotateLeft" />
+            <DxRibbonItem Text="Rotate right" Click="RotateRight" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+    <DxRibbonTab Text="Shape Tools" Contextual="true" Visible="IsShapeSelected">
+        <DxRibbonGroup Text="Shape">
+            <DxRibbonColorPaletteItem Text="Fill" Value="@ShapeFill" ValueChanged="OnShapeFillChanged">
+                <Groups>
+                    <DxRibbonColorGroup Header="Publication" Colors="@PageColors" />
+                </Groups>
+            </DxRibbonColorPaletteItem>
+            <DxRibbonColorPaletteItem Text="Outline" Value="@ShapeStroke" ValueChanged="OnShapeStrokeChanged">
+                <Groups>
+                    <DxRibbonColorGroup Header="Publication" Colors="@PageColors" />
+                </Groups>
+            </DxRibbonColorPaletteItem>
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Rotate">
+            <DxRibbonItem Text="Rotate left" Click="RotateLeft" />
+            <DxRibbonItem Text="Rotate right" Click="RotateRight" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+</DxRibbon>
+
+@code {
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback OnNew { get; set; }
+    [Parameter] public EventCallback OnOpen { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public EventCallback OnPrint { get; set; }
+    [Parameter] public EventCallback OnInsertPicture { get; set; }
+    [Parameter] public EventCallback OnEditStory { get; set; }
+
+    private string CropCommandText => State.CropMode ? "Finish crop" : "Crop";
+    private Task RequestNew() => OnNew.InvokeAsync();
+    private Task RequestOpen() => OnOpen.InvokeAsync();
+    private Task RequestSave() => OnSave.InvokeAsync();
+    private Task RequestPrint() => OnPrint.InvokeAsync();
+    private Task RequestPicture() => OnInsertPicture.InvokeAsync();
+    private Task RequestStoryEditor() => OnEditStory.InvokeAsync();
+
+    private bool HasSelection => State.SelectedElement is not null;
+    private bool IsImageSelected => State.SelectedElement is ImageFrameElement;
+    private bool IsTextSelected => State.SelectedElement is TextFrameElement;
+    private bool IsShapeSelected => State.SelectedElement is ShapeElement;
+    private string ShapeFill => (State.SelectedElement as ShapeElement)?.Fill ?? "#ffffff";
+    private string ShapeStroke => (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
+    private static readonly string[] PageColors = ["#ffffff", "#f8fafc", "#fef3c7", "#fee2e2", "#dcfce7", "#dbeafe", "#ede9fe", "#111827"];
+
+    private void Undo() => State.Undo();
+    private void Redo() => State.Redo();
+    private void Duplicate() => State.DuplicateSelected();
+    private void Delete() => State.DeleteSelected();
+    private void BringToFront() => State.BringToFront();
+    private void BringForward() => State.BringForward();
+    private void SendBackward() => State.SendBackward();
+    private void SendToBack() => State.SendToBack();
+    private void AlignLeft() => State.Align("left");
+    private void AlignCenter() => State.Align("center");
+    private void AlignRight() => State.Align("right");
+    private void AlignTop() => State.Align("top");
+    private void AlignMiddle() => State.Align("middle");
+    private void AlignBottom() => State.Align("bottom");
+    private void AddText() => State.AddText();
+    private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
+    private void AddRoundedRectangle() => State.AddShape(PublicationShape.RoundedRectangle);
+    private void AddEllipse() => State.AddShape(PublicationShape.Ellipse);
+    private void AddLine() => State.AddShape(PublicationShape.Line);
+    private void AddPage() => State.AddPage();
+    private void DuplicatePage() => State.DuplicatePage();
+    private void SetA4Portrait() => SetPage(210, 297);
+    private void SetA4Landscape() => SetPage(297, 210);
+    private void SetLetterPortrait() => SetPage(215.9, 279.4);
+    private void ToggleCrop() => State.ToggleCropMode();
+    private void AddVerticalGuide() => State.AddGuide(GuideOrientation.Vertical);
+    private void AddHorizontalGuide() => State.AddGuide(GuideOrientation.Horizontal);
+    private void ClearGuides() => State.ClearGuides();
+    private void PictureFit() => SetImage(i => i.FitInsideFrame = true);
+    private void PictureFill() => SetImage(i => i.FitInsideFrame = false);
+    private void BrightenPicture() => SetImage(i => i.Brightness = Math.Min(2, i.Brightness + .15));
+    private void ContrastPicture() => SetImage(i => i.Contrast = Math.Min(2, i.Contrast + .15));
+    private void SaturatePicture() => SetImage(i => i.Saturation = Math.Min(2, i.Saturation + .15));
+    private void ToggleGrayscale() => SetImage(i => i.Grayscale = i.Grayscale > 0 ? 0 : 1);
+    private void ToggleSepia() => SetImage(i => i.Sepia = i.Sepia > 0 ? 0 : .85);
+    private void ToggleInvert() => SetImage(i => i.Invert = i.Invert > 0 ? 0 : 1);
+    private void MaskRectangle() => SetImage(i => i.MaskShape = ImageMaskShape.Rectangle);
+    private void MaskRounded() => SetImage(i => i.MaskShape = ImageMaskShape.RoundedRectangle);
+    private void MaskEllipse() => SetImage(i => i.MaskShape = ImageMaskShape.Ellipse);
+    private void ToggleShadow() => SetImage(i => i.ShadowEnabled = !i.ShadowEnabled);
+    private void RatioSquare() => SetImageRatio(1);
+    private void RatioFourThree() => SetImageRatio(4d / 3d);
+    private void RatioSixteenNine() => SetImageRatio(16d / 9d);
+    private void RotateLeft() => Rotate(-90);
+    private void RotateRight() => Rotate(90);
+    private void FlipHorizontal() => SetImage(i => i.FlipHorizontal = !i.FlipHorizontal);
+    private void FlipVertical() => SetImage(i => i.FlipVertical = !i.FlipVertical);
+    private void TextNoFill() => SetText(t => t.Background = "transparent");
+    private void TextWhiteFill() => SetText(t => t.Background = "#ffffff");
+    private void SetPage(double width, double height) => State.UpdatePage(page => { page.WidthMm = width; page.HeightMm = height; });
+    private void Rotate(double amount) => State.UpdateSelected(element => element.Rotation = (element.Rotation + amount) % 360);
+    private void SetImage(Action<ImageFrameElement> update)
+    {
+        if (State.SelectedElement is ImageFrameElement image)
+            State.UpdateSelected(_ => update(image));
+    }
+    private void SetImageRatio(double ratio)
+    {
+        SetImage(image => image.Height = Math.Max(2, image.Width / ratio));
+    }
+    private void SetText(Action<TextFrameElement> update)
+    {
+        if (State.SelectedElement is TextFrameElement text)
+            State.UpdateSelected(_ => update(text));
+    }
+    private void OnPageColorChanged(string value) => State.UpdatePage(page => page.Background = value);
+    private void OnShapeFillChanged(string value)
+    {
+        if (State.SelectedElement is ShapeElement shape)
+            State.UpdateSelected(_ => shape.Fill = value);
+    }
+    private void OnShapeStrokeChanged(string value)
+    {
+        if (State.SelectedElement is ShapeElement shape)
+            State.UpdateSelected(_ => shape.Stroke = value);
+    }
+    private void ResetPicture()
+    {
+        SetImage(image =>
+        {
+            image.CropX = 0; image.CropY = 0; image.CropScale = 1;
+            image.Opacity = 1; image.Brightness = 1; image.Contrast = 1;
+            image.Saturation = 1; image.HueRotation = 0; image.Invert = 0;
+            image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
+            image.FlipHorizontal = false; image.FlipVertical = false;
+            image.MaskShape = ImageMaskShape.Rectangle; image.CornerRadiusMm = 4;
+            image.BorderColor = "transparent"; image.BorderWidthMm = 0; image.ShadowEnabled = false;
+        });
+    }
+}

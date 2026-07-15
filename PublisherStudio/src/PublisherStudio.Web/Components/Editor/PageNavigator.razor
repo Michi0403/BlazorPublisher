@@ -1,0 +1,37 @@
+@namespace PublisherStudio.Components.Editor
+
+<aside class="page-navigator">
+    <div class="pane-heading">
+        <strong>Pages</strong>
+        <span>@State.Document.Pages.Count</span>
+    </div>
+    <div class="page-thumbnail-list">
+        @for (var index = 0; index < State.Document.Pages.Count; index++)
+        {
+            var publicationPage = State.Document.Pages[index];
+            <button class="page-thumbnail @(publicationPage.Id == State.SelectedPageId ? "selected" : null)" @onclick="() => State.SelectPage(publicationPage.Id)">
+                <span class="page-number">@(index + 1)</span>
+                <span class="mini-page" style="@MiniPageStyle(publicationPage)">
+                    @foreach (var item in publicationPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
+                    {
+                        <span class="mini-element mini-@item.Kind.ToString().ToLowerInvariant()" style="@MiniElementStyle(item, publicationPage)"></span>
+                    }
+                </span>
+                <span class="page-name">@publicationPage.Name</span>
+            </button>
+        }
+    </div>
+    <div class="pane-actions">
+        <DxButton Text="Add" Click="@(() => State.AddPage())" />
+        <DxButton Text="Copy" Enabled="State.Document.Pages.Count > 0" Click="@(() => State.DuplicatePage())" />
+        <DxButton Text="Delete" Enabled="State.Document.Pages.Count > 1" Click="@(() => State.DeletePage())" />
+    </div>
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    private static string MiniPageStyle(PublicationPage page) => $"aspect-ratio:{page.WidthMm.ToString(CultureInfo.InvariantCulture)}/{page.HeightMm.ToString(CultureInfo.InvariantCulture)};background:{page.Background}";
+    private static string MiniElementStyle(PublicationElement element, PublicationPage page) =>
+        $"left:{Inv(element.X / page.WidthMm * 100)}%;top:{Inv(element.Y / page.HeightMm * 100)}%;width:{Inv(element.Width / page.WidthMm * 100)}%;height:{Inv(element.Height / page.HeightMm * 100)}%;transform:rotate({Inv(element.Rotation)}deg)";
+    private static string Inv(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+}

@@ -1,0 +1,11 @@
+.vs/
+**/bin/
+**/obj/
+artifacts/
+*.user
+*.suo
+*.db
+*.pfx
+*.snk
+*.licx
+PublisherStudio/runtime/

@@ -1,0 +1,123 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div class="publication-stage" @onclick="ClearSelection">
+    <div class="corner-ruler">mm</div>
+    <div class="horizontal-ruler" style="width:@PageWidthPx">
+        @foreach (var tick in HorizontalTicks)
+        {
+            <span class="ruler-tick major" style="left:@Px(tick * PixelsPerMm)"><b>@tick</b></span>
+        }
+    </div>
+    <div class="vertical-ruler" style="height:@PageHeightPx">
+        @foreach (var tick in VerticalTicks)
+        {
+            <span class="ruler-tick major" style="top:@Px(tick * PixelsPerMm)"><b>@tick</b></span>
+        }
+    </div>
+    <div class="page-scroll-area">
+        <div id="publisher-page" class="publication-page @(State.CropMode ? "crop-mode" : null)"
+             style="width:@PageWidthPx;height:@PageHeightPx;background:@State.CurrentPage.Background"
+             data-px-per-mm="@PixelsPerMm.ToString(CultureInfo.InvariantCulture)">
+            @foreach (var guide in State.CurrentPage.Guides)
+            {
+                <div class="guide-line @guide.Orientation.ToString().ToLowerInvariant()" style="@GuideStyle(guide)"></div>
+            }
+            @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
+            {
+                <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
+                     class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
+                     style="@ElementStyle(element)" @ondblclick="() => DoubleClick(element)" @onclick:stopPropagation="true">
+                    @switch (element)
+                    {
+                        case TextFrameElement text:
+                            <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@text.Background;border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                                @((MarkupString)text.PreviewHtml)
+                            </div>
+                            break;
+                        case ImageFrameElement image:
+                            <div class="image-frame" style="@ImageFrameStyle(image)">
+                                <img src="@image.DataUrl" alt="@image.AltText" draggable="false" style="@ImageStyle(image)"
+                                     data-crop-x="@Inv(image.CropX)" data-crop-y="@Inv(image.CropY)" data-crop-scale="@Inv(image.CropScale)"
+                                     data-flip-x="@(image.FlipHorizontal ? -1 : 1)" data-flip-y="@(image.FlipVertical ? -1 : 1)" />
+                            </div>
+                            break;
+                        case ShapeElement shape:
+                            <div class="shape shape-@shape.Shape.ToString().ToLowerInvariant()" style="@ShapeStyle(shape)"></div>
+                            break;
+                    }
+                    @if (element.Id == State.SelectedElementId && !element.Locked)
+                    {
+                        foreach (var handle in Handles)
+                        {
+                            <span class="selection-handle handle-@handle" data-resize-handle="@handle"></span>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback<Guid> EditTextRequested { get; set; }
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<PageSurface>? _self;
+    private static readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+    private double PixelsPerMm => 3.7795275591 * State.Document.Zoom;
+    private string PageWidthPx => Px(State.CurrentPage.WidthMm * PixelsPerMm);
+    private string PageHeightPx => Px(State.CurrentPage.HeightMm * PixelsPerMm);
+    private IEnumerable<int> HorizontalTicks => Enumerable.Range(0, (int)Math.Floor(State.CurrentPage.WidthMm / 10) + 1).Select(i => i * 10);
+    private IEnumerable<int> VerticalTicks => Enumerable.Range(0, (int)Math.Floor(State.CurrentPage.HeightMm / 10) + 1).Select(i => i * 10);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
+        _self ??= DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("initializeCanvas", "publisher-page", _self, PixelsPerMm, State.CropMode);
+    }
+
+    [JSInvokable] public void SelectElement(string id)
+    {
+        if (Guid.TryParse(id, out var guid)) State.SelectElement(guid);
+    }
+    [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height)
+    {
+        if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height);
+    }
+    [JSInvokable] public void CommitCrop(string id, double cropX, double cropY)
+    {
+        if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY);
+    }
+
+    private void ClearSelection() => State.SelectElement(null);
+    private Task DoubleClick(PublicationElement element) => element is TextFrameElement ? EditTextRequested.InvokeAsync(element.Id) : Task.CompletedTask;
+    private string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({e.Rotation.ToString(CultureInfo.InvariantCulture)}deg)";
+    private string ShapeStyle(ShapeElement s) => s.Shape == PublicationShape.Line
+        ? $"background:{s.Stroke};height:{Mm(Math.Max(s.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
+        : $"background:{s.Fill};border:{Mm(s.StrokeWidth)} solid {s.Stroke};border-radius:{(s.Shape == PublicationShape.Ellipse ? "50%" : s.Shape == PublicationShape.RoundedRectangle ? Mm(s.CornerRadiusMm) : "0")}";
+    private string ImageFrameStyle(ImageFrameElement i)
+    {
+        var radius = i.MaskShape == ImageMaskShape.Ellipse ? "50%" : i.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(i.CornerRadiusMm) : "0";
+        var shadow = i.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
+        return $"border-radius:{radius};border:{Mm(i.BorderWidthMm)} solid {i.BorderColor};box-shadow:{shadow}";
+    }
+    private string ImageStyle(ImageFrameElement i)
+    {
+        var fit = i.FitInsideFrame ? "contain" : "cover";
+        var sx = i.FlipHorizontal ? -i.CropScale : i.CropScale;
+        var sy = i.FlipVertical ? -i.CropScale : i.CropScale;
+        return $"object-fit:{fit};transform:translate({i.CropX.ToString(CultureInfo.InvariantCulture)}%,{i.CropY.ToString(CultureInfo.InvariantCulture)}%) scale({sx.ToString(CultureInfo.InvariantCulture)},{sy.ToString(CultureInfo.InvariantCulture)});opacity:{i.Opacity.ToString(CultureInfo.InvariantCulture)};filter:brightness({i.Brightness.ToString(CultureInfo.InvariantCulture)}) contrast({i.Contrast.ToString(CultureInfo.InvariantCulture)}) saturate({i.Saturation.ToString(CultureInfo.InvariantCulture)}) hue-rotate({i.HueRotation.ToString(CultureInfo.InvariantCulture)}deg) invert({i.Invert.ToString(CultureInfo.InvariantCulture)}) grayscale({i.Grayscale.ToString(CultureInfo.InvariantCulture)}) sepia({i.Sepia.ToString(CultureInfo.InvariantCulture)}) blur({i.Blur.ToString(CultureInfo.InvariantCulture)}px)";
+    }
+    private static string Inv(double value) => value.ToString(CultureInfo.InvariantCulture);
+    private string GuideStyle(GuideLine guide) => guide.Orientation == GuideOrientation.Horizontal ? $"top:{Mm(guide.PositionMm)}" : $"left:{Mm(guide.PositionMm)}";
+    private string Mm(double mm) => Px(mm * PixelsPerMm);
+    private static string Px(double px) => $"{px.ToString("0.###", CultureInfo.InvariantCulture)}px";
+    public async ValueTask DisposeAsync()
+    {
+        _self?.Dispose();
+        if (_module is not null) await _module.DisposeAsync();
+    }
+}

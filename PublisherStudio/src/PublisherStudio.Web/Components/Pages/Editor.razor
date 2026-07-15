@@ -1,0 +1,141 @@
+@page "/"
+@rendermode InteractiveServer
+@implements IDisposable
+@inject EditorStateService State
+@inject PublicationFileService Files
+@inject IJSRuntime JS
+
+<PageTitle>PublisherStudio</PageTitle>
+
+<div class="publisher-shell">
+    <header class="title-bar">
+        <div class="brand-mark">P</div>
+        <input class="document-name" value="@State.Document.Name" @onchange="RenameDocument" aria-label="Publication name" />
+        <span class="modified-label">Modified @State.Document.ModifiedUtc.LocalDateTime.ToString("g")</span>
+    </header>
+
+    <PublicationRibbon State="State" OnNew="NewDocument" OnOpen="OpenPublicationPicker" OnSave="SavePublication"
+                       OnPrint="Print" OnInsertPicture="OpenPicturePicker" OnEditStory="OpenStoryEditor" />
+
+    <div class="editor-workspace">
+        <PageNavigator State="State" />
+        <PageSurface State="State" EditTextRequested="OpenStoryEditorById" />
+        <InspectorPanel State="State" OnEditStory="OpenStoryEditor" />
+    </div>
+
+    <footer class="status-bar">
+        <span>Page @(State.Document.Pages.FindIndex(p => p.Id == State.SelectedPageId) + 1) of @State.Document.Pages.Count</span>
+        <span>@SelectionStatus</span>
+        <label class="zoom-control">Zoom
+            <input type="range" min="0.35" max="2" step="0.05" value="@State.Document.Zoom.ToString(CultureInfo.InvariantCulture)" @onchange="ChangeZoom" />
+            <b>@Math.Round(State.Document.Zoom * 100)%</b>
+        </label>
+    </footer>
+</div>
+
+<InputFile id="publication-file-input" class="hidden-file-input" accept=".json,.pubstudio.json,application/json" OnChange="OpenPublication" />
+<InputFile id="picture-file-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="InsertPicture" />
+
+<PrintPublication Document="State.Document" />
+
+<StoryEditor Visible="_storyEditorVisible" TextFrame="@(State.SelectedElement as TextFrameElement)" Saved="SaveStory" Cancelled="CloseStoryEditor" />
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="toast error" @onclick="() => _error = null">@_error</div>
+}
+
+@code {
+    private bool _storyEditorVisible;
+    private string? _error;
+    private string SelectionStatus => State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
+
+    protected override void OnInitialized() => State.Changed += StateChanged;
+    private void StateChanged() => InvokeAsync(StateHasChanged);
+
+    private void NewDocument() => State.NewDocument();
+    private async Task OpenPublicationPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "publication-file-input");
+    private async Task OpenPicturePicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-file-input");
+    private async Task SavePublication()
+    {
+        var json = Files.Serialize(State.Document);
+        var name = PublicationFileService.SafeFileName(State.Document.Name) + ".pubstudio.json";
+        await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+        using var streamReference = new DotNetStreamReference(stream);
+        await JS.InvokeVoidAsync("publisherStudio.downloadStream", name, streamReference, "application/json");
+    }
+    private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");
+
+    private async Task OpenPublication(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            await using var stream = args.File.OpenReadStream(64 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+            State.Load(await reader.ReadToEndAsync());
+        }
+        catch (Exception ex) { ShowError(ex); }
+    }
+
+    private async Task InsertPicture(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            var file = args.File;
+            var allowed = new[] { "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml" };
+            if (!allowed.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
+                throw new InvalidDataException("Unsupported picture format.");
+            await using var stream = file.OpenReadStream(64 * 1024 * 1024);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
+            if (State.SelectedElement is ImageFrameElement image)
+                State.UpdateSelected(_ => { image.DataUrl = dataUrl; image.AltText = file.Name; image.Name = file.Name; });
+            else
+                State.AddImage(dataUrl, file.Name);
+        }
+        catch (Exception ex) { ShowError(ex); }
+    }
+
+    private Task OpenStoryEditorById(Guid id)
+    {
+        State.SelectElement(id);
+        return OpenStoryEditor();
+    }
+    private Task OpenStoryEditor()
+    {
+        if (State.SelectedElement is TextFrameElement) _storyEditorVisible = true;
+        return Task.CompletedTask;
+    }
+    private Task CloseStoryEditor()
+    {
+        _storyEditorVisible = false;
+        return Task.CompletedTask;
+    }
+    private Task SaveStory((byte[] Content, string PreviewHtml) result)
+    {
+        State.UpdateTextDocument(result.Content, result.PreviewHtml);
+        _storyEditorVisible = false;
+        return Task.CompletedTask;
+    }
+    private void RenameDocument(ChangeEventArgs args)
+    {
+        State.Document.Name = string.IsNullOrWhiteSpace(args.Value?.ToString()) ? "Untitled Publication" : args.Value!.ToString()!;
+        State.Document.ModifiedUtc = DateTimeOffset.UtcNow;
+        StateChanged();
+    }
+    private void ChangeZoom(ChangeEventArgs args)
+    {
+        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var zoom))
+        {
+            State.Document.Zoom = Math.Clamp(zoom, .35, 2);
+            StateChanged();
+        }
+    }
+    private void ShowError(Exception ex)
+    {
+        _error = ex.Message;
+        StateChanged();
+    }
+    public void Dispose() => State.Changed -= StateChanged;
+}

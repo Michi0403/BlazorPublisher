@@ -1,0 +1,223 @@
+@namespace PublisherStudio.Components.Editor
+
+<aside class="inspector-panel">
+    <div class="inspector-tabs">
+        <button class="@PropertiesTabClass" @onclick="ShowProperties">Properties</button>
+        <button class="@LayersTabClass" @onclick="ShowLayers">Layers</button>
+    </div>
+
+    @if (_tab == "layers")
+    {
+        <div class="layers-list">
+            @foreach (var item in State.CurrentPage.Elements.OrderByDescending(e => e.ZIndex))
+            {
+                <button class="layer-row @(item.Id == State.SelectedElementId ? "selected" : null)" @onclick="() => State.SelectElement(item.Id)">
+                    <span class="layer-kind">@KindGlyph(item)</span>
+                    <span class="layer-name">@item.Name</span>
+                    <span class="layer-state">@(item.Locked ? "🔒" : "") @(item.Visible ? "" : "◌")</span>
+                </button>
+            }
+            @if (State.CurrentPage.Elements.Count == 0)
+            {
+                <div class="empty-panel">This page has no objects.</div>
+            }
+        </div>
+    }
+    else if (State.SelectedElement is { } element)
+    {
+        <div class="property-scroll">
+            <section class="property-section">
+                <h3>Object</h3>
+                <label>Name<input value="@element.Name" @onchange="ChangeName" /></label>
+                <div class="property-grid two">
+                    @NumberField("X", element.X, "x")
+                    @NumberField("Y", element.Y, "y")
+                    @NumberField("Width", element.Width, "width")
+                    @NumberField("Height", element.Height, "height")
+                    @NumberField("Rotation", element.Rotation, "rotation")
+                    @NumberField("Layer", element.ZIndex, "z")
+                </div>
+                <label class="check-row"><input type="checkbox" checked="@element.Visible" @onchange="ToggleVisible" /> Visible</label>
+                <label class="check-row"><input type="checkbox" checked="@element.Locked" @onchange="ToggleLocked" /> Locked</label>
+            </section>
+
+            @if (element is ImageFrameElement image)
+            {
+                <section class="property-section">
+                    <h3>Picture</h3>
+                    @RangeField("Crop zoom", image.CropScale, .2, 4, .05, "cropScale")
+                    @RangeField("Opacity", image.Opacity, 0, 1, .05, "opacity")
+                    @RangeField("Brightness", image.Brightness, 0, 2, .05, "brightness")
+                    @RangeField("Contrast", image.Contrast, 0, 2, .05, "contrast")
+                    @RangeField("Saturation", image.Saturation, 0, 2, .05, "saturation")
+                    @RangeField("Hue", image.HueRotation, -180, 180, 1, "hue")
+                    @RangeField("Invert", image.Invert, 0, 1, .05, "invert")
+                    @RangeField("Grayscale", image.Grayscale, 0, 1, .05, "grayscale")
+                    @RangeField("Sepia", image.Sepia, 0, 1, .05, "sepia")
+                    @RangeField("Blur", image.Blur, 0, 12, .25, "blur")
+                    <label>Mask
+                        <select value="@image.MaskShape" @onchange="ChangeImageMask">
+                            <option value="Rectangle">Rectangle</option>
+                            <option value="RoundedRectangle">Rounded rectangle</option>
+                            <option value="Ellipse">Ellipse</option>
+                        </select>
+                    </label>
+                    @RangeField("Rounded corners", image.CornerRadiusMm, 0, 30, .5, "corner")
+                    @ColorField("Border", image.BorderColor, "imageBorder")
+                    @RangeField("Border width", image.BorderWidthMm, 0, 5, .1, "imageBorderWidth")
+                    <label class="check-row"><input type="checkbox" checked="@image.ShadowEnabled" @onchange="ToggleImageShadow" /> Drop shadow</label>
+                    <label>Alt text<input value="@image.AltText" @onchange="ChangeAltText" /></label>
+                </section>
+            }
+            else if (element is TextFrameElement text)
+            {
+                <section class="property-section">
+                    <h3>Text frame</h3>
+                    @RangeField("Padding", text.PaddingMm, 0, 20, .5, "padding")
+                    @ColorField("Background", text.Background, "textBackground")
+                    @ColorField("Border", text.BorderColor, "textBorder")
+                    @RangeField("Border width", text.BorderWidth, 0, 5, .1, "textBorderWidth")
+                    <DxButton Text="Edit story" Click="RequestEditStory" CssClass="wide-button" />
+                </section>
+            }
+            else if (element is ShapeElement shape)
+            {
+                <section class="property-section">
+                    <h3>Shape</h3>
+                    @ColorField("Fill", shape.Fill, "shapeFill")
+                    @ColorField("Outline", shape.Stroke, "shapeStroke")
+                    @RangeField("Outline width", shape.StrokeWidth, 0, 8, .1, "shapeStrokeWidth")
+                    @RangeField("Corner radius", shape.CornerRadiusMm, 0, 30, .5, "shapeCorner")
+                </section>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-panel selection-help">
+            <strong>No object selected</strong>
+            <span>Select a text box, picture, or shape to edit its exact properties.</span>
+        </div>
+    }
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback OnEditStory { get; set; }
+    private string _tab = "properties";
+    private Task RequestEditStory() => OnEditStory.InvokeAsync();
+
+    private string PropertiesTabClass => _tab == "properties" ? "active" : string.Empty;
+    private string LayersTabClass => _tab == "layers" ? "active" : string.Empty;
+    private void ShowProperties() => _tab = "properties";
+    private void ShowLayers() => _tab = "layers";
+    private static string KindGlyph(PublicationElement item) => item.Kind switch
+    {
+        PublicationElementKind.Text => "T", PublicationElementKind.Image => "▧", _ => "◇"
+    };
+
+    private RenderFragment NumberField(string label, double value, string field) => builder =>
+    {
+        var seq = 0;
+        builder.OpenElement(seq++, "label");
+        builder.AddContent(seq++, label);
+        builder.OpenElement(seq++, "input");
+        builder.AddAttribute(seq++, "type", "number");
+        builder.AddAttribute(seq++, "step", field == "z" ? "1" : ".1");
+        builder.AddAttribute(seq++, "value", value.ToString("0.##", CultureInfo.InvariantCulture));
+        builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => ChangeNumber(field, e)));
+        builder.CloseElement(); builder.CloseElement();
+    };
+
+    private RenderFragment RangeField(string label, double value, double min, double max, double step, string field) => builder =>
+    {
+        var seq = 0;
+        builder.OpenElement(seq++, "label"); builder.AddAttribute(seq++, "class", "range-field");
+        builder.OpenElement(seq++, "span"); builder.AddContent(seq++, label); builder.OpenElement(seq++, "b"); builder.AddContent(seq++, value.ToString("0.##", CultureInfo.InvariantCulture)); builder.CloseElement(); builder.CloseElement();
+        builder.OpenElement(seq++, "input"); builder.AddAttribute(seq++, "type", "range"); builder.AddAttribute(seq++, "min", min); builder.AddAttribute(seq++, "max", max); builder.AddAttribute(seq++, "step", step); builder.AddAttribute(seq++, "value", value.ToString(CultureInfo.InvariantCulture));
+        builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => ChangeNumber(field, e))); builder.CloseElement(); builder.CloseElement();
+    };
+
+    private RenderFragment ColorField(string label, string value, string field) => builder =>
+    {
+        var seq = 0; var usable = value.StartsWith('#') ? value : "#ffffff";
+        builder.OpenElement(seq++, "label"); builder.AddContent(seq++, label);
+        builder.OpenElement(seq++, "span"); builder.AddAttribute(seq++, "class", "color-field");
+        builder.OpenElement(seq++, "input"); builder.AddAttribute(seq++, "type", "color"); builder.AddAttribute(seq++, "value", usable); builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => ChangeColor(field, e))); builder.CloseElement();
+        builder.OpenElement(seq++, "code"); builder.AddContent(seq++, value); builder.CloseElement(); builder.CloseElement(); builder.CloseElement();
+    };
+
+    private void ChangeName(ChangeEventArgs args) => State.UpdateSelected(e => e.Name = args.Value?.ToString() ?? e.Name);
+    private void ToggleVisible(ChangeEventArgs args) => State.UpdateSelected(e => e.Visible = ReadBool(args), allowLocked: true);
+    private void ToggleLocked(ChangeEventArgs args) => State.UpdateSelected(e => e.Locked = ReadBool(args), allowLocked: true);
+    private void ChangeAltText(ChangeEventArgs args)
+    {
+        if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => image.AltText = args.Value?.ToString() ?? string.Empty);
+    }
+    private void ChangeImageMask(ChangeEventArgs args)
+    {
+        if (State.SelectedElement is ImageFrameElement image && Enum.TryParse<ImageMaskShape>(args.Value?.ToString(), out var mask))
+            State.UpdateSelected(_ => image.MaskShape = mask);
+    }
+    private void ToggleImageShadow(ChangeEventArgs args)
+    {
+        if (State.SelectedElement is ImageFrameElement image)
+            State.UpdateSelected(_ => image.ShadowEnabled = ReadBool(args));
+    }
+    private void ChangeColor(string field, ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString() ?? "#ffffff";
+        State.UpdateSelected(element =>
+        {
+            if (element is ImageFrameElement image && field == "imageBorder")
+                image.BorderColor = value;
+            if (element is TextFrameElement text)
+            {
+                if (field == "textBackground") text.Background = value;
+                if (field == "textBorder") text.BorderColor = value;
+            }
+            if (element is ShapeElement shape)
+            {
+                if (field == "shapeFill") shape.Fill = value;
+                if (field == "shapeStroke") shape.Stroke = value;
+            }
+        });
+    }
+    private void ChangeNumber(string field, ChangeEventArgs args)
+    {
+        if (!double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) &&
+            !double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.CurrentCulture, out value)) return;
+        State.UpdateSelected(element =>
+        {
+            switch (field)
+            {
+                case "x": element.X = value; break; case "y": element.Y = value; break;
+                case "width": element.Width = Math.Max(2, value); break; case "height": element.Height = Math.Max(2, value); break;
+                case "rotation": element.Rotation = value; break; case "z": element.ZIndex = (int)Math.Round(value); break;
+            }
+            if (element is ImageFrameElement image)
+            {
+                switch (field)
+                {
+                    case "cropScale": image.CropScale = value; break; case "opacity": image.Opacity = value; break;
+                    case "brightness": image.Brightness = value; break; case "contrast": image.Contrast = value; break;
+                    case "saturation": image.Saturation = value; break; case "hue": image.HueRotation = value; break;
+                    case "invert": image.Invert = value; break; case "grayscale": image.Grayscale = value; break;
+                    case "sepia": image.Sepia = value; break; case "blur": image.Blur = value; break; case "corner": image.CornerRadiusMm = value; break;
+                    case "imageBorderWidth": image.BorderWidthMm = value; break;
+                }
+            }
+            if (element is TextFrameElement text)
+            {
+                if (field == "padding") text.PaddingMm = value;
+                if (field == "textBorderWidth") text.BorderWidth = value;
+            }
+            if (element is ShapeElement shape)
+            {
+                if (field == "shapeStrokeWidth") shape.StrokeWidth = value;
+                if (field == "shapeCorner") shape.CornerRadiusMm = value;
+            }
+        });
+    }
+    private static bool ReadBool(ChangeEventArgs args) => args.Value is bool b ? b : bool.TryParse(args.Value?.ToString(), out var result) && result;
+}

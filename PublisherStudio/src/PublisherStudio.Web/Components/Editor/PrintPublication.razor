@@ -1,0 +1,54 @@
+@namespace PublisherStudio.Components.Editor
+
+<div class="print-publication" aria-hidden="true">
+    @foreach (var page in Document.Pages)
+    {
+        <section class="print-page" style="@PageStyle(page)">
+            @foreach (var element in page.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
+            {
+                <div class="print-element" style="@ElementStyle(element)">
+                    @switch (element)
+                    {
+                        case TextFrameElement text:
+                            <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@text.Background;border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                                @((MarkupString)text.PreviewHtml)
+                            </div>
+                            break;
+                        case ImageFrameElement image:
+                            <div class="image-frame" style="@ImageFrameStyle(image)">
+                                <img src="@image.DataUrl" alt="@image.AltText" style="@ImageStyle(image)" />
+                            </div>
+                            break;
+                        case ShapeElement shape:
+                            <div class="shape shape-@shape.Shape.ToString().ToLowerInvariant()" style="@ShapeStyle(shape)"></div>
+                            break;
+                    }
+                </div>
+            }
+        </section>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    private static string PageStyle(PublicationPage p) => $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background}";
+    private static string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({Inv(e.Rotation)}deg)";
+    private static string ShapeStyle(ShapeElement s) => s.Shape == PublicationShape.Line
+        ? $"background:{s.Stroke};height:{Mm(Math.Max(s.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
+        : $"background:{s.Fill};border:{Mm(s.StrokeWidth)} solid {s.Stroke};border-radius:{(s.Shape == PublicationShape.Ellipse ? "50%" : s.Shape == PublicationShape.RoundedRectangle ? Mm(s.CornerRadiusMm) : "0")}";
+    private static string ImageFrameStyle(ImageFrameElement i)
+    {
+        var radius = i.MaskShape == ImageMaskShape.Ellipse ? "50%" : i.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(i.CornerRadiusMm) : "0";
+        var shadow = i.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
+        return $"border-radius:{radius};border:{Mm(i.BorderWidthMm)} solid {i.BorderColor};box-shadow:{shadow}";
+    }
+    private static string ImageStyle(ImageFrameElement i)
+    {
+        var fit = i.FitInsideFrame ? "contain" : "cover";
+        var sx = i.FlipHorizontal ? -i.CropScale : i.CropScale;
+        var sy = i.FlipVertical ? -i.CropScale : i.CropScale;
+        return $"object-fit:{fit};transform:translate({Inv(i.CropX)}%,{Inv(i.CropY)}%) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(i.Opacity)};filter:brightness({Inv(i.Brightness)}) contrast({Inv(i.Contrast)}) saturate({Inv(i.Saturation)}) hue-rotate({Inv(i.HueRotation)}deg) invert({Inv(i.Invert)}) grayscale({Inv(i.Grayscale)}) sepia({Inv(i.Sepia)}) blur({Inv(i.Blur)}px)";
+    }
+    private static string Mm(double value) => $"{Inv(value)}mm";
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+}

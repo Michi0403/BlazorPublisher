@@ -1,0 +1,57 @@
+@namespace PublisherStudio.Components.Editor
+
+@if (Visible && TextFrame is not null)
+{
+    <div class="modal-backdrop" role="presentation">
+        <section class="story-editor-dialog" role="dialog" aria-modal="true" aria-label="Edit text story">
+            <header>
+                <div><strong>Edit story</strong><span>@TextFrame.Name</span></div>
+                <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
+            </header>
+            <div class="story-editor-host">
+                <DxRichEdit @ref="_richEdit"
+                            DocumentFormat="DocumentFormat.Html"
+                            DocumentContent="@_content"
+                            DocumentContentChanged="ContentChanged"
+                            CssClass="story-rich-edit" />
+            </div>
+            <footer>
+                <span>Rich text is stored inside the publication as HTML bytes.</span>
+                <div>
+                    <DxButton Text="Cancel" Click="Cancel" />
+                    <DxButton Text="Apply to frame" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
+                </div>
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public TextFrameElement? TextFrame { get; set; }
+    [Parameter] public EventCallback<(byte[] Content, string PreviewHtml)> Saved { get; set; }
+    [Parameter] public EventCallback Cancelled { get; set; }
+
+    private DxRichEdit? _richEdit;
+    private byte[] _content = [];
+    private Guid? _loadedId;
+
+    protected override void OnParametersSet()
+    {
+        if (Visible && TextFrame is not null && _loadedId != TextFrame.Id)
+        {
+            _content = TextFrame.DocumentContent.ToArray();
+            _loadedId = TextFrame.Id;
+        }
+        if (!Visible) _loadedId = null;
+    }
+
+    private void ContentChanged(byte[] content) => _content = content;
+    private async Task Apply()
+    {
+        if (_richEdit is null) return;
+        await _richEdit.SaveDocumentAsync();
+        await Saved.InvokeAsync((_content, PublicationFileService.ExtractHtmlBody(_content)));
+    }
+    private Task Cancel() => Cancelled.InvokeAsync();
+}

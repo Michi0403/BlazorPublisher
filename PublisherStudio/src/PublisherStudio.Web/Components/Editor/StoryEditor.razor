@@ -23,6 +23,20 @@
                 <button type="button" @onclick="UpdateFields">Update fields</button>
                 <button type="button" @onclick="ShowFieldResults">Results</button>
                 <button type="button" @onclick="ShowFieldCodes">Codes</button>
+                <details class="story-field-help">
+                    <summary>Field list</summary>
+                    <div>
+                        <strong>Dynamic fields in this publication</strong>
+                        <span><code>DATE</code> Current date</span>
+                        <span><code>TIME</code> Current time</span>
+                        <span><code>PAGE</code> Current story page</span>
+                        <span><code>NUMPAGES</code> Story page count</span>
+                        <span><code>PublicationName</code> Publication title</span>
+                        <span><code>PageName</code> Canvas page name</span>
+                        <span><code>StoryName</code> Text-frame name</span>
+                        <small>The RichEdit References → Add Text menu contains the additional built-in field commands.</small>
+                    </div>
+                </details>
                 <span class="story-command-separator"></span>
                 <strong>Download</strong>
                 <button type="button" @onclick="ExportDocx">DOCX</button>

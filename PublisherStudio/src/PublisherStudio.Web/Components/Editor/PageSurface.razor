@@ -106,7 +106,7 @@
                             <div class="shape shape-@shape.Shape.ToString().ToLowerInvariant()" style="@ShapeStyle(shape)"></div>
                             break;
                         case WordArtElement wordArt:
-                            @WordArt(wordArt)
+                            <WordArtView Item="wordArt" IdPrefix="canvas" />
                             break;
                     }
                     @if (!element.Locked)

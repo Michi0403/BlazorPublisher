@@ -1,0 +1,191 @@
+@namespace PublisherStudio.Components.Editor
+
+<svg class="wordart-svg"
+     viewBox="0 0 1000 300"
+     preserveAspectRatio="xMidYMid meet"
+     role="img"
+     aria-label="@DisplayText">
+    <defs>
+        <linearGradient id="@GradientId"
+                        gradientUnits="userSpaceOnUse"
+                        x1="0" y1="0" x2="0" y2="300">
+            <stop offset="0%" stop-color="@SecondaryColor" />
+            <stop offset="100%" stop-color="@FillColor" />
+        </linearGradient>
+
+        @if (Item.Warp != WordArtWarp.None)
+        {
+            <path id="@PathId" d="@WarpPath" fill="none" />
+        }
+    </defs>
+
+    @if (Item.ShadowEnabled)
+    {
+        @if (Item.Warp == WordArtWarp.None)
+        {
+            <text class="wordart-shadow-face"
+                  x="500" y="150" dx="10" dy="12"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  font-family="@FontFamily"
+                  font-size="@FontSize"
+                  font-weight="@FontWeight"
+                  font-style="@FontStyle"
+                  letter-spacing="@LetterSpacing"
+                  fill="@ShadowColor" fill-opacity="0.45">@DisplayText</text>
+        }
+        else
+        {
+            <text class="wordart-shadow-face"
+                  x="0" y="0" dx="10" dy="12"
+                  text-anchor="middle"
+                  font-family="@FontFamily"
+                  font-size="@FontSize"
+                  font-weight="@FontWeight"
+                  font-style="@FontStyle"
+                  letter-spacing="@LetterSpacing"
+                  fill="@ShadowColor" fill-opacity="0.45">
+                <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
+            </text>
+        }
+    }
+
+    @foreach (var depth in ExtrusionLayers)
+    {
+        @if (Item.Warp == WordArtWarp.None)
+        {
+            <text class="wordart-extrusion"
+                  x="500" y="150"
+                  dx="@Inv(depth * 4)" dy="@Inv(depth * 4)"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  font-family="@FontFamily"
+                  font-size="@FontSize"
+                  font-weight="@FontWeight"
+                  font-style="@FontStyle"
+                  letter-spacing="@LetterSpacing"
+                  fill="@ExtrudeColor">@DisplayText</text>
+        }
+        else
+        {
+            <text class="wordart-extrusion"
+                  x="0" y="0"
+                  dx="@Inv(depth * 4)" dy="@Inv(depth * 4)"
+                  text-anchor="middle"
+                  font-family="@FontFamily"
+                  font-size="@FontSize"
+                  font-weight="@FontWeight"
+                  font-style="@FontStyle"
+                  letter-spacing="@LetterSpacing"
+                  fill="@ExtrudeColor">
+                <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
+            </text>
+        }
+    }
+
+    @* A solid face is deliberately rendered first. It guarantees readable text if a browser,
+       print engine, or rasterizer rejects the local SVG gradient paint server. *@
+    @if (Item.Warp == WordArtWarp.None)
+    {
+        <text class="wordart-face wordart-face-fallback"
+              x="500" y="150"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              font-family="@FontFamily"
+              font-size="@FontSize"
+              font-weight="@FontWeight"
+              font-style="@FontStyle"
+              letter-spacing="@LetterSpacing"
+              fill="@FillColor"
+              stroke="@OutlineColor"
+              stroke-width="@OutlineWidth"
+              paint-order="stroke fill">@DisplayText</text>
+
+        @if (Item.GradientFill)
+        {
+            <text class="wordart-face wordart-face-gradient"
+                  x="500" y="150"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  font-family="@FontFamily"
+                  font-size="@FontSize"
+                  font-weight="@FontWeight"
+                  font-style="@FontStyle"
+                  letter-spacing="@LetterSpacing"
+                  fill="@GradientFill">@DisplayText</text>
+        }
+    }
+    else
+    {
+        <text class="wordart-face wordart-face-fallback"
+              x="0" y="0"
+              text-anchor="middle"
+              font-family="@FontFamily"
+              font-size="@FontSize"
+              font-weight="@FontWeight"
+              font-style="@FontStyle"
+              letter-spacing="@LetterSpacing"
+              fill="@FillColor"
+              stroke="@OutlineColor"
+              stroke-width="@OutlineWidth"
+              paint-order="stroke fill">
+            <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
+        </text>
+
+        @if (Item.GradientFill)
+        {
+            <text class="wordart-face wordart-face-gradient"
+                  x="0" y="0"
+                  text-anchor="middle"
+                  font-family="@FontFamily"
+                  font-size="@FontSize"
+                  font-weight="@FontWeight"
+                  font-style="@FontStyle"
+                  letter-spacing="@LetterSpacing"
+                  fill="@GradientFill">
+                <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
+            </text>
+        }
+    }
+</svg>
+
+@code {
+    [Parameter, EditorRequired] public WordArtElement Item { get; set; } = default!;
+    [Parameter] public string IdPrefix { get; set; } = "canvas";
+
+    private string GradientId => $"{IdPrefix}-wordart-gradient-{Item.Id:N}";
+    private string PathId => $"{IdPrefix}-wordart-path-{Item.Id:N}";
+    private string PathHref => $"#{PathId}";
+    private string GradientFill => $"url(#{GradientId})";
+    private string DisplayText => string.IsNullOrWhiteSpace(Item.Text) ? "WordArt" : Item.Text;
+    private string FontFamily => string.IsNullOrWhiteSpace(Item.FontFamily) ? "Arial Black, Arial, sans-serif" : Item.FontFamily;
+    private string FontSize => Inv(Math.Clamp(Item.FontSizePt, 8, 300) * 3.5);
+    private string FontWeight => Item.Bold ? "700" : "400";
+    private string FontStyle => Item.Italic ? "italic" : "normal";
+    private string LetterSpacing => Inv(Math.Clamp(Item.LetterSpacing, -5, 30) * 2);
+    private string FillColor => SafeColor(Item.FillColor, "#2f75b5");
+    private string SecondaryColor => SafeColor(Item.SecondaryColor, "#8ec5ff");
+    private string OutlineColor => SafeColor(Item.OutlineColor, "#17365d");
+    private string ExtrudeColor => SafeColor(Item.ExtrudeColor, "#17365d");
+    private string ShadowColor => SafeColor(Item.ShadowColor, "#000000");
+    private string OutlineWidth => Inv(Math.Clamp(Item.OutlineWidth, 0, 20));
+    private IEnumerable<int> ExtrusionLayers => Enumerable.Range(1, Math.Clamp((int)Math.Round(Item.ExtrudeDepth), 0, 18)).Reverse();
+
+    private string WarpPath => Item.Warp switch
+    {
+        WordArtWarp.ArchUp => "M 80 225 Q 500 5 920 225",
+        WordArtWarp.ArchDown => "M 80 75 Q 500 295 920 75",
+        WordArtWarp.Wave => "M 40 165 C 220 20 350 290 520 145 C 690 0 810 280 960 125",
+        _ => "M 50 150 L 950 150"
+    };
+
+    private static string SafeColor(string? value, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return fallback;
+        var color = value.Trim();
+        if (color.Equals("transparent", StringComparison.OrdinalIgnoreCase)) return fallback;
+        return color;
+    }
+
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+}

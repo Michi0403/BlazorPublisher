@@ -39,3 +39,11 @@ Recommended smoke tests:
 5. Resize and collapse both side panes and verify the rulers and canvas consume the remaining workspace.
 
 When reporting a compiler failure, include the first compiler error and affected source line; later Razor errors are commonly cascading diagnostics.
+
+
+## v0.3.2 targeted validation
+
+- The custom story modal now uses z-index 1040, below the DevExpress popup baseline of 1050.
+- The existing z-index 10000 declaration is absent.
+- The StoryEditor Razor component contains the field catalogue and retains the existing Quick Fields and download handlers.
+- No package references or host wiring changed.

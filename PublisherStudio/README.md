@@ -90,3 +90,12 @@ dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip
 This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, free Bézier path editing, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
 
 See [`CHANGELOG-v0.3.md`](CHANGELOG-v0.3.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`VALIDATION.md`](VALIDATION.md).
+
+## v0.3.1 WordArt visibility hotfix
+
+See `CHANGELOG-v0.3.1.md`.
+
+
+## v0.3.2 RichEdit popup hotfix
+
+See `CHANGELOG-v0.3.2.md`. The custom Edit Story backdrop now stays below DevExpress popup layers, so RichEdit ribbon drop-downs and dialogs remain visible and interactive.

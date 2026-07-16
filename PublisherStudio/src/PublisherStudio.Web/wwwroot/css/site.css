@@ -280,8 +280,11 @@ button { cursor: pointer; }
 .zoom-control button:hover { background: #ffffff30; }
 .hidden-file-input, .print-publication { display: none; }
 
-.modal-backdrop { position: fixed; z-index: 10000; inset: 0; display: grid; place-items: center; padding: 22px; background: #0f172acc; }
-.story-editor-dialog { display: grid; grid-template-rows: 48px minmax(0, 1fr) 52px; width: min(1180px, 96vw); height: min(860px, 94vh); overflow: hidden; border-radius: 5px; background: white; box-shadow: 0 20px 70px #0009; }
+/* Keep the custom story window below DevExpress popup layers.
+   DevExpress starts popup/drop-down z-indices at 1050 and raises nested dialogs dynamically.
+   A z-index of 10000 here made RichEdit menus and dialogs open behind the dark backdrop. */
+.modal-backdrop { position: fixed; z-index: 1040; inset: 0; display: grid; place-items: center; padding: 22px; background: #0f172acc; }
+.story-editor-dialog { position: relative; z-index: 1; display: grid; grid-template-rows: 48px minmax(0, 1fr) 52px; width: min(1180px, 96vw); height: min(860px, 94vh); overflow: hidden; border-radius: 5px; background: white; box-shadow: 0 20px 70px #0009; }
 .story-editor-dialog header, .story-editor-dialog footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-color: #d5d9de; }
 .story-editor-dialog header { border-bottom: 1px solid #d5d9de; }
 .story-editor-dialog footer { border-top: 1px solid #d5d9de; font-size: 11px; }
@@ -515,3 +518,32 @@ button { cursor: pointer; }
     background-size: 16px 16px;
     background-position: 0 0, 0 8px, 8px -8px, -8px 0;
 }
+
+/* WordArt v0.3.1: keep the face visible even when an SVG gradient/filter is rejected. */
+.wordart-svg text {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: none;
+    text-rendering: geometricPrecision;
+}
+.wordart-face,
+.wordart-extrusion {
+    vector-effect: non-scaling-stroke;
+}
+.wordart-face-fallback {
+    /* The solid face remains underneath the optional gradient face. */
+    fill-opacity: 1;
+}
+.wordart-face-gradient {
+    stroke: none;
+}
+
+
+/* v0.3.2: visible field catalogue for the application-specific RichEdit fields. */
+.story-field-help { position: relative; font-size: 11px; }
+.story-field-help > summary { min-height: 27px; box-sizing: border-box; padding: 5px 8px; border: 1px solid #aeb6bf; border-radius: 3px; background: #fff; cursor: pointer; list-style-position: inside; }
+.story-field-help[open] > summary { border-color: #2f75b5; background: #e5f2fb; }
+.story-field-help > div { position: absolute; z-index: 2; top: calc(100% + 4px); left: 0; display: grid; gap: 4px; width: 290px; padding: 10px; border: 1px solid #9ea7b1; border-radius: 4px; background: #fff; box-shadow: 0 8px 24px #0004; }
+.story-field-help span { display: grid; grid-template-columns: 105px 1fr; gap: 7px; }
+.story-field-help code { font-size: 10px; }
+.story-field-help small { margin-top: 4px; color: #5b6470; line-height: 1.35; }

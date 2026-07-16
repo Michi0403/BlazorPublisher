@@ -71,6 +71,8 @@ public partial class PictureEditor
     private string SelectToolText => ToolText(PictureDrawTool.Select, "Select");
     private string BrushToolText => ToolText(PictureDrawTool.Brush, "Brush");
     private string PencilToolText => ToolText(PictureDrawTool.Pencil, "Pencil");
+    private string SprayToolText => ToolText(PictureDrawTool.Spray, "Spray can");
+    private string ToothbrushToolText => ToolText(PictureDrawTool.Toothbrush, "Toothbrush");
     private string LineToolText => ToolText(PictureDrawTool.Line, "Line");
     private string EraserToolText => ToolText(PictureDrawTool.Eraser, "Eraser");
     private string EyedropperToolText => ToolText(PictureDrawTool.Eyedropper, "Eyedropper");
@@ -83,6 +85,8 @@ public partial class PictureEditor
         PictureDrawTool.Eyedropper => "Click the rendered canvas to pick a color, then the Brush tool becomes active.",
         PictureDrawTool.Line => "Drag from the line start to its end. Hold the pointer down for a live preview.",
         PictureDrawTool.Eraser => "Draw over strokes on a paint layer to erase them non-destructively.",
+        PictureDrawTool.Spray => "Spray paint scatters soft droplets around the pointer path for airbrush-like shading.",
+        PictureDrawTool.Toothbrush => "Toothbrush lays down rough bristle streaks and splatter for textured paint effects.",
         _ => "Draw directly on the canvas. A paint layer is created automatically when necessary. Right-click does not draw."
     };
     private string CanvasColor => State.Document.Background.StartsWith('#') && State.Document.Background.Length is 4 or 7
@@ -348,6 +352,9 @@ public partial class PictureEditor
     private void AddNoise() => State.AddRender(PictureRenderKind.Noise);
     private void AddStripes() => State.AddRender(PictureRenderKind.Stripes);
     private void AddVignette() => State.AddRender(PictureRenderKind.Vignette);
+    private void AddBloom() => State.AddRender(PictureRenderKind.Bloom);
+    private void AddNeon() => State.AddRender(PictureRenderKind.Neon);
+    private void AddLensFlare() => State.AddRender(PictureRenderKind.LensFlare);
     private void AddPaintLayer() => State.AddPaint();
     private void MoveUp() => State.MoveSelectedLayer(1);
     private void MoveDown() => State.MoveSelectedLayer(-1);
@@ -513,6 +520,8 @@ public partial class PictureEditor
     private void SelectTool() => SetDrawTool(PictureDrawTool.Select);
     private void BrushTool() => SetDrawTool(PictureDrawTool.Brush);
     private void PencilTool() => SetDrawTool(PictureDrawTool.Pencil);
+    private void SprayTool() => SetDrawTool(PictureDrawTool.Spray);
+    private void ToothbrushTool() => SetDrawTool(PictureDrawTool.Toothbrush);
     private void LineTool() => SetDrawTool(PictureDrawTool.Line);
     private void EraserTool() => SetDrawTool(PictureDrawTool.Eraser);
     private void EyedropperTool() => SetDrawTool(PictureDrawTool.Eyedropper);
@@ -564,6 +573,9 @@ public partial class PictureEditor
     private void MakeRenderNoise() => WithRender(layer => layer.RenderKind = PictureRenderKind.Noise);
     private void MakeRenderStripes() => WithRender(layer => layer.RenderKind = PictureRenderKind.Stripes);
     private void MakeRenderVignette() => WithRender(layer => layer.RenderKind = PictureRenderKind.Vignette);
+    private void MakeRenderBloom() => WithRender(layer => layer.RenderKind = PictureRenderKind.Bloom);
+    private void MakeRenderNeon() => WithRender(layer => layer.RenderKind = PictureRenderKind.Neon);
+    private void MakeRenderLensFlare() => WithRender(layer => layer.RenderKind = PictureRenderKind.LensFlare);
     private void RasterContain() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Contain);
     private void RasterCover() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Cover);
     private void RasterStretch() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Stretch);
@@ -579,6 +591,32 @@ public partial class PictureEditor
     private void ToggleGrayscalePreset() => State.UpdateSelected(layer => layer.Grayscale = layer.Grayscale > .5 ? 0 : 1);
     private void ToggleSepiaPreset() => State.UpdateSelected(layer => layer.Sepia = layer.Sepia > .5 ? 0 : 1);
     private void ToggleInvertPreset() => State.UpdateSelected(layer => layer.Invert = layer.Invert > .5 ? 0 : 1);
+    private void ApplyBloomEffect() => State.UpdateSelected(layer =>
+    {
+        layer.Brightness = Math.Clamp(layer.Brightness + .18, 0, 3);
+        layer.Contrast = Math.Clamp(layer.Contrast + .06, 0, 3);
+        layer.Saturation = Math.Clamp(layer.Saturation + .12, 0, 3);
+        layer.Blur = Math.Clamp(Math.Max(layer.Blur, 4), 0, 50);
+        layer.Opacity = Math.Clamp(layer.Opacity, .82, 1);
+        layer.BlendMode = PictureBlendMode.Screen;
+    });
+    private void ApplyNeonEffect() => State.UpdateSelected(layer =>
+    {
+        layer.Brightness = Math.Clamp(layer.Brightness + .22, 0, 3);
+        layer.Contrast = Math.Clamp(layer.Contrast + .25, 0, 3);
+        layer.Saturation = Math.Clamp(layer.Saturation + .6, 0, 3);
+        layer.Blur = Math.Clamp(Math.Max(layer.Blur, 1.5), 0, 50);
+        layer.BlendMode = PictureBlendMode.Screen;
+    });
+    private void ApplyLensFlareEffect() => State.UpdateSelected(layer =>
+    {
+        layer.Brightness = Math.Clamp(layer.Brightness + .28, 0, 3);
+        layer.Contrast = Math.Clamp(layer.Contrast + .12, 0, 3);
+        layer.Saturation = Math.Clamp(layer.Saturation + .18, 0, 3);
+        layer.Blur = Math.Clamp(Math.Max(layer.Blur, .75), 0, 50);
+        layer.Opacity = Math.Clamp(layer.Opacity, .9, 1);
+        layer.BlendMode = PictureBlendMode.Screen;
+    });
 
     private void ShapeRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.Rectangle);
     private void ShapeRoundedRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.RoundedRectangle);

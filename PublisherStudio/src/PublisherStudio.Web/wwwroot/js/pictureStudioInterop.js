@@ -7,9 +7,9 @@ const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "l
 const rasterFits = ["stretch", "contain", "cover"];
 const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line"];
 const fillKinds = ["solid", "linearGradient", "radialGradient"];
-const renderKinds = ["clouds", "noise", "stripes", "vignette"];
+const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", "lensflare"];
 const textAlignments = ["left", "center", "right"];
-const drawTools = ["select", "brush", "pencil", "line", "eraser", "eyedropper"];
+const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "line", "eraser", "eyedropper"];
 
 function enumName(value, names, fallback) {
     if (typeof value === "string") return value;
@@ -118,6 +118,11 @@ function parseColor(value, fallback = [0, 0, 0, 255]) {
 function cssColor(value, fallback = "#000000") {
     if (typeof value !== "string" || !value.trim()) return fallback;
     return value;
+}
+
+function rgba(color, alpha = 1) {
+    const parsed = parseColor(color, [0, 0, 0, 255]);
+    return `rgba(${parsed[0]}, ${parsed[1]}, ${parsed[2]}, ${clamp(alpha * (parsed[3] / 255), 0, 1)})`;
 }
 
 function mixColor(first, second, amount) {
@@ -451,13 +456,116 @@ function createNoiseOrClouds(layer, width, height, clouds) {
     return canvas;
 }
 
+function createBloomCanvas(layer, width, height) {
+    const canvas = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+    const ctx = canvas.getContext("2d", { alpha: true });
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const seed = Number(layer.seed) || 1;
+    ctx.fillStyle = rgba(layer.primaryColor, .08);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const blooms = Math.max(3, Math.min(10, Math.round((layer.detail ?? 4) + 2)));
+    for (let index = 0; index < blooms; index++) {
+        const cx = canvas.width * (.15 + .7 * hashNoise(seed + index * 7, 11 + index, seed));
+        const cy = canvas.height * (.15 + .7 * hashNoise(seed + index * 11, 19 + index, seed));
+        const radius = Math.max(24, Math.min(canvas.width, canvas.height) * (.08 + .18 * hashNoise(seed + index * 17, 23 + index, seed)));
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        gradient.addColorStop(0, rgba(index % 2 === 0 ? layer.secondaryColor : layer.primaryColor, .65));
+        gradient.addColorStop(.45, rgba(index % 2 === 0 ? layer.primaryColor : layer.secondaryColor, .28));
+        gradient.addColorStop(1, rgba(layer.secondaryColor, 0));
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    return canvas;
+}
+
+function createNeonCanvas(layer, width, height) {
+    const canvas = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+    const ctx = canvas.getContext("2d", { alpha: true });
+    const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    background.addColorStop(0, "rgba(5,8,20,.95)");
+    background.addColorStop(1, "rgba(18,24,42,.95)");
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const bands = Math.max(2, Math.min(6, Math.round(layer.detail ?? 4)));
+    for (let index = 0; index < bands; index++) {
+        const startY = canvas.height * (.2 + index * .14);
+        ctx.save();
+        ctx.lineWidth = Math.max(2, canvas.height * .012 + index * 1.6);
+        ctx.strokeStyle = index % 2 === 0 ? cssColor(layer.primaryColor, "#22d3ee") : cssColor(layer.secondaryColor, "#f472b6");
+        ctx.shadowColor = ctx.strokeStyle;
+        ctx.shadowBlur = 18 + index * 6;
+        ctx.beginPath();
+        for (let x = 0; x <= canvas.width; x += 18) {
+            const wave = Math.sin((x / Math.max(20, layer.scale || 90)) + index * .8) * canvas.height * .07;
+            const y = startY + wave;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+    return canvas;
+}
+
+function createLensFlareCanvas(layer, width, height) {
+    const canvas = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+    const ctx = canvas.getContext("2d", { alpha: true });
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const seed = Number(layer.seed) || 1;
+    const focusX = canvas.width * (.2 + .6 * hashNoise(seed, 7, seed));
+    const focusY = canvas.height * (.18 + .28 * hashNoise(seed, 13, seed));
+    const star = ctx.createRadialGradient(focusX, focusY, 0, focusX, focusY, Math.max(canvas.width, canvas.height) * .26);
+    star.addColorStop(0, rgba(layer.primaryColor, .95));
+    star.addColorStop(.1, rgba(layer.secondaryColor, .7));
+    star.addColorStop(.35, rgba(layer.primaryColor, .14));
+    star.addColorStop(1, rgba(layer.primaryColor, 0));
+    ctx.fillStyle = star;
+    ctx.beginPath();
+    ctx.arc(focusX, focusY, Math.max(canvas.width, canvas.height) * .28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.strokeStyle = rgba(layer.primaryColor, .35);
+    ctx.lineWidth = Math.max(1, Math.min(canvas.width, canvas.height) * .006);
+    ctx.shadowColor = cssColor(layer.secondaryColor, "#ffffff");
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.moveTo(0, focusY); ctx.lineTo(canvas.width, focusY);
+    ctx.moveTo(focusX, 0); ctx.lineTo(focusX, canvas.height);
+    ctx.stroke();
+    ctx.restore();
+    const dx = canvas.width - focusX;
+    const dy = canvas.height - focusY;
+    for (let index = 1; index <= 6; index++) {
+        const t = index / 7;
+        const cx = focusX + dx * t * .85;
+        const cy = focusY + dy * t * .85;
+        const radius = Math.max(10, Math.min(canvas.width, canvas.height) * (.012 + .022 * (1 - t)));
+        const orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        orb.addColorStop(0, rgba(index % 2 ? layer.secondaryColor : layer.primaryColor, .35));
+        orb.addColorStop(1, rgba(layer.primaryColor, 0));
+        ctx.fillStyle = orb;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    return canvas;
+}
+
 function getProceduralCanvas(layer, width, height) {
     const key = proceduralKey(layer, width, height);
     if (proceduralCache.has(key)) return proceduralCache.get(key);
     const kind = enumName(layer.renderKind, renderKinds, "clouds").toLowerCase();
     const canvas = kind === "noise"
         ? createNoiseOrClouds(layer, width, height, false)
-        : createNoiseOrClouds(layer, width, height, true);
+        : kind === "bloom"
+            ? createBloomCanvas(layer, width, height)
+            : kind === "neon"
+                ? createNeonCanvas(layer, width, height)
+                : kind === "lensflare"
+                    ? createLensFlareCanvas(layer, width, height)
+                    : createNoiseOrClouds(layer, width, height, true);
     proceduralCache.set(key, canvas);
     if (proceduralCache.size > 40) proceduralCache.delete(proceduralCache.keys().next().value);
     return canvas;
@@ -493,7 +601,7 @@ function drawRenderLayer(ctx, layer) {
 
 function strokeKind(stroke) {
     if (typeof stroke?.kind === "string") return stroke.kind.toLowerCase();
-    return enumName(stroke?.kind, ["brush", "pencil", "line", "eraser"], "brush").toLowerCase();
+    return enumName(stroke?.kind, ["brush", "pencil", "spray", "toothbrush", "line", "eraser"], "brush").toLowerCase();
 }
 
 function traceStrokePath(ctx, points, kind) {
@@ -521,6 +629,84 @@ function traceStrokePath(ctx, points, kind) {
     ctx.lineTo(Number(last.x) || 0, Number(last.y) || 0);
 }
 
+function drawSprayStroke(ctx, points, width, color, opacity) {
+    const radius = Math.max(1, width / 2);
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.globalAlpha = opacity * .22;
+    let particle = 0;
+    for (let index = 1; index < points.length; index++) {
+        const a = points[index - 1];
+        const b = points[index];
+        const dx = (Number(b.x) || 0) - (Number(a.x) || 0);
+        const dy = (Number(b.y) || 0) - (Number(a.y) || 0);
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const steps = Math.max(1, Math.ceil(length / Math.max(2, radius * .45)));
+        for (let step = 0; step <= steps; step++) {
+            const t = step / steps;
+            const px = (Number(a.x) || 0) + dx * t;
+            const py = (Number(a.y) || 0) + dy * t;
+            const density = Math.max(8, Math.round(width * .8));
+            for (let dot = 0; dot < density; dot++) {
+                const angle = hashNoise(particle, dot + 1, 97) * Math.PI * 2;
+                const distance = Math.sqrt(hashNoise(particle + 17, dot + 13, 211)) * radius;
+                const size = Math.max(.5, width * (.012 + hashNoise(particle + 31, dot + 29, 313) * .028));
+                ctx.beginPath();
+                ctx.arc(px + Math.cos(angle) * distance, py + Math.sin(angle) * distance, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            particle++;
+        }
+    }
+    ctx.restore();
+}
+
+function drawToothbrushStroke(ctx, points, width, color, opacity) {
+    const last = points[points.length - 1];
+    if (!last) return;
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = opacity;
+    const bristles = Math.max(3, Math.min(11, Math.round(width / 3)));
+    for (let band = 0; band < bristles; band++) {
+        ctx.beginPath();
+        for (let index = 0; index < points.length; index++) {
+            const point = points[index];
+            const prev = points[Math.max(0, index - 1)] || point;
+            const next = points[Math.min(points.length - 1, index + 1)] || point;
+            const tangentX = (Number(next.x) || 0) - (Number(prev.x) || 0);
+            const tangentY = (Number(next.y) || 0) - (Number(prev.y) || 0);
+            const length = Math.max(.001, Math.hypot(tangentX, tangentY));
+            const nx = -tangentY / length;
+            const ny = tangentX / length;
+            const spread = ((band / Math.max(1, bristles - 1)) - .5) * width * .8;
+            const jitter = (hashNoise(index + band * 13, band + 5, 401) - .5) * width * .12;
+            const x = (Number(point.x) || 0) + nx * (spread + jitter);
+            const y = (Number(point.y) || 0) + ny * (spread + jitter);
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.lineWidth = Math.max(.6, width * (.08 + (band % 3) * .03));
+        ctx.globalAlpha = opacity * (.35 + ((band + 1) / bristles) * .35);
+        ctx.stroke();
+    }
+    ctx.globalAlpha = opacity * .18;
+    ctx.fillStyle = color;
+    for (let index = 0; index < points.length; index += Math.max(1, Math.floor(points.length / 18) || 1)) {
+        const point = points[index];
+        for (let dot = 0; dot < Math.max(2, Math.round(width / 5)); dot++) {
+            const angle = hashNoise(index, dot + 3, 509) * Math.PI * 2;
+            const distance = hashNoise(index + 7, dot + 17, 601) * width * .42;
+            ctx.beginPath();
+            ctx.arc((Number(point.x) || 0) + Math.cos(angle) * distance, (Number(point.y) || 0) + Math.sin(angle) * distance, Math.max(.4, width * .02), 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    ctx.restore();
+}
+
 function drawPaintStroke(ctx, stroke, preview = false) {
     const points = Array.isArray(stroke?.points) ? stroke.points : [];
     if (points.length < 2) return;
@@ -529,11 +715,20 @@ function drawPaintStroke(ctx, stroke, preview = false) {
     const opacity = clamp(stroke.opacity ?? 1, 0, 1);
     const hardness = clamp(stroke.hardness ?? .8, 0, 1);
     const erasing = kind === "eraser" && !preview;
+    const strokeColor = preview && kind === "eraser" ? "#ef4444" : cssColor(stroke.color, "#111827");
+    if (kind === "spray") {
+        drawSprayStroke(ctx, points, width, strokeColor, preview ? Math.max(.55, opacity) : opacity);
+        return;
+    }
+    if (kind === "toothbrush") {
+        drawToothbrushStroke(ctx, points, width, strokeColor, preview ? Math.max(.55, opacity) : opacity);
+        return;
+    }
     ctx.save();
     ctx.lineCap = kind === "pencil" ? "square" : "round";
     ctx.lineJoin = "round";
     ctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
-    ctx.strokeStyle = preview && kind === "eraser" ? "#ef4444" : cssColor(stroke.color, "#111827");
+    ctx.strokeStyle = strokeColor;
     ctx.globalAlpha = preview ? Math.max(.55, opacity) : opacity;
     if (kind === "brush" && hardness < .98 && !erasing) {
         ctx.shadowColor = ctx.strokeStyle;
@@ -934,16 +1129,23 @@ function beginDrawing(editor, event) {
         event.preventDefault();
         return;
     }
-    if (!["brush", "pencil", "line", "eraser"].includes(settings.tool)) return;
+    if (!["brush", "pencil", "spray", "toothbrush", "line", "eraser"].includes(settings.tool)) return;
+    const adjustedWidth = settings.tool === "pencil"
+        ? Math.min(settings.width, 6)
+        : settings.tool === "spray"
+            ? Math.max(6, settings.width)
+            : settings.tool === "toothbrush"
+                ? Math.max(4, settings.width)
+                : settings.width;
     editor.drawing = {
         pointerId: event.pointerId,
         tool: settings.tool,
         kind: settings.tool,
         color: settings.color,
-        width: settings.tool === "pencil" ? Math.min(settings.width, 6) : settings.width,
-        widthPx: settings.tool === "pencil" ? Math.min(settings.width, 6) : settings.width,
+        width: adjustedWidth,
+        widthPx: adjustedWidth,
         opacity: settings.opacity,
-        hardness: settings.tool === "pencil" ? 1 : settings.hardness,
+        hardness: settings.tool === "pencil" ? 1 : settings.tool === "spray" ? Math.min(settings.hardness, .55) : settings.hardness,
         points: [point, { ...point }]
     };
     editor.canvas.setPointerCapture(event.pointerId);

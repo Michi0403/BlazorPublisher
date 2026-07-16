@@ -1,20 +1,6 @@
 const studioStates = new Map();
 const CHUNK_SIZE = 24 * 1024;
 
-function baseMimeType(value, fallback = 'application/octet-stream') {
-    const mimeType = String(value || '').split(';', 1)[0].trim().toLowerCase();
-    return mimeType.includes('/') ? mimeType : fallback;
-}
-
-function normalizeMediaDataUrl(dataUrl, fallbackMimeType = 'application/octet-stream') {
-    const value = String(dataUrl || '');
-    if (!value.startsWith('data:')) return value;
-    const marker = value.toLowerCase().lastIndexOf(';base64,');
-    if (marker < 0) return value;
-    const mimeType = baseMimeType(value.slice(5, marker), fallbackMimeType);
-    return `data:${mimeType};base64,${value.slice(marker + 8)}`;
-}
-
 function stateFor(id) {
     let state = studioStates.get(id);
     if (!state) {
@@ -115,12 +101,11 @@ async function posterFromVideo(video) {
 }
 
 async function inspectElement(element, dataUrl, kind) {
-    const normalizedDataUrl = normalizeMediaDataUrl(dataUrl, kind === 'video' ? 'video/webm' : 'audio/webm');
-    element.src = normalizedDataUrl;
+    element.src = dataUrl;
     element.load();
     await waitForMetadata(element);
     const durationSeconds = Number.isFinite(element.duration) ? element.duration : 0;
-    const waveformSamples = await waveformFromSource(normalizedDataUrl);
+    const waveformSamples = await waveformFromSource(dataUrl);
     const posterDataUrl = kind === 'video' && element instanceof HTMLVideoElement ? await posterFromVideo(element) : '';
     element.currentTime = 0;
     return { durationSeconds, waveformSamples, posterDataUrl };
@@ -148,12 +133,9 @@ export async function inspectMediaDataUrl(dataUrl, kind) {
 
 function preferredMime(kind) {
     const choices = kind === 'video'
-        ? ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9,opus', 'video/webm']
+        ? ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
         : ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
-    const probe = document.createElement(kind === 'video' ? 'video' : 'audio');
-    return choices.find(value => MediaRecorder.isTypeSupported(value) && probe.canPlayType(value) !== '')
-        || choices.find(value => MediaRecorder.isTypeSupported(value))
-        || '';
+    return choices.find(value => MediaRecorder.isTypeSupported(value)) || '';
 }
 
 async function streamFor(kind, source) {
@@ -171,22 +153,16 @@ async function streamFor(kind, source) {
     return navigator.mediaDevices.getUserMedia({ audio: true });
 }
 
-async function transferRecording(state, blob, kind) {
-    // Codec lists such as "video/webm;codecs=vp8,opus" contain a comma. A comma is
-    // also the data-URL header separator, so FileReader would otherwise create a
-    // malformed URL that the video element cannot decode. Store the container MIME
-    // type only; the encoded WebM bytes still retain their actual codecs.
-    const mimeType = baseMimeType(blob.type, kind === 'video' ? 'video/webm' : 'audio/webm');
-    const transferableBlob = blob.type === mimeType ? blob : blob.slice(0, blob.size, mimeType);
+async function transferRecording(state, blob) {
     const dataUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(normalizeMediaDataUrl(String(reader.result || ''), mimeType));
+        reader.onload = () => resolve(String(reader.result || ''));
         reader.onerror = () => reject(reader.error || new Error('The recording could not be read.'));
-        reader.readAsDataURL(transferableBlob);
+        reader.readAsDataURL(blob);
     });
     const transferId = crypto.randomUUID();
     const chunkCount = Math.ceil(dataUrl.length / CHUNK_SIZE);
-    const accepted = await state.dotnet.invokeMethodAsync('BeginMediaRecordingTransfer', transferId, mimeType, dataUrl.length, chunkCount);
+    const accepted = await state.dotnet.invokeMethodAsync('BeginMediaRecordingTransfer', transferId, blob.type || 'application/octet-stream', dataUrl.length, chunkCount);
     if (!accepted) throw new Error('The recording is too large for the embedded publication.');
     for (let index = 0; index < chunkCount; index++) {
         const chunk = dataUrl.slice(index * CHUNK_SIZE, (index + 1) * CHUNK_SIZE);
@@ -237,7 +213,7 @@ export async function startMediaRecording(id, kind, source, dotnet) {
             }
             if (state.discardRecording) return;
             const blob = new Blob(state.chunks, { type: state.recorder?.mimeType || mimeType || (kind === 'video' ? 'video/webm' : 'audio/webm') });
-            await transferRecording(state, blob, kind);
+            await transferRecording(state, blob);
         } catch (error) {
             await state.dotnet?.invokeMethodAsync('MediaRecordingFailed', error?.message || String(error));
         } finally {

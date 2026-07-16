@@ -71,6 +71,8 @@ public sealed class EditorStateService
     public void SelectElement(Guid? id)
     {
         SelectedElementId = id;
+        if (id.HasValue)
+            ConnectorTool = ConnectorToolKind.None;
         if (SelectedElement is not ImageFrameElement)
             CropMode = false;
         EndLiveEdit();

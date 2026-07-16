@@ -328,8 +328,20 @@ function updateAttachedConnectors(state, movedId) {
     }
 }
 
+function mediaPointerTargetsControls(event) {
+    const target = event.target?.closest?.('[data-media-control],video,audio');
+    if (!target) return false;
+    const rect = target.getBoundingClientRect?.();
+    if (!rect || rect.height <= 0) return true;
+    const tag = String(target.tagName || '').toLowerCase();
+    const relativeY = event.clientY - rect.top;
+    const controlBand = tag === 'audio' ? rect.height : Math.min(38, rect.height * .3);
+    return relativeY >= rect.height - controlBand;
+}
+
 function pointerDown(state, event) {
-    if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler,[data-media-control],video,audio')) return;
+    if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
+    if (mediaPointerTargetsControls(event)) return;
     state.stage.focus({ preventScroll: true });
 
     const endpoint = event.target.closest('[data-connector-end]');

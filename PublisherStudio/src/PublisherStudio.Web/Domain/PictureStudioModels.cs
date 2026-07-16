@@ -49,10 +49,10 @@ public enum PictureBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighte
 public enum PictureRasterFitMode { Stretch, Contain, Cover }
 public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum PictureFillKind { Solid, LinearGradient, RadialGradient }
-public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette }
+public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette, Bloom, Neon, LensFlare }
 public enum PictureTextAlignment { Left, Center, Right }
-public enum PictureDrawTool { Select, Brush, Pencil, Line, Eraser, Eyedropper }
-public enum PictureStrokeKind { Brush, Pencil, Line, Eraser }
+public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Line, Eraser, Eyedropper }
+public enum PictureStrokeKind { Brush, Pencil, Spray, Toothbrush, Line, Eraser }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(RasterPictureLayer), "raster")]

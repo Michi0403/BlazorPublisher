@@ -20,6 +20,15 @@
         </div>
     }
 
+    <div class="pointer-state-indicator" @onclick:stopPropagation="true" title="Current mouse mode">
+        <strong>Mouse</strong>
+        <span>@PointerStateText</span>
+        @if (CanResetPointerState)
+        {
+            <button type="button" @onclick="ResetPointerState">Reset</button>
+        }
+    </div>
+
     <div id="publisher-scroll-area" class="page-scroll-area">
         <div id="publisher-page" class="publication-page @(State.CropMode ? "crop-mode" : null)"
              style="@PageStyle"
@@ -428,6 +437,11 @@
         _ => "mm"
     };
 
+    private string PointerStateText => State.ConnectorTool != ConnectorToolKind.None
+        ? (State.ConnectorTool == ConnectorToolKind.Arrow ? "Draw arrow connector" : "Draw connector")
+        : State.CropMode ? "Crop picture" : "Select / move";
+    private bool CanResetPointerState => State.ConnectorTool != ConnectorToolKind.None || State.CropMode;
+
     private string PageStyle
     {
         get
@@ -488,6 +502,7 @@
         State.ReconnectConnector(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), elementGuid, parsedAnchor);
     }
     [JSInvokable] public void CancelActiveTool() => State.CancelActiveTool();
+    private void ResetPointerState() => State.CancelActiveTool();
 
     private void ClearSelection() => State.SelectElement(null);
     private Task DoubleClick(PublicationElement element)

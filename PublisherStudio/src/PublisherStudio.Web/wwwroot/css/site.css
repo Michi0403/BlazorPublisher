@@ -6,10 +6,10 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; width: 100%; max-width: 100%; height: 100%; overflow: hidden; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
-.application-root, .publisher-shell { width: 100%; max-width: 100%; min-width: 0; height: 100vh; overflow: hidden; }
+.application-root, .publisher-shell { height: 100vh; }
 
 .publisher-shell {
     display: grid;
@@ -279,11 +279,9 @@ button { cursor: pointer; }
 .empty-panel { display: flex; flex-direction: column; gap: 7px; padding: 18px; color: #6b7280; font-size: 12px; }
 .selection-help { margin-top: 12px; }
 
-.status-bar { min-width: 0; width: 100%; display: flex; align-items: center; gap: 24px; padding: 0 10px; overflow: hidden; color: #eef6ff; background: #165a89; font-size: 11px; }
-.status-bar > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.zoom-control { min-width: 0; flex: 0 1 auto; display: flex; align-items: center; gap: 6px; margin-left: auto; white-space: nowrap; }
-.zoom-control input { width: clamp(84px, 10vw, 140px); min-width: 64px; padding: 0; }
-.zoom-control b { min-width: 38px; text-align: right; }
+.status-bar { display: flex; align-items: center; gap: 24px; padding: 0 10px; color: #eef6ff; background: #165a89; font-size: 11px; }
+.zoom-control { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.zoom-control input { width: 140px; padding: 0; }
 .zoom-control button { display: grid; place-items: center; width: 21px; height: 21px; padding: 0; color: white; border: 1px solid #ffffff55; border-radius: 2px; background: #ffffff12; }
 .zoom-control button:hover { background: #ffffff30; }
 .hidden-file-input { display: none; }
@@ -474,7 +472,7 @@ button { cursor: pointer; }
 
 /* v0.3 workspace hardening: the canvas owns every remaining pixel and panes never overlay it. */
 .publisher-shell { min-width: 0; min-height: 0; }
-.editor-workspace { width: 100%; height: auto; max-width: 100%; align-self: stretch; }
+.editor-workspace { width: 100%; height: auto; max-width: 100vw; align-self: stretch; }
 .page-navigator, .inspector-panel, .publication-stage { min-width: 0; max-width: 100%; }
 .page-scroll-area { width: auto; height: auto; overscroll-behavior: contain; }
 
@@ -515,6 +513,30 @@ button { cursor: pointer; }
 .connector-tool-hint strong { white-space: nowrap; color: #075985; }
 .connector-tool-hint span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .connector-tool-hint button { padding: 3px 8px; border: 1px solid #7aa8c8; border-radius: 3px; background: #fff; }
+
+.pointer-state-indicator {
+    position: absolute;
+    z-index: 29;
+    top: 38px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(280px, calc(100% - 24px));
+    padding: 6px 9px;
+    border: 1px solid #8da8bf;
+    border-radius: 999px;
+    color: #213547;
+    background: rgba(255,255,255,.92);
+    box-shadow: 0 3px 12px #0001;
+    font-size: 11px;
+    backdrop-filter: blur(4px);
+}
+.rulers-hidden .pointer-state-indicator { top: 10px; }
+.pointer-state-indicator strong { color: #0f517a; }
+.pointer-state-indicator span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pointer-state-indicator button { padding: 2px 8px; border: 1px solid #9fb6c9; border-radius: 999px; background: #fff; }
+.pointer-state-indicator button:hover { border-color: #2f75b5; background: #eef6fd; }
 
 /* A transparent page remains visible while editing but exports with a real alpha channel. */
 .publication-page[style*="background-color:transparent"],
@@ -1133,22 +1155,22 @@ button { cursor: pointer; }
 .timeline-playhead-control { min-width: 0; display: grid; grid-template-columns: auto minmax(80px,1fr) 62px; align-items: center; gap: 7px; font-size: 11px; }
 .timeline-playhead-control input { width: 100%; }
 .timeline-playhead-control b { font-variant-numeric: tabular-nums; text-align: right; }
-.timeline-overview { min-width: 0; display: grid; grid-template-columns: 132px minmax(0,1fr); align-items: center; padding: 2px 8px 1px; overflow: hidden; border-bottom: 1px solid #c9ced5; background: #f7f8fa; font-size: 10px; }
+.timeline-overview { min-width: 0; display: grid; grid-template-columns: 132px minmax(0,1fr); align-items: center; padding: 2px 8px 0; border-bottom: 1px solid #c9ced5; background: #f7f8fa; font-size: 10px; }
 .timeline-overview > span { padding-left: 5px; font-weight: 600; }
-.timeline-grid { --timeline-label-width: 150px; min-width: 0; min-height: 0; display: grid; grid-template-rows: 32px minmax(0,1fr); overflow: hidden; }
+.timeline-grid { --timeline-label-width: 156px; min-width: 0; min-height: 0; display: grid; grid-template-rows: 36px minmax(0,1fr); overflow: hidden; }
 .timeline-ruler-row, .timeline-track-row { min-width: 0; display: grid; grid-template-columns: var(--timeline-label-width) minmax(0,1fr); }
 .timeline-ruler-row { border-bottom: 1px solid #aeb5bf; background: #e6eaf0; }
 .timeline-track-scroll { min-height: 0; overflow: auto; background: #f7f8fa; }
-.timeline-track-row { min-height: 38px; border-bottom: 1px solid #d5d9df; }
+.timeline-track-row { min-height: 40px; border-bottom: 1px solid #d5d9df; }
 .timeline-track-row.selected { background: #edf6fd; }
 .timeline-track-label { min-width: 0; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 6px; padding: 4px 8px; overflow: hidden; text-align: left; border: 0; border-right: 1px solid #b8bfc8; color: #283548; background: #f4f6f8; }
-.timeline-track-label b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
-.timeline-track-label small { color: #6b7280; font-size: 8px; }
-.timeline-ruler, .timeline-track { position: relative; min-width: 0; overflow: hidden; cursor: crosshair; background-image: linear-gradient(90deg,#00000009 1px,transparent 1px); background-size: 5% 100%; }
+.timeline-track-label b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; line-height: 1.15; }
+.timeline-track-label small { color: #6b7280; font-size: 8px; line-height: 1.1; }
+.timeline-ruler, .timeline-track { position: relative; min-width: 0; overflow: hidden; cursor: crosshair; background-image: linear-gradient(90deg,#00000009 1px,transparent 1px); background-size: 10% 100%; }
 .timeline-ruler { background-color: #eef1f5; }
 .timeline-tick { position: absolute; inset: 0 auto 0 0; width: 1px; pointer-events: none; }
-.timeline-tick i { position: absolute; left: 0; top: 14px; bottom: 0; border-left: 1px solid #8f98a4; }
-.timeline-tick b { position: absolute; top: 2px; left: 3px; padding: 0 2px; color: #374151; border-radius: 2px; background: #eef1f5e6; font-size: 9px; line-height: 13px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.timeline-tick i { position: absolute; left: 0; top: 17px; bottom: 0; border-left: 1px solid #8f98a4; }
+.timeline-tick b { position: absolute; top: 2px; left: 4px; padding: 0 2px; color: #4b5563; background: rgba(238,241,245,.88); font-size: 7px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .timeline-playhead-line { position: absolute; z-index: 20; left: var(--timeline-playhead); top: 0; bottom: 0; width: 1px; background: #d92d20; pointer-events: none; }
 .timeline-playhead-line::before { content: ""; position: absolute; left: -4px; top: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid #d92d20; }
 .timeline-clip { position: absolute; z-index: 4; top: 5px; bottom: 5px; min-width: 8px; display: grid; grid-template-columns: 5px minmax(0,1fr) 5px; align-items: stretch; padding: 0; overflow: hidden; border: 1px solid #53749a; border-radius: 3px; color: #15243a; background: #d9e8f6; box-shadow: 0 1px 2px #0002; cursor: grab; }

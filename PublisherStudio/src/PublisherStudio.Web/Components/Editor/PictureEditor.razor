@@ -56,6 +56,9 @@
                         <DxRibbonItem Text="Noise" Click="AddNoise" />
                         <DxRibbonItem Text="Stripes" Click="AddStripes" />
                         <DxRibbonItem Text="Vignette" Click="AddVignette" />
+                        <DxRibbonItem Text="Bloom" Click="AddBloom" />
+                        <DxRibbonItem Text="Neon" Click="AddNeon" />
+                        <DxRibbonItem Text="Lens flare" Click="AddLensFlare" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
 
@@ -64,6 +67,8 @@
                         <DxRibbonItem Text="@SelectToolText" IsPrimary="true" Click="SelectTool" />
                         <DxRibbonItem Text="@BrushToolText" IsPrimary="true" Click="BrushTool" />
                         <DxRibbonItem Text="@PencilToolText" Click="PencilTool" />
+                        <DxRibbonItem Text="@SprayToolText" Click="SprayTool" />
+                        <DxRibbonItem Text="@ToothbrushToolText" Click="ToothbrushTool" />
                         <DxRibbonItem Text="@LineToolText" Click="LineTool" />
                         <DxRibbonItem Text="@EraserToolText" Click="EraserTool" />
                         <DxRibbonItem Text="@EyedropperToolText" Click="EyedropperTool" />
@@ -100,6 +105,11 @@
                         <DxRibbonItem Text="Invert" Enabled="HasSelection" Click="ToggleInvertPreset" />
                         <DxRibbonItem Text="Reset all" Enabled="HasSelection" Click="ResetAdjustments" />
                     </DxRibbonGroup>
+                    <DxRibbonGroup Text="Glow and flare">
+                        <DxRibbonItem Text="Bloom glow" Enabled="HasSelection" Click="ApplyBloomEffect" />
+                        <DxRibbonItem Text="Neon glow" Enabled="HasSelection" Click="ApplyNeonEffect" />
+                        <DxRibbonItem Text="Lens flare" Enabled="HasSelection" Click="ApplyLensFlareEffect" />
+                    </DxRibbonGroup>
                 </DxRibbonTab>
 
                 <DxRibbonTab Text="Render Tools" Contextual="true" Visible="IsRenderSelected">
@@ -108,6 +118,9 @@
                         <DxRibbonItem Text="Noise" Click="MakeRenderNoise" />
                         <DxRibbonItem Text="Stripes" Click="MakeRenderStripes" />
                         <DxRibbonItem Text="Vignette" Click="MakeRenderVignette" />
+                        <DxRibbonItem Text="Bloom" Click="MakeRenderBloom" />
+                        <DxRibbonItem Text="Neon" Click="MakeRenderNeon" />
+                        <DxRibbonItem Text="Lens flare" Click="MakeRenderLensFlare" />
                         <DxRibbonItem Text="New seed" IsPrimary="true" Click="RandomizeRender" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
@@ -115,6 +128,8 @@
                 <DxRibbonTab Text="Paint Tools" Contextual="true" Visible="IsPaintSelected">
                     <DxRibbonGroup Text="Paint layer">
                         <DxRibbonItem Text="Brush" IsPrimary="true" Click="BrushTool" />
+                        <DxRibbonItem Text="Spray can" Click="SprayTool" />
+                        <DxRibbonItem Text="Toothbrush" Click="ToothbrushTool" />
                         <DxRibbonItem Text="Eraser" Click="EraserTool" />
                         <DxRibbonItem Text="Clear strokes" Enabled="CanDelete" Click="State.ClearSelectedPaint" />
                     </DxRibbonGroup>
@@ -595,6 +610,8 @@
                 {
                     <DxContextMenuItem Text="Continue with brush" IconCssClass="pub-icon pub-icon-edit" BeginGroup="true" Click="BrushTool" />
                     <DxContextMenuItem Text="Continue with pencil" Click="PencilTool" />
+                    <DxContextMenuItem Text="Continue with spray can" Click="SprayTool" />
+                    <DxContextMenuItem Text="Continue with toothbrush" Click="ToothbrushTool" />
                     <DxContextMenuItem Text="Erase strokes" Click="EraserTool" />
                     <DxContextMenuItem Text="Clear all strokes" Enabled="@(paint.Strokes.Count > 0 && !paint.Locked)" Click="State.ClearSelectedPaint" />
                 }
@@ -606,6 +623,9 @@
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Noise, "Noise"))" Click="MakeRenderNoise" />
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Stripes, "Stripes"))" Click="MakeRenderStripes" />
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Vignette, "Vignette"))" Click="MakeRenderVignette" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Bloom, "Bloom"))" Click="MakeRenderBloom" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Neon, "Neon"))" Click="MakeRenderNeon" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.LensFlare, "Lens flare"))" Click="MakeRenderLensFlare" />
                         </Items>
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="New random seed" Click="RandomizeRender" />
@@ -678,6 +698,9 @@
                         <DxContextMenuItem Text="Noise" Click="AddNoise" />
                         <DxContextMenuItem Text="Stripes" Click="AddStripes" />
                         <DxContextMenuItem Text="Vignette" Click="AddVignette" />
+                        <DxContextMenuItem Text="Bloom" Click="AddBloom" />
+                        <DxContextMenuItem Text="Neon" Click="AddNeon" />
+                        <DxContextMenuItem Text="Lens flare" Click="AddLensFlare" />
                     </Items>
                 </DxContextMenuItem>
                 <DxContextMenuItem Text="Insert paint layer" IconCssClass="pub-icon pub-icon-edit" Click="AddPaintLayer" />

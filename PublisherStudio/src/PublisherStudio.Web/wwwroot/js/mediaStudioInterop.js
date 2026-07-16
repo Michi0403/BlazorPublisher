@@ -120,7 +120,7 @@ async function inspectElement(element, dataUrl, kind) {
     element.load();
     await waitForMetadata(element);
     const durationSeconds = Number.isFinite(element.duration) ? element.duration : 0;
-    const waveformSamples = await waveformFromSource(normalizedDataUrl);
+    const waveformSamples = kind === 'audio' ? await waveformFromSource(normalizedDataUrl) : [];
     const posterDataUrl = kind === 'video' && element instanceof HTMLVideoElement ? await posterFromVideo(element) : '';
     element.currentTime = 0;
     return { durationSeconds, waveformSamples, posterDataUrl };
@@ -143,6 +143,25 @@ export async function inspectMediaDataUrl(dataUrl, kind) {
         element.pause();
         element.removeAttribute('src');
         element.load();
+    }
+}
+
+export async function inspectMediaFileInput(inputId, kind) {
+    const input = document.getElementById(inputId);
+    const file = input instanceof HTMLInputElement ? input.files?.[0] : null;
+    if (!file) throw new Error('No media file was selected.');
+    const objectUrl = URL.createObjectURL(file);
+    const element = document.createElement(kind === 'video' ? 'video' : 'audio');
+    element.preload = 'metadata';
+    element.playsInline = true;
+    try {
+        const info = await inspectElement(element, objectUrl, kind);
+        return { ...info, mimeType: baseMimeType(file.type, kind === 'video' ? 'video/mp4' : 'audio/mpeg') };
+    } finally {
+        element.pause();
+        element.removeAttribute('src');
+        element.load();
+        URL.revokeObjectURL(objectUrl);
     }
 }
 

@@ -157,15 +157,27 @@ public sealed class PictureEditorStateService
 
     public ShapePictureLayer AddShape(PictureShapeKind shape = PictureShapeKind.Rectangle)
     {
+        return AddShapeAt(
+            shape,
+            Document.WidthPx * .25,
+            Document.HeightPx * .25,
+            Document.WidthPx * .5,
+            Document.HeightPx * .4,
+            0);
+    }
+
+    public ShapePictureLayer AddShapeAt(PictureShapeKind shape, double x, double y, double width, double height, double rotation = 0)
+    {
         Capture();
         var layer = new ShapePictureLayer
         {
             Name = NextName(shape.ToString()),
             Shape = shape,
-            X = Document.WidthPx * .25,
-            Y = Document.HeightPx * .25,
-            Width = Document.WidthPx * .5,
-            Height = Document.HeightPx * .4
+            X = Math.Clamp(x, -Document.WidthPx * 2d, Document.WidthPx * 3d),
+            Y = Math.Clamp(y, -Document.HeightPx * 2d, Document.HeightPx * 3d),
+            Width = Math.Clamp(width, 1, Document.WidthPx * 4d),
+            Height = Math.Clamp(height, 1, Document.HeightPx * 4d),
+            Rotation = ((rotation % 360) + 360) % 360
         };
         Document.Layers.Add(layer);
         SelectedLayerId = layer.Id;

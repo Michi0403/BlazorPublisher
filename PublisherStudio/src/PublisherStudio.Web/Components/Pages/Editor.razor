@@ -97,7 +97,7 @@
 
 <InputFile id="publication-file-input" class="hidden-file-input" accept=".json,.pubstudio.json,application/json" OnChange="OpenPublication" />
 <InputFile id="picture-file-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="InsertPicture" />
-<InputFile id="video-file-input" class="hidden-file-input" accept="video/mp4,video/webm,video/ogg,video/quicktime" OnChange="InsertVideo" />
+<InputFile id="video-file-input" class="hidden-file-input" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,video/mp4,video/x-m4v,video/webm,video/ogg,video/quicktime" OnChange="InsertVideo" />
 <InputFile id="audio-file-input" class="hidden-file-input" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac" OnChange="InsertAudio" />
 
 <PrintPublication Document="State.Document" />
@@ -195,9 +195,30 @@
         ShowNotice($"Saved {name}");
     }
 
-    private async Task ExportPng() => await ExportPage("png");
-    private async Task ExportJpeg() => await ExportPage("jpeg");
+    private async Task ExportPng() => await ExportRasterPages("png");
+    private async Task ExportJpeg() => await ExportRasterPages("jpeg");
     private async Task ExportSvg() => await ExportPage("svg");
+
+    private async Task ExportRasterPages(string format)
+    {
+        try
+        {
+            var baseName = PublicationFileService.SafeFileName(State.Document.Name);
+            var result = await JS.InvokeAsync<PageExportResult>(
+                "publisherStudio.exportPublicationPages",
+                ".print-publication",
+                baseName,
+                format,
+                State.Document.View.ExportDpi);
+            ShowNotice(result.Count == 1
+                ? $"Exported {result.FileName}."
+                : $"Exported {result.Count} page images in {result.FileName}.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
 
     private async Task ExportPage(string format)
     {
@@ -311,26 +332,37 @@
         try
         {
             var file = args.File;
+            var mimeType = ResolveMediaMimeType(file, kind);
             var expected = kind == PublicationElementKind.Video ? "video/" : "audio/";
-            if (!file.ContentType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format.");
+            if (!mimeType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format: {Path.GetExtension(file.Name)}.");
 
-            await using var stream = file.OpenReadStream(96 * 1024 * 1024);
-            using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
-            var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
             var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
             try
             {
-                var info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", dataUrl, kind == PublicationElementKind.Video ? "video" : "audio");
+                // Read metadata directly from the browser File object. Sending a multi-megabyte
+                // base64 data URL back to JavaScript merely to inspect it can corrupt or overload
+                // an Interactive Server render/interop message. The embedded bytes are transferred
+                // to .NET only once, after the browser has confirmed that it can decode the file.
+                var inputId = kind == PublicationElementKind.Video ? "video-file-input" : "audio-file-input";
+                var info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaFileInput", inputId, kind == PublicationElementKind.Video ? "video" : "audio");
+
+                await using var stream = file.OpenReadStream(160 * 1024 * 1024);
+                using var buffer = new MemoryStream();
+                await stream.CopyToAsync(buffer);
+                var dataUrl = PublicationMediaData.NormalizeDataUrl(
+                    $"data:{mimeType};base64,{Convert.ToBase64String(buffer.ToArray())}",
+                    kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg");
+                mimeType = PublicationMediaData.NormalizeMimeType(mimeType, kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg");
+
                 if (kind == PublicationElementKind.Video)
                 {
-                    var media = State.AddVideo(dataUrl, file.ContentType, file.Name, info.DurationSeconds, info.PosterDataUrl);
+                    var media = State.AddVideo(dataUrl, mimeType, file.Name, info.DurationSeconds, info.PosterDataUrl);
                     State.UpdateMedia(media.Id, item => item.WaveformSamples = info.WaveformSamples ?? [], capture: false);
                 }
                 else
                 {
-                    var media = State.AddAudio(dataUrl, file.ContentType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
+                    var media = State.AddAudio(dataUrl, mimeType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
                     State.SelectElement(media.Id);
                 }
             }
@@ -345,6 +377,30 @@
         {
             ShowError(ex);
         }
+    }
+
+    private static string ResolveMediaMimeType(IBrowserFile file, PublicationElementKind kind)
+    {
+        var fallback = kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg";
+        var declared = PublicationMediaData.NormalizeMimeType(file.ContentType, string.Empty);
+        if (declared.StartsWith(kind == PublicationElementKind.Video ? "video/" : "audio/", StringComparison.OrdinalIgnoreCase))
+            return declared;
+
+        var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+        return extension switch
+        {
+            ".mp4" => kind == PublicationElementKind.Video ? "video/mp4" : "audio/mp4",
+            ".m4v" => "video/x-m4v",
+            ".webm" => kind == PublicationElementKind.Video ? "video/webm" : "audio/webm",
+            ".ogv" => "video/ogg",
+            ".ogg" or ".oga" => kind == PublicationElementKind.Video ? "video/ogg" : "audio/ogg",
+            ".mov" => "video/quicktime",
+            ".mp3" => "audio/mpeg",
+            ".m4a" or ".aac" => "audio/mp4",
+            ".wav" => "audio/wav",
+            ".flac" => "audio/flac",
+            _ => fallback
+        };
     }
 
     private Task CreateVideo() => OpenMediaStudio(PublicationElementKind.Video, null);
@@ -647,6 +703,12 @@
         _notice = message;
         _error = null;
         StateChanged();
+    }
+
+    private sealed class PageExportResult
+    {
+        public int Count { get; set; }
+        public string FileName { get; set; } = string.Empty;
     }
 
     public void Dispose() => State.Changed -= StateChanged;

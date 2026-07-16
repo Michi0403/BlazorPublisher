@@ -100,7 +100,7 @@ public enum ImageTintMode { Overlay, Recolor }
 public enum ImageBlendMode { Normal, Multiply, Screen, Darken, Lighten }
 public enum WordArtWarp { None, ArchUp, ArchDown, Wave, Custom }
 public enum PublicationAnimationPhase { Entrance, Emphasis, Exit, Motion }
-public enum PublicationAnimationEffect { Fade, Fly, Float, Zoom, Wipe, Bounce, Pulse, Spin, Shake, GrowShrink, Move }
+public enum PublicationAnimationEffect { Fade, Fly, Float, Zoom, Wipe, Bounce, Pulse, Spin, Shake, GrowShrink, Move, PlayMedia, PauseMedia, StopMedia }
 public enum PublicationAnimationTrigger { OnPageEnter, WithPrevious, AfterPrevious, OnClick }
 public enum PublicationAnimationEasing { Linear, EaseIn, EaseOut, EaseInOut, BackOut, BounceOut }
 public enum PublicationAnimationDirection { None, Left, Right, Up, Down }

@@ -840,11 +840,109 @@ function cleanPageClone(page) {
     return clone;
 }
 
-async function pageSvg(page) {
+function waitForVideoFrame(video, timeoutMs = 8000) {
+    if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => finish(new Error('Video frame loading timed out.')), timeoutMs);
+        const finish = error => {
+            clearTimeout(timer);
+            video.removeEventListener('loadeddata', loaded);
+            video.removeEventListener('error', failed);
+            error ? reject(error) : resolve();
+        };
+        const loaded = () => finish();
+        const failed = () => finish(new Error('The video frame could not be decoded.'));
+        video.addEventListener('loadeddata', loaded, { once: true });
+        video.addEventListener('error', failed, { once: true });
+        video.load();
+    });
+}
+
+function drawVideoFrameDataUrl(video) {
+    if (!(video instanceof HTMLVideoElement) || video.videoWidth <= 0 || video.videoHeight <= 0) return '';
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, video.videoWidth);
+        canvas.height = Math.max(1, video.videoHeight);
+        const context = canvas.getContext('2d');
+        if (!context) return '';
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg', .9);
+    } catch {
+        return '';
+    }
+}
+
+async function snapshotVideoForRaster(video, owner) {
+    if (!(video instanceof HTMLVideoElement)) return '';
+    if (video.readyState >= 2) {
+        const current = drawVideoFrameDataUrl(video);
+        if (current) return current;
+    }
+    const poster = video.getAttribute('poster') || '';
+    if (poster.startsWith('data:image/')) return poster;
+    const source = video.currentSrc || video.getAttribute('src') || '';
+    if (!source) return poster;
+    const temporary = document.createElement('video');
+    temporary.muted = true;
+    temporary.playsInline = true;
+    temporary.preload = 'auto';
+    temporary.src = source;
+    try {
+        await waitForVideoFrame(temporary);
+        const requested = Number(owner?.dataset?.mediaTrimStart);
+        const target = Number.isFinite(requested) ? Math.max(0, requested) : 0;
+        if (target > .001 && Number.isFinite(temporary.duration) && target < temporary.duration) {
+            await new Promise(resolve => {
+                const timer = setTimeout(done, 3500);
+                function done() {
+                    clearTimeout(timer);
+                    temporary.removeEventListener('seeked', done);
+                    resolve();
+                }
+                temporary.addEventListener('seeked', done, { once: true });
+                temporary.currentTime = target;
+            });
+        }
+        return drawVideoFrameDataUrl(temporary) || poster;
+    } catch {
+        return poster;
+    } finally {
+        temporary.pause();
+        temporary.removeAttribute('src');
+        temporary.load();
+    }
+}
+
+async function freezeMediaForRaster(sourcePage, clonePage) {
+    const sourceVideos = [...sourcePage.querySelectorAll('video')];
+    const cloneVideos = [...clonePage.querySelectorAll('video')];
+    for (let index = 0; index < cloneVideos.length; index++) {
+        const cloneVideo = cloneVideos[index];
+        const sourceVideo = sourceVideos[index];
+        const sourceOwner = sourceVideo?.closest?.('[data-media-kind]');
+        const snapshot = await snapshotVideoForRaster(sourceVideo, sourceOwner);
+        const image = document.createElement('img');
+        image.alt = sourceVideo?.getAttribute('aria-label') || sourceVideo?.getAttribute('title') || 'Frozen video frame';
+        image.draggable = false;
+        image.style.cssText = cloneVideo.getAttribute('style') || 'width:100%;height:100%;object-fit:contain;';
+        image.style.display = 'block';
+        image.style.width = '100%';
+        image.style.height = '100%';
+        image.style.maxWidth = 'none';
+        image.src = snapshot || 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360"><rect width="100%" height="100%" fill="#111827"/><text x="50%" y="50%" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="26" text-anchor="middle" dominant-baseline="middle">Video frame unavailable</text></svg>');
+        cloneVideo.replaceWith(image);
+    }
+    clonePage.querySelectorAll('audio').forEach(audio => audio.remove());
+    clonePage.querySelectorAll('.media-object-badge').forEach(badge => badge.remove());
+}
+
+async function pageSvg(page, options = {}) {
     await document.fonts?.ready;
     await waitForImages(page);
     const rect = page.getBoundingClientRect();
     const clone = cleanPageClone(page);
+    if (options.freezeMedia) await freezeMediaForRaster(page, clone);
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
@@ -960,6 +1058,94 @@ function downloadBlob(fileName, blob) {
     anchor.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
+
+let zipCrcTable;
+function crc32(bytes) {
+    if (!zipCrcTable) {
+        zipCrcTable = new Uint32Array(256);
+        for (let index = 0; index < 256; index++) {
+            let value = index;
+            for (let bit = 0; bit < 8; bit++) value = (value & 1) ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
+            zipCrcTable[index] = value >>> 0;
+        }
+    }
+    let crc = 0xffffffff;
+    for (const value of bytes) crc = zipCrcTable[(crc ^ value) & 0xff] ^ (crc >>> 8);
+    return (crc ^ 0xffffffff) >>> 0;
+}
+
+function dosDateTime(date = new Date()) {
+    const year = Math.max(1980, date.getFullYear());
+    return {
+        time: ((date.getHours() & 31) << 11) | ((date.getMinutes() & 63) << 5) | ((Math.floor(date.getSeconds() / 2)) & 31),
+        date: (((year - 1980) & 127) << 9) | (((date.getMonth() + 1) & 15) << 5) | (date.getDate() & 31)
+    };
+}
+
+async function createStoredZip(files) {
+    const encoder = new TextEncoder();
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+    for (const file of files) {
+        const name = encoder.encode(file.name);
+        const bytes = new Uint8Array(await file.blob.arrayBuffer());
+        const crc = crc32(bytes);
+        const stamp = dosDateTime(file.modified || new Date());
+        const local = new Uint8Array(30 + name.length);
+        const localView = new DataView(local.buffer);
+        localView.setUint32(0, 0x04034b50, true);
+        localView.setUint16(4, 20, true);
+        localView.setUint16(6, 0x0800, true);
+        localView.setUint16(8, 0, true);
+        localView.setUint16(10, stamp.time, true);
+        localView.setUint16(12, stamp.date, true);
+        localView.setUint32(14, crc, true);
+        localView.setUint32(18, bytes.length, true);
+        localView.setUint32(22, bytes.length, true);
+        localView.setUint16(26, name.length, true);
+        localView.setUint16(28, 0, true);
+        local.set(name, 30);
+        localParts.push(local, bytes);
+
+        const central = new Uint8Array(46 + name.length);
+        const centralView = new DataView(central.buffer);
+        centralView.setUint32(0, 0x02014b50, true);
+        centralView.setUint16(4, 20, true);
+        centralView.setUint16(6, 20, true);
+        centralView.setUint16(8, 0x0800, true);
+        centralView.setUint16(10, 0, true);
+        centralView.setUint16(12, stamp.time, true);
+        centralView.setUint16(14, stamp.date, true);
+        centralView.setUint32(16, crc, true);
+        centralView.setUint32(20, bytes.length, true);
+        centralView.setUint32(24, bytes.length, true);
+        centralView.setUint16(28, name.length, true);
+        centralView.setUint16(30, 0, true);
+        centralView.setUint16(32, 0, true);
+        centralView.setUint16(34, 0, true);
+        centralView.setUint16(36, 0, true);
+        centralView.setUint32(38, 0, true);
+        centralView.setUint32(42, offset, true);
+        central.set(name, 46);
+        centralParts.push(central);
+        offset += local.length + bytes.length;
+    }
+    const centralOffset = offset;
+    const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+    const end = new Uint8Array(22);
+    const endView = new DataView(end.buffer);
+    endView.setUint32(0, 0x06054b50, true);
+    endView.setUint16(4, 0, true);
+    endView.setUint16(6, 0, true);
+    endView.setUint16(8, files.length, true);
+    endView.setUint16(10, files.length, true);
+    endView.setUint32(12, centralSize, true);
+    endView.setUint32(16, centralOffset, true);
+    endView.setUint16(20, 0, true);
+    return new Blob([...localParts, ...centralParts, end], { type: 'application/zip' });
+}
+
 
 function escapeHtml(value) {
     return String(value ?? '')
@@ -1274,9 +1460,11 @@ function parsePublicationData(value, fallback) {
 }
 
 function animationName(value) { return String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase(); }
+function isMediaAnimationEffect(value) { return ['playmedia', 'pausemedia', 'stopmedia'].includes(animationName(value)); }
 function publicationReducedMotion() { return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches; }
 function publicationAnimationSpan(animation) {
     if (publicationReducedMotion()) return .001;
+    if (isMediaAnimationEffect(animation.effect)) return .05;
     return Math.max(.05, animationNumber(animation.durationSeconds, .6))
         * Math.max(1, animationNumber(animation.repeatCount, 1))
         * (animation.autoReverse ? 2 : 1);
@@ -1363,7 +1551,32 @@ function publicationAnimationFrames(node, animation) {
             return [{ opacity: 1 }, { opacity: 1 }];
     }
 }
+function runPublicationMediaAnimation(node, animation, delaySeconds = 0) {
+    const effect = animationName(animation.effect);
+    let timer = 0;
+    let cancelled = false;
+    let resolveFinished;
+    const finished = new Promise(resolve => { resolveFinished = resolve; });
+    const execute = () => {
+        if (cancelled) return;
+        if (effect === 'playmedia') playPublicationMediaNode(node);
+        else if (effect === 'pausemedia') pausePublicationMediaNode(node, false);
+        else if (effect === 'stopmedia') pausePublicationMediaNode(node, true);
+        resolveFinished();
+    };
+    timer = setTimeout(execute, Math.max(0, delaySeconds) * 1000);
+    return {
+        finished,
+        cancel() {
+            cancelled = true;
+            clearTimeout(timer);
+            resolveFinished();
+        }
+    };
+}
+
 function runPublicationAnimation(node, animation, delaySeconds = 0) {
+    if (isMediaAnimationEffect(animation.effect)) return runPublicationMediaAnimation(node, animation, delaySeconds);
     const reducedMotion = publicationReducedMotion();
     const duration = (reducedMotion ? .001 : Math.max(.05, animationNumber(animation.durationSeconds, .6))) * 1000;
     const repeat = Math.max(1, Math.round(animationNumber(animation.repeatCount, 1)));
@@ -1438,6 +1651,7 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
         if (Number.isFinite(explicitStart)) start = Math.max(0, explicitStart);
         else if (trigger === 'withprevious') start = previousStart + ownDelay;
         else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
+        if (isMediaAnimationEffect(item.animation.effect)) state.mediaNodes.add(item.node);
         state.animations.push(runPublicationAnimation(item.node, item.animation, start));
         previousStart = start;
         previousEnd = start + publicationAnimationSpan(item.animation);
@@ -1604,8 +1818,9 @@ function websitePresentationRuntime() {
     const bool = value => String(value).toLowerCase() === 'true';
     const parse = (value, fallback) => { try { return JSON.parse(value || ''); } catch { return fallback; } };
     const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const animationSpan = animation => reducedMotion ? .001 : Math.max(.05, num(animation.durationSeconds, .6))
-        * Math.max(1, num(animation.repeatCount, 1)) * (animation.autoReverse ? 2 : 1);
+    const animationSpan = animation => reducedMotion ? .001 : ['playmedia','pausemedia','stopmedia'].includes(lower(animation.effect))
+        ? .05
+        : Math.max(.05, num(animation.durationSeconds, .6)) * Math.max(1, num(animation.repeatCount, 1)) * (animation.autoReverse ? 2 : 1);
     const easing = value => {
         switch (lower(value)) {
             case 'linear': return 'linear';
@@ -1668,6 +1883,25 @@ function websitePresentationRuntime() {
     const playItem = (item, delay = 0) => {
         item.prestate?.cancel();
         item.prestate = null;
+        const effect = lower(item.animation.effect);
+        if (['playmedia','pausemedia','stopmedia'].includes(effect)) {
+            let timer = 0;
+            let cancelled = false;
+            let resolveFinished;
+            const finished = new Promise(resolve => { resolveFinished = resolve; });
+            const execute = () => {
+                if (cancelled) return;
+                if (effect === 'playmedia') playMediaNode(item.node);
+                else if (effect === 'pausemedia') pauseMediaNode(item.node);
+                else stopMediaNode(item.node, true);
+                resolveFinished();
+            };
+            timer = setTimeout(execute, Math.max(0, delay) * 1000);
+            activeMediaTimers.push(timer);
+            const handle = { finished, cancel() { cancelled = true; clearTimeout(timer); resolveFinished(); } };
+            activeAnimations.push(handle);
+            return handle;
+        }
         if (lower(item.animation.phase) === 'entrance') item.node.classList.remove('ps-action-hidden');
         const repeat = Math.max(1, Math.round(num(item.animation.repeatCount, 1)));
         const animation = item.node.animate(frames(item.node, item.animation), {
@@ -1756,12 +1990,20 @@ function websitePresentationRuntime() {
         }
     };
     const mediaFromNode = node => node?.querySelector('video,audio') || null;
-    const stopMediaNode = node => {
+    const pauseMediaNode = node => {
+        const media = mediaFromNode(node);
+        if (media) media.pause();
+    };
+    const stopMediaNode = (node, rewind = false) => {
         const media = mediaFromNode(node);
         if (!media) return;
         media.pause();
         if (media.__psTimeHandler) media.removeEventListener('timeupdate', media.__psTimeHandler);
         media.__psTimeHandler = null;
+        if (rewind) {
+            const start = Math.max(0, num(node.dataset.mediaTrimStart, 0));
+            try { media.currentTime = start; } catch { }
+        }
     };
     const playMediaNode = (node, delay = 0) => {
         const media = mediaFromNode(node);
@@ -1821,7 +2063,7 @@ function websitePresentationRuntime() {
         activeAnimations = [];
         for (const timer of activeMediaTimers) clearTimeout(timer);
         activeMediaTimers = [];
-        for (const node of publication.querySelectorAll('[data-media-kind]')) stopMediaNode(node);
+        for (const node of publication.querySelectorAll('[data-media-kind]')) stopMediaNode(node, true);
         clickGroups = [];
     };
     const fitPages = () => {
@@ -1971,7 +2213,7 @@ function websitePresentationRuntime() {
                         const items = parse(target.dataset.animations, []).map(animation => ({ node: target, animation, prestate: null }));
                         scheduleGroup(items);
                     } else if (action === 'playmedia') playMediaNode(target);
-                    else if (action === 'pausemedia') stopMediaNode(target);
+                    else if (action === 'pausemedia') pauseMediaNode(target);
                     else if (action === 'togglemediaplayback') toggleMediaNode(target);
                 }
             });
@@ -2042,8 +2284,8 @@ window.publisherStudio = {
     async exportPage(pageId, fileName, format, dpi, zoom) {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
-        const serialized = await pageSvg(page);
         const normalized = String(format).toLowerCase();
+        const serialized = await pageSvg(page, { freezeMedia: normalized !== 'svg' });
 
         if (normalized === 'svg') {
             downloadBlob(fileName, new Blob([serialized.text], { type: 'image/svg+xml;charset=utf-8' }));
@@ -2057,10 +2299,38 @@ window.publisherStudio = {
         downloadBlob(fileName, blob);
     },
 
+    async exportPublicationPages(containerSelector, baseName, format, dpi) {
+        const container = document.querySelector(containerSelector);
+        if (!container) throw new Error('The publication export surface is not available.');
+        const pages = [...container.querySelectorAll(':scope > .print-page')];
+        if (!pages.length) throw new Error('The publication does not contain any pages.');
+        const normalized = String(format).toLowerCase();
+        const jpeg = normalized === 'jpeg' || normalized === 'jpg';
+        if (!jpeg && normalized !== 'png') throw new Error('Only PNG and JPEG page export are supported here.');
+        const extension = jpeg ? 'jpg' : 'png';
+        const mimeType = jpeg ? 'image/jpeg' : 'image/png';
+        const scale = clamp(number(dpi, 150) / 96, .5, 12);
+        const safeBase = String(baseName || 'publication').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').replace(/[. ]+$/g, '') || 'publication';
+        const files = [];
+        for (let index = 0; index < pages.length; index++) {
+            const serialized = await pageSvg(pages[index], { freezeMedia: true });
+            const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, scale, jpeg);
+            const blob = await canvasBlob(canvas, mimeType, jpeg ? .92 : undefined);
+            files.push({ name: `${safeBase}-page-${index + 1}.${extension}`, blob });
+        }
+        if (files.length === 1) {
+            downloadBlob(files[0].name, files[0].blob);
+            return { count: 1, fileName: files[0].name };
+        }
+        const archiveName = `${safeBase}-${extension}-pages.zip`;
+        downloadBlob(archiveName, await createStoredZip(files));
+        return { count: files.length, fileName: archiveName };
+    },
+
     async verifyPageRaster(pageId) {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
-        const serialized = await pageSvg(page);
+        const serialized = await pageSvg(page, { freezeMedia: true });
         const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, 1, false);
         return { width: canvas.width, height: canvas.height, prefix: canvas.toDataURL('image/png').slice(0, 22) };
     },

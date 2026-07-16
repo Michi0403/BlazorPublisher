@@ -5,11 +5,11 @@ const proceduralCache = new Map();
 const layerKinds = ["raster", "text", "shape", "fill", "render", "paint"];
 const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "lighten"];
 const rasterFits = ["stretch", "contain", "cover"];
-const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line"];
+const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow"];
 const fillKinds = ["solid", "linearGradient", "radialGradient"];
-const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", "lensflare"];
+const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", "lensflare", "grainnoise", "motionblur", "wind", "oceanwaves"];
 const textAlignments = ["left", "center", "right"];
-const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "line", "eraser", "eyedropper"];
+const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser", "eyedropper"];
 
 function enumName(value, names, fallback) {
     if (typeof value === "string") return value;
@@ -320,6 +320,18 @@ function drawShapeLayer(ctx, layer) {
     if (shape === "ellipse") {
         ctx.beginPath();
         ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, Math.PI * 2);
+    } else if (shape === "arrow") {
+        const shaftHalf = Math.max(1, height * .17);
+        const headStart = Math.max(-width * .15, width * .08);
+        ctx.beginPath();
+        ctx.moveTo(-width / 2, -shaftHalf);
+        ctx.lineTo(headStart, -shaftHalf);
+        ctx.lineTo(headStart, -height / 2);
+        ctx.lineTo(width / 2, 0);
+        ctx.lineTo(headStart, height / 2);
+        ctx.lineTo(headStart, shaftHalf);
+        ctx.lineTo(-width / 2, shaftHalf);
+        ctx.closePath();
     } else if (shape === "line") {
         ctx.beginPath();
         ctx.moveTo(-width / 2, 0);
@@ -553,19 +565,174 @@ function createLensFlareCanvas(layer, width, height) {
     return canvas;
 }
 
+function proceduralCanvasSize(width, height, maximum = 640) {
+    const ratio = width / Math.max(1, height);
+    return ratio >= 1
+        ? { width: maximum, height: Math.max(64, Math.round(maximum / ratio)) }
+        : { width: Math.max(64, Math.round(maximum * ratio)), height: maximum };
+}
+
+function createGrainNoiseCanvas(layer, width, height) {
+    const size = proceduralCanvasSize(width, height, 560);
+    const canvas = createCanvas(size.width, size.height);
+    const ctx = canvas.getContext("2d");
+    const image = ctx.createImageData(canvas.width, canvas.height);
+    const first = parseColor(layer.primaryColor, [15, 23, 42, 255]);
+    const second = parseColor(layer.secondaryColor, [248, 250, 252, 255]);
+    const seed = Number(layer.seed) || 1;
+    const contrast = clamp(layer.renderContrast ?? 1, .1, 5);
+    const softness = clamp(layer.softness ?? .25, 0, 1);
+    for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+            const fine = hashNoise(x, y, seed);
+            const coarse = valueNoise(x / 9, y / 9, seed + 31);
+            let amount = fine * (1 - softness * .65) + coarse * softness * .65;
+            amount = clamp(.5 + (amount - .5) * contrast, 0, 1);
+            const color = mixColor(first, second, amount);
+            const index = (y * canvas.width + x) * 4;
+            image.data[index] = color[0];
+            image.data[index + 1] = color[1];
+            image.data[index + 2] = color[2];
+            image.data[index + 3] = color[3];
+        }
+    }
+    ctx.putImageData(image, 0, 0);
+    return canvas;
+}
+
+function createMotionBlurCanvas(layer, width, height) {
+    const size = proceduralCanvasSize(width, height, 720);
+    const canvas = createCanvas(size.width, size.height);
+    const ctx = canvas.getContext("2d");
+    const primary = cssColor(layer.primaryColor, "#0f172a");
+    const secondary = cssColor(layer.secondaryColor, "#60a5fa");
+    const angle = (Number(layer.angleDegrees) || 0) * Math.PI / 180;
+    const seed = Number(layer.seed) || 1;
+    const streakLength = clamp(layer.scale ?? 90, 12, 900) * canvas.width / Math.max(1, width);
+    const count = Math.max(32, Math.min(420, Math.round((layer.detail ?? 4) * 58)));
+    const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    background.addColorStop(0, primary);
+    background.addColorStop(1, rgba(layer.secondaryColor, .18));
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(angle);
+    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    ctx.lineCap = "round";
+    for (let index = 0; index < count; index++) {
+        const y = hashNoise(index, 7, seed) * canvas.height;
+        const x = hashNoise(index, 17, seed + 11) * canvas.width - streakLength * .5;
+        const length = streakLength * (.15 + hashNoise(index, 29, seed + 23) * 1.15);
+        const alpha = .04 + hashNoise(index, 37, seed + 41) * .26;
+        const gradient = ctx.createLinearGradient(x, y, x + length, y);
+        gradient.addColorStop(0, rgba(layer.secondaryColor, 0));
+        gradient.addColorStop(.4, rgba(layer.secondaryColor, alpha));
+        gradient.addColorStop(1, rgba(layer.primaryColor, 0));
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = .5 + hashNoise(index, 43, seed + 61) * Math.max(1.5, (layer.stripeWidthPx ?? 32) * .08);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + length, y);
+        ctx.stroke();
+    }
+    ctx.restore();
+    ctx.globalCompositeOperation = "screen";
+    ctx.globalAlpha = .18;
+    ctx.fillStyle = secondary;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return canvas;
+}
+
+function createWindCanvas(layer, width, height) {
+    const size = proceduralCanvasSize(width, height, 720);
+    const canvas = createCanvas(size.width, size.height);
+    const ctx = canvas.getContext("2d");
+    const angle = (Number(layer.angleDegrees) || 0) * Math.PI / 180;
+    const seed = Number(layer.seed) || 1;
+    const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    background.addColorStop(0, cssColor(layer.primaryColor, "#e0f2fe"));
+    background.addColorStop(1, cssColor(layer.secondaryColor, "#0369a1"));
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(angle);
+    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    const gusts = Math.max(18, Math.min(180, Math.round((layer.detail ?? 4) * 28)));
+    for (let index = 0; index < gusts; index++) {
+        const y = hashNoise(index, 19, seed) * canvas.height;
+        const x = -canvas.width * .2 + hashNoise(index, 31, seed + 17) * canvas.width;
+        const length = canvas.width * (.12 + hashNoise(index, 47, seed + 29) * .65);
+        const lift = (hashNoise(index, 59, seed + 43) - .5) * canvas.height * .14;
+        ctx.strokeStyle = rgba(index % 3 ? layer.primaryColor : layer.secondaryColor, .08 + hashNoise(index, 71, seed + 53) * .3);
+        ctx.lineWidth = .7 + hashNoise(index, 83, seed + 67) * Math.max(1.2, (layer.stripeWidthPx ?? 32) * .06);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.bezierCurveTo(x + length * .28, y - lift, x + length * .65, y + lift, x + length, y - lift * .25);
+        ctx.stroke();
+    }
+    ctx.restore();
+    return canvas;
+}
+
+function createOceanWavesCanvas(layer, width, height) {
+    const size = proceduralCanvasSize(width, height, 720);
+    const canvas = createCanvas(size.width, size.height);
+    const ctx = canvas.getContext("2d");
+    const first = parseColor(layer.primaryColor, [224, 242, 254, 255]);
+    const second = parseColor(layer.secondaryColor, [3, 105, 161, 255]);
+    const seed = Number(layer.seed) || 1;
+    const scale = clamp(layer.scale ?? 90, 8, 900);
+    const detail = Math.max(1, Math.min(8, Math.round(layer.detail ?? 4)));
+    const contrast = clamp(layer.renderContrast ?? 1, .1, 5);
+    const image = ctx.createImageData(canvas.width, canvas.height);
+    for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+            const nx = x / canvas.width;
+            const ny = y / canvas.height;
+            let wave = 0;
+            let weight = 0;
+            for (let octave = 1; octave <= detail; octave++) {
+                const frequency = octave * (width / scale) * .85;
+                const phase = hashNoise(octave, 17, seed) * Math.PI * 2;
+                const amplitude = 1 / octave;
+                wave += Math.sin((nx * frequency + ny * frequency * .42) * Math.PI * 2 + phase) * amplitude;
+                wave += Math.cos((ny * frequency * .72 - nx * frequency * .22) * Math.PI * 2 + phase * .7) * amplitude * .55;
+                weight += amplitude * 1.55;
+            }
+            let amount = .5 + wave / Math.max(.001, weight) * .5;
+            amount += (valueNoise(nx * 8, ny * 8, seed + 101) - .5) * .18;
+            amount = clamp(.5 + (amount - .5) * contrast, 0, 1);
+            const foam = Math.max(0, (amount - .72) / .28);
+            const color = mixColor(first, second, amount * .9);
+            const index = (y * canvas.width + x) * 4;
+            image.data[index] = Math.round(color[0] + (255 - color[0]) * foam * .65);
+            image.data[index + 1] = Math.round(color[1] + (255 - color[1]) * foam * .72);
+            image.data[index + 2] = Math.round(color[2] + (255 - color[2]) * foam * .8);
+            image.data[index + 3] = color[3];
+        }
+    }
+    ctx.putImageData(image, 0, 0);
+    return canvas;
+}
+
 function getProceduralCanvas(layer, width, height) {
     const key = proceduralKey(layer, width, height);
     if (proceduralCache.has(key)) return proceduralCache.get(key);
     const kind = enumName(layer.renderKind, renderKinds, "clouds").toLowerCase();
-    const canvas = kind === "noise"
-        ? createNoiseOrClouds(layer, width, height, false)
-        : kind === "bloom"
-            ? createBloomCanvas(layer, width, height)
-            : kind === "neon"
-                ? createNeonCanvas(layer, width, height)
-                : kind === "lensflare"
-                    ? createLensFlareCanvas(layer, width, height)
-                    : createNoiseOrClouds(layer, width, height, true);
+    let canvas;
+    switch (kind) {
+        case "noise": canvas = createNoiseOrClouds(layer, width, height, false); break;
+        case "bloom": canvas = createBloomCanvas(layer, width, height); break;
+        case "neon": canvas = createNeonCanvas(layer, width, height); break;
+        case "lensflare": canvas = createLensFlareCanvas(layer, width, height); break;
+        case "grainnoise": canvas = createGrainNoiseCanvas(layer, width, height); break;
+        case "motionblur": canvas = createMotionBlurCanvas(layer, width, height); break;
+        case "wind": canvas = createWindCanvas(layer, width, height); break;
+        case "oceanwaves": canvas = createOceanWavesCanvas(layer, width, height); break;
+        default: canvas = createNoiseOrClouds(layer, width, height, true); break;
+    }
     proceduralCache.set(key, canvas);
     if (proceduralCache.size > 40) proceduralCache.delete(proceduralCache.keys().next().value);
     return canvas;
@@ -881,6 +1048,84 @@ function drawSelection(ctx, layer, zoom) {
     ctx.restore();
 }
 
+function isShapeDrawingTool(tool) {
+    return ["square", "rectangle", "ellipse", "arrow"].includes(String(tool || "").toLowerCase());
+}
+
+function shapeDrawingGeometry(drawing) {
+    const first = drawing?.points?.[0];
+    const last = drawing?.points?.[drawing.points.length - 1];
+    if (!first || !last) return null;
+    const tool = String(drawing.tool || "").toLowerCase();
+    const dx = (Number(last.x) || 0) - (Number(first.x) || 0);
+    const dy = (Number(last.y) || 0) - (Number(first.y) || 0);
+    if (tool === "arrow") {
+        const length = Math.max(4, Math.hypot(dx, dy));
+        const height = Math.max(8, Math.min(256, (Number(drawing.widthPx) || 8) * 3));
+        const centerX = (Number(first.x) + Number(last.x)) / 2;
+        const centerY = (Number(first.y) + Number(last.y)) / 2;
+        return { tool, x: centerX - length / 2, y: centerY - height / 2, width: length, height, rotation: Math.atan2(dy, dx) * 180 / Math.PI };
+    }
+    if (tool === "square") {
+        const side = Math.max(4, Math.max(Math.abs(dx), Math.abs(dy)));
+        return {
+            tool,
+            x: dx >= 0 ? Number(first.x) : Number(first.x) - side,
+            y: dy >= 0 ? Number(first.y) : Number(first.y) - side,
+            width: side,
+            height: side,
+            rotation: 0
+        };
+    }
+    return {
+        tool,
+        x: Math.min(Number(first.x), Number(last.x)),
+        y: Math.min(Number(first.y), Number(last.y)),
+        width: Math.max(4, Math.abs(dx)),
+        height: Math.max(4, Math.abs(dy)),
+        rotation: 0
+    };
+}
+
+function drawDrawingPreview(ctx, drawing) {
+    if (!drawing) return;
+    if (!isShapeDrawingTool(drawing.tool)) {
+        drawPaintStroke(ctx, drawing, true);
+        return;
+    }
+    const geometry = shapeDrawingGeometry(drawing);
+    if (!geometry) return;
+    ctx.save();
+    ctx.globalAlpha = Math.max(.45, clamp(drawing.opacity ?? 1, 0, 1));
+    ctx.strokeStyle = cssColor(drawing.color, "#0284c7");
+    ctx.fillStyle = rgba(drawing.color, .15);
+    ctx.lineWidth = Math.max(1, Math.min(8, Number(drawing.widthPx) || 2));
+    ctx.setLineDash([8, 5]);
+    if (geometry.tool === "arrow") {
+        const first = drawing.points[0];
+        const last = drawing.points[drawing.points.length - 1];
+        const angle = Math.atan2((Number(last.y) || 0) - (Number(first.y) || 0), (Number(last.x) || 0) - (Number(first.x) || 0));
+        const head = Math.max(10, Math.min(48, geometry.height * .8));
+        ctx.beginPath();
+        ctx.moveTo(Number(first.x) || 0, Number(first.y) || 0);
+        ctx.lineTo(Number(last.x) || 0, Number(last.y) || 0);
+        ctx.moveTo(Number(last.x) || 0, Number(last.y) || 0);
+        ctx.lineTo((Number(last.x) || 0) - Math.cos(angle - .55) * head, (Number(last.y) || 0) - Math.sin(angle - .55) * head);
+        ctx.moveTo(Number(last.x) || 0, Number(last.y) || 0);
+        ctx.lineTo((Number(last.x) || 0) - Math.cos(angle + .55) * head, (Number(last.y) || 0) - Math.sin(angle + .55) * head);
+        ctx.stroke();
+    } else if (geometry.tool === "ellipse") {
+        ctx.beginPath();
+        ctx.ellipse(geometry.x + geometry.width / 2, geometry.y + geometry.height / 2, geometry.width / 2, geometry.height / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    } else {
+        ctx.fillRect(geometry.x, geometry.y, geometry.width, geometry.height);
+        ctx.strokeRect(geometry.x, geometry.y, geometry.width, geometry.height);
+    }
+    ctx.restore();
+}
+
 async function drawDocument(canvas, document, options = {}) {
     document = normalizeDocument(document);
     if (canvas.width !== document.widthPx) canvas.width = document.widthPx;
@@ -895,7 +1140,7 @@ async function drawDocument(canvas, document, options = {}) {
         if (error) errors.push(error);
     }
     if (options.grid) drawGrid(ctx, document, options.zoom || 1);
-    if (options.previewStroke) drawPaintStroke(ctx, options.previewStroke, true);
+    if (options.previewStroke) drawDrawingPreview(ctx, options.previewStroke);
     if (options.selectedLayerId) {
         const selected = document.layers.find(layer => String(layer.id).toLowerCase() === String(options.selectedLayerId).toLowerCase());
         drawSelection(ctx, selected, options.zoom || 1);
@@ -1129,7 +1374,7 @@ function beginDrawing(editor, event) {
         event.preventDefault();
         return;
     }
-    if (!["brush", "pencil", "spray", "toothbrush", "line", "eraser"].includes(settings.tool)) return;
+    if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser"].includes(settings.tool)) return;
     const adjustedWidth = settings.tool === "pencil"
         ? Math.min(settings.width, 6)
         : settings.tool === "spray"
@@ -1157,11 +1402,12 @@ function updateDrawing(editor, event) {
     const drawing = editor.drawing;
     if (!drawing || drawing.pointerId !== event.pointerId) return;
     let point = canvasPoint(editor.canvas, event);
-    if (drawing.tool === "line" && editor.document.snapToGrid) {
+    const directShape = drawing.tool === "line" || isShapeDrawingTool(drawing.tool);
+    if (directShape && editor.document.snapToGrid) {
         const spacing = Math.max(2, Number(editor.document.gridSpacingPx) || 25);
         point = { x: snap(point.x, spacing, true), y: snap(point.y, spacing, true) };
     }
-    if (drawing.tool === "line") drawing.points[drawing.points.length - 1] = point;
+    if (directShape) drawing.points[drawing.points.length - 1] = point;
     else {
         const last = drawing.points[drawing.points.length - 1];
         if (Math.hypot(point.x - last.x, point.y - last.y) >= Math.max(.5, drawing.widthPx * .06)) drawing.points.push(point);
@@ -1187,6 +1433,12 @@ function finishDrawing(editor, event, cancel = false) {
     const drawing = editor.drawing;
     if (!drawing || (event && drawing.pointerId !== event.pointerId)) return;
     editor.drawing = null;
+    if (!cancel && isShapeDrawingTool(drawing.tool)) {
+        const geometry = shapeDrawingGeometry(drawing);
+        if (geometry) safeInvoke(editor, "PictureShapeCommitted", drawing.tool, geometry.x, geometry.y, geometry.width, geometry.height, geometry.rotation);
+        scheduleEditorRender(editor);
+        return;
+    }
     if (!cancel) {
         const points = localizeStrokePoints(editor, drawing.points, drawing.tool);
         if (points.length === 1) points.push({ x: points[0].x + .01, y: points[0].y + .01 });

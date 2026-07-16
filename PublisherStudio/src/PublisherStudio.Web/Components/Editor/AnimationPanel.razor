@@ -56,7 +56,7 @@
             <h3>In-page animation</h3>
             @if (State.SelectedElement is null)
             {
-                <p class="property-note">Select any text, picture, shape, connector, WordArt, or data visual to animate it.</p>
+                <p class="property-note">Select any text, picture, audio, video, shape, connector, WordArt, or data visual to animate it.</p>
             }
             else
             {
@@ -70,6 +70,12 @@
                     <button type="button" @onclick="AddSpin">Spin</button>
                     <button type="button" @onclick="AddMove">Move</button>
                     <button type="button" @onclick="AddFadeOut">Fade out</button>
+                    @if (State.SelectedElement is PublicationMediaElement)
+                    {
+                        <button type="button" @onclick="AddPlayMedia">Play media</button>
+                        <button type="button" @onclick="AddPauseMedia">Pause media</button>
+                        <button type="button" @onclick="AddStopMedia">Stop media</button>
+                    }
                 </div>
             }
         </section>
@@ -134,53 +140,56 @@
                         }
                     </select>
                 </label>
-                <label>Easing
-                    <select value="@animation.Easing" @onchange="ChangeAnimationEasing">
-                        @foreach (var value in Enum.GetValues<PublicationAnimationEasing>())
-                        {
-                            <option value="@value">@Friendly(value.ToString())</option>
-                        }
-                    </select>
-                </label>
-                @if (UsesDirection(animation.Effect))
+                @if (!IsMediaAnimationEffect(animation.Effect))
                 {
-                    <label>Direction
-                        <select value="@animation.Direction" @onchange="ChangeAnimationDirection">
-                            @foreach (var value in DirectionValues)
+                    <label>Easing
+                        <select value="@animation.Easing" @onchange="ChangeAnimationEasing">
+                            @foreach (var value in Enum.GetValues<PublicationAnimationEasing>())
                             {
-                                <option value="@value">@value</option>
+                                <option value="@value">@Friendly(value.ToString())</option>
                             }
                         </select>
                     </label>
+                    @if (UsesDirection(animation.Effect))
+                    {
+                        <label>Direction
+                            <select value="@animation.Direction" @onchange="ChangeAnimationDirection">
+                                @foreach (var value in DirectionValues)
+                                {
+                                    <option value="@value">@value</option>
+                                }
+                            </select>
+                        </label>
+                    }
+                    <label>Duration <b>@Seconds(animation.DurationSeconds)</b>
+                        <input type="range" min="0.05" max="8" step="0.05" value="@Inv(animation.DurationSeconds)" @oninput="ChangeAnimationDuration" @onchange="EndLiveEdit" />
+                    </label>
+                    @if (UsesDistance(animation.Effect))
+                    {
+                        <label>Travel distance <b>@Math.Round(animation.DistancePercent)%</b>
+                            <input type="range" min="1" max="200" step="1" value="@Inv(animation.DistancePercent)" @oninput="ChangeAnimationDistance" @onchange="EndLiveEdit" />
+                        </label>
+                    }
+                    @if (UsesScale(animation.Effect))
+                    {
+                        <label>Scale amount <b>@Math.Round(animation.ScalePercent)%</b>
+                            <input type="range" min="1" max="200" step="1" value="@Inv(animation.ScalePercent)" @oninput="ChangeAnimationScale" @onchange="EndLiveEdit" />
+                        </label>
+                    }
+                    @if (UsesRotation(animation.Effect))
+                    {
+                        <label>Rotation <b>@Math.Round(animation.RotationDegrees)°</b>
+                            <input type="range" min="-1080" max="1080" step="15" value="@Inv(animation.RotationDegrees)" @oninput="ChangeAnimationRotation" @onchange="EndLiveEdit" />
+                        </label>
+                    }
+                    <div class="property-grid two">
+                        <label>Repeat<input type="number" min="1" max="100" step="1" value="@animation.RepeatCount" @onchange="ChangeAnimationRepeat" /></label>
+                        <label class="check-row animation-auto-reverse"><input type="checkbox" checked="@animation.AutoReverse" @onchange="ToggleAnimationAutoReverse" /> Auto reverse</label>
+                    </div>
                 }
-                <label>Duration <b>@Seconds(animation.DurationSeconds)</b>
-                    <input type="range" min="0.05" max="8" step="0.05" value="@Inv(animation.DurationSeconds)" @oninput="ChangeAnimationDuration" @onchange="EndLiveEdit" />
-                </label>
                 <label>Delay <b>@Seconds(animation.DelaySeconds)</b>
                     <input type="range" min="0" max="8" step="0.05" value="@Inv(animation.DelaySeconds)" @oninput="ChangeAnimationDelay" @onchange="EndLiveEdit" />
                 </label>
-                @if (UsesDistance(animation.Effect))
-                {
-                    <label>Travel distance <b>@Math.Round(animation.DistancePercent)%</b>
-                        <input type="range" min="1" max="200" step="1" value="@Inv(animation.DistancePercent)" @oninput="ChangeAnimationDistance" @onchange="EndLiveEdit" />
-                    </label>
-                }
-                @if (UsesScale(animation.Effect))
-                {
-                    <label>Scale amount <b>@Math.Round(animation.ScalePercent)%</b>
-                        <input type="range" min="1" max="200" step="1" value="@Inv(animation.ScalePercent)" @oninput="ChangeAnimationScale" @onchange="EndLiveEdit" />
-                    </label>
-                }
-                @if (UsesRotation(animation.Effect))
-                {
-                    <label>Rotation <b>@Math.Round(animation.RotationDegrees)°</b>
-                        <input type="range" min="-1080" max="1080" step="15" value="@Inv(animation.RotationDegrees)" @oninput="ChangeAnimationRotation" @onchange="EndLiveEdit" />
-                    </label>
-                }
-                <div class="property-grid two">
-                    <label>Repeat<input type="number" min="1" max="100" step="1" value="@animation.RepeatCount" @onchange="ChangeAnimationRepeat" /></label>
-                    <label class="check-row animation-auto-reverse"><input type="checkbox" checked="@animation.AutoReverse" @onchange="ToggleAnimationAutoReverse" /> Auto reverse</label>
-                </div>
                 <DxButton Text="Preview this step" Click="PreviewSelectedStep" CssClass="wide-button" />
             </section>
         }
@@ -287,6 +296,9 @@
     private void AddSpin() => Add(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
     private void AddMove() => Add(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
     private void AddFadeOut() => Add(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+    private void AddPlayMedia() => Add(PublicationAnimationEffect.PlayMedia, PublicationAnimationPhase.Emphasis);
+    private void AddPauseMedia() => Add(PublicationAnimationEffect.PauseMedia, PublicationAnimationPhase.Emphasis);
+    private void AddStopMedia() => Add(PublicationAnimationEffect.StopMedia, PublicationAnimationPhase.Emphasis);
 
     private void MoveEarlier() { if (_selectedAnimationId is { } id) State.MoveAnimation(id, -1); }
     private void MoveLater() { if (_selectedAnimationId is { } id) State.MoveAnimation(id, 1); }
@@ -384,18 +396,25 @@
         ShowControls = value.ShowControls
     };
 
-    private static PublicationAnimationEffect[] EffectsFor(PublicationAnimationPhase phase) => phase switch
+    private PublicationAnimationEffect[] EffectsFor(PublicationAnimationPhase phase)
     {
-        PublicationAnimationPhase.Entrance => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Float, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe, PublicationAnimationEffect.Bounce],
-        PublicationAnimationPhase.Emphasis => [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce],
-        PublicationAnimationPhase.Exit => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe],
-        _ => [PublicationAnimationEffect.Move]
-    };
+        if (phase == PublicationAnimationPhase.Emphasis && State.SelectedElement is PublicationMediaElement)
+            return [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce,
+                PublicationAnimationEffect.PlayMedia, PublicationAnimationEffect.PauseMedia, PublicationAnimationEffect.StopMedia];
+        return phase switch
+        {
+            PublicationAnimationPhase.Entrance => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Float, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe, PublicationAnimationEffect.Bounce],
+            PublicationAnimationPhase.Emphasis => [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce],
+            PublicationAnimationPhase.Exit => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe],
+            _ => [PublicationAnimationEffect.Move]
+        };
+    }
 
     private static bool UsesDirection(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move;
     private static bool UsesDistance(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Move or PublicationAnimationEffect.Shake;
     private static bool UsesScale(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Zoom or PublicationAnimationEffect.Pulse or PublicationAnimationEffect.GrowShrink or PublicationAnimationEffect.Bounce;
     private static bool UsesRotation(PublicationAnimationEffect value) => value == PublicationAnimationEffect.Spin;
+    private static bool IsMediaAnimationEffect(PublicationAnimationEffect value) => value is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia;
     private static string TriggerName(PublicationAnimationTrigger value) => value switch
     {
         PublicationAnimationTrigger.OnPageEnter => "When page opens",

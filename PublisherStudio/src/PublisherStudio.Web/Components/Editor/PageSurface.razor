@@ -310,6 +310,12 @@
                     <DxContextMenuItem Text="Add fly in" Click="AddFlyInAnimation" />
                     <DxContextMenuItem Text="Add pulse" Click="AddPulseAnimation" />
                     <DxContextMenuItem Text="Add fade out" Click="AddFadeOutAnimation" />
+                    @if (State.SelectedElement is PublicationMediaElement)
+                    {
+                        <DxContextMenuItem Text="Play media at this step" BeginGroup="true" Click="AddPlayMediaAnimation" />
+                        <DxContextMenuItem Text="Pause media at this step" Click="AddPauseMediaAnimation" />
+                        <DxContextMenuItem Text="Stop media at this step" Click="AddStopMediaAnimation" />
+                    }
                     <DxContextMenuItem Text="Preview object" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="PreviewSelectedAnimations" />
                     <DxContextMenuItem Text="Remove all object animations" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="ClearSelectedAnimations" />
                     <DxContextMenuItem Text="@TimelineCommandText" BeginGroup="true" Click="ToggleTimeline" />
@@ -628,6 +634,9 @@
     private void AddFlyInAnimation() => State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
     private void AddPulseAnimation() => State.AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
     private void AddFadeOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+    private void AddPlayMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.PlayMedia, PublicationAnimationPhase.Emphasis);
+    private void AddPauseMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.PauseMedia, PublicationAnimationPhase.Emphasis);
+    private void AddStopMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.StopMedia, PublicationAnimationPhase.Emphasis);
     private void ClearSelectedAnimations() => State.ClearSelectedAnimations();
     private Task PreviewSelectedAnimations() => State.SelectedElementId is { } id
         ? JS.InvokeVoidAsync("publisherStudio.previewElementAnimations", $"element-{id}").AsTask()

@@ -73,6 +73,10 @@ public partial class PictureEditor
     private string PencilToolText => ToolText(PictureDrawTool.Pencil, "Pencil");
     private string SprayToolText => ToolText(PictureDrawTool.Spray, "Spray can");
     private string ToothbrushToolText => ToolText(PictureDrawTool.Toothbrush, "Toothbrush");
+    private string SquareToolText => ToolText(PictureDrawTool.Square, "Square");
+    private string RectangleToolText => ToolText(PictureDrawTool.Rectangle, "Rectangle");
+    private string EllipseToolText => ToolText(PictureDrawTool.Ellipse, "Ellipse");
+    private string ArrowToolText => ToolText(PictureDrawTool.Arrow, "Arrow");
     private string LineToolText => ToolText(PictureDrawTool.Line, "Line");
     private string EraserToolText => ToolText(PictureDrawTool.Eraser, "Eraser");
     private string EyedropperToolText => ToolText(PictureDrawTool.Eyedropper, "Eyedropper");
@@ -87,6 +91,10 @@ public partial class PictureEditor
         PictureDrawTool.Eraser => "Draw over strokes on a paint layer to erase them non-destructively.",
         PictureDrawTool.Spray => "Spray paint scatters soft droplets around the pointer path for airbrush-like shading.",
         PictureDrawTool.Toothbrush => "Toothbrush lays down rough bristle streaks and splatter for textured paint effects.",
+        PictureDrawTool.Square => "Drag a square directly onto the canvas. The result remains an editable shape layer.",
+        PictureDrawTool.Rectangle => "Drag a rectangle directly onto the canvas. The result remains an editable shape layer.",
+        PictureDrawTool.Ellipse => "Drag an ellipse directly onto the canvas. The result remains an editable shape layer.",
+        PictureDrawTool.Arrow => "Drag from the arrow tail to its point. The result remains an editable, rotatable shape layer.",
         _ => "Draw directly on the canvas. A paint layer is created automatically when necessary. Right-click does not draw."
     };
     private string CanvasColor => State.Document.Background.StartsWith('#') && State.Document.Background.Length is 4 or 7
@@ -231,6 +239,19 @@ public partial class PictureEditor
     }
 
     [JSInvokable]
+    public void PictureShapeCommitted(string tool, double x, double y, double width, double height, double rotation)
+    {
+        var shape = tool?.Trim().ToLowerInvariant() switch
+        {
+            "ellipse" => PictureShapeKind.Ellipse,
+            "arrow" => PictureShapeKind.Arrow,
+            _ => PictureShapeKind.Rectangle
+        };
+        State.AddShapeAt(shape, x, y, width, height, rotation);
+        SetDrawTool(PictureDrawTool.Select);
+    }
+
+    [JSInvokable]
     public void PictureColorPicked(string color)
     {
         if (!string.IsNullOrWhiteSpace(color)) _drawColor = color;
@@ -345,6 +366,7 @@ public partial class PictureEditor
     private void AddTextLayer() => State.AddText();
     private void AddRectangle() => State.AddShape(PictureShapeKind.Rectangle);
     private void AddEllipse() => State.AddShape(PictureShapeKind.Ellipse);
+    private void AddArrowShape() => State.AddShape(PictureShapeKind.Arrow);
     private void AddLineShape() => State.AddShape(PictureShapeKind.Line);
     private void AddGradient() => State.AddFill(PictureFillKind.LinearGradient);
     private void AddSolidFill() => State.AddFill(PictureFillKind.Solid);
@@ -355,6 +377,10 @@ public partial class PictureEditor
     private void AddBloom() => State.AddRender(PictureRenderKind.Bloom);
     private void AddNeon() => State.AddRender(PictureRenderKind.Neon);
     private void AddLensFlare() => State.AddRender(PictureRenderKind.LensFlare);
+    private void AddGrainNoise() => State.AddRender(PictureRenderKind.GrainNoise);
+    private void AddMotionBlur() => State.AddRender(PictureRenderKind.MotionBlur);
+    private void AddWind() => State.AddRender(PictureRenderKind.Wind);
+    private void AddOceanWaves() => State.AddRender(PictureRenderKind.OceanWaves);
     private void AddPaintLayer() => State.AddPaint();
     private void MoveUp() => State.MoveSelectedLayer(1);
     private void MoveDown() => State.MoveSelectedLayer(-1);
@@ -522,6 +548,10 @@ public partial class PictureEditor
     private void PencilTool() => SetDrawTool(PictureDrawTool.Pencil);
     private void SprayTool() => SetDrawTool(PictureDrawTool.Spray);
     private void ToothbrushTool() => SetDrawTool(PictureDrawTool.Toothbrush);
+    private void SquareTool() => SetDrawTool(PictureDrawTool.Square);
+    private void RectangleTool() => SetDrawTool(PictureDrawTool.Rectangle);
+    private void EllipseTool() => SetDrawTool(PictureDrawTool.Ellipse);
+    private void ArrowTool() => SetDrawTool(PictureDrawTool.Arrow);
     private void LineTool() => SetDrawTool(PictureDrawTool.Line);
     private void EraserTool() => SetDrawTool(PictureDrawTool.Eraser);
     private void EyedropperTool() => SetDrawTool(PictureDrawTool.Eyedropper);
@@ -576,6 +606,10 @@ public partial class PictureEditor
     private void MakeRenderBloom() => WithRender(layer => layer.RenderKind = PictureRenderKind.Bloom);
     private void MakeRenderNeon() => WithRender(layer => layer.RenderKind = PictureRenderKind.Neon);
     private void MakeRenderLensFlare() => WithRender(layer => layer.RenderKind = PictureRenderKind.LensFlare);
+    private void MakeRenderGrainNoise() => WithRender(layer => layer.RenderKind = PictureRenderKind.GrainNoise);
+    private void MakeRenderMotionBlur() => WithRender(layer => layer.RenderKind = PictureRenderKind.MotionBlur);
+    private void MakeRenderWind() => WithRender(layer => layer.RenderKind = PictureRenderKind.Wind);
+    private void MakeRenderOceanWaves() => WithRender(layer => layer.RenderKind = PictureRenderKind.OceanWaves);
     private void RasterContain() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Contain);
     private void RasterCover() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Cover);
     private void RasterStretch() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Stretch);
@@ -621,6 +655,7 @@ public partial class PictureEditor
     private void ShapeRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.Rectangle);
     private void ShapeRoundedRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.RoundedRectangle);
     private void ShapeEllipse() => WithShape(layer => layer.Shape = PictureShapeKind.Ellipse);
+    private void ShapeArrow() => WithShape(layer => layer.Shape = PictureShapeKind.Arrow);
     private void ShapeLine() => WithShape(layer => layer.Shape = PictureShapeKind.Line);
     private void FillSolid() => WithFill(layer => layer.FillKind = PictureFillKind.Solid);
     private void FillLinearGradient() => WithFill(layer => layer.FillKind = PictureFillKind.LinearGradient);

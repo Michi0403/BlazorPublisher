@@ -1,8 +1,10 @@
-# v1.0.2 — recorded-video decode and timeline legibility fix
+# v1.0.2 — media import, raster export, media cues, and Picture Studio tools
 
-- Fixed recorded video data URLs whose codec parameter contained a comma (for example `video/webm;codecs=vp8,opus`). The comma was interpreted as the data-URL payload separator and produced an undecodable source after the recording returned from JavaScript to Blazor.
-- Recorded media is now transferred with the container MIME type only while preserving the original encoded bytes.
-- Existing malformed embedded recording URLs are normalized when opened in Media Studio, so affected documents can be recovered without recording again.
-- Video recording now prefers broadly compatible VP8 WebM when the browser can both record and play it.
-- DevExpress Range Selector labels now hide overlaps, and timeline ruler labels have clearer spacing and contrast.
-- Removed the remaining `100vw` workspace constraint and hardened shell/status-bar sizing so the right edge and zoom controls remain inside the viewport.
+- Direct video insertion now inspects the browser's selected `File` object through an object URL before embedding it, avoiding a large base64 round-trip merely to read metadata.
+- Added extension-based MIME fallback for MP4, M4V, WebM, Ogg video, MOV, MP3, M4A/AAC, WAV, Ogg audio, and FLAC.
+- PNG and JPEG export now freezes video at a visible/poster/trim-start frame, removes live media controls from the raster surface, and exports every publication page.
+- Multi-page PNG/JPEG exports are delivered as a ZIP containing one image per page; a one-page document downloads the image directly.
+- Added animation timeline actions for Play Media, Pause Media, and Stop Media, including editor preview and animated website runtime behavior.
+- Added Picture Studio procedural renderers: Grain Noise, Motion Blur, Wind, and Ocean Waves.
+- Added direct-draw Square, Rectangle, Ellipse, and Arrow tools that create editable shape layers.
+- Added an editable Arrow shape to Picture Studio insert, render, and context-menu workflows.

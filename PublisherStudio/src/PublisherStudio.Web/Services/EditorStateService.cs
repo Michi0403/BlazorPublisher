@@ -536,7 +536,8 @@ public sealed class EditorStateService
             Direction = effect is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move
                 ? PublicationAnimationDirection.Left
                 : PublicationAnimationDirection.None,
-            AutoReverse = phase == PublicationAnimationPhase.Emphasis
+            DurationSeconds = effect is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia ? .05 : .6,
+            AutoReverse = phase == PublicationAnimationPhase.Emphasis && effect is not (PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia)
         };
         element.Animations.Add(animation);
         EnsureTimelineDuration();

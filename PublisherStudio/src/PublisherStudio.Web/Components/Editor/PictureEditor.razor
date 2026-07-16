@@ -45,6 +45,7 @@
                     <DxRibbonGroup Text="Shapes">
                         <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
                         <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
+                        <DxRibbonItem Text="Arrow" Click="AddArrowShape" />
                         <DxRibbonItem Text="Line" Click="AddLineShape" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Fills">
@@ -59,6 +60,10 @@
                         <DxRibbonItem Text="Bloom" Click="AddBloom" />
                         <DxRibbonItem Text="Neon" Click="AddNeon" />
                         <DxRibbonItem Text="Lens flare" Click="AddLensFlare" />
+                        <DxRibbonItem Text="Grain noise" Click="AddGrainNoise" />
+                        <DxRibbonItem Text="Motion blur" Click="AddMotionBlur" />
+                        <DxRibbonItem Text="Wind" Click="AddWind" />
+                        <DxRibbonItem Text="Ocean waves" Click="AddOceanWaves" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
 
@@ -69,6 +74,10 @@
                         <DxRibbonItem Text="@PencilToolText" Click="PencilTool" />
                         <DxRibbonItem Text="@SprayToolText" Click="SprayTool" />
                         <DxRibbonItem Text="@ToothbrushToolText" Click="ToothbrushTool" />
+                        <DxRibbonItem Text="@SquareToolText" Click="SquareTool" />
+                        <DxRibbonItem Text="@RectangleToolText" Click="RectangleTool" />
+                        <DxRibbonItem Text="@EllipseToolText" Click="EllipseTool" />
+                        <DxRibbonItem Text="@ArrowToolText" Click="ArrowTool" />
                         <DxRibbonItem Text="@LineToolText" Click="LineTool" />
                         <DxRibbonItem Text="@EraserToolText" Click="EraserTool" />
                         <DxRibbonItem Text="@EyedropperToolText" Click="EyedropperTool" />
@@ -121,6 +130,10 @@
                         <DxRibbonItem Text="Bloom" Click="MakeRenderBloom" />
                         <DxRibbonItem Text="Neon" Click="MakeRenderNeon" />
                         <DxRibbonItem Text="Lens flare" Click="MakeRenderLensFlare" />
+                        <DxRibbonItem Text="Grain noise" Click="MakeRenderGrainNoise" />
+                        <DxRibbonItem Text="Motion blur" Click="MakeRenderMotionBlur" />
+                        <DxRibbonItem Text="Wind" Click="MakeRenderWind" />
+                        <DxRibbonItem Text="Ocean waves" Click="MakeRenderOceanWaves" />
                         <DxRibbonItem Text="New seed" IsPrimary="true" Click="RandomizeRender" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
@@ -626,6 +639,10 @@
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Bloom, "Bloom"))" Click="MakeRenderBloom" />
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Neon, "Neon"))" Click="MakeRenderNeon" />
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.LensFlare, "Lens flare"))" Click="MakeRenderLensFlare" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.GrainNoise, "Grain noise"))" Click="MakeRenderGrainNoise" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.MotionBlur, "Motion blur"))" Click="MakeRenderMotionBlur" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Wind, "Wind"))" Click="MakeRenderWind" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.OceanWaves, "Ocean waves"))" Click="MakeRenderOceanWaves" />
                         </Items>
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="New random seed" Click="RandomizeRender" />
@@ -637,6 +654,7 @@
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Rectangle, "Rectangle"))" Click="ShapeRectangle" />
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.RoundedRectangle, "Rounded rectangle"))" Click="ShapeRoundedRectangle" />
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Ellipse, "Ellipse"))" Click="ShapeEllipse" />
+                            <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Arrow, "Arrow"))" Click="ShapeArrow" />
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Line, "Line"))" Click="ShapeLine" />
                         </Items>
                     </DxContextMenuItem>
@@ -683,6 +701,7 @@
                     <Items>
                         <DxContextMenuItem Text="Rectangle" Click="AddRectangle" />
                         <DxContextMenuItem Text="Ellipse" Click="AddEllipse" />
+                        <DxContextMenuItem Text="Arrow" Click="AddArrowShape" />
                         <DxContextMenuItem Text="Line" Click="AddLineShape" />
                     </Items>
                 </DxContextMenuItem>
@@ -701,6 +720,10 @@
                         <DxContextMenuItem Text="Bloom" Click="AddBloom" />
                         <DxContextMenuItem Text="Neon" Click="AddNeon" />
                         <DxContextMenuItem Text="Lens flare" Click="AddLensFlare" />
+                        <DxContextMenuItem Text="Grain noise" Click="AddGrainNoise" />
+                        <DxContextMenuItem Text="Motion blur" Click="AddMotionBlur" />
+                        <DxContextMenuItem Text="Wind" Click="AddWind" />
+                        <DxContextMenuItem Text="Ocean waves" Click="AddOceanWaves" />
                     </Items>
                 </DxContextMenuItem>
                 <DxContextMenuItem Text="Insert paint layer" IconCssClass="pub-icon pub-icon-edit" Click="AddPaintLayer" />

@@ -47,11 +47,11 @@ public sealed class PictureDocument
 public enum PictureLayerKind { Raster, Text, Shape, Fill, Render, Paint }
 public enum PictureBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighten }
 public enum PictureRasterFitMode { Stretch, Contain, Cover }
-public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line }
+public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line, Arrow }
 public enum PictureFillKind { Solid, LinearGradient, RadialGradient }
-public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette, Bloom, Neon, LensFlare }
+public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette, Bloom, Neon, LensFlare, GrainNoise, MotionBlur, Wind, OceanWaves }
 public enum PictureTextAlignment { Left, Center, Right }
-public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Line, Eraser, Eyedropper }
+public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Eraser, Eyedropper }
 public enum PictureStrokeKind { Brush, Pencil, Spray, Toothbrush, Line, Eraser }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]

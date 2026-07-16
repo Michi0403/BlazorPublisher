@@ -9,11 +9,12 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.6";
+    public string FormatVersion { get; set; } = "1.7";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
     public List<PublicationPage> Pages { get; set; } = [];
+    public List<PublicationDataObject> DataObjects { get; set; } = [];
 
     public static PublicationDocument CreateDefault()
     {
@@ -83,7 +84,7 @@ public sealed class GuideLine
 
 public enum GuideOrientation { Horizontal, Vertical }
 public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
-public enum PublicationElementKind { Text, Image, Shape, WordArt, Connector }
+public enum PublicationElementKind { Text, Image, Shape, WordArt, Connector, DataVisual }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ConnectorPathKind { Straight, Elbow, Curved }
 public enum ConnectorMarker { None, Arrow, Triangle, Diamond }
@@ -102,6 +103,7 @@ public enum WordArtWarp { None, ArchUp, ArchDown, Wave, Custom }
 [JsonDerivedType(typeof(ShapeElement), "shape")]
 [JsonDerivedType(typeof(WordArtElement), "wordArt")]
 [JsonDerivedType(typeof(ConnectorElement), "connector")]
+[JsonDerivedType(typeof(DataVisualElement), "dataVisual")]
 public abstract class PublicationElement
 {
     public Guid Id { get; set; } = Guid.NewGuid();

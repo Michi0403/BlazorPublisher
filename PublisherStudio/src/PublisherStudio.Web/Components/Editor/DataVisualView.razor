@@ -1,0 +1,238 @@
+@namespace PublisherStudio.Components.Editor
+@inject PublicationDataService DataService
+
+<div class="data-visual-view" style="@ContainerStyle">
+    @if (DataObject is null)
+    {
+        <div class="data-visual-empty">
+            <strong>Missing data source</strong>
+            <span>Open Data Tools and choose or create a publication data object.</span>
+        </div>
+    }
+    else if (Columns.Count == 0)
+    {
+        <div class="data-visual-empty">
+            <strong>No columns</strong>
+            <span>Edit the data object and parse its JSON or delimited text.</span>
+        </div>
+    }
+    else
+    {
+        @switch (Item.VisualKind)
+        {
+            case DataVisualKind.CartesianChart:
+                <DxChart Data="@ChartPoints" Width="100%" Height="100%">
+                    @if (Item.ShowTitle)
+                    {
+                        <DxChartTitle Text="@Item.Title" />
+                    }
+                    <DxChartCommonSeries NameField="@((DataChartPoint point) => point.Series)"
+                                         ArgumentField="@((DataChartPoint point) => point.Argument)"
+                                         ValueField="@((DataChartPoint point) => point.Value)"
+                                         SeriesType="@ResolvedChartSeriesType" />
+                    <DxChartLegend Visible="@Item.ShowLegend" Position="RelativePosition.Outside" />
+                </DxChart>
+                break;
+
+            case DataVisualKind.PieChart:
+                <DxPieChart Data="@PiePoints" Width="100%" Height="100%" InnerDiameter="@PieInnerDiameter">
+                    @if (Item.ShowTitle)
+                    {
+                        <DxChartTitle Text="@Item.Title" />
+                    }
+                    <DxPieChartSeries ArgumentField="@((DataPiePoint point) => point.Argument)"
+                                      ValueField="@((DataPiePoint point) => point.Value)">
+                        <DxChartSeriesLabel Visible="@Item.ShowLabels" />
+                    </DxPieChartSeries>
+                    <DxChartLegend Visible="@Item.ShowLegend" Position="RelativePosition.Outside" />
+                </DxPieChart>
+                break;
+
+            case DataVisualKind.PolarChart:
+                <DxPolarChart Data="@PolarPoints" Width="100%" Height="100%">
+                    @if (Item.ShowTitle)
+                    {
+                        <DxChartTitle Text="@Item.Title" />
+                    }
+                    @switch (Item.PolarStyle)
+                    {
+                        case PolarChartStyle.Area:
+                            <DxPolarChartAreaSeries Name="@PrimaryValueField"
+                                                    ArgumentField="@((DataSparkPoint point) => point.Argument)"
+                                                    ValueField="@((DataSparkPoint point) => point.Value)">
+                                <DxChartSeriesLabel Visible="@Item.ShowLabels" />
+                            </DxPolarChartAreaSeries>
+                            break;
+                        case PolarChartStyle.Bar:
+                            <DxPolarChartBarSeries Name="@PrimaryValueField"
+                                                   ArgumentField="@((DataSparkPoint point) => point.Argument)"
+                                                   ValueField="@((DataSparkPoint point) => point.Value)">
+                                <DxChartSeriesLabel Visible="@Item.ShowLabels" />
+                            </DxPolarChartBarSeries>
+                            break;
+                        case PolarChartStyle.Scatter:
+                            <DxPolarChartScatterSeries Name="@PrimaryValueField"
+                                                       ArgumentField="@((DataSparkPoint point) => point.Argument)"
+                                                       ValueField="@((DataSparkPoint point) => point.Value)">
+                                <DxChartSeriesLabel Visible="@Item.ShowLabels" />
+                            </DxPolarChartScatterSeries>
+                            break;
+                        default:
+                            <DxPolarChartLineSeries Name="@PrimaryValueField"
+                                                    ArgumentField="@((DataSparkPoint point) => point.Argument)"
+                                                    ValueField="@((DataSparkPoint point) => point.Value)">
+                                <DxChartSeriesLabel Visible="@Item.ShowLabels" />
+                            </DxPolarChartLineSeries>
+                            break;
+                    }
+                    <DxChartLegend Visible="@Item.ShowLegend" Position="RelativePosition.Outside" />
+                </DxPolarChart>
+                break;
+
+            case DataVisualKind.Sparkline:
+                <div class="sparkline-visual">
+                    @if (Item.ShowTitle)
+                    {
+                        <strong>@Item.Title</strong>
+                    }
+                    <DxSparkline Data="@SparkPoints"
+                                 ArgumentFieldName="Argument"
+                                 ValueFieldName="Value"
+                                 Type="@ResolvedSparklineType"
+                                 Width="100%"
+                                 Height="100%" />
+                </div>
+                break;
+
+            case DataVisualKind.BarGauge:
+                <div class="gauge-visual">
+                    @if (Item.ShowTitle)
+                    {
+                        <strong>@Item.Title</strong>
+                    }
+                    <DxBarGauge Width="100%"
+                                Height="100%"
+                                StartValue="@Item.MinimumValue"
+                                EndValue="@Item.MaximumValue"
+                                Values="@GaugeValues">
+                        <DxBarGaugeLegendSettings Visible="@Item.ShowLegend" />
+                    </DxBarGauge>
+                </div>
+                break;
+
+            case DataVisualKind.DataTable:
+                <div class="data-table-visual">
+                    @if (Item.ShowTitle)
+                    {
+                        <strong class="data-table-title">@Item.Title</strong>
+                    }
+                    <DxGrid Data="@GridRows"
+                            ShowFilterRow="@Item.TableShowFilterRow"
+                            PageSize="@Math.Clamp(Item.RowLimit, 1, 100)"
+                            PagerVisible="false">
+                        <Columns>
+                            @if (GridColumns.Count > 0)
+                            {
+                                <DxGridDataColumn FieldName="C1" Caption="@GridColumns[0]" />
+                            }
+                            @if (GridColumns.Count > 1)
+                            {
+                                <DxGridDataColumn FieldName="C2" Caption="@GridColumns[1]" />
+                            }
+                            @if (GridColumns.Count > 2)
+                            {
+                                <DxGridDataColumn FieldName="C3" Caption="@GridColumns[2]" />
+                            }
+                            @if (GridColumns.Count > 3)
+                            {
+                                <DxGridDataColumn FieldName="C4" Caption="@GridColumns[3]" />
+                            }
+                            @if (GridColumns.Count > 4)
+                            {
+                                <DxGridDataColumn FieldName="C5" Caption="@GridColumns[4]" />
+                            }
+                            @if (GridColumns.Count > 5)
+                            {
+                                <DxGridDataColumn FieldName="C6" Caption="@GridColumns[5]" />
+                            }
+                            @if (GridColumns.Count > 6)
+                            {
+                                <DxGridDataColumn FieldName="C7" Caption="@GridColumns[6]" />
+                            }
+                            @if (GridColumns.Count > 7)
+                            {
+                                <DxGridDataColumn FieldName="C8" Caption="@GridColumns[7]" />
+                            }
+                        </Columns>
+                    </DxGrid>
+                </div>
+                break;
+
+            case DataVisualKind.KpiProgress:
+                <div class="kpi-visual">
+                    <span class="kpi-title">@Item.Title</span>
+                    <strong class="kpi-value">@KpiValue.ToString("0.##", CultureInfo.InvariantCulture)</strong>
+                    <DxProgressBar MinValue="@Item.MinimumValue"
+                                   MaxValue="@Item.MaximumValue"
+                                   Value="@KpiValue"
+                                   Label="@KpiLabel"
+                                   ShowLabel="true"
+                                   SetSuccessStatusOnComplete="false" />
+                </div>
+                break;
+        }
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    [Parameter, EditorRequired] public DataVisualElement Item { get; set; } = default!;
+    [Parameter] public Guid CurrentPageId { get; set; }
+
+    private PublicationDataObject? DataObject => Document.DataObjects.FirstOrDefault(data => data.Id == Item.DataObjectId);
+    private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(DataObject);
+    private IReadOnlyList<DataChartPoint> ChartPoints => DataService.BuildChartPoints(Document, Item, CurrentPageId);
+    private IReadOnlyList<DataPiePoint> PiePoints => DataService.BuildPiePoints(Document, Item, CurrentPageId);
+    private IReadOnlyList<DataSparkPoint> SparkPoints => DataService.BuildSparkPoints(Document, Item, CurrentPageId);
+    private IReadOnlyList<DataSparkPoint> PolarPoints => SparkPoints;
+    private IReadOnlyList<string> GridColumns => DataService.GridColumns(DataObject);
+    private IReadOnlyList<PublicationGridRow> GridRows => DataService.BuildGridRows(Document, Item, CurrentPageId);
+    private string PrimaryValueField => Item.ValueFields.FirstOrDefault() ?? string.Empty;
+    private double[] GaugeValues => ChartPoints.Select(point => point.Value).Take(8).ToArray();
+    private double KpiValue => ChartPoints.FirstOrDefault()?.Value ?? 0;
+    private string KpiLabel => $"{KpiValue:0.##} / {Item.MaximumValue:0.##}";
+    private double PieInnerDiameter => Item.PieStyle == PieChartStyle.Doughnut ? .55 : 0;
+    private ChartSeriesType ResolvedChartSeriesType => Item.CartesianStyle switch
+    {
+        CartesianChartStyle.Line => ChartSeriesType.Line,
+        CartesianChartStyle.Spline => ChartSeriesType.Spline,
+        CartesianChartStyle.Scatter => ChartSeriesType.Scatter,
+        CartesianChartStyle.Area => ChartSeriesType.Area,
+        CartesianChartStyle.SplineArea => ChartSeriesType.SplineArea,
+        CartesianChartStyle.StepLine => ChartSeriesType.StepLine,
+        CartesianChartStyle.StepArea => ChartSeriesType.StepArea,
+        CartesianChartStyle.StackedBar => ChartSeriesType.StackedBar,
+        CartesianChartStyle.FullStackedBar => ChartSeriesType.FullStackedBar,
+        CartesianChartStyle.StackedArea => ChartSeriesType.StackedArea,
+        CartesianChartStyle.FullStackedArea => ChartSeriesType.FullStackedArea,
+        CartesianChartStyle.StackedLine => ChartSeriesType.StackedLine,
+        CartesianChartStyle.FullStackedLine => ChartSeriesType.FullStackedLine,
+        CartesianChartStyle.StackedSpline => ChartSeriesType.StackedSpline,
+        CartesianChartStyle.FullStackedSpline => ChartSeriesType.FullStackedSpline,
+        CartesianChartStyle.StackedSplineArea => ChartSeriesType.StackedSplineArea,
+        CartesianChartStyle.FullStackedSplineArea => ChartSeriesType.FullStackedSplineArea,
+        _ => ChartSeriesType.Bar
+    };
+    private SparklineType ResolvedSparklineType => Item.SparklineStyle switch
+    {
+        SparklineChartStyle.Spline => SparklineType.Spline,
+        SparklineChartStyle.StepLine => SparklineType.StepLine,
+        SparklineChartStyle.Area => SparklineType.Area,
+        SparklineChartStyle.SplineArea => SparklineType.SplineArea,
+        SparklineChartStyle.StepArea => SparklineType.StepArea,
+        SparklineChartStyle.Bar => SparklineType.Bar,
+        SparklineChartStyle.WinLoss => SparklineType.WinLoss,
+        _ => SparklineType.Line
+    };
+    private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor}";
+}

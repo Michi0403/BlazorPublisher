@@ -6,13 +6,14 @@
 - **PublisherStudio.InstallerConsole** remains an optional deployment helper with no UI project dependency. It can install/start published output or publish a source ZIP without Git.
 - **WinUI remains optional and absent.** The browser host is the product core.
 
-v0.5 extends these boundaries without replacing routing, controllers, the installer, or the publication editing model. Picture Studio is an additional scoped subsystem within the existing web host.
+v0.6 extends these boundaries without replacing routing, controllers, the installer, or the publication editing model. Picture Studio and publication data visuals are additional scoped subsystems within the existing web host.
 
 ## Editing engines
 
 - DevExpress `DxRibbon` is the main command surface.
 - DevExpress `DxContextMenu` provides page/object right-click workflows.
 - DevExpress `DxRichEdit` owns rich story editing, DOCX persistence, fields, page layout, printing, and DOCX/RTF/TXT/HTML downloads.
+- DevExpress chart, pie, polar, sparkline, bar-gauge, grid, and progress components render publication data visuals directly on the page and in the print surface.
 - The publication surface is an absolute-positioned HTML/SVG canvas. Native JavaScript performs pointer previews, rulers, guides, crop gestures, snapping, connector reconnection, and browser export.
 - C# is authoritative. JavaScript commits final millimetre values/endpoints through JS interop.
 
@@ -25,6 +26,14 @@ Supported layer types are raster, text, shape, fill, and procedural render. Ever
 
 When Picture Studio applies its result, JavaScript returns a PNG as `IJSStreamReference`; Blazor reads the stream and stores the rendered data URL in the normal `ImageFrameElement.DataUrl`. A cloned `PictureDocument` is stored in `ImageFrameElement.PictureSource`. This dual representation keeps all established publication rendering/export code simple while allowing later non-destructive Picture Studio edits. Imported pictures have no `PictureSource` until first applied through Picture Studio.
 
+## Publication data and visual subsystem
+
+`PublicationDataService` owns parsing, normalization, type inference, and projection of publication data into component-specific rows. `PublicationDataObject` is stored once at document level and can be reused by any number of visual elements. Supported source kinds are JSON, delimited text (CSV, TSV, semicolon, or pipe), and live document-object data. The live source projects page name, object name/type, position, dimensions, rotation, Z index, visibility, and lock state without duplicating those values into the file.
+
+`DataVisualElement` is an ordinary polymorphic publication element. It stores the DevExpress visual kind, selected data-object ID, category/series/value fields, subtype, legend/label/title options, gauge/KPI range, and grid row settings. `DataManager` edits reusable sources; `DataVisualEditor` maps fields and previews the result; `DataVisualView` is shared by the page canvas and print surface. C# data objects remain authoritative, and no external JavaScript chart library is introduced.
+
+The first visual set is deliberately publication-oriented: Cartesian chart, pie/doughnut, polar chart, sparkline, circular bar gauge, data grid, and KPI progress indicator. Maps are not included because useful map rendering generally requires an external GIS/tile provider and often an API key, which conflicts with the self-contained runtime rule. Sankey/dashboard/reporting components remain potential later additions after their document/export semantics are defined.
+
 ## Workspace and view model
 
 `PublicationViewSettings` stores rulers, unit, grid/guides, snapping, zoom-related preferences, and raster DPI separately from page content. The five-column workspace allocates fixed/resizable side panes and gives all remaining width to the canvas; panes can collapse without overlaying the rulers.
@@ -33,7 +42,7 @@ The page stays millimetre-based. Zoom only changes millimetres-to-CSS-pixels con
 
 ## Object/layer model
 
-Every publication object is a layer with visibility, lock state, and Z index. Supported polymorphic elements are text frame, image frame, shape, WordArt, and connector. The Layers UI is a direct view over that list rather than a second layer subsystem.
+Every publication object is a layer with visibility, lock state, and Z index. Supported polymorphic elements are text frame, image frame, shape, WordArt, connector, and data visual. The Layers UI is a direct view over that list rather than a second layer subsystem.
 
 ## Picture model
 
@@ -62,7 +71,7 @@ No runtime package was added. A future server-side prepress exporter can sit beh
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded image data URLs, and optional editable Picture Studio layer documents. Current format version is `1.6`; the loader supplies defaults and migrates older story, image, and WordArt path fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded image data URLs, and optional editable Picture Studio layer documents. Current format version is `1.7`; the loader supplies defaults and migrates older story, image, WordArt path, data-object, and data-visual fields.
 
 ## Reference and license boundary
 

@@ -35,6 +35,9 @@
                             case WordArtElement wordArt:
                                 <WordArtView Item="wordArt" IdPrefix="print" />
                                 break;
+                            case DataVisualElement dataVisual:
+                                <DataVisualView Document="Document" Item="dataVisual" CurrentPageId="publicationPage.Id" />
+                                break;
                         }
                     </div>
                 }

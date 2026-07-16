@@ -1,0 +1,249 @@
+@namespace PublisherStudio.Components.Editor
+@inject PublicationDataService DataService
+
+@if (Visible)
+{
+    <div class="modal-backdrop data-modal-backdrop">
+        <section class="data-manager-dialog" role="dialog" aria-modal="true" aria-label="Publication data manager">
+            <header>
+                <div>
+                    <strong>Publication data</strong>
+                    <span>Store reusable JSON, delimited text, or live document-object data inside the publication.</span>
+                </div>
+                <button type="button" class="window-close" @onclick="Close">×</button>
+            </header>
+
+            <div class="data-manager-body">
+                <aside class="data-object-list">
+                    <div class="data-list-heading">
+                        <strong>Data objects</strong>
+                        <button type="button" @onclick="CreateNew">＋</button>
+                    </div>
+                    @if (State.Document.DataObjects.Count == 0)
+                    {
+                        <p>No stored data yet.</p>
+                    }
+                    @foreach (var data in State.Document.DataObjects)
+                    {
+                        <button type="button" class="data-object-row @(data.Id == _draft.Id ? "selected" : null)" @onclick="() => Select(data)">
+                            <strong>@data.Name</strong>
+                            <span>@data.SourceKind · @ResolvedRowCount(data) rows</span>
+                        </button>
+                    }
+                    <DxButton Text="Sample sales data" Click="CreateSample" CssClass="wide-button" />
+                </aside>
+
+                <main class="data-object-editor">
+                    <div class="data-form-grid">
+                        <label>Name<input value="@_draft.Name" @onchange="ChangeName" /></label>
+                        <label>Source
+                            <select value="@_draft.SourceKind" @onchange="ChangeSourceKind">
+                                <option value="DelimitedText">Delimited text / pasted table</option>
+                                <option value="Json">JSON</option>
+                                <option value="DocumentObjects">Publication objects</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    @if (_draft.SourceKind == PublicationDataSourceKind.DocumentObjects)
+                    {
+                        <section class="data-source-help">
+                            <strong>Live document-object data</strong>
+                            <p>Rows are regenerated from publication objects. Use this for charts about object kinds, dimensions, positions, layers, visibility, or page membership.</p>
+                            <label>Scope
+                                <select value="@_draft.DocumentScope" @onchange="ChangeDocumentScope">
+                                    <option value="AllPages">All pages</option>
+                                    <option value="CurrentPage">Current page at render time</option>
+                                </select>
+                            </label>
+                        </section>
+                    }
+                    else
+                    {
+                        @if (_draft.SourceKind == PublicationDataSourceKind.DelimitedText)
+                        {
+                            <div class="data-form-grid compact">
+                                <label>Delimiter
+                                    <select value="@DelimiterKey" @onchange="ChangeDelimiter">
+                                        <option value=",">Comma</option>
+                                        <option value=";">Semicolon</option>
+                                        <option value="tab">Tab</option>
+                                        <option value="|">Pipe</option>
+                                    </select>
+                                </label>
+                                <label class="check-row"><input type="checkbox" checked="@_draft.FirstRowContainsHeaders" @onchange="ToggleHeaders" /> First row contains headers</label>
+                            </div>
+                        }
+                        <label class="data-source-input">@(_draft.SourceKind == PublicationDataSourceKind.Json ? "JSON" : "Text / CSV / TSV")
+                            <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" spellcheck="false"></textarea>
+                        </label>
+                    }
+
+                    <div class="data-editor-actions">
+                        <DxButton Text="Parse / refresh preview" Click="ParsePreview" />
+                        <DxButton Text="Save data object" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
+                        <DxButton Text="Delete" Click="Delete" Enabled="@ExistingDraft" />
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(_error))
+                    {
+                        <div class="inline-error">@_error</div>
+                    }
+
+                    <section class="data-preview">
+                        <div class="pane-heading">
+                            <strong>Preview</strong>
+                            <span>@PreviewRows.Count rows · @PreviewColumns.Count columns</span>
+                        </div>
+                        @if (PreviewColumns.Count == 0)
+                        {
+                            <div class="empty-panel">Parse the source to see its columns and rows.</div>
+                        }
+                        else
+                        {
+                            <div class="data-preview-scroll">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            @foreach (var column in PreviewColumns)
+                                            {
+                                                <th>@column.Name <small>@column.ValueKind</small></th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in PreviewRows.Take(25))
+                                        {
+                                            <tr>
+                                                @foreach (var column in PreviewColumns)
+                                                {
+                                                    <td>@row.Get(column.Name)</td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </section>
+                </main>
+            </div>
+
+            <footer>
+                <span>Data objects are saved in the .pubstudio.json file and can be reused by several visuals.</span>
+                <DxButton Text="Close" Click="Close" RenderStyle="ButtonRenderStyle.Primary" />
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback Closed { get; set; }
+    [Parameter] public EventCallback DataChanged { get; set; }
+
+    private PublicationDataObject _draft = new();
+    private bool _wasVisible;
+    private string? _error;
+    private bool ExistingDraft => State.Document.DataObjects.Any(data => data.Id == _draft.Id);
+    private string DelimiterKey => _draft.Delimiter == "\t" ? "tab" : _draft.Delimiter;
+    private IReadOnlyList<PublicationDataColumn> PreviewColumns => DataService.ResolveColumns(_draft);
+    private IReadOnlyList<PublicationDataRow> PreviewRows => DataService.ResolveRows(State.Document, _draft, State.SelectedPageId);
+
+    protected override void OnParametersSet()
+    {
+        if (Visible && !_wasVisible)
+        {
+            _error = null;
+            _draft = State.Document.DataObjects.Count > 0
+                ? DataService.Clone(State.Document.DataObjects[0])
+                : DataService.CreateSample();
+        }
+        _wasVisible = Visible;
+    }
+
+    private void Select(PublicationDataObject data)
+    {
+        _draft = DataService.Clone(data);
+        _error = null;
+    }
+
+    private void CreateNew()
+    {
+        _draft = new PublicationDataObject
+        {
+            Name = "New Data",
+            SourceKind = PublicationDataSourceKind.DelimitedText,
+            RawSource = "Category,Value\nA,10\nB,20\nC,15"
+        };
+        ParsePreview();
+    }
+
+    private void CreateSample()
+    {
+        _draft = DataService.CreateSample($"Quarterly Sales {State.Document.DataObjects.Count + 1}");
+        _draft.Id = Guid.NewGuid();
+        _error = null;
+    }
+
+    private void ParsePreview()
+    {
+        try
+        {
+            DataService.ParseInto(_draft);
+            _error = null;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_draft.Name)) throw new InvalidDataException("Enter a data object name.");
+            DataService.ParseInto(_draft);
+            State.UpsertDataObject(_draft);
+            _draft = DataService.Clone(State.Document.DataObjects.First(data => data.Id == _draft.Id));
+            _error = null;
+            await DataChanged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task Delete()
+    {
+        if (!ExistingDraft) return;
+        if (!State.DeleteDataObject(_draft.Id))
+        {
+            _error = "This data object is still used by one or more chart, gauge, table, sparkline, or KPI objects.";
+            return;
+        }
+        _draft = State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample();
+        await DataChanged.InvokeAsync();
+    }
+
+    private int ResolvedRowCount(PublicationDataObject data) => DataService.ResolveRows(State.Document, data, State.SelectedPageId).Count;
+    private Task Close() => Closed.InvokeAsync();
+    private void ChangeName(ChangeEventArgs args) => _draft.Name = args.Value?.ToString() ?? string.Empty;
+    private void ChangeRawSource(ChangeEventArgs args) => _draft.RawSource = args.Value?.ToString() ?? string.Empty;
+    private void ToggleHeaders(ChangeEventArgs args) => _draft.FirstRowContainsHeaders = args.Value is bool value && value;
+    private void ChangeDelimiter(ChangeEventArgs args) => _draft.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ",";
+    private void ChangeSourceKind(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<PublicationDataSourceKind>(args.Value?.ToString(), out var value)) return;
+        _draft.SourceKind = value;
+        if (value == PublicationDataSourceKind.Json && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "[{\"Category\":\"A\",\"Value\":10}]";
+        ParsePreview();
+    }
+    private void ChangeDocumentScope(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<DocumentObjectDataScope>(args.Value?.ToString(), out var value)) _draft.DocumentScope = value;
+    }
+}

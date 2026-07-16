@@ -30,12 +30,16 @@
                        OnFitPage="FitPage"
                        OnTogglePagesPane="TogglePagesPane"
                        OnToggleInspectorPane="ToggleInspectorPane"
-                       OnResetWorkspace="ResetWorkspace" />
+                       OnResetWorkspace="ResetWorkspace"
+                       OnInsertDataVisual="InsertDataVisual"
+                       OnEditDataVisual="OpenDataVisualEditor"
+                       OnManageData="OpenDataManager" />
 
     <div id="publisher-workspace" class="editor-workspace">
         <PageNavigator State="State" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
-        <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture" />
+        <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
+                     RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
         <InspectorPanel State="State"
                         OnEditStory="OpenStoryEditor"
@@ -44,7 +48,10 @@
                         OnCreatePicture="CreatePicture"
                         OnEditPicture="EditSelectedPicture"
                         OnApplyTransparentColor="ApplyTransparentColor"
-                        OnRestoreOriginalPicture="RestoreOriginalPicture" />
+                        OnRestoreOriginalPicture="RestoreOriginalPicture"
+                        OnInsertDataVisual="InsertDataVisual"
+                        OnEditDataVisual="OpenDataVisualEditor"
+                        OnManageData="OpenDataManager" />
     </div>
 
     <footer class="status-bar">
@@ -83,6 +90,9 @@
                Saved="SavePictureStudio"
                Cancelled="ClosePictureStudio" />
 
+<DataVisualEditor Visible="_dataVisualEditorVisible" State="State" Saved="SaveDataVisualEditor" Cancelled="CancelDataVisualEditor" ManageDataRequested="OpenDataManagerFromVisual" />
+<DataManager Visible="_dataManagerVisible" State="State" Closed="CloseDataManager" DataChanged="DataManagerChanged" />
+
 @if (!string.IsNullOrWhiteSpace(_error))
 {
     <div class="toast error" @onclick="() => _error = null">@_error</div>
@@ -97,6 +107,10 @@
     private PageSurface? _pageSurface;
     private bool _storyEditorVisible;
     private bool _pictureEditorVisible;
+    private bool _dataVisualEditorVisible;
+    private bool _dataManagerVisible;
+    private Guid? _pendingNewDataVisualId;
+    private bool _resumeDataVisualAfterManager;
     private Guid _pictureEditorSessionId;
     private Guid? _pictureEditorTargetId;
     private PictureDocument? _pictureEditorInitialDocument;
@@ -316,6 +330,75 @@
         _pictureEditorTargetId = null;
         _pictureEditorInitialDocument = null;
         _pictureEditorInitialRaster = null;
+        return Task.CompletedTask;
+    }
+
+    private Task InsertDataVisual(DataVisualKind kind)
+    {
+        var visual = State.AddDataVisual(kind);
+        _pendingNewDataVisualId = visual.Id;
+        _dataVisualEditorVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task OpenDataVisualEditor()
+    {
+        if (State.SelectedElement is DataVisualElement)
+        {
+            _pendingNewDataVisualId = null;
+            _dataVisualEditorVisible = true;
+        }
+        return Task.CompletedTask;
+    }
+
+    private Task SaveDataVisualEditor()
+    {
+        _dataVisualEditorVisible = false;
+        _pendingNewDataVisualId = null;
+        ShowNotice("Data visual applied to the publication.");
+        return Task.CompletedTask;
+    }
+
+    private Task CancelDataVisualEditor()
+    {
+        _dataVisualEditorVisible = false;
+        if (_pendingNewDataVisualId is Guid id)
+        {
+            State.SelectElement(id);
+            if (State.SelectedElement is DataVisualElement)
+                State.DeleteSelected();
+        }
+        _pendingNewDataVisualId = null;
+        return Task.CompletedTask;
+    }
+
+    private Task OpenDataManager()
+    {
+        _dataManagerVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task OpenDataManagerFromVisual()
+    {
+        _resumeDataVisualAfterManager = true;
+        _dataVisualEditorVisible = false;
+        _dataManagerVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task CloseDataManager()
+    {
+        _dataManagerVisible = false;
+        if (_resumeDataVisualAfterManager && State.SelectedElement is DataVisualElement)
+            _dataVisualEditorVisible = true;
+        _resumeDataVisualAfterManager = false;
+        return Task.CompletedTask;
+    }
+
+    private Task DataManagerChanged()
+    {
+        State.RefreshDataVisuals();
+        ShowNotice("Publication data updated.");
         return Task.CompletedTask;
     }
 

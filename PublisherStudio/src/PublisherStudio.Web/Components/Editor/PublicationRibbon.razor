@@ -46,6 +46,16 @@
             <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" IsPrimary="true" Click="RequestPicture" AdaptivePriority="-5" />
             <DxRibbonItem Text="Create picture" IconCssClass="pub-icon pub-icon-create-picture" IsPrimary="true" Click="RequestCreatePicture" AdaptivePriority="-5" />
         </DxRibbonGroup>
+        <DxRibbonGroup Text="Data and diagrams" IconCssClass="pub-icon pub-icon-chart">
+            <DxRibbonItem Text="Chart" IconCssClass="pub-icon pub-icon-chart" IsPrimary="true" Click="AddChart" AdaptivePriority="-4" />
+            <DxRibbonItem Text="Pie / doughnut" IconCssClass="pub-icon pub-icon-pie" Click="AddPieChart" />
+            <DxRibbonItem Text="Polar chart" Click="AddPolarChart" />
+            <DxRibbonItem Text="Sparkline" Click="AddSparkline" />
+            <DxRibbonItem Text="Bar gauge" Click="AddBarGauge" />
+            <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-table" Click="AddDataTable" />
+            <DxRibbonItem Text="KPI progress" Click="AddKpi" />
+            <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
+        </DxRibbonGroup>
         <DxRibbonGroup Text="Shapes" IconCssClass="pub-icon pub-icon-shape">
             <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
             <DxRibbonItem Text="Rounded rectangle" Click="AddRoundedRectangle" />
@@ -231,6 +241,22 @@
         </DxRibbonGroup>
     </DxRibbonTab>
 
+    <DxRibbonTab Text="Data Tools" Contextual="true" Visible="IsDataVisualSelected">
+        <DxRibbonGroup Text="Data visual" IconCssClass="pub-icon pub-icon-chart">
+            <DxRibbonItem Text="Edit visual" IconCssClass="pub-icon pub-icon-edit" IsPrimary="true" Click="RequestEditDataVisual" />
+            <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
+            <DxRibbonItem Text="Refresh" Click="RefreshData" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Quick type">
+            <DxRibbonItem Text="Bar / line chart" Click="MakeCartesian" />
+            <DxRibbonItem Text="Pie" Click="MakePie" />
+            <DxRibbonItem Text="Sparkline" Click="MakeSparkline" />
+            <DxRibbonItem Text="Gauge" Click="MakeGauge" />
+            <DxRibbonItem Text="Table" Click="MakeTable" />
+            <DxRibbonItem Text="KPI" Click="MakeKpi" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
     <DxRibbonTab Text="Shape Tools" Contextual="true" Visible="IsShapeSelected">
         <DxRibbonGroup Text="Shape">
             <DxRibbonColorPaletteItem Text="Fill" Value="@ShapeFill" ValueChanged="OnShapeFillChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
@@ -262,6 +288,9 @@
     [Parameter] public EventCallback OnTogglePagesPane { get; set; }
     [Parameter] public EventCallback OnToggleInspectorPane { get; set; }
     [Parameter] public EventCallback OnResetWorkspace { get; set; }
+    [Parameter] public EventCallback<DataVisualKind> OnInsertDataVisual { get; set; }
+    [Parameter] public EventCallback OnEditDataVisual { get; set; }
+    [Parameter] public EventCallback OnManageData { get; set; }
 
     private string CropCommandText => State.CropMode ? "Finish crop" : "Crop";
     private string RulersText => CheckText(State.Document.View.RulersVisible, "Rulers");
@@ -288,6 +317,8 @@
     private Task RequestTogglePagesPane() => OnTogglePagesPane.InvokeAsync();
     private Task RequestToggleInspectorPane() => OnToggleInspectorPane.InvokeAsync();
     private Task RequestResetWorkspace() => OnResetWorkspace.InvokeAsync();
+    private Task RequestEditDataVisual() => OnEditDataVisual.InvokeAsync();
+    private Task RequestManageData() => OnManageData.InvokeAsync();
 
     private bool HasSelection => State.SelectedElement is not null;
     private bool CanAlign => State.SelectedElement is not null and not ConnectorElement;
@@ -296,6 +327,7 @@
     private bool IsShapeSelected => State.SelectedElement is ShapeElement;
     private bool IsWordArtSelected => State.SelectedElement is WordArtElement;
     private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
+    private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
     private string ShapeFill => (State.SelectedElement as ShapeElement)?.Fill ?? "#ffffff";
     private string ShapeStroke => (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
     private string ConnectorStroke => (State.SelectedElement as ConnectorElement)?.Stroke ?? "#245b85";
@@ -324,6 +356,21 @@
     private void AddRoundedRectangle() => State.AddShape(PublicationShape.RoundedRectangle);
     private void AddEllipse() => State.AddShape(PublicationShape.Ellipse);
     private void AddLine() => State.AddShape(PublicationShape.Line);
+    private Task AddChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
+    private Task AddPieChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.PieChart);
+    private Task AddPolarChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
+    private Task AddSparkline() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
+    private Task AddBarGauge() => OnInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
+    private Task AddDataTable() => OnInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
+    private Task AddKpi() => OnInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
+    private void RefreshData() => State.RefreshDataVisuals();
+    private void MakeCartesian() => SetDataVisualKind(DataVisualKind.CartesianChart);
+    private void MakePie() => SetDataVisualKind(DataVisualKind.PieChart);
+    private void MakeSparkline() => SetDataVisualKind(DataVisualKind.Sparkline);
+    private void MakeGauge() => SetDataVisualKind(DataVisualKind.BarGauge);
+    private void MakeTable() => SetDataVisualKind(DataVisualKind.DataTable);
+    private void MakeKpi() => SetDataVisualKind(DataVisualKind.KpiProgress);
+    private void SetDataVisualKind(DataVisualKind kind) => State.UpdateSelected(element => { if (element is DataVisualElement visual) visual.VisualKind = kind; });
     private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
     private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
     private void AddPage() => State.AddPage();

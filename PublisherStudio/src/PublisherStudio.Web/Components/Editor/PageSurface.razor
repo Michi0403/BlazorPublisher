@@ -108,6 +108,9 @@
                         case WordArtElement wordArt:
                             <WordArtView Item="wordArt" IdPrefix="canvas" />
                             break;
+                        case DataVisualElement dataVisual:
+                            <DataVisualView Document="State.Document" Item="dataVisual" CurrentPageId="State.SelectedPageId" />
+                            break;
                     }
                     @if (!element.Locked)
                     {
@@ -148,6 +151,12 @@
         {
             <DxContextMenuItem Text="Use custom text path" IconCssClass="pub-icon pub-icon-path" Click="WordArtCustomPath" />
             <DxContextMenuItem Text="Reverse text path" Click="WordArtReversePath" />
+        }
+        @if (State.SelectedElement is DataVisualElement)
+        {
+            <DxContextMenuItem Text="Edit data visual" IconCssClass="pub-icon pub-icon-chart" Click="EditSelectedDataVisual" />
+            <DxContextMenuItem Text="Manage publication data" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
+            <DxContextMenuItem Text="Refresh data" Click="RefreshData" />
         }
         @if (State.SelectedElement is ConnectorElement)
         {
@@ -194,6 +203,8 @@
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
             <DxContextMenuItem Text="Insert picture…" IconCssClass="pub-icon pub-icon-picture" Click="InsertPicture" />
             <DxContextMenuItem Text="Create picture…" IconCssClass="pub-icon pub-icon-create-picture" Click="CreatePicture" />
+            <DxContextMenuItem Text="Insert chart…" IconCssClass="pub-icon pub-icon-chart" Click="InsertChart" />
+            <DxContextMenuItem Text="Manage publication data…" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
             <DxContextMenuItem Text="Insert rectangle" Click="AddRectangle" />
             <DxContextMenuItem Text="Draw connector" BeginGroup="true" Click="StartConnector" />
             <DxContextMenuItem Text="Draw arrow connector" Click="StartArrowConnector" />
@@ -208,6 +219,9 @@
     [Parameter] public EventCallback RequestPicture { get; set; }
     [Parameter] public EventCallback RequestCreatePicture { get; set; }
     [Parameter] public EventCallback RequestEditPicture { get; set; }
+    [Parameter] public EventCallback<DataVisualKind> RequestInsertDataVisual { get; set; }
+    [Parameter] public EventCallback RequestEditDataVisual { get; set; }
+    [Parameter] public EventCallback RequestManageData { get; set; }
 
     private DxContextMenu _contextMenu = default!;
     private IJSObjectReference? _module;
@@ -294,6 +308,7 @@
     {
         if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
         if (element is ImageFrameElement) State.ToggleCropMode();
+        if (element is DataVisualElement) return RequestEditDataVisual.InvokeAsync();
         return Task.CompletedTask;
     }
 
@@ -316,6 +331,10 @@
     private Task InsertPicture() => RequestPicture.InvokeAsync();
     private Task CreatePicture() => RequestCreatePicture.InvokeAsync();
     private Task EditSelectedPicture() => RequestEditPicture.InvokeAsync();
+    private Task EditSelectedDataVisual() => RequestEditDataVisual.InvokeAsync();
+    private Task ManageData() => RequestManageData.InvokeAsync();
+    private Task InsertChart() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
+    private void RefreshData() => State.RefreshDataVisuals();
     private void ToggleCrop() => State.ToggleCropMode();
     private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
     private void PictureFill() => SetImage(image => image.FitInsideFrame = false);

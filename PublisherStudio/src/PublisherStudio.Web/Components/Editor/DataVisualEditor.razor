@@ -1,0 +1,323 @@
+@namespace PublisherStudio.Components.Editor
+@inject PublicationDataService DataService
+
+@if (Visible && _draft is not null)
+{
+    <div class="modal-backdrop data-modal-backdrop">
+        <section class="data-visual-editor-dialog" role="dialog" aria-modal="true" aria-label="Data visual editor">
+            <header>
+                <div>
+                    <strong>Insert / edit data visual</strong>
+                    <span>DevExpress chart, pie, polar, sparkline, bar gauge, grid, and KPI components.</span>
+                </div>
+                <button type="button" class="window-close" @onclick="Cancel">×</button>
+            </header>
+
+            <div class="data-visual-editor-body">
+                <aside class="visual-type-list">
+                    @foreach (var kind in Enum.GetValues<DataVisualKind>())
+                    {
+                        <button type="button" class="@(_draft.VisualKind == kind ? "selected" : null)" @onclick="() => SetKind(kind)">
+                            <span class="visual-type-icon">@KindIcon(kind)</span>
+                            <strong>@KindName(kind)</strong>
+                            <small>@KindDescription(kind)</small>
+                        </button>
+                    }
+                </aside>
+
+                <main class="visual-settings">
+                    <div class="data-form-grid">
+                        <label>Title<input value="@_draft.Title" @onchange="ChangeTitle" /></label>
+                        <label>Data object
+                            <select value="@_draft.DataObjectId" @onchange="ChangeDataObject">
+                                @foreach (var data in State.Document.DataObjects)
+                                {
+                                    <option value="@data.Id">@data.Name (@data.SourceKind)</option>
+                                }
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="data-editor-actions compact-actions">
+                        <DxButton Text="Manage publication data" Click="RequestManage" />
+                        <DxButton Text="Refresh live document data" Click="Refresh" />
+                    </div>
+
+                    @if (CurrentData is null)
+                    {
+                        <div class="inline-error">No data object is available. Open the data manager and create one.</div>
+                    }
+                    else
+                    {
+                        <div class="data-form-grid">
+                            <label>Argument / category
+                                <select value="@_draft.ArgumentField" @onchange="ChangeArgumentField">
+                                    @foreach (var column in Columns)
+                                    {
+                                        <option value="@column.Name">@column.Name</option>
+                                    }
+                                </select>
+                            </label>
+                            <label>Series grouping (optional)
+                                <select value="@_draft.SeriesField" @onchange="ChangeSeriesField">
+                                    <option value="">None</option>
+                                    @foreach (var column in Columns)
+                                    {
+                                        <option value="@column.Name">@column.Name</option>
+                                    }
+                                </select>
+                            </label>
+                        </div>
+
+                        @if (_draft.VisualKind != DataVisualKind.DataTable)
+                        {
+                            <fieldset class="value-field-picker">
+                                <legend>@(AllowsMultipleValueFields ? "Value fields" : "Value field")</legend>
+                                @foreach (var column in ValueColumns)
+                                {
+                                    <label class="check-row">
+                                        <input type="checkbox"
+                                               checked="@_draft.ValueFields.Contains(column.Name, StringComparer.OrdinalIgnoreCase)"
+                                               @onchange="(ChangeEventArgs args) => ToggleValueField(column.Name, args)" />
+                                        @column.Name <small>@column.ValueKind</small>
+                                    </label>
+                                }
+                                @if (ValueColumns.Count == 0)
+                                {
+                                    <small>No numeric field was detected in this data object.</small>
+                                }
+                            </fieldset>
+                        }
+
+                        @if (_draft.VisualKind == DataVisualKind.CartesianChart)
+                        {
+                            <label>Chart subtype
+                                <select value="@_draft.CartesianStyle" @onchange="ChangeCartesianStyle">
+                                    @foreach (var value in Enum.GetValues<CartesianChartStyle>())
+                                    {
+                                        <option value="@value">@Friendly(value.ToString())</option>
+                                    }
+                                </select>
+                            </label>
+                        }
+                        else if (_draft.VisualKind == DataVisualKind.PieChart)
+                        {
+                            <label>Pie subtype
+                                <select value="@_draft.PieStyle" @onchange="ChangePieStyle">
+                                    @foreach (var value in Enum.GetValues<PieChartStyle>())
+                                    {
+                                        <option value="@value">@Friendly(value.ToString())</option>
+                                    }
+                                </select>
+                            </label>
+                        }
+                        else if (_draft.VisualKind == DataVisualKind.PolarChart)
+                        {
+                            <label>Polar subtype
+                                <select value="@_draft.PolarStyle" @onchange="ChangePolarStyle">
+                                    @foreach (var value in Enum.GetValues<PolarChartStyle>())
+                                    {
+                                        <option value="@value">@Friendly(value.ToString())</option>
+                                    }
+                                </select>
+                            </label>
+                        }
+                        else if (_draft.VisualKind == DataVisualKind.Sparkline)
+                        {
+                            <label>Sparkline subtype
+                                <select value="@_draft.SparklineStyle" @onchange="ChangeSparklineStyle">
+                                    @foreach (var value in Enum.GetValues<SparklineChartStyle>())
+                                    {
+                                        <option value="@value">@Friendly(value.ToString())</option>
+                                    }
+                                </select>
+                            </label>
+                        }
+
+                        @if (_draft.VisualKind is DataVisualKind.BarGauge or DataVisualKind.KpiProgress)
+                        {
+                            <div class="data-form-grid">
+                                <label>Minimum<input type="number" step="any" value="@Inv(_draft.MinimumValue)" @onchange="ChangeMinimum" /></label>
+                                <label>Maximum<input type="number" step="any" value="@Inv(_draft.MaximumValue)" @onchange="ChangeMaximum" /></label>
+                            </div>
+                        }
+                        @if (_draft.VisualKind == DataVisualKind.DataTable)
+                        {
+                            <div class="data-form-grid">
+                                <label>Maximum rows<input type="number" min="1" max="100" value="@_draft.RowLimit" @onchange="ChangeRowLimit" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@_draft.TableShowFilterRow" @onchange="ToggleFilterRow" /> Interactive filter row</label>
+                            </div>
+                        }
+
+                        <div class="visual-option-grid">
+                            <label class="check-row"><input type="checkbox" checked="@_draft.ShowTitle" @onchange="ToggleTitle" /> Show title</label>
+                            @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge)
+                            {
+                                <label class="check-row"><input type="checkbox" checked="@_draft.ShowLegend" @onchange="ToggleLegend" /> Show legend</label>
+                            }
+                            @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart)
+                            {
+                                <label class="check-row"><input type="checkbox" checked="@_draft.ShowLabels" @onchange="ToggleLabels" /> Show point labels</label>
+                            }
+                        </div>
+                    }
+                </main>
+
+                <section class="visual-live-preview">
+                    <div class="pane-heading"><strong>Live preview</strong><span>@CurrentData?.Name</span></div>
+                    <div class="visual-preview-frame">
+                        <DataVisualView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" />
+                    </div>
+                    <p>Charts remain live DevExpress components on the publication canvas. Stored document-object sources update when publication objects change.</p>
+                </section>
+            </div>
+
+            <footer>
+                <span>@ValidationText</span>
+                <div><DxButton Text="Cancel" Click="Cancel" /><DxButton Text="Apply to object" Click="Save" RenderStyle="ButtonRenderStyle.Primary" Enabled="@CanSave" /></div>
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback Saved { get; set; }
+    [Parameter] public EventCallback Cancelled { get; set; }
+    [Parameter] public EventCallback ManageDataRequested { get; set; }
+
+    private bool _wasVisible;
+    private Guid? _targetId;
+    private DataVisualElement? _draft;
+    private PublicationDataObject? CurrentData => _draft is null ? null : State.Document.DataObjects.FirstOrDefault(data => data.Id == _draft.DataObjectId);
+    private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(CurrentData);
+    private IReadOnlyList<PublicationDataColumn> ValueColumns => Columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).ToArray();
+    private bool AllowsMultipleValueFields => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.BarGauge;
+    private bool CanSave => _draft is not null && CurrentData is not null && (_draft.VisualKind == DataVisualKind.DataTable || _draft.ValueFields.Count > 0);
+    private string ValidationText => CurrentData is null
+        ? "Choose or create a data object."
+        : _draft is not null && _draft.VisualKind != DataVisualKind.DataTable && _draft.ValueFields.Count == 0
+            ? "Select at least one value field."
+            : "The visual uses publication data stored in the document.";
+
+    protected override void OnParametersSet()
+    {
+        if (Visible && !_wasVisible)
+        {
+            if (State.SelectedElement is DataVisualElement selected)
+            {
+                _targetId = selected.Id;
+                _draft = Clone(selected);
+            }
+            else
+            {
+                _targetId = null;
+                _draft = null;
+            }
+        }
+        _wasVisible = Visible;
+    }
+
+    private async Task Save()
+    {
+        if (_draft is null || _targetId is null || !CanSave) return;
+        State.SelectElement(_targetId);
+        State.UpdateSelected(element =>
+        {
+            if (element is not DataVisualElement target) return;
+            CopySettings(_draft, target);
+        });
+        await Saved.InvokeAsync();
+    }
+
+    private Task Cancel() => Cancelled.InvokeAsync();
+    private Task RequestManage() => ManageDataRequested.InvokeAsync();
+    private void Refresh() => State.RefreshDataVisuals();
+    private void SetKind(DataVisualKind kind)
+    {
+        if (_draft is null) return;
+        _draft.VisualKind = kind;
+        if (!AllowsMultipleValueFields && _draft.ValueFields.Count > 1)
+            _draft.ValueFields = [ _draft.ValueFields[0] ];
+    }
+
+    private void ChangeDataObject(ChangeEventArgs args)
+    {
+        if (_draft is null || !Guid.TryParse(args.Value?.ToString(), out var id)) return;
+        _draft.DataObjectId = id;
+        var columns = DataService.ResolveColumns(CurrentData);
+        _draft.ArgumentField = columns.FirstOrDefault()?.Name ?? string.Empty;
+        _draft.SeriesField = string.Empty;
+        _draft.ValueFields = columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).Take(2).Select(column => column.Name).ToList();
+        if (_draft.ValueFields.Count == 0 && columns.Count > 1) _draft.ValueFields.Add(columns[1].Name);
+    }
+
+    private void ToggleValueField(string field, ChangeEventArgs args)
+    {
+        if (_draft is null) return;
+        var selected = args.Value is bool value && value;
+        _draft.ValueFields.RemoveAll(value => string.Equals(value, field, StringComparison.OrdinalIgnoreCase));
+        if (!selected) return;
+        if (!AllowsMultipleValueFields) _draft.ValueFields.Clear();
+        _draft.ValueFields.Add(field);
+    }
+
+    private void ChangeTitle(ChangeEventArgs args) { if (_draft is not null) _draft.Title = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeArgumentField(ChangeEventArgs args) { if (_draft is not null) _draft.ArgumentField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeSeriesField(ChangeEventArgs args) { if (_draft is not null) _draft.SeriesField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeCartesianStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<CartesianChartStyle>(args.Value?.ToString(), out var value)) _draft.CartesianStyle = value; }
+    private void ChangePieStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PieChartStyle>(args.Value?.ToString(), out var value)) _draft.PieStyle = value; }
+    private void ChangePolarStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PolarChartStyle>(args.Value?.ToString(), out var value)) _draft.PolarStyle = value; }
+    private void ChangeSparklineStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<SparklineChartStyle>(args.Value?.ToString(), out var value)) _draft.SparklineStyle = value; }
+    private void ChangeMinimum(ChangeEventArgs args) { if (_draft is not null && TryDouble(args.Value, out var value)) _draft.MinimumValue = value; }
+    private void ChangeMaximum(ChangeEventArgs args) { if (_draft is not null && TryDouble(args.Value, out var value)) _draft.MaximumValue = Math.Max(value, _draft.MinimumValue + .001); }
+    private void ChangeRowLimit(ChangeEventArgs args) { if (_draft is not null && int.TryParse(args.Value?.ToString(), out var value)) _draft.RowLimit = Math.Clamp(value, 1, 100); }
+    private void ToggleTitle(ChangeEventArgs args) { if (_draft is not null) _draft.ShowTitle = Checked(args); }
+    private void ToggleLegend(ChangeEventArgs args) { if (_draft is not null) _draft.ShowLegend = Checked(args); }
+    private void ToggleLabels(ChangeEventArgs args) { if (_draft is not null) _draft.ShowLabels = Checked(args); }
+    private void ToggleFilterRow(ChangeEventArgs args) { if (_draft is not null) _draft.TableShowFilterRow = Checked(args); }
+
+    private static DataVisualElement Clone(DataVisualElement source)
+    {
+        var result = new DataVisualElement();
+        CopySettings(source, result);
+        result.Id = source.Id;
+        result.Name = source.Name;
+        result.X = source.X; result.Y = source.Y; result.Width = source.Width; result.Height = source.Height;
+        result.Rotation = source.Rotation; result.ZIndex = source.ZIndex; result.Visible = source.Visible; result.Locked = source.Locked;
+        return result;
+    }
+
+    private static void CopySettings(DataVisualElement source, DataVisualElement target)
+    {
+        target.DataObjectId = source.DataObjectId; target.VisualKind = source.VisualKind;
+        target.CartesianStyle = source.CartesianStyle; target.PieStyle = source.PieStyle; target.PolarStyle = source.PolarStyle; target.SparklineStyle = source.SparklineStyle;
+        target.Title = source.Title; target.ArgumentField = source.ArgumentField; target.SeriesField = source.SeriesField; target.ValueFields = [.. source.ValueFields];
+        target.ShowLegend = source.ShowLegend; target.ShowLabels = source.ShowLabels; target.ShowTitle = source.ShowTitle;
+        target.TableShowHeader = source.TableShowHeader; target.TableShowFilterRow = source.TableShowFilterRow; target.RowLimit = source.RowLimit;
+        target.MinimumValue = source.MinimumValue; target.MaximumValue = source.MaximumValue;
+        target.Background = source.Background; target.BorderColor = source.BorderColor; target.BorderWidthMm = source.BorderWidthMm;
+    }
+
+    private static string KindIcon(DataVisualKind kind) => kind switch
+    {
+        DataVisualKind.CartesianChart => "▥", DataVisualKind.PieChart => "◕", DataVisualKind.PolarChart => "✥",
+        DataVisualKind.Sparkline => "⌁", DataVisualKind.BarGauge => "◔", DataVisualKind.DataTable => "▦", _ => "%"
+    };
+    private static string KindName(DataVisualKind kind) => Friendly(kind.ToString());
+    private static string KindDescription(DataVisualKind kind) => kind switch
+    {
+        DataVisualKind.CartesianChart => "Bar, line, spline, area, and stacked series",
+        DataVisualKind.PieChart => "Pie or doughnut composition",
+        DataVisualKind.PolarChart => "Polar line, area, bar, or scatter",
+        DataVisualKind.Sparkline => "Compact trend graphic",
+        DataVisualKind.BarGauge => "Circular multi-value gauge",
+        DataVisualKind.DataTable => "DevExpress data grid",
+        _ => "Single value with progress indicator"
+    };
+    private static string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
+    private static bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
+    private static bool TryDouble(object? value, out double result) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out result) || double.TryParse(value?.ToString(), out result);
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+}

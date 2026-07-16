@@ -1,6 +1,6 @@
 # Validation status
 
-The v0.5 source tree was checked without restoring proprietary packages.
+The v0.6 source tree was checked without restoring proprietary packages.
 
 ## Completed checks
 
@@ -15,6 +15,8 @@ The v0.5 source tree was checked without restoring proprietary packages.
 - No GIMP, Inkscape, or Blazor.Diagrams source/package/binary/asset is included.
 - No `bin`, `obj`, `.vs`, compiled assemblies, symbols, DevExpress binaries, license keys, databases, or AI/Ollama/EF/WinUI dependencies are included.
 - The final ZIP is tested with the system archive verifier and accompanied by a SHA-256 checksum.
+- DevExpress data-visual markup uses explicit typed field lambdas for generic chart/pie/polar series to reduce Razor generic-inference ambiguity.
+- JSON and delimited-text parsing bounds visual projections to finite row counts; live document-object sources are derived from the in-memory publication rather than executable expressions.
 
 ## Browser raster test limitation
 
@@ -80,3 +82,17 @@ When reporting a compiler failure, include the first compiler error and affected
 - Literal attributed SVG `<text>` tags remain absent from Razor files.
 - No package was added; only the two DevExpress 25.2 package references remain.
 - A Chromium Canvas smoke test was attempted, but the available headless Chromium process again stalled in the container's missing DBus/desktop environment; browser rendering still requires the local Visual Studio/browser smoke test.
+
+
+## v0.6 targeted validation
+
+- The publication format version is `1.7`; `DataObjects` defaults to an empty list, so older publications remain loadable.
+- Reusable data objects support JSON, comma/semicolon/tab/pipe-delimited text, and live current-page/all-page object projections.
+- The document-object source exposes only predefined publication metadata fields and evaluates no user code or query expression.
+- Data visual elements are normal publication layers and participate in selection, transform, ordering, serialization, duplication, print rendering, and the existing export DOM.
+- DevExpress components used by the shared renderer are `DxChart`, `DxPieChart`, `DxPolarChart`, `DxSparkline`, `DxBarGauge`, `DxGrid`, and `DxProgressBar`.
+- Cartesian subtype selection maps to DevExpress common-series types; pie/doughnut uses `InnerDiameter`; polar series and pie series can show point labels.
+- The hidden print tree remains mounted off-screen instead of `display:none` so DevExpress visual components can initialize before print/export cloning.
+- No map or external GIS component was added because that would require an external tile/provider dependency or API key.
+- No package was added; only the two DevExpress 25.2 package references remain.
+- JavaScript, JSON/XML, C# syntax trees, Razor `@code` blocks, literal SVG/Razor collisions, package boundaries, and archive contents are checked.

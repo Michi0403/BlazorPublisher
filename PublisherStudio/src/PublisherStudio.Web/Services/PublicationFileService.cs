@@ -8,6 +8,7 @@ namespace PublisherStudio.Services;
 public sealed partial class PublicationFileService
 {
     private readonly PictureDocumentService _pictures;
+    private readonly PublicationDataService _data;
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -16,7 +17,11 @@ public sealed partial class PublicationFileService
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public PublicationFileService(PictureDocumentService pictures) => _pictures = pictures;
+    public PublicationFileService(PictureDocumentService pictures, PublicationDataService data)
+    {
+        _pictures = pictures;
+        _data = data;
+    }
 
     public string Serialize(PublicationDocument document)
     {
@@ -29,6 +34,7 @@ public sealed partial class PublicationFileService
         var document = JsonSerializer.Deserialize<PublicationDocument>(json, _options)
             ?? throw new InvalidDataException("The publication file is empty or invalid.");
         document.View ??= new PublicationViewSettings();
+        _data.Normalize(document);
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .8 : document.Zoom, .2, 4);
         document.View.GridSpacingMm = Math.Clamp(document.View.GridSpacingMm <= 0 ? 5 : document.View.GridSpacingMm, .5, 100);
         document.View.ExportDpi = Math.Clamp(document.View.ExportDpi <= 0 ? 150 : document.View.ExportDpi, 72, 600);
@@ -69,6 +75,27 @@ public sealed partial class PublicationFileService
             wordArt.PathBaselineOffset = Math.Clamp(wordArt.PathBaselineOffset, -80, 80);
         }
 
+
+        foreach (var visual in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<DataVisualElement>())
+        {
+            visual.ValueFields ??= [];
+            visual.RowLimit = Math.Clamp(visual.RowLimit <= 0 ? 12 : visual.RowLimit, 1, 100);
+            visual.MaximumValue = visual.MaximumValue <= visual.MinimumValue ? visual.MinimumValue + 100 : visual.MaximumValue;
+            visual.BorderWidthMm = Math.Clamp(visual.BorderWidthMm, 0, 8);
+            var source = document.DataObjects.FirstOrDefault(data => data.Id == visual.DataObjectId);
+            if (source is null && document.DataObjects.Count > 0)
+                visual.DataObjectId = document.DataObjects[0].Id;
+            source = document.DataObjects.FirstOrDefault(data => data.Id == visual.DataObjectId);
+            var columns = _data.ResolveColumns(source);
+            if (string.IsNullOrWhiteSpace(visual.ArgumentField))
+                visual.ArgumentField = columns.FirstOrDefault()?.Name ?? string.Empty;
+            if (visual.ValueFields.Count == 0)
+            {
+                var numeric = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name;
+                if (!string.IsNullOrWhiteSpace(numeric)) visual.ValueFields.Add(numeric);
+            }
+        }
+
         foreach (var publicationPage in document.Pages)
         {
             var objectIds = publicationPage.Elements.Where(item => item is not ConnectorElement).Select(item => item.Id).ToHashSet();
@@ -78,7 +105,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.6";
+        document.FormatVersion = "1.7";
         return document;
     }
 

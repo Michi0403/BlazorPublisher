@@ -5,14 +5,16 @@ namespace PublisherStudio.Services;
 public sealed class EditorStateService
 {
     private readonly PublicationFileService _files;
+    private readonly PublicationDataService _data;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private string? _clipboard;
     private string? _liveEditKey;
 
-    public EditorStateService(PublicationFileService files)
+    public EditorStateService(PublicationFileService files, PublicationDataService data)
     {
         _files = files;
+        _data = data;
         Document = PublicationDocument.CreateDefault();
         SelectedPageId = Document.Pages[0].Id;
     }
@@ -139,6 +141,85 @@ public sealed class EditorStateService
         Notify();
         return element;
     }
+
+    public PublicationDataObject EnsureDataObject()
+    {
+        if (Document.DataObjects.Count > 0) return Document.DataObjects[0];
+        var data = _data.CreateSample();
+        Document.DataObjects.Add(data);
+        return data;
+    }
+
+    public DataVisualElement AddDataVisual(DataVisualKind kind)
+    {
+        Capture();
+        var data = EnsureDataObject();
+        var columns = _data.ResolveColumns(data);
+        var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
+        var numeric = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name
+            ?? columns.Skip(1).FirstOrDefault()?.Name
+            ?? argument;
+        var element = new DataVisualElement
+        {
+            Name = NextName(DataVisualName(kind)),
+            Title = DataVisualName(kind),
+            VisualKind = kind,
+            DataObjectId = data.Id,
+            ArgumentField = argument,
+            ValueFields = string.IsNullOrWhiteSpace(numeric) ? [] : [numeric],
+            X = 28,
+            Y = 30,
+            Width = kind is DataVisualKind.Sparkline or DataVisualKind.KpiProgress ? 110 : 130,
+            Height = kind switch
+            {
+                DataVisualKind.Sparkline => 28,
+                DataVisualKind.KpiProgress => 35,
+                DataVisualKind.DataTable => 75,
+                _ => 80
+            },
+            ZIndex = NextZ()
+        };
+        CurrentPage.Elements.Add(element);
+        SelectedElementId = element.Id;
+        Notify();
+        return element;
+    }
+
+    public void UpsertDataObject(PublicationDataObject value)
+    {
+        Capture();
+        var normalized = _data.Clone(value);
+        _data.ParseInto(normalized);
+        var index = Document.DataObjects.FindIndex(data => data.Id == normalized.Id);
+        if (index < 0) Document.DataObjects.Add(normalized);
+        else Document.DataObjects[index] = normalized;
+        Notify();
+    }
+
+    public bool DeleteDataObject(Guid id)
+    {
+        if (Document.Pages.SelectMany(page => page.Elements).OfType<DataVisualElement>().Any(item => item.DataObjectId == id)) return false;
+        var index = Document.DataObjects.FindIndex(data => data.Id == id);
+        if (index < 0) return false;
+        Capture();
+        Document.DataObjects.RemoveAt(index);
+        Notify();
+        return true;
+    }
+
+    public void RefreshDataVisuals() => Notify(false);
+
+    private static string DataVisualName(DataVisualKind kind) => kind switch
+    {
+        DataVisualKind.CartesianChart => "Chart",
+        DataVisualKind.PieChart => "Pie Chart",
+        DataVisualKind.PolarChart => "Polar Chart",
+        DataVisualKind.Sparkline => "Sparkline",
+        DataVisualKind.BarGauge => "Gauge",
+        DataVisualKind.DataTable => "Data Table",
+        DataVisualKind.KpiProgress => "KPI",
+        _ => "Data Visual"
+    };
 
     public ConnectorElement? AddConnector(Guid sourceElementId, ConnectorAnchor sourceAnchor, Guid targetElementId, ConnectorAnchor targetAnchor, ConnectorMarker endMarker = ConnectorMarker.Arrow)
     {

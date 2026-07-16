@@ -911,3 +911,45 @@ button { cursor: pointer; }
     .data-visual-editor-body { grid-template-columns: 180px minmax(300px,1fr); }
     .visual-live-preview { display: none; }
 }
+
+/* v0.7 Picture Studio ribbon, robust draw tools, and paint-layer properties. */
+.picture-studio-ribbon {
+    min-width: 0;
+    border-bottom: 1px solid #b8bec6;
+    background: #f8fafc;
+}
+.picture-studio-ribbon .dxbl-ribbon-item,
+.picture-studio-ribbon .dxbl-ribbon-item-content,
+.picture-studio-ribbon .dxbl-btn,
+.picture-studio-ribbon button:not([role="tab"]),
+.picture-studio-ribbon [role="button"]:not([role="tab"]) {
+    color: #273444 !important;
+}
+.picture-studio-ribbon .dxbl-ribbon-item *,
+.picture-studio-ribbon .dxbl-ribbon-item-content *,
+.picture-studio-ribbon .dxbl-btn *,
+.picture-studio-ribbon button:not([role="tab"]) * {
+    color: inherit !important;
+}
+.picture-studio-ribbon .dxbl-disabled,
+.picture-studio-ribbon [aria-disabled="true"],
+.picture-studio-ribbon button:disabled {
+    color: #7b8490 !important;
+    opacity: .78;
+}
+.picture-layer-actions { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.picture-drawing-properties { background: #f8fbff; }
+.picture-property-note { margin: 0 0 8px; color: #64748b; font-size: 10px; line-height: 1.4; }
+.picture-paint-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 8px 0;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    background: #f8fafc;
+}
+.picture-paint-summary strong { color: #17689b; font-size: 18px; }
+.picture-paint-summary span { color: #64748b; font-size: 10px; }
+.picture-property-section .wide-button + .wide-button { margin-top: 5px; }

@@ -63,8 +63,19 @@ public sealed class PictureEditorStateService
         heightPx = Math.Clamp(heightPx, 16, 8192);
         if (widthPx == Document.WidthPx && heightPx == Document.HeightPx) return;
         Capture();
+        var oldWidth = Document.WidthPx;
+        var oldHeight = Document.HeightPx;
         Document.WidthPx = widthPx;
         Document.HeightPx = heightPx;
+        foreach (var paint in Document.Layers.OfType<PaintPictureLayer>())
+        {
+            if (Math.Abs(paint.X) < .001 && Math.Abs(paint.Y) < .001 &&
+                Math.Abs(paint.Width - oldWidth) < .001 && Math.Abs(paint.Height - oldHeight) < .001)
+            {
+                paint.Width = widthPx;
+                paint.Height = heightPx;
+            }
+        }
         Notify();
     }
 
@@ -185,6 +196,48 @@ public sealed class PictureEditorStateService
         SelectedLayerId = layer.Id;
         Notify();
         return layer;
+    }
+
+    public PaintPictureLayer AddPaint(string name = "Paint")
+    {
+        Capture();
+        var layer = CreatePaintLayer(name);
+        Notify();
+        return layer;
+    }
+
+    public void AddStroke(PictureStrokeKind kind, IReadOnlyList<PicturePoint> points, string color, double widthPx, double opacity, double hardness)
+    {
+        if (points.Count < 2) return;
+        Capture();
+        var layer = SelectedLayer as PaintPictureLayer;
+        if ((layer is null || layer.Locked) && kind == PictureStrokeKind.Eraser)
+            layer = Document.Layers.OfType<PaintPictureLayer>().LastOrDefault(candidate => !candidate.Locked);
+        if (layer is null || layer.Locked) layer = CreatePaintLayer(kind == PictureStrokeKind.Eraser ? "Eraser" : "Paint");
+        var stroke = new PictureStroke
+        {
+            Kind = kind,
+            Color = string.IsNullOrWhiteSpace(color) ? "#111827" : color,
+            WidthPx = Math.Clamp(widthPx, .25, 512),
+            Opacity = Math.Clamp(opacity, 0, 1),
+            Hardness = Math.Clamp(hardness, 0, 1),
+            Points = points.Take(20000).Select(point => new PicturePoint
+            {
+                X = Math.Clamp(point.X, -16384, 32768),
+                Y = Math.Clamp(point.Y, -16384, 32768)
+            }).ToList()
+        };
+        layer.Strokes.Add(stroke);
+        SelectedLayerId = layer.Id;
+        Notify();
+    }
+
+    public void ClearSelectedPaint()
+    {
+        if (SelectedLayer is not PaintPictureLayer paint || paint.Locked || paint.Strokes.Count == 0) return;
+        Capture();
+        paint.Strokes.Clear();
+        Notify();
     }
 
     public void DeleteSelected()
@@ -346,6 +399,21 @@ public sealed class PictureEditorStateService
         _redo.Clear();
     }
 
+    private PaintPictureLayer CreatePaintLayer(string name)
+    {
+        var layer = new PaintPictureLayer
+        {
+            Name = NextName(string.IsNullOrWhiteSpace(name) ? "Paint" : name),
+            X = 0,
+            Y = 0,
+            Width = Document.WidthPx,
+            Height = Document.HeightPx
+        };
+        Document.Layers.Add(layer);
+        SelectedLayerId = layer.Id;
+        return layer;
+    }
+
     private PictureLayer CloneLayer(PictureLayer layer)
     {
         var wrapper = PictureDocument.CreateDefault(Document.WidthPx, Document.HeightPx, true);
@@ -404,6 +472,17 @@ public sealed class PictureEditorStateService
             render.Softness = Math.Clamp(render.Softness, 0, 1);
             render.RenderContrast = Math.Clamp(render.RenderContrast, .1, 5);
             render.StripeWidthPx = Math.Clamp(render.StripeWidthPx, 1, 1000);
+        }
+        if (layer is PaintPictureLayer paint)
+        {
+            paint.Strokes ??= [];
+            foreach (var stroke in paint.Strokes)
+            {
+                stroke.WidthPx = Math.Clamp(stroke.WidthPx, .25, 512);
+                stroke.Opacity = Math.Clamp(stroke.Opacity, 0, 1);
+                stroke.Hardness = Math.Clamp(stroke.Hardness, 0, 1);
+                stroke.Points ??= [];
+            }
         }
     }
 

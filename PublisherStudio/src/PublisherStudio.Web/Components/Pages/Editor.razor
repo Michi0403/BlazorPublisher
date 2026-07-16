@@ -81,11 +81,11 @@
              Saved="SaveStory"
              Cancelled="CloseStoryEditor" />
 
-<PictureEditor Visible="_pictureEditorVisible"
-               SessionId="_pictureEditorSessionId"
-               InitialDocument="_pictureEditorInitialDocument"
-               InitialRasterDataUrl="_pictureEditorInitialRaster"
-               InitialName="_pictureEditorInitialName"
+<PictureEditor Visible="@_pictureEditorVisible"
+               SessionId="@_pictureEditorSessionId"
+               InitialDocument="@_pictureEditorInitialDocument"
+               InitialRasterDataUrl="@_pictureEditorInitialRaster"
+               InitialName="@_pictureEditorInitialName"
                EditingExisting="@(_pictureEditorTargetId is not null)"
                Saved="SavePictureStudio"
                Cancelled="ClosePictureStudio" />

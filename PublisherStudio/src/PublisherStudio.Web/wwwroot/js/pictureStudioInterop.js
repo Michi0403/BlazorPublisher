@@ -2,13 +2,14 @@ const editors = new Map();
 const imageCache = new Map();
 const proceduralCache = new Map();
 
-const layerKinds = ["raster", "text", "shape", "fill", "render"];
+const layerKinds = ["raster", "text", "shape", "fill", "render", "paint"];
 const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "lighten"];
 const rasterFits = ["stretch", "contain", "cover"];
 const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line"];
 const fillKinds = ["solid", "linearGradient", "radialGradient"];
 const renderKinds = ["clouds", "noise", "stripes", "vignette"];
 const textAlignments = ["left", "center", "right"];
+const drawTools = ["select", "brush", "pencil", "line", "eraser", "eyedropper"];
 
 function enumName(value, names, fallback) {
     if (typeof value === "string") return value;
@@ -52,6 +53,17 @@ function cloneDocument(document) {
     return JSON.parse(JSON.stringify(normalizeDocument(document)));
 }
 
+function normalizeToolSettings(settings) {
+    const rawTool = typeof settings?.tool === "string" ? settings.tool.toLowerCase() : "select";
+    return {
+        tool: drawTools.includes(rawTool) ? rawTool : "select",
+        color: cssColor(settings?.color, "#111827"),
+        width: clamp(settings?.width ?? 12, .25, 512),
+        opacity: clamp(settings?.opacity ?? 1, 0, 1),
+        hardness: clamp(settings?.hardness ?? .8, 0, 1)
+    };
+}
+
 function createCanvas(width, height) {
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(width));
@@ -61,15 +73,21 @@ function createCanvas(width, height) {
 
 function loadImage(dataUrl) {
     if (!dataUrl) return Promise.resolve(null);
-    if (imageCache.has(dataUrl)) return imageCache.get(dataUrl);
+    const source = String(dataUrl).trim();
+    if (!source.startsWith("data:image/") && !source.startsWith("blob:"))
+        return Promise.reject(new Error("The image layer contains an invalid source instead of embedded image data."));
+    if (imageCache.has(source)) return imageCache.get(source);
     const promise = new Promise((resolve, reject) => {
         const image = new Image();
         image.decoding = "async";
         image.onload = () => resolve(image);
         image.onerror = () => reject(new Error("The image layer could not be decoded."));
-        image.src = dataUrl;
+        image.src = source;
+    }).catch(error => {
+        imageCache.delete(source);
+        throw error;
     });
-    imageCache.set(dataUrl, promise);
+    imageCache.set(source, promise);
     return promise;
 }
 
@@ -182,8 +200,27 @@ function drawImageWithFit(ctx, image, width, height, fit) {
 }
 
 async function drawRasterLayer(ctx, layer) {
-    const image = await loadImage(layer.dataUrl);
     const { width, height } = beginLayer(ctx, layer);
+    let image;
+    try {
+        image = await loadImage(layer.dataUrl);
+    } catch (error) {
+        ctx.save();
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillRect(-width / 2, -height / 2, width, height);
+        ctx.strokeStyle = "#dc2626";
+        ctx.lineWidth = Math.max(2, Math.min(width, height) * .015);
+        ctx.strokeRect(-width / 2, -height / 2, width, height);
+        ctx.beginPath();
+        ctx.moveTo(-width / 2, -height / 2);
+        ctx.lineTo(width / 2, height / 2);
+        ctx.moveTo(width / 2, -height / 2);
+        ctx.lineTo(-width / 2, height / 2);
+        ctx.stroke();
+        ctx.restore();
+        endLayer(ctx);
+        return `${layer.name || "Image"}: ${error?.message || error}`;
+    }
     const scratch = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
     const scratchContext = scratch.getContext("2d");
     scratchContext.save();
@@ -202,6 +239,7 @@ async function drawRasterLayer(ctx, layer) {
     }
     ctx.drawImage(scratch, -width / 2, -height / 2, width, height);
     endLayer(ctx);
+    return null;
 }
 
 function wrapText(ctx, text, maximumWidth) {
@@ -453,15 +491,90 @@ function drawRenderLayer(ctx, layer) {
     endLayer(ctx);
 }
 
+function strokeKind(stroke) {
+    if (typeof stroke?.kind === "string") return stroke.kind.toLowerCase();
+    return enumName(stroke?.kind, ["brush", "pencil", "line", "eraser"], "brush").toLowerCase();
+}
+
+function traceStrokePath(ctx, points, kind) {
+    if (!points.length) return;
+    ctx.beginPath();
+    ctx.moveTo(Number(points[0].x) || 0, Number(points[0].y) || 0);
+    if (kind === "line" || points.length === 2) {
+        const last = points[points.length - 1];
+        ctx.lineTo(Number(last.x) || 0, Number(last.y) || 0);
+        return;
+    }
+    if (points.length < 3) {
+        for (let index = 1; index < points.length; index++)
+            ctx.lineTo(Number(points[index].x) || 0, Number(points[index].y) || 0);
+        return;
+    }
+    for (let index = 1; index < points.length - 1; index++) {
+        const point = points[index];
+        const next = points[index + 1];
+        const middleX = ((Number(point.x) || 0) + (Number(next.x) || 0)) / 2;
+        const middleY = ((Number(point.y) || 0) + (Number(next.y) || 0)) / 2;
+        ctx.quadraticCurveTo(Number(point.x) || 0, Number(point.y) || 0, middleX, middleY);
+    }
+    const last = points[points.length - 1];
+    ctx.lineTo(Number(last.x) || 0, Number(last.y) || 0);
+}
+
+function drawPaintStroke(ctx, stroke, preview = false) {
+    const points = Array.isArray(stroke?.points) ? stroke.points : [];
+    if (points.length < 2) return;
+    const kind = strokeKind(stroke);
+    const width = clamp(stroke.widthPx ?? stroke.width ?? 1, .25, 512);
+    const opacity = clamp(stroke.opacity ?? 1, 0, 1);
+    const hardness = clamp(stroke.hardness ?? .8, 0, 1);
+    const erasing = kind === "eraser" && !preview;
+    ctx.save();
+    ctx.lineCap = kind === "pencil" ? "square" : "round";
+    ctx.lineJoin = "round";
+    ctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+    ctx.strokeStyle = preview && kind === "eraser" ? "#ef4444" : cssColor(stroke.color, "#111827");
+    ctx.globalAlpha = preview ? Math.max(.55, opacity) : opacity;
+    if (kind === "brush" && hardness < .98 && !erasing) {
+        ctx.shadowColor = ctx.strokeStyle;
+        ctx.shadowBlur = width * (1 - hardness) * 1.5;
+        ctx.lineWidth = Math.max(.25, width * (.55 + hardness * .45));
+    } else {
+        ctx.lineWidth = width;
+    }
+    traceStrokePath(ctx, points, kind);
+    ctx.stroke();
+    if (kind === "brush" && hardness < .98 && !erasing) {
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = preview ? Math.max(.65, opacity) : opacity;
+        ctx.lineWidth = Math.max(.25, width * (.25 + hardness * .65));
+        traceStrokePath(ctx, points, kind);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function drawPaintLayer(ctx, layer) {
+    const { width, height } = beginLayer(ctx, layer);
+    const scratch = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+    const scratchContext = scratch.getContext("2d", { alpha: true });
+    for (const stroke of Array.isArray(layer.strokes) ? layer.strokes : [])
+        drawPaintStroke(scratchContext, stroke);
+    ctx.drawImage(scratch, -width / 2, -height / 2, width, height);
+    endLayer(ctx);
+}
+
 async function drawLayer(ctx, layer) {
-    if (!layer || layer.visible === false || clamp(layer.opacity ?? 1, 0, 1) <= 0) return;
+    if (!layer || layer.visible === false || clamp(layer.opacity ?? 1, 0, 1) <= 0) return null;
     switch (layerKind(layer)) {
-        case "raster": await drawRasterLayer(ctx, layer); break;
+        case "raster": return await drawRasterLayer(ctx, layer);
         case "text": drawTextLayer(ctx, layer); break;
         case "fill": drawFillLayer(ctx, layer); break;
         case "render": drawRenderLayer(ctx, layer); break;
+        case "paint": drawPaintLayer(ctx, layer); break;
         default: drawShapeLayer(ctx, layer); break;
     }
+    return null;
 }
 
 function drawBackground(ctx, document, forceOpaque = false) {
@@ -550,7 +663,7 @@ function drawSelection(ctx, layer, zoom) {
     ctx.lineWidth = 1.5 / scale;
     ctx.setLineDash(layer.locked ? [6 / scale, 4 / scale] : []);
     ctx.strokeRect(-width / 2, -height / 2, width, height);
-    if (!layer.locked) {
+    if (!layer.locked && layerKind(layer) !== "paint") {
         ctx.setLineDash([]);
         ctx.beginPath();
         ctx.moveTo(0, -height / 2);
@@ -581,12 +694,18 @@ async function drawDocument(canvas, document, options = {}) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground(ctx, document, options.forceOpaque === true);
-    for (const layer of document.layers) await drawLayer(ctx, layer);
+    const errors = [];
+    for (const layer of document.layers) {
+        const error = await drawLayer(ctx, layer);
+        if (error) errors.push(error);
+    }
     if (options.grid) drawGrid(ctx, document, options.zoom || 1);
+    if (options.previewStroke) drawPaintStroke(ctx, options.previewStroke, true);
     if (options.selectedLayerId) {
         const selected = document.layers.find(layer => String(layer.id).toLowerCase() === String(options.selectedLayerId).toLowerCase());
         drawSelection(ctx, selected, options.zoom || 1);
     }
+    canvas.pictureStudioErrors = errors;
     return canvas;
 }
 
@@ -598,10 +717,42 @@ function canvasPoint(canvas, event) {
     };
 }
 
+function distanceToSegment(pointX, pointY, firstX, firstY, secondX, secondY) {
+    const dx = secondX - firstX;
+    const dy = secondY - firstY;
+    if (Math.abs(dx) < .0001 && Math.abs(dy) < .0001) return Math.hypot(pointX - firstX, pointY - firstY);
+    const amount = clamp(((pointX - firstX) * dx + (pointY - firstY) * dy) / (dx * dx + dy * dy), 0, 1);
+    return Math.hypot(pointX - (firstX + dx * amount), pointY - (firstY + dy * amount));
+}
+
+function hitPaintLayer(layer, worldX, worldY) {
+    const local = worldToLocal(layer, worldX, worldY);
+    const width = Math.max(1, Number(layer.width) || 1);
+    const height = Math.max(1, Number(layer.height) || 1);
+    const x = local.x + width / 2;
+    const y = local.y + height / 2;
+    const strokes = Array.isArray(layer.strokes) ? layer.strokes : [];
+    for (let strokeIndex = strokes.length - 1; strokeIndex >= 0; strokeIndex--) {
+        const stroke = strokes[strokeIndex];
+        if (strokeKind(stroke) === "eraser") continue;
+        const points = Array.isArray(stroke.points) ? stroke.points : [];
+        const threshold = Math.max(5, clamp(stroke.widthPx ?? 1, .25, 512) / 2 + 3);
+        for (let index = 1; index < points.length; index++) {
+            if (distanceToSegment(x, y, Number(points[index - 1].x) || 0, Number(points[index - 1].y) || 0,
+                Number(points[index].x) || 0, Number(points[index].y) || 0) <= threshold) return true;
+        }
+    }
+    return false;
+}
+
 function hitLayer(document, x, y) {
     for (let index = document.layers.length - 1; index >= 0; index--) {
         const layer = document.layers[index];
         if (!layer.visible) continue;
+        if (layerKind(layer) === "paint") {
+            if (hitPaintLayer(layer, x, y)) return layer;
+            continue;
+        }
         const local = worldToLocal(layer, x, y);
         const width = Math.max(1, Number(layer.width) || 1);
         const height = Math.max(1, Number(layer.height) || 1);
@@ -612,7 +763,7 @@ function hitLayer(document, x, y) {
 }
 
 function hitHandle(layer, x, y, zoom) {
-    if (!layer || layer.locked) return null;
+    if (!layer || layer.locked || layerKind(layer) === "paint") return null;
     const handles = selectionHandles(layer, zoom);
     const threshold = 13 / Math.max(.05, zoom);
     for (const [name, point] of Object.entries(handles)) {
@@ -621,16 +772,39 @@ function hitHandle(layer, x, y, zoom) {
     return null;
 }
 
+function safeInvoke(editor, method, ...args) {
+    if (!editor?.dotNetRef) return;
+    editor.dotNetRef.invokeMethodAsync(method, ...args).catch(error => console.warn(`Picture Studio callback ${method} failed.`, error));
+}
+
+function reportRenderState(editor, message) {
+    const next = message || "";
+    if (next === editor.lastRenderError) return;
+    const hadError = Boolean(editor.lastRenderError);
+    editor.lastRenderError = next;
+    if (next) safeInvoke(editor, "PictureRenderFailed", next);
+    else if (hadError) safeInvoke(editor, "PictureRenderRecovered");
+}
+
 function scheduleEditorRender(editor) {
-    if (editor.animationFrame) return;
+    if (editor.animationFrame || !editor.canvas || !editor.document) return;
     editor.animationFrame = requestAnimationFrame(async () => {
         editor.animationFrame = 0;
         const token = ++editor.renderToken;
-        await drawDocument(editor.canvas, editor.document, {
-            grid: true,
-            selectedLayerId: editor.selectedLayerId,
-            zoom: editor.zoom
-        });
+        try {
+            const rendered = await drawDocument(editor.canvas, editor.document, {
+                grid: true,
+                selectedLayerId: editor.selectedLayerId,
+                zoom: editor.zoom,
+                previewStroke: editor.drawing
+            });
+            if (token === editor.renderToken) {
+                const errors = Array.isArray(rendered.pictureStudioErrors) ? rendered.pictureStudioErrors : [];
+                reportRenderState(editor, errors[0] || "");
+            }
+        } catch (error) {
+            reportRenderState(editor, error?.message || String(error));
+        }
         if (token !== editor.renderToken) scheduleEditorRender(editor);
     });
 }
@@ -673,10 +847,10 @@ function beginInteraction(editor, event) {
     if (!handle) {
         selected = hitLayer(editor.document, point.x, point.y);
         editor.selectedLayerId = selected ? String(selected.id) : null;
-        editor.dotNetRef.invokeMethodAsync("PictureLayerSelected", editor.selectedLayerId);
+        safeInvoke(editor, "PictureLayerSelected", editor.selectedLayerId);
         scheduleEditorRender(editor);
     }
-    if (!selected || selected.locked) return;
+    if (!selected || selected.locked || layerKind(selected) === "paint") return;
     const mode = handle || "move";
     editor.interaction = {
         mode,
@@ -728,7 +902,7 @@ function finishInteraction(editor, event, cancel = false) {
     editor.interaction = null;
     if (cancel) Object.assign(interaction.layer, interaction.original);
     if (!cancel) {
-        editor.dotNetRef.invokeMethodAsync(
+        safeInvoke(editor,
             "PictureTransformCommitted", String(interaction.layer.id),
             Number(interaction.layer.x) || 0, Number(interaction.layer.y) || 0,
             Math.max(1, Number(interaction.layer.width) || 1), Math.max(1, Number(interaction.layer.height) || 1),
@@ -738,18 +912,125 @@ function finishInteraction(editor, event, cancel = false) {
     scheduleEditorRender(editor);
 }
 
+async function pickCanvasColor(editor, point) {
+    try {
+        const clean = createCanvas(editor.document.widthPx, editor.document.heightPx);
+        await drawDocument(clean, editor.document, { grid: false, selectedLayerId: null, zoom: 1 });
+        const data = clean.getContext("2d", { willReadFrequently: true }).getImageData(
+            Math.round(clamp(point.x, 0, clean.width - 1)), Math.round(clamp(point.y, 0, clean.height - 1)), 1, 1).data;
+        const hex = `#${[data[0], data[1], data[2]].map(value => value.toString(16).padStart(2, "0")).join("")}`;
+        safeInvoke(editor, "PictureColorPicked", hex);
+    } catch (error) {
+        reportRenderState(editor, `The eyedropper could not read this pixel: ${error?.message || error}`);
+    }
+}
+
+function beginDrawing(editor, event) {
+    if (!editor.document) return;
+    const settings = editor.toolSettings || normalizeToolSettings(null);
+    const point = canvasPoint(editor.canvas, event);
+    if (settings.tool === "eyedropper") {
+        void pickCanvasColor(editor, point);
+        event.preventDefault();
+        return;
+    }
+    if (!["brush", "pencil", "line", "eraser"].includes(settings.tool)) return;
+    editor.drawing = {
+        pointerId: event.pointerId,
+        tool: settings.tool,
+        kind: settings.tool,
+        color: settings.color,
+        width: settings.tool === "pencil" ? Math.min(settings.width, 6) : settings.width,
+        widthPx: settings.tool === "pencil" ? Math.min(settings.width, 6) : settings.width,
+        opacity: settings.opacity,
+        hardness: settings.tool === "pencil" ? 1 : settings.hardness,
+        points: [point, { ...point }]
+    };
+    editor.canvas.setPointerCapture(event.pointerId);
+    scheduleEditorRender(editor);
+    event.preventDefault();
+}
+
+function updateDrawing(editor, event) {
+    const drawing = editor.drawing;
+    if (!drawing || drawing.pointerId !== event.pointerId) return;
+    let point = canvasPoint(editor.canvas, event);
+    if (drawing.tool === "line" && editor.document.snapToGrid) {
+        const spacing = Math.max(2, Number(editor.document.gridSpacingPx) || 25);
+        point = { x: snap(point.x, spacing, true), y: snap(point.y, spacing, true) };
+    }
+    if (drawing.tool === "line") drawing.points[drawing.points.length - 1] = point;
+    else {
+        const last = drawing.points[drawing.points.length - 1];
+        if (Math.hypot(point.x - last.x, point.y - last.y) >= Math.max(.5, drawing.widthPx * .06)) drawing.points.push(point);
+    }
+    scheduleEditorRender(editor);
+    event.preventDefault();
+}
+
+function localizeStrokePoints(editor, points, tool) {
+    let layer = editor.document.layers.find(item => String(item.id) === String(editor.selectedLayerId));
+    if ((!layer || layer.locked || layerKind(layer) !== "paint") && tool === "eraser")
+        layer = [...editor.document.layers].reverse().find(item => layerKind(item) === "paint" && !item.locked);
+    if (!layer || layer.locked || layerKind(layer) !== "paint") return points;
+    const width = Math.max(1, Number(layer.width) || 1);
+    const height = Math.max(1, Number(layer.height) || 1);
+    return points.map(point => {
+        const local = worldToLocal(layer, point.x, point.y);
+        return { x: local.x + width / 2, y: local.y + height / 2 };
+    });
+}
+
+function finishDrawing(editor, event, cancel = false) {
+    const drawing = editor.drawing;
+    if (!drawing || (event && drawing.pointerId !== event.pointerId)) return;
+    editor.drawing = null;
+    if (!cancel) {
+        const points = localizeStrokePoints(editor, drawing.points, drawing.tool);
+        if (points.length === 1) points.push({ x: points[0].x + .01, y: points[0].y + .01 });
+        const coordinates = [];
+        for (const point of points) coordinates.push(Number(point.x) || 0, Number(point.y) || 0);
+        safeInvoke(editor, "PictureStrokeCommitted", drawing.tool, coordinates, drawing.color,
+            drawing.widthPx, drawing.opacity, drawing.hardness);
+    }
+    scheduleEditorRender(editor);
+}
+
+function updateCanvasCursor(editor) {
+    if (!editor.canvas) return;
+    const tool = editor.toolSettings?.tool || "select";
+    editor.canvas.style.cursor = tool === "select" ? "default" : tool === "eyedropper" ? "copy" : "crosshair";
+}
+
 function bindEditorCanvas(editor, canvas) {
     if (editor.canvas === canvas && canvas.dataset.pictureStudioBound === "true") return;
     editor.canvas = canvas;
     editor.interaction = null;
+    editor.drawing = null;
     canvas.dataset.pictureStudioBound = "true";
-    canvas.addEventListener("pointerdown", event => beginInteraction(editor, event));
-    canvas.addEventListener("pointermove", event => updateInteraction(editor, event));
-    canvas.addEventListener("pointerup", event => finishInteraction(editor, event));
-    canvas.addEventListener("pointercancel", event => finishInteraction(editor, event, true));
-    canvas.addEventListener("keydown", event => {
-        if (event.key === "Escape") finishInteraction(editor, null, true);
+    canvas.addEventListener("pointerdown", event => {
+        if ((editor.toolSettings?.tool || "select") === "select") beginInteraction(editor, event);
+        else beginDrawing(editor, event);
     });
+    canvas.addEventListener("pointermove", event => {
+        if (editor.drawing) updateDrawing(editor, event);
+        else updateInteraction(editor, event);
+    });
+    canvas.addEventListener("pointerup", event => {
+        if (editor.drawing) finishDrawing(editor, event);
+        else finishInteraction(editor, event);
+    });
+    canvas.addEventListener("pointercancel", event => {
+        if (editor.drawing) finishDrawing(editor, event, true);
+        else finishInteraction(editor, event, true);
+    });
+    canvas.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            if (editor.drawing) finishDrawing(editor, null, true);
+            else finishInteraction(editor, null, true);
+        }
+    });
+    updateCanvasCursor(editor);
 }
 
 export function initializePictureStudio(canvasId, dotNetRef) {
@@ -764,8 +1045,11 @@ export function initializePictureStudio(canvasId, dotNetRef) {
             selectedLayerId: null,
             zoom: .65,
             interaction: null,
+            drawing: null,
+            toolSettings: normalizeToolSettings(null),
             animationFrame: 0,
-            renderToken: 0
+            renderToken: 0,
+            lastRenderError: ""
         };
         editors.set(canvasId, editor);
     } else {
@@ -774,7 +1058,7 @@ export function initializePictureStudio(canvasId, dotNetRef) {
     bindEditorCanvas(editor, canvas);
 }
 
-export async function renderPictureStudio(canvasId, documentModel, selectedLayerId, zoom) {
+export async function renderPictureStudio(canvasId, documentModel, selectedLayerId, zoom, toolSettings) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const editor = editors.get(canvasId);
@@ -782,9 +1066,11 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     const nextDocument = cloneDocument(documentModel);
     editor.selectedLayerId = selectedLayerId || null;
     editor.zoom = clamp(zoom ?? nextDocument.zoom, .05, 4);
+    editor.toolSettings = normalizeToolSettings(toolSettings);
     canvas.style.width = `${Math.round(nextDocument.widthPx * editor.zoom)}px`;
     canvas.style.height = `${Math.round(nextDocument.heightPx * editor.zoom)}px`;
-    if (!editor.interaction) editor.document = nextDocument;
+    if (!editor.interaction && !editor.drawing) editor.document = nextDocument;
+    updateCanvasCursor(editor);
     scheduleEditorRender(editor);
 }
 

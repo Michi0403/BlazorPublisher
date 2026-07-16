@@ -1,6 +1,6 @@
 # Validation status
 
-The v0.6 source tree was checked without restoring proprietary packages.
+The v0.7 source tree was checked without restoring proprietary packages.
 
 ## Completed checks
 
@@ -96,3 +96,14 @@ When reporting a compiler failure, include the first compiler error and affected
 - No map or external GIS component was added because that would require an external tile/provider dependency or API key.
 - No package was added; only the two DevExpress 25.2 package references remain.
 - JavaScript, JSON/XML, C# syntax trees, Razor `@code` blocks, literal SVG/Razor collisions, package boundaries, and archive contents are checked.
+
+## v0.7 targeted validation
+
+- Picture Studio string parameters use explicit Razor expressions; no literal `_pictureEditorInitialRaster` or `_pictureEditorInitialName` component attribute remains.
+- Raster decoding accepts embedded `data:image/...` and local `blob:` sources only; a failed decode is shown once and the rejected cache entry is discarded.
+- The Picture Studio renderer catches layer and frame failures and reports them through Blazor instead of leaving unhandled promise rejections in the browser console.
+- Picture Studio uses `DxRibbon` with Home, Insert, Draw, Effects, Render Tools, Paint Tools, and Picture Tools tabs.
+- Paint layers and strokes are bounded, normalized, polymorphically serialized, and included in the existing undo/redo and export paths.
+- Brush, Pencil, Line, Eraser, and Eyedropper pointer paths are handled by the existing Canvas 2D module; no JavaScript or image-processing dependency was added.
+- JavaScript passes `node --check`; JSON/XML, source delimiters, direct Razor `@page.` collisions, package boundaries, and archive contents are checked.
+- A real `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.

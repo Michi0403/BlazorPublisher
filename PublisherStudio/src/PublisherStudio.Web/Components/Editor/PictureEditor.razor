@@ -14,36 +14,120 @@
                 <button type="button" class="window-close" title="Close" @onclick="Cancel">×</button>
             </header>
 
-            <div class="picture-studio-toolbar">
-                <div class="picture-tool-group">
-                    <strong>History</strong>
-                    <DxButton Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
-                    <DxButton Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
-                </div>
-                <div class="picture-tool-group">
-                    <strong>Add layer</strong>
-                    <DxButton Text="Image" Click="RequestImage" />
-                    <DxButton Text="Text" Click="AddTextLayer" />
-                    <DxButton Text="Shape" Click="AddRectangle" />
-                    <DxButton Text="Fill" Click="AddGradient" />
-                    <DxButton Text="Clouds" Click="AddClouds" />
-                    <DxButton Text="Noise" Click="AddNoise" />
-                </div>
-                <div class="picture-tool-group">
-                    <strong>Arrange</strong>
-                    <DxButton Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
-                    <DxButton Text="Up" Enabled="HasSelection" Click="MoveUp" />
-                    <DxButton Text="Down" Enabled="HasSelection" Click="MoveDown" />
-                    <DxButton Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
-                </div>
-                <div class="picture-tool-group picture-zoom-tools">
-                    <strong>View</strong>
-                    <DxButton Text="Fit" Click="FitCanvas" />
-                    <DxButton Text="100%" Click="Zoom100" />
-                    <label><input type="checkbox" checked="@State.Document.GridVisible" @onchange="ToggleGrid" /> Grid</label>
-                    <label><input type="checkbox" checked="@State.Document.SnapToGrid" @onchange="ToggleSnap" /> Snap</label>
-                </div>
-            </div>
+            <DxRibbon CssClass="picture-studio-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Home">
+                    <DxRibbonGroup Text="History">
+                        <DxRibbonItem Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
+                        <DxRibbonItem Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Arrange">
+                        <DxRibbonItem Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
+                        <DxRibbonItem Text="Up" Enabled="HasSelection" Click="MoveUp" />
+                        <DxRibbonItem Text="Down" Enabled="HasSelection" Click="MoveDown" />
+                        <DxRibbonItem Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="View">
+                        <DxRibbonItem Text="Fit" Click="FitCanvas" />
+                        <DxRibbonItem Text="100%" Click="Zoom100" />
+                        <DxRibbonItem Text="@GridText" Click="ToggleGridRibbon" />
+                        <DxRibbonItem Text="@SnapText" Click="ToggleSnapRibbon" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+
+                <DxRibbonTab Text="Insert">
+                    <DxRibbonGroup Text="Content">
+                        <DxRibbonItem Text="Image" IsPrimary="true" Click="RequestImage" />
+                        <DxRibbonItem Text="Text" IsPrimary="true" Click="AddTextLayer" />
+                        <DxRibbonItem Text="Paint layer" IsPrimary="true" Click="AddPaintLayer" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Shapes">
+                        <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
+                        <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
+                        <DxRibbonItem Text="Line" Click="AddLineShape" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Fills">
+                        <DxRibbonItem Text="Solid" Click="AddSolidFill" />
+                        <DxRibbonItem Text="Gradient" Click="AddGradient" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Procedural render">
+                        <DxRibbonItem Text="Clouds" Click="AddClouds" />
+                        <DxRibbonItem Text="Noise" Click="AddNoise" />
+                        <DxRibbonItem Text="Stripes" Click="AddStripes" />
+                        <DxRibbonItem Text="Vignette" Click="AddVignette" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+
+                <DxRibbonTab Text="Draw">
+                    <DxRibbonGroup Text="Tools">
+                        <DxRibbonItem Text="@SelectToolText" IsPrimary="true" Click="SelectTool" />
+                        <DxRibbonItem Text="@BrushToolText" IsPrimary="true" Click="BrushTool" />
+                        <DxRibbonItem Text="@PencilToolText" Click="PencilTool" />
+                        <DxRibbonItem Text="@LineToolText" Click="LineTool" />
+                        <DxRibbonItem Text="@EraserToolText" Click="EraserTool" />
+                        <DxRibbonItem Text="@EyedropperToolText" Click="EyedropperTool" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Color">
+                        <DxRibbonColorPaletteItem Text="Stroke color" Value="@_drawColor" ValueChanged="ChangeDrawColor">
+                            <Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups>
+                        </DxRibbonColorPaletteItem>
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Width">
+                        <DxRibbonItem Text="1 px" Click="DrawWidth1" />
+                        <DxRibbonItem Text="3 px" Click="DrawWidth3" />
+                        <DxRibbonItem Text="8 px" Click="DrawWidth8" />
+                        <DxRibbonItem Text="16 px" Click="DrawWidth16" />
+                        <DxRibbonItem Text="32 px" Click="DrawWidth32" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+
+                <DxRibbonTab Text="Effects">
+                    <DxRibbonGroup Text="Tone">
+                        <DxRibbonItem Text="Brighten" Enabled="HasSelection" Click="Brighten" />
+                        <DxRibbonItem Text="Darken" Enabled="HasSelection" Click="Darken" />
+                        <DxRibbonItem Text="More contrast" Enabled="HasSelection" Click="MoreContrast" />
+                        <DxRibbonItem Text="More saturation" Enabled="HasSelection" Click="MoreSaturation" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Soften">
+                        <DxRibbonItem Text="Light soften" Enabled="HasSelection" Click="SoftenLight" />
+                        <DxRibbonItem Text="Medium soften" Enabled="HasSelection" Click="SoftenMedium" />
+                        <DxRibbonItem Text="Remove soften" Enabled="HasSelection" Click="RemoveSoftening" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Color effects">
+                        <DxRibbonItem Text="Grayscale" Enabled="HasSelection" Click="ToggleGrayscalePreset" />
+                        <DxRibbonItem Text="Sepia" Enabled="HasSelection" Click="ToggleSepiaPreset" />
+                        <DxRibbonItem Text="Invert" Enabled="HasSelection" Click="ToggleInvertPreset" />
+                        <DxRibbonItem Text="Reset all" Enabled="HasSelection" Click="ResetAdjustments" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+
+                <DxRibbonTab Text="Render Tools" Contextual="true" Visible="IsRenderSelected">
+                    <DxRibbonGroup Text="Renderer">
+                        <DxRibbonItem Text="Clouds" Click="MakeRenderClouds" />
+                        <DxRibbonItem Text="Noise" Click="MakeRenderNoise" />
+                        <DxRibbonItem Text="Stripes" Click="MakeRenderStripes" />
+                        <DxRibbonItem Text="Vignette" Click="MakeRenderVignette" />
+                        <DxRibbonItem Text="New seed" IsPrimary="true" Click="RandomizeRender" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+
+                <DxRibbonTab Text="Paint Tools" Contextual="true" Visible="IsPaintSelected">
+                    <DxRibbonGroup Text="Paint layer">
+                        <DxRibbonItem Text="Brush" IsPrimary="true" Click="BrushTool" />
+                        <DxRibbonItem Text="Eraser" Click="EraserTool" />
+                        <DxRibbonItem Text="Clear strokes" Enabled="CanDelete" Click="State.ClearSelectedPaint" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+
+                <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsRasterSelected">
+                    <DxRibbonGroup Text="Raster">
+                        <DxRibbonItem Text="Replace" IsPrimary="true" Click="RequestImage" />
+                        <DxRibbonItem Text="Contain" Click="RasterContain" />
+                        <DxRibbonItem Text="Cover" Click="RasterCover" />
+                        <DxRibbonItem Text="Flip horizontal" Click="RasterFlipHorizontal" />
+                        <DxRibbonItem Text="Flip vertical" Click="RasterFlipVertical" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
 
             <div class="picture-studio-workspace">
                 <aside class="picture-studio-layers">
@@ -57,6 +141,7 @@
                         <button type="button" title="Add shape" @onclick="AddRectangle">◇</button>
                         <button type="button" title="Add gradient" @onclick="AddGradient">◩</button>
                         <button type="button" title="Add render layer" @onclick="AddClouds">☁</button>
+                        <button type="button" title="Add paint layer" @onclick="AddPaintLayer">✎</button>
                     </div>
                     <div class="picture-layer-list">
                         @foreach (var layer in State.Document.Layers.AsEnumerable().Reverse())
@@ -77,7 +162,7 @@
                         {
                             <div class="picture-empty-layers">
                                 <strong>Transparent canvas</strong>
-                                <span>Add an image, text, shape, fill, or procedural render layer.</span>
+                                <span>Add an image, text, shape, fill, paint, or procedural render layer.</span>
                             </div>
                         }
                     </div>
@@ -93,7 +178,7 @@
                             <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label="Picture canvas"></canvas>
                         </div>
                     </div>
-                    <div class="picture-canvas-hint">Drag layers directly. Corner handles resize; the round handle rotates.</div>
+                    <div class="picture-canvas-hint">@CanvasHint</div>
                 </main>
 
                 <aside class="picture-studio-properties">
@@ -135,6 +220,35 @@
                             <label>Grid spacing (px)
                                 <input type="number" min="2" max="1000" value="@State.Document.GridSpacingPx" @onchange="ChangeGridSpacing" />
                             </label>
+                        </section>
+
+                        <section class="picture-property-section picture-drawing-properties">
+                            <h3>Drawing tools</h3>
+                            <label>Tool
+                                <select value="@_drawTool" @onchange="ChangeDrawTool">
+                                    @foreach (var tool in Enum.GetValues<PictureDrawTool>())
+                                    {
+                                        <option value="@tool">@tool</option>
+                                    }
+                                </select>
+                            </label>
+                            <div class="picture-property-grid">
+                                <label>Color
+                                    <input type="color" value="@SafeColor(_drawColor)" @onchange="ChangeDrawColorInput" />
+                                </label>
+                                <label>Width (px)
+                                    <input type="number" min="0.25" max="512" step="0.25" value="@Inv(_drawWidth)" @onchange="ChangeDrawWidth" />
+                                </label>
+                            </div>
+                            <label>Opacity
+                                <input type="range" min="0" max="1" step="0.01" value="@Inv(_drawOpacity)" @oninput="ChangeDrawOpacity" />
+                                <span class="picture-range-value">@Math.Round(_drawOpacity * 100)%</span>
+                            </label>
+                            <label>Brush hardness
+                                <input type="range" min="0" max="1" step="0.01" value="@Inv(_drawHardness)" @oninput="ChangeDrawHardness" />
+                                <span class="picture-range-value">@Math.Round(_drawHardness * 100)%</span>
+                            </label>
+                            <DxButton Text="New paint layer" Click="AddPaintLayer" CssClass="wide-button" />
                         </section>
 
                         @if (State.SelectedLayer is PictureLayer selected)
@@ -304,6 +418,18 @@
                                             <input type="range" min="0" max="360" step="1" value="@Inv(fillLayer.AngleDegrees)" @oninput="ChangeFillAngle" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(fillLayer.AngleDegrees)°</span>
                                         </label>
+                                    </section>
+                                    break;
+                                case PaintPictureLayer paintLayer:
+                                    <section class="picture-property-section">
+                                        <h3>Paint</h3>
+                                        <p class="picture-property-note">Brush, pencil, line and eraser strokes stay editable as a separate layer.</p>
+                                        <div class="picture-paint-summary">
+                                            <strong>@paintLayer.Strokes.Count</strong>
+                                            <span>stored strokes</span>
+                                        </div>
+                                        <DxButton Text="Continue with brush" Click="BrushTool" CssClass="wide-button" />
+                                        <DxButton Text="Clear all strokes" Enabled="@(paintLayer.Strokes.Count > 0 && !paintLayer.Locked)" Click="State.ClearSelectedPaint" CssClass="wide-button" />
                                     </section>
                                     break;
                                 case RenderPictureLayer renderLayer:

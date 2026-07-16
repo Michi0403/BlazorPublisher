@@ -15,6 +15,10 @@ public partial class PictureEditor
     [
         "Segoe UI", "Arial", "Arial Black", "Calibri", "Cambria", "Georgia", "Impact", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"
     ];
+    private static readonly string[] PictureColors =
+    [
+        "#000000", "#ffffff", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b", "#92400e"
+    ];
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] public PictureEditorStateService State { get; set; } = default!;
@@ -35,15 +39,39 @@ public partial class PictureEditor
     private bool _initialized;
     private bool _pendingRasterInitialization;
     private string? _error;
+    private bool _renderErrorActive;
+    private PictureDrawTool _drawTool = PictureDrawTool.Select;
+    private string _drawColor = "#111827";
+    private double _drawWidth = 12;
+    private double _drawOpacity = 1;
+    private double _drawHardness = .8;
 
     private bool HasSelection => State.SelectedLayer is not null;
     private bool CanDelete => State.SelectedLayer is { Locked: false };
+    private bool IsRenderSelected => State.SelectedLayer is RenderPictureLayer;
+    private bool IsRasterSelected => State.SelectedLayer is RasterPictureLayer;
+    private bool IsPaintSelected => State.SelectedLayer is PaintPictureLayer;
+    private bool CanDraw => _drawTool != PictureDrawTool.Select;
+    private string SelectToolText => ToolText(PictureDrawTool.Select, "Select");
+    private string BrushToolText => ToolText(PictureDrawTool.Brush, "Brush");
+    private string PencilToolText => ToolText(PictureDrawTool.Pencil, "Pencil");
+    private string LineToolText => ToolText(PictureDrawTool.Line, "Line");
+    private string EraserToolText => ToolText(PictureDrawTool.Eraser, "Eraser");
+    private string EyedropperToolText => ToolText(PictureDrawTool.Eyedropper, "Eyedropper");
+    private string CanvasHint => _drawTool switch
+    {
+        PictureDrawTool.Select => "Drag layers directly. Corner handles resize; the round handle rotates.",
+        PictureDrawTool.Eyedropper => "Click the rendered canvas to pick a color, then the Brush tool becomes active.",
+        PictureDrawTool.Line => "Drag from the line start to its end. Hold the pointer down for a live preview.",
+        PictureDrawTool.Eraser => "Draw over strokes on a paint layer to erase them non-destructively.",
+        _ => "Draw directly on the canvas. A paint layer is created automatically when necessary."
+    };
     private string CanvasColor => State.Document.Background.StartsWith('#') && State.Document.Background.Length is 4 or 7
         ? State.Document.Background
         : "#ffffff";
-    private string StatusText => _error ?? (State.SelectedLayer is null
-        ? "No layer selected"
-        : $"{State.SelectedLayer.Kind}: {State.SelectedLayer.Name}");
+    private string StatusText => _error ?? (_drawTool != PictureDrawTool.Select
+        ? $"{_drawTool} tool · {_drawWidth:0.#} px · {_drawColor}"
+        : State.SelectedLayer is null ? "No layer selected" : $"{State.SelectedLayer.Kind}: {State.SelectedLayer.Name}");
 
     protected override void OnInitialized() => State.Changed += StateChanged;
 
@@ -58,6 +86,8 @@ public partial class PictureEditor
         if (SessionId == Guid.Empty || SessionId == _loadedSession) return;
         _loadedSession = SessionId;
         _error = null;
+        _renderErrorActive = false;
+        _drawTool = PictureDrawTool.Select;
         if (InitialDocument is not null)
         {
             _pendingRasterInitialization = false;
@@ -86,16 +116,26 @@ public partial class PictureEditor
         if (_pendingRasterInitialization && !string.IsNullOrWhiteSpace(InitialRasterDataUrl))
         {
             _pendingRasterInitialization = false;
-            try
+            if (!IsSupportedImageDataUrl(InitialRasterDataUrl))
             {
-                var natural = await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", InitialRasterDataUrl);
-                var fitted = FitRasterCanvasSize(natural.Width, natural.Height);
-                State.StartFromRaster(InitialRasterDataUrl, InitialName, fitted.Width, fitted.Height);
+                _error = "The selected picture does not contain a valid embedded image source.";
+                State.StartNew();
+                State.SetDocumentName(InitialName);
             }
-            catch (Exception ex)
+            else
             {
-                _error = $"The source image size could not be read: {ex.Message}";
-                State.StartFromRaster(InitialRasterDataUrl, InitialName);
+                try
+                {
+                    var natural = await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", InitialRasterDataUrl);
+                    var fitted = FitRasterCanvasSize(natural.Width, natural.Height);
+                    State.StartFromRaster(InitialRasterDataUrl, InitialName, fitted.Width, fitted.Height);
+                }
+                catch (Exception ex)
+                {
+                    _error = $"The source image could not be decoded: {ex.Message}";
+                    State.StartNew();
+                    State.SetDocumentName(InitialName);
+                }
             }
         }
         if (!_initialized)
@@ -122,7 +162,14 @@ public partial class PictureEditor
         if (_module is null || !Visible) return;
         try
         {
-            await _module.InvokeVoidAsync("renderPictureStudio", CanvasId, State.Document, State.SelectedLayerId?.ToString(), State.Document.Zoom);
+            await _module.InvokeVoidAsync("renderPictureStudio", CanvasId, State.Document, State.SelectedLayerId?.ToString(), State.Document.Zoom, new
+            {
+                Tool = _drawTool.ToString(),
+                Color = _drawColor,
+                Width = _drawWidth,
+                Opacity = _drawOpacity,
+                Hardness = _drawHardness
+            });
         }
         catch (JSDisconnectedException)
         {
@@ -131,6 +178,7 @@ public partial class PictureEditor
         catch (Exception ex)
         {
             _error = ex.Message;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -145,6 +193,42 @@ public partial class PictureEditor
     {
         if (Guid.TryParse(id, out var parsed))
             State.CommitTransform(parsed, x, y, width, height, rotation);
+    }
+
+    [JSInvokable]
+    public void PictureStrokeCommitted(string tool, double[] coordinates, string color, double width, double opacity, double hardness)
+    {
+        if (!Enum.TryParse<PictureStrokeKind>(tool, true, out var kind) || coordinates.Length < 4) return;
+        var points = new List<PicturePoint>(coordinates.Length / 2);
+        for (var index = 0; index + 1 < coordinates.Length; index += 2)
+            points.Add(new PicturePoint { X = coordinates[index], Y = coordinates[index + 1] });
+        State.AddStroke(kind, points, color, width, opacity, hardness);
+    }
+
+    [JSInvokable]
+    public void PictureColorPicked(string color)
+    {
+        if (!string.IsNullOrWhiteSpace(color)) _drawColor = color;
+        _drawTool = PictureDrawTool.Brush;
+        _renderRequested = true;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public void PictureRenderFailed(string message)
+    {
+        _renderErrorActive = true;
+        _error = string.IsNullOrWhiteSpace(message) ? "A picture layer could not be rendered." : message;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public void PictureRenderRecovered()
+    {
+        if (!_renderErrorActive) return;
+        _renderErrorActive = false;
+        _error = null;
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private async Task RequestImage()
@@ -178,9 +262,15 @@ public partial class PictureEditor
 
     private void AddTextLayer() => State.AddText();
     private void AddRectangle() => State.AddShape(PictureShapeKind.Rectangle);
+    private void AddEllipse() => State.AddShape(PictureShapeKind.Ellipse);
+    private void AddLineShape() => State.AddShape(PictureShapeKind.Line);
     private void AddGradient() => State.AddFill(PictureFillKind.LinearGradient);
+    private void AddSolidFill() => State.AddFill(PictureFillKind.Solid);
     private void AddClouds() => State.AddRender(PictureRenderKind.Clouds);
     private void AddNoise() => State.AddRender(PictureRenderKind.Noise);
+    private void AddStripes() => State.AddRender(PictureRenderKind.Stripes);
+    private void AddVignette() => State.AddRender(PictureRenderKind.Vignette);
+    private void AddPaintLayer() => State.AddPaint();
     private void MoveUp() => State.MoveSelectedLayer(1);
     private void MoveDown() => State.MoveSelectedLayer(-1);
     private void Zoom100() => State.SetZoom(1);
@@ -229,6 +319,49 @@ public partial class PictureEditor
 
     private Task Cancel() => Cancelled.InvokeAsync();
 
+    private void SelectTool() => SetDrawTool(PictureDrawTool.Select);
+    private void BrushTool() => SetDrawTool(PictureDrawTool.Brush);
+    private void PencilTool() => SetDrawTool(PictureDrawTool.Pencil);
+    private void LineTool() => SetDrawTool(PictureDrawTool.Line);
+    private void EraserTool() => SetDrawTool(PictureDrawTool.Eraser);
+    private void EyedropperTool() => SetDrawTool(PictureDrawTool.Eyedropper);
+    private void SetDrawTool(PictureDrawTool tool)
+    {
+        _drawTool = tool;
+        _renderRequested = true;
+        StateHasChanged();
+    }
+    private string ToolText(PictureDrawTool tool, string text) => _drawTool == tool ? $"✓ {text}" : text;
+    private void ChangeDrawColor(string value) { if (!string.IsNullOrWhiteSpace(value)) _drawColor = value; _renderRequested = true; }
+    private void SetDrawWidth(double value) { _drawWidth = Math.Clamp(value, .25, 512); _renderRequested = true; }
+    private void DrawWidth1() => SetDrawWidth(1);
+    private void DrawWidth3() => SetDrawWidth(3);
+    private void DrawWidth8() => SetDrawWidth(8);
+    private void DrawWidth16() => SetDrawWidth(16);
+    private void DrawWidth32() => SetDrawWidth(32);
+    private void ToggleGridRibbon() => State.SetGrid(!State.Document.GridVisible);
+    private void ToggleSnapRibbon() => State.SetSnap(!State.Document.SnapToGrid);
+    private string GridText => State.Document.GridVisible ? "✓ Grid" : "Grid";
+    private string SnapText => State.Document.SnapToGrid ? "✓ Snap" : "Snap";
+    private void MakeRenderClouds() => WithRender(layer => layer.RenderKind = PictureRenderKind.Clouds);
+    private void MakeRenderNoise() => WithRender(layer => layer.RenderKind = PictureRenderKind.Noise);
+    private void MakeRenderStripes() => WithRender(layer => layer.RenderKind = PictureRenderKind.Stripes);
+    private void MakeRenderVignette() => WithRender(layer => layer.RenderKind = PictureRenderKind.Vignette);
+    private void RasterContain() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Contain);
+    private void RasterCover() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Cover);
+    private void RasterFlipHorizontal() => WithRaster(layer => layer.FlipHorizontal = !layer.FlipHorizontal);
+    private void RasterFlipVertical() => WithRaster(layer => layer.FlipVertical = !layer.FlipVertical);
+    private void SoftenLight() => State.UpdateSelected(layer => layer.Blur = 2);
+    private void SoftenMedium() => State.UpdateSelected(layer => layer.Blur = 6);
+    private void RemoveSoftening() => State.UpdateSelected(layer => layer.Blur = 0);
+    private void Brighten() => State.UpdateSelected(layer => layer.Brightness = Math.Clamp(layer.Brightness + .1, 0, 3));
+    private void Darken() => State.UpdateSelected(layer => layer.Brightness = Math.Clamp(layer.Brightness - .1, 0, 3));
+    private void MoreContrast() => State.UpdateSelected(layer => layer.Contrast = Math.Clamp(layer.Contrast + .1, 0, 3));
+    private void MoreSaturation() => State.UpdateSelected(layer => layer.Saturation = Math.Clamp(layer.Saturation + .1, 0, 3));
+    private void ToggleGrayscalePreset() => State.UpdateSelected(layer => layer.Grayscale = layer.Grayscale > .5 ? 0 : 1);
+    private void ToggleSepiaPreset() => State.UpdateSelected(layer => layer.Sepia = layer.Sepia > .5 ? 0 : 1);
+    private void ToggleInvertPreset() => State.UpdateSelected(layer => layer.Invert = layer.Invert > .5 ? 0 : 1);
+
     private void ChangeDocumentName(ChangeEventArgs args) => State.SetDocumentName(Text(args));
     private void ChangeCanvasWidth(ChangeEventArgs args) => State.SetDocumentSize(Int(args, State.Document.WidthPx), State.Document.HeightPx);
     private void ChangeCanvasHeight(ChangeEventArgs args) => State.SetDocumentSize(State.Document.WidthPx, Int(args, State.Document.HeightPx));
@@ -238,6 +371,14 @@ public partial class PictureEditor
     private void ToggleGrid(ChangeEventArgs args) => State.SetGrid(Bool(args));
     private void ToggleSnap(ChangeEventArgs args) => State.SetSnap(Bool(args));
     private void ChangeZoom(ChangeEventArgs args) => State.SetZoom(Number(args, State.Document.Zoom));
+    private void ChangeDrawTool(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<PictureDrawTool>(Text(args), true, out var tool)) SetDrawTool(tool);
+    }
+    private void ChangeDrawColorInput(ChangeEventArgs args) => ChangeDrawColor(Text(args));
+    private void ChangeDrawWidth(ChangeEventArgs args) => SetDrawWidth(Number(args, _drawWidth));
+    private void ChangeDrawOpacity(ChangeEventArgs args) { _drawOpacity = Math.Clamp(Number(args, _drawOpacity), 0, 1); _renderRequested = true; }
+    private void ChangeDrawHardness(ChangeEventArgs args) { _drawHardness = Math.Clamp(Number(args, _drawHardness), 0, 1); _renderRequested = true; }
 
     private void PresetSquare() => State.SetDocumentSize(1200, 1200);
     private void PresetLandscape() => State.SetDocumentSize(1600, 1000);
@@ -379,6 +520,9 @@ public partial class PictureEditor
     }
 
 
+    private static bool IsSupportedImageDataUrl(string value) =>
+        value.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) && value.Contains(",", StringComparison.Ordinal);
+
     private static PictureImageSize FitRasterCanvasSize(int width, int height)
     {
         if (width <= 0 || height <= 0) return new PictureImageSize { Width = 1200, Height = 800 };
@@ -397,6 +541,7 @@ public partial class PictureEditor
         PictureLayerKind.Shape => "◇",
         PictureLayerKind.Fill => "◩",
         PictureLayerKind.Render => "☁",
+        PictureLayerKind.Paint => "✎",
         _ => "•"
     };
 
@@ -407,6 +552,7 @@ public partial class PictureEditor
         ShapePictureLayer shape => shape.Shape.ToString(),
         FillPictureLayer fill => fill.FillKind.ToString(),
         RenderPictureLayer render => render.RenderKind.ToString(),
+        PaintPictureLayer paint => $"{paint.Strokes.Count} stroke{(paint.Strokes.Count == 1 ? string.Empty : "s")}",
         _ => layer.Kind.ToString()
     };
 

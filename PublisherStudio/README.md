@@ -96,7 +96,7 @@ dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip
 
 ## Deliberate limits
 
-This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, full pen-tool Bézier handles, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. Picture Studio currently focuses on compositing and non-destructive layers; paint brushes, lasso selections, pixel masks, clone/heal tools, and pressure-sensitive input remain later milestones. Data visuals currently cover self-contained publication data; external databases, authenticated APIs, maps that require external tile/GIS providers, dashboards, reports, and spreadsheet-calculation engines remain deliberate later integrations. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
+This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, full pen-tool Bézier handles, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. Picture Studio now includes editable brush, pencil, line, eraser, and eyedropper tools in addition to compositing and non-destructive layers; lasso selections, pixel masks, clone/heal tools, and pressure-sensitive input remain later milestones. Data visuals currently cover self-contained publication data; external databases, authenticated APIs, maps that require external tile/GIS providers, dashboards, reports, and spreadsheet-calculation engines remain deliberate later integrations. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
 
 See [`CHANGELOG-v0.3.md`](CHANGELOG-v0.3.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`VALIDATION.md`](VALIDATION.md).
 
@@ -127,3 +127,7 @@ See `CHANGELOG-v0.5.md`. A decoupled layered Picture Studio can create transpare
 ## v0.6 publication data and DevExpress visuals
 
 See `CHANGELOG-v0.6.md`. Publications can now store reusable data objects and insert live DevExpress Cartesian, pie/doughnut, polar, sparkline, bar-gauge, grid, and KPI visuals. Data can come from JSON, pasted delimited text, or the publication's own page/object metadata.
+
+## v0.7 Picture Studio drawing and recovery
+
+See `CHANGELOG-v0.7.md`. Picture Studio now uses a DevExpress Ribbon for insert, render, drawing, raster, and effect commands; adds editable paint layers with Brush, Pencil, Line, Eraser, and Eyedropper tools; and fixes the literal initial-image binding that caused repeated image decode exceptions.

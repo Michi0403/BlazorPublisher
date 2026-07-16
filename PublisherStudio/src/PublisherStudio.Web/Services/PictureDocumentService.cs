@@ -28,7 +28,7 @@ public sealed class PictureDocumentService
 
     public void Normalize(PictureDocument document)
     {
-        document.FormatVersion = "1.0";
+        document.FormatVersion = "1.1";
         document.WidthPx = Math.Clamp(document.WidthPx, 16, 8192);
         document.HeightPx = Math.Clamp(document.HeightPx, 16, 8192);
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .65 : document.Zoom, .05, 4);
@@ -72,6 +72,23 @@ public sealed class PictureDocumentService
                     render.Softness = Math.Clamp(render.Softness, 0, 1);
                     render.RenderContrast = Math.Clamp(render.RenderContrast <= 0 ? 1 : render.RenderContrast, .1, 5);
                     render.StripeWidthPx = Math.Clamp(render.StripeWidthPx <= 0 ? 32 : render.StripeWidthPx, 1, 1000);
+                    break;
+                case PaintPictureLayer paint:
+                    paint.Strokes ??= [];
+                    foreach (var stroke in paint.Strokes)
+                    {
+                        stroke.Color = string.IsNullOrWhiteSpace(stroke.Color) ? "#111827" : stroke.Color;
+                        stroke.WidthPx = Math.Clamp(stroke.WidthPx <= 0 ? 1 : stroke.WidthPx, .25, 512);
+                        stroke.Opacity = Math.Clamp(stroke.Opacity, 0, 1);
+                        stroke.Hardness = Math.Clamp(stroke.Hardness, 0, 1);
+                        stroke.Points ??= [];
+                        if (stroke.Points.Count > 20000) stroke.Points = stroke.Points.Take(20000).ToList();
+                        foreach (var point in stroke.Points)
+                        {
+                            point.X = Math.Clamp(point.X, -16384, 32768);
+                            point.Y = Math.Clamp(point.Y, -16384, 32768);
+                        }
+                    }
                     break;
             }
         }

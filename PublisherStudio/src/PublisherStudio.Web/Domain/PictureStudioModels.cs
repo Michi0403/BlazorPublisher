@@ -6,7 +6,7 @@ public sealed class PictureDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Picture";
-    public string FormatVersion { get; set; } = "1.0";
+    public string FormatVersion { get; set; } = "1.1";
     public int WidthPx { get; set; } = 1200;
     public int HeightPx { get; set; } = 800;
     public string Background { get; set; } = "transparent";
@@ -44,13 +44,15 @@ public sealed class PictureDocument
     }
 }
 
-public enum PictureLayerKind { Raster, Text, Shape, Fill, Render }
+public enum PictureLayerKind { Raster, Text, Shape, Fill, Render, Paint }
 public enum PictureBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighten }
 public enum PictureRasterFitMode { Stretch, Contain, Cover }
 public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum PictureFillKind { Solid, LinearGradient, RadialGradient }
 public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette }
 public enum PictureTextAlignment { Left, Center, Right }
+public enum PictureDrawTool { Select, Brush, Pencil, Line, Eraser, Eyedropper }
+public enum PictureStrokeKind { Brush, Pencil, Line, Eraser }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(RasterPictureLayer), "raster")]
@@ -58,6 +60,7 @@ public enum PictureTextAlignment { Left, Center, Right }
 [JsonDerivedType(typeof(ShapePictureLayer), "shape")]
 [JsonDerivedType(typeof(FillPictureLayer), "fill")]
 [JsonDerivedType(typeof(RenderPictureLayer), "render")]
+[JsonDerivedType(typeof(PaintPictureLayer), "paint")]
 public abstract class PictureLayer
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -73,7 +76,7 @@ public abstract class PictureLayer
     public bool Locked { get; set; }
     public PictureBlendMode BlendMode { get; set; }
 
-    // Non-destructive layer adjustments shared by raster, text, shape, fill and render layers.
+    // Non-destructive layer adjustments shared by raster, text, shape, fill, render and paint layers.
     public double Brightness { get; set; } = 1;
     public double Contrast { get; set; } = 1;
     public double Saturation { get; set; } = 1;
@@ -146,6 +149,29 @@ public sealed class RenderPictureLayer : PictureLayer
     public double RenderContrast { get; set; } = 1;
     public double AngleDegrees { get; set; } = 45;
     public double StripeWidthPx { get; set; } = 32;
+}
+
+public sealed class PaintPictureLayer : PictureLayer
+{
+    public override PictureLayerKind Kind => PictureLayerKind.Paint;
+    public List<PictureStroke> Strokes { get; set; } = [];
+}
+
+public sealed class PictureStroke
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public PictureStrokeKind Kind { get; set; } = PictureStrokeKind.Brush;
+    public string Color { get; set; } = "#111827";
+    public double WidthPx { get; set; } = 12;
+    public double Opacity { get; set; } = 1;
+    public double Hardness { get; set; } = 0.8;
+    public List<PicturePoint> Points { get; set; } = [];
+}
+
+public sealed class PicturePoint
+{
+    public double X { get; set; }
+    public double Y { get; set; }
 }
 
 public sealed record PictureEditorResult(string DataUrl, PictureDocument SourceDocument, string Name);

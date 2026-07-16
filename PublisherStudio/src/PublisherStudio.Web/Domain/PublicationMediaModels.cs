@@ -7,6 +7,7 @@ public sealed class MediaEditorResult
     public string DataUrl { get; set; } = string.Empty;
     public string MimeType { get; set; } = string.Empty;
     public string PosterDataUrl { get; set; } = string.Empty;
+    public Guid PreviewAssetId { get; set; }
     public double DurationSeconds { get; set; }
     public double TrimStartSeconds { get; set; }
     public double TrimEndSeconds { get; set; }

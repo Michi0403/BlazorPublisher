@@ -1282,8 +1282,12 @@ function hitHandle(layer, x, y, zoom) {
 }
 
 function safeInvoke(editor, method, ...args) {
-    if (!editor?.dotNetRef) return;
-    editor.dotNetRef.invokeMethodAsync(method, ...args).catch(error => console.warn(`Picture Studio callback ${method} failed.`, error));
+    if (!editor?.dotNetRef) return Promise.resolve();
+    return editor.dotNetRef.invokeMethodAsync(method, ...args).catch(error => {
+        const message = String(error?.message || error || "");
+        if (!/disconnected|disposed|circuit/i.test(message))
+            console.warn(`Picture Studio callback ${method} failed.`, error);
+    });
 }
 
 function reportRenderState(editor, message) {
@@ -1349,16 +1353,31 @@ function resizeLayer(interaction, point) {
     interaction.layer.y = worldCenterY - newHeight / 2;
 }
 
+function releaseEditorPointer(editor, pointerId) {
+    if (!editor?.canvas || pointerId == null) return;
+    try { editor.canvas.releasePointerCapture(pointerId); } catch { }
+}
+
+function resetEditorPointerState(editor, cancel = true) {
+    if (!editor) return;
+    if (editor.drawing) finishDrawing(editor, null, cancel);
+    if (editor.interaction) finishInteraction(editor, null, cancel);
+}
+
 function beginInteraction(editor, event) {
     if (!editor.document) return;
+    if (editor.interaction || editor.drawing) resetEditorPointerState(editor, true);
     const point = canvasPoint(editor.canvas, event);
     let selected = editor.document.layers.find(layer => String(layer.id) === String(editor.selectedLayerId));
     const handle = hitHandle(selected, point.x, point.y, editor.zoom);
     if (!handle) {
         selected = hitLayer(editor.document, point.x, point.y);
-        editor.selectedLayerId = selected ? String(selected.id) : null;
-        safeInvoke(editor, "PictureLayerSelected", editor.selectedLayerId);
-        scheduleEditorRender(editor);
+        const nextId = selected ? String(selected.id) : null;
+        if (nextId !== editor.selectedLayerId) {
+            editor.selectedLayerId = nextId;
+            safeInvoke(editor, "PictureLayerSelected", editor.selectedLayerId);
+            scheduleEditorRender(editor);
+        }
     }
     if (!selected || selected.locked || layerKind(selected) === "paint") return;
     const mode = handle || "move";
@@ -1366,6 +1385,9 @@ function beginInteraction(editor, event) {
         mode,
         pointerId: event.pointerId,
         start: point,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        moved: false,
         layer: selected,
         original: {
             id: selected.id,
@@ -1376,13 +1398,20 @@ function beginInteraction(editor, event) {
             rotation: Number(selected.rotation) || 0
         }
     };
-    editor.canvas.setPointerCapture(event.pointerId);
-    event.preventDefault();
+    try { editor.canvas.setPointerCapture(event.pointerId); } catch { }
+    if (handle) event.preventDefault();
 }
 
 function updateInteraction(editor, event) {
     const interaction = editor.interaction;
     if (!interaction || interaction.pointerId !== event.pointerId) return;
+    if (event.pointerType === "mouse" && (event.buttons & 1) === 0) {
+        finishInteraction(editor, event);
+        return;
+    }
+    const movementPixels = Math.hypot(event.clientX - interaction.startClientX, event.clientY - interaction.startClientY);
+    if (!interaction.moved && movementPixels < (interaction.mode === "move" ? 3 : 1.5)) return;
+    interaction.moved = true;
     const point = canvasPoint(editor.canvas, event);
     const grid = Math.max(2, Number(editor.document.gridSpacingPx) || 25);
     if (interaction.mode === "move") {
@@ -1410,8 +1439,9 @@ function finishInteraction(editor, event, cancel = false) {
     const interaction = editor.interaction;
     if (!interaction || (event && interaction.pointerId !== event.pointerId)) return;
     editor.interaction = null;
+    releaseEditorPointer(editor, interaction.pointerId);
     if (cancel) Object.assign(interaction.layer, interaction.original);
-    if (!cancel) {
+    if (!cancel && interaction.moved) {
         safeInvoke(editor,
             "PictureTransformCommitted", String(interaction.layer.id),
             Number(interaction.layer.x) || 0, Number(interaction.layer.y) || 0,
@@ -1437,6 +1467,7 @@ async function pickCanvasColor(editor, point) {
 
 function beginDrawing(editor, event) {
     if (!editor.document) return;
+    if (editor.interaction || editor.drawing) resetEditorPointerState(editor, true);
     const settings = editor.toolSettings || normalizeToolSettings(null);
     const point = canvasPoint(editor.canvas, event);
     if (settings.tool === "eyedropper") {
@@ -1470,7 +1501,7 @@ function beginDrawing(editor, event) {
         selectionTool: isAreaFillTool(settings.tool) ? "rectangleselect" : settings.tool,
         points: [point, { ...point }]
     };
-    editor.canvas.setPointerCapture(event.pointerId);
+    try { editor.canvas.setPointerCapture(event.pointerId); } catch { }
     scheduleEditorRender(editor);
     event.preventDefault();
 }
@@ -1478,6 +1509,10 @@ function beginDrawing(editor, event) {
 function updateDrawing(editor, event) {
     const drawing = editor.drawing;
     if (!drawing || drawing.pointerId !== event.pointerId) return;
+    if (event.pointerType === "mouse" && (event.buttons & 1) === 0) {
+        finishDrawing(editor, event);
+        return;
+    }
     let point = canvasPoint(editor.canvas, event);
     const effectiveTool = drawing.selectionTool || drawing.tool;
     if (effectiveTool === "magneticselect") point = magneticSnapPoint(editor, point);
@@ -1512,6 +1547,7 @@ function finishDrawing(editor, event, cancel = false) {
     const drawing = editor.drawing;
     if (!drawing || (event && drawing.pointerId !== event.pointerId)) return;
     editor.drawing = null;
+    releaseEditorPointer(editor, drawing.pointerId);
     const effectiveTool = drawing.selectionTool || drawing.tool;
     if (!cancel && isAreaSelectionTool(effectiveTool)) {
         drawing.tool = effectiveTool;
@@ -1567,6 +1603,22 @@ function bindEditorCanvas(editor, canvas) {
         if (editor.drawing) finishDrawing(editor, event, true);
         else finishInteraction(editor, event, true);
     });
+    canvas.addEventListener("lostpointercapture", event => {
+        if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event, true);
+        else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
+    });
+    canvas.addEventListener("dblclick", event => {
+        if ((editor.toolSettings?.tool || "select") !== "select") return;
+        const point = canvasPoint(canvas, event);
+        const layer = hitLayer(editor.document, point.x, point.y);
+        const nextId = layer ? String(layer.id) : null;
+        if (nextId !== editor.selectedLayerId) {
+            editor.selectedLayerId = nextId;
+            safeInvoke(editor, "PictureLayerSelected", nextId);
+            scheduleEditorRender(editor);
+        }
+        event.preventDefault();
+    });
     canvas.addEventListener("keydown", event => {
         const modifier = event.ctrlKey || event.metaKey;
         const key = String(event.key || "").toLowerCase();
@@ -1614,11 +1666,30 @@ export function initializePictureStudio(canvasId, dotNetRef) {
             renderToken: 0,
             lastRenderError: ""
         };
+        window.addEventListener("pointerdown", event => {
+            if ((editor.drawing || editor.interaction) && event.target !== editor.canvas)
+                resetEditorPointerState(editor, true);
+        }, true);
+        window.addEventListener("pointerup", event => {
+            if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event);
+            else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event);
+        }, true);
+        window.addEventListener("pointercancel", event => {
+            if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event, true);
+            else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
+        }, true);
+        window.addEventListener("blur", () => resetEditorPointerState(editor, true));
+        document.addEventListener("visibilitychange", () => { if (document.hidden) resetEditorPointerState(editor, true); });
         editors.set(canvasId, editor);
     } else {
         editor.dotNetRef = dotNetRef;
     }
     bindEditorCanvas(editor, canvas);
+}
+
+export function cancelPictureStudioInteraction(canvasId) {
+    const editor = editors.get(canvasId);
+    if (editor) resetEditorPointerState(editor, true);
 }
 
 export async function renderPictureStudio(canvasId, documentModel, selectedLayerId, zoom, toolSettings) {

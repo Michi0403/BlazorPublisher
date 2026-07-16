@@ -4,7 +4,7 @@
 @inject PublicationMediaAssetStore MediaAssets
 
 <div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null)"
-     tabindex="0" @onclick="ClearSelection" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
+     tabindex="0" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
     @if (State.Document.View.RulersVisible)
     {
         <button class="corner-ruler" title="Change ruler unit" @onclick:stopPropagation="true" @onclick="CycleRulerUnit">@UnitLabel</button>
@@ -77,7 +77,6 @@
                          data-target-element-id="@connector.Target.ElementId" data-target-anchor="@connector.Target.Anchor"
                          data-path-kind="@connector.PathKind" data-start-marker="@connector.StartMarker" data-end-marker="@connector.EndMarker"
                          data-stroke="@connector.Stroke" data-stroke-width="@Inv(connector.StrokeWidthMm)" data-dash-style="@connector.DashStyle"
-                         @onclick:stopPropagation="true" @onclick="() => State.SelectElement(connector.Id)"
                          @oncontextmenu="args => ShowElementContextMenu(connector, args)" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
                         <defs>
                             @ConnectorMarkerDefinition(connector, true)
@@ -117,9 +116,6 @@
                      data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)"
                      class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
-                     @ondblclick="() => DoubleClick(element)"
-                     @onclick="IgnoreElementClick"
-                     @onclick:stopPropagation="true"
                      @oncontextmenu="args => ShowElementContextMenu(element, args)"
                      @oncontextmenu:preventDefault
                      @oncontextmenu:stopPropagation>
@@ -501,6 +497,16 @@
     }
 
     [JSInvokable] public void SelectElement(string id) { if (Guid.TryParse(id, out var guid)) State.SelectElement(guid); }
+    [JSInvokable] public void ClearSelectionFromCanvas() => State.SelectElement(null);
+    [JSInvokable]
+    public Task ActivateElement(string id)
+    {
+        if (!Guid.TryParse(id, out var guid)) return Task.CompletedTask;
+        var element = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == guid);
+        if (element is null) return Task.CompletedTask;
+        State.SelectElement(guid);
+        return DoubleClick(element);
+    }
     [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) { if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height); }
     [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) { if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale); }
     [JSInvokable] public void AddGuideAt(string orientation, double positionMm) { if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed)) State.AddGuideAt(parsed, positionMm); }
@@ -522,8 +528,6 @@
     [JSInvokable] public void CancelActiveTool() => State.CancelActiveTool();
     private void ResetPointerState() => State.CancelActiveTool();
 
-    private void ClearSelection() => State.SelectElement(null);
-    private static void IgnoreElementClick(MouseEventArgs _) { }
     private Task DoubleClick(PublicationElement element)
     {
         if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);

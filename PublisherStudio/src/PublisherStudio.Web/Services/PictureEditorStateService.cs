@@ -429,12 +429,28 @@ public sealed class PictureEditorStateService
     {
         var layer = Document.Layers.FirstOrDefault(item => item.Id == id);
         if (layer is null || layer.Locked) return;
+        var nextWidth = Math.Clamp(width, 1, 16384);
+        var nextHeight = Math.Clamp(height, 1, 16384);
+        var nextX = Math.Clamp(x, -nextWidth + 1, Document.WidthPx - 1);
+        var nextY = Math.Clamp(y, -nextHeight + 1, Document.HeightPx - 1);
+        var nextRotation = NormalizeAngle(rotation);
+        if (NearlyEqual(layer.X, nextX) && NearlyEqual(layer.Y, nextY) &&
+            NearlyEqual(layer.Width, nextWidth) && NearlyEqual(layer.Height, nextHeight) &&
+            NearlyEqual(layer.Rotation, nextRotation))
+        {
+            if (SelectedLayerId != id)
+            {
+                SelectedLayerId = id;
+                Notify(false);
+            }
+            return;
+        }
         Capture();
-        layer.X = Math.Clamp(x, -width + 1, Document.WidthPx - 1);
-        layer.Y = Math.Clamp(y, -height + 1, Document.HeightPx - 1);
-        layer.Width = Math.Clamp(width, 1, 16384);
-        layer.Height = Math.Clamp(height, 1, 16384);
-        layer.Rotation = NormalizeAngle(rotation);
+        layer.X = nextX;
+        layer.Y = nextY;
+        layer.Width = nextWidth;
+        layer.Height = nextHeight;
+        layer.Rotation = nextRotation;
         SelectedLayerId = id;
         Notify();
     }
@@ -594,6 +610,7 @@ public sealed class PictureEditorStateService
         }
     }
 
+    private static bool NearlyEqual(double first, double second) => Math.Abs(first - second) < .0001;
     private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;
     private void Notify(bool markChanged = true) => Changed?.Invoke();
 }

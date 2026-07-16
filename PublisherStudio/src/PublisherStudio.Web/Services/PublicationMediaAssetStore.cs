@@ -65,6 +65,13 @@ public sealed class PublicationMediaAssetStore
         return false;
     }
 
+    public bool Copy(Guid sourceId, Guid targetId)
+    {
+        if (sourceId == Guid.Empty || targetId == Guid.Empty || !_assets.TryGetValue(sourceId, out var asset)) return false;
+        _assets[targetId] = asset with { LastAccessUtc = DateTimeOffset.UtcNow };
+        return true;
+    }
+
     public void RegisterDocument(PublicationDocument document)
     {
         foreach (var media in document.Pages.SelectMany(page => page.Elements).OfType<PublicationMediaElement>())

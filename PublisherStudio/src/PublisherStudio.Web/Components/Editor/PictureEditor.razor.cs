@@ -566,7 +566,11 @@ public partial class PictureEditor
         }
     }
 
-    private Task Cancel() => Cancelled.InvokeAsync();
+    private async Task Cancel()
+    {
+        await CancelPictureInteractionAsync();
+        await Cancelled.InvokeAsync();
+    }
 
     private void SelectTool() => SetDrawTool(PictureDrawTool.Select);
     private void BrushTool() => SetDrawTool(PictureDrawTool.Brush);
@@ -593,9 +597,22 @@ public partial class PictureEditor
     }
     private void SetDrawTool(PictureDrawTool tool)
     {
+        _ = CancelPictureInteractionAsync();
         _drawTool = tool;
         _renderRequested = true;
         StateHasChanged();
+    }
+
+    private async Task CancelPictureInteractionAsync()
+    {
+        if (_module is null) return;
+        try
+        {
+            await _module.InvokeVoidAsync("cancelPictureStudioInteraction", CanvasId);
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (JSException) { }
     }
     private string ToolText(PictureDrawTool tool, string text) => _drawTool == tool ? $"✓ {text}" : text;
     private bool IsDrawWidth(double value) => Math.Abs(_drawWidth - value) < .001;

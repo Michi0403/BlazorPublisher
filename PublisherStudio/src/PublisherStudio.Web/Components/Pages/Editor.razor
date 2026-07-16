@@ -448,42 +448,53 @@
             : Task.CompletedTask;
     }
 
-    private Task OpenMediaStudio(PublicationElementKind kind, PublicationMediaElement? media)
+    private async Task OpenMediaStudio(PublicationElementKind kind, PublicationMediaElement? media)
     {
+        await CancelPublisherPointerAsync();
         _mediaStudioTargetId = media?.Id;
         _mediaStudioKind = kind;
         _mediaStudioInitial = media;
         _mediaStudioSessionId = Guid.NewGuid();
         _mediaStudioVisible = true;
-        return Task.CompletedTask;
     }
 
     private Task SaveMediaStudio(MediaEditorResult result)
     {
-        PublicationMediaElement media;
-        if (_mediaStudioTargetId is Guid targetId && State.CurrentPage.Elements.OfType<PublicationMediaElement>().Any(item => item.Id == targetId))
-        {
-            State.SelectElement(targetId);
-            media = State.CurrentPage.Elements.OfType<PublicationMediaElement>().First(item => item.Id == targetId);
-            State.UpdateMedia(targetId, item => ApplyMediaResult(item, result));
-        }
-        else if (result.Kind == PublicationElementKind.Video)
-        {
-            media = State.AddVideo(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.PosterDataUrl);
-            State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
-        }
-        else
-        {
-            media = State.AddAudio(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.WaveformSamples);
-            State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
-        }
-
-        MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
+        var targetId = _mediaStudioTargetId;
         _mediaStudioVisible = false;
         _mediaStudioTargetId = null;
         _mediaStudioInitial = null;
-        _timelineVisible = true;
-        ShowNotice($"{(result.Kind == PublicationElementKind.Video ? "Video" : "Audio")} applied to the publication timeline.");
+
+        try
+        {
+            PublicationMediaElement media;
+            if (targetId is Guid existingId && State.CurrentPage.Elements.OfType<PublicationMediaElement>().Any(item => item.Id == existingId))
+            {
+                State.SelectElement(existingId);
+                media = State.CurrentPage.Elements.OfType<PublicationMediaElement>().First(item => item.Id == existingId);
+                State.UpdateMedia(existingId, item => ApplyMediaResult(item, result));
+            }
+            else if (result.Kind == PublicationElementKind.Video)
+            {
+                media = State.AddVideo(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.PosterDataUrl);
+                State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
+            }
+            else
+            {
+                media = State.AddAudio(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.WaveformSamples);
+                State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
+            }
+
+            if (!MediaAssets.Copy(result.PreviewAssetId, media.Id))
+                MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
+            State.SelectElement(media.Id);
+            _timelineVisible = true;
+            ShowNotice($"{(result.Kind == PublicationElementKind.Video ? "Video" : "Audio")} applied to the publication timeline.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
         return Task.CompletedTask;
     }
 
@@ -600,27 +611,38 @@
         return Task.CompletedTask;
     }
 
-    private Task CreatePicture()
+    private async Task CancelPublisherPointerAsync()
     {
+        try
+        {
+            await JS.InvokeVoidAsync("publisherStudio.cancelCanvasInteraction", "publisher-stage");
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (JSException) { }
+    }
+
+    private async Task CreatePicture()
+    {
+        await CancelPublisherPointerAsync();
         _pictureEditorTargetId = null;
         _pictureEditorInitialDocument = null;
         _pictureEditorInitialRaster = null;
         _pictureEditorInitialName = "Untitled Picture";
         _pictureEditorSessionId = Guid.NewGuid();
         _pictureEditorVisible = true;
-        return Task.CompletedTask;
     }
 
-    private Task EditSelectedPicture()
+    private async Task EditSelectedPicture()
     {
-        if (State.SelectedElement is not ImageFrameElement image) return Task.CompletedTask;
+        if (State.SelectedElement is not ImageFrameElement image) return;
+        await CancelPublisherPointerAsync();
         _pictureEditorTargetId = image.Id;
         _pictureEditorInitialDocument = image.PictureSource;
         _pictureEditorInitialRaster = image.PictureSource is null ? image.DataUrl : null;
         _pictureEditorInitialName = string.IsNullOrWhiteSpace(image.Name) ? "Picture" : image.Name;
         _pictureEditorSessionId = Guid.NewGuid();
         _pictureEditorVisible = true;
-        return Task.CompletedTask;
     }
 
     private Task SavePictureStudio(PictureEditorResult result)

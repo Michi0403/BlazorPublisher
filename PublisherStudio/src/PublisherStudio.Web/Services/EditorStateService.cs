@@ -809,11 +809,17 @@ public sealed class EditorStateService
     {
         var element = CurrentPage.Elements.FirstOrDefault(e => e.Id == id);
         if (element is null || element.Locked || element is ConnectorElement) return;
+        var nextWidth = Math.Max(2, Math.Min(width, CurrentPage.WidthMm * 2));
+        var nextHeight = Math.Max(2, Math.Min(height, CurrentPage.HeightMm * 2));
+        var nextX = Math.Clamp(x, -nextWidth + 2, CurrentPage.WidthMm - 2);
+        var nextY = Math.Clamp(y, -nextHeight + 2, CurrentPage.HeightMm - 2);
+        if (NearlyEqual(element.X, nextX) && NearlyEqual(element.Y, nextY) &&
+            NearlyEqual(element.Width, nextWidth) && NearlyEqual(element.Height, nextHeight)) return;
         Capture();
-        element.Width = Math.Max(2, Math.Min(width, CurrentPage.WidthMm * 2));
-        element.Height = Math.Max(2, Math.Min(height, CurrentPage.HeightMm * 2));
-        element.X = Math.Clamp(x, -element.Width + 2, CurrentPage.WidthMm - 2);
-        element.Y = Math.Clamp(y, -element.Height + 2, CurrentPage.HeightMm - 2);
+        element.Width = nextWidth;
+        element.Height = nextHeight;
+        element.X = nextX;
+        element.Y = nextY;
         Notify();
     }
 
@@ -1146,6 +1152,8 @@ public sealed class EditorStateService
     {
         for (var index = 0; index < ordered.Count; index++) ordered[index].ZIndex = index + 1;
     }
+
+    private static bool NearlyEqual(double first, double second) => Math.Abs(first - second) < .0001;
 
     private int NextZ() => CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
     private string NextName(string basis) => $"{basis} {CurrentPage.Elements.Count + 1}";

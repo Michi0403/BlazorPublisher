@@ -86,8 +86,13 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         stage.addEventListener('pointerup', event => pointerUp(state, event));
         stage.addEventListener('pointercancel', event => pointerCancel(state, event));
         stage.addEventListener('lostpointercapture', event => {
-            if (state.operation?.pointerId === event.pointerId) resetPointerOperation(state, false);
+            if (state.operation?.pointerId === event.pointerId) resetPointerOperation(state, true);
         });
+        window.addEventListener('pointerdown', event => {
+            if (state.operation && !state.stage.contains(event.target)) resetPointerOperation(state, true);
+        }, true);
+        window.addEventListener('pointerup', event => pointerUp(state, event), true);
+        window.addEventListener('pointercancel', event => pointerCancel(state, event), true);
         window.addEventListener('blur', () => resetPointerOperation(state, true));
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) resetPointerOperation(state, true);
@@ -107,8 +112,6 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         canvasStates.set(stage, state);
     }
 
-    if (state.operation && !stage.hasPointerCapture?.(state.operation.pointerId))
-        resetPointerOperation(state, false);
     state.scroll = scroll;
     state.page = page;
     state.dotnet = dotnet;
@@ -440,7 +443,13 @@ function pointerDown(state, event) {
     }
 
     const element = event.target.closest('[data-publication-element]');
-    if (!element || !state.page.contains(element)) return;
+    if (!element || !state.page.contains(element)) {
+        if (state.page.contains(event.target) || state.scroll.contains(event.target)) {
+            safeDotNet(state, 'ClearSelectionFromCanvas');
+            event.preventDefault();
+        }
+        return;
+    }
 
     const id = element.dataset.elementId;
     const wasSelected = element.classList.contains('selected');
@@ -450,8 +459,14 @@ function pointerDown(state, event) {
         safeDotNet(state, 'SelectElement', id);
     }
     if (element.classList.contains('locked')) return;
+    if (element.matches('[data-connector-id]')) return;
 
     const handle = event.target.closest('[data-resize-handle]');
+    if (!handle && event.detail >= 2) {
+        safeDotNet(state, 'ActivateElement', id);
+        event.preventDefault();
+        return;
+    }
     const image = element.querySelector('img');
     const bounds = elementMm(element, state.config.pxPerMm);
     const base = {
@@ -460,6 +475,8 @@ function pointerDown(state, event) {
         pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
+        moved: false,
+        wasSelected,
         ...bounds
     };
 
@@ -482,7 +499,7 @@ function pointerDown(state, event) {
     }
 
     try { state.stage.setPointerCapture(event.pointerId); } catch { }
-    event.preventDefault();
+    if (handle || state.config.cropMode) event.preventDefault();
 }
 
 function refreshOperationElement(state, operation) {
@@ -503,6 +520,10 @@ function pointerMove(state, event) {
 
     const operation = state.operation;
     if (!operation || operation.pointerId !== event.pointerId) return;
+    if (event.pointerType === 'mouse' && (event.buttons & 1) === 0) {
+        pointerUp(state, event);
+        return;
+    }
 
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
         updateConnectorDrag(state, event, operation);
@@ -519,6 +540,9 @@ function pointerMove(state, event) {
         return;
     }
 
+    const movementPixels = Math.hypot(event.clientX - operation.startX, event.clientY - operation.startY);
+    if (!operation.moved && movementPixels < (operation.kind === 'resize' ? 1.5 : 3)) return;
+    operation.moved = true;
     const dx = (event.clientX - operation.startX) / state.config.pxPerMm;
     const dy = (event.clientY - operation.startY) / state.config.pxPerMm;
 
@@ -637,6 +661,7 @@ function pointerUp(state, event) {
         return;
     }
 
+    if (!operation.moved) return;
     if (operation.kind === 'crop') {
         safeDotNet(
             state,
@@ -867,20 +892,62 @@ function waitForImages(root) {
     }));
 }
 
+let cssColorProbeContext = null;
+
+function cssColorFunctionToRgba(value) {
+    try {
+        if (!cssColorProbeContext) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            cssColorProbeContext = canvas.getContext('2d', { willReadFrequently: true });
+        }
+        const context = cssColorProbeContext;
+        if (!context) return value;
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = '#010203';
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        const pixel = context.getImageData(0, 0, 1, 1).data;
+        const alpha = Math.round((pixel[3] / 255) * 10000) / 10000;
+        return `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${alpha})`;
+    } catch {
+        return value;
+    }
+}
+
+function normalizeCssColorFunctions(value) {
+    if (!value || !/(?:^|\W)(?:color|lab|lch|oklab|oklch)\(/i.test(value)) return value;
+    return String(value).replace(/(?:color|lab|lch|oklab|oklch)\([^()]*\)/gi, match => cssColorFunctionToRgba(match));
+}
+
+function sanitizeInlineColorFunctions(root) {
+    const elements = [root, ...root.querySelectorAll('*')];
+    for (const element of elements) {
+        const style = element.getAttribute?.('style');
+        if (style) element.setAttribute('style', normalizeCssColorFunctions(style));
+        for (const attribute of ['fill', 'stroke', 'color', 'flood-color', 'stop-color']) {
+            const value = element.getAttribute?.(attribute);
+            if (value) element.setAttribute(attribute, normalizeCssColorFunctions(value));
+        }
+    }
+}
+
 function copyComputedStyles(source, clone) {
     if (!(source instanceof Element) || !(clone instanceof Element)) return;
     const computed = getComputedStyle(source);
     const important = [
         'position','display','left','top','right','bottom','width','height','box-sizing','overflow',
-        'background','background-color','border','border-radius','box-shadow','opacity','filter',
+        'background','background-color','border','border-top','border-right','border-bottom','border-left',
+        'border-color','border-radius','box-shadow','text-shadow','opacity','filter',
         'transform','transform-origin','object-fit','object-position','color','font','font-family',
         'font-size','font-weight','font-style','line-height','letter-spacing','text-align','text-decoration',
         'white-space','word-break','padding','margin','z-index','clip-path','isolation','mix-blend-mode',
         'paint-order','stroke','stroke-width','fill'
     ];
-    let inline = clone.getAttribute('style') || '';
+    let inline = normalizeCssColorFunctions(clone.getAttribute('style') || '');
     for (const property of important) {
-        const value = computed.getPropertyValue(property);
+        const value = normalizeCssColorFunctions(computed.getPropertyValue(property));
         if (value) inline += `${property}:${value};`;
     }
     clone.setAttribute('style', inline);
@@ -903,7 +970,67 @@ function cleanPageClone(page) {
         item.classList.remove('selected');
         item.style.outline = 'none';
     });
+    sanitizeInlineColorFunctions(clone);
     return clone;
+}
+
+function pageExportMetrics(page) {
+    const rect = page.getBoundingClientRect();
+    const widthMm = number(page.dataset.pageWidthMm, 0);
+    const heightMm = number(page.dataset.pageHeightMm, 0);
+    const canonicalWidth = widthMm > 0 ? widthMm * PX_PER_MM_AT_96_DPI : Math.max(1, rect.width);
+    const canonicalHeight = heightMm > 0 ? heightMm * PX_PER_MM_AT_96_DPI : Math.max(1, rect.height);
+    return {
+        rect,
+        widthMm,
+        heightMm,
+        sourceWidth: Math.max(1, rect.width),
+        sourceHeight: Math.max(1, rect.height),
+        width: Math.max(1, canonicalWidth),
+        height: Math.max(1, canonicalHeight)
+    };
+}
+
+function canonicalizePageClone(clone, metrics) {
+    clone.style.position = 'absolute';
+    clone.style.left = '0';
+    clone.style.top = '0';
+    clone.style.width = `${metrics.sourceWidth}px`;
+    clone.style.height = `${metrics.sourceHeight}px`;
+    clone.style.margin = '0';
+    clone.style.transformOrigin = '0 0';
+    clone.style.transform = `scale(${metrics.width / metrics.sourceWidth}, ${metrics.height / metrics.sourceHeight})`;
+    clone.style.translate = 'none';
+    return clone;
+}
+
+function normalizePublicationPageSizes(publication) {
+    for (const page of publication.querySelectorAll(':scope > .print-page')) {
+        const widthMm = number(page.dataset.pageWidthMm, 0);
+        const heightMm = number(page.dataset.pageHeightMm, 0);
+        let width = widthMm > 0 ? widthMm * PX_PER_MM_AT_96_DPI : 0;
+        let height = heightMm > 0 ? heightMm * PX_PER_MM_AT_96_DPI : 0;
+        if (!(width > 0)) {
+            const match = /^([0-9.]+)mm$/i.exec(page.style.width || '');
+            width = match ? number(match[1]) * PX_PER_MM_AT_96_DPI : number(page.style.width, 800);
+        }
+        if (!(height > 0)) {
+            const match = /^([0-9.]+)mm$/i.exec(page.style.height || '');
+            height = match ? number(match[1]) * PX_PER_MM_AT_96_DPI : number(page.style.height, 600);
+        }
+        width = Math.max(1, width);
+        height = Math.max(1, height);
+        page.dataset.exportWidthPx = String(width);
+        page.dataset.exportHeightPx = String(height);
+        page.style.width = `${width}px`;
+        page.style.height = `${height}px`;
+        page.style.minWidth = `${width}px`;
+        page.style.minHeight = `${height}px`;
+        page.style.maxWidth = 'none';
+        page.style.maxHeight = 'none';
+        page.style.transform = 'none';
+        page.style.translate = 'none';
+    }
 }
 
 function waitForVideoFrame(video, timeoutMs = 8000) {
@@ -1029,33 +1156,39 @@ async function inlineLocalMediaSources(root) {
 async function pageSvg(page, options = {}) {
     await document.fonts?.ready;
     await waitForImages(page);
-    const rect = page.getBoundingClientRect();
+    const metrics = pageExportMetrics(page);
     const clone = cleanPageClone(page);
     if (options.freezeMedia) await freezeMediaForRaster(page, clone);
     else await inlineLocalMediaSources(clone);
+    sanitizeInlineColorFunctions(clone);
+    canonicalizePageClone(clone, metrics);
+
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-    svg.setAttribute('width', String(rect.width));
-    svg.setAttribute('height', String(rect.height));
-    svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    svg.setAttribute('width', metrics.widthMm > 0 ? `${metrics.widthMm}mm` : `${metrics.width}px`);
+    svg.setAttribute('height', metrics.heightMm > 0 ? `${metrics.heightMm}mm` : `${metrics.height}px`);
+    svg.setAttribute('viewBox', `0 0 ${metrics.width} ${metrics.height}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     foreignObject.setAttribute('x', '0');
     foreignObject.setAttribute('y', '0');
-    foreignObject.setAttribute('width', String(rect.width));
-    foreignObject.setAttribute('height', String(rect.height));
+    foreignObject.setAttribute('width', String(metrics.width));
+    foreignObject.setAttribute('height', String(metrics.height));
 
     const host = document.createElement('div');
     host.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-    host.style.width = `${rect.width}px`;
-    host.style.height = `${rect.height}px`;
+    host.style.position = 'relative';
+    host.style.width = `${metrics.width}px`;
+    host.style.height = `${metrics.height}px`;
     host.style.margin = '0';
     host.style.padding = '0';
+    host.style.overflow = 'hidden';
     host.appendChild(clone);
     foreignObject.appendChild(host);
     svg.appendChild(foreignObject);
-    return { text: new XMLSerializer().serializeToString(svg), width: rect.width, height: rect.height };
+    return { text: new XMLSerializer().serializeToString(svg), width: metrics.width, height: metrics.height };
 }
 
 async function loadSvgImage(svgText) {
@@ -1102,39 +1235,47 @@ async function rasterizePageElement(page, scale, jpeg) {
         throw new Error('The local raster export engine did not load. Refresh the application and try again.');
     await document.fonts?.ready;
     await waitForImages(page);
-    const rect = page.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0)
+    const metrics = pageExportMetrics(page);
+    if (metrics.width <= 0 || metrics.height <= 0)
         throw new Error('The publication page has no measurable export size.');
 
     const clone = cleanPageClone(page);
     await freezeMediaForRaster(page, clone);
+    sanitizeInlineColorFunctions(clone);
     clone.style.visibility = 'visible';
     clone.style.opacity = '1';
-    clone.style.width = `${rect.width}px`;
-    clone.style.height = `${rect.height}px`;
-    clone.style.margin = '0';
-    clone.style.transform = 'none';
+    canonicalizePageClone(clone, metrics);
+
+    const frame = document.createElement('div');
+    const rasterId = `publisher-raster-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    frame.dataset.publisherRasterRoot = rasterId;
+    frame.style.cssText = [
+        'position:relative', 'left:0', 'top:0', `width:${metrics.width}px`, `height:${metrics.height}px`,
+        'overflow:hidden', 'visibility:visible', 'opacity:1', 'pointer-events:none',
+        jpeg ? 'background:#fff' : 'background:transparent'
+    ].join(';');
+    frame.appendChild(clone);
 
     const stage = document.createElement('div');
     stage.setAttribute('aria-hidden', 'true');
     stage.style.cssText = [
-        'position:fixed', 'left:-100000px', 'top:0', `width:${rect.width}px`, `height:${rect.height}px`,
+        'position:fixed', 'left:-100000px', 'top:0', `width:${metrics.width}px`, `height:${metrics.height}px`,
         'overflow:hidden', 'visibility:visible', 'opacity:1', 'pointer-events:none', 'z-index:-2147483648',
         jpeg ? 'background:#fff' : 'background:transparent'
     ].join(';');
-    stage.appendChild(clone);
+    stage.appendChild(frame);
     document.body.appendChild(stage);
     try {
-        await waitForImages(clone);
+        await waitForImages(frame);
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        const requestedWidth = Math.max(1, Math.round(rect.width * scale));
-        const requestedHeight = Math.max(1, Math.round(rect.height * scale));
+        const requestedWidth = Math.max(1, Math.round(metrics.width * scale));
+        const requestedHeight = Math.max(1, Math.round(metrics.height * scale));
         const maxPixels = 80_000_000;
         const reduction = requestedWidth * requestedHeight > maxPixels
             ? Math.sqrt(maxPixels / (requestedWidth * requestedHeight))
             : 1;
         const effectiveScale = scale * reduction;
-        return await window.html2canvas(clone, {
+        const html2canvasOptions = {
             backgroundColor: jpeg ? '#ffffff' : null,
             scale: effectiveScale,
             logging: false,
@@ -1142,13 +1283,35 @@ async function rasterizePageElement(page, scale, jpeg) {
             allowTaint: false,
             imageTimeout: 20000,
             removeContainer: true,
-            width: rect.width,
-            height: rect.height,
-            windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(rect.width)),
-            windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(rect.height)),
+            width: metrics.width,
+            height: metrics.height,
+            windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(metrics.width)),
+            windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(metrics.height)),
             scrollX: 0,
-            scrollY: 0
-        });
+            scrollY: 0,
+            onclone: clonedDocument => {
+                clonedDocument.documentElement.style.backgroundColor = jpeg ? '#ffffff' : 'transparent';
+                clonedDocument.body.style.backgroundColor = jpeg ? '#ffffff' : 'transparent';
+                clonedDocument.body.style.color = '#111827';
+                const clonedRoot = clonedDocument.querySelector(`[data-publisher-raster-root="${rasterId}"]`);
+                if (clonedRoot) sanitizeInlineColorFunctions(clonedRoot);
+            }
+        };
+        try {
+            // Let Chromium render modern CSS colors itself. The computed html2canvas renderer
+            // currently rejects CSS Color 4 values such as color(display-p3 ...).
+            return await window.html2canvas(frame, { ...html2canvasOptions, foreignObjectRendering: true });
+        } catch (foreignObjectError) {
+            console.warn('Foreign-object rasterization failed. Retrying with the sanitized computed renderer.', foreignObjectError);
+            try {
+                return await window.html2canvas(frame, { ...html2canvasOptions, foreignObjectRendering: false });
+            } catch (computedError) {
+                if (!/unsupported color function/i.test(String(computedError?.message || computedError))) throw computedError;
+                console.warn('html2canvas still rejected a CSS Color 4 value. Falling back to browser SVG rasterization.', computedError);
+                const serialized = await pageSvg(page, { freezeMedia: true });
+                return await svgToCanvas(serialized.text, serialized.width, serialized.height, effectiveScale, jpeg);
+            }
+        }
     } catch (error) {
         throw new Error(`Raster export failed: ${error?.message || error}`);
     } finally {
@@ -2218,8 +2381,10 @@ function websitePresentationRuntime() {
     const fitPages = () => {
         const controlsHeight = controls && !controls.hidden ? 62 : 18;
         for (const page of pages) {
-            const width = page.offsetWidth || 1;
-            const height = page.offsetHeight || 1;
+            const width = Math.max(1, num(page.dataset.exportWidthPx, page.offsetWidth || 1));
+            const height = Math.max(1, num(page.dataset.exportHeightPx, page.offsetHeight || 1));
+            page.style.width = `${width}px`;
+            page.style.height = `${height}px`;
             const scale = Math.min((innerWidth - 32) / width, (innerHeight - controlsHeight - 24) / height, 1.75);
             page.style.transform = `scale(${Math.max(.05, scale)})`;
         }
@@ -2870,7 +3035,14 @@ function initializeStoryEditorLayout(shellId, hostId) {
     schedule();
 }
 
+export function cancelCanvasInteraction(stageId = 'publisher-stage') {
+    const stage = document.getElementById(stageId);
+    const state = stage ? canvasStates.get(stage) : null;
+    if (state) resetPointerOperation(state, true);
+}
+
 window.publisherStudio = {
+    cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
     initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
@@ -2924,7 +3096,11 @@ window.publisherStudio = {
         if (!page) throw new Error('The publication page is not available.');
         const normalized = String(format).toLowerCase();
         if (normalized === 'svg') {
-            const serialized = await pageSvg(page, { freezeMedia: false });
+            const pageId = page.dataset.pageId || '';
+            const canonicalPage = pageId
+                ? document.querySelector(`.print-publication > .print-page[data-page-id="${CSS.escape(pageId)}"]`) || page
+                : page;
+            const serialized = await pageSvg(canonicalPage, { freezeMedia: false });
             downloadBlob(fileName, new Blob([serialized.text], { type: 'image/svg+xml;charset=utf-8' }));
             return;
         }
@@ -3003,6 +3179,7 @@ window.publisherStudio = {
         const publication = source.cloneNode(true);
         publication.removeAttribute('aria-hidden');
         publication.className = 'website-publication';
+        normalizePublicationPageSizes(publication);
         await inlineLocalMediaSources(publication);
         const css = collectExportCss();
         const runtime = `(${websitePresentationRuntime.toString()})();`;

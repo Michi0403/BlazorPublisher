@@ -165,7 +165,12 @@
 
                 <section class="visual-live-preview">
                     <div class="pane-heading"><strong>Live preview</strong><span>@CurrentData?.Name</span></div>
-                    <div class="visual-preview-frame">
+                    <div class="visual-preview-frame"
+                         tabindex="0"
+                         title="Right-click for visual commands"
+                         @oncontextmenu="ShowVisualContextMenu"
+                         @oncontextmenu:preventDefault
+                         @oncontextmenu:stopPropagation>
                         <DataVisualView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" />
                     </div>
                     <p>Charts remain live DevExpress components on the publication canvas. Stored document-object sources update when publication objects change.</p>
@@ -178,6 +183,39 @@
             </footer>
         </section>
     </div>
+
+    <DxContextMenu @ref="_visualContextMenu">
+        <Items>
+            <DxContextMenuItem Text="Apply changes" IconCssClass="pub-icon pub-icon-edit" Enabled="@CanSave" Click="Save" />
+            <DxContextMenuItem Text="Refresh live data" IconCssClass="pub-icon pub-icon-data" Click="Refresh" />
+            <DxContextMenuItem Text="Manage publication data…" IconCssClass="pub-icon pub-icon-data" Click="RequestManage" />
+            <DxContextMenuItem Text="Visual type" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.CartesianChart, KindName(DataVisualKind.CartesianChart)))" Click="SetCartesianChart" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.PieChart, KindName(DataVisualKind.PieChart)))" Click="SetPieChart" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.PolarChart, KindName(DataVisualKind.PolarChart)))" Click="SetPolarChart" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.Sparkline, KindName(DataVisualKind.Sparkline)))" Click="SetSparkline" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.BarGauge, KindName(DataVisualKind.BarGauge)))" Click="SetBarGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.DataTable, KindName(DataVisualKind.DataTable)))" Click="SetDataTable" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.KpiProgress, KindName(DataVisualKind.KpiProgress)))" Click="SetKpiProgress" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="@(CheckedText(_draft.ShowTitle, "Show title"))" Click="ToggleTitleMenu" />
+            @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge)
+            {
+                <DxContextMenuItem Text="@(CheckedText(_draft.ShowLegend, "Show legend"))" Click="ToggleLegendMenu" />
+            }
+            @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart)
+            {
+                <DxContextMenuItem Text="@(CheckedText(_draft.ShowLabels, "Show point labels"))" Click="ToggleLabelsMenu" />
+            }
+            @if (_draft.VisualKind == DataVisualKind.DataTable)
+            {
+                <DxContextMenuItem Text="@(CheckedText(_draft.TableShowFilterRow, "Interactive filter row"))" Click="ToggleFilterRowMenu" />
+            }
+            <DxContextMenuItem Text="Reset visual options" BeginGroup="true" Click="ResetVisualOptions" />
+        </Items>
+    </DxContextMenu>
 }
 
 @code {
@@ -187,6 +225,7 @@
     [Parameter] public EventCallback Cancelled { get; set; }
     [Parameter] public EventCallback ManageDataRequested { get; set; }
 
+    private DxContextMenu _visualContextMenu = default!;
     private bool _wasVisible;
     private Guid? _targetId;
     private DataVisualElement? _draft;
@@ -231,6 +270,7 @@
         await Saved.InvokeAsync();
     }
 
+    private Task ShowVisualContextMenu(MouseEventArgs args) => _visualContextMenu.ShowAsync(args);
     private Task Cancel() => Cancelled.InvokeAsync();
     private Task RequestManage() => ManageDataRequested.InvokeAsync();
     private void Refresh() => State.RefreshDataVisuals();
@@ -241,6 +281,14 @@
         if (!AllowsMultipleValueFields && _draft.ValueFields.Count > 1)
             _draft.ValueFields = [ _draft.ValueFields[0] ];
     }
+
+    private void SetCartesianChart() => SetKind(DataVisualKind.CartesianChart);
+    private void SetPieChart() => SetKind(DataVisualKind.PieChart);
+    private void SetPolarChart() => SetKind(DataVisualKind.PolarChart);
+    private void SetSparkline() => SetKind(DataVisualKind.Sparkline);
+    private void SetBarGauge() => SetKind(DataVisualKind.BarGauge);
+    private void SetDataTable() => SetKind(DataVisualKind.DataTable);
+    private void SetKpiProgress() => SetKind(DataVisualKind.KpiProgress);
 
     private void ChangeDataObject(ChangeEventArgs args)
     {
@@ -277,6 +325,24 @@
     private void ToggleLegend(ChangeEventArgs args) { if (_draft is not null) _draft.ShowLegend = Checked(args); }
     private void ToggleLabels(ChangeEventArgs args) { if (_draft is not null) _draft.ShowLabels = Checked(args); }
     private void ToggleFilterRow(ChangeEventArgs args) { if (_draft is not null) _draft.TableShowFilterRow = Checked(args); }
+
+    private void ToggleTitleMenu() { if (_draft is not null) _draft.ShowTitle = !_draft.ShowTitle; }
+    private void ToggleLegendMenu() { if (_draft is not null) _draft.ShowLegend = !_draft.ShowLegend; }
+    private void ToggleLabelsMenu() { if (_draft is not null) _draft.ShowLabels = !_draft.ShowLabels; }
+    private void ToggleFilterRowMenu() { if (_draft is not null) _draft.TableShowFilterRow = !_draft.TableShowFilterRow; }
+    private void ResetVisualOptions()
+    {
+        if (_draft is null) return;
+        _draft.ShowTitle = true;
+        _draft.ShowLegend = true;
+        _draft.ShowLabels = false;
+        _draft.TableShowHeader = true;
+        _draft.TableShowFilterRow = false;
+        _draft.RowLimit = 12;
+        _draft.MinimumValue = 0;
+        _draft.MaximumValue = 100;
+    }
+    private static string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
 
     private static DataVisualElement Clone(DataVisualElement source)
     {

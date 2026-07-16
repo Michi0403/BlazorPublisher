@@ -20,7 +20,9 @@
                         <DxRibbonItem Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
                         <DxRibbonItem Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Arrange">
+                    <DxRibbonGroup Text="Clipboard and arrange">
+                        <DxRibbonItem Text="Copy" Enabled="HasSelection" Click="State.CopySelected" />
+                        <DxRibbonItem Text="Paste" Enabled="State.CanPaste" Click="State.Paste" />
                         <DxRibbonItem Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
                         <DxRibbonItem Text="Up" Enabled="HasSelection" Click="MoveUp" />
                         <DxRibbonItem Text="Down" Enabled="HasSelection" Click="MoveDown" />
@@ -72,11 +74,11 @@
                         </DxRibbonColorPaletteItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Width">
-                        <DxRibbonItem Text="1 px" Click="DrawWidth1" />
-                        <DxRibbonItem Text="3 px" Click="DrawWidth3" />
-                        <DxRibbonItem Text="8 px" Click="DrawWidth8" />
-                        <DxRibbonItem Text="16 px" Click="DrawWidth16" />
-                        <DxRibbonItem Text="32 px" Click="DrawWidth32" />
+                        <DxRibbonItem Text="@DrawWidthText(1)" Click="DrawWidth1" />
+                        <DxRibbonItem Text="@DrawWidthText(3)" Click="DrawWidth3" />
+                        <DxRibbonItem Text="@DrawWidthText(8)" Click="DrawWidth8" />
+                        <DxRibbonItem Text="@DrawWidthText(16)" Click="DrawWidth16" />
+                        <DxRibbonItem Text="@DrawWidthText(32)" Click="DrawWidth32" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
 
@@ -120,11 +122,12 @@
 
                 <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsRasterSelected">
                     <DxRibbonGroup Text="Raster">
-                        <DxRibbonItem Text="Replace" IsPrimary="true" Click="RequestImage" />
-                        <DxRibbonItem Text="Contain" Click="RasterContain" />
-                        <DxRibbonItem Text="Cover" Click="RasterCover" />
-                        <DxRibbonItem Text="Flip horizontal" Click="RasterFlipHorizontal" />
-                        <DxRibbonItem Text="Flip vertical" Click="RasterFlipVertical" />
+                        <DxRibbonItem Text="Replace" IsPrimary="true" Enabled="CanDelete" Click="RequestRasterReplacement" />
+                        <DxRibbonItem Text="Contain" Enabled="CanDelete" Click="RasterContain" />
+                        <DxRibbonItem Text="Cover" Enabled="CanDelete" Click="RasterCover" />
+                        <DxRibbonItem Text="Stretch" Enabled="CanDelete" Click="RasterStretch" />
+                        <DxRibbonItem Text="Flip horizontal" Enabled="CanDelete" Click="RasterFlipHorizontal" />
+                        <DxRibbonItem Text="Flip vertical" Enabled="CanDelete" Click="RasterFlipVertical" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
@@ -143,10 +146,15 @@
                         <button type="button" title="Add render layer" @onclick="AddClouds">☁</button>
                         <button type="button" title="Add paint layer" @onclick="AddPaintLayer">✎</button>
                     </div>
-                    <div class="picture-layer-list">
+                    <div class="picture-layer-list"
+                         @oncontextmenu="ShowLayerListContextMenu"
+                         @oncontextmenu:preventDefault>
                         @foreach (var layer in State.Document.Layers.AsEnumerable().Reverse())
                         {
-                            <div class="picture-layer-row @(layer.Id == State.SelectedLayerId ? "selected" : null)">
+                            <div class="picture-layer-row @(layer.Id == State.SelectedLayerId ? "selected" : null)"
+                                 @oncontextmenu="args => ShowLayerContextMenu(layer, args)"
+                                 @oncontextmenu:preventDefault
+                                 @oncontextmenu:stopPropagation>
                                 <button type="button" class="picture-layer-select" @onclick="() => State.SelectLayer(layer.Id)">
                                     <span class="picture-layer-icon">@LayerIcon(layer)</span>
                                     <span>
@@ -175,7 +183,10 @@
                 <main id="picture-studio-canvas-host" class="picture-studio-canvas-host">
                     <div class="picture-canvas-scroll">
                         <div class="picture-canvas-mat">
-                            <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label="Picture canvas"></canvas>
+                            <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label="Picture canvas"
+                                    @oncontextmenu="ShowCanvasContextMenu"
+                                    @oncontextmenu:preventDefault
+                                    @oncontextmenu:stopPropagation></canvas>
                         </div>
                     </div>
                     <div class="picture-canvas-hint">@CanvasHint</div>
@@ -236,9 +247,33 @@
                                 <label>Color
                                     <input type="color" value="@SafeColor(_drawColor)" @onchange="ChangeDrawColorInput" />
                                 </label>
-                                <label>Width (px)
+                                <label>Exact width (px)
                                     <input type="number" min="0.25" max="512" step="0.25" value="@Inv(_drawWidth)" @onchange="ChangeDrawWidth" />
                                 </label>
+                            </div>
+                            <label class="picture-brush-size-label">Brush size
+                                <span class="picture-brush-size-row">
+                                    <input class="picture-dynamic-range"
+                                           type="range"
+                                           min="0"
+                                           max="100"
+                                           step="0.1"
+                                           value="@Inv(BrushWidthSliderValue)"
+                                           style="@BrushWidthSliderStyle"
+                                           aria-label="Brush size"
+                                           aria-valuemin="0.25"
+                                           aria-valuemax="512"
+                                           aria-valuenow="@Inv(_drawWidth)"
+                                           @oninput="ChangeDrawWidthSlider" />
+                                    <output>@DrawWidthDisplay</output>
+                                </span>
+                            </label>
+                            <div class="picture-brush-presets" role="group" aria-label="Brush size presets">
+                                <button type="button" class="@DrawWidthButtonClass(1)" aria-pressed="@(IsDrawWidth(1) ? "true" : "false")" @onclick="DrawWidth1">1</button>
+                                <button type="button" class="@DrawWidthButtonClass(3)" aria-pressed="@(IsDrawWidth(3) ? "true" : "false")" @onclick="DrawWidth3">3</button>
+                                <button type="button" class="@DrawWidthButtonClass(8)" aria-pressed="@(IsDrawWidth(8) ? "true" : "false")" @onclick="DrawWidth8">8</button>
+                                <button type="button" class="@DrawWidthButtonClass(16)" aria-pressed="@(IsDrawWidth(16) ? "true" : "false")" @onclick="DrawWidth16">16</button>
+                                <button type="button" class="@DrawWidthButtonClass(32)" aria-pressed="@(IsDrawWidth(32) ? "true" : "false")" @onclick="DrawWidth32">32</button>
                             </div>
                             <label>Opacity
                                 <input type="range" min="0" max="1" step="0.01" value="@Inv(_drawOpacity)" @oninput="ChangeDrawOpacity" />
@@ -535,6 +570,128 @@
             </footer>
         </section>
     </div>
+
+    <DxContextMenu @ref="_pictureContextMenu">
+        <Items>
+            <DxContextMenuItem Text="Undo" IconCssClass="pub-icon pub-icon-undo" Enabled="State.CanUndo" Click="State.Undo" />
+            <DxContextMenuItem Text="Redo" IconCssClass="pub-icon pub-icon-redo" Enabled="State.CanRedo" Click="State.Redo" />
+
+            @if (State.SelectedLayer is PictureLayer selectedLayer)
+            {
+                @if (selectedLayer is RasterPictureLayer raster)
+                {
+                    <DxContextMenuItem Text="Replace image…" IconCssClass="pub-icon pub-icon-picture" BeginGroup="true" Enabled="@(!raster.Locked)" Click="RequestRasterReplacement" />
+                    <DxContextMenuItem Text="Image fit" Enabled="@(!raster.Locked)">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(raster.FitMode == PictureRasterFitMode.Contain, "Contain"))" Click="RasterContain" />
+                            <DxContextMenuItem Text="@(CheckedText(raster.FitMode == PictureRasterFitMode.Cover, "Cover"))" Click="RasterCover" />
+                            <DxContextMenuItem Text="@(CheckedText(raster.FitMode == PictureRasterFitMode.Stretch, "Stretch"))" Click="RasterStretch" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Flip horizontal" Enabled="@(!raster.Locked)" Click="RasterFlipHorizontal" />
+                    <DxContextMenuItem Text="Flip vertical" Enabled="@(!raster.Locked)" Click="RasterFlipVertical" />
+                }
+                else if (selectedLayer is PaintPictureLayer paint)
+                {
+                    <DxContextMenuItem Text="Continue with brush" IconCssClass="pub-icon pub-icon-edit" BeginGroup="true" Click="BrushTool" />
+                    <DxContextMenuItem Text="Continue with pencil" Click="PencilTool" />
+                    <DxContextMenuItem Text="Erase strokes" Click="EraserTool" />
+                    <DxContextMenuItem Text="Clear all strokes" Enabled="@(paint.Strokes.Count > 0 && !paint.Locked)" Click="State.ClearSelectedPaint" />
+                }
+                else if (selectedLayer is RenderPictureLayer render)
+                {
+                    <DxContextMenuItem Text="Renderer" BeginGroup="true">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Clouds, "Clouds"))" Click="MakeRenderClouds" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Noise, "Noise"))" Click="MakeRenderNoise" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Stripes, "Stripes"))" Click="MakeRenderStripes" />
+                            <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Vignette, "Vignette"))" Click="MakeRenderVignette" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="New random seed" Click="RandomizeRender" />
+                }
+                else if (selectedLayer is ShapePictureLayer shape)
+                {
+                    <DxContextMenuItem Text="Shape" BeginGroup="true">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Rectangle, "Rectangle"))" Click="ShapeRectangle" />
+                            <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.RoundedRectangle, "Rounded rectangle"))" Click="ShapeRoundedRectangle" />
+                            <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Ellipse, "Ellipse"))" Click="ShapeEllipse" />
+                            <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Line, "Line"))" Click="ShapeLine" />
+                        </Items>
+                    </DxContextMenuItem>
+                }
+                else if (selectedLayer is FillPictureLayer fill)
+                {
+                    <DxContextMenuItem Text="Fill type" BeginGroup="true">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(fill.FillKind == PictureFillKind.Solid, "Solid"))" Click="FillSolid" />
+                            <DxContextMenuItem Text="@(CheckedText(fill.FillKind == PictureFillKind.LinearGradient, "Linear gradient"))" Click="FillLinearGradient" />
+                            <DxContextMenuItem Text="@(CheckedText(fill.FillKind == PictureFillKind.RadialGradient, "Radial gradient"))" Click="FillRadialGradient" />
+                        </Items>
+                    </DxContextMenuItem>
+                }
+
+                <DxContextMenuItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="State.CopySelected" />
+                <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="State.CanPaste" Click="State.Paste" />
+                <DxContextMenuItem Text="Duplicate" IconCssClass="pub-icon pub-icon-duplicate" Click="State.DuplicateSelected" />
+                <DxContextMenuItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                <DxContextMenuItem Text="Arrange" BeginGroup="true">
+                    <Items>
+                        <DxContextMenuItem Text="Bring to front" Click="State.BringSelectedToFront" />
+                        <DxContextMenuItem Text="Bring forward" Click="MoveUp" />
+                        <DxContextMenuItem Text="Send backward" Click="MoveDown" />
+                        <DxContextMenuItem Text="Send to back" Click="State.SendSelectedToBack" />
+                    </Items>
+                </DxContextMenuItem>
+                <DxContextMenuItem Text="Place on canvas">
+                    <Items>
+                        <DxContextMenuItem Text="Center on canvas" Click="State.CenterSelected" />
+                        <DxContextMenuItem Text="Fit to canvas" Click="State.FitSelectedToCanvas" />
+                    </Items>
+                </DxContextMenuItem>
+                <DxContextMenuItem Text="Reset adjustments" Click="ResetAdjustments" />
+                <DxContextMenuItem Text="@(selectedLayer.Locked ? "Unlock layer" : "Lock layer")" BeginGroup="true" Click="ToggleSelectedLockMenu" />
+                <DxContextMenuItem Text="@(selectedLayer.Visible ? "Hide layer" : "Show layer")" Click="ToggleSelectedVisibilityMenu" />
+            }
+            else
+            {
+                <DxContextMenuItem Text="Paste layer" IconCssClass="pub-icon pub-icon-paste" BeginGroup="true" Enabled="State.CanPaste" Click="State.Paste" />
+                <DxContextMenuItem Text="Insert image…" IconCssClass="pub-icon pub-icon-picture" Click="RequestImage" />
+                <DxContextMenuItem Text="Insert text" IconCssClass="pub-icon pub-icon-text" Click="AddTextLayer" />
+                <DxContextMenuItem Text="Insert shape">
+                    <Items>
+                        <DxContextMenuItem Text="Rectangle" Click="AddRectangle" />
+                        <DxContextMenuItem Text="Ellipse" Click="AddEllipse" />
+                        <DxContextMenuItem Text="Line" Click="AddLineShape" />
+                    </Items>
+                </DxContextMenuItem>
+                <DxContextMenuItem Text="Insert fill">
+                    <Items>
+                        <DxContextMenuItem Text="Solid color" Click="AddSolidFill" />
+                        <DxContextMenuItem Text="Gradient" Click="AddGradient" />
+                    </Items>
+                </DxContextMenuItem>
+                <DxContextMenuItem Text="Insert procedural render">
+                    <Items>
+                        <DxContextMenuItem Text="Clouds" Click="AddClouds" />
+                        <DxContextMenuItem Text="Noise" Click="AddNoise" />
+                        <DxContextMenuItem Text="Stripes" Click="AddStripes" />
+                        <DxContextMenuItem Text="Vignette" Click="AddVignette" />
+                    </Items>
+                </DxContextMenuItem>
+                <DxContextMenuItem Text="Insert paint layer" IconCssClass="pub-icon pub-icon-edit" Click="AddPaintLayer" />
+                <DxContextMenuItem Text="View" BeginGroup="true">
+                    <Items>
+                        <DxContextMenuItem Text="Fit canvas" Click="FitCanvas" />
+                        <DxContextMenuItem Text="100% zoom" Click="Zoom100" />
+                        <DxContextMenuItem Text="@GridText" Click="ToggleGridRibbon" />
+                        <DxContextMenuItem Text="@SnapText" Click="ToggleSnapRibbon" />
+                    </Items>
+                </DxContextMenuItem>
+            }
+        </Items>
+    </DxContextMenu>
 
     <InputFile id="picture-studio-image-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="ImportImage" />
 }

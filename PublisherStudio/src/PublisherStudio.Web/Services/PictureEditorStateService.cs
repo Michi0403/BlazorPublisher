@@ -8,6 +8,7 @@ public sealed class PictureEditorStateService
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private string? _liveEditKey;
+    private PictureLayer? _clipboard;
 
     public PictureEditorStateService(PictureDocumentService documents)
     {
@@ -21,6 +22,7 @@ public sealed class PictureEditorStateService
     public PictureLayer? SelectedLayer => Document.Layers.FirstOrDefault(layer => layer.Id == SelectedLayerId);
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
+    public bool CanPaste => _clipboard is not null;
 
     public void StartNew(int widthPx = 1200, int heightPx = 800, bool transparent = true)
     {
@@ -123,6 +125,16 @@ public sealed class PictureEditorStateService
         SelectedLayerId = layer.Id;
         Notify();
         return layer;
+    }
+
+    public bool ReplaceRaster(Guid id, string dataUrl)
+    {
+        var layer = Document.Layers.OfType<RasterPictureLayer>().FirstOrDefault(item => item.Id == id);
+        if (layer is null || layer.Locked || string.IsNullOrWhiteSpace(dataUrl)) return false;
+        Capture();
+        layer.DataUrl = dataUrl;
+        Notify();
+        return true;
     }
 
     public TextPictureLayer AddText()
@@ -251,6 +263,28 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    public void CopySelected()
+    {
+        var layer = SelectedLayer;
+        if (layer is null) return;
+        _clipboard = CloneLayer(layer);
+        Notify(false);
+    }
+
+    public void Paste()
+    {
+        if (_clipboard is null) return;
+        Capture();
+        var clone = CloneLayer(_clipboard);
+        clone.Id = Guid.NewGuid();
+        clone.Name = NextName(_clipboard.Name);
+        clone.X += 18;
+        clone.Y += 18;
+        Document.Layers.Add(clone);
+        SelectedLayerId = clone.Id;
+        Notify();
+    }
+
     public void DuplicateSelected()
     {
         var layer = SelectedLayer;
@@ -263,6 +297,29 @@ public sealed class PictureEditorStateService
         clone.Y += 18;
         Document.Layers.Insert(Document.Layers.IndexOf(layer) + 1, clone);
         SelectedLayerId = clone.Id;
+        Notify();
+    }
+
+    public void CenterSelected()
+    {
+        var layer = SelectedLayer;
+        if (layer is null || layer.Locked) return;
+        Capture();
+        layer.X = (Document.WidthPx - layer.Width) / 2;
+        layer.Y = (Document.HeightPx - layer.Height) / 2;
+        Notify();
+    }
+
+    public void FitSelectedToCanvas()
+    {
+        var layer = SelectedLayer;
+        if (layer is null || layer.Locked) return;
+        Capture();
+        layer.X = 0;
+        layer.Y = 0;
+        layer.Width = Document.WidthPx;
+        layer.Height = Document.HeightPx;
+        layer.Rotation = 0;
         Notify();
     }
 

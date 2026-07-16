@@ -1009,6 +1009,8 @@ function bindEditorCanvas(editor, canvas) {
     editor.drawing = null;
     canvas.dataset.pictureStudioBound = "true";
     canvas.addEventListener("pointerdown", event => {
+        canvas.focus({ preventScroll: true });
+        if (event.button !== 0) return;
         if ((editor.toolSettings?.tool || "select") === "select") beginInteraction(editor, event);
         else beginDrawing(editor, event);
     });
@@ -1025,9 +1027,28 @@ function bindEditorCanvas(editor, canvas) {
         else finishInteraction(editor, event, true);
     });
     canvas.addEventListener("keydown", event => {
+        const modifier = event.ctrlKey || event.metaKey;
+        const key = String(event.key || "").toLowerCase();
+        let command = null;
+        if (modifier && key === "z") command = event.shiftKey ? "redo" : "undo";
+        else if (modifier && key === "y") command = "redo";
+        else if (modifier && key === "c") command = "copy";
+        else if (modifier && key === "v") command = "paste";
+        else if (modifier && key === "d") command = "duplicate";
+        else if (event.key === "Delete") command = "delete";
+        else if (event.key === "Home") command = "front";
+        else if (event.key === "End") command = "back";
+
+        if (command) {
+            safeInvoke(editor, "PictureShortcutRequested", command);
+            event.preventDefault();
+            return;
+        }
         if (event.key === "Escape") {
             if (editor.drawing) finishDrawing(editor, null, true);
-            else finishInteraction(editor, null, true);
+            else if (editor.interaction) finishInteraction(editor, null, true);
+            else safeInvoke(editor, "PictureShortcutRequested", "select");
+            event.preventDefault();
         }
     });
     updateCanvasCursor(editor);
@@ -1072,6 +1093,15 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     if (!editor.interaction && !editor.drawing) editor.document = nextDocument;
     updateCanvasCursor(editor);
     scheduleEditorRender(editor);
+}
+
+export function hitTestPictureStudioLayer(canvasId, clientX, clientY) {
+    const editor = editors.get(canvasId);
+    const canvas = document.getElementById(canvasId);
+    if (!editor?.document || !canvas) return null;
+    const point = canvasPoint(canvas, { clientX: Number(clientX) || 0, clientY: Number(clientY) || 0 });
+    const layer = hitLayer(editor.document, point.x, point.y);
+    return layer ? String(layer.id) : null;
 }
 
 export function fitPictureStudio(hostId, width, height) {

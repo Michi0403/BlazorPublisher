@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Web;
+using DevExpress.Blazor;
 using Microsoft.JSInterop;
 using PublisherStudio.Domain;
 using PublisherStudio.Services;
@@ -12,6 +14,8 @@ public partial class PictureEditor
 {
     private const string CanvasId = "picture-studio-canvas";
     private const string CanvasHostId = "picture-studio-canvas-host";
+    private const double MinDrawWidth = .25;
+    private const double MaxDrawWidth = 512;
     private static readonly string[] PictureFonts =
     [
         "Segoe UI", "Arial", "Arial Black", "Calibri", "Cambria", "Georgia", "Impact", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"
@@ -34,6 +38,7 @@ public partial class PictureEditor
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private IJSObjectReference? _module;
+    private DxContextMenu _pictureContextMenu = default!;
     private DotNetObjectReference<PictureEditor>? _self;
     private Guid _loadedSession;
     private bool _renderRequested;
@@ -54,6 +59,7 @@ public partial class PictureEditor
     private int _pictureExportExpectedChunks;
     private int _pictureExportNextChunk;
     private int _pictureExportExpectedLength;
+    private Guid? _replaceRasterLayerId;
 
     private bool HasSelection => State.SelectedLayer is not null;
     private bool CanDelete => State.SelectedLayer is { Locked: false };
@@ -68,13 +74,16 @@ public partial class PictureEditor
     private string LineToolText => ToolText(PictureDrawTool.Line, "Line");
     private string EraserToolText => ToolText(PictureDrawTool.Eraser, "Eraser");
     private string EyedropperToolText => ToolText(PictureDrawTool.Eyedropper, "Eyedropper");
+    private double BrushWidthSliderValue => WidthToSlider(_drawWidth);
+    private string BrushWidthSliderStyle => $"--picture-range-progress: {Inv(BrushWidthSliderValue)}%;";
+    private string DrawWidthDisplay => $"{_drawWidth:0.##} px";
     private string CanvasHint => _drawTool switch
     {
-        PictureDrawTool.Select => "Drag layers directly. Corner handles resize; the round handle rotates.",
+        PictureDrawTool.Select => "Drag layers directly. Corner handles resize; the round handle rotates. Right-click for layer commands.",
         PictureDrawTool.Eyedropper => "Click the rendered canvas to pick a color, then the Brush tool becomes active.",
         PictureDrawTool.Line => "Drag from the line start to its end. Hold the pointer down for a live preview.",
         PictureDrawTool.Eraser => "Draw over strokes on a paint layer to erase them non-destructively.",
-        _ => "Draw directly on the canvas. A paint layer is created automatically when necessary."
+        _ => "Draw directly on the canvas. A paint layer is created automatically when necessary. Right-click does not draw."
     };
     private string CanvasColor => State.Document.Background.StartsWith('#') && State.Document.Background.Length is 4 or 7
         ? State.Document.Background
@@ -227,6 +236,23 @@ public partial class PictureEditor
     }
 
     [JSInvokable]
+    public void PictureShortcutRequested(string command)
+    {
+        switch (command?.Trim().ToLowerInvariant())
+        {
+            case "undo": State.Undo(); break;
+            case "redo": State.Redo(); break;
+            case "copy": State.CopySelected(); break;
+            case "paste": State.Paste(); break;
+            case "duplicate": State.DuplicateSelected(); break;
+            case "delete": State.DeleteSelected(); break;
+            case "front": State.BringSelectedToFront(); break;
+            case "back": State.SendSelectedToBack(); break;
+            case "select": SetDrawTool(PictureDrawTool.Select); break;
+        }
+    }
+
+    [JSInvokable]
     public void PictureRenderFailed(string message)
     {
         _renderErrorActive = true;
@@ -243,8 +269,41 @@ public partial class PictureEditor
         _ = InvokeAsync(StateHasChanged);
     }
 
+    private async Task ShowCanvasContextMenu(MouseEventArgs args)
+    {
+        if (_module is not null && args.Button == 2)
+        {
+            var id = await _module.InvokeAsync<string?>("hitTestPictureStudioLayer", CanvasId, args.ClientX, args.ClientY);
+            State.SelectLayer(Guid.TryParse(id, out var parsed) ? parsed : null);
+        }
+        await InvokeAsync(StateHasChanged);
+        await _pictureContextMenu.ShowAsync(args);
+    }
+
+    private async Task ShowLayerContextMenu(PictureLayer layer, MouseEventArgs args)
+    {
+        State.SelectLayer(layer.Id);
+        await InvokeAsync(StateHasChanged);
+        await _pictureContextMenu.ShowAsync(args);
+    }
+
+    private async Task ShowLayerListContextMenu(MouseEventArgs args)
+    {
+        State.SelectLayer(null);
+        await InvokeAsync(StateHasChanged);
+        await _pictureContextMenu.ShowAsync(args);
+    }
+
     private async Task RequestImage()
     {
+        _replaceRasterLayerId = null;
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-studio-image-input");
+    }
+
+    private async Task RequestRasterReplacement()
+    {
+        if (State.SelectedLayer is not RasterPictureLayer { Locked: false } raster) return;
+        _replaceRasterLayerId = raster.Id;
         await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-studio-image-input");
     }
 
@@ -264,11 +323,18 @@ public partial class PictureEditor
             var size = _module is null
                 ? new PictureImageSize()
                 : await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", dataUrl);
-            State.AddRaster(dataUrl, file.Name, size.Width, size.Height);
+            if (_replaceRasterLayerId is Guid targetId && State.ReplaceRaster(targetId, dataUrl))
+                State.SelectLayer(targetId);
+            else
+                State.AddRaster(dataUrl, file.Name, size.Width, size.Height);
         }
         catch (Exception ex)
         {
             _error = ex.Message;
+        }
+        finally
+        {
+            _replaceRasterLayerId = null;
         }
     }
 
@@ -457,8 +523,34 @@ public partial class PictureEditor
         StateHasChanged();
     }
     private string ToolText(PictureDrawTool tool, string text) => _drawTool == tool ? $"✓ {text}" : text;
+    private bool IsDrawWidth(double value) => Math.Abs(_drawWidth - value) < .001;
+    private string DrawWidthText(double value) => IsDrawWidth(value) ? $"✓ {value:0.##} px" : $"{value:0.##} px";
+    private string DrawWidthButtonClass(double value) => IsDrawWidth(value) ? "selected" : string.Empty;
     private void ChangeDrawColor(string value) { if (!string.IsNullOrWhiteSpace(value)) _drawColor = value; _renderRequested = true; }
-    private void SetDrawWidth(double value) { _drawWidth = Math.Clamp(value, .25, 512); _renderRequested = true; }
+    private void SetDrawWidth(double value)
+    {
+        _drawWidth = Math.Clamp(value, MinDrawWidth, MaxDrawWidth);
+        _renderRequested = true;
+    }
+    private static double WidthToSlider(double width)
+    {
+        var clamped = Math.Clamp(width, MinDrawWidth, MaxDrawWidth);
+        return Math.Log(clamped / MinDrawWidth) / Math.Log(MaxDrawWidth / MinDrawWidth) * 100;
+    }
+    private static double SliderToWidth(double slider)
+    {
+        var normalized = Math.Clamp(slider, 0, 100) / 100;
+        var width = MinDrawWidth * Math.Pow(MaxDrawWidth / MinDrawWidth, normalized);
+        var step = width switch
+        {
+            < 4 => .25,
+            < 16 => .5,
+            < 64 => 1,
+            < 128 => 2,
+            _ => 4
+        };
+        return Math.Round(width / step) * step;
+    }
     private void DrawWidth1() => SetDrawWidth(1);
     private void DrawWidth3() => SetDrawWidth(3);
     private void DrawWidth8() => SetDrawWidth(8);
@@ -474,6 +566,7 @@ public partial class PictureEditor
     private void MakeRenderVignette() => WithRender(layer => layer.RenderKind = PictureRenderKind.Vignette);
     private void RasterContain() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Contain);
     private void RasterCover() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Cover);
+    private void RasterStretch() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Stretch);
     private void RasterFlipHorizontal() => WithRaster(layer => layer.FlipHorizontal = !layer.FlipHorizontal);
     private void RasterFlipVertical() => WithRaster(layer => layer.FlipVertical = !layer.FlipVertical);
     private void SoftenLight() => State.UpdateSelected(layer => layer.Blur = 2);
@@ -486,6 +579,23 @@ public partial class PictureEditor
     private void ToggleGrayscalePreset() => State.UpdateSelected(layer => layer.Grayscale = layer.Grayscale > .5 ? 0 : 1);
     private void ToggleSepiaPreset() => State.UpdateSelected(layer => layer.Sepia = layer.Sepia > .5 ? 0 : 1);
     private void ToggleInvertPreset() => State.UpdateSelected(layer => layer.Invert = layer.Invert > .5 ? 0 : 1);
+
+    private void ShapeRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.Rectangle);
+    private void ShapeRoundedRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.RoundedRectangle);
+    private void ShapeEllipse() => WithShape(layer => layer.Shape = PictureShapeKind.Ellipse);
+    private void ShapeLine() => WithShape(layer => layer.Shape = PictureShapeKind.Line);
+    private void FillSolid() => WithFill(layer => layer.FillKind = PictureFillKind.Solid);
+    private void FillLinearGradient() => WithFill(layer => layer.FillKind = PictureFillKind.LinearGradient);
+    private void FillRadialGradient() => WithFill(layer => layer.FillKind = PictureFillKind.RadialGradient);
+    private void ToggleSelectedLockMenu()
+    {
+        if (State.SelectedLayer is PictureLayer layer) State.ToggleLock(layer.Id);
+    }
+    private void ToggleSelectedVisibilityMenu()
+    {
+        if (State.SelectedLayer is PictureLayer layer) State.ToggleVisibility(layer.Id);
+    }
+    private static string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
 
     private void ChangeDocumentName(ChangeEventArgs args) => State.SetDocumentName(Text(args));
     private void ChangeCanvasWidth(ChangeEventArgs args) => State.SetDocumentSize(Int(args, State.Document.WidthPx), State.Document.HeightPx);
@@ -502,6 +612,7 @@ public partial class PictureEditor
     }
     private void ChangeDrawColorInput(ChangeEventArgs args) => ChangeDrawColor(Text(args));
     private void ChangeDrawWidth(ChangeEventArgs args) => SetDrawWidth(Number(args, _drawWidth));
+    private void ChangeDrawWidthSlider(ChangeEventArgs args) => SetDrawWidth(SliderToWidth(Number(args, BrushWidthSliderValue)));
     private void ChangeDrawOpacity(ChangeEventArgs args) { _drawOpacity = Math.Clamp(Number(args, _drawOpacity), 0, 1); _renderRequested = true; }
     private void ChangeDrawHardness(ChangeEventArgs args) { _drawHardness = Math.Clamp(Number(args, _drawHardness), 0, 1); _renderRequested = true; }
 

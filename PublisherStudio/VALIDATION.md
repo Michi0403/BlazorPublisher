@@ -1,6 +1,6 @@
 # Validation status
 
-The v0.7 source tree was checked without restoring proprietary packages.
+The v0.8 source tree was checked without restoring proprietary packages.
 
 ## Completed checks
 
@@ -75,7 +75,7 @@ When reporting a compiler failure, include the first compiler error and affected
 - Picture Studio is registered as a scoped state service and a singleton serializer/normalizer inside the existing ASP.NET Core host. No controller, route, InstallerConsole, or runtime-host replacement was introduced.
 - The final raster and editable layer source are stored separately: `DataUrl` remains the normal publication image while `PictureSource` retains the non-destructive layer model.
 - PNG export uses an alpha-enabled canvas; JPEG export forces a white background.
-- Canvas-to-Blazor apply uses `IJSStreamReference` rather than returning a large base64 JavaScript string.
+- Canvas-to-Blazor apply transfers a PNG data URL in bounded chunks, avoiding both JS stream-reference type detection and the default SignalR message-size limit.
 - The Picture Studio canvas is rebound after every modal reopen so direct manipulation does not remain attached to a removed DOM element.
 - Existing imported pictures are initialized from their natural pixel dimensions, scaled down only when a side exceeds the 8192-pixel document limit.
 - JavaScript passes `node --check`; project JSON/XML and CSS/C# lexical scans pass.
@@ -106,4 +106,17 @@ When reporting a compiler failure, include the first compiler error and affected
 - Paint layers and strokes are bounded, normalized, polymorphically serialized, and included in the existing undo/redo and export paths.
 - Brush, Pencil, Line, Eraser, and Eyedropper pointer paths are handled by the existing Canvas 2D module; no JavaScript or image-processing dependency was added.
 - JavaScript passes `node --check`; JSON/XML, source delimiters, direct Razor `@page.` collisions, package boundaries, and archive contents are checked.
+- A real `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+
+## v0.8 targeted validation
+
+- Picture Studio right-click uses the same DevExpress `DxContextMenu` component family as the publication canvas.
+- Canvas context opening first performs coordinate-aware layer hit testing; layer-list context opening selects the row before the menu is rendered.
+- Non-primary pointer-down events are rejected before Picture Studio transform or drawing logic starts.
+- Picture Studio clipboard copies polymorphic layer models through the existing serializer-backed clone path and pastes a new identifier with an offset.
+- Raster replacement targets the originally selected unlocked raster layer and preserves its transform, fit mode, effects, and layer ordering.
+- Focused-canvas keyboard commands call bounded Blazor state operations; browser defaults are suppressed only for handled commands.
+- Publication context commands cover text, image, WordArt, data visual, shape, connector, selected-object, and empty-page cases without changing the page model.
+- Data-visual preview context commands mutate only the editor draft until **Apply changes** is chosen.
+- JavaScript passes `node --check`; project JSON/XML, source delimiters, context-menu handler references, package boundaries, and archive contents are checked.
 - A real `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.

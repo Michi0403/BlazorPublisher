@@ -5,7 +5,7 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 ## Implemented in this source package
 
 - DevExpress Blazor `DxRibbon` with File, Home, Insert, Page Design, View, Picture Tools, Text Box Tools, WordArt Tools, Connector Tools, Shape Tools, and Data Tools tabs.
-- DevExpress `DxContextMenu` on the page and on selected objects.
+- DevExpress `DxContextMenu` on the page, selected publication objects, Picture Studio canvas/layers, and data-visual preview.
 - Multi-page workspace with page thumbnails, layers, selection handles, drag, resize, rotation, ordering, alignment, duplication, copy/paste, undo, and redo.
 - Canvas-linked horizontal and vertical rulers that follow page position, scroll, zoom, and the selected unit.
 - Millimetre, centimetre, inch, and pixel ruler units.
@@ -13,7 +13,7 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 - A larger preset catalogue: A3, A4, A5, Letter, Legal, Tabloid, business card, landscape variants, and square, plus custom dimensions.
 - Text frames edited with DevExpress Blazor RichEdit and its Office ribbon; stories use DOCX storage, support dynamic fields, and download as DOCX, RTF, TXT, or HTML.
 - Image frames with preserved PNG alpha, replacement, fit/fill, interactive crop panning, wheel-based crop zoom, picture rotation, flipping, opacity, brightness, contrast, saturation, hue, inversion, grayscale, sepia, blur, masks, borders, shadows, tint/full recolor, blend modes, color-key transparency, and frame-ratio presets.
-- A separate **Picture Studio** opened by **Insert > Create picture** or **Picture Tools > Edit in Picture Studio**, with transparent canvases, direct transforms, undo/redo, and editable raster, text, shape, fill, and procedural-render layers.
+- A separate **Picture Studio** opened by **Insert > Create picture** or **Picture Tools > Edit in Picture Studio**, with transparent canvases, direct transforms, undo/redo, a layer clipboard, keyboard shortcuts, contextual right-click commands, and editable raster, text, shape, fill, paint, and procedural-render layers.
 - Publication-level reusable data objects sourced from JSON, pasted CSV/TSV/delimited text, or live publication-object metadata.
 - Insertable live DevExpress data visuals: Cartesian charts, pie/doughnut charts, polar charts, sparklines, circular bar gauges, data tables, and KPI progress indicators.
 - A guided data-visual editor for choosing component type, chart subtype, category, series, numeric fields, labels, legends, ranges, and row limits with a live preview.
@@ -69,7 +69,8 @@ Without a supplied port, Kestrel asks the operating system for a loopback port a
 8. Choose **Insert > Create picture** to start a transparent layered image, or select an image and choose **Picture Tools > Edit in Picture Studio**. Use **Insert into publication / Apply to picture** to retain the editable layer source.
 9. Choose **Insert > Manage data** to create a reusable data object from JSON, pasted CSV/TSV, or live page/object metadata.
 10. Choose **Insert > Chart**, **Pie**, **Polar**, **Sparkline**, **Bar Gauge**, **Data Table**, or **KPI**, then select fields and subtypes in the live visual editor.
-11. Use **File** for JSON save/open and PNG, JPEG, SVG, website, or print/PDF output.
+11. Right-click the page, a selected publication object, the Picture Studio canvas/layer list, or a data-visual preview for commands relevant to that location.
+12. Use **File** for JSON save/open and PNG, JPEG, SVG, website, or print/PDF output.
 
 The file picker is reset before every picture/open command, so selecting the same file again also triggers replacement.
 
@@ -131,3 +132,7 @@ See `CHANGELOG-v0.6.md`. Publications can now store reusable data objects and in
 ## v0.7 Picture Studio drawing and recovery
 
 See `CHANGELOG-v0.7.md`. Picture Studio now uses a DevExpress Ribbon for insert, render, drawing, raster, and effect commands; adds editable paint layers with Brush, Pencil, Line, Eraser, and Eyedropper tools; and fixes the literal initial-image binding that caused repeated image decode exceptions.
+
+## v0.8 desktop context menus
+
+See `CHANGELOG-v0.8.md`. Picture Studio now has hit-tested canvas and layer-list context menus, an internal layer clipboard, and focused-canvas keyboard shortcuts. The publication canvas and data-visual editor context menus now expose more relevant insert, type, display, page, and editing commands.

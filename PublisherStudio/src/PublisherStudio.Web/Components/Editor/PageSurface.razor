@@ -134,29 +134,80 @@
 
 <DxContextMenu @ref="_contextMenu">
     <Items>
-        @if (State.SelectedElement is TextFrameElement)
+        <DxContextMenuItem Text="Undo" IconCssClass="pub-icon pub-icon-undo" Enabled="@State.CanUndo" Click="State.Undo" />
+        <DxContextMenuItem Text="Redo" IconCssClass="pub-icon pub-icon-redo" Enabled="@State.CanRedo" Click="State.Redo" />
+        @if (State.SelectedElement is TextFrameElement textFrame)
         {
-            <DxContextMenuItem Text="Edit story" IconCssClass="pub-icon pub-icon-edit" Click="EditSelectedStory" />
+            <DxContextMenuItem Text="Edit story" IconCssClass="pub-icon pub-icon-edit" BeginGroup="true" Click="EditSelectedStory" />
+            <DxContextMenuItem Text="Frame fill">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(string.Equals(textFrame.Background, "transparent", StringComparison.OrdinalIgnoreCase), "No fill"))" Click="TextFrameNoFill" />
+                    <DxContextMenuItem Text="@(CheckedText(string.Equals(textFrame.Background, "#ffffff", StringComparison.OrdinalIgnoreCase), "White fill"))" Click="TextFrameWhiteFill" />
+                </Items>
+            </DxContextMenuItem>
         }
-        @if (State.SelectedElement is ImageFrameElement)
+        @if (State.SelectedElement is ImageFrameElement imageFrame)
         {
-            <DxContextMenuItem Text="Edit in Picture Studio" IconCssClass="pub-icon pub-icon-create-picture" Click="EditSelectedPicture" />
+            <DxContextMenuItem Text="Edit in Picture Studio" IconCssClass="pub-icon pub-icon-create-picture" BeginGroup="true" Click="EditSelectedPicture" />
             <DxContextMenuItem Text="Replace picture…" IconCssClass="pub-icon pub-icon-picture" Click="ReplaceSelectedPicture" />
             <DxContextMenuItem Text="@(State.CropMode ? "Finish crop" : "Crop picture")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleCrop" />
             <DxContextMenuItem Text="Fit picture" Click="PictureFit" />
             <DxContextMenuItem Text="Fill frame" Click="PictureFill" />
+            <DxContextMenuItem Text="Transform picture">
+                <Items>
+                    <DxContextMenuItem Text="Rotate left" Click="RotatePictureLeft" />
+                    <DxContextMenuItem Text="Rotate right" Click="RotatePictureRight" />
+                    <DxContextMenuItem Text="@(CheckedText(imageFrame.FlipHorizontal, "Flip horizontal"))" Click="FlipPictureHorizontal" />
+                    <DxContextMenuItem Text="@(CheckedText(imageFrame.FlipVertical, "Flip vertical"))" Click="FlipPictureVertical" />
+                </Items>
+            </DxContextMenuItem>
             <DxContextMenuItem Text="Reset picture" Click="ResetPicture" />
         }
         @if (State.SelectedElement is WordArtElement)
         {
-            <DxContextMenuItem Text="Use custom text path" IconCssClass="pub-icon pub-icon-path" Click="WordArtCustomPath" />
+            <DxContextMenuItem Text="Use custom text path" IconCssClass="pub-icon pub-icon-path" BeginGroup="true" Click="WordArtCustomPath" />
             <DxContextMenuItem Text="Reverse text path" Click="WordArtReversePath" />
         }
-        @if (State.SelectedElement is DataVisualElement)
+        @if (State.SelectedElement is DataVisualElement dataVisual)
         {
-            <DxContextMenuItem Text="Edit data visual" IconCssClass="pub-icon pub-icon-chart" Click="EditSelectedDataVisual" />
+            <DxContextMenuItem Text="Edit data visual" IconCssClass="pub-icon pub-icon-chart" BeginGroup="true" Click="EditSelectedDataVisual" />
+            <DxContextMenuItem Text="Visual type">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.CartesianChart, DataVisualMenuName(DataVisualKind.CartesianChart)))" Click="SelectedVisualChart" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.PieChart, DataVisualMenuName(DataVisualKind.PieChart)))" Click="SelectedVisualPie" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.PolarChart, DataVisualMenuName(DataVisualKind.PolarChart)))" Click="SelectedVisualPolar" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.Sparkline, DataVisualMenuName(DataVisualKind.Sparkline)))" Click="SelectedVisualSparkline" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.BarGauge, DataVisualMenuName(DataVisualKind.BarGauge)))" Click="SelectedVisualBarGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.DataTable, DataVisualMenuName(DataVisualKind.DataTable)))" Click="SelectedVisualDataTable" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.KpiProgress, DataVisualMenuName(DataVisualKind.KpiProgress)))" Click="SelectedVisualKpi" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="@(CheckedText(dataVisual.ShowTitle, "Show title"))" Click="ToggleDataVisualTitle" />
+            @if (dataVisual.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge)
+            {
+                <DxContextMenuItem Text="@(CheckedText(dataVisual.ShowLegend, "Show legend"))" Click="ToggleDataVisualLegend" />
+            }
+            @if (dataVisual.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart)
+            {
+                <DxContextMenuItem Text="@(CheckedText(dataVisual.ShowLabels, "Show point labels"))" Click="ToggleDataVisualLabels" />
+            }
+            @if (dataVisual.VisualKind == DataVisualKind.DataTable)
+            {
+                <DxContextMenuItem Text="@(CheckedText(dataVisual.TableShowFilterRow, "Interactive filter row"))" Click="ToggleDataVisualFilterRow" />
+            }
             <DxContextMenuItem Text="Manage publication data" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
             <DxContextMenuItem Text="Refresh data" Click="RefreshData" />
+        }
+        @if (State.SelectedElement is ShapeElement shape)
+        {
+            <DxContextMenuItem Text="Shape type" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(shape.Shape == PublicationShape.Rectangle, ShapeMenuName(PublicationShape.Rectangle)))" Click="SelectedShapeRectangle" />
+                    <DxContextMenuItem Text="@(CheckedText(shape.Shape == PublicationShape.RoundedRectangle, ShapeMenuName(PublicationShape.RoundedRectangle)))" Click="SelectedShapeRoundedRectangle" />
+                    <DxContextMenuItem Text="@(CheckedText(shape.Shape == PublicationShape.Ellipse, ShapeMenuName(PublicationShape.Ellipse)))" Click="SelectedShapeEllipse" />
+                    <DxContextMenuItem Text="@(CheckedText(shape.Shape == PublicationShape.Line, ShapeMenuName(PublicationShape.Line)))" Click="SelectedShapeLine" />
+                </Items>
+            </DxContextMenuItem>
         }
         @if (State.SelectedElement is ConnectorElement)
         {
@@ -198,17 +249,40 @@
         }
         else
         {
-            <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" Click="Paste" />
-            <DxContextMenuItem Text="Insert text box" IconCssClass="pub-icon pub-icon-text" BeginGroup="true" Click="AddText" />
+            <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" BeginGroup="true" Click="Paste" />
+            <DxContextMenuItem Text="Insert text box" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
             <DxContextMenuItem Text="Insert picture…" IconCssClass="pub-icon pub-icon-picture" Click="InsertPicture" />
             <DxContextMenuItem Text="Create picture…" IconCssClass="pub-icon pub-icon-create-picture" Click="CreatePicture" />
-            <DxContextMenuItem Text="Insert chart…" IconCssClass="pub-icon pub-icon-chart" Click="InsertChart" />
+            <DxContextMenuItem Text="Insert data visual" IconCssClass="pub-icon pub-icon-chart">
+                <Items>
+                    <DxContextMenuItem Text="Chart" Click="InsertChart" />
+                    <DxContextMenuItem Text="Pie / doughnut" Click="InsertPie" />
+                    <DxContextMenuItem Text="Polar chart" Click="InsertPolar" />
+                    <DxContextMenuItem Text="Sparkline" Click="InsertSparkline" />
+                    <DxContextMenuItem Text="Bar gauge" Click="InsertBarGauge" />
+                    <DxContextMenuItem Text="Data table" Click="InsertDataTable" />
+                    <DxContextMenuItem Text="KPI progress" Click="InsertKpi" />
+                </Items>
+            </DxContextMenuItem>
             <DxContextMenuItem Text="Manage publication data…" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
-            <DxContextMenuItem Text="Insert rectangle" Click="AddRectangle" />
+            <DxContextMenuItem Text="Insert shape">
+                <Items>
+                    <DxContextMenuItem Text="Rectangle" Click="AddRectangle" />
+                    <DxContextMenuItem Text="Rounded rectangle" Click="AddRoundedRectangle" />
+                    <DxContextMenuItem Text="Ellipse" Click="AddEllipse" />
+                    <DxContextMenuItem Text="Line" Click="AddLine" />
+                </Items>
+            </DxContextMenuItem>
             <DxContextMenuItem Text="Draw connector" BeginGroup="true" Click="StartConnector" />
             <DxContextMenuItem Text="Draw arrow connector" Click="StartArrowConnector" />
-            <DxContextMenuItem Text="Add page" BeginGroup="true" Click="AddPage" />
+            <DxContextMenuItem Text="Page" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="Add page" Click="AddPage" />
+                    <DxContextMenuItem Text="Duplicate page" Click="DuplicatePage" />
+                    <DxContextMenuItem Text="Delete page" Enabled="@(State.Document.Pages.Count > 1)" Click="DeletePage" />
+                </Items>
+            </DxContextMenuItem>
         }
     </Items>
 </DxContextMenu>
@@ -334,10 +408,72 @@
     private Task EditSelectedDataVisual() => RequestEditDataVisual.InvokeAsync();
     private Task ManageData() => RequestManageData.InvokeAsync();
     private Task InsertChart() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
+    private Task InsertPie() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.PieChart);
+    private Task InsertPolar() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
+    private Task InsertSparkline() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
+    private Task InsertBarGauge() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
+    private Task InsertDataTable() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
+    private Task InsertKpi() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
     private void RefreshData() => State.RefreshDataVisuals();
+    private void ChangeSelectedDataVisualKind(DataVisualKind kind)
+    {
+        if (State.SelectedElement is not DataVisualElement dataVisual) return;
+        State.UpdateSelected(_ =>
+        {
+            dataVisual.VisualKind = kind;
+            if (kind is not (DataVisualKind.CartesianChart or DataVisualKind.BarGauge) && dataVisual.ValueFields.Count > 1)
+                dataVisual.ValueFields = [dataVisual.ValueFields[0]];
+        });
+    }
+    private void ToggleDataVisualTitle() => UpdateSelectedDataVisual(item => item.ShowTitle = !item.ShowTitle);
+    private void ToggleDataVisualLegend() => UpdateSelectedDataVisual(item => item.ShowLegend = !item.ShowLegend);
+    private void ToggleDataVisualLabels() => UpdateSelectedDataVisual(item => item.ShowLabels = !item.ShowLabels);
+    private void ToggleDataVisualFilterRow() => UpdateSelectedDataVisual(item => item.TableShowFilterRow = !item.TableShowFilterRow);
+    private void SelectedVisualChart() => ChangeSelectedDataVisualKind(DataVisualKind.CartesianChart);
+    private void SelectedVisualPie() => ChangeSelectedDataVisualKind(DataVisualKind.PieChart);
+    private void SelectedVisualPolar() => ChangeSelectedDataVisualKind(DataVisualKind.PolarChart);
+    private void SelectedVisualSparkline() => ChangeSelectedDataVisualKind(DataVisualKind.Sparkline);
+    private void SelectedVisualBarGauge() => ChangeSelectedDataVisualKind(DataVisualKind.BarGauge);
+    private void SelectedVisualDataTable() => ChangeSelectedDataVisualKind(DataVisualKind.DataTable);
+    private void SelectedVisualKpi() => ChangeSelectedDataVisualKind(DataVisualKind.KpiProgress);
+    private void UpdateSelectedDataVisual(Action<DataVisualElement> update)
+    {
+        if (State.SelectedElement is DataVisualElement item) State.UpdateSelected(_ => update(item));
+    }
+    private void ChangeSelectedShape(PublicationShape shape)
+    {
+        if (State.SelectedElement is ShapeElement item) State.UpdateSelected(_ => item.Shape = shape);
+    }
+    private void SelectedShapeRectangle() => ChangeSelectedShape(PublicationShape.Rectangle);
+    private void SelectedShapeRoundedRectangle() => ChangeSelectedShape(PublicationShape.RoundedRectangle);
+    private void SelectedShapeEllipse() => ChangeSelectedShape(PublicationShape.Ellipse);
+    private void SelectedShapeLine() => ChangeSelectedShape(PublicationShape.Line);
+    private static string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
+    private static string ShapeMenuName(PublicationShape shape) => shape == PublicationShape.RoundedRectangle ? "Rounded rectangle" : shape.ToString();
+    private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;
+    private static string DataVisualMenuName(DataVisualKind kind) => kind switch
+    {
+        DataVisualKind.CartesianChart => "Chart",
+        DataVisualKind.PieChart => "Pie / doughnut",
+        DataVisualKind.PolarChart => "Polar chart",
+        DataVisualKind.Sparkline => "Sparkline",
+        DataVisualKind.BarGauge => "Bar gauge",
+        DataVisualKind.DataTable => "Data table",
+        _ => "KPI progress"
+    };
     private void ToggleCrop() => State.ToggleCropMode();
+    private void SetTextFrame(Action<TextFrameElement> update)
+    {
+        if (State.SelectedElement is TextFrameElement item) State.UpdateSelected(_ => update(item));
+    }
+    private void TextFrameNoFill() => SetTextFrame(item => item.Background = "transparent");
+    private void TextFrameWhiteFill() => SetTextFrame(item => item.Background = "#ffffff");
     private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
     private void PictureFill() => SetImage(image => image.FitInsideFrame = false);
+    private void RotatePictureLeft() => SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation - 90));
+    private void RotatePictureRight() => SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation + 90));
+    private void FlipPictureHorizontal() => SetImage(image => image.FlipHorizontal = !image.FlipHorizontal);
+    private void FlipPictureVertical() => SetImage(image => image.FlipVertical = !image.FlipVertical);
     private void Copy() => State.CopySelected();
     private void Paste() => State.Paste();
     private void Duplicate() => State.DuplicateSelected();
@@ -357,9 +493,14 @@
     private void AddText() => State.AddText();
     private void AddWordArt() => State.AddWordArt();
     private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
+    private void AddRoundedRectangle() => State.AddShape(PublicationShape.RoundedRectangle);
+    private void AddEllipse() => State.AddShape(PublicationShape.Ellipse);
+    private void AddLine() => State.AddShape(PublicationShape.Line);
     private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
     private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
     private void AddPage() => State.AddPage();
+    private void DuplicatePage() => State.DuplicatePage();
+    private void DeletePage() => State.DeletePage();
     private void CycleRulerUnit() => State.CycleRulerUnit();
 
     private void SetConnector(Action<ConnectorElement> update) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); }

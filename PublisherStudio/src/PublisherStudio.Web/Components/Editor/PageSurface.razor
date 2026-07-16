@@ -303,6 +303,7 @@
                     <DxContextMenuItem Text="Add fade out" Click="AddFadeOutAnimation" />
                     <DxContextMenuItem Text="Preview object" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="PreviewSelectedAnimations" />
                     <DxContextMenuItem Text="Remove all object animations" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="ClearSelectedAnimations" />
+                    <DxContextMenuItem Text="@TimelineCommandText" BeginGroup="true" Click="ToggleTimeline" />
                 </Items>
             </DxContextMenuItem>
             <DxContextMenuItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="Copy" />
@@ -336,6 +337,7 @@
         else
         {
             <DxContextMenuItem Text="Preview page animations" IconCssClass="pub-icon pub-icon-animation" Click="PreviewPageAnimations" />
+            <DxContextMenuItem Text="@TimelineCommandText" IconCssClass="pub-icon pub-icon-timeline" Click="ToggleTimeline" />
             <DxContextMenuItem Text="Page transition">
                 <Items>
                     <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.None, "None"))" Click="TransitionNone" />
@@ -402,6 +404,10 @@
     [Parameter] public EventCallback RequestCreateVideo { get; set; }
     [Parameter] public EventCallback RequestCreateAudio { get; set; }
     [Parameter] public EventCallback RequestEditMedia { get; set; }
+    [Parameter] public bool TimelineVisible { get; set; }
+    [Parameter] public EventCallback RequestToggleTimeline { get; set; }
+
+    private string TimelineCommandText => TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
 
     private DxContextMenu _contextMenu = default!;
     private IJSObjectReference? _module;
@@ -519,6 +525,7 @@
     private Task CreateVideo() => RequestCreateVideo.InvokeAsync();
     private Task CreateAudio() => RequestCreateAudio.InvokeAsync();
     private Task EditSelectedMedia() => RequestEditMedia.InvokeAsync();
+    private Task ToggleTimeline() => RequestToggleTimeline.InvokeAsync();
     private Task PlaySelectedMedia() => State.SelectedElement is PublicationMediaElement media
         ? JS.InvokeVoidAsync("publisherStudio.playPublicationMedia", $"element-{media.Id}").AsTask()
         : Task.CompletedTask;

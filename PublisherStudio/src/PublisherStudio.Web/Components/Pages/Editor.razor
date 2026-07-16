@@ -15,6 +15,7 @@
     </header>
 
     <PublicationRibbon State="State"
+                       TimelineVisible="_timelineVisible"
                        OnNew="NewDocument"
                        OnOpen="OpenPublicationPicker"
                        OnSave="SavePublication"
@@ -44,21 +45,13 @@
                        OnPreviewObjectAnimations="PreviewObjectAnimations"
                        OnStopAnimations="StopAnimations" />
 
-    <PublicationTimeline State="State"
-                         Collapsed="_timelineCollapsed"
-                         CollapsedChanged="TimelineCollapsedChanged"
-                         RequestInsertAudio="OpenAudioPicker"
-                         RequestInsertVideo="OpenVideoPicker"
-                         RequestCreateAudio="CreateAudio"
-                         RequestCreateVideo="CreateVideo"
-                         RequestEditMedia="EditSelectedMedia" />
-
-    <div id="publisher-workspace" class="editor-workspace">
-        <PageNavigator State="State" />
+    <div id="publisher-workspace" class="editor-workspace @(_timelineVisible ? "timeline-open" : null)">
+        <PageNavigator State="State" TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
         <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
                      RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
-                     RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia" />
+                     RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia"
+                     TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
         <InspectorPanel State="State"
                         OnEditStory="OpenStoryEditor"
@@ -76,6 +69,17 @@
                         OnCreateVideo="CreateVideo"
                         OnCreateAudio="CreateAudio"
                         OnEditMedia="EditSelectedMedia" />
+
+        @if (_timelineVisible)
+        {
+            <PublicationTimeline State="State"
+                                 RequestClose="HideTimeline"
+                                 RequestInsertAudio="OpenAudioPicker"
+                                 RequestInsertVideo="OpenVideoPicker"
+                                 RequestCreateAudio="CreateAudio"
+                                 RequestCreateVideo="CreateVideo"
+                                 RequestEditMedia="EditSelectedMedia" />
+        }
     </div>
 
     <footer class="status-bar">
@@ -144,7 +148,7 @@
     private bool _dataVisualEditorVisible;
     private bool _dataManagerVisible;
     private bool _mediaStudioVisible;
-    private bool _timelineCollapsed;
+    private bool _timelineVisible;
     private Guid _mediaStudioSessionId;
     private Guid? _mediaStudioTargetId;
     private PublicationElementKind _mediaStudioKind = PublicationElementKind.Audio;
@@ -239,7 +243,11 @@
 
     private Task TogglePagesPane() => JS.InvokeVoidAsync("publisherStudio.toggleWorkspacePane", "publisher-workspace", "left").AsTask();
     private Task ToggleInspectorPane() => JS.InvokeVoidAsync("publisherStudio.toggleWorkspacePane", "publisher-workspace", "right").AsTask();
-    private Task ResetWorkspace() => JS.InvokeVoidAsync("publisherStudio.resetWorkspaceLayout", "publisher-workspace").AsTask();
+    private async Task ResetWorkspace()
+    {
+        _timelineVisible = false;
+        await JS.InvokeVoidAsync("publisherStudio.resetWorkspaceLayout", "publisher-workspace");
+    }
 
     private int CurrentPageNumber => Math.Max(1, State.Document.Pages.FindIndex(publicationPage => publicationPage.Id == State.SelectedPageId) + 1);
 
@@ -330,7 +338,8 @@
             {
                 await module.DisposeAsync();
             }
-            ShowNotice($"Inserted {file.Name}.");
+            _timelineVisible = true;
+            ShowNotice($"Inserted {file.Name}. The timeline pane is open for timing and trimming.");
         }
         catch (Exception ex)
         {
@@ -381,6 +390,7 @@
         _mediaStudioVisible = false;
         _mediaStudioTargetId = null;
         _mediaStudioInitial = null;
+        _timelineVisible = true;
         ShowNotice($"{(result.Kind == PublicationElementKind.Video ? "Video" : "Audio")} applied to the publication timeline.");
         return Task.CompletedTask;
     }
@@ -419,13 +429,13 @@
 
     private Task ToggleTimeline()
     {
-        _timelineCollapsed = !_timelineCollapsed;
+        _timelineVisible = !_timelineVisible;
         return Task.CompletedTask;
     }
 
-    private Task TimelineCollapsedChanged(bool collapsed)
+    private Task HideTimeline()
     {
-        _timelineCollapsed = collapsed;
+        _timelineVisible = false;
         return Task.CompletedTask;
     }
 

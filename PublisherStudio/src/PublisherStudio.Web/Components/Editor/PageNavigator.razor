@@ -61,7 +61,8 @@
             </DxContextMenuItem>
             <DxContextMenuItem Text="Timeline">
                 <Items>
-                    <DxContextMenuItem Text="Fit duration to page content" Click="FitTimelineToContent" />
+                    <DxContextMenuItem Text="@TimelineCommandText" Click="ToggleTimeline" />
+                    <DxContextMenuItem Text="Fit duration to page content" BeginGroup="true" Click="FitTimelineToContent" />
                     <DxContextMenuItem Text="Set duration to 10 seconds" Click="SetTenSecondTimeline" />
                 </Items>
             </DxContextMenuItem>
@@ -70,12 +71,17 @@
         {
             <DxContextMenuItem Text="Add new page" Click="AddPage" />
             <DxContextMenuItem Text="Duplicate selected page" Enabled="@(State.Document.Pages.Count > 0)" Click="DuplicateSelectedPage" />
+            <DxContextMenuItem Text="@TimelineCommandText" BeginGroup="true" Click="ToggleTimeline" />
         }
     </Items>
 </DxContextMenu>
 
 @code {
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public bool TimelineVisible { get; set; }
+    [Parameter] public EventCallback RequestToggleTimeline { get; set; }
+
+    private string TimelineCommandText => TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
 
     private DxContextMenu _pageContextMenu = default!;
     private Guid? _contextPageId;
@@ -115,6 +121,7 @@
     }
 
     private void AddPage() => State.AddPage();
+    private Task ToggleTimeline() => RequestToggleTimeline.InvokeAsync();
     private void DuplicateSelectedPage() => State.DuplicatePage();
 
     private void SetTransition(PublicationPageTransitionKind kind)

@@ -19,7 +19,7 @@
 
 ## Page timeline
 
-- A collapsible timeline now sits directly below the ribbon.
+- An on-demand timeline is docked to the bottom of the workspace, so it behaves like the Pages and Properties panes instead of creating another toolbar row.
 - It provides a page playhead, play/pause/stop transport, visible-range selector, ruler, tracks, and media/animation clips.
 - Animation clips can be moved and resized; media clips can be moved and trimmed directly.
 - Explicit animation positions coexist with the existing trigger-based sequence. A context command returns an animation to normal trigger timing.

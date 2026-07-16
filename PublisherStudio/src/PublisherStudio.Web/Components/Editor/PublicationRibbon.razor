@@ -118,7 +118,7 @@
             <DxRibbonItem Text="Stop" Click="RequestStopAnimations" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Timeline" IconCssClass="pub-icon pub-icon-timeline">
-            <DxRibbonItem Text="Show / hide timeline" IsPrimary="true" Click="RequestToggleTimeline" />
+            <DxRibbonItem Text="@TimelinePaneText" IsPrimary="true" Click="RequestToggleTimeline" />
             <DxRibbonItem Text="Edit selected media" Enabled="IsMediaSelected" Click="RequestEditMedia" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Entrance">
@@ -151,6 +151,7 @@
         <DxRibbonGroup Text="Workspace" IconCssClass="pub-icon pub-icon-panels">
             <DxRibbonItem Text="Pages pane" IconCssClass="pub-icon pub-icon-pages" Click="RequestTogglePagesPane" />
             <DxRibbonItem Text="Properties pane" IconCssClass="pub-icon pub-icon-properties" Click="RequestToggleInspectorPane" />
+            <DxRibbonItem Text="@TimelinePaneText" IconCssClass="pub-icon pub-icon-timeline" Click="RequestToggleTimeline" />
             <DxRibbonItem Text="Reset layout" Click="RequestResetWorkspace" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Show">
@@ -307,7 +308,7 @@
             <DxRibbonItem Text="@MediaAutoPlayText" Click="ToggleMediaAutoPlay" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Timeline">
-            <DxRibbonItem Text="Show / hide timeline" Click="RequestToggleTimeline" />
+            <DxRibbonItem Text="@TimelinePaneText" Click="RequestToggleTimeline" />
             <DxRibbonItem Text="Start at page entry" Click="MediaStartAtPageEntry" />
             <DxRibbonItem Text="Start on click" Click="MediaStartOnClick" />
             <DxRibbonItem Text="Start with animation" Click="MediaStartWithAnimation" />
@@ -329,6 +330,7 @@
 
 @code {
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
     [Parameter] public EventCallback OnOpen { get; set; }
     [Parameter] public EventCallback OnSave { get; set; }
@@ -365,6 +367,7 @@
     private string SnapGridText => CheckText(State.Document.View.SnapToGrid, "Snap to grid");
     private string SnapGuidesText => CheckText(State.Document.View.SnapToGuides, "Snap to guides");
     private string SnapPageText => CheckText(State.Document.View.SnapToPage, "Snap to page");
+    private string TimelinePaneText => CheckText(TimelineVisible, "Timeline pane");
     private static string CheckText(bool value, string text) => value ? $"✓ {text}" : text;
 
     private Task RequestNew() => OnNew.InvokeAsync();

@@ -2,7 +2,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<section id="publisher-timeline" class="publication-timeline @(Collapsed ? "collapsed" : null)">
+<section id="publisher-timeline" class="publication-timeline">
     <header class="timeline-toolbar" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
         <div class="timeline-transport">
             <button type="button" title="Play page timeline" @onclick="PlayTimeline">▶</button>
@@ -19,13 +19,11 @@
             <button type="button" title="Insert video" @onclick="InsertVideo">+ Video</button>
             <button type="button" title="Create audio" @onclick="CreateAudio">Create audio</button>
             <button type="button" title="Create video" @onclick="CreateVideo">Create video</button>
-            <button type="button" title="Collapse timeline" @onclick="ToggleCollapsed">@(Collapsed ? "▴" : "▾")</button>
+            <button type="button" class="timeline-close-button" title="Close timeline pane" aria-label="Close timeline pane" @onclick="CloseTimeline">×</button>
         </div>
     </header>
 
-    @if (!Collapsed)
-    {
-        <div class="timeline-overview" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
+    <div class="timeline-overview" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
             <span>Visible range</span>
             <DxRangeSelector Height="68px"
                              SelectedRangeStartValue="@_viewStart"
@@ -128,7 +126,6 @@
                 }
             </div>
         </div>
-    }
 </section>
 
 <DxContextMenu @ref="_contextMenu">
@@ -173,6 +170,7 @@
             <DxContextMenuItem Text="Insert video…" Click="InsertVideo" />
             <DxContextMenuItem Text="Create video…" Click="CreateVideo" />
         }
+        <DxContextMenuItem Text="Close timeline pane" BeginGroup="true" Click="CloseTimeline" />
     </Items>
 </DxContextMenu>
 
@@ -183,8 +181,7 @@
     [Parameter] public EventCallback RequestCreateAudio { get; set; }
     [Parameter] public EventCallback RequestCreateVideo { get; set; }
     [Parameter] public EventCallback RequestEditMedia { get; set; }
-    [Parameter] public bool Collapsed { get; set; }
-    [Parameter] public EventCallback<bool> CollapsedChanged { get; set; }
+    [Parameter] public EventCallback RequestClose { get; set; }
 
     private DxContextMenu _contextMenu = default!;
     private IJSObjectReference? _module;
@@ -240,7 +237,6 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Collapsed) return;
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/timelineInterop.js");
         _self ??= DotNetObjectReference.Create(this);
         await _module.InvokeVoidAsync("initializePublicationTimeline", "publisher-timeline", _self);
@@ -385,7 +381,7 @@
     private Task InsertVideo() => RequestInsertVideo.InvokeAsync();
     private Task CreateAudio() => RequestCreateAudio.InvokeAsync();
     private Task CreateVideo() => RequestCreateVideo.InvokeAsync();
-    private Task ToggleCollapsed() => CollapsedChanged.InvokeAsync(!Collapsed);
+    private Task CloseTimeline() => RequestClose.InvokeAsync();
 
     private string ClipStyle(double start, double duration)
     {

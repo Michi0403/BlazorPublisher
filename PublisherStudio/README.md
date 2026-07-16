@@ -24,7 +24,7 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 - Current-page PNG, JPEG, and browser-oriented SVG export.
 - Page-wide animation timelines, object entrance/emphasis/motion/exit effects, page transitions, click triggers, playback timing, and object interactions across every publication element type.
 - Embedded audio and video page objects with import, camera/screen/microphone recording, generated sample audio, non-destructive trims, fades, playback settings, and layer integration.
-- A collapsible page timeline below the ribbon with playhead transport, a DevExpress visible-range selector, draggable/resizable animation clips, and draggable/trim-enabled media clips.
+- An on-demand page timeline docked to the bottom of the workspace with playhead transport, a DevExpress visible-range selector, draggable/resizable animation clips, and draggable/trim-enabled media clips.
 - Self-contained animated HTML presentation export with responsive scaling, keyboard/control navigation, fullscreen, replay, looping, automatic advance, and print fallback.
 - Browser print workflow suitable for printing or the browser's Save as PDF command.
 - Optional InstallerConsole that installs a published payload, starts the Blazor host, removes it, or downloads and publishes a source ZIP without requiring Git.
@@ -73,7 +73,7 @@ Without a supplied port, Kestrel asks the operating system for a loopback port a
 9. Choose **Insert > Manage data** to create a reusable data object from JSON, pasted CSV/TSV, or live page/object metadata.
 10. Choose **Insert > Chart**, **Pie**, **Polar**, **Sparkline**, **Bar Gauge**, **Data Table**, or **KPI**, then select fields and subtypes in the live visual editor.
 11. Choose **Insert > Media** to embed audio/video, or open **Create audio / Create video** for microphone, camera, screen, generated-tone, trim, fade, volume, and playback controls.
-12. Select an object and open the **Animations** inspector tab or ribbon tab to add entrance, emphasis, motion, or exit steps. Use the timeline below the ribbon to drag animation timing and arrange or trim media clips against one page playhead.
+12. Select an object and open the **Animations** inspector tab or ribbon tab to add entrance, emphasis, motion, or exit steps. Open the docked timeline pane from the Animations, View, or Media Tools ribbon tabs and use it to drag animation timing and arrange or trim media clips against one page playhead.
 13. Right-click the page, page thumbnails, selected objects, timeline clips/background, Picture Studio canvas/layers, Media Studio preview/range, or a data-visual preview for commands relevant to that location.
 14. Use **File** for JSON save/open and PNG, JPEG, SVG, animated website, or print/PDF output.
 

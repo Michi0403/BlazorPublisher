@@ -1,0 +1,104 @@
+@namespace PublisherStudio.Components.Editor
+@inject IJSRuntime JS
+
+@if (Visible && Item is not null)
+{
+    <div class="modal-backdrop">
+        <section class="barcode-editor-dialog" role="dialog" aria-modal="true" aria-label="Barcode editor">
+            <header><div><strong>Barcode Studio</strong><span>@_draft.Format</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
+            <div class="barcode-editor-body">
+                <div class="barcode-editor-preview" @oncontextmenu="ShowContextMenu" @oncontextmenu:preventDefault>
+                    @if (!string.IsNullOrWhiteSpace(_error)) { <div class="barcode-error">@_error</div> }
+                    else { @((MarkupString)_svg) }
+                </div>
+                <div class="barcode-editor-properties">
+                    <label>Format<select value="@_draft.Format" @onchange="ChangeFormat">@foreach (var format in Enum.GetValues<PublicationBarcodeFormat>()) { <option value="@format">@FormatName(format)</option> }</select></label>
+                    <label>Value<textarea rows="4" @oninput="ChangeValue">@_draft.Value</textarea></label>
+                    <div class="picture-property-grid"><label>Foreground<input type="color" value="@_draft.ForegroundColor" @oninput="ChangeForeground" /></label><label>Background<input type="color" value="@_draft.BackgroundColor" @oninput="ChangeBackground" /></label></div>
+                    <label><input type="checkbox" checked="@_draft.TransparentBackground" @onchange="ChangeTransparent" /> Transparent background</label>
+                    @if (_draft.Format == PublicationBarcodeFormat.QrCode)
+                    {
+                        <label>Error correction<select value="@_draft.ErrorCorrection" @onchange="ChangeCorrection">@foreach (var level in Enum.GetValues<PublicationBarcodeErrorCorrection>()) { <option value="@level">@level</option> }</select></label>
+                        <label>Module design<select value="@_draft.ModuleShape" @onchange="ChangeShape">@foreach (var shape in Enum.GetValues<PublicationBarcodeModuleShape>()) { <option value="@shape">@shape</option> }</select></label>
+                    }
+                    else
+                    {
+                        <label><input type="checkbox" checked="@_draft.ShowText" @onchange="ChangeShowText" /> Show readable text</label>
+                        <div class="picture-property-grid"><label>Line width<input type="number" min="1" max="8" value="@_draft.LineWidth" @onchange="ChangeLineWidth" /></label><label>Bar height<input type="number" min="24" max="400" value="@_draft.BarHeight" @onchange="ChangeBarHeight" /></label><label>Font size<input type="number" min="8" max="72" value="@_draft.FontSize" @onchange="ChangeFontSize" /></label><label>Bar design<select value="@_draft.ModuleShape" @onchange="ChangeShape"><option value="Square">Square</option><option value="Rounded">Rounded</option></select></label></div>
+                    }
+                    <label>Margin<input type="range" min="0" max="32" step="1" value="@_draft.Margin" @oninput="ChangeMargin" /><span>@_draft.Margin</span></label>
+                </div>
+            </div>
+            <footer><DxButton Text="Cancel" Click="Cancel" /><DxButton Text="Insert / Apply" RenderStyle="ButtonRenderStyle.Primary" Enabled="@string.IsNullOrWhiteSpace(_error)" Click="Save" /></footer>
+        </section>
+    </div>
+
+    <DxContextMenu @ref="_menu"><Items>
+        <DxContextMenuItem Text="Regenerate" Click="RefreshNow" />
+        <DxContextMenuItem Text="Swap colors" Click="SwapColors" />
+        @if (_draft.Format == PublicationBarcodeFormat.QrCode)
+        {
+            <DxContextMenuItem Text="High error correction" Click="SetHighCorrection" />
+            <DxContextMenuItem Text="Rounded modules" Click="SetRounded" />
+            <DxContextMenuItem Text="Dot modules" Click="SetDots" />
+        }
+    </Items></DxContextMenu>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public BarcodeElement? Item { get; set; }
+    [Parameter] public EventCallback<BarcodeElement> Saved { get; set; }
+    [Parameter] public EventCallback Cancelled { get; set; }
+    private readonly BarcodeElement _draft = new();
+    private Guid _loadedId;
+    private string _svg = string.Empty;
+    private string? _error;
+    private bool _refresh;
+    private DxContextMenu _menu = default!;
+
+    protected override void OnParametersSet()
+    {
+        if (!Visible || Item is null || Item.Id == _loadedId) return;
+        _loadedId = Item.Id;
+        Copy(Item, _draft);
+        _refresh = true;
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Visible || !_refresh) return;
+        _refresh = false;
+        await Generate();
+    }
+    private async Task Generate()
+    {
+        try { _svg = await JS.InvokeAsync<string>("publisherStudio.generateBarcodeSvg", _draft); _error = null; }
+        catch (Exception ex) { _svg = string.Empty; _error = ex.Message; }
+        await InvokeAsync(StateHasChanged);
+    }
+    private void Queue() { _refresh = true; StateHasChanged(); }
+    private Task RefreshNow() => Generate();
+    private Task ShowContextMenu(MouseEventArgs args) => _menu.ShowAsync(args);
+    private async Task Save() { _draft.SvgMarkup = _svg; await Saved.InvokeAsync(Clone(_draft)); }
+    private Task Cancel() => Cancelled.InvokeAsync();
+    private void ChangeFormat(ChangeEventArgs e) { if (Enum.TryParse<PublicationBarcodeFormat>(e.Value?.ToString(), out var v)) _draft.Format = v; Queue(); }
+    private void ChangeValue(ChangeEventArgs e) { _draft.Value = e.Value?.ToString() ?? string.Empty; Queue(); }
+    private void ChangeForeground(ChangeEventArgs e) { _draft.ForegroundColor = e.Value?.ToString() ?? "#111827"; Queue(); }
+    private void ChangeBackground(ChangeEventArgs e) { _draft.BackgroundColor = e.Value?.ToString() ?? "#ffffff"; Queue(); }
+    private void ChangeTransparent(ChangeEventArgs e) { _draft.TransparentBackground = e.Value is bool b && b; Queue(); }
+    private void ChangeShowText(ChangeEventArgs e) { _draft.ShowText = e.Value is bool b && b; Queue(); }
+    private void ChangeCorrection(ChangeEventArgs e) { if (Enum.TryParse<PublicationBarcodeErrorCorrection>(e.Value?.ToString(), out var v)) _draft.ErrorCorrection = v; Queue(); }
+    private void ChangeShape(ChangeEventArgs e) { if (Enum.TryParse<PublicationBarcodeModuleShape>(e.Value?.ToString(), out var v)) _draft.ModuleShape = v; Queue(); }
+    private void ChangeMargin(ChangeEventArgs e) { _draft.Margin = Int(e, _draft.Margin); Queue(); }
+    private void ChangeLineWidth(ChangeEventArgs e) { _draft.LineWidth = Int(e, _draft.LineWidth); Queue(); }
+    private void ChangeBarHeight(ChangeEventArgs e) { _draft.BarHeight = Int(e, _draft.BarHeight); Queue(); }
+    private void ChangeFontSize(ChangeEventArgs e) { _draft.FontSize = Int(e, _draft.FontSize); Queue(); }
+    private void SwapColors() { (_draft.ForegroundColor, _draft.BackgroundColor) = (_draft.BackgroundColor, _draft.ForegroundColor); Queue(); }
+    private void SetHighCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.H; Queue(); }
+    private void SetRounded() { _draft.ModuleShape = PublicationBarcodeModuleShape.Rounded; Queue(); }
+    private void SetDots() { _draft.ModuleShape = PublicationBarcodeModuleShape.Dots; Queue(); }
+    private static int Int(ChangeEventArgs e, int fallback) => int.TryParse(e.Value?.ToString(), out var v) ? v : fallback;
+    private static string FormatName(PublicationBarcodeFormat f) => f switch { PublicationBarcodeFormat.QrCode => "QR Code", PublicationBarcodeFormat.Code128 => "Code 128", PublicationBarcodeFormat.Code39 => "Code 39", PublicationBarcodeFormat.Ean13 => "EAN-13", PublicationBarcodeFormat.UpcA => "UPC-A", PublicationBarcodeFormat.Itf14 => "ITF-14", _ => "Codabar" };
+    private static BarcodeElement Clone(BarcodeElement source) { var target = new BarcodeElement(); Copy(source, target); target.Id = source.Id; return target; }
+    private static void Copy(BarcodeElement s, BarcodeElement t) { t.Id=s.Id;t.Name=s.Name;t.X=s.X;t.Y=s.Y;t.Width=s.Width;t.Height=s.Height;t.Rotation=s.Rotation;t.ZIndex=s.ZIndex;t.Visible=s.Visible;t.Locked=s.Locked;t.Format=s.Format;t.Value=s.Value;t.ForegroundColor=s.ForegroundColor;t.BackgroundColor=s.BackgroundColor;t.TransparentBackground=s.TransparentBackground;t.ShowText=s.ShowText;t.Margin=s.Margin;t.LineWidth=s.LineWidth;t.BarHeight=s.BarHeight;t.FontSize=s.FontSize;t.ErrorCorrection=s.ErrorCorrection;t.ModuleShape=s.ModuleShape;t.SvgMarkup=s.SvgMarkup; }
+}

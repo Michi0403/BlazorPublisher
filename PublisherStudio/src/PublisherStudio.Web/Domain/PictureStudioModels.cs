@@ -47,11 +47,11 @@ public sealed class PictureDocument
 public enum PictureLayerKind { Raster, Text, Shape, Fill, Render, Paint }
 public enum PictureBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighten }
 public enum PictureRasterFitMode { Stretch, Contain, Cover }
-public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line, Arrow }
+public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line, Arrow, Freeform }
 public enum PictureFillKind { Solid, LinearGradient, RadialGradient }
 public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette, Bloom, Neon, LensFlare, GrainNoise, MotionBlur, Wind, OceanWaves }
 public enum PictureTextAlignment { Left, Center, Right }
-public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Eraser, Eyedropper }
+public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Eraser, Eyedropper, RectangleSelect, EllipseSelect, FreeSelect, MagneticSelect, FillSolid, FillGradient }
 public enum PictureStrokeKind { Brush, Pencil, Spray, Toothbrush, Line, Eraser }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
@@ -121,10 +121,14 @@ public sealed class ShapePictureLayer : PictureLayer
 {
     public override PictureLayerKind Kind => PictureLayerKind.Shape;
     public PictureShapeKind Shape { get; set; } = PictureShapeKind.Rectangle;
+    public PictureFillKind FillKind { get; set; } = PictureFillKind.Solid;
     public string FillColor { get; set; } = "#60a5fa";
+    public string SecondaryFillColor { get; set; } = "#ffffff";
+    public double FillAngleDegrees { get; set; } = 45;
     public string StrokeColor { get; set; } = "#1d4ed8";
     public double StrokeWidthPx { get; set; } = 3;
     public double CornerRadiusPx { get; set; } = 24;
+    public List<PicturePoint> PathPoints { get; set; } = [];
 }
 
 public sealed class FillPictureLayer : PictureLayer

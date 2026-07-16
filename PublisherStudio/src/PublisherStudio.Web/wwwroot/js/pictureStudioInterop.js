@@ -5,11 +5,11 @@ const proceduralCache = new Map();
 const layerKinds = ["raster", "text", "shape", "fill", "render", "paint"];
 const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "lighten"];
 const rasterFits = ["stretch", "contain", "cover"];
-const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow"];
+const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow", "freeform"];
 const fillKinds = ["solid", "linearGradient", "radialGradient"];
 const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", "lensflare", "grainnoise", "motionblur", "wind", "oceanwaves"];
 const textAlignments = ["left", "center", "right"];
-const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser", "eyedropper"];
+const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"];
 
 function enumName(value, names, fallback) {
     if (typeof value === "string") return value;
@@ -58,6 +58,7 @@ function normalizeToolSettings(settings) {
     return {
         tool: drawTools.includes(rawTool) ? rawTool : "select",
         color: cssColor(settings?.color, "#111827"),
+        secondaryColor: cssColor(settings?.secondaryColor, "#ffffff"),
         width: clamp(settings?.width ?? 12, .25, 512),
         opacity: clamp(settings?.opacity ?? 1, 0, 1),
         hardness: clamp(settings?.hardness ?? .8, 0, 1)
@@ -309,42 +310,49 @@ function drawTextLayer(ctx, layer) {
     endLayer(ctx);
 }
 
+function shapeFillStyle(ctx, layer, width, height) {
+    const fillKind = enumName(layer.fillKind, fillKinds, "solid").toLowerCase();
+    const first = cssColor(layer.fillColor, "#60a5fa");
+    const second = cssColor(layer.secondaryFillColor, "#ffffff");
+    if (fillKind === "solid") return first;
+    if (fillKind === "radialgradient") {
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(width, height) * .7);
+        gradient.addColorStop(0, first); gradient.addColorStop(1, second); return gradient;
+    }
+    const angle = (Number(layer.fillAngleDegrees) || 0) * Math.PI / 180;
+    const distance = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
+    const dx = Math.cos(angle) * distance / 2; const dy = Math.sin(angle) * distance / 2;
+    const gradient = ctx.createLinearGradient(-dx, -dy, dx, dy);
+    gradient.addColorStop(0, first); gradient.addColorStop(1, second); return gradient;
+}
+
 function drawShapeLayer(ctx, layer) {
     const { width, height } = beginLayer(ctx, layer);
     const shape = enumName(layer.shape, shapeKinds, "rectangle").toLowerCase();
     const x = -width / 2;
     const y = -height / 2;
-    ctx.fillStyle = cssColor(layer.fillColor, "#60a5fa");
+    ctx.fillStyle = shapeFillStyle(ctx, layer, width, height);
     ctx.strokeStyle = cssColor(layer.strokeColor, "#1d4ed8");
     ctx.lineWidth = clamp(layer.strokeWidthPx ?? 3, 0, 200);
     if (shape === "ellipse") {
+        ctx.beginPath(); ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, Math.PI * 2);
+    } else if (shape === "freeform") {
+        const points = Array.isArray(layer.pathPoints) ? layer.pathPoints : [];
         ctx.beginPath();
-        ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, Math.PI * 2);
+        if (points.length) {
+            ctx.moveTo((Number(points[0].x) || 0) - width / 2, (Number(points[0].y) || 0) - height / 2);
+            for (let index = 1; index < points.length; index++) ctx.lineTo((Number(points[index].x) || 0) - width / 2, (Number(points[index].y) || 0) - height / 2);
+            ctx.closePath();
+        } else ctx.rect(x, y, width, height);
     } else if (shape === "arrow") {
         const shaftHalf = Math.max(1, height * .17);
         const headStart = Math.max(-width * .15, width * .08);
-        ctx.beginPath();
-        ctx.moveTo(-width / 2, -shaftHalf);
-        ctx.lineTo(headStart, -shaftHalf);
-        ctx.lineTo(headStart, -height / 2);
-        ctx.lineTo(width / 2, 0);
-        ctx.lineTo(headStart, height / 2);
-        ctx.lineTo(headStart, shaftHalf);
-        ctx.lineTo(-width / 2, shaftHalf);
-        ctx.closePath();
+        ctx.beginPath(); ctx.moveTo(-width / 2, -shaftHalf); ctx.lineTo(headStart, -shaftHalf); ctx.lineTo(headStart, -height / 2);
+        ctx.lineTo(width / 2, 0); ctx.lineTo(headStart, height / 2); ctx.lineTo(headStart, shaftHalf); ctx.lineTo(-width / 2, shaftHalf); ctx.closePath();
     } else if (shape === "line") {
-        ctx.beginPath();
-        ctx.moveTo(-width / 2, 0);
-        ctx.lineTo(width / 2, 0);
-        if (ctx.lineWidth > 0) ctx.stroke();
-        endLayer(ctx);
-        return;
-    } else if (shape === "roundedrectangle") {
-        roundedRectanglePath(ctx, x, y, width, height, clamp(layer.cornerRadiusPx ?? 24, 0, 2000));
-    } else {
-        ctx.beginPath();
-        ctx.rect(x, y, width, height);
-    }
+        ctx.beginPath(); ctx.moveTo(-width / 2, 0); ctx.lineTo(width / 2, 0); if (ctx.lineWidth > 0) ctx.stroke(); endLayer(ctx); return;
+    } else if (shape === "roundedrectangle") roundedRectanglePath(ctx, x, y, width, height, clamp(layer.cornerRadiusPx ?? 24, 0, 2000));
+    else { ctx.beginPath(); ctx.rect(x, y, width, height); }
     if (layer.fillColor !== "transparent") ctx.fill();
     if (ctx.lineWidth > 0 && layer.strokeColor !== "transparent") ctx.stroke();
     endLayer(ctx);
@@ -1048,6 +1056,59 @@ function drawSelection(ctx, layer, zoom) {
     ctx.restore();
 }
 
+function isAreaSelectionTool(tool) { return ["rectangleselect", "ellipseselect", "freeselect", "magneticselect"].includes(String(tool || "").toLowerCase()); }
+function isAreaFillTool(tool) { return ["fillsolid", "fillgradient"].includes(String(tool || "").toLowerCase()); }
+function selectionKindForTool(tool) {
+    const name = String(tool || "").toLowerCase();
+    return name === "ellipseselect" ? "ellipse" : name === "freeselect" ? "free" : name === "magneticselect" ? "magnetic" : "rectangle";
+}
+function selectionFromDrawing(drawing) {
+    const points = Array.isArray(drawing?.points) ? drawing.points.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 })) : [];
+    if (points.length < 2) return null;
+    const kind = selectionKindForTool(drawing.tool);
+    if (kind === "rectangle" || kind === "ellipse") {
+        const first = points[0], last = points[points.length - 1];
+        return { kind, points: [{ x: Math.min(first.x,last.x), y: Math.min(first.y,last.y) }, { x: Math.max(first.x,last.x), y: Math.max(first.y,last.y) }] };
+    }
+    return { kind, points };
+}
+function selectionCoordinates(selection) {
+    const points = Array.isArray(selection?.points) ? selection.points : [];
+    const values = [];
+    for (const point of points) values.push(Number(point.x) || 0, Number(point.y) || 0);
+    return values;
+}
+function drawAreaSelection(ctx, selection, zoom) {
+    const points = Array.isArray(selection?.points) ? selection.points : [];
+    if (points.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = "#0284c7"; ctx.fillStyle = "rgba(14,165,233,.08)"; ctx.lineWidth = Math.max(.5, 1.4 / Math.max(.05, zoom));
+    ctx.setLineDash([7 / Math.max(.05, zoom), 5 / Math.max(.05, zoom)]);
+    ctx.beginPath();
+    if (selection.kind === "rectangle" || selection.kind === "ellipse") {
+        const a=points[0], b=points[1], x=Math.min(a.x,b.x), y=Math.min(a.y,b.y), w=Math.abs(b.x-a.x), h=Math.abs(b.y-a.y);
+        if (selection.kind === "ellipse") ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2); else ctx.rect(x,y,w,h);
+    } else {
+        ctx.moveTo(points[0].x, points[0].y); for (let i=1;i<points.length;i++) ctx.lineTo(points[i].x,points[i].y); ctx.closePath();
+    }
+    ctx.fill(); ctx.stroke(); ctx.restore();
+}
+function magneticSnapPoint(editor, point) {
+    let best = point; let distance = 18 / Math.max(.05, editor.zoom || 1);
+    for (const layer of editor.document?.layers || []) {
+        if (!layer.visible) continue;
+        const width=Math.max(1,Number(layer.width)||1), height=Math.max(1,Number(layer.height)||1);
+        const candidates=[localToWorld(layer,-width/2,-height/2),localToWorld(layer,width/2,-height/2),localToWorld(layer,width/2,height/2),localToWorld(layer,-width/2,height/2),localToWorld(layer,0,-height/2),localToWorld(layer,width/2,0),localToWorld(layer,0,height/2),localToWorld(layer,-width/2,0)];
+        for (const candidate of candidates) { const d=Math.hypot(candidate.x-point.x,candidate.y-point.y); if (d<distance) {distance=d;best=candidate;} }
+    }
+    return {x:best.x,y:best.y};
+}
+function commitAreaFill(editor, selection, gradient) {
+    if (!selection) return;
+    safeInvoke(editor, "PictureAreaFillCommitted", selection.kind, selectionCoordinates(selection), editor.toolSettings.color, editor.toolSettings.secondaryColor, gradient);
+    editor.areaSelection = null;
+}
+
 function isShapeDrawingTool(tool) {
     return ["square", "rectangle", "ellipse", "arrow"].includes(String(tool || "").toLowerCase());
 }
@@ -1089,6 +1150,13 @@ function shapeDrawingGeometry(drawing) {
 
 function drawDrawingPreview(ctx, drawing) {
     if (!drawing) return;
+    const effectiveTool = drawing.selectionTool || drawing.tool;
+    if (isAreaSelectionTool(effectiveTool)) {
+        const proxy = { ...drawing, tool: effectiveTool };
+        const selection = selectionFromDrawing(proxy);
+        if (selection) drawAreaSelection(ctx, selection, 1);
+        return;
+    }
     if (!isShapeDrawingTool(drawing.tool)) {
         drawPaintStroke(ctx, drawing, true);
         return;
@@ -1141,6 +1209,7 @@ async function drawDocument(canvas, document, options = {}) {
     }
     if (options.grid) drawGrid(ctx, document, options.zoom || 1);
     if (options.previewStroke) drawDrawingPreview(ctx, options.previewStroke);
+    if (options.areaSelection) drawAreaSelection(ctx, options.areaSelection, options.zoom || 1);
     if (options.selectedLayerId) {
         const selected = document.layers.find(layer => String(layer.id).toLowerCase() === String(options.selectedLayerId).toLowerCase());
         drawSelection(ctx, selected, options.zoom || 1);
@@ -1236,7 +1305,8 @@ function scheduleEditorRender(editor) {
                 grid: true,
                 selectedLayerId: editor.selectedLayerId,
                 zoom: editor.zoom,
-                previewStroke: editor.drawing
+                previewStroke: editor.drawing,
+                areaSelection: editor.areaSelection
             });
             if (token === editor.renderToken) {
                 const errors = Array.isArray(rendered.pictureStudioErrors) ? rendered.pictureStudioErrors : [];
@@ -1374,7 +1444,11 @@ function beginDrawing(editor, event) {
         event.preventDefault();
         return;
     }
-    if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser"].includes(settings.tool)) return;
+    if (isAreaFillTool(settings.tool) && editor.areaSelection) {
+        commitAreaFill(editor, editor.areaSelection, settings.tool === "fillgradient");
+        scheduleEditorRender(editor); event.preventDefault(); return;
+    }
+    if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"].includes(settings.tool)) return;
     const adjustedWidth = settings.tool === "pencil"
         ? Math.min(settings.width, 6)
         : settings.tool === "spray"
@@ -1391,6 +1465,9 @@ function beginDrawing(editor, event) {
         widthPx: adjustedWidth,
         opacity: settings.opacity,
         hardness: settings.tool === "pencil" ? 1 : settings.tool === "spray" ? Math.min(settings.hardness, .55) : settings.hardness,
+        fillAfterSelection: isAreaFillTool(settings.tool),
+        fillGradient: settings.tool === "fillgradient",
+        selectionTool: isAreaFillTool(settings.tool) ? "rectangleselect" : settings.tool,
         points: [point, { ...point }]
     };
     editor.canvas.setPointerCapture(event.pointerId);
@@ -1402,7 +1479,9 @@ function updateDrawing(editor, event) {
     const drawing = editor.drawing;
     if (!drawing || drawing.pointerId !== event.pointerId) return;
     let point = canvasPoint(editor.canvas, event);
-    const directShape = drawing.tool === "line" || isShapeDrawingTool(drawing.tool);
+    const effectiveTool = drawing.selectionTool || drawing.tool;
+    if (effectiveTool === "magneticselect") point = magneticSnapPoint(editor, point);
+    const directShape = drawing.tool === "line" || isShapeDrawingTool(drawing.tool) || effectiveTool === "rectangleselect" || effectiveTool === "ellipseselect";
     if (directShape && editor.document.snapToGrid) {
         const spacing = Math.max(2, Number(editor.document.gridSpacingPx) || 25);
         point = { x: snap(point.x, spacing, true), y: snap(point.y, spacing, true) };
@@ -1433,6 +1512,14 @@ function finishDrawing(editor, event, cancel = false) {
     const drawing = editor.drawing;
     if (!drawing || (event && drawing.pointerId !== event.pointerId)) return;
     editor.drawing = null;
+    const effectiveTool = drawing.selectionTool || drawing.tool;
+    if (!cancel && isAreaSelectionTool(effectiveTool)) {
+        drawing.tool = effectiveTool;
+        editor.areaSelection = selectionFromDrawing(drawing);
+        if (drawing.fillAfterSelection) commitAreaFill(editor, editor.areaSelection, drawing.fillGradient === true);
+        scheduleEditorRender(editor);
+        return;
+    }
     if (!cancel && isShapeDrawingTool(drawing.tool)) {
         const geometry = shapeDrawingGeometry(drawing);
         if (geometry) safeInvoke(editor, "PictureShapeCommitted", drawing.tool, geometry.x, geometry.y, geometry.width, geometry.height, geometry.rotation);
@@ -1521,6 +1608,7 @@ export function initializePictureStudio(canvasId, dotNetRef) {
             zoom: .65,
             interaction: null,
             drawing: null,
+            areaSelection: null,
             toolSettings: normalizeToolSettings(null),
             animationFrame: 0,
             renderToken: 0,
@@ -1556,6 +1644,13 @@ export function hitTestPictureStudioLayer(canvasId, clientX, clientY) {
     const point = canvasPoint(canvas, { clientX: Number(clientX) || 0, clientY: Number(clientY) || 0 });
     const layer = hitLayer(editor.document, point.x, point.y);
     return layer ? String(layer.id) : null;
+}
+
+export function clearPictureStudioAreaSelection(canvasId) {
+    const editor = editors.get(canvasId);
+    if (!editor) return;
+    editor.areaSelection = null;
+    scheduleEditorRender(editor);
 }
 
 export function fitPictureStudio(hostId, width, height) {

@@ -82,8 +82,22 @@
                         <DxRibbonItem Text="@EraserToolText" Click="EraserTool" />
                         <DxRibbonItem Text="@EyedropperToolText" Click="EyedropperTool" />
                     </DxRibbonGroup>
+                    <DxRibbonGroup Text="Selections">
+                        <DxRibbonItem Text="@RectangleSelectToolText" Click="RectangleSelectTool" />
+                        <DxRibbonItem Text="@EllipseSelectToolText" Click="EllipseSelectTool" />
+                        <DxRibbonItem Text="@FreeSelectToolText" Click="FreeSelectTool" />
+                        <DxRibbonItem Text="@MagneticSelectToolText" Click="MagneticSelectTool" />
+                        <DxRibbonItem Text="Clear selection" Click="ClearAreaSelection" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Area fill">
+                        <DxRibbonItem Text="@FillSolidToolText" IsPrimary="true" Click="FillSolidTool" />
+                        <DxRibbonItem Text="@FillGradientToolText" IsPrimary="true" Click="FillGradientTool" />
+                    </DxRibbonGroup>
                     <DxRibbonGroup Text="Color">
-                        <DxRibbonColorPaletteItem Text="Stroke color" Value="@_drawColor" ValueChanged="ChangeDrawColor">
+                        <DxRibbonColorPaletteItem Text="Primary" Value="@_drawColor" ValueChanged="ChangeDrawColor">
+                            <Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups>
+                        </DxRibbonColorPaletteItem>
+                        <DxRibbonColorPaletteItem Text="Secondary" Value="@_drawSecondaryColor" ValueChanged="ChangeDrawSecondaryColor">
                             <Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups>
                         </DxRibbonColorPaletteItem>
                     </DxRibbonGroup>
@@ -272,8 +286,11 @@
                                 </select>
                             </label>
                             <div class="picture-property-grid">
-                                <label>Color
+                                <label>Primary color
                                     <input type="color" value="@SafeColor(_drawColor)" @onchange="ChangeDrawColorInput" />
+                                </label>
+                                <label>Secondary color
+                                    <input type="color" value="@SafeColor(_drawSecondaryColor)" @onchange="ChangeDrawSecondaryColorInput" />
                                 </label>
                                 <label>Exact width (px)
                                     <input type="number" min="0.25" max="512" step="0.25" value="@Inv(_drawWidth)" @onchange="ChangeDrawWidth" />
@@ -442,9 +459,20 @@
                                                 }
                                             </select>
                                         </label>
+                                        <label>Fill type
+                                            <select value="@shapeLayer.FillKind" @onchange="ChangeShapeFillKind">
+                                                @foreach (var fillKind in Enum.GetValues<PictureFillKind>())
+                                                {
+                                                    <option value="@fillKind">@fillKind</option>
+                                                }
+                                            </select>
+                                        </label>
                                         <div class="picture-property-grid">
-                                            <label>Fill
+                                            <label>Fill 1
                                                 <input type="color" value="@SafeColor(shapeLayer.FillColor)" @onchange="ChangeShapeFill" />
+                                            </label>
+                                            <label>Fill 2
+                                                <input type="color" value="@SafeColor(shapeLayer.SecondaryFillColor)" @onchange="ChangeShapeSecondaryFill" />
                                             </label>
                                             <label>Stroke
                                                 <input type="color" value="@SafeColor(shapeLayer.StrokeColor)" @onchange="ChangeShapeStroke" />
@@ -456,6 +484,13 @@
                                                 <input type="number" min="0" max="2000" value="@Inv(shapeLayer.CornerRadiusPx)" @onchange="ChangeShapeRadius" />
                                             </label>
                                         </div>
+                                        @if (shapeLayer.FillKind != PictureFillKind.Solid)
+                                        {
+                                            <label>Fill angle
+                                                <input type="range" min="0" max="360" step="1" value="@Inv(shapeLayer.FillAngleDegrees)" @oninput="ChangeShapeFillAngle" @onchange="EndLiveEdit" />
+                                                <span class="picture-range-value">@Math.Round(shapeLayer.FillAngleDegrees)°</span>
+                                            </label>
+                                        }
                                     </section>
                                     break;
                                 case FillPictureLayer fillLayer:
@@ -727,6 +762,17 @@
                     </Items>
                 </DxContextMenuItem>
                 <DxContextMenuItem Text="Insert paint layer" IconCssClass="pub-icon pub-icon-edit" Click="AddPaintLayer" />
+                <DxContextMenuItem Text="Area selection" BeginGroup="true"><Items>
+                    <DxContextMenuItem Text="Rectangle selection" Click="RectangleSelectTool" />
+                    <DxContextMenuItem Text="Ellipse selection" Click="EllipseSelectTool" />
+                    <DxContextMenuItem Text="Freehand lasso" Click="FreeSelectTool" />
+                    <DxContextMenuItem Text="Magnetic lasso" Click="MagneticSelectTool" />
+                    <DxContextMenuItem Text="Clear selection" Click="ClearAreaSelection" />
+                </Items></DxContextMenuItem>
+                <DxContextMenuItem Text="Fill selected area"><Items>
+                    <DxContextMenuItem Text="Solid fill" Click="FillSolidTool" />
+                    <DxContextMenuItem Text="Gradient fill" Click="FillGradientTool" />
+                </Items></DxContextMenuItem>
                 <DxContextMenuItem Text="View" BeginGroup="true">
                     <Items>
                         <DxContextMenuItem Text="Fit canvas" Click="FitCanvas" />

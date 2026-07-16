@@ -87,7 +87,7 @@ public sealed class GuideLine
 
 public enum GuideOrientation { Horizontal, Vertical }
 public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
-public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual }
+public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual, Barcode }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ConnectorPathKind { Straight, Elbow, Curved }
 public enum ConnectorMarker { None, Arrow, Triangle, Diamond }
@@ -109,6 +109,9 @@ public enum PublicationInteractionAction { None, NextPage, PreviousPage, GoToPag
 public enum PublicationMediaPlaybackTrigger { OnPageEnter, OnClick, WithAnimation }
 public enum PublicationAudioDisplayKind { Waveform, Compact, Hidden }
 public enum PublicationVideoFitMode { Contain, Cover, Stretch }
+public enum PublicationBarcodeFormat { QrCode, Code128, Code39, Ean13, UpcA, Itf14, Codabar }
+public enum PublicationBarcodeErrorCorrection { L, M, Q, H }
+public enum PublicationBarcodeModuleShape { Square, Rounded, Dots }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextFrameElement), "text")]
@@ -119,6 +122,7 @@ public enum PublicationVideoFitMode { Contain, Cover, Stretch }
 [JsonDerivedType(typeof(WordArtElement), "wordArt")]
 [JsonDerivedType(typeof(ConnectorElement), "connector")]
 [JsonDerivedType(typeof(DataVisualElement), "dataVisual")]
+[JsonDerivedType(typeof(BarcodeElement), "barcode")]
 public abstract class PublicationElement
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -239,6 +243,24 @@ public sealed class ShapeElement : PublicationElement
     public string Stroke { get; set; } = "#1d4ed8";
     public double StrokeWidth { get; set; } = 0.4;
     public double CornerRadiusMm { get; set; } = 3;
+}
+
+public sealed class BarcodeElement : PublicationElement
+{
+    public override PublicationElementKind Kind => PublicationElementKind.Barcode;
+    public PublicationBarcodeFormat Format { get; set; } = PublicationBarcodeFormat.QrCode;
+    public string Value { get; set; } = "https://github.com/Michi0403/BlazorPublisher";
+    public string ForegroundColor { get; set; } = "#111827";
+    public string BackgroundColor { get; set; } = "#ffffff";
+    public bool TransparentBackground { get; set; }
+    public bool ShowText { get; set; } = true;
+    public int Margin { get; set; } = 8;
+    public int LineWidth { get; set; } = 2;
+    public int BarHeight { get; set; } = 90;
+    public int FontSize { get; set; } = 16;
+    public PublicationBarcodeErrorCorrection ErrorCorrection { get; set; } = PublicationBarcodeErrorCorrection.M;
+    public PublicationBarcodeModuleShape ModuleShape { get; set; } = PublicationBarcodeModuleShape.Square;
+    public string SvgMarkup { get; set; } = string.Empty;
 }
 
 

@@ -1007,6 +1007,65 @@ async function loadSvgImage(svgText) {
     throw lastError || new Error('The browser could not prepare the publication for raster export.');
 }
 
+async function rasterizePageElement(page, scale, jpeg) {
+    if (typeof window.html2canvas !== 'function')
+        throw new Error('The local raster export engine did not load. Refresh the application and try again.');
+    await document.fonts?.ready;
+    await waitForImages(page);
+    const rect = page.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0)
+        throw new Error('The publication page has no measurable export size.');
+
+    const clone = cleanPageClone(page);
+    await freezeMediaForRaster(page, clone);
+    clone.style.visibility = 'visible';
+    clone.style.opacity = '1';
+    clone.style.width = `${rect.width}px`;
+    clone.style.height = `${rect.height}px`;
+    clone.style.margin = '0';
+    clone.style.transform = 'none';
+
+    const stage = document.createElement('div');
+    stage.setAttribute('aria-hidden', 'true');
+    stage.style.cssText = [
+        'position:fixed', 'left:-100000px', 'top:0', `width:${rect.width}px`, `height:${rect.height}px`,
+        'overflow:hidden', 'visibility:visible', 'opacity:1', 'pointer-events:none', 'z-index:-2147483648',
+        jpeg ? 'background:#fff' : 'background:transparent'
+    ].join(';');
+    stage.appendChild(clone);
+    document.body.appendChild(stage);
+    try {
+        await waitForImages(clone);
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const requestedWidth = Math.max(1, Math.round(rect.width * scale));
+        const requestedHeight = Math.max(1, Math.round(rect.height * scale));
+        const maxPixels = 80_000_000;
+        const reduction = requestedWidth * requestedHeight > maxPixels
+            ? Math.sqrt(maxPixels / (requestedWidth * requestedHeight))
+            : 1;
+        const effectiveScale = scale * reduction;
+        return await window.html2canvas(clone, {
+            backgroundColor: jpeg ? '#ffffff' : null,
+            scale: effectiveScale,
+            logging: false,
+            useCORS: true,
+            allowTaint: false,
+            imageTimeout: 20000,
+            removeContainer: true,
+            width: rect.width,
+            height: rect.height,
+            windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(rect.width)),
+            windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(rect.height)),
+            scrollX: 0,
+            scrollY: 0
+        });
+    } catch (error) {
+        throw new Error(`Raster export failed: ${error?.message || error}`);
+    } finally {
+        stage.remove();
+    }
+}
+
 async function svgToCanvas(svgText, width, height, scale, jpeg) {
     const loaded = await loadSvgImage(svgText);
     try {
@@ -2236,7 +2295,220 @@ function websitePresentationRuntime() {
     runCurrentPage(startAutomatically);
 }
 
+function barcodeColor(value, fallback) {
+    const text = String(value || '').trim();
+    return /^#[0-9a-f]{3,8}$/i.test(text) || /^(rgb|hsl)a?\(/i.test(text) || /^[a-z]+$/i.test(text) ? text : fallback;
+}
+
+function barcodeFormatName(value) {
+    const normalized = String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    return ({ qrcode: 'QR', code128: 'CODE128', code39: 'CODE39', ean13: 'EAN13', upca: 'UPC', itf14: 'ITF14', codabar: 'codabar' })[normalized] || 'CODE128';
+}
+
+function generateQrSvg(options) {
+    if (typeof window.qrcode !== 'function') throw new Error('QR-code generator did not load.');
+    const value = String(options?.value || '').trim();
+    if (!value) throw new Error('Barcode value cannot be empty.');
+    const correction = String(options?.errorCorrection || 'M').toUpperCase();
+    const qr = window.qrcode(0, ['L','M','Q','H'].includes(correction) ? correction : 'M');
+    qr.addData(value, 'Byte');
+    qr.make();
+    const count = qr.getModuleCount();
+    const margin = Math.max(0, Math.min(32, Number(options?.margin) || 0));
+    const size = count + margin * 2;
+    const foreground = barcodeColor(options?.foregroundColor, '#111827');
+    const background = options?.transparentBackground ? 'transparent' : barcodeColor(options?.backgroundColor, '#ffffff');
+    const shape = String(options?.moduleShape || 'Square').toLowerCase();
+    const cells = [];
+    for (let row = 0; row < count; row++) {
+        for (let column = 0; column < count; column++) {
+            if (!qr.isDark(row, column)) continue;
+            const x = column + margin;
+            const y = row + margin;
+            if (shape === 'dots') cells.push(`<circle cx="${x + .5}" cy="${y + .5}" r=".43"/>`);
+            else cells.push(`<rect x="${x}" y="${y}" width="1" height="1"${shape === 'rounded' ? ' rx=".22" ry=".22"' : ''}/>`);
+        }
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="QR code"><rect width="100%" height="100%" fill="${background}"/><g fill="${foreground}">${cells.join('')}</g></svg>`;
+}
+
+function generateLinearBarcodeSvg(options) {
+    if (typeof window.JsBarcode !== 'function') throw new Error('Barcode generator did not load.');
+    const value = String(options?.value || '').trim();
+    if (!value) throw new Error('Barcode value cannot be empty.');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const background = options?.transparentBackground ? 'transparent' : barcodeColor(options?.backgroundColor, '#ffffff');
+    window.JsBarcode(svg, value, {
+        format: barcodeFormatName(options?.format),
+        lineColor: barcodeColor(options?.foregroundColor, '#111827'),
+        background,
+        displayValue: options?.showText !== false,
+        margin: Math.max(0, Math.min(64, Number(options?.margin) || 0)),
+        width: Math.max(1, Math.min(8, Number(options?.lineWidth) || 2)),
+        height: Math.max(24, Math.min(400, Number(options?.barHeight) || 90)),
+        fontSize: Math.max(8, Math.min(72, Number(options?.fontSize) || 16)),
+        textMargin: 4,
+        valid: valid => { if (!valid) throw new Error('The value is invalid for the selected barcode format.'); }
+    });
+    const width = Number(svg.getAttribute('width')) || 320;
+    const height = Number(svg.getAttribute('height')) || 120;
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', `${options?.format || 'Barcode'}: ${value}`);
+    if (String(options?.moduleShape || '').toLowerCase() === 'rounded')
+        svg.querySelectorAll('rect').forEach(rect => { if (Number(rect.getAttribute('width')) < width * .5) { rect.setAttribute('rx', '1'); rect.setAttribute('ry', '1'); } });
+    return svg.outerHTML;
+}
+
+function generateBarcodeSvg(options) {
+    const format = String(options?.format || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    return format === 'qrcode' ? generateQrSvg(options) : generateLinearBarcodeSvg(options);
+}
+
+function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
+
+function chooseVideoRecordingMimeType() {
+    const candidates = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    return candidates.find(type => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(type)) || '';
+}
+
+function exportedPageDuration(page) {
+    let duration = Math.max(2.5, animationNumber(page.dataset.timelineDuration, 0), animationNumber(page.dataset.autoAdvanceSeconds, 0));
+    let cursor = 0;
+    for (const item of animationItems(page)) {
+        const animation = item.animation || {};
+        const explicit = Number(animation.timelineStartSeconds);
+        const delay = Math.max(0, animationNumber(animation.delaySeconds, 0));
+        const start = Number.isFinite(explicit) ? Math.max(0, explicit) : cursor + delay;
+        const span = publicationAnimationSpan(animation);
+        duration = Math.max(duration, start + span + .3);
+        cursor = Math.max(cursor, start + span);
+    }
+    for (const node of page.querySelectorAll('[data-media-kind]')) {
+        const start = Math.max(0, animationNumber(node.dataset.mediaStart, 0));
+        const trimStart = Math.max(0, animationNumber(node.dataset.mediaTrimStart, 0));
+        const trimEnd = Math.max(trimStart, animationNumber(node.dataset.mediaTrimEnd, trimStart));
+        const rate = Math.max(.1, animationNumber(node.dataset.mediaRate, 1));
+        duration = Math.max(duration, start + (trimEnd - trimStart) / rate + .3);
+    }
+    return Math.min(600, duration);
+}
+
+function prepareVideoExportPage(page) {
+    page.querySelectorAll('[data-media-kind]').forEach(node => {
+        if (animationName(node.dataset.mediaTrigger) === 'onclick') node.dataset.mediaTrigger = 'OnPageEnter';
+        node.dataset.mediaAutoplay = 'true';
+    });
+    return animationItems(page).map(item => ({
+        node: item.node,
+        animation: animationName(item.animation.trigger) === 'onclick'
+            ? { ...item.animation, trigger: 'AfterPrevious', timelineStartSeconds: null }
+            : item.animation
+    }));
+}
+
+async function requestPresentationCapture() {
+    if (!navigator.mediaDevices?.getDisplayMedia)
+        throw new Error('This browser does not support tab/screen capture video export.');
+    try {
+        return await navigator.mediaDevices.getDisplayMedia({
+            video: { frameRate: { ideal: 30, max: 60 } },
+            audio: true,
+            preferCurrentTab: true,
+            selfBrowserSurface: 'include',
+            surfaceSwitching: 'exclude',
+            systemAudio: 'include'
+        });
+    } catch (error) {
+        if (error?.name === 'TypeError')
+            return await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        throw error;
+    }
+}
+
+async function exportPresentationVideo(containerSelector, fileName, title) {
+    if (typeof MediaRecorder === 'undefined') throw new Error('This browser does not support MediaRecorder video export.');
+    const source = document.querySelector(containerSelector);
+    if (!source) throw new Error('The publication export surface is not available.');
+    const sourcePages = [...source.querySelectorAll(':scope > .print-page')];
+    if (!sourcePages.length) throw new Error('The publication does not contain any pages.');
+
+    const capture = await requestPresentationCapture();
+    const chunks = [];
+    const mimeType = chooseVideoRecordingMimeType();
+    const recorder = new MediaRecorder(capture, mimeType ? { mimeType, videoBitsPerSecond: 8_000_000 } : { videoBitsPerSecond: 8_000_000 });
+    recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
+    const stopped = new Promise((resolve, reject) => {
+        recorder.addEventListener('stop', resolve, { once: true });
+        recorder.addEventListener('error', event => reject(event.error || new Error('Video recording failed.')), { once: true });
+    });
+
+    const overlay = document.createElement('div');
+    overlay.className = 'publisher-video-export-overlay';
+    overlay.setAttribute('aria-label', `${title || 'Publication'} video export`);
+    const publication = source.cloneNode(true);
+    publication.removeAttribute('aria-hidden');
+    publication.className = 'publisher-video-export-publication';
+    const pages = [...publication.querySelectorAll(':scope > .print-page')];
+    pages.forEach((page, index) => {
+        page.id = `publisher-video-export-page-${index}-${Date.now()}`;
+        page.hidden = index !== 0;
+        page.querySelectorAll('video,audio').forEach(media => { media.controls = false; media.preload = 'auto'; });
+    });
+    const countdown = document.createElement('div');
+    countdown.className = 'publisher-video-export-countdown';
+    overlay.append(publication, countdown);
+    document.body.appendChild(overlay);
+
+    const fit = page => {
+        const width = Math.max(1, page.getBoundingClientRect().width || number(page.style.width, 800));
+        const height = Math.max(1, page.getBoundingClientRect().height || number(page.style.height, 600));
+        const scale = Math.min((innerWidth - 40) / width, (innerHeight - 40) / height);
+        page.style.transform = `scale(${Math.max(.05, scale)})`;
+        page.style.transformOrigin = 'center';
+    };
+    const resize = () => pages.forEach(fit);
+    window.addEventListener('resize', resize);
+    resize();
+
+    let totalDuration = 0;
+    try {
+        for (let count = 3; count > 0; count--) { countdown.textContent = `Recording starts in ${count}`; await sleep(700); }
+        countdown.remove();
+        recorder.start(1000);
+        for (let index = 0; index < pages.length; index++) {
+            const page = pages[index];
+            pages.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
+            fit(page);
+            await sleep(80);
+            const duration = exportedPageDuration(page);
+            totalDuration += duration;
+            previewPublicationItems(page, prepareVideoExportPage(page), true);
+            await sleep(duration * 1000);
+            clearPublicationPreview(page.id || page);
+            page.querySelectorAll('video,audio').forEach(media => { media.pause(); try { media.currentTime = 0; } catch { } });
+        }
+        if (recorder.state !== 'inactive') recorder.stop();
+        await stopped;
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+        if (!blob.size) throw new Error('The browser completed the capture but produced an empty video.');
+        downloadBlob(fileName || 'publication.webm', blob);
+        return { fileName: fileName || 'publication.webm', durationSeconds: totalDuration };
+    } finally {
+        if (recorder.state !== 'inactive') { try { recorder.stop(); } catch { } }
+        capture.getTracks().forEach(track => track.stop());
+        window.removeEventListener('resize', resize);
+        overlay.remove();
+    }
+}
+
 window.publisherStudio = {
+    generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
+    exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
+
     clickElement(id) {
         const element = document.getElementById(id);
         if (!element) return;
@@ -2285,16 +2557,15 @@ window.publisherStudio = {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
         const normalized = String(format).toLowerCase();
-        const serialized = await pageSvg(page, { freezeMedia: normalized !== 'svg' });
-
         if (normalized === 'svg') {
+            const serialized = await pageSvg(page, { freezeMedia: false });
             downloadBlob(fileName, new Blob([serialized.text], { type: 'image/svg+xml;charset=utf-8' }));
             return;
         }
 
         const jpeg = normalized === 'jpeg' || normalized === 'jpg';
         const scale = clamp(number(dpi, 150) / (96 * Math.max(number(zoom, 1), .05)), .5, 12);
-        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, scale, jpeg);
+        const canvas = await rasterizePageElement(page, scale, jpeg);
         const blob = await canvasBlob(canvas, jpeg ? 'image/jpeg' : 'image/png', jpeg ? .92 : undefined);
         downloadBlob(fileName, blob);
     },
@@ -2313,10 +2584,14 @@ window.publisherStudio = {
         const safeBase = String(baseName || 'publication').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').replace(/[. ]+$/g, '') || 'publication';
         const files = [];
         for (let index = 0; index < pages.length; index++) {
-            const serialized = await pageSvg(pages[index], { freezeMedia: true });
-            const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, scale, jpeg);
-            const blob = await canvasBlob(canvas, mimeType, jpeg ? .92 : undefined);
-            files.push({ name: `${safeBase}-page-${index + 1}.${extension}`, blob });
+            try {
+                const canvas = await rasterizePageElement(pages[index], scale, jpeg);
+                const blob = await canvasBlob(canvas, mimeType, jpeg ? .92 : undefined);
+                files.push({ name: `${safeBase}-page-${index + 1}.${extension}`, blob });
+            } catch (error) {
+                console.error(`Page ${index + 1} raster export failed.`, error);
+                throw new Error(`Page ${index + 1} could not be exported: ${error?.message || error}`);
+            }
         }
         if (files.length === 1) {
             downloadBlob(files[0].name, files[0].blob);
@@ -2330,8 +2605,7 @@ window.publisherStudio = {
     async verifyPageRaster(pageId) {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
-        const serialized = await pageSvg(page, { freezeMedia: true });
-        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, 1, false);
+        const canvas = await rasterizePageElement(page, 1, false);
         return { width: canvas.width, height: canvas.height, prefix: canvas.toDataURL('image/png').slice(0, 22) };
     },
 

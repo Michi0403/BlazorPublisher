@@ -1,10 +1,20 @@
-# PublisherStudio InstallerConsole
+# BlazorPublisher InstallerConsole
 
-The installer intentionally stays small. It can copy a previously published web payload, launch it, remove it with an explicit `--force`, or download/build a source ZIP without Git.
+`PublisherStudio.Setup.exe` is a Git-free release installer for Windows.
+
+A double-click with no arguments downloads the latest application ZIP from `Michi0403/BlazorPublisher`, installs it to `%LOCALAPPDATA%\Programs\BlazorPublisher`, generates `Install.cmd`, `Update.cmd`, `Start.cmd`, and `Uninstall.cmd`, creates a Start Menu folder, starts the web host, and opens its detected loopback URL.
+
+Expected release asset name:
+
+```text
+BlazorPublisher-win-x64.zip
+```
+
+The ZIP must contain the output of `dotnet publish` for `PublisherStudio.Web`.
 
 ```powershell
-dotnet run --project . -- install --payload ..\..\artifacts\payload --force --start
-dotnet run --project . -- start
-dotnet run --project . -- uninstall --force
-dotnet run --project . -- source --source-zip https://github.com/OWNER/REPO/archive/refs/heads/main.zip --force --start
+PublisherStudio.Setup.exe --install
+PublisherStudio.Setup.exe --update
+PublisherStudio.Setup.exe --start
+PublisherStudio.Setup.exe --uninstall --force
 ```

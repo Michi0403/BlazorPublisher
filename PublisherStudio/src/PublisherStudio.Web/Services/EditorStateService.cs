@@ -234,6 +234,24 @@ public sealed class EditorStateService
         return data;
     }
 
+    public BarcodeElement AddBarcode()
+    {
+        Capture();
+        var element = new BarcodeElement
+        {
+            Name = NextName("Barcode"),
+            X = 42,
+            Y = 42,
+            Width = 70,
+            Height = 70,
+            ZIndex = NextZ()
+        };
+        CurrentPage.Elements.Add(element);
+        SelectedElementId = element.Id;
+        Notify();
+        return element;
+    }
+
     public DataVisualElement AddDataVisual(DataVisualKind kind)
     {
         Capture();

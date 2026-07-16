@@ -185,6 +185,45 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    public ShapePictureLayer AddAreaFill(string selectionKind, IReadOnlyList<PicturePoint> points, string primaryColor, string secondaryColor, bool gradient)
+    {
+        if (points.Count < 2) return AddShape(PictureShapeKind.Rectangle);
+        var minX = points.Min(point => point.X);
+        var minY = points.Min(point => point.Y);
+        var maxX = points.Max(point => point.X);
+        var maxY = points.Max(point => point.Y);
+        var width = Math.Max(1, maxX - minX);
+        var height = Math.Max(1, maxY - minY);
+        Capture();
+        var kind = selectionKind?.Trim().ToLowerInvariant() switch
+        {
+            "ellipse" => PictureShapeKind.Ellipse,
+            "free" or "magnetic" => PictureShapeKind.Freeform,
+            _ => PictureShapeKind.Rectangle
+        };
+        var layer = new ShapePictureLayer
+        {
+            Name = NextName(gradient ? "Gradient Fill" : "Area Fill"),
+            Shape = kind,
+            FillKind = gradient ? PictureFillKind.LinearGradient : PictureFillKind.Solid,
+            FillColor = string.IsNullOrWhiteSpace(primaryColor) ? "#111827" : primaryColor,
+            SecondaryFillColor = string.IsNullOrWhiteSpace(secondaryColor) ? "#ffffff" : secondaryColor,
+            StrokeColor = "transparent",
+            StrokeWidthPx = 0,
+            X = minX,
+            Y = minY,
+            Width = width,
+            Height = height,
+            PathPoints = kind == PictureShapeKind.Freeform
+                ? points.Select(point => new PicturePoint { X = point.X - minX, Y = point.Y - minY }).ToList()
+                : []
+        };
+        Document.Layers.Add(layer);
+        SelectedLayerId = layer.Id;
+        Notify();
+        return layer;
+    }
+
     public FillPictureLayer AddFill(PictureFillKind fillKind = PictureFillKind.LinearGradient)
     {
         Capture();

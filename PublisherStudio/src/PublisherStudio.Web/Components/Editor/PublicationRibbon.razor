@@ -9,6 +9,7 @@
         <DxRibbonApplicationTabItem Text="Export current page as JPEG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportJpeg" />
         <DxRibbonApplicationTabItem Text="Export current page as SVG" IconCssClass="pub-icon pub-icon-vector" Click="RequestExportSvg" />
         <DxRibbonApplicationTabItem Text="Export publication as website" IconCssClass="pub-icon pub-icon-web" Click="RequestExportWebsite" />
+        <DxRibbonApplicationTabItem Text="Export presentation as video" IconCssClass="pub-icon pub-icon-video" Click="RequestExportVideo" />
         <DxRibbonApplicationTabItem Text="Print / Save as PDF" IconCssClass="pub-icon pub-icon-print" Click="RequestPrint" />
     </DxRibbonApplicationTab>
 
@@ -61,6 +62,7 @@
             <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-table" Click="AddDataTable" />
             <DxRibbonItem Text="KPI progress" Click="AddKpi" />
             <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
+            <DxRibbonItem Text="Barcode / QR" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" Click="RequestBarcode" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Shapes" IconCssClass="pub-icon pub-icon-shape">
             <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
@@ -288,6 +290,7 @@
         <DxRibbonGroup Text="Data visual" IconCssClass="pub-icon pub-icon-chart">
             <DxRibbonItem Text="Edit visual" IconCssClass="pub-icon pub-icon-edit" IsPrimary="true" Click="RequestEditDataVisual" />
             <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
+            <DxRibbonItem Text="Barcode / QR" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" Click="RequestBarcode" />
             <DxRibbonItem Text="Refresh" Click="RefreshData" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Quick type">
@@ -339,6 +342,7 @@
     [Parameter] public EventCallback OnExportJpeg { get; set; }
     [Parameter] public EventCallback OnExportSvg { get; set; }
     [Parameter] public EventCallback OnExportWebsite { get; set; }
+    [Parameter] public EventCallback OnExportVideo { get; set; }
     [Parameter] public EventCallback OnInsertPicture { get; set; }
     [Parameter] public EventCallback OnCreatePicture { get; set; }
     [Parameter] public EventCallback OnEditPicture { get; set; }
@@ -347,6 +351,7 @@
     [Parameter] public EventCallback OnCreateVideo { get; set; }
     [Parameter] public EventCallback OnCreateAudio { get; set; }
     [Parameter] public EventCallback OnEditMedia { get; set; }
+    [Parameter] public EventCallback OnInsertBarcode { get; set; }
     [Parameter] public EventCallback OnToggleTimeline { get; set; }
     [Parameter] public EventCallback OnEditStory { get; set; }
     [Parameter] public EventCallback OnFitPage { get; set; }
@@ -378,6 +383,7 @@
     private Task RequestExportJpeg() => OnExportJpeg.InvokeAsync();
     private Task RequestExportSvg() => OnExportSvg.InvokeAsync();
     private Task RequestExportWebsite() => OnExportWebsite.InvokeAsync();
+    private Task RequestExportVideo() => OnExportVideo.InvokeAsync();
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
     private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
     private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
@@ -386,6 +392,7 @@
     private Task RequestCreateVideo() => OnCreateVideo.InvokeAsync();
     private Task RequestCreateAudio() => OnCreateAudio.InvokeAsync();
     private Task RequestEditMedia() => OnEditMedia.InvokeAsync();
+    private Task RequestBarcode() => OnInsertBarcode.InvokeAsync();
     private Task RequestToggleTimeline() => OnToggleTimeline.InvokeAsync();
     private Task RequestStoryEditor() => OnEditStory.InvokeAsync();
     private Task RequestFitPage() => OnFitPage.InvokeAsync();

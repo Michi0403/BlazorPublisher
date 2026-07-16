@@ -340,6 +340,16 @@
                     <p class="property-note">The source remains embedded. Trimming, fades, playback rate, and timeline placement are non-destructive.</p>
                 </section>
             }
+            else if (element is BarcodeElement barcode)
+            {
+                <section class="property-section barcode-properties">
+                    <h3>Barcode / QR</h3>
+                    <div class="inspector-barcode-preview"><BarcodeView Item="barcode" /></div>
+                    <p class="property-note"><b>@barcode.Format</b> · @barcode.Value</p>
+                    <DxButton Text="Edit barcode" Click="RequestEditBarcode" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text="Insert another barcode" Click="RequestInsertBarcode" CssClass="wide-button" />
+                </section>
+            }
             else if (element is DataVisualElement dataVisual)
             {
                 <section class="property-section data-visual-properties">
@@ -430,6 +440,10 @@
     <DxContextMenu @ref="_layerContextMenu">
         <Items>
             <DxContextMenuItem Text="Select layer" Click="SelectContextLayer" />
+            @if (ContextLayer is BarcodeElement)
+            {
+                <DxContextMenuItem Text="Edit barcode" BeginGroup="true" Click="EditContextBarcode" />
+            }
             @if (ContextLayer is PublicationMediaElement contextMedia)
             {
                 <DxContextMenuItem Text="Edit in Media Studio" BeginGroup="true" Click="EditContextMedia" />
@@ -465,6 +479,8 @@
     [Parameter] public EventCallback OnCreateVideo { get; set; }
     [Parameter] public EventCallback OnCreateAudio { get; set; }
     [Parameter] public EventCallback OnEditMedia { get; set; }
+    [Parameter] public EventCallback OnInsertBarcode { get; set; }
+    [Parameter] public EventCallback OnEditBarcode { get; set; }
 
     private string _tab = "properties";
     private DxContextMenu _layerContextMenu = default!;
@@ -497,6 +513,8 @@
     private Task RequestCreateVideo() => OnCreateVideo.InvokeAsync();
     private Task RequestCreateAudio() => OnCreateAudio.InvokeAsync();
     private Task RequestEditMedia() => OnEditMedia.InvokeAsync();
+    private Task RequestInsertBarcode() => OnInsertBarcode.InvokeAsync();
+    private Task RequestEditBarcode() => OnEditBarcode.InvokeAsync();
     private void ShowProperties() => _tab = "properties";
     private void ShowPage() => _tab = "page";
     private void ShowLayers() => _tab = "layers";
@@ -528,6 +546,7 @@
     }
     private void SelectContextLayer() { if (_contextLayerId is Guid id) State.SelectElement(id); }
     private Task EditContextMedia() { SelectContextLayer(); return OnEditMedia.InvokeAsync(); }
+    private Task EditContextBarcode() { SelectContextLayer(); return OnEditBarcode.InvokeAsync(); }
     private void DuplicateContextLayer() { SelectContextLayer(); State.DuplicateSelected(); }
     private void DeleteContextLayer() { SelectContextLayer(); State.DeleteSelected(); }
     private void ContextBringToFront() { SelectContextLayer(); State.BringToFront(); }
@@ -549,6 +568,7 @@
         PublicationElementKind.WordArt => "A★",
         PublicationElementKind.Connector => "↝",
         PublicationElementKind.DataVisual => "▥",
+        PublicationElementKind.Barcode => "▦",
         _ => "◇"
     };
 

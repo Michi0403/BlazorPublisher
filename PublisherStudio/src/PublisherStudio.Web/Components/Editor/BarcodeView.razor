@@ -1,0 +1,16 @@
+@namespace PublisherStudio.Components.Editor
+
+<div class="barcode-view" aria-label="@Item.Name">
+    @if (string.IsNullOrWhiteSpace(Item.SvgMarkup))
+    {
+        <div class="barcode-placeholder"><strong>Barcode</strong><span>@Item.Value</span></div>
+    }
+    else
+    {
+        @((MarkupString)Item.SvgMarkup)
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public BarcodeElement Item { get; set; } = default!;
+}

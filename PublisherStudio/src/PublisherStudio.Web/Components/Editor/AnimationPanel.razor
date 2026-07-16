@@ -462,6 +462,7 @@
         PublicationElementKind.WordArt => "A★",
         PublicationElementKind.Connector => "↝",
         PublicationElementKind.DataVisual => "▥",
+        PublicationElementKind.Barcode => "▦",
         _ => "•"
     };
     private static string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");

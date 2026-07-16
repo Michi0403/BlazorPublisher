@@ -156,3 +156,14 @@ Recommended local media smoke tests:
 3. Drag media trim handles and repeated/auto-reversed animation clips, then undo once per operation.
 4. Right-click media on the page, timeline clips/background, page thumbnails, and the Media Studio preview/range.
 5. Export animated HTML and verify page-entry media, click media, fades, looping, media interactions, page changes, replay, and print fallback.
+
+## v1.0.3 beta targeted validation
+
+- PNG/JPEG page export uses the vendored html2canvas renderer instead of reading pixels from an SVG `foreignObject`, avoiding the tainted-canvas failure that surfaced only as a `JSException` in Interactive Server.
+- Raster export freezes video at the current/poster/trim-start frame, removes live media controls, preserves visible audio cards, and creates a stored ZIP for multi-page output.
+- The browser video exporter records a user-selected display/tab stream through `MediaRecorder`; capture permission and optional tab audio remain explicit browser choices.
+- QR Code, Code 128, Code 39, EAN-13, UPC-A, ITF-14, and Codabar generation was smoke-tested in Chromium with the vendored libraries.
+- Barcode objects are polymorphic publication elements and participate in selection, layer ordering, serialization, animations, print, SVG/HTML, and raster output.
+- Picture Studio selection/fill and shape tools use bounded coordinates and create editable shape layers rather than flattening the result.
+- Installer source parses without C# syntax errors and includes safe ZIP traversal checks, GitHub release/pre-release asset resolution, per-user AppData installation, generated launch commands, and Start Menu provisioning.
+- `node --check`, C# syntax-tree parsing, and Razor `@code` block parsing pass. A full `dotnet build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.

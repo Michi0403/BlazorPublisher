@@ -48,6 +48,7 @@ public partial class PictureEditor
     private bool _renderErrorActive;
     private PictureDrawTool _drawTool = PictureDrawTool.Select;
     private string _drawColor = "#111827";
+    private string _drawSecondaryColor = "#ffffff";
     private double _drawWidth = 12;
     private double _drawOpacity = 1;
     private double _drawHardness = .8;
@@ -80,6 +81,12 @@ public partial class PictureEditor
     private string LineToolText => ToolText(PictureDrawTool.Line, "Line");
     private string EraserToolText => ToolText(PictureDrawTool.Eraser, "Eraser");
     private string EyedropperToolText => ToolText(PictureDrawTool.Eyedropper, "Eyedropper");
+    private string RectangleSelectToolText => ToolText(PictureDrawTool.RectangleSelect, "Rectangle select");
+    private string EllipseSelectToolText => ToolText(PictureDrawTool.EllipseSelect, "Ellipse select");
+    private string FreeSelectToolText => ToolText(PictureDrawTool.FreeSelect, "Freehand select");
+    private string MagneticSelectToolText => ToolText(PictureDrawTool.MagneticSelect, "Magnetic select");
+    private string FillSolidToolText => ToolText(PictureDrawTool.FillSolid, "Solid fill");
+    private string FillGradientToolText => ToolText(PictureDrawTool.FillGradient, "Gradient fill");
     private double BrushWidthSliderValue => WidthToSlider(_drawWidth);
     private string BrushWidthSliderStyle => $"--picture-range-progress: {Inv(BrushWidthSliderValue)}%;";
     private string DrawWidthDisplay => $"{_drawWidth:0.##} px";
@@ -89,6 +96,12 @@ public partial class PictureEditor
         PictureDrawTool.Eyedropper => "Click the rendered canvas to pick a color, then the Brush tool becomes active.",
         PictureDrawTool.Line => "Drag from the line start to its end. Hold the pointer down for a live preview.",
         PictureDrawTool.Eraser => "Draw over strokes on a paint layer to erase them non-destructively.",
+        PictureDrawTool.RectangleSelect => "Drag a rectangular area selection. Use a fill tool to turn it into an editable layer.",
+        PictureDrawTool.EllipseSelect => "Drag an elliptical area selection. Use a fill tool to turn it into an editable layer.",
+        PictureDrawTool.FreeSelect => "Draw a freehand lasso around the area you want to fill.",
+        PictureDrawTool.MagneticSelect => "Draw a lasso that snaps to nearby layer edges and corners.",
+        PictureDrawTool.FillSolid => "Click to fill the current area selection, or drag a new rectangular filled area.",
+        PictureDrawTool.FillGradient => "Click to gradient-fill the current area selection, or drag a new rectangular gradient area.",
         PictureDrawTool.Spray => "Spray paint scatters soft droplets around the pointer path for airbrush-like shading.",
         PictureDrawTool.Toothbrush => "Toothbrush lays down rough bristle streaks and splatter for textured paint effects.",
         PictureDrawTool.Square => "Drag a square directly onto the canvas. The result remains an editable shape layer.",
@@ -199,6 +212,7 @@ public partial class PictureEditor
             {
                 Tool = _drawTool.ToString(),
                 Color = _drawColor,
+                SecondaryColor = _drawSecondaryColor,
                 Width = _drawWidth,
                 Opacity = _drawOpacity,
                 Hardness = _drawHardness
@@ -248,6 +262,17 @@ public partial class PictureEditor
             _ => PictureShapeKind.Rectangle
         };
         State.AddShapeAt(shape, x, y, width, height, rotation);
+        SetDrawTool(PictureDrawTool.Select);
+    }
+
+    [JSInvokable]
+    public void PictureAreaFillCommitted(string selectionKind, double[] coordinates, string primaryColor, string secondaryColor, bool gradient)
+    {
+        if (coordinates.Length < 4) return;
+        var points = new List<PicturePoint>(coordinates.Length / 2);
+        for (var index = 0; index + 1 < coordinates.Length; index += 2)
+            points.Add(new PicturePoint { X = coordinates[index], Y = coordinates[index + 1] });
+        State.AddAreaFill(selectionKind, points, primaryColor, secondaryColor, gradient);
         SetDrawTool(PictureDrawTool.Select);
     }
 
@@ -555,6 +580,17 @@ public partial class PictureEditor
     private void LineTool() => SetDrawTool(PictureDrawTool.Line);
     private void EraserTool() => SetDrawTool(PictureDrawTool.Eraser);
     private void EyedropperTool() => SetDrawTool(PictureDrawTool.Eyedropper);
+    private void RectangleSelectTool() => SetDrawTool(PictureDrawTool.RectangleSelect);
+    private void EllipseSelectTool() => SetDrawTool(PictureDrawTool.EllipseSelect);
+    private void FreeSelectTool() => SetDrawTool(PictureDrawTool.FreeSelect);
+    private void MagneticSelectTool() => SetDrawTool(PictureDrawTool.MagneticSelect);
+    private void FillSolidTool() => SetDrawTool(PictureDrawTool.FillSolid);
+    private void FillGradientTool() => SetDrawTool(PictureDrawTool.FillGradient);
+    private async Task ClearAreaSelection()
+    {
+        if (_module is not null) await _module.InvokeVoidAsync("clearPictureStudioAreaSelection", CanvasId);
+        _renderRequested = true;
+    }
     private void SetDrawTool(PictureDrawTool tool)
     {
         _drawTool = tool;
@@ -566,6 +602,7 @@ public partial class PictureEditor
     private string DrawWidthText(double value) => IsDrawWidth(value) ? $"✓ {value:0.##} px" : $"{value:0.##} px";
     private string DrawWidthButtonClass(double value) => IsDrawWidth(value) ? "selected" : string.Empty;
     private void ChangeDrawColor(string value) { if (!string.IsNullOrWhiteSpace(value)) _drawColor = value; _renderRequested = true; }
+    private void ChangeDrawSecondaryColor(string value) { if (!string.IsNullOrWhiteSpace(value)) _drawSecondaryColor = value; _renderRequested = true; }
     private void SetDrawWidth(double value)
     {
         _drawWidth = Math.Clamp(value, MinDrawWidth, MaxDrawWidth);
@@ -684,6 +721,7 @@ public partial class PictureEditor
         if (Enum.TryParse<PictureDrawTool>(Text(args), true, out var tool)) SetDrawTool(tool);
     }
     private void ChangeDrawColorInput(ChangeEventArgs args) => ChangeDrawColor(Text(args));
+    private void ChangeDrawSecondaryColorInput(ChangeEventArgs args) => ChangeDrawSecondaryColor(Text(args));
     private void ChangeDrawWidth(ChangeEventArgs args) => SetDrawWidth(Number(args, _drawWidth));
     private void ChangeDrawWidthSlider(ChangeEventArgs args) => SetDrawWidth(SliderToWidth(Number(args, BrushWidthSliderValue)));
     private void ChangeDrawOpacity(ChangeEventArgs args) { _drawOpacity = Math.Clamp(Number(args, _drawOpacity), 0, 1); _renderRequested = true; }
@@ -741,7 +779,13 @@ public partial class PictureEditor
         if (Enum.TryParse<PictureShapeKind>(Text(args), true, out var value))
             WithShape(layer => layer.Shape = value);
     }
+    private void ChangeShapeFillKind(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<PictureFillKind>(Text(args), true, out var value)) WithShape(layer => layer.FillKind = value);
+    }
     private void ChangeShapeFill(ChangeEventArgs args) => WithShape(layer => layer.FillColor = Text(args));
+    private void ChangeShapeSecondaryFill(ChangeEventArgs args) => WithShape(layer => layer.SecondaryFillColor = Text(args));
+    private void ChangeShapeFillAngle(ChangeEventArgs args) => State.UpdateSelectedLive("shape-fill-angle", layer => { if (layer is ShapePictureLayer shape) shape.FillAngleDegrees = Number(args, shape.FillAngleDegrees); });
     private void ChangeShapeStroke(ChangeEventArgs args) => WithShape(layer => layer.StrokeColor = Text(args));
     private void ChangeShapeStrokeWidth(ChangeEventArgs args) => WithShape(layer => layer.StrokeWidthPx = Number(args, layer.StrokeWidthPx));
     private void ChangeShapeRadius(ChangeEventArgs args) => WithShape(layer => layer.CornerRadiusPx = Number(args, layer.CornerRadiusPx));

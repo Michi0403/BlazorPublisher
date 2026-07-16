@@ -24,6 +24,7 @@
                        OnExportJpeg="ExportJpeg"
                        OnExportSvg="ExportSvg"
                        OnExportWebsite="ExportWebsite"
+                       OnExportVideo="ExportVideo"
                        OnInsertPicture="OpenPicturePicker"
                        OnCreatePicture="CreatePicture"
                        OnEditPicture="EditSelectedPicture"
@@ -32,6 +33,7 @@
                        OnCreateVideo="CreateVideo"
                        OnCreateAudio="CreateAudio"
                        OnEditMedia="EditSelectedMedia"
+                       OnInsertBarcode="InsertBarcode"
                        OnToggleTimeline="ToggleTimeline"
                        OnEditStory="OpenStoryEditor"
                        OnFitPage="FitPage"
@@ -51,6 +53,7 @@
         <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
                      RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
                      RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia"
+                     RequestInsertBarcode="InsertBarcode" RequestEditBarcode="EditBarcode"
                      TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
         <InspectorPanel State="State"
@@ -68,7 +71,9 @@
                         OnInsertAudio="OpenAudioPicker"
                         OnCreateVideo="CreateVideo"
                         OnCreateAudio="CreateAudio"
-                        OnEditMedia="EditSelectedMedia" />
+                        OnEditMedia="EditSelectedMedia"
+                        OnInsertBarcode="InsertBarcode"
+                        OnEditBarcode="EditBarcode" />
 
         @if (_timelineVisible)
         {
@@ -130,6 +135,7 @@
 
 <DataVisualEditor Visible="_dataVisualEditorVisible" State="State" Saved="SaveDataVisualEditor" Cancelled="CancelDataVisualEditor" ManageDataRequested="OpenDataManagerFromVisual" />
 <DataManager Visible="_dataManagerVisible" State="State" Closed="CloseDataManager" DataChanged="DataManagerChanged" />
+<BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
 
 @if (!string.IsNullOrWhiteSpace(_error))
 {
@@ -149,6 +155,8 @@
     private bool _dataManagerVisible;
     private bool _mediaStudioVisible;
     private bool _timelineVisible;
+    private bool _barcodeEditorVisible;
+    private Guid? _pendingNewBarcodeId;
     private Guid _mediaStudioSessionId;
     private Guid? _mediaStudioTargetId;
     private PublicationElementKind _mediaStudioKind = PublicationElementKind.Audio;
@@ -246,6 +254,18 @@
         {
             ShowError(ex);
         }
+    }
+
+    private async Task ExportVideo()
+    {
+        try
+        {
+            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".webm";
+            ShowNotice("Choose this browser tab in the capture dialog and enable tab audio when media sound should be included.");
+            var result = await JS.InvokeAsync<VideoExportResult>("publisherStudio.exportPresentationVideo", ".print-publication", fileName, State.Document.Name);
+            ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds).");
+        }
+        catch (Exception ex) { ShowError(ex); }
     }
 
     private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");
@@ -520,6 +540,50 @@
         return Task.CompletedTask;
     }
 
+    private Task InsertBarcode()
+    {
+        var item = State.AddBarcode();
+        _pendingNewBarcodeId = item.Id;
+        _barcodeEditorVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task EditBarcode()
+    {
+        if (State.SelectedElement is BarcodeElement) _barcodeEditorVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task SaveBarcode(BarcodeElement result)
+    {
+        if (State.SelectedElement is BarcodeElement target)
+        {
+            State.UpdateSelected(_ =>
+            {
+                target.Format = result.Format; target.Value = result.Value; target.ForegroundColor = result.ForegroundColor;
+                target.BackgroundColor = result.BackgroundColor; target.TransparentBackground = result.TransparentBackground;
+                target.ShowText = result.ShowText; target.Margin = result.Margin; target.LineWidth = result.LineWidth;
+                target.BarHeight = result.BarHeight; target.FontSize = result.FontSize; target.ErrorCorrection = result.ErrorCorrection;
+                target.ModuleShape = result.ModuleShape; target.SvgMarkup = result.SvgMarkup;
+            });
+        }
+        _pendingNewBarcodeId = null;
+        _barcodeEditorVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private Task CancelBarcode()
+    {
+        if (_pendingNewBarcodeId is Guid id)
+        {
+            State.SelectElement(id);
+            State.DeleteSelected();
+        }
+        _pendingNewBarcodeId = null;
+        _barcodeEditorVisible = false;
+        return Task.CompletedTask;
+    }
+
     private Task CreatePicture()
     {
         _pictureEditorTargetId = null;
@@ -693,6 +757,7 @@
 
     private void ShowError(Exception ex)
     {
+        Console.Error.WriteLine(ex);
         _error = ex.Message;
         _notice = null;
         StateChanged();
@@ -703,6 +768,12 @@
         _notice = message;
         _error = null;
         StateChanged();
+    }
+
+    private sealed class VideoExportResult
+    {
+        public string FileName { get; set; } = string.Empty;
+        public double DurationSeconds { get; set; }
     }
 
     private sealed class PageExportResult

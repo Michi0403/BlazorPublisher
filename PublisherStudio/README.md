@@ -17,17 +17,18 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 - Publication-level reusable data objects sourced from JSON, pasted CSV/TSV/delimited text, or live publication-object metadata.
 - Insertable live DevExpress data visuals: Cartesian charts, pie/doughnut charts, polar charts, sparklines, circular bar gauges, data tables, and KPI progress indicators.
 - A guided data-visual editor for choosing component type, chart subtype, category, series, numeric fields, labels, legends, ranges, and row limits with a live preview.
-- Picture Studio effects include tint/recolor, soften/blur, tonal and color adjustments, gradients, Clouds, Noise, Stripes, Vignette, opacity, and blend modes; its editable source is retained inside the publication while a rendered PNG is used by the page.
+- Picture Studio effects include tint/recolor, soften/blur, tonal and color adjustments, gradients, Clouds, Noise, Stripes, Vignette, Bloom, Neon, Lens Flare, Grain, Motion Blur, Wind, and Ocean Waves; drawing includes brush, pencil, spray, toothbrush, lines, arrows, base forms, area selections, and solid/gradient selection fills.
 - Rectangles, rounded rectangles, ellipses, lines, and WordArt/LogoArt with fixed transforms plus freely drawn text paths.
 - Attached straight, elbow, and curved connectors with eight ports per object, reconnectable endpoints, line styles, and arrow/triangle/diamond markers.
 - Native self-contained JSON publication format (`.pubstudio.json`).
-- Current-page PNG, JPEG, and browser-oriented SVG export.
+- Per-page PNG and JPEG export (ZIP for multi-page documents), browser-oriented SVG export, and browser-capture WebM presentation export.
 - Page-wide animation timelines, object entrance/emphasis/motion/exit effects, page transitions, click triggers, playback timing, and object interactions across every publication element type.
-- Embedded audio and video page objects with import, camera/screen/microphone recording, generated sample audio, non-destructive trims, fades, playback settings, and layer integration.
+- Embedded audio and video page objects with import, camera/screen/microphone recording, generated sample audio, non-destructive trims, fades, playback settings, media animation cues, and layer integration.
 - An on-demand page timeline docked to the bottom of the workspace with playhead transport, a DevExpress visible-range selector, draggable/resizable animation clips, and draggable/trim-enabled media clips.
 - Self-contained animated HTML presentation export with responsive scaling, keyboard/control navigation, fullscreen, replay, looping, automatic advance, and print fallback.
 - Browser print workflow suitable for printing or the browser's Save as PDF command.
-- Optional InstallerConsole that installs a published payload, starts the Blazor host, removes it, or downloads and publishes a source ZIP without requiring Git.
+- Insertable QR and linear barcodes with common symbologies, colors, readable text, module designs, and QR error correction.
+- Windows InstallerConsole bootstrapper that downloads the latest GitHub release, installs per-user into AppData, starts the host, updates or uninstalls it, and creates Start Menu command entries without requiring Git.
 
 ## Design reference boundary
 
@@ -75,7 +76,8 @@ Without a supplied port, Kestrel asks the operating system for a loopback port a
 11. Choose **Insert > Media** to embed audio/video, or open **Create audio / Create video** for microphone, camera, screen, generated-tone, trim, fade, volume, and playback controls.
 12. Select an object and open the **Animations** inspector tab or ribbon tab to add entrance, emphasis, motion, or exit steps. Open the docked timeline pane from the Animations, View, or Media Tools ribbon tabs and use it to drag animation timing and arrange or trim media clips against one page playhead.
 13. Right-click the page, page thumbnails, selected objects, timeline clips/background, Picture Studio canvas/layers, Media Studio preview/range, or a data-visual preview for commands relevant to that location.
-14. Use **File** for JSON save/open and PNG, JPEG, SVG, animated website, or print/PDF output.
+14. Use **Insert > Barcode / QR** for QR, Code 128, Code 39, EAN-13, UPC-A, ITF-14, or Codabar objects.
+15. Use **File** for JSON save/open and PNG, JPEG, SVG, animated website, WebM presentation capture, or print/PDF output.
 
 The file picker is reset before every picture/open command, so selecting the same file again also triggers replacement.
 

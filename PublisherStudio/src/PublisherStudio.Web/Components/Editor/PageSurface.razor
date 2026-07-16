@@ -176,6 +176,9 @@
                         case DataVisualElement dataVisual:
                             <DataVisualView Document="State.Document" Item="dataVisual" CurrentPageId="State.SelectedPageId" />
                             break;
+                        case BarcodeElement barcode:
+                            <BarcodeView Item="barcode" />
+                            break;
                     }
                     @if (!element.Locked)
                     {
@@ -252,6 +255,10 @@
         {
             <DxContextMenuItem Text="Use custom text path" IconCssClass="pub-icon pub-icon-path" BeginGroup="true" Click="WordArtCustomPath" />
             <DxContextMenuItem Text="Reverse text path" Click="WordArtReversePath" />
+        }
+        @if (State.SelectedElement is BarcodeElement)
+        {
+            <DxContextMenuItem Text="Edit barcode / QR" IconCssClass="pub-icon pub-icon-barcode" BeginGroup="true" Click="EditSelectedBarcode" />
         }
         @if (State.SelectedElement is DataVisualElement dataVisual)
         {
@@ -384,6 +391,7 @@
                 </Items>
             </DxContextMenuItem>
             <DxContextMenuItem Text="Manage publication data…" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
+            <DxContextMenuItem Text="Insert barcode / QR…" IconCssClass="pub-icon pub-icon-barcode" Click="InsertBarcode" />
             <DxContextMenuItem Text="Insert shape">
                 <Items>
                     <DxContextMenuItem Text="Rectangle" Click="AddRectangle" />
@@ -419,6 +427,8 @@
     [Parameter] public EventCallback RequestCreateVideo { get; set; }
     [Parameter] public EventCallback RequestCreateAudio { get; set; }
     [Parameter] public EventCallback RequestEditMedia { get; set; }
+    [Parameter] public EventCallback RequestInsertBarcode { get; set; }
+    [Parameter] public EventCallback RequestEditBarcode { get; set; }
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback RequestToggleTimeline { get; set; }
 
@@ -517,6 +527,7 @@
         if (element is ImageFrameElement) State.ToggleCropMode();
         if (element is DataVisualElement) return RequestEditDataVisual.InvokeAsync();
         if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
+        if (element is BarcodeElement) return RequestEditBarcode.InvokeAsync();
         return Task.CompletedTask;
     }
 
@@ -546,6 +557,8 @@
     private Task CreateVideo() => RequestCreateVideo.InvokeAsync();
     private Task CreateAudio() => RequestCreateAudio.InvokeAsync();
     private Task EditSelectedMedia() => RequestEditMedia.InvokeAsync();
+    private Task InsertBarcode() => RequestInsertBarcode.InvokeAsync();
+    private Task EditSelectedBarcode() => RequestEditBarcode.InvokeAsync();
     private Task ToggleTimeline() => RequestToggleTimeline.InvokeAsync();
     private Task PlaySelectedMedia() => State.SelectedElement is PublicationMediaElement media
         ? JS.InvokeVoidAsync("publisherStudio.playPublicationMedia", $"element-{media.Id}").AsTask()

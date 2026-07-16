@@ -1,176 +1,382 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 
 internal static class Program
 {
+    private const string DefaultRepository = "Michi0403/BlazorPublisher";
+    private const string ProductName = "BlazorPublisher";
+    private const string SetupFileName = "PublisherStudio.Setup.exe";
+    private const string StartMenuGroup = "BlazorPublisher by Michi0403";
     private static readonly HttpClient Http = CreateClient();
 
     public static async Task<int> Main(string[] args)
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
+        var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
+        Options? options = null;
         try
         {
-            var options = Options.Parse(args);
-            if (options.Help || string.IsNullOrWhiteSpace(options.Command)) { Options.PrintHelp(); return 0; }
-            return options.Command switch
+            options = Options.Parse(args);
+            if (options.Help)
             {
-                "install" => await InstallAsync(options),
-                "start" => await StartAsync(options),
-                "uninstall" => Uninstall(options),
-                "source" => await BuildFromSourceZipAsync(options),
-                _ => throw new ArgumentException($"Unknown command: {options.Command}")
+                Options.PrintHelp();
+                return 0;
+            }
+
+            return options.Action switch
+            {
+                SetupAction.Install => await InstallOrUpdateAsync(options, update: false),
+                SetupAction.Update => await InstallOrUpdateAsync(options, update: true),
+                SetupAction.Start => await StartAsync(options),
+                SetupAction.Uninstall => await UninstallAsync(options),
+                _ => 0
             };
         }
         catch (Exception ex)
         {
-            WriteLine(ex.Message, ConsoleColor.Red);
+            WriteLine(ex.ToString(), ConsoleColor.Red);
             return 1;
+        }
+        finally
+        {
+            if (launchedByDoubleClick || options?.WaitOnExit == true)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Press any key to close...");
+                Console.ReadKey(intercept: true);
+            }
         }
     }
 
-    private static async Task<int> InstallAsync(Options options)
+    private static async Task<int> InstallOrUpdateAsync(Options options, bool update)
     {
-        var payload = RequireDirectory(options.Payload, "--payload");
-        var target = options.InstallDirectory;
-        WriteLine($"Installing PublisherStudio to {target}", ConsoleColor.Cyan);
-        if (Directory.Exists(target) && options.Force) Directory.Delete(target, true);
-        Directory.CreateDirectory(target);
-        CopyDirectory(payload, target, overwrite: true);
-        WriteInstallMetadata(target);
-        WriteLine("Installation complete.", ConsoleColor.Green);
-        return options.StartAfter ? await StartAsync(options) : 0;
+        var installDirectory = options.InstallDirectory;
+        Directory.CreateDirectory(Path.GetDirectoryName(installDirectory)!);
+        var tempRoot = Path.Combine(Path.GetTempPath(), $"BlazorPublisher-Setup-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempRoot);
+        try
+        {
+            WriteLine(update ? "Updating BlazorPublisher..." : "Installing BlazorPublisher...", ConsoleColor.Cyan);
+            var release = await ResolveReleaseAssetAsync(options);
+            var archive = Path.Combine(tempRoot, release.AssetName);
+            await DownloadFileAsync(release.DownloadUrl, archive);
+            var extracted = Path.Combine(tempRoot, "extracted");
+            ExtractZipSafe(archive, extracted);
+            var payload = ResolvePayloadRoot(extracted);
+
+            StopPublisherProcesses();
+            Directory.CreateDirectory(installDirectory);
+            ClearApplicationPayload(installDirectory);
+            CopyDirectory(payload, installDirectory, overwrite: true);
+            CopySetupExecutableIfPossible(installDirectory);
+            WriteCommandFiles(installDirectory, options);
+            WriteInstallMetadata(installDirectory, release);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && options.CreateShortcuts)
+                ProvisionStartMenu(installDirectory);
+
+            WriteLine($"BlazorPublisher installed to: {installDirectory}", ConsoleColor.Green);
+            WriteLine($"Release: {release.TagName} / {release.AssetName}", ConsoleColor.DarkGray);
+            return options.StartAfter ? await StartAsync(options) : 0;
+        }
+        finally
+        {
+            try { Directory.Delete(tempRoot, recursive: true); } catch { }
+        }
     }
 
     private static async Task<int> StartAsync(Options options)
     {
-        var target = options.InstallDirectory;
-        var executable = ResolveWebExecutable(target);
-        var arguments = options.Port is null ? string.Empty : $"--port {options.Port}";
-        var endpointFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "runtime", "server.json");
-        try { File.Delete(endpointFile); } catch { }
-        var process = Process.Start(new ProcessStartInfo(executable, arguments)
+        var endpointFile = RuntimeEndpointFile();
+        if (TryReadEndpoint(endpointFile, out var existingUrl) && IsPublisherRunning())
         {
-            WorkingDirectory = target,
-            UseShellExecute = true
-        }) ?? throw new InvalidOperationException("The PublisherStudio process could not be started.");
-        WriteLine($"Started PublisherStudio (PID {process.Id}).", ConsoleColor.Green);
+            WriteLine($"BlazorPublisher is already running. Opening {existingUrl}", ConsoleColor.Yellow);
+            OpenBrowser(existingUrl!);
+            return 0;
+        }
 
-        var baseUrl = await WaitForEndpointAsync(endpointFile, process);
-        if (baseUrl is not null)
+        var launch = ResolveLaunch(options.InstallDirectory);
+        try { File.Delete(endpointFile); } catch { }
+        var startInfo = new ProcessStartInfo
         {
-            WriteLine($"Opening {baseUrl}", ConsoleColor.Cyan);
-            Process.Start(new ProcessStartInfo(baseUrl) { UseShellExecute = true });
+            FileName = launch.FileName,
+            WorkingDirectory = launch.WorkingDirectory,
+            UseShellExecute = launch.UseShellExecute
+        };
+        foreach (var argument in launch.PrefixArguments) startInfo.ArgumentList.Add(argument);
+        if (options.Port is int port)
+        {
+            startInfo.ArgumentList.Add("--port");
+            startInfo.ArgumentList.Add(port.ToString());
+        }
+        var process = Process.Start(startInfo) ?? throw new InvalidOperationException("BlazorPublisher could not be started.");
+        WriteLine($"Started BlazorPublisher (PID {process.Id}).", ConsoleColor.Green);
+        var url = await WaitForEndpointAsync(endpointFile, process);
+        if (!string.IsNullOrWhiteSpace(url))
+        {
+            WriteLine($"Opening {url}", ConsoleColor.Cyan);
+            OpenBrowser(url);
+        }
+        else WriteLine("The host started, but its endpoint file was not available yet.", ConsoleColor.Yellow);
+        return 0;
+    }
+
+    private static async Task<int> UninstallAsync(Options options)
+    {
+        if (!options.Force)
+            throw new InvalidOperationException("Use --force to confirm uninstall.");
+        StopPublisherProcesses();
+        RemoveStartMenu();
+        var target = options.InstallDirectory;
+        if (!Directory.Exists(target))
+        {
+            WriteLine("BlazorPublisher is not installed.", ConsoleColor.Yellow);
+            return 0;
+        }
+
+        var current = Environment.ProcessPath is { Length: > 0 } path ? Path.GetFullPath(path) : string.Empty;
+        var targetFull = Path.GetFullPath(target).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        if (current.StartsWith(targetFull, StringComparison.OrdinalIgnoreCase) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var cleanup = Path.Combine(Path.GetTempPath(), $"BlazorPublisher-Uninstall-{Guid.NewGuid():N}.cmd");
+            await File.WriteAllTextAsync(cleanup, $"@echo off\r\nping 127.0.0.1 -n 3 >nul\r\nrmdir /s /q \"{target}\"\r\ndel /q \"%~f0\"\r\n");
+            Process.Start(new ProcessStartInfo("cmd.exe", $"/c start \"\" /min \"{cleanup}\"") { UseShellExecute = false, CreateNoWindow = true });
+            WriteLine("Uninstall scheduled. The installation folder will be removed after this setup process closes.", ConsoleColor.Green);
         }
         else
         {
-            WriteLine("The host started, but no runtime endpoint file appeared. Open the URL shown by PublisherStudio.Web.", ConsoleColor.Yellow);
+            Directory.Delete(target, recursive: true);
+            WriteLine($"Removed {target}", ConsoleColor.Green);
         }
         return 0;
     }
 
+    private static async Task<ReleaseAsset> ResolveReleaseAssetAsync(Options options)
+    {
+        if (!string.IsNullOrWhiteSpace(options.AssetUrl))
+        {
+            var name = Path.GetFileName(new Uri(options.AssetUrl).AbsolutePath);
+            return new ReleaseAsset("explicit", string.IsNullOrWhiteSpace(name) ? "BlazorPublisher.zip" : name, options.AssetUrl);
+        }
+
+        ValidateRepository(options.Repository);
+        var api = $"https://api.github.com/repos/{options.Repository}/releases?per_page=30";
+        WriteLine($"Reading published releases: {api}", ConsoleColor.DarkGray);
+        using var response = await Http.GetAsync(api, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        using var json = await JsonDocument.ParseAsync(stream);
+        if (json.RootElement.ValueKind != JsonValueKind.Array || json.RootElement.GetArrayLength() == 0)
+            throw new InvalidOperationException("No published GitHub release exists yet. Create a release and upload the application ZIP plus the setup EXE.");
+
+        var runtime = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "win-arm64" : "win-x64";
+        foreach (var release in json.RootElement.EnumerateArray())
+        {
+            if (release.TryGetProperty("draft", out var draft) && draft.GetBoolean()) continue;
+            var tag = release.TryGetProperty("tag_name", out var tagValue) ? tagValue.GetString() ?? "release" : "release";
+            if (!release.TryGetProperty("assets", out var assets) || assets.ValueKind != JsonValueKind.Array) continue;
+
+            var candidates = assets.EnumerateArray().Select(asset => new
+            {
+                Name = asset.GetProperty("name").GetString() ?? string.Empty,
+                Url = asset.GetProperty("browser_download_url").GetString() ?? string.Empty
+            }).Where(asset => asset.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)
+                && !asset.Name.Contains("source", StringComparison.OrdinalIgnoreCase)
+                && !asset.Name.Contains("installer", StringComparison.OrdinalIgnoreCase)
+                && !asset.Name.Contains("setup", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            var selected = !string.IsNullOrWhiteSpace(options.ReleaseAssetName)
+                ? candidates.FirstOrDefault(asset => asset.Name.Equals(options.ReleaseAssetName, StringComparison.OrdinalIgnoreCase))
+                : candidates.FirstOrDefault(asset => asset.Name.Contains(runtime, StringComparison.OrdinalIgnoreCase))
+                    ?? candidates.FirstOrDefault(asset => asset.Name.Contains("win", StringComparison.OrdinalIgnoreCase))
+                    ?? candidates.FirstOrDefault();
+            if (selected is not null && !string.IsNullOrWhiteSpace(selected.Url))
+            {
+                var prerelease = release.TryGetProperty("prerelease", out var prereleaseValue) && prereleaseValue.GetBoolean();
+                WriteLine($"Selected {(prerelease ? "pre-release" : "release")} {tag}: {selected.Name}", ConsoleColor.DarkGray);
+                return new ReleaseAsset(tag, selected.Name, selected.Url);
+            }
+        }
+
+        throw new InvalidOperationException($"No application ZIP was found in the published releases. Expected an asset such as BlazorPublisher-{runtime}.zip.");
+    }
+
+    private static async Task DownloadFileAsync(string url, string destination)
+    {
+        WriteLine($"Downloading {url}", ConsoleColor.Cyan);
+        using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+        var length = response.Content.Headers.ContentLength;
+        await using var input = await response.Content.ReadAsStreamAsync();
+        await using var output = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024, useAsync: true);
+        var buffer = new byte[1024 * 1024];
+        long total = 0;
+        var nextReport = 0L;
+        while (true)
+        {
+            var read = await input.ReadAsync(buffer);
+            if (read == 0) break;
+            await output.WriteAsync(buffer.AsMemory(0, read));
+            total += read;
+            if (total >= nextReport)
+            {
+                var text = length is > 0 ? $"{total * 100d / length.Value:0.0}%" : FormatBytes(total);
+                Console.Write($"\r{text,-12}");
+                nextReport = total + 4L * 1024 * 1024;
+            }
+        }
+        Console.WriteLine();
+        if (total == 0) throw new IOException("The downloaded release asset is empty.");
+    }
+
+    private static void ExtractZipSafe(string archive, string destination)
+    {
+        Directory.CreateDirectory(destination);
+        var root = Path.GetFullPath(destination).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        using var zip = ZipFile.OpenRead(archive);
+        foreach (var entry in zip.Entries)
+        {
+            var target = Path.GetFullPath(Path.Combine(destination, entry.FullName));
+            if (!target.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException($"Unsafe ZIP entry: {entry.FullName}");
+            if (string.IsNullOrEmpty(entry.Name)) { Directory.CreateDirectory(target); continue; }
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            entry.ExtractToFile(target, overwrite: true);
+        }
+    }
+
+    private static string ResolvePayloadRoot(string extracted)
+    {
+        var executable = Directory.EnumerateFiles(extracted, "PublisherStudio.Web.exe", SearchOption.AllDirectories).FirstOrDefault();
+        var dll = executable is null ? Directory.EnumerateFiles(extracted, "PublisherStudio.Web.dll", SearchOption.AllDirectories).FirstOrDefault() : null;
+        var marker = executable ?? dll ?? throw new FileNotFoundException("The release ZIP does not contain PublisherStudio.Web.exe or PublisherStudio.Web.dll.");
+        return Path.GetDirectoryName(marker)!;
+    }
+
+    private static void ClearApplicationPayload(string target)
+    {
+        var preserved = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            SetupFileName, "Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "installation.json"
+        };
+        foreach (var file in Directory.EnumerateFiles(target))
+            if (!preserved.Contains(Path.GetFileName(file))) TryDeleteFile(file);
+        foreach (var directory in Directory.EnumerateDirectories(target))
+            try { Directory.Delete(directory, recursive: true); } catch (Exception ex) { WriteLine($"Could not remove old directory '{directory}': {ex.Message}", ConsoleColor.Yellow); }
+    }
+
+    private static void CopySetupExecutableIfPossible(string installDirectory)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        var source = Environment.ProcessPath;
+        if (string.IsNullOrWhiteSpace(source) || !File.Exists(source)) return;
+        var destination = Path.Combine(installDirectory, SetupFileName);
+        if (Path.GetFullPath(source).Equals(Path.GetFullPath(destination), StringComparison.OrdinalIgnoreCase)) return;
+        File.Copy(source, destination, overwrite: true);
+    }
+
+    private static void WriteCommandFiles(string installDirectory, Options options)
+    {
+        var setup = Path.Combine(installDirectory, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SetupFileName : Path.GetFileName(Environment.ProcessPath ?? "PublisherStudio.Setup"));
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        WriteCommand(Path.Combine(installDirectory, "Install.cmd"), $"\"{setup}\" --install --start");
+        WriteCommand(Path.Combine(installDirectory, "Update.cmd"), $"\"{setup}\" --update --start");
+        WriteCommand(Path.Combine(installDirectory, "Start.cmd"), $"\"{setup}\" --start");
+        WriteCommand(Path.Combine(installDirectory, "Uninstall.cmd"), $"\"{setup}\" --uninstall --force");
+    }
+
+    private static void WriteCommand(string path, string command)
+    {
+        File.WriteAllText(path, $"@echo off\r\nsetlocal\r\ncd /d \"%~dp0\"\r\ncall {command}\r\nset \"EXITCODE=%ERRORLEVEL%\"\r\nif not \"%EXITCODE%\"==\"0\" echo Command failed with exit code %EXITCODE%.\r\nif not \"%EXITCODE%\"==\"0\" pause\r\nexit /b %EXITCODE%\r\n", new UTF8Encoding(false));
+    }
+
+    private static void ProvisionStartMenu(string installDirectory)
+    {
+        var folder = StartMenuFolder();
+        Directory.CreateDirectory(folder);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Start.url"), Path.Combine(installDirectory, "Start.cmd"));
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Update.url"), Path.Combine(installDirectory, "Update.cmd"));
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Install or Repair.url"), Path.Combine(installDirectory, "Install.cmd"));
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Uninstall.url"), Path.Combine(installDirectory, "Uninstall.cmd"));
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Folder.url"), installDirectory);
+        WriteLine($"Start Menu entries created in '{StartMenuGroup}'.", ConsoleColor.Green);
+    }
+
+    private static void CreateUrlShortcut(string shortcutPath, string targetPath)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine("[InternetShortcut]");
+        builder.AppendLine($"URL={new Uri(Path.GetFullPath(targetPath)).AbsoluteUri}");
+        var icon = Directory.EnumerateFiles(Path.GetDirectoryName(targetPath) ?? string.Empty, "*.ico", SearchOption.AllDirectories).FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(icon)) { builder.AppendLine($"IconFile={icon}"); builder.AppendLine("IconIndex=0"); }
+        File.WriteAllText(shortcutPath, builder.ToString(), new UTF8Encoding(false));
+    }
+
+    private static void RemoveStartMenu()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        var folder = StartMenuFolder();
+        if (Directory.Exists(folder)) try { Directory.Delete(folder, recursive: true); } catch { }
+    }
+
+    private static string StartMenuFolder() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", StartMenuGroup);
+
+    private static LaunchInfo ResolveLaunch(string installDirectory)
+    {
+        var executable = Directory.Exists(installDirectory)
+            ? Directory.EnumerateFiles(installDirectory, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "PublisherStudio.Web.exe" : "PublisherStudio.Web", SearchOption.AllDirectories).FirstOrDefault()
+            : null;
+        if (!string.IsNullOrWhiteSpace(executable)) return new LaunchInfo(executable, Path.GetDirectoryName(executable)!, true, []);
+        var dll = Directory.Exists(installDirectory) ? Directory.EnumerateFiles(installDirectory, "PublisherStudio.Web.dll", SearchOption.AllDirectories).FirstOrDefault() : null;
+        if (!string.IsNullOrWhiteSpace(dll)) return new LaunchInfo("dotnet", Path.GetDirectoryName(dll)!, false, [dll]);
+        throw new FileNotFoundException($"BlazorPublisher is not installed in '{installDirectory}'. Run Install first.");
+    }
+
     private static async Task<string?> WaitForEndpointAsync(string endpointFile, Process process)
     {
-        for (var attempt = 0; attempt < 80; attempt++)
+        for (var attempt = 0; attempt < 120; attempt++)
         {
-            if (process.HasExited) throw new InvalidOperationException($"PublisherStudio exited with code {process.ExitCode} before publishing its endpoint.");
-            if (File.Exists(endpointFile))
-            {
-                try
-                {
-                    using var document = JsonDocument.Parse(await File.ReadAllTextAsync(endpointFile));
-                    if (document.RootElement.TryGetProperty("BaseUrl", out var property)) return property.GetString();
-                }
-                catch (IOException) { }
-                catch (JsonException) { }
-            }
+            if (process.HasExited) throw new InvalidOperationException($"BlazorPublisher exited with code {process.ExitCode}.");
+            if (TryReadEndpoint(endpointFile, out var url)) return url;
             await Task.Delay(125);
         }
         return null;
     }
 
-    private static int Uninstall(Options options)
+    private static bool TryReadEndpoint(string file, out string? url)
     {
-        var target = options.InstallDirectory;
-        if (!Directory.Exists(target)) { WriteLine("PublisherStudio is not installed in the selected directory.", ConsoleColor.Yellow); return 0; }
-        if (!options.Force) throw new InvalidOperationException("Uninstall requires --force to prevent accidental deletion.");
-        Directory.Delete(target, recursive: true);
-        WriteLine($"Removed {target}", ConsoleColor.Green);
-        return 0;
-    }
-
-    private static async Task<int> BuildFromSourceZipAsync(Options options)
-    {
-        if (string.IsNullOrWhiteSpace(options.SourceZip)) throw new ArgumentException("source requires --source-zip <URL-or-file>.");
-        var temp = Path.Combine(Path.GetTempPath(), "PublisherStudio-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(temp);
+        url = null;
+        if (!File.Exists(file)) return false;
         try
         {
-            var zipPath = Path.Combine(temp, "source.zip");
-            if (Uri.TryCreate(options.SourceZip, UriKind.Absolute, out var uri) && (uri.Scheme == "http" || uri.Scheme == "https"))
+            using var document = JsonDocument.Parse(File.ReadAllText(file));
+            if (document.RootElement.TryGetProperty("BaseUrl", out var value)) url = value.GetString();
+            return !string.IsNullOrWhiteSpace(url);
+        }
+        catch { return false; }
+    }
+
+    private static void StopPublisherProcesses()
+    {
+        foreach (var process in Process.GetProcessesByName("PublisherStudio.Web"))
+        {
+            try
             {
-                WriteLine($"Downloading {uri}", ConsoleColor.Cyan);
-                await using var destination = File.Create(zipPath);
-                await using var source = await Http.GetStreamAsync(uri);
-                await source.CopyToAsync(destination);
+                WriteLine($"Stopping PublisherStudio.Web PID {process.Id}...", ConsoleColor.Yellow);
+                if (!process.CloseMainWindow() || !process.WaitForExit(2500)) process.Kill(entireProcessTree: true);
             }
-            else File.Copy(Path.GetFullPath(options.SourceZip), zipPath);
-            ZipFile.ExtractToDirectory(zipPath, Path.Combine(temp, "source"));
-            var project = Directory.EnumerateFiles(Path.Combine(temp, "source"), "PublisherStudio.Web.csproj", SearchOption.AllDirectories).FirstOrDefault()
-                ?? throw new FileNotFoundException("PublisherStudio.Web.csproj was not found in the source ZIP.");
-            var output = Path.Combine(temp, "payload");
-            var runtime = options.RuntimeIdentifier ?? DefaultRuntimeIdentifier();
-            await RunDotNetAsync($"publish \"{project}\" -c Release -r {runtime} --self-contained false -o \"{output}\"");
-            options.Payload = output;
-            return await InstallAsync(options);
+            catch { }
+            finally { process.Dispose(); }
         }
-        finally { try { Directory.Delete(temp, true); } catch { } }
     }
 
-    private static async Task RunDotNetAsync(string arguments)
-    {
-        WriteLine("dotnet " + arguments, ConsoleColor.DarkGray);
-        using var process = Process.Start(new ProcessStartInfo("dotnet", arguments)
-        {
-            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true
-        }) ?? throw new InvalidOperationException("dotnet could not be started.");
-        process.OutputDataReceived += (_, e) => { if (e.Data is not null) Console.WriteLine(e.Data); };
-        process.ErrorDataReceived += (_, e) => { if (e.Data is not null) Console.Error.WriteLine(e.Data); };
-        process.BeginOutputReadLine(); process.BeginErrorReadLine();
-        await process.WaitForExitAsync();
-        if (process.ExitCode != 0) throw new InvalidOperationException($"dotnet publish failed with exit code {process.ExitCode}.");
-    }
-
-    private static string ResolveWebExecutable(string directory)
-    {
-        var names = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? new[] { "PublisherStudio.Web.exe", "PublisherStudio.Web" }
-            : new[] { "PublisherStudio.Web" };
-        foreach (var name in names)
-        {
-            var path = Path.Combine(directory, name);
-            if (File.Exists(path)) return path;
-        }
-        var dll = Path.Combine(directory, "PublisherStudio.Web.dll");
-        if (File.Exists(dll)) return CreateDotNetLauncher(directory, dll);
-        throw new FileNotFoundException("No published PublisherStudio.Web executable was found.");
-    }
-
-    private static string CreateDotNetLauncher(string directory, string dll)
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            var cmd = Path.Combine(directory, "PublisherStudio.Web.cmd");
-            File.WriteAllText(cmd, $"@echo off\r\ndotnet \"{dll}\" %*\r\n");
-            return cmd;
-        }
-        var sh = Path.Combine(directory, "PublisherStudio.Web.sh");
-        File.WriteAllText(sh, $"#!/usr/bin/env sh\nexec dotnet \"{dll}\" \"$@\"\n");
-        try { File.SetUnixFileMode(sh, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute); } catch { }
-        return sh;
-    }
+    private static bool IsPublisherRunning() => Process.GetProcessesByName("PublisherStudio.Web").Any();
+    private static string RuntimeEndpointFile() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "runtime", "server.json");
+    private static void OpenBrowser(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 
     private static void CopyDirectory(string source, string target, bool overwrite)
     {
@@ -184,60 +390,96 @@ internal static class Program
         }
     }
 
-    private static string RequireDirectory(string? value, string option)
+    private static void WriteInstallMetadata(string target, ReleaseAsset release)
     {
-        if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException($"{option} is required.");
-        var path = Path.GetFullPath(value);
-        return Directory.Exists(path) ? path : throw new DirectoryNotFoundException(path);
+        var metadata = new { Product = ProductName, InstalledUtc = DateTimeOffset.UtcNow, release.TagName, release.AssetName, InstallerVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() };
+        File.WriteAllText(Path.Combine(target, "installation.json"), JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
     }
-    private static void WriteInstallMetadata(string target) => File.WriteAllText(Path.Combine(target, "installation.json"), JsonSerializer.Serialize(new { InstalledUtc = DateTimeOffset.UtcNow, Version = "0.1.0" }, new JsonSerializerOptions { WriteIndented = true }));
-    private static string DefaultRuntimeIdentifier() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? (RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "win-arm64" : "win-x64") : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? (RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "osx-arm64" : "osx-x64") : (RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "linux-arm64" : "linux-x64");
-    private static HttpClient CreateClient() { var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) }; client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudio-Setup", "0.1")); return client; }
+
+    private static void ValidateRepository(string repository)
+    {
+        if (string.IsNullOrWhiteSpace(repository) || repository.Count(character => character == '/') != 1)
+            throw new ArgumentException("Repository must use owner/name format.");
+    }
+
+    private static void TryDeleteFile(string path) { try { File.SetAttributes(path, FileAttributes.Normal); File.Delete(path); } catch (Exception ex) { WriteLine($"Could not remove old file '{path}': {ex.Message}", ConsoleColor.Yellow); } }
+    private static string FormatBytes(long value) { string[] units = ["B", "KB", "MB", "GB"]; double size = value; var index = 0; while (size >= 1024 && index < units.Length - 1) { size /= 1024; index++; } return $"{size:0.##} {units[index]}"; }
+    private static HttpClient CreateClient() { var client = new HttpClient { Timeout = TimeSpan.FromMinutes(30) }; client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("BlazorPublisher-Setup", "1.0")); client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json")); return client; }
     private static void WriteLine(string value, ConsoleColor color) { var previous = Console.ForegroundColor; Console.ForegroundColor = color; Console.WriteLine(value); Console.ForegroundColor = previous; }
+
+    private sealed record ReleaseAsset(string TagName, string AssetName, string DownloadUrl);
+    private sealed record LaunchInfo(string FileName, string WorkingDirectory, bool UseShellExecute, string[] PrefixArguments);
+    private enum SetupAction { Install, Update, Start, Uninstall, Help }
 
     private sealed class Options
     {
-        public string? Command { get; private set; }
-        public string? Payload { get; set; }
-        public string? SourceZip { get; private set; }
-        public string? RuntimeIdentifier { get; private set; }
+        public SetupAction Action { get; private set; } = SetupAction.Install;
+        public string Repository { get; private set; } = DefaultRepository;
+        public string? AssetUrl { get; private set; }
+        public string? ReleaseAssetName { get; private set; }
+        public string InstallDirectory { get; private set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "BlazorPublisher");
         public int? Port { get; private set; }
-        public bool StartAfter { get; private set; }
+        public bool StartAfter { get; private set; } = true;
+        public bool CreateShortcuts { get; private set; } = true;
         public bool Force { get; private set; }
+        public bool WaitOnExit { get; private set; }
         public bool Help { get; private set; }
-        public string InstallDirectory { get; private set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "PublisherStudio");
 
         public static Options Parse(string[] args)
         {
             var result = new Options();
-            if (args.Length > 0 && !args[0].StartsWith('-')) result.Command = args[0].ToLowerInvariant();
-            for (var i = result.Command is null ? 0 : 1; i < args.Length; i++)
+            if (args.Length == 0) return result;
+            var actionSpecified = false;
+            for (var index = 0; index < args.Length; index++)
             {
-                string Next() => ++i < args.Length ? args[i] : throw new ArgumentException($"Missing value after {args[i - 1]}.");
-                switch (args[i])
+                var argument = args[index].Trim();
+                string Next() => ++index < args.Length ? args[index] : throw new ArgumentException($"Missing value after {argument}.");
+                switch (argument.ToLowerInvariant())
                 {
-                    case "--payload": result.Payload = Next(); break;
-                    case "--source-zip": result.SourceZip = Next(); break;
+                    case "install" or "--install": result.Action = SetupAction.Install; result.StartAfter = true; actionSpecified = true; break;
+                    case "update" or "--update": result.Action = SetupAction.Update; result.StartAfter = true; actionSpecified = true; break;
+                    case "start": result.Action = SetupAction.Start; result.StartAfter = false; actionSpecified = true; break;
+                    case "--start":
+                        if (actionSpecified && result.Action is SetupAction.Install or SetupAction.Update) result.StartAfter = true;
+                        else { result.Action = SetupAction.Start; result.StartAfter = false; actionSpecified = true; }
+                        break;
+                    case "uninstall" or "--uninstall": result.Action = SetupAction.Uninstall; result.StartAfter = false; actionSpecified = true; break;
+                    case "--repo": result.Repository = Next(); break;
+                    case "--asset-url": result.AssetUrl = Next(); break;
+                    case "--release-asset": result.ReleaseAssetName = Next(); break;
                     case "--install-dir": result.InstallDirectory = Path.GetFullPath(Next()); break;
-                    case "--runtime": result.RuntimeIdentifier = Next(); break;
                     case "--port": result.Port = int.Parse(Next()); break;
-                    case "--start": result.StartAfter = true; break;
+                    case "--no-start": result.StartAfter = false; break;
+                    case "--no-shortcuts": result.CreateShortcuts = false; break;
                     case "--force": result.Force = true; break;
-                    case "--help" or "-h": result.Help = true; break;
-                    default: throw new ArgumentException($"Unknown option: {args[i]}");
+                    case "--wait" or "--pause": result.WaitOnExit = true; break;
+                    case "--help" or "-h" or "/?": result.Help = true; result.Action = SetupAction.Help; break;
+                    default: throw new ArgumentException($"Unknown option: {argument}");
                 }
             }
             return result;
         }
+
         public static void PrintHelp() => Console.WriteLine("""
-PublisherStudio.Setup
+BlazorPublisher setup
 
-  install   --payload <published-folder> [--install-dir <folder>] [--force] [--start] [--port N]
-  start     [--install-dir <folder>] [--port N]
-  uninstall [--install-dir <folder>] --force
-  source    --source-zip <URL-or-file> [--runtime win-x64] [--install-dir <folder>] [--force] [--start]
+Double-click without arguments:
+  Downloads the latest Michi0403/BlazorPublisher release, installs it, creates Start Menu entries, starts the server, and opens the browser.
 
-The source command downloads/extracts a ZIP and runs dotnet publish. Git is not required.
+Commands:
+  PublisherStudio.Setup.exe --install [--start]
+  PublisherStudio.Setup.exe --update [--start]
+  PublisherStudio.Setup.exe --start [--port 5198]
+  PublisherStudio.Setup.exe --uninstall --force
+
+Options:
+  --repo owner/name          GitHub repository. Default: Michi0403/BlazorPublisher
+  --asset-url URL            Direct application ZIP URL instead of GitHub latest release
+  --release-asset NAME       Select an exact release asset name
+  --install-dir PATH         Installation folder
+  --no-start                 Install/update without starting
+  --no-shortcuts             Do not create Start Menu entries
+  --wait                     Wait for a key before closing
 """);
     }
 }

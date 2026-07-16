@@ -1,15 +1,19 @@
 @namespace PublisherStudio.Components.Editor
 
 <aside class="page-navigator">
-    <div class="pane-heading">
+    <div class="pane-heading" @oncontextmenu="ShowNavigatorMenu" @oncontextmenu:preventDefault>
         <strong>Pages</strong>
         <span>@State.Document.Pages.Count</span>
     </div>
-    <div class="page-thumbnail-list">
+    <div class="page-thumbnail-list" @oncontextmenu="ShowNavigatorMenu" @oncontextmenu:preventDefault>
         @for (var index = 0; index < State.Document.Pages.Count; index++)
         {
             var publicationPage = State.Document.Pages[index];
-            <button class="page-thumbnail @(publicationPage.Id == State.SelectedPageId ? "selected" : null)" @onclick="() => State.SelectPage(publicationPage.Id)">
+            <button class="page-thumbnail @(publicationPage.Id == State.SelectedPageId ? "selected" : null)"
+                    @onclick="() => State.SelectPage(publicationPage.Id)"
+                    @oncontextmenu="args => ShowPageMenu(publicationPage, args)"
+                    @oncontextmenu:preventDefault
+                    @oncontextmenu:stopPropagation>
                 <span class="page-number">@(index + 1)</span>
                 <span class="mini-page" style="@MiniPageStyle(publicationPage)">
                     @foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>().Where(e => e.Visible).OrderBy(e => e.ZIndex))
@@ -37,8 +41,118 @@
     </div>
 </aside>
 
+<DxContextMenu @ref="_pageContextMenu">
+    <Items>
+        @if (ContextPage is not null)
+        {
+            <DxContextMenuItem Text="Select page" Click="SelectContextPage" />
+            <DxContextMenuItem Text="Duplicate page" Click="DuplicateContextPage" />
+            <DxContextMenuItem Text="Add new page" Click="AddPage" />
+            <DxContextMenuItem Text="Delete page" Enabled="@(State.Document.Pages.Count > 1)" Click="DeleteContextPage" />
+            <DxContextMenuItem Text="Page transition" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.None)" Click="TransitionNone" />
+                    <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.Fade)" Click="TransitionFade" />
+                    <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.Push)" Click="TransitionPush" />
+                    <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.Wipe)" Click="TransitionWipe" />
+                    <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.Zoom)" Click="TransitionZoom" />
+                    <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.Flip)" Click="TransitionFlip" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="Timeline">
+                <Items>
+                    <DxContextMenuItem Text="Fit duration to page content" Click="FitTimelineToContent" />
+                    <DxContextMenuItem Text="Set duration to 10 seconds" Click="SetTenSecondTimeline" />
+                </Items>
+            </DxContextMenuItem>
+        }
+        else
+        {
+            <DxContextMenuItem Text="Add new page" Click="AddPage" />
+            <DxContextMenuItem Text="Duplicate selected page" Enabled="@(State.Document.Pages.Count > 0)" Click="DuplicateSelectedPage" />
+        }
+    </Items>
+</DxContextMenu>
+
 @code {
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+
+    private DxContextMenu _pageContextMenu = default!;
+    private Guid? _contextPageId;
+    private PublicationPage? ContextPage => _contextPageId is { } id ? State.Document.Pages.FirstOrDefault(page => page.Id == id) : null;
+
+    private async Task ShowPageMenu(PublicationPage publicationPage, MouseEventArgs args)
+    {
+        _contextPageId = publicationPage.Id;
+        State.SelectPage(publicationPage.Id);
+        await InvokeAsync(StateHasChanged);
+        await _pageContextMenu.ShowAsync(args);
+    }
+
+    private async Task ShowNavigatorMenu(MouseEventArgs args)
+    {
+        _contextPageId = null;
+        await InvokeAsync(StateHasChanged);
+        await _pageContextMenu.ShowAsync(args);
+    }
+
+    private void SelectContextPage()
+    {
+        if (_contextPageId is { } id) State.SelectPage(id);
+    }
+
+    private void DuplicateContextPage()
+    {
+        SelectContextPage();
+        State.DuplicatePage();
+    }
+
+    private void DeleteContextPage()
+    {
+        SelectContextPage();
+        State.DeletePage();
+        _contextPageId = State.SelectedPageId;
+    }
+
+    private void AddPage() => State.AddPage();
+    private void DuplicateSelectedPage() => State.DuplicatePage();
+
+    private void SetTransition(PublicationPageTransitionKind kind)
+    {
+        SelectContextPage();
+        State.UpdatePageTransition(transition => transition.Kind = kind);
+    }
+
+    private void TransitionNone() => SetTransition(PublicationPageTransitionKind.None);
+    private void TransitionFade() => SetTransition(PublicationPageTransitionKind.Fade);
+    private void TransitionPush() => SetTransition(PublicationPageTransitionKind.Push);
+    private void TransitionWipe() => SetTransition(PublicationPageTransitionKind.Wipe);
+    private void TransitionZoom() => SetTransition(PublicationPageTransitionKind.Zoom);
+    private void TransitionFlip() => SetTransition(PublicationPageTransitionKind.Flip);
+
+    private void FitTimelineToContent()
+    {
+        SelectContextPage();
+        State.SetPageTimelineDuration(Math.Max(1, TimelineContentEnd + .5));
+    }
+
+    private void SetTenSecondTimeline()
+    {
+        SelectContextPage();
+        State.SetPageTimelineDuration(10);
+    }
+
+    private double TimelineContentEnd => Math.Max(
+        State.CurrentPage.Elements.SelectMany(item => item.Animations)
+            .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
+            .DefaultIfEmpty(0).Max(),
+        State.CurrentPage.Elements.OfType<PublicationMediaElement>()
+            .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
+            .DefaultIfEmpty(0).Max());
+
+    private string TransitionText(PublicationPageTransitionKind kind) =>
+        State.CurrentPage.Transition.Kind == kind ? $"✓ {kind}" : kind.ToString();
+
     private static string MiniPageStyle(PublicationPage page) => $"aspect-ratio:{page.WidthMm.ToString(CultureInfo.InvariantCulture)}/{page.HeightMm.ToString(CultureInfo.InvariantCulture)};background:{page.Background}";
     private static string MiniElementStyle(PublicationElement element, PublicationPage page) =>
         $"left:{Inv(element.X / page.WidthMm * 100)}%;top:{Inv(element.Y / page.HeightMm * 100)}%;width:{Inv(element.Width / page.WidthMm * 100)}%;height:{Inv(element.Height / page.HeightMm * 100)}%;transform:rotate({Inv(element.Rotation)}deg)";

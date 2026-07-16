@@ -34,7 +34,8 @@
              data-transition-duration="@Inv(State.CurrentPage.Transition.DurationSeconds)"
              data-advance-on-click="@State.CurrentPage.Transition.AdvanceOnClick.ToString().ToLowerInvariant()"
              data-auto-advance="@State.CurrentPage.Transition.AutoAdvance.ToString().ToLowerInvariant()"
-             data-auto-advance-seconds="@Inv(State.CurrentPage.Transition.AutoAdvanceSeconds)">
+             data-auto-advance-seconds="@Inv(State.CurrentPage.Transition.AutoAdvanceSeconds)"
+             data-timeline-duration="@Inv(State.CurrentPage.TimelineDurationSeconds)">
             @if (State.Document.View.GuidesVisible)
             {
                 @foreach (var guide in State.CurrentPage.Guides)
@@ -92,6 +93,18 @@
                      data-interaction="@PublicationAnimationData.Interaction(element)"
                      data-interaction-action="@element.Interaction.Action"
                      data-playback-hidden="@element.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
+                     data-media-kind="@(element is PublicationMediaElement ? element.Kind.ToString().ToLowerInvariant() : null)"
+                     data-media-start="@(element is PublicationMediaElement mediaData ? Inv(mediaData.TimelineStartSeconds) : null)"
+                     data-media-trim-start="@(element is PublicationMediaElement mediaTrimStart ? Inv(mediaTrimStart.TrimStartSeconds) : null)"
+                     data-media-trim-end="@(element is PublicationMediaElement mediaTrimEnd ? Inv(mediaTrimEnd.EffectiveTrimEndSeconds) : null)"
+                     data-media-volume="@(element is PublicationMediaElement mediaVolume ? Inv(mediaVolume.Volume) : null)"
+                     data-media-rate="@(element is PublicationMediaElement mediaRate ? Inv(mediaRate.PlaybackRate) : null)"
+                     data-media-muted="@(element is PublicationMediaElement mediaMuted ? mediaMuted.Muted.ToString().ToLowerInvariant() : null)"
+                     data-media-loop="@(element is PublicationMediaElement mediaLoop ? mediaLoop.Loop.ToString().ToLowerInvariant() : null)"
+                     data-media-autoplay="@(element is PublicationMediaElement mediaAuto ? mediaAuto.AutoPlay.ToString().ToLowerInvariant() : null)"
+                     data-media-trigger="@(element is PublicationMediaElement mediaTrigger ? mediaTrigger.PlaybackTrigger.ToString() : null)"
+                     data-media-fade-in="@(element is PublicationMediaElement mediaFadeIn ? Inv(mediaFadeIn.FadeInSeconds) : null)"
+                     data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)"
                      class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
                      @ondblclick="() => DoubleClick(element)"
@@ -118,6 +131,31 @@
                                     <div class="crop-thirds" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
                                     <div class="crop-help">Drag picture · mouse wheel zooms · double-click finishes</div>
                                 }
+                            </div>
+                            break;
+                        case VideoElement video:
+                            <div class="publication-video-frame" style="background:@video.Background">
+                                <video src="@video.DataUrl" poster="@video.PosterDataUrl" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
+                                       preload="metadata" playsinline data-media-control draggable="false" style="object-fit:@VideoFit(video.FitMode)"></video>
+                                <span class="media-object-badge">▶ @Time(video.TimelineLengthSeconds)</span>
+                            </div>
+                            break;
+                        case AudioElement audio:
+                            <div class="publication-audio-frame display-@audio.DisplayKind.ToString().ToLowerInvariant()" style="--media-accent:@audio.AccentColor">
+                                @if (audio.DisplayKind != PublicationAudioDisplayKind.Hidden)
+                                {
+                                    <div class="publication-audio-heading"><span>♪</span><b>@audio.Name</b><small>@Time(audio.TimelineLengthSeconds)</small></div>
+                                    @if (audio.DisplayKind == PublicationAudioDisplayKind.Waveform)
+                                    {
+                                        <div class="publication-audio-waveform">
+                                            @foreach (var sample in AudioSamples(audio))
+                                            {
+                                                <i style="height:@WaveHeight(sample)"></i>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                <audio src="@audio.DataUrl" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control></audio>
                             </div>
                             break;
                         case ShapeElement shape:
@@ -180,6 +218,26 @@
                 </Items>
             </DxContextMenuItem>
             <DxContextMenuItem Text="Reset picture" Click="ResetPicture" />
+        }
+        @if (State.SelectedElement is PublicationMediaElement mediaElement)
+        {
+            <DxContextMenuItem Text="Edit in Media Studio" IconCssClass="pub-icon pub-icon-media" BeginGroup="true" Click="EditSelectedMedia" />
+            <DxContextMenuItem Text="Play selected clip" Click="PlaySelectedMedia" />
+            <DxContextMenuItem Text="Pause" Click="PauseSelectedMedia" />
+            <DxContextMenuItem Text="Playback">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(mediaElement.Muted, "Muted"))" Click="ToggleMediaMuted" />
+                    <DxContextMenuItem Text="@(CheckedText(mediaElement.Loop, "Loop clip"))" Click="ToggleMediaLoop" />
+                    <DxContextMenuItem Text="@(CheckedText(mediaElement.AutoPlay, "Play in presentation"))" Click="ToggleMediaAutoPlay" />
+                    <DxContextMenuItem Text="Start behavior">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(mediaElement.PlaybackTrigger == PublicationMediaPlaybackTrigger.OnPageEnter, "On page entry"))" Click="MediaOnPageEnter" />
+                            <DxContextMenuItem Text="@(CheckedText(mediaElement.PlaybackTrigger == PublicationMediaPlaybackTrigger.OnClick, "On click"))" Click="MediaOnClick" />
+                            <DxContextMenuItem Text="@(CheckedText(mediaElement.PlaybackTrigger == PublicationMediaPlaybackTrigger.WithAnimation, "With animation"))" Click="MediaWithAnimation" />
+                        </Items>
+                    </DxContextMenuItem>
+                </Items>
+            </DxContextMenuItem>
         }
         @if (State.SelectedElement is WordArtElement)
         {
@@ -293,6 +351,10 @@
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
             <DxContextMenuItem Text="Insert picture…" IconCssClass="pub-icon pub-icon-picture" Click="InsertPicture" />
             <DxContextMenuItem Text="Create picture…" IconCssClass="pub-icon pub-icon-create-picture" Click="CreatePicture" />
+            <DxContextMenuItem Text="Insert video…" IconCssClass="pub-icon pub-icon-video" Click="InsertVideo" />
+            <DxContextMenuItem Text="Create video…" Click="CreateVideo" />
+            <DxContextMenuItem Text="Insert audio…" IconCssClass="pub-icon pub-icon-audio" Click="InsertAudio" />
+            <DxContextMenuItem Text="Create audio…" Click="CreateAudio" />
             <DxContextMenuItem Text="Insert data visual" IconCssClass="pub-icon pub-icon-chart">
                 <Items>
                     <DxContextMenuItem Text="Chart" Click="InsertChart" />
@@ -335,6 +397,11 @@
     [Parameter] public EventCallback<DataVisualKind> RequestInsertDataVisual { get; set; }
     [Parameter] public EventCallback RequestEditDataVisual { get; set; }
     [Parameter] public EventCallback RequestManageData { get; set; }
+    [Parameter] public EventCallback RequestInsertVideo { get; set; }
+    [Parameter] public EventCallback RequestInsertAudio { get; set; }
+    [Parameter] public EventCallback RequestCreateVideo { get; set; }
+    [Parameter] public EventCallback RequestCreateAudio { get; set; }
+    [Parameter] public EventCallback RequestEditMedia { get; set; }
 
     private DxContextMenu _contextMenu = default!;
     private IJSObjectReference? _module;
@@ -422,6 +489,7 @@
         if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
         if (element is ImageFrameElement) State.ToggleCropMode();
         if (element is DataVisualElement) return RequestEditDataVisual.InvokeAsync();
+        if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
         return Task.CompletedTask;
     }
 
@@ -446,6 +514,27 @@
     private Task EditSelectedPicture() => RequestEditPicture.InvokeAsync();
     private Task EditSelectedDataVisual() => RequestEditDataVisual.InvokeAsync();
     private Task ManageData() => RequestManageData.InvokeAsync();
+    private Task InsertVideo() => RequestInsertVideo.InvokeAsync();
+    private Task InsertAudio() => RequestInsertAudio.InvokeAsync();
+    private Task CreateVideo() => RequestCreateVideo.InvokeAsync();
+    private Task CreateAudio() => RequestCreateAudio.InvokeAsync();
+    private Task EditSelectedMedia() => RequestEditMedia.InvokeAsync();
+    private Task PlaySelectedMedia() => State.SelectedElement is PublicationMediaElement media
+        ? JS.InvokeVoidAsync("publisherStudio.playPublicationMedia", $"element-{media.Id}").AsTask()
+        : Task.CompletedTask;
+    private Task PauseSelectedMedia() => State.SelectedElement is PublicationMediaElement media
+        ? JS.InvokeVoidAsync("publisherStudio.pausePublicationMedia", $"element-{media.Id}").AsTask()
+        : Task.CompletedTask;
+    private void UpdateSelectedMedia(Action<PublicationMediaElement> update)
+    {
+        if (State.SelectedElement is PublicationMediaElement media) State.UpdateMedia(media.Id, update);
+    }
+    private void ToggleMediaMuted() => UpdateSelectedMedia(media => media.Muted = !media.Muted);
+    private void ToggleMediaLoop() => UpdateSelectedMedia(media => media.Loop = !media.Loop);
+    private void ToggleMediaAutoPlay() => UpdateSelectedMedia(media => media.AutoPlay = !media.AutoPlay);
+    private void MediaOnPageEnter() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter);
+    private void MediaOnClick() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnClick);
+    private void MediaWithAnimation() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.WithAnimation);
     private Task InsertChart() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
     private Task InsertPie() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.PieChart);
     private Task InsertPolar() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
@@ -746,6 +835,18 @@
         return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
     }
     private static string AnchorCss(ConnectorAnchor anchor) => anchor.ToString().ToLowerInvariant();
+
+    private static string VideoFit(PublicationVideoFitMode mode) => mode switch
+    {
+        PublicationVideoFitMode.Cover => "cover",
+        PublicationVideoFitMode.Stretch => "fill",
+        _ => "contain"
+    };
+    private static IEnumerable<double> AudioSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
+        ? audio.WaveformSamples.Take(96)
+        : Enumerable.Range(0, 64).Select(index => .22 + Math.Abs(Math.Sin(index * .41)) * .68);
+    private static string WaveHeight(double sample) => $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
+    private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
 
     private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
     private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line

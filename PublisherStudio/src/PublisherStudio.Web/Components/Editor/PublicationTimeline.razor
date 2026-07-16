@@ -1,0 +1,441 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<section id="publisher-timeline" class="publication-timeline @(Collapsed ? "collapsed" : null)">
+    <header class="timeline-toolbar" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
+        <div class="timeline-transport">
+            <button type="button" title="Play page timeline" @onclick="PlayTimeline">▶</button>
+            <button type="button" title="Pause page timeline" @onclick="PauseTimeline">Ⅱ</button>
+            <button type="button" title="Stop and rewind" @onclick="StopTimeline">■</button>
+            <button type="button" title="Replay the page with transitions and click groups" @onclick="PreviewPage">Page preview</button>
+        </div>
+        <label class="timeline-playhead-control">Playhead
+            <input type="range" min="0" max="@Inv(TimelineDuration)" step="0.01" value="@Inv(_playhead)" @oninput="ChangePlayhead" />
+            <b>@Time(_playhead)</b>
+        </label>
+        <div class="timeline-toolbar-actions">
+            <button type="button" title="Insert audio" @onclick="InsertAudio">+ Audio</button>
+            <button type="button" title="Insert video" @onclick="InsertVideo">+ Video</button>
+            <button type="button" title="Create audio" @onclick="CreateAudio">Create audio</button>
+            <button type="button" title="Create video" @onclick="CreateVideo">Create video</button>
+            <button type="button" title="Collapse timeline" @onclick="ToggleCollapsed">@(Collapsed ? "▴" : "▾")</button>
+        </div>
+    </header>
+
+    @if (!Collapsed)
+    {
+        <div class="timeline-overview" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
+            <span>Visible range</span>
+            <DxRangeSelector Height="68px"
+                             SelectedRangeStartValue="@_viewStart"
+                             SelectedRangeEndValue="@_viewEnd"
+                             ValueChanged="ViewportChanged"
+                             ValueChangeMode="RangeSelectorValueChangeMode.OnHandleMove"
+                             MoveSelectedRangeByClick="true"
+                             AllowMouseSelection="true">
+                <DxRangeSelectorScale StartValue="@(0d)"
+                                      EndValue="@TimelineDuration"
+                                      ValueType="ChartAxisDataType.Numeric"
+                                      TickInterval="@MajorTick"
+                                      MinorTickInterval="@MinorTick"
+                                      MinRange="@(0.5d)">
+                    <DxRangeSelectorScaleMarker Visible="false" />
+                </DxRangeSelectorScale>
+                <DxRangeSelectorSliderMarker Visible="true" />
+            </DxRangeSelector>
+        </div>
+
+        <div class="timeline-grid" style="--timeline-playhead:@PlayheadPercent%;">
+            <div class="timeline-ruler-row">
+                <div class="timeline-track-label"><b>@State.CurrentPage.Name</b><small>@Time(TimelineDuration)</small></div>
+                <div class="timeline-ruler" @onclick="SeekFromRuler" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
+                    @foreach (var tick in Ticks)
+                    {
+                        <span class="timeline-tick" style="@TickStyle(tick)"><i></i><b>@Time(tick)</b></span>
+                    }
+                    <span class="timeline-playhead-line"></span>
+                </div>
+            </div>
+
+            <div class="timeline-track-scroll">
+                @foreach (var row in Rows)
+                {
+                    <div class="timeline-track-row @(row.Element.Id == State.SelectedElementId ? "selected" : null)">
+                        <button type="button" class="timeline-track-label" @onclick="() => SelectElement(row.Element.Id)" @oncontextmenu="args => ShowElementMenu(row.Element, args)" @oncontextmenu:preventDefault>
+                            <span>@KindGlyph(row.Element)</span><b>@row.Element.Name</b><small>@TrackSummary(row)</small>
+                        </button>
+                        <div class="timeline-track" data-timeline-track data-view-start="@Inv(_viewStart)" data-view-end="@Inv(_viewEnd)" data-page-duration="@Inv(TimelineDuration)" @onclick="SeekFromTrack" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
+                            @if (row.Element is PublicationMediaElement media)
+                            {
+                                <button type="button"
+                                        class="timeline-clip media-clip kind-@media.Kind.ToString().ToLowerInvariant() @(_selectionKind == TimelineSelectionKind.Media && _selectedId == media.Id ? "selected" : null)"
+                                        style="@ClipStyle(media.TimelineStartSeconds, media.TimelineLengthSeconds)"
+                                        data-timeline-clip="media"
+                                        data-clip-id="@media.Id"
+                                        data-clip-start="@Inv(media.TimelineStartSeconds)"
+                                        data-clip-duration="@Inv(media.TimelineLengthSeconds)"
+                                        title="@media.Name · @Time(media.TimelineLengthSeconds)"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => SelectMedia(media)"
+                                        @oncontextmenu="args => ShowMediaMenu(media, args)"
+                                        @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
+                                    <span class="timeline-clip-handle left" data-timeline-handle="trim-left"></span>
+                                    <span class="timeline-clip-body">
+                                        <b>@(media is VideoElement ? "Video" : "Audio")</b>
+                                        @if (media is AudioElement audio)
+                                        {
+                                            <span class="timeline-audio-mini-wave" aria-hidden="true">
+                                                @foreach (var sample in TimelineSamples(audio))
+                                                {
+                                                    <i style="height:@WaveHeight(sample)"></i>
+                                                }
+                                            </span>
+                                        }
+                                        <small>@Time(media.TrimStartSeconds)–@Time(media.EffectiveTrimEndSeconds)</small>
+                                    </span>
+                                    <span class="timeline-clip-handle right" data-timeline-handle="trim-right"></span>
+                                </button>
+                            }
+                            @foreach (var animation in row.Animations)
+                            {
+                                var start = State.EffectiveAnimationStart(animation);
+                                var span = AnimationSpan(animation);
+                                <button type="button"
+                                        class="timeline-clip animation-clip phase-@animation.Phase.ToString().ToLowerInvariant() @(_selectionKind == TimelineSelectionKind.Animation && _selectedId == animation.Id ? "selected" : null)"
+                                        style="@ClipStyle(start, span)"
+                                        data-timeline-clip="animation"
+                                        data-clip-id="@animation.Id"
+                                        data-clip-start="@Inv(start)"
+                                        data-clip-duration="@Inv(span)"
+                                        title="@animation.Name · @Time(start)–@Time(start + span)"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => SelectAnimation(row.Element.Id, animation.Id)"
+                                        @oncontextmenu="args => ShowAnimationMenu(row.Element, animation, args)"
+                                        @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
+                                    <span class="timeline-clip-handle left" data-timeline-handle="resize-left"></span>
+                                    <span class="timeline-clip-body"><b>@Friendly(animation.Effect.ToString())</b><small>@TriggerGlyph(animation.Trigger) @Time(span)</small></span>
+                                    <span class="timeline-clip-handle right" data-timeline-handle="resize-right"></span>
+                                </button>
+                            }
+                            <span class="timeline-playhead-line"></span>
+                        </div>
+                    </div>
+                }
+                @if (Rows.Count == 0)
+                {
+                    <div class="timeline-empty"><b>The page timeline is empty.</b><span>Add an animation, audio clip, or video clip.</span></div>
+                }
+            </div>
+        </div>
+    }
+</section>
+
+<DxContextMenu @ref="_contextMenu">
+    <Items>
+        @if (_selectionKind == TimelineSelectionKind.Animation && SelectedAnimation is { } animation)
+        {
+            <DxContextMenuItem Text="Preview animation step" Click="PreviewSelectedAnimation" />
+            <DxContextMenuItem Text="Move start to playhead" Click="MoveAnimationToPlayhead" />
+            <DxContextMenuItem Text="@(animation.TimelineStartSeconds is null ? "Use explicit timeline position" : "Return to trigger timing")" Click="ToggleExplicitAnimationTiming" />
+            <DxContextMenuItem Text="Duplicate animation" BeginGroup="true" Click="DuplicateSelectedAnimation" />
+            <DxContextMenuItem Text="Delete animation" Click="DeleteSelectedAnimation" />
+        }
+        else if (_selectionKind == TimelineSelectionKind.Media && SelectedMedia is { } media)
+        {
+            <DxContextMenuItem Text="@(media is VideoElement ? "Edit in Video Studio" : "Edit in Audio Studio")" Click="EditSelectedMedia" />
+            <DxContextMenuItem Text="Play selected range" Click="PlaySelectedMedia" />
+            <DxContextMenuItem Text="Pause" Click="PauseSelectedMedia" />
+            <DxContextMenuItem Text="Move clip start to playhead" BeginGroup="true" Click="MoveMediaToPlayhead" />
+            <DxContextMenuItem Text="Trim start to playhead" Enabled="@CanTrimMediaStart" Click="TrimMediaStartToPlayhead" />
+            <DxContextMenuItem Text="Trim end to playhead" Enabled="@CanTrimMediaEnd" Click="TrimMediaEndToPlayhead" />
+            <DxContextMenuItem Text="@(media.Muted ? "Unmute" : "Mute")" BeginGroup="true" Click="ToggleSelectedMediaMute" />
+            <DxContextMenuItem Text="@(media.Loop ? "Disable loop" : "Loop clip")" Click="ToggleSelectedMediaLoop" />
+            <DxContextMenuItem Text="Duplicate media object" BeginGroup="true" Click="DuplicateSelectedMedia" />
+            <DxContextMenuItem Text="Delete media object" Click="DeleteSelectedMedia" />
+        }
+        else if (_selectionKind == TimelineSelectionKind.Element && SelectedElement is { } element)
+        {
+            <DxContextMenuItem Text="Select on page" Click="SelectContextElement" />
+            <DxContextMenuItem Text="Add fade in" Click="AddFadeIn" />
+            <DxContextMenuItem Text="Add pulse" Click="AddPulse" />
+            <DxContextMenuItem Text="Add fade out" Click="AddFadeOut" />
+            <DxContextMenuItem Text="Remove object animations" Enabled="@(element.Animations.Count > 0)" Click="ClearElementAnimations" />
+        }
+        else
+        {
+            <DxContextMenuItem Text="Play page timeline" Click="PlayTimeline" />
+            <DxContextMenuItem Text="Stop and rewind" Click="StopTimeline" />
+            <DxContextMenuItem Text="Set page duration to playhead" Enabled="@(_playhead >= 1)" Click="SetDurationToPlayhead" />
+            <DxContextMenuItem Text="Fit duration to content" Click="FitDurationToContent" />
+            <DxContextMenuItem Text="Insert audio…" BeginGroup="true" Click="InsertAudio" />
+            <DxContextMenuItem Text="Create audio…" Click="CreateAudio" />
+            <DxContextMenuItem Text="Insert video…" Click="InsertVideo" />
+            <DxContextMenuItem Text="Create video…" Click="CreateVideo" />
+        }
+    </Items>
+</DxContextMenu>
+
+@code {
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback RequestInsertAudio { get; set; }
+    [Parameter] public EventCallback RequestInsertVideo { get; set; }
+    [Parameter] public EventCallback RequestCreateAudio { get; set; }
+    [Parameter] public EventCallback RequestCreateVideo { get; set; }
+    [Parameter] public EventCallback RequestEditMedia { get; set; }
+    [Parameter] public bool Collapsed { get; set; }
+    [Parameter] public EventCallback<bool> CollapsedChanged { get; set; }
+
+    private DxContextMenu _contextMenu = default!;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<PublicationTimeline>? _self;
+    private double _playhead;
+    private double _viewStart;
+    private double _viewEnd = 10;
+    private Guid? _selectedId;
+    private Guid? _contextElementId;
+    private TimelineSelectionKind _selectionKind;
+    private double TimelineDuration => State.EffectivePageTimelineDuration();
+    private double VisibleDuration => Math.Max(.1, _viewEnd - _viewStart);
+    private double PlayheadPercent => Math.Clamp((_playhead - _viewStart) / VisibleDuration * 100, 0, 100);
+    private double MajorTick => VisibleDuration switch { <= 5 => .5, <= 15 => 1, <= 45 => 5, <= 180 => 15, <= 600 => 60, _ => 300 };
+    private double MinorTick => Math.Max(.05, MajorTick / 5);
+    private IEnumerable<double> Ticks
+    {
+        get
+        {
+            var first = Math.Ceiling(_viewStart / MajorTick) * MajorTick;
+            for (var value = first; value <= _viewEnd + .0001; value += MajorTick) yield return value;
+        }
+    }
+
+    private List<TimelineRow> Rows => State.CurrentPage.Elements
+        .Where(element => element.Animations.Count > 0 || element is PublicationMediaElement || element.Id == State.SelectedElementId)
+        .OrderByDescending(element => element.ZIndex)
+        .Select(element => new TimelineRow(element, element.Animations.OrderBy(item => item.Order).ToList()))
+        .ToList();
+
+    private PublicationAnimation? SelectedAnimation => _selectionKind == TimelineSelectionKind.Animation
+        ? State.CurrentPage.Elements.SelectMany(item => item.Animations).FirstOrDefault(item => item.Id == _selectedId)
+        : null;
+    private PublicationMediaElement? SelectedMedia => _selectionKind == TimelineSelectionKind.Media
+        ? State.CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == _selectedId)
+        : null;
+    private PublicationElement? SelectedElement => _selectionKind == TimelineSelectionKind.Element
+        ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == _contextElementId)
+        : null;
+    private bool CanTrimMediaStart => SelectedMedia is { } media && _playhead > media.TimelineStartSeconds && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds - .05;
+    private bool CanTrimMediaEnd => SelectedMedia is { } media && _playhead > media.TimelineStartSeconds + .05 && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds;
+
+    protected override void OnParametersSet()
+    {
+        var duration = TimelineDuration;
+        if (_viewEnd <= _viewStart || _viewEnd > duration + .001)
+        {
+            _viewStart = 0;
+            _viewEnd = duration;
+        }
+        _playhead = Math.Clamp(_playhead, 0, duration);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Collapsed) return;
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/timelineInterop.js");
+        _self ??= DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("initializePublicationTimeline", "publisher-timeline", _self);
+    }
+
+    private void ViewportChanged(RangeSelectorValueChangedEventArgs args)
+    {
+        var values = args.CurrentRange.Select(value => Convert.ToDouble(value, CultureInfo.InvariantCulture)).ToArray();
+        if (values.Length < 2) return;
+        _viewStart = Math.Clamp(Math.Min(values[0], values[1]), 0, TimelineDuration);
+        _viewEnd = Math.Clamp(Math.Max(values[0], values[1]), _viewStart + .1, TimelineDuration);
+    }
+
+    private async Task ChangePlayhead(ChangeEventArgs args)
+    {
+        if (!TryDouble(args, out var value)) return;
+        _playhead = Math.Clamp(value, 0, TimelineDuration);
+        if (_module is not null) await _module.InvokeVoidAsync("scrubPublicationTimeline", "publisher-page", _playhead);
+    }
+
+    private async Task SeekFromRuler(MouseEventArgs args) => await SeekFromPointer(args);
+    private async Task SeekFromTrack(MouseEventArgs args) => await SeekFromPointer(args);
+    private async Task SeekFromPointer(MouseEventArgs args)
+    {
+        if (_module is null) return;
+        _playhead = await _module.InvokeAsync<double>("timelineSecondsFromPointer", args.ClientX, _viewStart, _viewEnd);
+        _playhead = Math.Clamp(_playhead, 0, TimelineDuration);
+        await _module.InvokeVoidAsync("scrubPublicationTimeline", "publisher-page", _playhead);
+    }
+
+    private async Task PlayTimeline()
+    {
+        if (_module is null || _self is null) return;
+        await _module.InvokeVoidAsync("playPublicationTimeline", "publisher-page", _playhead, TimelineDuration, _self);
+    }
+    private Task PauseTimeline() => _module?.InvokeVoidAsync("pausePublicationTimeline", "publisher-page").AsTask() ?? Task.CompletedTask;
+    private async Task StopTimeline()
+    {
+        _playhead = 0;
+        if (_module is not null) await _module.InvokeVoidAsync("stopPublicationTimeline", "publisher-page");
+    }
+    private Task PreviewPage() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
+
+    [JSInvokable]
+    public Task TimelinePositionChanged(double seconds, bool finished)
+    {
+        _playhead = finished ? Math.Min(TimelineDuration, seconds) : Math.Clamp(seconds, 0, TimelineDuration);
+        return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public void CommitAnimationTimelineClip(string id, double startSeconds, double durationSeconds)
+    {
+        if (Guid.TryParse(id, out var parsed)) State.SetAnimationTimelineRange(parsed, startSeconds, durationSeconds);
+    }
+
+    [JSInvokable]
+    public void CommitMediaTimelineClip(string id, string mode, double startSeconds, double durationSeconds)
+    {
+        if (Guid.TryParse(id, out var parsed)) State.SetMediaTimelineRange(parsed, mode, startSeconds, durationSeconds);
+    }
+
+    private void SelectElement(Guid id) { State.SelectElement(id); _contextElementId = id; _selectionKind = TimelineSelectionKind.Element; }
+    private void SelectAnimation(Guid elementId, Guid animationId) { State.SelectElement(elementId); _selectedId = animationId; _selectionKind = TimelineSelectionKind.Animation; }
+    private void SelectMedia(PublicationMediaElement media) { State.SelectElement(media.Id); _selectedId = media.Id; _selectionKind = TimelineSelectionKind.Media; }
+
+    private async Task ShowAnimationMenu(PublicationElement element, PublicationAnimation animation, MouseEventArgs args)
+    {
+        SelectAnimation(element.Id, animation.Id);
+        await InvokeAsync(StateHasChanged);
+        await _contextMenu.ShowAsync(args);
+    }
+    private async Task ShowMediaMenu(PublicationMediaElement media, MouseEventArgs args)
+    {
+        SelectMedia(media);
+        await InvokeAsync(StateHasChanged);
+        await _contextMenu.ShowAsync(args);
+    }
+    private async Task ShowElementMenu(PublicationElement element, MouseEventArgs args)
+    {
+        _contextElementId = element.Id;
+        _selectionKind = TimelineSelectionKind.Element;
+        await InvokeAsync(StateHasChanged);
+        await _contextMenu.ShowAsync(args);
+    }
+    private async Task ShowBackgroundMenu(MouseEventArgs args)
+    {
+        _selectionKind = TimelineSelectionKind.Background;
+        await InvokeAsync(StateHasChanged);
+        await _contextMenu.ShowAsync(args);
+    }
+
+    private Task PreviewSelectedAnimation() => SelectedAnimation is { } item ? JS.InvokeVoidAsync("publisherStudio.previewAnimationStep", "publisher-page", item.Id.ToString()).AsTask() : Task.CompletedTask;
+    private void MoveAnimationToPlayhead() { if (SelectedAnimation is { } item) State.SetAnimationTimelineRange(item.Id, _playhead, AnimationSpan(item)); }
+    private void ToggleExplicitAnimationTiming()
+    {
+        if (SelectedAnimation is not { } item) return;
+        if (item.TimelineStartSeconds is null) State.SetAnimationTimelineRange(item.Id, State.EffectiveAnimationStart(item), AnimationSpan(item));
+        else State.ClearAnimationTimelinePosition(item.Id);
+    }
+    private void DuplicateSelectedAnimation() { if (SelectedAnimation is { } item) _selectedId = State.DuplicateAnimation(item.Id)?.Id; }
+    private void DeleteSelectedAnimation() { if (SelectedAnimation is { } item) { State.DeleteAnimation(item.Id); _selectedId = null; _selectionKind = TimelineSelectionKind.Background; } }
+
+    private Task EditSelectedMedia() => RequestEditMedia.InvokeAsync();
+    private Task PlaySelectedMedia() => SelectedMedia is { } media && _module is not null
+        ? _module.InvokeVoidAsync("playMediaClip", $"element-{media.Id}", media.TrimStartSeconds, media.EffectiveTrimEndSeconds, media.Volume, media.PlaybackRate, media.Muted, media.Loop).AsTask()
+        : Task.CompletedTask;
+    private Task PauseSelectedMedia() => SelectedMedia is { } media && _module is not null
+        ? _module.InvokeVoidAsync("pauseMediaClip", $"element-{media.Id}").AsTask()
+        : Task.CompletedTask;
+    private void MoveMediaToPlayhead() { if (SelectedMedia is { } media) State.SetMediaTimelineRange(media.Id, "move", _playhead, media.TimelineLengthSeconds); }
+    private void TrimMediaStartToPlayhead()
+    {
+        if (SelectedMedia is not { } media || !CanTrimMediaStart) return;
+        var delta = _playhead - media.TimelineStartSeconds;
+        State.UpdateMedia(media.Id, item => { item.TrimStartSeconds += delta * item.PlaybackRate; item.TimelineStartSeconds = _playhead; });
+    }
+    private void TrimMediaEndToPlayhead()
+    {
+        if (SelectedMedia is not { } media || !CanTrimMediaEnd) return;
+        var length = _playhead - media.TimelineStartSeconds;
+        State.UpdateMedia(media.Id, item => item.TrimEndSeconds = item.TrimStartSeconds + length * item.PlaybackRate);
+    }
+    private void ToggleSelectedMediaMute() { if (SelectedMedia is { } media) State.UpdateMedia(media.Id, item => item.Muted = !item.Muted); }
+    private void ToggleSelectedMediaLoop() { if (SelectedMedia is { } media) State.UpdateMedia(media.Id, item => item.Loop = !item.Loop); }
+    private void DuplicateSelectedMedia() { if (SelectedMedia is not null) State.DuplicateSelected(); }
+    private void DeleteSelectedMedia() { if (SelectedMedia is not null) { State.DeleteSelected(); _selectedId = null; _selectionKind = TimelineSelectionKind.Background; } }
+
+    private void SelectContextElement() { if (_contextElementId is { } id) State.SelectElement(id); }
+    private void AddFadeIn() { SelectContextElement(); State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance); }
+    private void AddPulse() { SelectContextElement(); State.AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis); }
+    private void AddFadeOut() { SelectContextElement(); State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit); }
+    private void ClearElementAnimations() { SelectContextElement(); State.ClearSelectedAnimations(); }
+
+    private void SetDurationToPlayhead() => State.SetPageTimelineDuration(_playhead);
+    private void FitDurationToContent() => State.SetPageTimelineDuration(ContentEnd + .5);
+    private double ContentEnd => Math.Max(1, Math.Max(
+        State.CurrentPage.Elements.SelectMany(item => item.Animations).Select(item => State.EffectiveAnimationStart(item) + AnimationSpan(item)).DefaultIfEmpty(0).Max(),
+        State.CurrentPage.Elements.OfType<PublicationMediaElement>().Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds).DefaultIfEmpty(0).Max()));
+
+    private Task InsertAudio() => RequestInsertAudio.InvokeAsync();
+    private Task InsertVideo() => RequestInsertVideo.InvokeAsync();
+    private Task CreateAudio() => RequestCreateAudio.InvokeAsync();
+    private Task CreateVideo() => RequestCreateVideo.InvokeAsync();
+    private Task ToggleCollapsed() => CollapsedChanged.InvokeAsync(!Collapsed);
+
+    private string ClipStyle(double start, double duration)
+    {
+        var left = (start - _viewStart) / VisibleDuration * 100;
+        var width = duration / VisibleDuration * 100;
+        return $"left:{left.ToString("0.###", CultureInfo.InvariantCulture)}%;width:{Math.Max(.35, width).ToString("0.###", CultureInfo.InvariantCulture)}%;";
+    }
+    private double Percent(double seconds) => Math.Clamp((seconds - _viewStart) / VisibleDuration * 100, 0, 100);
+    private string TickStyle(double seconds) => $"left:{Percent(seconds).ToString("0.###", CultureInfo.InvariantCulture)}%";
+    private static double AnimationSpan(PublicationAnimation item) => Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1);
+    private static string TrackSummary(TimelineRow row) => row.Element is PublicationMediaElement media ? Time(media.TimelineLengthSeconds) : $"{row.Animations.Count} animation{(row.Animations.Count == 1 ? string.Empty : "s")}";
+    private static string KindGlyph(PublicationElement item) => item.Kind switch
+    {
+        PublicationElementKind.Text => "T",
+        PublicationElementKind.Image => "▧",
+        PublicationElementKind.Video => "▶",
+        PublicationElementKind.Audio => "♪",
+        PublicationElementKind.Shape => "◇",
+        PublicationElementKind.WordArt => "A★",
+        PublicationElementKind.Connector => "↝",
+        PublicationElementKind.DataVisual => "▥",
+        _ => "•"
+    };
+    private static string TriggerGlyph(PublicationAnimationTrigger value) => value switch
+    {
+        PublicationAnimationTrigger.OnPageEnter => "▶",
+        PublicationAnimationTrigger.WithPrevious => "⇉",
+        PublicationAnimationTrigger.AfterPrevious => "→",
+        _ => "☝"
+    };
+    private static IEnumerable<double> TimelineSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
+        ? audio.WaveformSamples.Take(28)
+        : Enumerable.Range(0, 20).Select(index => .18 + Math.Abs(Math.Sin(index * .67)) * .72);
+    private static string WaveHeight(double value) => $"{Math.Clamp(value, .05, 1) * 100:0.#}%";
+    private static string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+    private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+
+    private sealed record TimelineRow(PublicationElement Element, List<PublicationAnimation> Animations);
+    private enum TimelineSelectionKind { Background, Element, Animation, Media }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null) await _module.InvokeVoidAsync("disposePublicationTimeline", "publisher-timeline");
+        }
+        catch (JSDisconnectedException) { }
+        _self?.Dispose();
+        if (_module is not null) await _module.DisposeAsync();
+    }
+}

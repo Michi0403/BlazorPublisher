@@ -10,15 +10,15 @@ Animation data belongs to the publication document, not to JavaScript or a speci
 - timing and easing;
 - optional direction, distance, scale, rotation, repetition, and auto-reverse.
 
-The page timeline is defined by `Order` across all objects on that page. This avoids embedding CSS names, browser keyframes, PowerPoint XML, or video-frame data in `.pubstudio.json`.
+The default animation sequence is defined by `Order` across all objects on the page. An optional `TimelineStartSeconds` overrides that trigger-derived position when a clip is placed directly on the visual page timeline. This avoids embedding CSS names, browser keyframes, PowerPoint XML, or video-frame data in `.pubstudio.json`.
 
 ## Page and object separation
 
-`PublicationPageTransition` handles movement between pages. Object timelines handle what happens inside a page. `PublicationInteraction` handles user actions after an object is clicked. These concerns remain separate so exporters can choose the closest native representation:
+`PublicationPageTransition` handles movement between pages. Object timelines handle what happens inside a page. `PublicationInteraction` handles user actions after an object is clicked. `PublicationMediaElement` adds embedded source data, trim range, page-timeline start, playback rate, volume, fades, looping, and semantic playback trigger. These concerns remain separate so exporters can choose the closest native representation:
 
-- HTML: page shells, Web Animations API, DOM click handlers;
-- PowerPoint: slide transitions, timing tree, click/with/after triggers, hyperlinks/actions;
-- video: deterministic page/timeline scheduler rendered at a chosen frame rate;
+- HTML: page shells, Web Animations API, native `<audio>` / `<video>`, and DOM click handlers;
+- PowerPoint: slide transitions, timing tree, click/with/after triggers, hyperlinks/actions, and native media relationships where supported;
+- video: deterministic animation/media scheduler rendered and mixed at a chosen frame rate;
 - static PNG/JPEG/SVG/PDF: final publication appearance with no playback runtime.
 
 ## HTML runtime
@@ -32,6 +32,7 @@ The website exporter clones the existing print surface, preserves animation and 
 - previous, next, replay, fullscreen, keyboard, loop, and auto-advance controls;
 - navigation, URL, visibility, and replay interactions;
 - elements hidden at presentation start;
+- embedded audio/video with timeline start, trim range, fades, rate, volume, loop, page-entry/click playback, and media interaction commands;
 - print and reduced-motion fallbacks.
 
 The runtime only opens URLs with `http`, `https`, or `mailto` schemes.
@@ -52,16 +53,17 @@ Features without an exact PowerPoint equivalent should be reduced predictably ra
 
 ## Video mapping target
 
-A video exporter should consume the normalized page timeline rather than recording the editor UI. For each page it can:
+A video exporter should consume the normalized page timeline rather than recording the editor UI. The same timeline now contains animation clips and non-destructive media clips. For each page it can:
 
 1. determine the page-transition interval;
 2. resolve automatic groups and configured click groups using an export policy;
 3. evaluate element transforms, opacity, clipping, and visibility at each timestamp;
-4. rasterize at the requested resolution and frame rate;
-5. send frames to an encoder such as FFmpeg in an optional export service.
+4. decode, trim, rate-adjust, fade, and mix embedded audio/video sources at their semantic timeline positions;
+5. rasterize at the requested resolution and frame rate;
+6. send frames and mixed audio to an encoder such as FFmpeg in an optional export service.
 
 Click interactions require an export policy because video is not interactive. Reasonable policies are: play all click groups in order with a configurable pause, ignore navigation actions, and optionally render URL/action hints.
 
 ## Current implementation boundary
 
-The current package implements the document model, editor, preview engine, interaction authoring, and animated self-contained HTML export. It does not yet write PowerPoint timing XML or encode video. Those exporters can be added without changing the publication format or editor timeline.
+The current package implements the document model, animation/media timeline editor, browser-native media studios, preview engine, interaction authoring, and animated self-contained HTML export. It does not yet write PowerPoint timing XML/native media packages or encode a final video. Those exporters can be added without changing the publication format or editor timeline.

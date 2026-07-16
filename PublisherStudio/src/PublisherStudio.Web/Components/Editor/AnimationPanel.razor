@@ -211,12 +211,12 @@
                         </select>
                     </label>
                 }
-                @if (selected.Interaction.Action is PublicationInteractionAction.ToggleVisibility or PublicationInteractionAction.Show or PublicationInteractionAction.Hide or PublicationInteractionAction.ReplayAnimation)
+                @if (selected.Interaction.Action is PublicationInteractionAction.ToggleVisibility or PublicationInteractionAction.Show or PublicationInteractionAction.Hide or PublicationInteractionAction.ReplayAnimation or PublicationInteractionAction.PlayMedia or PublicationInteractionAction.PauseMedia or PublicationInteractionAction.ToggleMediaPlayback)
                 {
                     <label>Target object
                         <select value="@selected.Interaction.TargetElementId" @onchange="ChangeInteractionElement">
-                            <option value="">This object</option>
-                            @foreach (var item in State.CurrentPage.Elements.Where(item => item.Id != selected.Id))
+                            <option value="">@(IsMediaInteraction(selected.Interaction.Action) && selected is not PublicationMediaElement ? "Select media object" : "This object")</option>
+                            @foreach (var item in InteractionTargets(selected))
                             {
                                 <option value="@item.Id">@item.Name</option>
                             }
@@ -344,7 +344,20 @@
     private void ChangeInteractionAction(ChangeEventArgs args)
     {
         if (!Enum.TryParse<PublicationInteractionAction>(Text(args), out var value)) return;
-        State.UpdateInteraction(item => item.Action = value);
+        var selected = State.SelectedElement;
+        State.UpdateInteraction(item =>
+        {
+            item.Action = value;
+            if (!IsMediaInteraction(value)) return;
+            if (selected is PublicationMediaElement)
+            {
+                item.TargetElementId = null;
+                return;
+            }
+            var currentTargetIsMedia = item.TargetElementId is { } targetId && State.CurrentPage.Elements.OfType<PublicationMediaElement>().Any(media => media.Id == targetId);
+            if (!currentTargetIsMedia)
+                item.TargetElementId = State.CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault()?.Id;
+        });
     }
     private void ChangeInteractionPage(ChangeEventArgs args) => State.UpdateInteraction(item => item.TargetPageId = Guid.TryParse(Text(args), out var value) ? value : null);
     private void ChangeInteractionElement(ChangeEventArgs args) => State.UpdateInteraction(item => item.TargetElementId = Guid.TryParse(Text(args), out var value) ? value : null);
@@ -397,6 +410,14 @@
         PublicationAnimationTrigger.AfterPrevious => "→",
         _ => "☝"
     };
+    private IEnumerable<PublicationElement> InteractionTargets(PublicationElement selected)
+    {
+        var items = State.CurrentPage.Elements.Where(item => item.Id != selected.Id);
+        return IsMediaInteraction(selected.Interaction.Action) ? items.OfType<PublicationMediaElement>() : items;
+    }
+    private static bool IsMediaInteraction(PublicationInteractionAction value) => value is
+        PublicationInteractionAction.PlayMedia or PublicationInteractionAction.PauseMedia or PublicationInteractionAction.ToggleMediaPlayback;
+
     private static string InteractionName(PublicationInteractionAction value) => value switch
     {
         PublicationInteractionAction.None => "Nothing",
@@ -407,12 +428,17 @@
         PublicationInteractionAction.ToggleVisibility => "Toggle object visibility",
         PublicationInteractionAction.Show => "Show object",
         PublicationInteractionAction.Hide => "Hide object",
-        _ => "Replay object animation"
+        PublicationInteractionAction.ReplayAnimation => "Replay object animation",
+        PublicationInteractionAction.PlayMedia => "Play audio or video",
+        PublicationInteractionAction.PauseMedia => "Pause audio or video",
+        _ => "Toggle media playback"
     };
     private static string KindGlyph(PublicationElement item) => item.Kind switch
     {
         PublicationElementKind.Text => "T",
         PublicationElementKind.Image => "▧",
+        PublicationElementKind.Video => "▶",
+        PublicationElementKind.Audio => "♪",
         PublicationElementKind.Shape => "◇",
         PublicationElementKind.WordArt => "A★",
         PublicationElementKind.Connector => "↝",

@@ -1,0 +1,555 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+@if (Visible)
+{
+    <div class="editor-modal-backdrop media-studio-backdrop">
+        <section class="media-studio-window" role="dialog" aria-modal="true" aria-label="@(IsVideo ? "Video Studio" : "Audio Studio")">
+            <header class="media-studio-titlebar">
+                <div>
+                    <strong>@(IsVideo ? "Video Studio" : "Audio Studio")</strong>
+                    <span>@(EditingExisting ? "Edit the selected media object" : IsVideo ? "Import or record a video" : "Import, record, trim, and mix a simple audio clip")</span>
+                </div>
+                <button type="button" title="Close" @onclick="Cancel">×</button>
+            </header>
+
+            <div class="media-studio-toolbar">
+                <button type="button" disabled="@_recording" @onclick="OpenMediaPicker">▣ Import @(IsVideo ? "video" : "audio")</button>
+                @if (IsVideo)
+                {
+                    <button type="button" disabled="@_recording" @onclick="RecordCamera">● Record camera</button>
+                    <button type="button" disabled="@_recording" @onclick="RecordScreen">▤ Record screen</button>
+                }
+                else
+                {
+                    <button type="button" disabled="@_recording" @onclick="RecordMicrophone">● Record microphone</button>
+                    <button type="button" disabled="@_recording" @onclick="GenerateTone">♪ Generate tone</button>
+                }
+                <button type="button" disabled="@(!_recording)" @onclick="StopRecording">■ Stop recording</button>
+                <span class="media-studio-source-state">@SourceStatus</span>
+            </div>
+
+            <div class="media-studio-body">
+                <div class="media-studio-preview-column">
+                    <div class="media-studio-preview-shell @(IsVideo ? "video" : "audio")"
+                         @oncontextmenu="ShowMediaContextMenu" @oncontextmenu:preventDefault>
+                        @if (IsVideo)
+                        {
+                            <video id="media-studio-preview" src="@_dataUrl" poster="@_posterDataUrl" controls playsinline preload="metadata"></video>
+                        }
+                        else
+                        {
+                            <div class="media-studio-audio-card">
+                                <div class="media-studio-waveform" aria-label="Audio waveform">
+                                    @foreach (var sample in DisplayWaveform)
+                                    {
+                                        <i style="height:@WaveHeight(sample)"></i>
+                                    }
+                                </div>
+                                <audio id="media-studio-preview" src="@_dataUrl" controls preload="metadata"></audio>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="media-transport">
+                        <button type="button" disabled="@(!HasSource)" title="Play selected range" @onclick="PlaySelection">▶</button>
+                        <button type="button" disabled="@(!HasSource)" title="Pause" @onclick="PausePreview">Ⅱ</button>
+                        <button type="button" disabled="@(!HasSource)" title="Jump to trim start" @onclick="SeekStart">|◀</button>
+                        <span>@Time(_trimStart) — @Time(_trimEnd) / @Time(_duration)</span>
+                    </div>
+
+                    @if (HasSource)
+                    {
+                        <div class="media-range-selector" @oncontextmenu="ShowMediaContextMenu" @oncontextmenu:preventDefault>
+                            <div class="media-range-caption"><b>Trim range</b><span>@Time(_trimEnd - _trimStart) selected</span></div>
+                            <DxRangeSelector Height="96px"
+                                             SelectedRangeStartValue="@_trimStart"
+                                             SelectedRangeEndValue="@_trimEnd"
+                                             ValueChanged="TrimRangeChanged"
+                                             ValueChangeMode="RangeSelectorValueChangeMode.OnHandleMove"
+                                             AllowMouseSelection="true"
+                                             MoveSelectedRangeByClick="true">
+                                <DxRangeSelectorScale StartValue="@(0d)"
+                                                      EndValue="@Math.Max(.1, _duration)"
+                                                      ValueType="ChartAxisDataType.Numeric"
+                                                      TickInterval="@MajorTick"
+                                                      MinorTickInterval="@MinorTick"
+                                                      MinRange="@(0.05d)">
+                                    <DxRangeSelectorScaleMarker Visible="false" />
+                                </DxRangeSelectorScale>
+                                <DxRangeSelectorSliderMarker Visible="true" />
+                            </DxRangeSelector>
+                        </div>
+                    }
+                </div>
+
+                <aside class="media-studio-properties">
+                    <section>
+                        <h3>Clip</h3>
+                        <label>Name<input value="@_name" @onchange="ChangeName" /></label>
+                        <div class="property-grid two">
+                            <label>Trim start<input type="number" min="0" max="@Inv(_duration)" step="0.01" value="@Inv(_trimStart)" @onchange="ChangeTrimStart" /></label>
+                            <label>Trim end<input type="number" min="0" max="@Inv(_duration)" step="0.01" value="@Inv(_trimEnd)" @onchange="ChangeTrimEnd" /></label>
+                        </div>
+                        <label>Playback rate <b>@_playbackRate.ToString("0.##", CultureInfo.InvariantCulture)×</b>
+                            <input type="range" min="0.25" max="2" step="0.05" value="@Inv(_playbackRate)" @oninput="ChangePlaybackRate" />
+                        </label>
+                        <label>Volume <b>@Math.Round(_volume * 100)%</b>
+                            <input type="range" min="0" max="1" step="0.01" value="@Inv(_volume)" @oninput="ChangeVolume" />
+                        </label>
+                        <label class="check-row"><input type="checkbox" checked="@_muted" @onchange="ToggleMuted" /> Muted</label>
+                        <label class="check-row"><input type="checkbox" checked="@_loop" @onchange="ToggleLoop" /> Loop selected range</label>
+                    </section>
+
+                    <section>
+                        <h3>Timeline playback</h3>
+                        <label>Start behavior
+                            <select value="@_playbackTrigger" @onchange="ChangePlaybackTrigger">
+                                @foreach (var value in Enum.GetValues<PublicationMediaPlaybackTrigger>())
+                                {
+                                    <option value="@value">@PlaybackTriggerName(value)</option>
+                                }
+                            </select>
+                        </label>
+                        <label class="check-row"><input type="checkbox" checked="@_autoPlay" @onchange="ToggleAutoPlay" /> Play during page preview/export</label>
+                    </section>
+
+                    @if (!IsVideo)
+                    {
+                        <section>
+                            <h3>Simple mix</h3>
+                            <label>Fade in <b>@Time(_fadeIn)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeIn)" @oninput="ChangeFadeIn" /></label>
+                            <label>Fade out <b>@Time(_fadeOut)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeOut)" @oninput="ChangeFadeOut" /></label>
+                            <p class="property-note">Edits are non-destructive. The source stays embedded while the selected range, fades, volume, and playback rate are stored in the publication timeline.</p>
+                        </section>
+                    }
+                    else
+                    {
+                        <section>
+                            <h3>Video</h3>
+                            <p class="property-note">Camera and screen recording use the browser’s MediaRecorder. The resulting WebM clip remains self-contained in the publication and animated HTML export.</p>
+                        </section>
+                    }
+                </aside>
+            </div>
+
+            <footer class="media-studio-footer">
+                <span>@(_error ?? (HasSource ? $"{MimeLabel} · {Time(_duration)}" : "Import or record a source to begin."))</span>
+                <div>
+                    <DxButton Text="Cancel" Click="Cancel" />
+                    <DxButton Text="@(EditingExisting ? "Apply media" : "Insert media")" Enabled="@(HasSource && !_recording)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
+                </div>
+            </footer>
+        </section>
+    </div>
+}
+
+<DxContextMenu @ref="_mediaContextMenu">
+    <Items>
+        <DxContextMenuItem Text="@ImportMenuText" Enabled="@(!_recording)" Click="OpenMediaPicker" />
+        @if (IsVideo)
+        {
+            <DxContextMenuItem Text="Record camera…" Enabled="@(!_recording)" Click="RecordCamera" />
+            <DxContextMenuItem Text="Record screen…" Enabled="@(!_recording)" Click="RecordScreen" />
+        }
+        else
+        {
+            <DxContextMenuItem Text="Record microphone…" Enabled="@(!_recording)" Click="RecordMicrophone" />
+            <DxContextMenuItem Text="Generate example tone" Enabled="@(!_recording)" Click="GenerateTone" />
+        }
+        <DxContextMenuItem Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
+        <DxContextMenuItem Text="Play selected range" Enabled="@HasSource" BeginGroup="true" Click="PlaySelection" />
+        <DxContextMenuItem Text="Pause" Enabled="@HasSource" Click="PausePreview" />
+        <DxContextMenuItem Text="Jump to trim start" Enabled="@HasSource" Click="SeekStart" />
+        <DxContextMenuItem Text="Set trim start at playhead" Enabled="@HasSource" BeginGroup="true" Click="SetTrimStartAtPlayhead" />
+        <DxContextMenuItem Text="Set trim end at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
+        <DxContextMenuItem Text="Reset trim to full clip" Enabled="@HasSource" Click="ResetTrim" />
+        <DxContextMenuItem Text="@(_muted ? "Unmute" : "Mute")" BeginGroup="true" Click="ToggleMutedFromMenu" />
+        <DxContextMenuItem Text="@(_loop ? "Disable loop" : "Loop selected range")" Click="ToggleLoopFromMenu" />
+        <DxContextMenuItem Text="Import replacement…" Enabled="@(!_recording)" BeginGroup="true" Click="OpenMediaPicker" />
+    </Items>
+</DxContextMenu>
+
+<InputFile id="media-studio-file-input" class="hidden-file-input" accept="@Accept" OnChange="LoadFile" />
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public Guid SessionId { get; set; }
+    [Parameter] public PublicationElementKind Kind { get; set; } = PublicationElementKind.Audio;
+    [Parameter] public PublicationMediaElement? InitialMedia { get; set; }
+    [Parameter] public bool EditingExisting { get; set; }
+    [Parameter] public EventCallback<MediaEditorResult> Saved { get; set; }
+    [Parameter] public EventCallback Cancelled { get; set; }
+
+    private const int MaxMediaDataUrlLength = 160 * 1024 * 1024;
+    private DotNetObjectReference<MediaStudio>? _self;
+    private DxContextMenu _mediaContextMenu = default!;
+    private IJSObjectReference? _module;
+    private Guid _loadedSession;
+    private string _name = "Audio";
+    private string _dataUrl = string.Empty;
+    private string _mimeType = string.Empty;
+    private string _posterDataUrl = string.Empty;
+    private double _duration;
+    private double _trimStart;
+    private double _trimEnd;
+    private double _volume = 1;
+    private double _playbackRate = 1;
+    private double _fadeIn;
+    private double _fadeOut;
+    private bool _muted;
+    private bool _loop;
+    private bool _autoPlay = true;
+    private bool _recording;
+    private PublicationMediaPlaybackTrigger _playbackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter;
+    private List<double> _waveform = [];
+    private string? _error;
+    private StringBuilder? _recordingBuffer;
+    private string? _recordingId;
+    private int _recordingExpectedChunks;
+    private int _recordingNextChunk;
+
+    private bool IsVideo => Kind == PublicationElementKind.Video;
+    private bool HasSource => !string.IsNullOrWhiteSpace(_dataUrl) && _duration > 0;
+    private string ImportMenuText => $"Import {(IsVideo ? "video" : "audio")}…";
+    private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
+    private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? "Video" : "Audio") : _mimeType;
+    private string SourceStatus => _recording ? "Recording…" : HasSource ? $"Ready · {Time(_trimEnd - _trimStart)} selected" : "No source";
+    private IEnumerable<double> DisplayWaveform => _waveform.Count > 0 ? _waveform : Enumerable.Repeat(.22, 64);
+    private double MaxFade => Math.Max(.05, Math.Min(10, (_trimEnd - _trimStart) / Math.Max(.25, _playbackRate) / 2));
+    private double MajorTick => _duration switch { <= 10 => 1, <= 30 => 5, <= 120 => 10, <= 600 => 60, _ => 300 };
+    private double MinorTick => Math.Max(.1, MajorTick / 5);
+
+    protected override void OnParametersSet()
+    {
+        if (!Visible || SessionId == Guid.Empty || SessionId == _loadedSession) return;
+        _loadedSession = SessionId;
+        _error = null;
+        _recording = false;
+        if (InitialMedia is { } media)
+        {
+            _name = media.Name;
+            _dataUrl = media.DataUrl;
+            _mimeType = media.MimeType;
+            _duration = media.DurationSeconds;
+            _trimStart = media.TrimStartSeconds;
+            _trimEnd = media.EffectiveTrimEndSeconds;
+            _volume = media.Volume;
+            _playbackRate = media.PlaybackRate;
+            _fadeIn = media.FadeInSeconds;
+            _fadeOut = media.FadeOutSeconds;
+            _muted = media.Muted;
+            _loop = media.Loop;
+            _autoPlay = media.AutoPlay;
+            _playbackTrigger = media.PlaybackTrigger;
+            _waveform = [.. media.WaveformSamples];
+            _posterDataUrl = media is VideoElement video ? video.PosterDataUrl : string.Empty;
+        }
+        else
+        {
+            _name = IsVideo ? "Untitled Video" : "Untitled Audio";
+            _dataUrl = string.Empty;
+            _mimeType = string.Empty;
+            _posterDataUrl = string.Empty;
+            _duration = _trimStart = _trimEnd = 0;
+            _volume = 1;
+            _playbackRate = 1;
+            _fadeIn = _fadeOut = 0;
+            _muted = _loop = false;
+            _autoPlay = true;
+            _playbackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter;
+            _waveform = [];
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Visible) return;
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+        _self ??= DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("initializeMediaStudio", "media-studio-preview", _self);
+    }
+
+    private async Task ShowMediaContextMenu(MouseEventArgs args)
+    {
+        await _mediaContextMenu.ShowAsync(args);
+    }
+    private async Task SetTrimStartAtPlayhead()
+    {
+        if (_module is null) return;
+        var position = await _module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
+        _trimStart = Math.Clamp(position, 0, Math.Max(0, _trimEnd - .01));
+        ClampFades();
+    }
+    private async Task SetTrimEndAtPlayhead()
+    {
+        if (_module is null) return;
+        var position = await _module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
+        _trimEnd = Math.Clamp(position, _trimStart + .01, _duration);
+        ClampFades();
+    }
+    private void ResetTrim() { _trimStart = 0; _trimEnd = _duration; ClampFades(); }
+    private void ToggleMutedFromMenu() => _muted = !_muted;
+    private void ToggleLoopFromMenu() => _loop = !_loop;
+
+    private Task OpenMediaPicker() => JS.InvokeVoidAsync("publisherStudio.clickElement", "media-studio-file-input").AsTask();
+
+    private async Task LoadFile(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            var file = args.File;
+            if (!(IsVideo ? file.ContentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) : file.ContentType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidDataException($"Select a supported {(IsVideo ? "video" : "audio")} file.");
+            await using var stream = file.OpenReadStream(96 * 1024 * 1024);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            _dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
+            _mimeType = file.ContentType;
+            _name = file.Name;
+            await InspectSource();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task InspectSource()
+    {
+        if (_module is null || string.IsNullOrWhiteSpace(_dataUrl)) return;
+        try
+        {
+            var info = await _module.InvokeAsync<MediaSourceInfo>("inspectMediaSource", "media-studio-preview", _dataUrl, IsVideo ? "video" : "audio");
+            _duration = Math.Max(.01, info.DurationSeconds);
+            _trimStart = 0;
+            _trimEnd = _duration;
+            _posterDataUrl = info.PosterDataUrl ?? string.Empty;
+            _waveform = info.WaveformSamples ?? [];
+            _fadeIn = _fadeOut = 0;
+            _error = null;
+        }
+        catch (Exception ex)
+        {
+            _error = $"The media source could not be decoded: {ex.Message}";
+        }
+    }
+
+    private Task RecordCamera() => StartRecording("camera");
+    private Task RecordScreen() => StartRecording("screen");
+    private Task RecordMicrophone() => StartRecording("microphone");
+    private async Task StartRecording(string source)
+    {
+        if (_module is null || _self is null) return;
+        _error = null;
+        try
+        {
+            _recording = true;
+            await _module.InvokeVoidAsync("startMediaRecording", "media-studio-preview", IsVideo ? "video" : "audio", source, _self);
+        }
+        catch (Exception ex)
+        {
+            _recording = false;
+            _error = ex.Message;
+        }
+    }
+
+    private async Task StopRecording()
+    {
+        if (_module is not null) await _module.InvokeVoidAsync("stopMediaRecording", "media-studio-preview");
+    }
+
+    private async Task GenerateTone()
+    {
+        if (_module is null) return;
+        try
+        {
+            _dataUrl = CreateToneDataUrl(3, 440, .32);
+            _mimeType = "audio/wav";
+            _name = "Generated A4 tone.wav";
+            await InspectSource();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    [JSInvokable]
+    public bool BeginMediaRecordingTransfer(string transferId, string mimeType, int totalLength, int chunkCount)
+    {
+        if (totalLength <= 0 || totalLength > MaxMediaDataUrlLength || chunkCount <= 0 || chunkCount > 100_000) return false;
+        _recordingId = transferId;
+        _mimeType = mimeType;
+        _recordingBuffer = new StringBuilder(totalLength);
+        _recordingExpectedChunks = chunkCount;
+        _recordingNextChunk = 0;
+        return true;
+    }
+
+    [JSInvokable]
+    public bool AppendMediaRecordingChunk(string transferId, int chunkIndex, string chunk)
+    {
+        if (_recordingId != transferId || _recordingBuffer is null || chunkIndex != _recordingNextChunk) return false;
+        if (_recordingBuffer.Length + chunk.Length > MaxMediaDataUrlLength) return false;
+        _recordingBuffer.Append(chunk);
+        _recordingNextChunk++;
+        return true;
+    }
+
+    [JSInvokable]
+    public async Task CompleteMediaRecordingTransfer(string transferId)
+    {
+        if (_recordingId != transferId || _recordingBuffer is null || _recordingNextChunk != _recordingExpectedChunks) return;
+        _dataUrl = _recordingBuffer.ToString();
+        _recordingBuffer = null;
+        _recordingId = null;
+        _recording = false;
+        _name = RecordingName(_mimeType, IsVideo);
+        await InspectSource();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task MediaRecordingFailed(string message)
+    {
+        _recording = false;
+        _recordingBuffer = null;
+        _recordingId = null;
+        _error = message;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task PlaySelection()
+    {
+        if (_module is not null) await _module.InvokeVoidAsync("playMediaRange", "media-studio-preview", _trimStart, _trimEnd, _volume, _playbackRate, _muted, _loop);
+    }
+    private Task PausePreview() => _module?.InvokeVoidAsync("pauseMedia", "media-studio-preview").AsTask() ?? Task.CompletedTask;
+    private Task SeekStart() => _module?.InvokeVoidAsync("seekMedia", "media-studio-preview", _trimStart).AsTask() ?? Task.CompletedTask;
+
+    private void TrimRangeChanged(RangeSelectorValueChangedEventArgs args)
+    {
+        var values = args.CurrentRange.Select(value => Convert.ToDouble(value, CultureInfo.InvariantCulture)).ToArray();
+        if (values.Length < 2) return;
+        _trimStart = Math.Clamp(Math.Min(values[0], values[1]), 0, _duration);
+        _trimEnd = Math.Clamp(Math.Max(values[0], values[1]), _trimStart + .01, _duration);
+        ClampFades();
+    }
+
+    private void ChangeName(ChangeEventArgs args) => _name = string.IsNullOrWhiteSpace(Text(args)) ? (IsVideo ? "Video" : "Audio") : Text(args);
+    private void ChangeTrimStart(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimStart = Math.Clamp(value, 0, Math.Max(0, _trimEnd - .01)); ClampFades(); } }
+    private void ChangeTrimEnd(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimEnd = Math.Clamp(value, _trimStart + .01, _duration); ClampFades(); } }
+    private void ChangePlaybackRate(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _playbackRate = Math.Clamp(value, .25, 2); ClampFades(); } }
+    private void ChangeVolume(ChangeEventArgs args) { if (TryDouble(args, out var value)) _volume = Math.Clamp(value, 0, 1); }
+    private void ChangeFadeIn(ChangeEventArgs args) { if (TryDouble(args, out var value)) _fadeIn = Math.Clamp(value, 0, MaxFade); }
+    private void ChangeFadeOut(ChangeEventArgs args) { if (TryDouble(args, out var value)) _fadeOut = Math.Clamp(value, 0, MaxFade); }
+    private void ToggleMuted(ChangeEventArgs args) => _muted = Bool(args);
+    private void ToggleLoop(ChangeEventArgs args) => _loop = Bool(args);
+    private void ToggleAutoPlay(ChangeEventArgs args) => _autoPlay = Bool(args);
+    private void ChangePlaybackTrigger(ChangeEventArgs args) { if (Enum.TryParse<PublicationMediaPlaybackTrigger>(Text(args), out var value)) _playbackTrigger = value; }
+    private void ClampFades() { _fadeIn = Math.Min(_fadeIn, MaxFade); _fadeOut = Math.Min(_fadeOut, MaxFade); }
+
+    private Task Save() => Saved.InvokeAsync(new MediaEditorResult
+    {
+        Kind = Kind,
+        Name = _name,
+        DataUrl = _dataUrl,
+        MimeType = _mimeType,
+        PosterDataUrl = _posterDataUrl,
+        DurationSeconds = _duration,
+        TrimStartSeconds = _trimStart,
+        TrimEndSeconds = _trimEnd,
+        Volume = _volume,
+        PlaybackRate = _playbackRate,
+        FadeInSeconds = _fadeIn,
+        FadeOutSeconds = _fadeOut,
+        Muted = _muted,
+        Loop = _loop,
+        AutoPlay = _autoPlay,
+        PlaybackTrigger = _playbackTrigger,
+        WaveformSamples = [.. _waveform]
+    });
+
+    private async Task Cancel()
+    {
+        _recording = false;
+        _recordingBuffer = null;
+        _recordingId = null;
+        if (_module is not null)
+        {
+            await _module.InvokeVoidAsync("cancelMediaRecording", "media-studio-preview");
+            await _module.InvokeVoidAsync("pauseMedia", "media-studio-preview");
+        }
+        await Cancelled.InvokeAsync();
+    }
+
+    private static string CreateToneDataUrl(double durationSeconds, double frequency, double volume)
+    {
+        const int sampleRate = 44_100;
+        var frames = Math.Max(1, (int)Math.Floor(sampleRate * Math.Max(.1, durationSeconds)));
+        using var stream = new MemoryStream(44 + frames * 2);
+        using var writer = new BinaryWriter(stream, Encoding.ASCII, leaveOpen: true);
+        writer.Write(Encoding.ASCII.GetBytes("RIFF"));
+        writer.Write(36 + frames * 2);
+        writer.Write(Encoding.ASCII.GetBytes("WAVE"));
+        writer.Write(Encoding.ASCII.GetBytes("fmt "));
+        writer.Write(16);
+        writer.Write((short)1);
+        writer.Write((short)1);
+        writer.Write(sampleRate);
+        writer.Write(sampleRate * 2);
+        writer.Write((short)2);
+        writer.Write((short)16);
+        writer.Write(Encoding.ASCII.GetBytes("data"));
+        writer.Write(frames * 2);
+        var attack = (int)(sampleRate * .025);
+        var release = (int)(sampleRate * .12);
+        for (var frame = 0; frame < frames; frame++)
+        {
+            var attackGain = Math.Min(1, frame / (double)Math.Max(1, attack));
+            var releaseGain = Math.Min(1, (frames - frame) / (double)Math.Max(1, release));
+            var envelope = Math.Min(attackGain, releaseGain);
+            var sample = Math.Sin(2 * Math.PI * frequency * frame / sampleRate) * Math.Clamp(volume, 0, 1) * envelope;
+            writer.Write((short)Math.Round(sample * short.MaxValue));
+        }
+        writer.Flush();
+        return $"data:audio/wav;base64,{Convert.ToBase64String(stream.ToArray())}";
+    }
+
+    private static string RecordingName(string mimeType, bool isVideo)
+    {
+        var extension = mimeType.ToLowerInvariant() switch
+        {
+            var value when value.Contains("mp4", StringComparison.Ordinal) => "mp4",
+            var value when value.Contains("ogg", StringComparison.Ordinal) => "ogg",
+            var value when value.Contains("wav", StringComparison.Ordinal) => "wav",
+            _ => "webm"
+        };
+        return $"Recorded {(isVideo ? "Video" : "Audio")}.{extension}";
+    }
+
+    private static string PlaybackTriggerName(PublicationMediaPlaybackTrigger value) => value switch
+    {
+        PublicationMediaPlaybackTrigger.OnPageEnter => "When the page opens",
+        PublicationMediaPlaybackTrigger.OnClick => "When the media object is clicked",
+        _ => "With the object animation"
+    };
+    private static string WaveHeight(double value) => $"{Math.Clamp(value, .05, 1) * 100:0.#}%";
+    private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+    private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null) await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview");
+        }
+        catch (JSDisconnectedException) { }
+        _self?.Dispose();
+        if (_module is not null) await _module.DisposeAsync();
+    }
+}

@@ -14,7 +14,8 @@
                  data-transition-duration="@Inv(publicationPage.Transition.DurationSeconds)"
                  data-advance-on-click="@publicationPage.Transition.AdvanceOnClick.ToString().ToLowerInvariant()"
                  data-auto-advance="@publicationPage.Transition.AutoAdvance.ToString().ToLowerInvariant()"
-                 data-auto-advance-seconds="@Inv(publicationPage.Transition.AutoAdvanceSeconds)">
+                 data-auto-advance-seconds="@Inv(publicationPage.Transition.AutoAdvanceSeconds)"
+                 data-timeline-duration="@Inv(publicationPage.TimelineDurationSeconds)">
             @foreach (var element in publicationPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
             {
                 @if (element is ConnectorElement connector && ConnectorGeometry.TryResolve(publicationPage, connector, out var sourcePoint, out var targetPoint))
@@ -37,7 +38,19 @@
                          data-animations="@PublicationAnimationData.Animations(element)"
                          data-interaction="@PublicationAnimationData.Interaction(element)"
                      data-interaction-action="@element.Interaction.Action"
-                     data-playback-hidden="@element.HiddenAtPresentationStart.ToString().ToLowerInvariant()">
+                     data-playback-hidden="@element.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
+                     data-media-kind="@(element is PublicationMediaElement ? element.Kind.ToString().ToLowerInvariant() : null)"
+                     data-media-start="@(element is PublicationMediaElement mediaData ? Inv(mediaData.TimelineStartSeconds) : null)"
+                     data-media-trim-start="@(element is PublicationMediaElement mediaTrimStart ? Inv(mediaTrimStart.TrimStartSeconds) : null)"
+                     data-media-trim-end="@(element is PublicationMediaElement mediaTrimEnd ? Inv(mediaTrimEnd.EffectiveTrimEndSeconds) : null)"
+                     data-media-volume="@(element is PublicationMediaElement mediaVolume ? Inv(mediaVolume.Volume) : null)"
+                     data-media-rate="@(element is PublicationMediaElement mediaRate ? Inv(mediaRate.PlaybackRate) : null)"
+                     data-media-muted="@(element is PublicationMediaElement mediaMuted ? mediaMuted.Muted.ToString().ToLowerInvariant() : null)"
+                     data-media-loop="@(element is PublicationMediaElement mediaLoop ? mediaLoop.Loop.ToString().ToLowerInvariant() : null)"
+                     data-media-autoplay="@(element is PublicationMediaElement mediaAuto ? mediaAuto.AutoPlay.ToString().ToLowerInvariant() : null)"
+                     data-media-trigger="@(element is PublicationMediaElement mediaTrigger ? mediaTrigger.PlaybackTrigger.ToString() : null)"
+                     data-media-fade-in="@(element is PublicationMediaElement mediaFadeIn ? Inv(mediaFadeIn.FadeInSeconds) : null)"
+                     data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)">
                         @switch (element)
                         {
                             case TextFrameElement text:
@@ -49,6 +62,31 @@
                                 <div class="image-frame" style="@ImageFrameStyle(image)">
                                     @PictureFilter(image)
                                     <img src="@image.DataUrl" alt="@image.AltText" style="@ImageStyle(image)" />
+                                </div>
+                                break;
+                            case VideoElement video:
+                                <div class="publication-video-frame" style="background:@video.Background">
+                                    <video src="@video.DataUrl" poster="@video.PosterDataUrl" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
+                                           preload="metadata" playsinline data-media-control style="object-fit:@VideoFit(video.FitMode)"></video>
+                                    <span class="media-object-badge">▶ @Time(video.TimelineLengthSeconds)</span>
+                                </div>
+                                break;
+                            case AudioElement audio:
+                                <div class="publication-audio-frame display-@audio.DisplayKind.ToString().ToLowerInvariant()" style="--media-accent:@audio.AccentColor">
+                                    @if (audio.DisplayKind != PublicationAudioDisplayKind.Hidden)
+                                    {
+                                        <div class="publication-audio-heading"><span>♪</span><b>@audio.Name</b><small>@Time(audio.TimelineLengthSeconds)</small></div>
+                                        @if (audio.DisplayKind == PublicationAudioDisplayKind.Waveform)
+                                        {
+                                            <div class="publication-audio-waveform">
+                                                @foreach (var sample in AudioSamples(audio))
+                                                {
+                                                    <i style="height:@WaveHeight(sample)"></i>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                    <audio src="@audio.DataUrl" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control></audio>
                                 </div>
                                 break;
                             case ShapeElement shape:
@@ -214,6 +252,18 @@
         var marker = start ? connector.StartMarker : connector.EndMarker;
         return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
     }
+
+    private static string VideoFit(PublicationVideoFitMode mode) => mode switch
+    {
+        PublicationVideoFitMode.Cover => "cover",
+        PublicationVideoFitMode.Stretch => "fill",
+        _ => "contain"
+    };
+    private static IEnumerable<double> AudioSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
+        ? audio.WaveformSamples.Take(96)
+        : Enumerable.Range(0, 64).Select(index => .22 + Math.Abs(Math.Sin(index * .41)) * .68);
+    private static string WaveHeight(double sample) => $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
+    private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
 
     private static string PageStyle(PublicationPage p) => $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background}";
     private static string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({Inv(e.Rotation)}deg)";

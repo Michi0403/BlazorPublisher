@@ -329,7 +329,7 @@ function updateAttachedConnectors(state, movedId) {
 }
 
 function pointerDown(state, event) {
-    if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
+    if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler,[data-media-control],video,audio')) return;
     state.stage.focus({ preventScroll: true });
 
     const endpoint = event.target.closest('[data-connector-end]');
@@ -1409,6 +1409,8 @@ function clearPublicationPreview(key) {
     for (const animation of state.animations) {
         try { animation.cancel(); } catch { }
     }
+    for (const timer of state.mediaTimers || []) clearTimeout(timer);
+    for (const node of state.mediaNodes || []) pausePublicationMediaNode(node, true);
     if (state.clickTarget && state.clickHandler) state.clickTarget.removeEventListener('click', state.clickHandler, true);
     state.root?.classList.remove('pub-animation-previewing', 'pub-animation-click-hint');
     publicationAnimationPreviews.delete(key);
@@ -1420,7 +1422,9 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
         const trigger = animationName(item.animation.trigger);
         const ownDelay = publicationReducedMotion() ? 0 : Math.max(0, animationNumber(item.animation.delaySeconds, 0));
         let start = initialOffset + ownDelay;
-        if (trigger === 'withprevious') start = previousStart + ownDelay;
+        const explicitStart = Number(item.animation.timelineStartSeconds);
+        if (Number.isFinite(explicitStart)) start = Math.max(0, explicitStart);
+        else if (trigger === 'withprevious') start = previousStart + ownDelay;
         else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
         state.animations.push(runPublicationAnimation(item.node, item.animation, start));
         previousStart = start;
@@ -1429,7 +1433,7 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
 }
 function previewPublicationItems(root, items, includeTransition) {
     clearPublicationPreview(root.id || root);
-    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [] };
+    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set() };
     publicationAnimationPreviews.set(root.id || root, state);
     root.classList.add('pub-animation-previewing');
     if (includeTransition) state.animations.push(runPublicationPageTransition(root, true));
@@ -1450,16 +1454,31 @@ function previewPublicationItems(root, items, includeTransition) {
             automatic.push(item);
         }
     }
-    schedulePublicationPreviewGroup(state, automatic, includeTransition && !publicationReducedMotion() ? animationNumber(root.dataset.transitionDuration, .55) : 0);
+    const transitionOffset = includeTransition && !publicationReducedMotion() ? animationNumber(root.dataset.transitionDuration, .55) : 0;
+    schedulePublicationPreviewGroup(state, automatic, transitionOffset);
+    if (includeTransition) schedulePublicationPreviewMedia(state, root, transitionOffset);
 
-    if (state.clickGroups.length) {
+    const hasClickMedia = includeTransition && [...root.querySelectorAll('[data-media-kind]')]
+        .some(node => animationName(node.dataset.mediaTrigger) === 'onclick');
+    if (state.clickGroups.length || hasClickMedia) {
         root.classList.add('pub-animation-click-hint');
         state.clickHandler = event => {
+            const mediaNode = event.target.closest?.('[data-media-kind]');
+            if (mediaNode && root.contains(mediaNode)) {
+                if (animationName(mediaNode.dataset.mediaTrigger) === 'onclick') {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    state.mediaNodes.add(mediaNode);
+                    togglePublicationMediaNode(mediaNode);
+                    return;
+                }
+                if (event.target.closest?.('[data-media-control],video,audio')) return;
+            }
             if (!state.clickGroups.length) return;
             event.preventDefault();
             event.stopImmediatePropagation();
             schedulePublicationPreviewGroup(state, state.clickGroups.shift(), 0);
-            if (!state.clickGroups.length) root.classList.remove('pub-animation-click-hint');
+            if (!state.clickGroups.length && !hasClickMedia) root.classList.remove('pub-animation-click-hint');
         };
         root.addEventListener('click', state.clickHandler, true);
     }
@@ -1489,6 +1508,79 @@ function stopAnimationPreview(pageId) {
     if (page) clearPublicationPreview(page);
 }
 
+
+function publicationMediaElement(elementId) {
+    const node = document.getElementById(elementId);
+    return node?.querySelector('video,audio') || null;
+}
+function configurePublicationMedia(node, media) {
+    if (!node || !media) return null;
+    const start = Math.max(0, animationNumber(node.dataset.mediaTrimStart, 0));
+    const end = Math.max(start + .01, animationNumber(node.dataset.mediaTrimEnd, media.duration || start + 1));
+    const baseVolume = Math.max(0, Math.min(1, animationNumber(node.dataset.mediaVolume, 1)));
+    const rate = Math.max(.1, animationNumber(node.dataset.mediaRate, 1));
+    const fadeIn = Math.max(0, animationNumber(node.dataset.mediaFadeIn, 0));
+    const fadeOut = Math.max(0, animationNumber(node.dataset.mediaFadeOut, 0));
+    media.volume = fadeIn > 0 ? 0 : baseVolume;
+    media.playbackRate = rate;
+    media.muted = node.dataset.mediaMuted === 'true';
+    media.loop = false;
+    try { media.currentTime = start; } catch { }
+    const previous = media.__publisherTimeHandler;
+    if (previous) media.removeEventListener('timeupdate', previous);
+    const handler = () => {
+        const presentationPosition = (media.currentTime - start) / rate;
+        const presentationRemaining = (end - media.currentTime) / rate;
+        let gain = baseVolume;
+        if (fadeIn > 0) gain *= Math.max(0, Math.min(1, presentationPosition / fadeIn));
+        if (fadeOut > 0) gain *= Math.max(0, Math.min(1, presentationRemaining / fadeOut));
+        if (!media.muted) media.volume = Math.max(0, Math.min(1, gain));
+        if (media.currentTime < end - .02) return;
+        if (node.dataset.mediaLoop === 'true') {
+            media.currentTime = start;
+            media.play().catch(() => {});
+        } else media.pause();
+    };
+    media.__publisherTimeHandler = handler;
+    media.addEventListener('timeupdate', handler);
+    return { start, end };
+}
+function playPublicationMediaNode(node) {
+    const media = node?.querySelector('video,audio');
+    if (!node || !media) return;
+    configurePublicationMedia(node, media);
+    media.play().catch(() => {});
+}
+function pausePublicationMediaNode(node, rewind = false) {
+    const media = node?.querySelector('video,audio');
+    if (!media) return;
+    media.pause();
+    if (rewind) {
+        const start = Math.max(0, animationNumber(node.dataset.mediaTrimStart, 0));
+        try { media.currentTime = start; } catch { }
+    }
+}
+function togglePublicationMediaNode(node) {
+    const media = node?.querySelector('video,audio');
+    if (!media) return;
+    if (media.paused) playPublicationMediaNode(node); else media.pause();
+}
+function schedulePublicationPreviewMedia(state, root, initialOffset = 0) {
+    for (const node of root.querySelectorAll('[data-media-kind]')) {
+        const trigger = animationName(node.dataset.mediaTrigger);
+        if (node.dataset.mediaAutoplay === 'false' || trigger === 'onclick') continue;
+        const delay = Math.max(0, initialOffset + animationNumber(node.dataset.mediaStart, 0));
+        state.mediaNodes.add(node);
+        if (publicationReducedMotion() || delay <= 0) playPublicationMediaNode(node);
+        else state.mediaTimers.push(setTimeout(() => playPublicationMediaNode(node), delay * 1000));
+    }
+}
+function playPublicationMedia(elementId) {
+    playPublicationMediaNode(document.getElementById(elementId));
+}
+function pausePublicationMedia(elementId) {
+    pausePublicationMediaNode(document.getElementById(elementId));
+}
 
 function websitePresentationRuntime() {
     const publication = document.querySelector('.website-publication');
@@ -1630,7 +1722,9 @@ function websitePresentationRuntime() {
             const trigger = lower(item.animation.trigger);
             const ownDelay = reducedMotion ? 0 : Math.max(0, num(item.animation.delaySeconds, 0));
             let start = ownDelay;
-            if (trigger === 'withprevious') start = previousStart + ownDelay;
+            const explicitStart = Number(item.animation.timelineStartSeconds);
+            if (Number.isFinite(explicitStart)) start = Math.max(0, explicitStart);
+            else if (trigger === 'withprevious') start = previousStart + ownDelay;
             else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
             playItem(item, start);
             const end = start + animationSpan(item.animation);
@@ -1649,6 +1743,61 @@ function websitePresentationRuntime() {
             activeAnimations.push(item.prestate);
         }
     };
+    const mediaFromNode = node => node?.querySelector('video,audio') || null;
+    const stopMediaNode = node => {
+        const media = mediaFromNode(node);
+        if (!media) return;
+        media.pause();
+        if (media.__psTimeHandler) media.removeEventListener('timeupdate', media.__psTimeHandler);
+        media.__psTimeHandler = null;
+    };
+    const playMediaNode = (node, delay = 0) => {
+        const media = mediaFromNode(node);
+        if (!media) return;
+        const run = () => {
+            const start = Math.max(0, num(node.dataset.mediaTrimStart, 0));
+            const end = Math.max(start + .01, num(node.dataset.mediaTrimEnd, media.duration || start + 1));
+            const baseVolume = Math.max(0, Math.min(1, num(node.dataset.mediaVolume, 1)));
+            const fadeIn = Math.max(0, num(node.dataset.mediaFadeIn, 0));
+            const fadeOut = Math.max(0, num(node.dataset.mediaFadeOut, 0));
+            media.playbackRate = Math.max(.1, num(node.dataset.mediaRate, 1));
+            media.muted = bool(node.dataset.mediaMuted);
+            media.loop = false;
+            media.volume = fadeIn > 0 ? 0 : baseVolume;
+            try { media.currentTime = start; } catch { }
+            if (media.__psTimeHandler) media.removeEventListener('timeupdate', media.__psTimeHandler);
+            const onTime = () => {
+                const position = media.currentTime;
+                const timelinePosition = (position - start) / Math.max(.1, media.playbackRate);
+                const timelineRemaining = (end - position) / Math.max(.1, media.playbackRate);
+                let volume = baseVolume;
+                if (fadeIn > 0) volume *= Math.max(0, Math.min(1, timelinePosition / fadeIn));
+                if (fadeOut > 0) volume *= Math.max(0, Math.min(1, timelineRemaining / fadeOut));
+                if (!media.muted) media.volume = Math.max(0, Math.min(1, volume));
+                if (position < end - .02) return;
+                if (bool(node.dataset.mediaLoop)) {
+                    media.currentTime = start;
+                    media.play().catch(() => {});
+                } else media.pause();
+            };
+            media.__psTimeHandler = onTime;
+            media.addEventListener('timeupdate', onTime);
+            media.play().catch(() => {});
+        };
+        if (delay > 0) activeMediaTimers.push(setTimeout(run, delay * 1000)); else run();
+    };
+    const toggleMediaNode = node => {
+        const media = mediaFromNode(node);
+        if (!media) return;
+        if (media.paused) playMediaNode(node); else media.pause();
+    };
+    const startPageMedia = page => {
+        for (const node of page.querySelectorAll('[data-media-kind]')) {
+            const trigger = lower(node.dataset.mediaTrigger);
+            if (!bool(node.dataset.mediaAutoplay) || trigger === 'onclick') continue;
+            playMediaNode(node, Math.max(0, num(node.dataset.mediaStart, 0)));
+        }
+    };
     const resetPageVisibility = page => {
         for (const node of page.querySelectorAll('[data-publication-element]'))
             node.classList.toggle('ps-action-hidden', bool(node.dataset.playbackHidden));
@@ -1658,6 +1807,9 @@ function websitePresentationRuntime() {
         autoTimer = 0;
         for (const animation of activeAnimations) { try { animation.cancel(); } catch { } }
         activeAnimations = [];
+        for (const timer of activeMediaTimers) clearTimeout(timer);
+        activeMediaTimers = [];
+        for (const node of publication.querySelectorAll('[data-media-kind]')) stopMediaNode(node);
         clickGroups = [];
     };
     const fitPages = () => {
@@ -1712,8 +1864,10 @@ function websitePresentationRuntime() {
         resetPageVisibility(page);
         const timeline = splitTimeline(pageItems(page));
         clickGroups = timeline.clickGroups;
-        if (shouldRun) scheduleGroup(timeline.automatic);
-        else primeClickEntrances([timeline.automatic]);
+        if (shouldRun) {
+            scheduleGroup(timeline.automatic);
+            startPageMedia(page);
+        } else primeClickEntrances([timeline.automatic]);
         primeClickEntrances(clickGroups);
         if (bool(page.dataset.autoAdvance)) {
             const seconds = Math.max(.25, num(page.dataset.autoAdvanceSeconds, 5));
@@ -1743,6 +1897,7 @@ function websitePresentationRuntime() {
     const startAutomatically = publication.dataset.playbackStart !== 'false';
     let current = 0;
     let activeAnimations = [];
+    let activeMediaTimers = [];
     let clickGroups = [];
     let autoTimer = 0;
 
@@ -1770,7 +1925,16 @@ function websitePresentationRuntime() {
         });
         for (const node of page.querySelectorAll('[data-publication-element]')) {
             const interaction = parse(node.dataset.interaction, {});
-            if (lower(interaction.action) === 'none' || !interaction.action) continue;
+            const interactionAction = lower(interaction.action);
+            if (node.dataset.mediaKind && lower(node.dataset.mediaTrigger) === 'onclick' && (!interactionAction || interactionAction === 'none')) {
+                node.classList.add('ps-interactive');
+                node.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleMediaNode(node);
+                });
+            }
+            if (interactionAction === 'none' || !interaction.action) continue;
             node.classList.add('ps-interactive');
             node.addEventListener('click', event => {
                 event.preventDefault();
@@ -1794,7 +1958,9 @@ function websitePresentationRuntime() {
                     else if (action === 'replayanimation') {
                         const items = parse(target.dataset.animations, []).map(animation => ({ node: target, animation, prestate: null }));
                         scheduleGroup(items);
-                    }
+                    } else if (action === 'playmedia') playMediaNode(target);
+                    else if (action === 'pausemedia') stopMediaNode(target);
+                    else if (action === 'togglemediaplayback') toggleMediaNode(target);
                 }
             });
         }
@@ -1853,6 +2019,8 @@ window.publisherStudio = {
     previewElementAnimations(elementId) { previewElementAnimations(elementId); },
     previewAnimationStep(pageId, animationId) { previewAnimationStep(pageId, animationId); },
     stopAnimationPreview(pageId) { stopAnimationPreview(pageId); },
+    playPublicationMedia(elementId) { playPublicationMedia(elementId); },
+    pausePublicationMedia(elementId) { pausePublicationMedia(elementId); },
 
     async downloadStream(fileName, streamReference, mimeType) {
         const buffer = await streamReference.arrayBuffer();

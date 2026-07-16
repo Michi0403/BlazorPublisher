@@ -46,6 +46,12 @@
             <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" IsPrimary="true" Click="RequestPicture" AdaptivePriority="-5" />
             <DxRibbonItem Text="Create picture" IconCssClass="pub-icon pub-icon-create-picture" IsPrimary="true" Click="RequestCreatePicture" AdaptivePriority="-5" />
         </DxRibbonGroup>
+        <DxRibbonGroup Text="Media" IconCssClass="pub-icon pub-icon-media">
+            <DxRibbonItem Text="Video" IconCssClass="pub-icon pub-icon-video" IsPrimary="true" Click="RequestVideo" AdaptivePriority="-5" />
+            <DxRibbonItem Text="Audio" IconCssClass="pub-icon pub-icon-audio" IsPrimary="true" Click="RequestAudio" AdaptivePriority="-5" />
+            <DxRibbonItem Text="Create video" Click="RequestCreateVideo" />
+            <DxRibbonItem Text="Create audio" Click="RequestCreateAudio" />
+        </DxRibbonGroup>
         <DxRibbonGroup Text="Data and diagrams" IconCssClass="pub-icon pub-icon-chart">
             <DxRibbonItem Text="Chart" IconCssClass="pub-icon pub-icon-chart" IsPrimary="true" Click="AddChart" AdaptivePriority="-4" />
             <DxRibbonItem Text="Pie / doughnut" IconCssClass="pub-icon pub-icon-pie" Click="AddPieChart" />
@@ -110,6 +116,10 @@
             <DxRibbonItem Text="Preview page" IconCssClass="pub-icon pub-icon-animation" IsPrimary="true" Click="RequestPreviewPageAnimations" />
             <DxRibbonItem Text="Preview object" Enabled="@(State.SelectedElement?.Animations.Count > 0)" Click="RequestPreviewObjectAnimations" />
             <DxRibbonItem Text="Stop" Click="RequestStopAnimations" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Timeline" IconCssClass="pub-icon pub-icon-timeline">
+            <DxRibbonItem Text="Show / hide timeline" IsPrimary="true" Click="RequestToggleTimeline" />
+            <DxRibbonItem Text="Edit selected media" Enabled="IsMediaSelected" Click="RequestEditMedia" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Entrance">
             <DxRibbonItem Text="Fade in" Enabled="HasSelection" Click="AnimationFadeIn" />
@@ -289,6 +299,21 @@
         </DxRibbonGroup>
     </DxRibbonTab>
 
+    <DxRibbonTab Text="Media Tools" Contextual="true" Visible="IsMediaSelected">
+        <DxRibbonGroup Text="Clip" IconCssClass="pub-icon pub-icon-media">
+            <DxRibbonItem Text="Edit in Media Studio" IsPrimary="true" Click="RequestEditMedia" />
+            <DxRibbonItem Text="@MediaMutedText" Click="ToggleMediaMuted" />
+            <DxRibbonItem Text="@MediaLoopText" Click="ToggleMediaLoop" />
+            <DxRibbonItem Text="@MediaAutoPlayText" Click="ToggleMediaAutoPlay" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Timeline">
+            <DxRibbonItem Text="Show / hide timeline" Click="RequestToggleTimeline" />
+            <DxRibbonItem Text="Start at page entry" Click="MediaStartAtPageEntry" />
+            <DxRibbonItem Text="Start on click" Click="MediaStartOnClick" />
+            <DxRibbonItem Text="Start with animation" Click="MediaStartWithAnimation" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
     <DxRibbonTab Text="Shape Tools" Contextual="true" Visible="IsShapeSelected">
         <DxRibbonGroup Text="Shape">
             <DxRibbonColorPaletteItem Text="Fill" Value="@ShapeFill" ValueChanged="OnShapeFillChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
@@ -315,6 +340,12 @@
     [Parameter] public EventCallback OnInsertPicture { get; set; }
     [Parameter] public EventCallback OnCreatePicture { get; set; }
     [Parameter] public EventCallback OnEditPicture { get; set; }
+    [Parameter] public EventCallback OnInsertVideo { get; set; }
+    [Parameter] public EventCallback OnInsertAudio { get; set; }
+    [Parameter] public EventCallback OnCreateVideo { get; set; }
+    [Parameter] public EventCallback OnCreateAudio { get; set; }
+    [Parameter] public EventCallback OnEditMedia { get; set; }
+    [Parameter] public EventCallback OnToggleTimeline { get; set; }
     [Parameter] public EventCallback OnEditStory { get; set; }
     [Parameter] public EventCallback OnFitPage { get; set; }
     [Parameter] public EventCallback OnTogglePagesPane { get; set; }
@@ -347,6 +378,12 @@
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
     private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
     private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
+    private Task RequestVideo() => OnInsertVideo.InvokeAsync();
+    private Task RequestAudio() => OnInsertAudio.InvokeAsync();
+    private Task RequestCreateVideo() => OnCreateVideo.InvokeAsync();
+    private Task RequestCreateAudio() => OnCreateAudio.InvokeAsync();
+    private Task RequestEditMedia() => OnEditMedia.InvokeAsync();
+    private Task RequestToggleTimeline() => OnToggleTimeline.InvokeAsync();
     private Task RequestStoryEditor() => OnEditStory.InvokeAsync();
     private Task RequestFitPage() => OnFitPage.InvokeAsync();
     private Task RequestTogglePagesPane() => OnTogglePagesPane.InvokeAsync();
@@ -366,11 +403,26 @@
     private bool IsWordArtSelected => State.SelectedElement is WordArtElement;
     private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
     private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
+    private bool IsMediaSelected => State.SelectedElement is PublicationMediaElement;
+    private string MediaMutedText => CheckText((State.SelectedElement as PublicationMediaElement)?.Muted == true, "Muted");
+    private string MediaLoopText => CheckText((State.SelectedElement as PublicationMediaElement)?.Loop == true, "Loop clip");
+    private string MediaAutoPlayText => CheckText((State.SelectedElement as PublicationMediaElement)?.AutoPlay == true, "Play in presentation");
     private string ShapeFill => (State.SelectedElement as ShapeElement)?.Fill ?? "#ffffff";
     private string ShapeStroke => (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
     private string ConnectorStroke => (State.SelectedElement as ConnectorElement)?.Stroke ?? "#245b85";
     private string PagePaletteColor => State.CurrentPage.Background.StartsWith('#') ? State.CurrentPage.Background : "#ffffff";
     private static readonly string[] PageColors = ["#ffffff", "#f8fafc", "#fef3c7", "#fee2e2", "#dcfce7", "#dbeafe", "#ede9fe", "#111827"];
+
+    private void UpdateSelectedMedia(Action<PublicationMediaElement> update)
+    {
+        if (State.SelectedElement is PublicationMediaElement media) State.UpdateMedia(media.Id, update);
+    }
+    private void ToggleMediaMuted() => UpdateSelectedMedia(media => media.Muted = !media.Muted);
+    private void ToggleMediaLoop() => UpdateSelectedMedia(media => media.Loop = !media.Loop);
+    private void ToggleMediaAutoPlay() => UpdateSelectedMedia(media => media.AutoPlay = !media.AutoPlay);
+    private void MediaStartAtPageEntry() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter);
+    private void MediaStartOnClick() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnClick);
+    private void MediaStartWithAnimation() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.WithAnimation);
 
     private void Undo() => State.Undo();
     private void Redo() => State.Redo();

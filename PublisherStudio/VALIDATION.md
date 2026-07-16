@@ -135,3 +135,24 @@ When reporting a compiler failure, include the first compiler error and affected
 - Open-URL interaction playback accepts only `http`, `https`, and `mailto` schemes.
 - JavaScript passes `node --check`; C# syntax trees and Razor `@code` blocks parse without syntax errors; JSON/XML files and archive integrity are checked.
 - A real `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+
+## v1.0 targeted validation
+
+- The publication format version is `1.9`; older files receive a ten-second page timeline and no media objects.
+- Audio and video are polymorphic publication elements and follow the existing serialization, layer, selection, duplication, page-copy, undo/redo, print, and HTML-export paths.
+- Imported and recorded sources are bounded before embedding. Browser recordings return to Interactive Server in 24 KB text chunks rather than binary JS stream references or one oversized interop result.
+- The generated example tone is created server-side as PCM WAV, so it does not return a large data URL through JS-to-.NET interop.
+- DevExpress `DxRangeSelector` is used for live trim selection and timeline viewport selection; the selected range is normalized and bounded again in the C# model.
+- Animation clips preserve their visual span when repeated or auto-reversed. Explicit timeline starts are evaluated directly and retain the original trigger delay for use if the clip is returned to trigger timing.
+- Media playback stops when pages change, honors trim/rate/volume/fade/loop settings, and avoids double click handling when an object has an explicit interaction.
+- Recording cancellation discards pending chunks and stops active camera, screen, and microphone tracks.
+- JavaScript passes `node --check`; C# syntax trees and Razor `@code` blocks parse without syntax errors; JSON/XML files, XML declarations, source delimiters, patch application, archive integrity, and package boundaries are checked.
+- A real `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+
+Recommended local media smoke tests:
+
+1. Insert MP4/WebM and MP3/WAV files, save/reopen JSON, and verify poster/waveform, trim, volume, and timeline positions.
+2. Record a short camera, screen, and microphone clip; stop from both the Studio button and the browser sharing control.
+3. Drag media trim handles and repeated/auto-reversed animation clips, then undo once per operation.
+4. Right-click media on the page, timeline clips/background, page thumbnails, and the Media Studio preview/range.
+5. Export animated HTML and verify page-entry media, click media, fades, looping, media interactions, page changes, replay, and print fallback.

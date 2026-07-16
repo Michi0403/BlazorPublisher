@@ -74,6 +74,30 @@ public sealed partial class PublicationFileService
                 _pictures.Normalize(image.PictureSource);
         }
 
+        foreach (var media in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<PublicationMediaElement>())
+        {
+            media.DurationSeconds = Math.Clamp(media.DurationSeconds, 0, 24 * 60 * 60);
+            media.TrimStartSeconds = Math.Clamp(media.TrimStartSeconds, 0, Math.Max(0, media.DurationSeconds));
+            var trimEnd = media.TrimEndSeconds <= media.TrimStartSeconds ? media.DurationSeconds : media.TrimEndSeconds;
+            media.TrimEndSeconds = Math.Clamp(trimEnd, media.TrimStartSeconds, Math.Max(media.TrimStartSeconds, media.DurationSeconds));
+            media.TimelineStartSeconds = Math.Clamp(media.TimelineStartSeconds, 0, 3600);
+            media.Volume = Math.Clamp(media.Volume, 0, 1);
+            media.PlaybackRate = Math.Clamp(media.PlaybackRate <= 0 ? 1 : media.PlaybackRate, .25, 4);
+            media.FadeInSeconds = Math.Clamp(media.FadeInSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
+            media.FadeOutSeconds = Math.Clamp(media.FadeOutSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
+            media.WaveformSamples ??= [];
+            if (media.WaveformSamples.Count > 256) media.WaveformSamples = media.WaveformSamples.Take(256).ToList();
+            if (media is VideoElement video)
+            {
+                if (string.IsNullOrWhiteSpace(video.MimeType)) video.MimeType = "video/webm";
+                if (string.IsNullOrWhiteSpace(video.AltText)) video.AltText = video.Name;
+            }
+            else if (media is AudioElement audio && string.IsNullOrWhiteSpace(audio.MimeType))
+            {
+                audio.MimeType = "audio/webm";
+            }
+        }
+
         foreach (var wordArt in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<WordArtElement>())
         {
             wordArt.FontSizePt = Math.Clamp(wordArt.FontSizePt, 6, 300);
@@ -110,6 +134,7 @@ public sealed partial class PublicationFileService
             publicationPage.Transition ??= new PublicationPageTransition();
             publicationPage.Transition.DurationSeconds = Math.Clamp(publicationPage.Transition.DurationSeconds <= 0 ? .55 : publicationPage.Transition.DurationSeconds, .1, 8);
             publicationPage.Transition.AutoAdvanceSeconds = Math.Clamp(publicationPage.Transition.AutoAdvanceSeconds <= 0 ? 5 : publicationPage.Transition.AutoAdvanceSeconds, .25, 3600);
+            publicationPage.TimelineDurationSeconds = Math.Clamp(publicationPage.TimelineDurationSeconds <= 0 ? 10 : publicationPage.TimelineDurationSeconds, 1, 3600);
 
             foreach (var element in publicationPage.Elements)
             {
@@ -140,6 +165,8 @@ public sealed partial class PublicationFileService
                 animation.Order = index + 1;
                 animation.DurationSeconds = Math.Clamp(animation.DurationSeconds <= 0 ? .6 : animation.DurationSeconds, .05, 60);
                 animation.DelaySeconds = Math.Clamp(animation.DelaySeconds, 0, 60);
+                if (animation.TimelineStartSeconds is { } timelineStart)
+                    animation.TimelineStartSeconds = Math.Clamp(timelineStart, 0, 3600);
                 animation.DistancePercent = Math.Clamp(animation.DistancePercent, 0, 500);
                 animation.ScalePercent = Math.Clamp(animation.ScalePercent, 0, 500);
                 animation.RotationDegrees = Math.Clamp(animation.RotationDegrees, -3600, 3600);
@@ -163,7 +190,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.8";
+        document.FormatVersion = "1.9";
         return document;
     }
 

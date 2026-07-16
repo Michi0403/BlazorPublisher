@@ -26,6 +26,12 @@
                        OnInsertPicture="OpenPicturePicker"
                        OnCreatePicture="CreatePicture"
                        OnEditPicture="EditSelectedPicture"
+                       OnInsertVideo="OpenVideoPicker"
+                       OnInsertAudio="OpenAudioPicker"
+                       OnCreateVideo="CreateVideo"
+                       OnCreateAudio="CreateAudio"
+                       OnEditMedia="EditSelectedMedia"
+                       OnToggleTimeline="ToggleTimeline"
                        OnEditStory="OpenStoryEditor"
                        OnFitPage="FitPage"
                        OnTogglePagesPane="TogglePagesPane"
@@ -38,11 +44,21 @@
                        OnPreviewObjectAnimations="PreviewObjectAnimations"
                        OnStopAnimations="StopAnimations" />
 
+    <PublicationTimeline State="State"
+                         Collapsed="_timelineCollapsed"
+                         CollapsedChanged="TimelineCollapsedChanged"
+                         RequestInsertAudio="OpenAudioPicker"
+                         RequestInsertVideo="OpenVideoPicker"
+                         RequestCreateAudio="CreateAudio"
+                         RequestCreateVideo="CreateVideo"
+                         RequestEditMedia="EditSelectedMedia" />
+
     <div id="publisher-workspace" class="editor-workspace">
         <PageNavigator State="State" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
         <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
-                     RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager" />
+                     RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
+                     RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
         <InspectorPanel State="State"
                         OnEditStory="OpenStoryEditor"
@@ -54,7 +70,12 @@
                         OnRestoreOriginalPicture="RestoreOriginalPicture"
                         OnInsertDataVisual="InsertDataVisual"
                         OnEditDataVisual="OpenDataVisualEditor"
-                        OnManageData="OpenDataManager" />
+                        OnManageData="OpenDataManager"
+                        OnInsertVideo="OpenVideoPicker"
+                        OnInsertAudio="OpenAudioPicker"
+                        OnCreateVideo="CreateVideo"
+                        OnCreateAudio="CreateAudio"
+                        OnEditMedia="EditSelectedMedia" />
     </div>
 
     <footer class="status-bar">
@@ -72,6 +93,8 @@
 
 <InputFile id="publication-file-input" class="hidden-file-input" accept=".json,.pubstudio.json,application/json" OnChange="OpenPublication" />
 <InputFile id="picture-file-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="InsertPicture" />
+<InputFile id="video-file-input" class="hidden-file-input" accept="video/mp4,video/webm,video/ogg,video/quicktime" OnChange="InsertVideo" />
+<InputFile id="audio-file-input" class="hidden-file-input" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac" OnChange="InsertAudio" />
 
 <PrintPublication Document="State.Document" />
 
@@ -93,6 +116,14 @@
                Saved="SavePictureStudio"
                Cancelled="ClosePictureStudio" />
 
+<MediaStudio Visible="_mediaStudioVisible"
+             SessionId="_mediaStudioSessionId"
+             Kind="_mediaStudioKind"
+             InitialMedia="_mediaStudioInitial"
+             EditingExisting="@(_mediaStudioTargetId is not null)"
+             Saved="SaveMediaStudio"
+             Cancelled="CloseMediaStudio" />
+
 <DataVisualEditor Visible="_dataVisualEditorVisible" State="State" Saved="SaveDataVisualEditor" Cancelled="CancelDataVisualEditor" ManageDataRequested="OpenDataManagerFromVisual" />
 <DataManager Visible="_dataManagerVisible" State="State" Closed="CloseDataManager" DataChanged="DataManagerChanged" />
 
@@ -112,6 +143,12 @@
     private bool _pictureEditorVisible;
     private bool _dataVisualEditorVisible;
     private bool _dataManagerVisible;
+    private bool _mediaStudioVisible;
+    private bool _timelineCollapsed;
+    private Guid _mediaStudioSessionId;
+    private Guid? _mediaStudioTargetId;
+    private PublicationElementKind _mediaStudioKind = PublicationElementKind.Audio;
+    private PublicationMediaElement? _mediaStudioInitial;
     private Guid? _pendingNewDataVisualId;
     private bool _resumeDataVisualAfterManager;
     private Guid _pictureEditorSessionId;
@@ -141,6 +178,8 @@
     private void NewDocument() => State.NewDocument();
     private async Task OpenPublicationPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "publication-file-input");
     private async Task OpenPicturePicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-file-input");
+    private async Task OpenVideoPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "video-file-input");
+    private async Task OpenAudioPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "audio-file-input");
 
     private async Task SavePublication()
     {
@@ -254,6 +293,140 @@
         {
             ShowError(ex);
         }
+    }
+
+    private async Task InsertVideo(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Video);
+    private async Task InsertAudio(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Audio);
+
+    private async Task InsertMediaFile(InputFileChangeEventArgs args, PublicationElementKind kind)
+    {
+        try
+        {
+            var file = args.File;
+            var expected = kind == PublicationElementKind.Video ? "video/" : "audio/";
+            if (!file.ContentType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format.");
+
+            await using var stream = file.OpenReadStream(96 * 1024 * 1024);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+            try
+            {
+                var info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", dataUrl, kind == PublicationElementKind.Video ? "video" : "audio");
+                if (kind == PublicationElementKind.Video)
+                {
+                    var media = State.AddVideo(dataUrl, file.ContentType, file.Name, info.DurationSeconds, info.PosterDataUrl);
+                    State.UpdateMedia(media.Id, item => item.WaveformSamples = info.WaveformSamples ?? [], capture: false);
+                }
+                else
+                {
+                    var media = State.AddAudio(dataUrl, file.ContentType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
+                    State.SelectElement(media.Id);
+                }
+            }
+            finally
+            {
+                await module.DisposeAsync();
+            }
+            ShowNotice($"Inserted {file.Name}.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
+
+    private Task CreateVideo() => OpenMediaStudio(PublicationElementKind.Video, null);
+    private Task CreateAudio() => OpenMediaStudio(PublicationElementKind.Audio, null);
+
+    private Task EditSelectedMedia()
+    {
+        return State.SelectedElement is PublicationMediaElement media
+            ? OpenMediaStudio(media.Kind, media)
+            : Task.CompletedTask;
+    }
+
+    private Task OpenMediaStudio(PublicationElementKind kind, PublicationMediaElement? media)
+    {
+        _mediaStudioTargetId = media?.Id;
+        _mediaStudioKind = kind;
+        _mediaStudioInitial = media;
+        _mediaStudioSessionId = Guid.NewGuid();
+        _mediaStudioVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task SaveMediaStudio(MediaEditorResult result)
+    {
+        PublicationMediaElement media;
+        if (_mediaStudioTargetId is Guid targetId && State.CurrentPage.Elements.OfType<PublicationMediaElement>().Any(item => item.Id == targetId))
+        {
+            State.SelectElement(targetId);
+            media = State.CurrentPage.Elements.OfType<PublicationMediaElement>().First(item => item.Id == targetId);
+            State.UpdateMedia(targetId, item => ApplyMediaResult(item, result));
+        }
+        else if (result.Kind == PublicationElementKind.Video)
+        {
+            media = State.AddVideo(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.PosterDataUrl);
+            State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
+        }
+        else
+        {
+            media = State.AddAudio(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.WaveformSamples);
+            State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
+        }
+
+        _mediaStudioVisible = false;
+        _mediaStudioTargetId = null;
+        _mediaStudioInitial = null;
+        ShowNotice($"{(result.Kind == PublicationElementKind.Video ? "Video" : "Audio")} applied to the publication timeline.");
+        return Task.CompletedTask;
+    }
+
+    private static void ApplyMediaResult(PublicationMediaElement item, MediaEditorResult result)
+    {
+        item.Name = result.Name;
+        item.DataUrl = result.DataUrl;
+        item.MimeType = result.MimeType;
+        item.DurationSeconds = result.DurationSeconds;
+        item.TrimStartSeconds = result.TrimStartSeconds;
+        item.TrimEndSeconds = result.TrimEndSeconds;
+        item.Volume = result.Volume;
+        item.PlaybackRate = result.PlaybackRate;
+        item.FadeInSeconds = result.FadeInSeconds;
+        item.FadeOutSeconds = result.FadeOutSeconds;
+        item.Muted = result.Muted;
+        item.Loop = result.Loop;
+        item.AutoPlay = result.AutoPlay;
+        item.PlaybackTrigger = result.PlaybackTrigger;
+        item.WaveformSamples = result.WaveformSamples ?? [];
+        if (item is VideoElement video)
+        {
+            video.PosterDataUrl = result.PosterDataUrl;
+            video.AltText = result.Name;
+        }
+    }
+
+    private Task CloseMediaStudio()
+    {
+        _mediaStudioVisible = false;
+        _mediaStudioTargetId = null;
+        _mediaStudioInitial = null;
+        return Task.CompletedTask;
+    }
+
+    private Task ToggleTimeline()
+    {
+        _timelineCollapsed = !_timelineCollapsed;
+        return Task.CompletedTask;
+    }
+
+    private Task TimelineCollapsedChanged(bool collapsed)
+    {
+        _timelineCollapsed = collapsed;
+        return Task.CompletedTask;
     }
 
     private async Task ApplyTransparentColor()

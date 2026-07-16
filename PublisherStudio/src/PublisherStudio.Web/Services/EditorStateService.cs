@@ -122,6 +122,84 @@ public sealed class EditorStateService
         return element;
     }
 
+    public VideoElement AddVideo(string dataUrl, string mimeType, string name, double durationSeconds, string posterDataUrl = "")
+    {
+        Capture();
+        var element = new VideoElement
+        {
+            Name = NextName(string.IsNullOrWhiteSpace(name) ? "Video" : name),
+            DataUrl = dataUrl,
+            MimeType = mimeType,
+            DurationSeconds = Math.Max(0, durationSeconds),
+            TrimEndSeconds = Math.Max(0, durationSeconds),
+            PosterDataUrl = posterDataUrl,
+            AltText = string.IsNullOrWhiteSpace(name) ? "Video" : name,
+            X = 28,
+            Y = 32,
+            Width = 120,
+            Height = 67.5,
+            ZIndex = NextZ()
+        };
+        CurrentPage.Elements.Add(element);
+        SelectedElementId = element.Id;
+        EnsureTimelineDuration();
+        Notify();
+        return element;
+    }
+
+    public AudioElement AddAudio(string dataUrl, string mimeType, string name, double durationSeconds, IReadOnlyList<double>? waveformSamples = null)
+    {
+        Capture();
+        var element = new AudioElement
+        {
+            Name = NextName(string.IsNullOrWhiteSpace(name) ? "Audio" : name),
+            DataUrl = dataUrl,
+            MimeType = mimeType,
+            DurationSeconds = Math.Max(0, durationSeconds),
+            TrimEndSeconds = Math.Max(0, durationSeconds),
+            WaveformSamples = waveformSamples?.Select(value => Math.Clamp(value, 0, 1)).Take(256).ToList() ?? [],
+            X = 28,
+            Y = 42,
+            Width = 120,
+            Height = 28,
+            ZIndex = NextZ()
+        };
+        CurrentPage.Elements.Add(element);
+        SelectedElementId = element.Id;
+        EnsureTimelineDuration();
+        Notify();
+        return element;
+    }
+
+    public void UpdateMedia(Guid id, Action<PublicationMediaElement> update, bool capture = true)
+    {
+        var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == id);
+        if (media is null || media.Locked) return;
+        if (capture) Capture();
+        update(media);
+        NormalizeMedia(media);
+        EnsureTimelineDuration();
+        SelectedElementId = media.Id;
+        Notify();
+    }
+
+    public void UpdateMediaLive(Guid id, string key, Action<PublicationMediaElement> update)
+    {
+        var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == id);
+        if (media is null || media.Locked) return;
+        var liveKey = $"media:{id}:{key}";
+        if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+        {
+            Capture();
+            _liveEditKey = liveKey;
+        }
+        update(media);
+        NormalizeMedia(media);
+        EnsureTimelineDuration();
+        Notify();
+    }
+
+
 
     public WordArtElement AddWordArt()
     {
@@ -301,7 +379,8 @@ public sealed class EditorStateService
             WidthMm = source.WidthMm,
             HeightMm = source.HeightMm,
             Background = source.Background,
-            Transition = CloneTransition(source.Transition)
+            Transition = CloneTransition(source.Transition),
+            TimelineDurationSeconds = source.TimelineDurationSeconds
         };
         Document.Pages.Add(publicationPage);
         SelectedPageId = publicationPage.Id;
@@ -454,6 +533,7 @@ public sealed class EditorStateService
             AutoReverse = phase == PublicationAnimationPhase.Emphasis
         };
         element.Animations.Add(animation);
+        EnsureTimelineDuration();
         Notify();
         return animation;
     }
@@ -465,6 +545,7 @@ public sealed class EditorStateService
         Capture();
         update(animation);
         NormalizeAnimation(animation);
+        EnsureTimelineDuration();
         Notify();
     }
 
@@ -480,7 +561,41 @@ public sealed class EditorStateService
         }
         update(animation);
         NormalizeAnimation(animation);
+        EnsureTimelineDuration();
         Notify();
+    }
+
+    public PublicationAnimation? DuplicateAnimation(Guid animationId)
+    {
+        var owner = CurrentPage.Elements.FirstOrDefault(item => item.Animations.Any(animation => animation.Id == animationId));
+        var source = owner?.Animations.FirstOrDefault(item => item.Id == animationId);
+        if (owner is null || source is null) return null;
+        Capture();
+        var clone = new PublicationAnimation
+        {
+            Id = Guid.NewGuid(),
+            Name = NextName(source.Name),
+            Order = NextAnimationOrder(),
+            Phase = source.Phase,
+            Effect = source.Effect,
+            Trigger = source.Trigger,
+            Easing = source.Easing,
+            Direction = source.Direction,
+            DurationSeconds = source.DurationSeconds,
+            DelaySeconds = source.DelaySeconds,
+            TimelineStartSeconds = source.TimelineStartSeconds is { } start ? start + .25 : null,
+            DistancePercent = source.DistancePercent,
+            ScalePercent = source.ScalePercent,
+            RotationDegrees = source.RotationDegrees,
+            RepeatCount = source.RepeatCount,
+            AutoReverse = source.AutoReverse
+        };
+        owner.Animations.Add(clone);
+        ReindexAnimations();
+        EnsureTimelineDuration();
+        SelectedElementId = owner.Id;
+        Notify();
+        return clone;
     }
 
     public void DeleteAnimation(Guid animationId)
@@ -491,6 +606,7 @@ public sealed class EditorStateService
         Capture();
         owner.Animations.Remove(animation);
         ReindexAnimations();
+        EnsureTimelineDuration();
         Notify();
     }
 
@@ -556,6 +672,103 @@ public sealed class EditorStateService
         CurrentPage.Transition.DurationSeconds = Math.Clamp(CurrentPage.Transition.DurationSeconds, .1, 8);
         CurrentPage.Transition.AutoAdvanceSeconds = Math.Clamp(CurrentPage.Transition.AutoAdvanceSeconds, .25, 3600);
         Notify();
+    }
+
+    public void SetAnimationTimelineRange(Guid animationId, double startSeconds, double durationSeconds)
+    {
+        var animation = FindAnimation(animationId);
+        if (animation is null) return;
+        Capture();
+        animation.TimelineStartSeconds = Math.Clamp(startSeconds, 0, 3600);
+        var playbackMultiplier = Math.Max(1, animation.RepeatCount) * (animation.AutoReverse ? 2 : 1);
+        animation.DurationSeconds = Math.Clamp(durationSeconds / playbackMultiplier, .05, 60);
+        EnsureTimelineDuration();
+        Notify();
+    }
+
+    public void ClearAnimationTimelinePosition(Guid animationId)
+    {
+        var animation = FindAnimation(animationId);
+        if (animation is null || animation.TimelineStartSeconds is null) return;
+        Capture();
+        animation.TimelineStartSeconds = null;
+        Notify();
+    }
+
+    public void SetMediaTimelineRange(Guid elementId, string mode, double startSeconds, double lengthSeconds)
+    {
+        var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == elementId);
+        if (media is null || media.Locked) return;
+        Capture();
+        NormalizeMedia(media);
+        var oldStart = media.TimelineStartSeconds;
+        var oldLength = media.TimelineLengthSeconds;
+        var sourceRate = Math.Max(.1, media.PlaybackRate);
+        startSeconds = Math.Clamp(startSeconds, 0, 3600);
+        lengthSeconds = Math.Clamp(lengthSeconds, .05, 3600);
+        switch (mode)
+        {
+            case "trim-left":
+            {
+                var oldTimelineEnd = oldStart + oldLength;
+                var newTimelineEnd = startSeconds + lengthSeconds;
+                if (Math.Abs(newTimelineEnd - oldTimelineEnd) > .15)
+                    startSeconds = Math.Max(0, oldTimelineEnd - lengthSeconds);
+                media.TrimStartSeconds = Math.Clamp(media.EffectiveTrimEndSeconds - lengthSeconds * sourceRate, 0, media.EffectiveTrimEndSeconds - .01);
+                media.TimelineStartSeconds = startSeconds;
+                break;
+            }
+            case "trim-right":
+                media.TrimEndSeconds = Math.Clamp(media.TrimStartSeconds + lengthSeconds * sourceRate, media.TrimStartSeconds + .01, Math.Max(media.DurationSeconds, media.TrimStartSeconds + .01));
+                break;
+            default:
+                media.TimelineStartSeconds = startSeconds;
+                break;
+        }
+        NormalizeMedia(media);
+        EnsureTimelineDuration();
+        SelectedElementId = media.Id;
+        Notify();
+    }
+
+    public void SetPageTimelineDuration(double seconds)
+    {
+        Capture();
+        CurrentPage.TimelineDurationSeconds = Math.Clamp(seconds, 1, 3600);
+        EnsureTimelineDuration();
+        Notify();
+    }
+
+    public double EffectiveAnimationStart(PublicationAnimation target)
+    {
+        if (target.TimelineStartSeconds is { } explicitStart) return Math.Max(0, explicitStart);
+        var timeline = CurrentPage.Elements.SelectMany(item => item.Animations).OrderBy(item => item.Order).ToList();
+        double previousStart = 0;
+        double previousEnd = 0;
+        foreach (var animation in timeline)
+        {
+            var start = Math.Max(0, animation.DelaySeconds);
+            if (animation.Trigger == PublicationAnimationTrigger.WithPrevious) start = previousStart + Math.Max(0, animation.DelaySeconds);
+            else if (animation.Trigger == PublicationAnimationTrigger.AfterPrevious) start = previousEnd + Math.Max(0, animation.DelaySeconds);
+            else if (animation.Trigger == PublicationAnimationTrigger.OnClick) start = animation.TimelineStartSeconds ?? 0;
+            if (animation.Id == target.Id) return start;
+            previousStart = start;
+            previousEnd = start + AnimationSpan(animation);
+        }
+        return 0;
+    }
+
+    public double EffectivePageTimelineDuration()
+    {
+        var animationEnd = CurrentPage.Elements.SelectMany(item => item.Animations)
+            .Select(item => EffectiveAnimationStart(item) + AnimationSpan(item))
+            .DefaultIfEmpty(0)
+            .Max();
+        var mediaEnd = CurrentPage.Elements.OfType<PublicationMediaElement>()
+            .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
+            .DefaultIfEmpty(0)
+            .Max();
+        return Math.Clamp(Math.Max(CurrentPage.TimelineDurationSeconds, Math.Max(animationEnd, mediaEnd) + .5), 1, 3600);
     }
 
     public void CommitBounds(Guid id, double x, double y, double width, double height)
@@ -792,10 +1005,35 @@ public sealed class EditorStateService
         if (!preserveOrder) ReindexAnimations();
     }
 
+    private void EnsureTimelineDuration()
+    {
+        CurrentPage.TimelineDurationSeconds = Math.Clamp(Math.Max(CurrentPage.TimelineDurationSeconds, EffectivePageTimelineDuration()), 1, 3600);
+    }
+
+    private static double AnimationSpan(PublicationAnimation animation) =>
+        Math.Max(.05, animation.DurationSeconds) * Math.Max(1, animation.RepeatCount) * (animation.AutoReverse ? 2 : 1);
+
+    private static void NormalizeMedia(PublicationMediaElement media)
+    {
+        media.DurationSeconds = Math.Clamp(media.DurationSeconds, 0, 24 * 60 * 60);
+        media.TrimStartSeconds = Math.Clamp(media.TrimStartSeconds, 0, Math.Max(0, media.DurationSeconds));
+        var end = media.TrimEndSeconds <= media.TrimStartSeconds ? media.DurationSeconds : media.TrimEndSeconds;
+        media.TrimEndSeconds = Math.Clamp(end, media.TrimStartSeconds, Math.Max(media.TrimStartSeconds, media.DurationSeconds));
+        media.TimelineStartSeconds = Math.Clamp(media.TimelineStartSeconds, 0, 3600);
+        media.Volume = Math.Clamp(media.Volume, 0, 1);
+        media.PlaybackRate = Math.Clamp(media.PlaybackRate <= 0 ? 1 : media.PlaybackRate, .25, 4);
+        media.FadeInSeconds = Math.Clamp(media.FadeInSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
+        media.FadeOutSeconds = Math.Clamp(media.FadeOutSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
+        media.WaveformSamples ??= [];
+        if (media.WaveformSamples.Count > 256) media.WaveformSamples = media.WaveformSamples.Take(256).ToList();
+    }
+
     private static void NormalizeAnimation(PublicationAnimation animation)
     {
         animation.DurationSeconds = Math.Clamp(animation.DurationSeconds <= 0 ? .6 : animation.DurationSeconds, .05, 60);
         animation.DelaySeconds = Math.Clamp(animation.DelaySeconds, 0, 60);
+        if (animation.TimelineStartSeconds is { } timelineStart)
+            animation.TimelineStartSeconds = Math.Clamp(timelineStart, 0, 3600);
         animation.DistancePercent = Math.Clamp(animation.DistancePercent, 0, 500);
         animation.ScalePercent = Math.Clamp(animation.ScalePercent, 0, 500);
         animation.RotationDegrees = Math.Clamp(animation.RotationDegrees, -3600, 3600);

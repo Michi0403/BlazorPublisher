@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.8";
+    public string FormatVersion { get; set; } = "1.9";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -73,6 +73,7 @@ public sealed class PublicationPage
     public List<PublicationElement> Elements { get; set; } = [];
     public List<GuideLine> Guides { get; set; } = [];
     public PublicationPageTransition Transition { get; set; } = new();
+    public double TimelineDurationSeconds { get; set; } = 10;
 
     public static PublicationPage CreateA4(string name = "Page 1") => new() { Name = name };
 }
@@ -86,7 +87,7 @@ public sealed class GuideLine
 
 public enum GuideOrientation { Horizontal, Vertical }
 public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
-public enum PublicationElementKind { Text, Image, Shape, WordArt, Connector, DataVisual }
+public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ConnectorPathKind { Straight, Elbow, Curved }
 public enum ConnectorMarker { None, Arrow, Triangle, Diamond }
@@ -104,11 +105,16 @@ public enum PublicationAnimationTrigger { OnPageEnter, WithPrevious, AfterPrevio
 public enum PublicationAnimationEasing { Linear, EaseIn, EaseOut, EaseInOut, BackOut, BounceOut }
 public enum PublicationAnimationDirection { None, Left, Right, Up, Down }
 public enum PublicationPageTransitionKind { None, Fade, Push, Wipe, Zoom, Flip }
-public enum PublicationInteractionAction { None, NextPage, PreviousPage, GoToPage, OpenUrl, ToggleVisibility, Show, Hide, ReplayAnimation }
+public enum PublicationInteractionAction { None, NextPage, PreviousPage, GoToPage, OpenUrl, ToggleVisibility, Show, Hide, ReplayAnimation, PlayMedia, PauseMedia, ToggleMediaPlayback }
+public enum PublicationMediaPlaybackTrigger { OnPageEnter, OnClick, WithAnimation }
+public enum PublicationAudioDisplayKind { Waveform, Compact, Hidden }
+public enum PublicationVideoFitMode { Contain, Cover, Stretch }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextFrameElement), "text")]
 [JsonDerivedType(typeof(ImageFrameElement), "image")]
+[JsonDerivedType(typeof(VideoElement), "video")]
+[JsonDerivedType(typeof(AudioElement), "audio")]
 [JsonDerivedType(typeof(ShapeElement), "shape")]
 [JsonDerivedType(typeof(WordArtElement), "wordArt")]
 [JsonDerivedType(typeof(ConnectorElement), "connector")]
@@ -177,6 +183,52 @@ public sealed class ImageFrameElement : PublicationElement
     public string TransparentColor { get; set; } = "#ffffff";
     public int TransparentColorTolerance { get; set; } = 24;
     public PictureDocument? PictureSource { get; set; }
+}
+
+
+public abstract class PublicationMediaElement : PublicationElement
+{
+    public string DataUrl { get; set; } = string.Empty;
+    public string MimeType { get; set; } = string.Empty;
+    public double DurationSeconds { get; set; }
+    public double TrimStartSeconds { get; set; }
+    public double TrimEndSeconds { get; set; }
+    public double TimelineStartSeconds { get; set; }
+    public double Volume { get; set; } = 1;
+    public double PlaybackRate { get; set; } = 1;
+    public double FadeInSeconds { get; set; }
+    public double FadeOutSeconds { get; set; }
+    public bool Muted { get; set; }
+    public bool Loop { get; set; }
+    public bool AutoPlay { get; set; } = true;
+    public PublicationMediaPlaybackTrigger PlaybackTrigger { get; set; } = PublicationMediaPlaybackTrigger.OnPageEnter;
+    public List<double> WaveformSamples { get; set; } = [];
+
+    [JsonIgnore]
+    public double EffectiveTrimEndSeconds => TrimEndSeconds > TrimStartSeconds
+        ? TrimEndSeconds
+        : Math.Max(TrimStartSeconds, DurationSeconds);
+
+    [JsonIgnore]
+    public double TimelineLengthSeconds => Math.Max(.05, (EffectiveTrimEndSeconds - TrimStartSeconds) / Math.Max(.1, PlaybackRate));
+}
+
+public sealed class VideoElement : PublicationMediaElement
+{
+    public override PublicationElementKind Kind => PublicationElementKind.Video;
+    public string PosterDataUrl { get; set; } = string.Empty;
+    public string AltText { get; set; } = "Video";
+    public bool ShowControls { get; set; } = true;
+    public PublicationVideoFitMode FitMode { get; set; } = PublicationVideoFitMode.Contain;
+    public string Background { get; set; } = "#111827";
+}
+
+public sealed class AudioElement : PublicationMediaElement
+{
+    public override PublicationElementKind Kind => PublicationElementKind.Audio;
+    public PublicationAudioDisplayKind DisplayKind { get; set; } = PublicationAudioDisplayKind.Waveform;
+    public string AccentColor { get; set; } = "#2f75b5";
+    public bool ShowControls { get; set; } = true;
 }
 
 public sealed class ShapeElement : PublicationElement
@@ -264,6 +316,7 @@ public sealed class PublicationAnimation
     public PublicationAnimationDirection Direction { get; set; } = PublicationAnimationDirection.Left;
     public double DurationSeconds { get; set; } = .6;
     public double DelaySeconds { get; set; }
+    public double? TimelineStartSeconds { get; set; }
     public double DistancePercent { get; set; } = 18;
     public double ScalePercent { get; set; } = 20;
     public double RotationDegrees { get; set; } = 360;

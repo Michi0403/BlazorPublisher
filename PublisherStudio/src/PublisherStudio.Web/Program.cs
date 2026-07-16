@@ -40,6 +40,7 @@ public static class Program
         builder.Services.AddSingleton<PictureDocumentService>();
         builder.Services.AddSingleton<PublicationDataService>();
         builder.Services.AddSingleton<PublicationFileService>();
+        builder.Services.AddSingleton<PublicationMediaAssetStore>();
         builder.Services.AddScoped<EditorStateService>();
         builder.Services.AddScoped<PictureEditorStateService>();
 

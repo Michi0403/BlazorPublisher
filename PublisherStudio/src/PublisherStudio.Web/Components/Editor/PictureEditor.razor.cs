@@ -926,7 +926,12 @@ public partial class PictureEditor
     {
         State.Changed -= StateChanged;
         _self?.Dispose();
-        if (_module is not null) await _module.DisposeAsync();
+        try
+        {
+            if (_module is not null) await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
     }
 
     private sealed class PictureImageSize

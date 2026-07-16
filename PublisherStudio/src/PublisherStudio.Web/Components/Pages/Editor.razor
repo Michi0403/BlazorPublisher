@@ -3,6 +3,7 @@
 @implements IDisposable
 @inject EditorStateService State
 @inject PublicationFileService Files
+@inject PublicationMediaAssetStore MediaAssets
 @inject IJSRuntime JS
 
 <PageTitle>BlazorPublisher</PageTitle>
@@ -389,16 +390,20 @@
                 {
                     var media = State.AddVideo(dataUrl, mimeType, file.Name, info.DurationSeconds, info.PosterDataUrl);
                     State.UpdateMedia(media.Id, item => item.WaveformSamples = info.WaveformSamples ?? [], capture: false);
+                    MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
                 }
                 else
                 {
                     var media = State.AddAudio(dataUrl, mimeType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
+                    MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
                     State.SelectElement(media.Id);
                 }
             }
             finally
             {
-                await module.DisposeAsync();
+                try { await module.DisposeAsync(); }
+                catch (JSDisconnectedException) { }
+                catch (TaskCanceledException) { }
             }
             _timelineVisible = true;
             ShowNotice($"Inserted {file.Name}. The timeline pane is open for timing and trimming.");
@@ -473,6 +478,7 @@
             State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
         }
 
+        MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
         _mediaStudioVisible = false;
         _mediaStudioTargetId = null;
         _mediaStudioInitial = null;

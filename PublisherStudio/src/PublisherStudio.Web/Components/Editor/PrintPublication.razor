@@ -1,4 +1,5 @@
 @namespace PublisherStudio.Components.Editor
+@inject PublicationMediaAssetStore MediaAssets
 
 <div class="print-publication" aria-hidden="true"
      data-playback-start="@Document.Playback.StartAutomatically.ToString().ToLowerInvariant()"
@@ -66,7 +67,7 @@
                                 break;
                             case VideoElement video:
                                 <div class="publication-video-frame" style="background:@video.Background">
-                                    <video src="@video.DataUrl" poster="@video.PosterDataUrl" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
+                                    <video src="@MediaSource(video)" poster="@video.PosterDataUrl" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
                                            preload="metadata" playsinline data-media-control style="object-fit:@VideoFit(video.FitMode)"></video>
                                     <span class="media-object-badge">▶ @Time(video.TimelineLengthSeconds)</span>
                                 </div>
@@ -86,7 +87,7 @@
                                             </div>
                                         }
                                     }
-                                    <audio src="@audio.DataUrl" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control></audio>
+                                    <audio src="@MediaSource(audio)" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control></audio>
                                 </div>
                                 break;
                             case ShapeElement shape:
@@ -300,5 +301,6 @@
         _ => "M 50 170 L 950 170"
     };
     private static string Mm(double value) => $"{Inv(value)}mm";
+    private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 }

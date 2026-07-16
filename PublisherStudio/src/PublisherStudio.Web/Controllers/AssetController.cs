@@ -1,15 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
+using PublisherStudio.Services;
 
 namespace PublisherStudio.Controllers;
 
 [ApiController]
 [Route("api/assets")]
-public sealed class AssetController : ControllerBase
+public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : ControllerBase
 {
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"
     };
+
+    [HttpGet("media/{id:guid}")]
+    public IActionResult GetMedia(Guid id)
+    {
+        if (!mediaAssets.TryGet(id, out var bytes, out var mimeType, out var version))
+            return NotFound();
+
+        Response.Headers[HeaderNames.CacheControl] = "private, max-age=31536000, immutable";
+        Response.Headers[HeaderNames.ETag] = $"\"{version}\"";
+        return File(bytes, mimeType, enableRangeProcessing: true);
+    }
 
     [HttpPost("image")]
     [RequestSizeLimit(64 * 1024 * 1024)]

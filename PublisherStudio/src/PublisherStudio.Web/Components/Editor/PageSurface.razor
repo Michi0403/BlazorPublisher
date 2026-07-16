@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @implements IAsyncDisposable
 @inject IJSRuntime JS
+@inject PublicationMediaAssetStore MediaAssets
 
 <div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null)"
      tabindex="0" @onclick="ClearSelection" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
@@ -117,6 +118,7 @@
                      class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
                      @ondblclick="() => DoubleClick(element)"
+                     @onclick="IgnoreElementClick"
                      @onclick:stopPropagation="true"
                      @oncontextmenu="args => ShowElementContextMenu(element, args)"
                      @oncontextmenu:preventDefault
@@ -144,7 +146,7 @@
                             break;
                         case VideoElement video:
                             <div class="publication-video-frame" style="background:@video.Background">
-                                <video src="@video.DataUrl" poster="@video.PosterDataUrl" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
+                                <video src="@MediaSource(video)" poster="@video.PosterDataUrl" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
                                        preload="metadata" playsinline data-media-control draggable="false" style="object-fit:@VideoFit(video.FitMode)"></video>
                                 <span class="media-object-badge">▶ @Time(video.TimelineLengthSeconds)</span>
                             </div>
@@ -164,7 +166,7 @@
                                         </div>
                                     }
                                 }
-                                <audio src="@audio.DataUrl" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control></audio>
+                                <audio src="@MediaSource(audio)" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control></audio>
                             </div>
                             break;
                         case ShapeElement shape:
@@ -521,6 +523,7 @@
     private void ResetPointerState() => State.CancelActiveTool();
 
     private void ClearSelection() => State.SelectElement(null);
+    private static void IgnoreElementClick(MouseEventArgs _) { }
     private Task DoubleClick(PublicationElement element)
     {
         if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
@@ -924,6 +927,7 @@
     };
 
     private string GuideStyle(GuideLine guide) => guide.Orientation == GuideOrientation.Horizontal ? $"top:{Mm(guide.PositionMm)}" : $"left:{Mm(guide.PositionMm)}";
+    private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
     private string Mm(double mm) => Px(mm * PixelsPerMm);
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string Px(double px) => $"{px.ToString("0.###", CultureInfo.InvariantCulture)}px";
@@ -931,6 +935,11 @@
     public async ValueTask DisposeAsync()
     {
         _self?.Dispose();
-        if (_module is not null) await _module.DisposeAsync();
+        try
+        {
+            if (_module is not null) await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
     }
 }

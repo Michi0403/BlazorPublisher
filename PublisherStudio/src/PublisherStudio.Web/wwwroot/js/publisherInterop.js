@@ -30,6 +30,35 @@ function nextAnimationFrame(state) {
     });
 }
 
+function safeDotNet(state, method, ...args) {
+    if (!state?.dotnet) return Promise.resolve();
+    return state.dotnet.invokeMethodAsync(method, ...args).catch(error => {
+        const message = String(error?.message || error || '');
+        if (!/disconnected|disposed|circuit/i.test(message))
+            console.warn(`Publisher callback ${method} failed.`, error);
+    });
+}
+
+function resetPointerOperation(state, restoreDom = false) {
+    const operation = state?.operation;
+    if (!operation) return;
+    state.operation = null;
+    try { state.stage.releasePointerCapture(operation.pointerId); } catch { }
+
+    if (operation.kind?.startsWith('connector-')) {
+        state.operation = operation;
+        clearConnectorOperation(state, true);
+        return;
+    }
+    if (!restoreDom || !operation.id) return;
+    const element = state.page?.querySelector?.(`[data-element-id="${CSS.escape(operation.id)}"]`);
+    if (!element) return;
+    element.style.left = `${operation.x * state.config.pxPerMm}px`;
+    element.style.top = `${operation.y * state.config.pxPerMm}px`;
+    element.style.width = `${operation.width * state.config.pxPerMm}px`;
+    element.style.height = `${operation.height * state.config.pxPerMm}px`;
+}
+
 export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) {
     const stage = document.getElementById(stageId);
     const scroll = document.getElementById(scrollId);
@@ -55,7 +84,14 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         stage.addEventListener('pointerdown', event => pointerDown(state, event));
         stage.addEventListener('pointermove', event => pointerMove(state, event));
         stage.addEventListener('pointerup', event => pointerUp(state, event));
-        stage.addEventListener('pointercancel', event => pointerUp(state, event));
+        stage.addEventListener('pointercancel', event => pointerCancel(state, event));
+        stage.addEventListener('lostpointercapture', event => {
+            if (state.operation?.pointerId === event.pointerId) resetPointerOperation(state, false);
+        });
+        window.addEventListener('blur', () => resetPointerOperation(state, true));
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) resetPointerOperation(state, true);
+        });
         stage.addEventListener('pointerleave', () => {
             state.cursorX = null;
             state.cursorY = null;
@@ -71,6 +107,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         canvasStates.set(stage, state);
     }
 
+    if (state.operation && !stage.hasPointerCapture?.(state.operation.pointerId))
+        resetPointerOperation(state, false);
     state.scroll = scroll;
     state.page = page;
     state.dotnet = dotnet;
@@ -150,7 +188,7 @@ function finishRulerGuide(state, orientation, event) {
 function canvasKeyDown(state, event) {
     if (event.key !== 'Escape') return;
     clearConnectorOperation(state, true);
-    state.dotnet.invokeMethodAsync('CancelActiveTool');
+    safeDotNet(state, 'CancelActiveTool');
     event.preventDefault();
 }
 
@@ -276,12 +314,12 @@ function finishConnectorDrag(state, operation) {
     const target = operation.target;
     if (target) {
         if (operation.kind === 'connector-new') {
-            state.dotnet.invokeMethodAsync(
+            safeDotNet(state,
                 'CommitConnector',
                 operation.sourceOwnerId, operation.sourceAnchor,
                 target.ownerId, target.anchor, operation.tool);
         } else {
-            state.dotnet.invokeMethodAsync(
+            safeDotNet(state,
                 'ReconnectConnector', operation.connectorId, operation.endpoint, target.ownerId, target.anchor);
         }
     }
@@ -341,6 +379,7 @@ function mediaPointerTargetsControls(event) {
 
 function pointerDown(state, event) {
     if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
+    if (state.operation) resetPointerOperation(state, true);
     if (mediaPointerTargetsControls(event)) return;
     state.stage.focus({ preventScroll: true });
 
@@ -359,7 +398,7 @@ function pointerDown(state, event) {
             endpoint: endpointName, fixedPoint: anchorPointForElement(fixedElement, fixedAnchor, state.config.pxPerMm),
             pathKind: connector.dataset.pathKind || 'Curved', markerEnd: endpointName !== 'source', excludedIds: [otherId]
         };
-        state.stage.setPointerCapture(event.pointerId);
+        try { state.stage.setPointerCapture(event.pointerId); } catch { }
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -375,7 +414,7 @@ function pointerDown(state, event) {
             pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow', tool: state.config.connectorTool,
             excludedIds: [sourceOwnerId]
         };
-        state.stage.setPointerCapture(event.pointerId);
+        try { state.stage.setPointerCapture(event.pointerId); } catch { }
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -408,8 +447,7 @@ function pointerDown(state, event) {
     const activeConnectorTool = connectorToolActive(state);
     if (!wasSelected || activeConnectorTool) {
         state.config = { ...state.config, connectorTool: 'None' };
-        state.dotnet.invokeMethodAsync('SelectElement', id)
-            .catch(error => console.warn('Publisher selection update failed.', error));
+        safeDotNet(state, 'SelectElement', id);
     }
     if (element.classList.contains('locked')) return;
 
@@ -578,12 +616,14 @@ function nearestCandidate(value, candidates, tolerance) {
 function pointerUp(state, event) {
     const operation = state.operation;
     if (!operation || operation.pointerId !== event.pointerId) return;
+    state.operation = null;
     try { state.stage.releasePointerCapture(event.pointerId); } catch { }
+
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
+        state.operation = operation;
         finishConnectorDrag(state, operation);
         return;
     }
-    state.operation = null;
 
     if (operation.kind === 'guide') {
         const max = operation.orientation === 'Horizontal'
@@ -591,14 +631,15 @@ function pointerUp(state, event) {
             : number(state.page.dataset.pageWidthMm);
         const position = operation.currentPosition ?? operation.position;
         if (position < -10 || position > max + 10)
-            state.dotnet.invokeMethodAsync('DeleteGuide', operation.id);
+            safeDotNet(state, 'DeleteGuide', operation.id);
         else
-            state.dotnet.invokeMethodAsync('CommitGuide', operation.id, clamp(position, 0, max));
+            safeDotNet(state, 'CommitGuide', operation.id, clamp(position, 0, max));
         return;
     }
 
     if (operation.kind === 'crop') {
-        state.dotnet.invokeMethodAsync(
+        safeDotNet(
+            state,
             'CommitCrop',
             operation.id,
             operation.currentCropX ?? operation.cropX,
@@ -606,8 +647,13 @@ function pointerUp(state, event) {
             operation.cropScale);
     } else {
         const value = operation.current ?? { x: operation.x, y: operation.y, width: operation.width, height: operation.height };
-        state.dotnet.invokeMethodAsync('CommitBounds', operation.id, value.x, value.y, value.width, value.height);
+        safeDotNet(state, 'CommitBounds', operation.id, value.x, value.y, value.width, value.height);
     }
+}
+
+function pointerCancel(state, event) {
+    if (state.operation?.pointerId !== event.pointerId) return;
+    resetPointerOperation(state, true);
 }
 
 function cropWheel(state, event) {
@@ -634,7 +680,7 @@ function cropWheel(state, event) {
     if (previous) clearTimeout(previous);
     state.cropTimers.set(id, setTimeout(() => {
         state.cropTimers.delete(id);
-        state.dotnet.invokeMethodAsync('CommitCrop', id, cropX, cropY, nextScale);
+        safeDotNet(state, 'CommitCrop', id, cropX, cropY, nextScale);
     }, 140));
 }
 
@@ -957,12 +1003,36 @@ async function freezeMediaForRaster(sourcePage, clonePage) {
     clonePage.querySelectorAll('.media-object-badge').forEach(badge => badge.remove());
 }
 
+function blobAsDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(reader.error || new Error('The media asset could not be embedded.'));
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function inlineLocalMediaSources(root) {
+    const nodes = [...root.querySelectorAll('video[src],audio[src],source[src]')];
+    for (const node of nodes) {
+        const source = node.getAttribute('src') || '';
+        if (!source || source.startsWith('data:') || source.startsWith('blob:')) continue;
+        let url;
+        try { url = new URL(source, location.href); } catch { continue; }
+        if (url.origin !== location.origin || !url.pathname.startsWith('/api/assets/media/')) continue;
+        const response = await fetch(url.href, { cache: 'force-cache' });
+        if (!response.ok) throw new Error(`Media asset ${url.pathname} could not be embedded (${response.status}).`);
+        node.setAttribute('src', await blobAsDataUrl(await response.blob()));
+    }
+}
+
 async function pageSvg(page, options = {}) {
     await document.fonts?.ready;
     await waitForImages(page);
     const rect = page.getBoundingClientRect();
     const clone = cleanPageClone(page);
     if (options.freezeMedia) await freezeMediaForRaster(page, clone);
+    else await inlineLocalMediaSources(clone);
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
@@ -2927,12 +2997,13 @@ window.publisherStudio = {
         return canvas.toDataURL('image/png');
     },
 
-    exportWebsite(fileName, title) {
+    async exportWebsite(fileName, title) {
         const source = document.querySelector('.print-publication');
         if (!source) throw new Error('The publication export surface is not available.');
         const publication = source.cloneNode(true);
         publication.removeAttribute('aria-hidden');
         publication.className = 'website-publication';
+        await inlineLocalMediaSources(publication);
         const css = collectExportCss();
         const runtime = `(${websitePresentationRuntime.toString()})();`;
         const html = `<!doctype html>

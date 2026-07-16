@@ -6,15 +6,17 @@ public sealed class EditorStateService
 {
     private readonly PublicationFileService _files;
     private readonly PublicationDataService _data;
+    private readonly PublicationMediaAssetStore _mediaAssets;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private PublicationElement? _clipboard;
     private string? _liveEditKey;
 
-    public EditorStateService(PublicationFileService files, PublicationDataService data)
+    public EditorStateService(PublicationFileService files, PublicationDataService data, PublicationMediaAssetStore mediaAssets)
     {
         _files = files;
         _data = data;
+        _mediaAssets = mediaAssets;
         Document = PublicationDocument.CreateDefault();
         SelectedPageId = Document.Pages[0].Id;
     }
@@ -33,6 +35,7 @@ public sealed class EditorStateService
 
     public void NewDocument()
     {
+        RemoveMediaAssets(Document);
         Document = PublicationDocument.CreateDefault();
         SelectedPageId = Document.Pages[0].Id;
         SelectedElementId = null;
@@ -46,7 +49,9 @@ public sealed class EditorStateService
 
     public void Load(string json)
     {
+        RemoveMediaAssets(Document);
         Document = _files.Deserialize(json);
+        _mediaAssets.RegisterDocument(Document);
         SelectedPageId = Document.Pages[0].Id;
         SelectedElementId = null;
         CropMode = false;
@@ -463,6 +468,8 @@ public sealed class EditorStateService
         Capture();
         var removedIds = new HashSet<Guid> { element.Id };
         CurrentPage.Elements.Remove(element);
+        if (element is PublicationMediaElement)
+            _mediaAssets.Remove(element.Id);
         if (element is not ConnectorElement)
         {
             foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>()
@@ -1142,6 +1149,12 @@ public sealed class EditorStateService
 
     private int NextZ() => CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
     private string NextName(string basis) => $"{basis} {CurrentPage.Elements.Count + 1}";
+
+    private void RemoveMediaAssets(PublicationDocument document)
+    {
+        foreach (var media in document.Pages.SelectMany(page => page.Elements).OfType<PublicationMediaElement>())
+            _mediaAssets.Remove(media.Id);
+    }
 
     private void Capture()
     {

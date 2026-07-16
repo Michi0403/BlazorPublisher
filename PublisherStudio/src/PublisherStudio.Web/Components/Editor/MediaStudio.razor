@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @implements IAsyncDisposable
 @inject IJSRuntime JS
+@inject PublicationMediaAssetStore MediaAssets
 
 @if (Visible)
 {
@@ -36,7 +37,7 @@
                          @oncontextmenu="ShowMediaContextMenu" @oncontextmenu:preventDefault>
                         @if (IsVideo)
                         {
-                            <video id="media-studio-preview" src="@_dataUrl" poster="@_posterDataUrl" controls playsinline preload="metadata"></video>
+                            <video id="media-studio-preview" src="@_previewSource" poster="@_posterDataUrl" controls playsinline preload="metadata"></video>
                         }
                         else
                         {
@@ -47,7 +48,7 @@
                                         <i style="height:@WaveHeight(sample)"></i>
                                     }
                                 </div>
-                                <audio id="media-studio-preview" src="@_dataUrl" controls preload="metadata"></audio>
+                                <audio id="media-studio-preview" src="@_previewSource" controls preload="metadata"></audio>
                             </div>
                         }
                     </div>
@@ -191,6 +192,8 @@
     private string _dataUrl = string.Empty;
     private string _mimeType = string.Empty;
     private string _posterDataUrl = string.Empty;
+    private Guid _previewAssetId = Guid.NewGuid();
+    private string _previewSource = string.Empty;
     private double _duration;
     private double _trimStart;
     private double _trimEnd;
@@ -225,6 +228,9 @@
     {
         if (!Visible || SessionId == Guid.Empty || SessionId == _loadedSession) return;
         _loadedSession = SessionId;
+        MediaAssets.Remove(_previewAssetId);
+        _previewAssetId = Guid.NewGuid();
+        _previewSource = string.Empty;
         _error = null;
         _recording = false;
         if (InitialMedia is { } media)
@@ -261,6 +267,7 @@
             _playbackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter;
             _waveform = [];
         }
+        RefreshPreviewSource();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -300,14 +307,16 @@
         try
         {
             var file = args.File;
-            if (!(IsVideo ? file.ContentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) : file.ContentType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase)))
+            _mimeType = ResolveImportedMimeType(file.Name, file.ContentType, IsVideo);
+            var expectedPrefix = IsVideo ? "video/" : "audio/";
+            if (!_mimeType.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Select a supported {(IsVideo ? "video" : "audio")} file.");
-            await using var stream = file.OpenReadStream(96 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(160 * 1024 * 1024);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
-            _mimeType = NormalizeMimeType(file.ContentType, IsVideo ? "video/webm" : "audio/webm");
             _dataUrl = $"data:{_mimeType};base64,{Convert.ToBase64String(buffer.ToArray())}";
             _name = file.Name;
+            RefreshPreviewSource();
             await InspectSource();
         }
         catch (Exception ex)
@@ -324,7 +333,8 @@
             var fallbackMimeType = IsVideo ? "video/webm" : "audio/webm";
             _mimeType = NormalizeMimeType(_mimeType, fallbackMimeType);
             _dataUrl = NormalizeMediaDataUrl(_dataUrl, _mimeType);
-            var info = await _module.InvokeAsync<MediaSourceInfo>("inspectMediaSource", "media-studio-preview", _dataUrl, IsVideo ? "video" : "audio");
+            RefreshPreviewSource();
+            var info = await _module.InvokeAsync<MediaSourceInfo>("inspectMediaSource", "media-studio-preview", _previewSource, IsVideo ? "video" : "audio");
             _duration = Math.Max(.01, info.DurationSeconds);
             _trimStart = 0;
             _trimEnd = _duration;
@@ -371,6 +381,7 @@
             _dataUrl = CreateToneDataUrl(3, 440, .32);
             _mimeType = "audio/wav";
             _name = "Generated A4 tone.wav";
+            RefreshPreviewSource();
             await InspectSource();
         }
         catch (Exception ex)
@@ -410,6 +421,7 @@
         _recordingId = null;
         _recording = false;
         _name = RecordingName(_mimeType, IsVideo);
+        RefreshPreviewSource();
         await InspectSource();
         await InvokeAsync(StateHasChanged);
     }
@@ -422,6 +434,18 @@
         _recordingId = null;
         _error = message;
         return InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshPreviewSource()
+    {
+        MediaAssets.Remove(_previewAssetId);
+        if (string.IsNullOrWhiteSpace(_dataUrl))
+        {
+            _previewSource = string.Empty;
+            return;
+        }
+        _previewAssetId = Guid.NewGuid();
+        _previewSource = MediaAssets.Register(_previewAssetId, _dataUrl, _mimeType);
     }
 
     private async Task PlaySelection()
@@ -481,8 +505,13 @@
         _recordingId = null;
         if (_module is not null)
         {
-            await _module.InvokeVoidAsync("cancelMediaRecording", "media-studio-preview");
-            await _module.InvokeVoidAsync("pauseMedia", "media-studio-preview");
+            try
+            {
+                await _module.InvokeVoidAsync("cancelMediaRecording", "media-studio-preview");
+                await _module.InvokeVoidAsync("pauseMedia", "media-studio-preview");
+            }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
         }
         await Cancelled.InvokeAsync();
     }
@@ -518,6 +547,29 @@
         }
         writer.Flush();
         return $"data:audio/wav;base64,{Convert.ToBase64String(stream.ToArray())}";
+    }
+
+    private static string ResolveImportedMimeType(string fileName, string? declaredMimeType, bool video)
+    {
+        var fallback = video ? "video/mp4" : "audio/mpeg";
+        var declared = NormalizeMimeType(declaredMimeType, string.Empty);
+        if (declared.StartsWith(video ? "video/" : "audio/", StringComparison.OrdinalIgnoreCase))
+            return declared;
+
+        return Path.GetExtension(fileName).ToLowerInvariant() switch
+        {
+            ".mp4" => video ? "video/mp4" : "audio/mp4",
+            ".m4v" => "video/x-m4v",
+            ".webm" => video ? "video/webm" : "audio/webm",
+            ".ogv" => "video/ogg",
+            ".ogg" or ".oga" => video ? "video/ogg" : "audio/ogg",
+            ".mov" => "video/quicktime",
+            ".mp3" => "audio/mpeg",
+            ".m4a" or ".aac" => "audio/mp4",
+            ".wav" => "audio/wav",
+            ".flac" => "audio/flac",
+            _ => fallback
+        };
     }
 
     private static string NormalizeMimeType(string? mimeType, string fallback)
@@ -566,12 +618,23 @@
 
     public async ValueTask DisposeAsync()
     {
+        MediaAssets.Remove(_previewAssetId);
         try
         {
             if (_module is not null) await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview");
         }
         catch (JSDisconnectedException) { }
-        _self?.Dispose();
-        if (_module is not null) await _module.DisposeAsync();
+        catch (TaskCanceledException) { }
+        finally
+        {
+            _self?.Dispose();
+        }
+
+        try
+        {
+            if (_module is not null) await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
     }
 }

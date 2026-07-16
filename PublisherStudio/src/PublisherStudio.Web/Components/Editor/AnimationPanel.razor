@@ -1,0 +1,428 @@
+@namespace PublisherStudio.Components.Editor
+@inject IJSRuntime JS
+
+<div class="animation-panel">
+    <div class="animation-preview-bar">
+        <button type="button" title="Preview the complete current page" @onclick="PreviewPage">▶ Page</button>
+        <button type="button" title="Preview animations on the selected object" disabled="@(State.SelectedElement is null || State.SelectedElement.Animations.Count == 0)" @onclick="PreviewObject">▶ Object</button>
+        <button type="button" title="Stop animation preview" @onclick="StopPreview">■ Stop</button>
+    </div>
+
+    <div class="animation-scroll">
+        <section class="property-section animation-transition-section">
+            <h3>Between pages</h3>
+            <p class="property-note">The transition belongs to this page and is used when the page becomes active.</p>
+            <label>Transition
+                <select value="@State.CurrentPage.Transition.Kind" @onchange="ChangeTransitionKind">
+                    @foreach (var value in Enum.GetValues<PublicationPageTransitionKind>())
+                    {
+                        <option value="@value">@Friendly(value.ToString())</option>
+                    }
+                </select>
+            </label>
+            @if (State.CurrentPage.Transition.Kind is PublicationPageTransitionKind.Push or PublicationPageTransitionKind.Wipe or PublicationPageTransitionKind.Flip)
+            {
+                <label>Direction
+                    <select value="@State.CurrentPage.Transition.Direction" @onchange="ChangeTransitionDirection">
+                        @foreach (var value in DirectionValues)
+                        {
+                            <option value="@value">@value</option>
+                        }
+                    </select>
+                </label>
+            }
+            <label>Easing
+                <select value="@State.CurrentPage.Transition.Easing" @onchange="ChangeTransitionEasing">
+                    @foreach (var value in Enum.GetValues<PublicationAnimationEasing>())
+                    {
+                        <option value="@value">@Friendly(value.ToString())</option>
+                    }
+                </select>
+            </label>
+            <label>Duration <b>@Seconds(State.CurrentPage.Transition.DurationSeconds)</b>
+                <input type="range" min="0.1" max="4" step="0.05" value="@Inv(State.CurrentPage.Transition.DurationSeconds)" @oninput="ChangeTransitionDuration" @onchange="EndLiveEdit" />
+            </label>
+            <label class="check-row"><input type="checkbox" checked="@State.CurrentPage.Transition.AdvanceOnClick" @onchange="ToggleAdvanceOnClick" /> Advance after unused page click</label>
+            <label class="check-row"><input type="checkbox" checked="@State.CurrentPage.Transition.AutoAdvance" @onchange="ToggleAutoAdvance" /> Advance automatically</label>
+            @if (State.CurrentPage.Transition.AutoAdvance)
+            {
+                <label>Advance after <b>@Seconds(State.CurrentPage.Transition.AutoAdvanceSeconds)</b>
+                    <input type="range" min="0.5" max="30" step="0.25" value="@Inv(State.CurrentPage.Transition.AutoAdvanceSeconds)" @oninput="ChangeAutoAdvanceSeconds" @onchange="EndLiveEdit" />
+                </label>
+            }
+        </section>
+
+        <section class="property-section animation-add-section">
+            <h3>In-page animation</h3>
+            @if (State.SelectedElement is null)
+            {
+                <p class="property-note">Select any text, picture, shape, connector, WordArt, or data visual to animate it.</p>
+            }
+            else
+            {
+                <div class="animation-selected-object"><span>@KindGlyph(State.SelectedElement)</span><b>@State.SelectedElement.Name</b></div>
+                <div class="animation-preset-grid">
+                    <button type="button" @onclick="AddFadeIn">Fade in</button>
+                    <button type="button" @onclick="AddFlyIn">Fly in</button>
+                    <button type="button" @onclick="AddZoomIn">Zoom in</button>
+                    <button type="button" @onclick="AddWipeIn">Wipe in</button>
+                    <button type="button" @onclick="AddPulse">Pulse</button>
+                    <button type="button" @onclick="AddSpin">Spin</button>
+                    <button type="button" @onclick="AddMove">Move</button>
+                    <button type="button" @onclick="AddFadeOut">Fade out</button>
+                </div>
+            }
+        </section>
+
+        <section class="property-section animation-timeline-section">
+            <div class="animation-section-title">
+                <h3>Page timeline</h3>
+                <span>@Timeline.Count @(Timeline.Count == 1 ? "step" : "steps")</span>
+            </div>
+            <div class="animation-timeline-actions">
+                <button type="button" title="Move selected animation earlier" disabled="@(SelectedAnimation is null)" @onclick="MoveEarlier">↑</button>
+                <button type="button" title="Move selected animation later" disabled="@(SelectedAnimation is null)" @onclick="MoveLater">↓</button>
+                <button type="button" title="Delete selected animation" disabled="@(SelectedAnimation is null)" @onclick="DeleteAnimation">⌫</button>
+            </div>
+            <div class="animation-timeline-list">
+                @foreach (var row in Timeline)
+                {
+                    <button type="button" class="animation-timeline-row @(row.Animation.Id == _selectedAnimationId ? "selected" : null)" @onclick="() => SelectAnimation(row.Element.Id, row.Animation.Id)">
+                        <span class="animation-order">@row.Animation.Order</span>
+                        <span class="animation-row-main">
+                            <b>@row.Element.Name</b>
+                            <small>@Friendly(row.Animation.Effect.ToString()) · @Friendly(row.Animation.Phase.ToString())</small>
+                        </span>
+                        <span class="animation-trigger">@TriggerGlyph(row.Animation.Trigger)</span>
+                    </button>
+                }
+                @if (Timeline.Count == 0)
+                {
+                    <div class="animation-empty">No animation steps on this page.</div>
+                }
+            </div>
+        </section>
+
+        @if (SelectedAnimation is { } animation)
+        {
+            <section class="property-section animation-editor-section">
+                <h3>Selected step</h3>
+                <label>Name<input value="@animation.Name" @onchange="ChangeAnimationName" /></label>
+                <div class="property-grid two">
+                    <label>Phase
+                        <select value="@animation.Phase" @onchange="ChangeAnimationPhase">
+                            @foreach (var value in Enum.GetValues<PublicationAnimationPhase>())
+                            {
+                                <option value="@value">@value</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Effect
+                        <select value="@animation.Effect" @onchange="ChangeAnimationEffect">
+                            @foreach (var value in EffectsFor(animation.Phase))
+                            {
+                                <option value="@value">@Friendly(value.ToString())</option>
+                            }
+                        </select>
+                    </label>
+                </div>
+                <label>Start
+                    <select value="@animation.Trigger" @onchange="ChangeAnimationTrigger">
+                        @foreach (var value in Enum.GetValues<PublicationAnimationTrigger>())
+                        {
+                            <option value="@value">@TriggerName(value)</option>
+                        }
+                    </select>
+                </label>
+                <label>Easing
+                    <select value="@animation.Easing" @onchange="ChangeAnimationEasing">
+                        @foreach (var value in Enum.GetValues<PublicationAnimationEasing>())
+                        {
+                            <option value="@value">@Friendly(value.ToString())</option>
+                        }
+                    </select>
+                </label>
+                @if (UsesDirection(animation.Effect))
+                {
+                    <label>Direction
+                        <select value="@animation.Direction" @onchange="ChangeAnimationDirection">
+                            @foreach (var value in DirectionValues)
+                            {
+                                <option value="@value">@value</option>
+                            }
+                        </select>
+                    </label>
+                }
+                <label>Duration <b>@Seconds(animation.DurationSeconds)</b>
+                    <input type="range" min="0.05" max="8" step="0.05" value="@Inv(animation.DurationSeconds)" @oninput="ChangeAnimationDuration" @onchange="EndLiveEdit" />
+                </label>
+                <label>Delay <b>@Seconds(animation.DelaySeconds)</b>
+                    <input type="range" min="0" max="8" step="0.05" value="@Inv(animation.DelaySeconds)" @oninput="ChangeAnimationDelay" @onchange="EndLiveEdit" />
+                </label>
+                @if (UsesDistance(animation.Effect))
+                {
+                    <label>Travel distance <b>@Math.Round(animation.DistancePercent)%</b>
+                        <input type="range" min="1" max="200" step="1" value="@Inv(animation.DistancePercent)" @oninput="ChangeAnimationDistance" @onchange="EndLiveEdit" />
+                    </label>
+                }
+                @if (UsesScale(animation.Effect))
+                {
+                    <label>Scale amount <b>@Math.Round(animation.ScalePercent)%</b>
+                        <input type="range" min="1" max="200" step="1" value="@Inv(animation.ScalePercent)" @oninput="ChangeAnimationScale" @onchange="EndLiveEdit" />
+                    </label>
+                }
+                @if (UsesRotation(animation.Effect))
+                {
+                    <label>Rotation <b>@Math.Round(animation.RotationDegrees)°</b>
+                        <input type="range" min="-1080" max="1080" step="15" value="@Inv(animation.RotationDegrees)" @oninput="ChangeAnimationRotation" @onchange="EndLiveEdit" />
+                    </label>
+                }
+                <div class="property-grid two">
+                    <label>Repeat<input type="number" min="1" max="100" step="1" value="@animation.RepeatCount" @onchange="ChangeAnimationRepeat" /></label>
+                    <label class="check-row animation-auto-reverse"><input type="checkbox" checked="@animation.AutoReverse" @onchange="ToggleAnimationAutoReverse" /> Auto reverse</label>
+                </div>
+                <DxButton Text="Preview this step" Click="PreviewSelectedStep" CssClass="wide-button" />
+            </section>
+        }
+
+        @if (State.SelectedElement is { } selected)
+        {
+            <section class="property-section animation-interaction-section">
+                <h3>Interaction</h3>
+                <p class="property-note">Runs when this object is clicked in the exported animated website or presentation preview.</p>
+                <label class="check-row"><input type="checkbox" checked="@selected.HiddenAtPresentationStart" @onchange="ToggleHiddenAtPresentationStart" /> Hidden when the page starts</label>
+                <label>On click
+                    <select value="@selected.Interaction.Action" @onchange="ChangeInteractionAction">
+                        @foreach (var value in Enum.GetValues<PublicationInteractionAction>())
+                        {
+                            <option value="@value">@InteractionName(value)</option>
+                        }
+                    </select>
+                </label>
+                @if (selected.Interaction.Action == PublicationInteractionAction.GoToPage)
+                {
+                    <label>Target page
+                        <select value="@selected.Interaction.TargetPageId" @onchange="ChangeInteractionPage">
+                            <option value="">Select page</option>
+                            @foreach (var documentPage in State.Document.Pages)
+                            {
+                                <option value="@documentPage.Id">@documentPage.Name</option>
+                            }
+                        </select>
+                    </label>
+                }
+                @if (selected.Interaction.Action is PublicationInteractionAction.ToggleVisibility or PublicationInteractionAction.Show or PublicationInteractionAction.Hide or PublicationInteractionAction.ReplayAnimation)
+                {
+                    <label>Target object
+                        <select value="@selected.Interaction.TargetElementId" @onchange="ChangeInteractionElement">
+                            <option value="">This object</option>
+                            @foreach (var item in State.CurrentPage.Elements.Where(item => item.Id != selected.Id))
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        </select>
+                    </label>
+                }
+                @if (selected.Interaction.Action == PublicationInteractionAction.OpenUrl)
+                {
+                    <label>Web address<input type="url" placeholder="https://example.com" value="@selected.Interaction.Url" @onchange="ChangeInteractionUrl" /></label>
+                    <label class="check-row"><input type="checkbox" checked="@selected.Interaction.OpenInNewWindow" @onchange="ToggleInteractionNewWindow" /> Open in a new window</label>
+                }
+            </section>
+        }
+
+        <section class="property-section animation-playback-section">
+            <h3>Presentation playback</h3>
+            <label class="check-row"><input type="checkbox" checked="@State.Document.Playback.StartAutomatically" @onchange="ToggleStartAutomatically" /> Start page animations automatically</label>
+            <label class="check-row"><input type="checkbox" checked="@State.Document.Playback.LoopPresentation" @onchange="ToggleLoopPresentation" /> Loop after the last page</label>
+            <label class="check-row"><input type="checkbox" checked="@State.Document.Playback.ShowControls" @onchange="ToggleShowControls" /> Show website playback controls</label>
+            <p class="property-note">Click-triggered steps consume page clicks first. The page transition runs only after no click step remains.</p>
+        </section>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+
+    private Guid? _selectedAnimationId;
+    private Guid? _lastElementId;
+    private static readonly PublicationAnimationDirection[] DirectionValues =
+    [PublicationAnimationDirection.Left, PublicationAnimationDirection.Right, PublicationAnimationDirection.Up, PublicationAnimationDirection.Down];
+
+    private List<(PublicationElement Element, PublicationAnimation Animation)> Timeline => State.CurrentPage.Elements
+        .SelectMany(element => element.Animations.Select(animation => (Element: element, Animation: animation)))
+        .OrderBy(item => item.Animation.Order)
+        .ToList();
+
+    private PublicationAnimation? SelectedAnimation => Timeline
+        .Where(item => item.Animation.Id == _selectedAnimationId)
+        .Select(item => item.Animation)
+        .FirstOrDefault();
+
+    protected override void OnParametersSet()
+    {
+        if (_lastElementId == State.SelectedElementId && _selectedAnimationId is { } selectedId && Timeline.Any(item => item.Animation.Id == selectedId)) return;
+        _lastElementId = State.SelectedElementId;
+        _selectedAnimationId = State.SelectedElement?.Animations.OrderBy(item => item.Order).FirstOrDefault()?.Id;
+    }
+
+    private void SelectAnimation(Guid elementId, Guid animationId)
+    {
+        State.SelectElement(elementId);
+        _lastElementId = elementId;
+        _selectedAnimationId = animationId;
+    }
+
+    private void Add(PublicationAnimationEffect effect, PublicationAnimationPhase phase)
+    {
+        var animation = State.AddAnimation(effect, phase);
+        _selectedAnimationId = animation?.Id;
+    }
+
+    private void AddFadeIn() => Add(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
+    private void AddFlyIn() => Add(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
+    private void AddZoomIn() => Add(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
+    private void AddWipeIn() => Add(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
+    private void AddPulse() => Add(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
+    private void AddSpin() => Add(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
+    private void AddMove() => Add(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
+    private void AddFadeOut() => Add(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+
+    private void MoveEarlier() { if (_selectedAnimationId is { } id) State.MoveAnimation(id, -1); }
+    private void MoveLater() { if (_selectedAnimationId is { } id) State.MoveAnimation(id, 1); }
+    private void DeleteAnimation()
+    {
+        if (_selectedAnimationId is not { } id) return;
+        State.DeleteAnimation(id);
+        _selectedAnimationId = State.SelectedElement?.Animations.OrderBy(item => item.Order).FirstOrDefault()?.Id;
+    }
+
+    private Task PreviewPage() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
+    private Task PreviewObject() => JS.InvokeVoidAsync("publisherStudio.previewElementAnimations", $"element-{State.SelectedElementId}").AsTask();
+    private Task PreviewSelectedStep() => _selectedAnimationId is { } id
+        ? JS.InvokeVoidAsync("publisherStudio.previewAnimationStep", "publisher-page", id.ToString()).AsTask()
+        : Task.CompletedTask;
+    private Task StopPreview() => JS.InvokeVoidAsync("publisherStudio.stopAnimationPreview", "publisher-page").AsTask();
+
+    private void ChangeTransitionKind(ChangeEventArgs args) { if (Enum.TryParse<PublicationPageTransitionKind>(Text(args), out var value)) State.UpdatePageTransition(item => item.Kind = value); }
+    private void ChangeTransitionDirection(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationDirection>(Text(args), out var value)) State.UpdatePageTransition(item => item.Direction = value); }
+    private void ChangeTransitionEasing(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationEasing>(Text(args), out var value)) State.UpdatePageTransition(item => item.Easing = value); }
+    private void ChangeTransitionDuration(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.UpdatePageTransitionLive("duration", item => item.DurationSeconds = value); }
+    private void ToggleAdvanceOnClick(ChangeEventArgs args) => State.UpdatePageTransition(item => item.AdvanceOnClick = Bool(args));
+    private void ToggleAutoAdvance(ChangeEventArgs args) => State.UpdatePageTransition(item => item.AutoAdvance = Bool(args));
+    private void ChangeAutoAdvanceSeconds(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.UpdatePageTransitionLive("auto-advance", item => item.AutoAdvanceSeconds = value); }
+
+    private void ChangeAnimationName(ChangeEventArgs args) => Update(item => item.Name = Text(args));
+    private void ChangeAnimationPhase(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<PublicationAnimationPhase>(Text(args), out var value)) return;
+        Update(item =>
+        {
+            item.Phase = value;
+            if (!EffectsFor(value).Contains(item.Effect)) item.Effect = EffectsFor(value)[0];
+        });
+    }
+    private void ChangeAnimationEffect(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationEffect>(Text(args), out var value)) Update(item => item.Effect = value); }
+    private void ChangeAnimationTrigger(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationTrigger>(Text(args), out var value)) Update(item => item.Trigger = value); }
+    private void ChangeAnimationEasing(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationEasing>(Text(args), out var value)) Update(item => item.Easing = value); }
+    private void ChangeAnimationDirection(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationDirection>(Text(args), out var value)) Update(item => item.Direction = value); }
+    private void ChangeAnimationDuration(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("duration", item => item.DurationSeconds = value); }
+    private void ChangeAnimationDelay(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("delay", item => item.DelaySeconds = value); }
+    private void ChangeAnimationDistance(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("distance", item => item.DistancePercent = value); }
+    private void ChangeAnimationScale(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("scale", item => item.ScalePercent = value); }
+    private void ChangeAnimationRotation(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("rotation", item => item.RotationDegrees = value); }
+    private void ChangeAnimationRepeat(ChangeEventArgs args) { if (int.TryParse(Text(args), out var value)) Update(item => item.RepeatCount = value); }
+    private void ToggleAnimationAutoReverse(ChangeEventArgs args) => Update(item => item.AutoReverse = Bool(args));
+    private void EndLiveEdit(ChangeEventArgs _) => State.EndLiveEdit();
+
+    private void ToggleHiddenAtPresentationStart(ChangeEventArgs args)
+    {
+        if (State.SelectedElement is not { } selected) return;
+        State.UpdateSelected(_ => selected.HiddenAtPresentationStart = Bool(args));
+    }
+
+    private void ChangeInteractionAction(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<PublicationInteractionAction>(Text(args), out var value)) return;
+        State.UpdateInteraction(item => item.Action = value);
+    }
+    private void ChangeInteractionPage(ChangeEventArgs args) => State.UpdateInteraction(item => item.TargetPageId = Guid.TryParse(Text(args), out var value) ? value : null);
+    private void ChangeInteractionElement(ChangeEventArgs args) => State.UpdateInteraction(item => item.TargetElementId = Guid.TryParse(Text(args), out var value) ? value : null);
+    private void ChangeInteractionUrl(ChangeEventArgs args) => State.UpdateInteraction(item => item.Url = Text(args));
+    private void ToggleInteractionNewWindow(ChangeEventArgs args) => State.UpdateInteraction(item => item.OpenInNewWindow = Bool(args));
+
+    private void ToggleStartAutomatically(ChangeEventArgs args) => SetPlayback(item => item.StartAutomatically = Bool(args));
+    private void ToggleLoopPresentation(ChangeEventArgs args) => SetPlayback(item => item.LoopPresentation = Bool(args));
+    private void ToggleShowControls(ChangeEventArgs args) => SetPlayback(item => item.ShowControls = Bool(args));
+    private void SetPlayback(Action<PublicationPlaybackSettings> update)
+    {
+        var value = BoolCopy(State.Document.Playback);
+        update(value);
+        State.SetPlayback(value);
+    }
+
+    private void Update(Action<PublicationAnimation> change) { if (_selectedAnimationId is { } id) State.UpdateAnimation(id, change); }
+    private void UpdateLive(string key, Action<PublicationAnimation> change) { if (_selectedAnimationId is { } id) State.UpdateAnimationLive(id, key, change); }
+
+    private static PublicationPlaybackSettings BoolCopy(PublicationPlaybackSettings value) => new()
+    {
+        LoopPresentation = value.LoopPresentation,
+        StartAutomatically = value.StartAutomatically,
+        ShowControls = value.ShowControls
+    };
+
+    private static PublicationAnimationEffect[] EffectsFor(PublicationAnimationPhase phase) => phase switch
+    {
+        PublicationAnimationPhase.Entrance => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Float, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe, PublicationAnimationEffect.Bounce],
+        PublicationAnimationPhase.Emphasis => [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce],
+        PublicationAnimationPhase.Exit => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe],
+        _ => [PublicationAnimationEffect.Move]
+    };
+
+    private static bool UsesDirection(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move;
+    private static bool UsesDistance(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Move or PublicationAnimationEffect.Shake;
+    private static bool UsesScale(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Zoom or PublicationAnimationEffect.Pulse or PublicationAnimationEffect.GrowShrink or PublicationAnimationEffect.Bounce;
+    private static bool UsesRotation(PublicationAnimationEffect value) => value == PublicationAnimationEffect.Spin;
+    private static string TriggerName(PublicationAnimationTrigger value) => value switch
+    {
+        PublicationAnimationTrigger.OnPageEnter => "When page opens",
+        PublicationAnimationTrigger.WithPrevious => "With previous",
+        PublicationAnimationTrigger.AfterPrevious => "After previous",
+        _ => "On click"
+    };
+    private static string TriggerGlyph(PublicationAnimationTrigger value) => value switch
+    {
+        PublicationAnimationTrigger.OnPageEnter => "▶",
+        PublicationAnimationTrigger.WithPrevious => "⇉",
+        PublicationAnimationTrigger.AfterPrevious => "→",
+        _ => "☝"
+    };
+    private static string InteractionName(PublicationInteractionAction value) => value switch
+    {
+        PublicationInteractionAction.None => "Nothing",
+        PublicationInteractionAction.NextPage => "Go to next page",
+        PublicationInteractionAction.PreviousPage => "Go to previous page",
+        PublicationInteractionAction.GoToPage => "Go to page…",
+        PublicationInteractionAction.OpenUrl => "Open web address…",
+        PublicationInteractionAction.ToggleVisibility => "Toggle object visibility",
+        PublicationInteractionAction.Show => "Show object",
+        PublicationInteractionAction.Hide => "Hide object",
+        _ => "Replay object animation"
+    };
+    private static string KindGlyph(PublicationElement item) => item.Kind switch
+    {
+        PublicationElementKind.Text => "T",
+        PublicationElementKind.Image => "▧",
+        PublicationElementKind.Shape => "◇",
+        PublicationElementKind.WordArt => "A★",
+        PublicationElementKind.Connector => "↝",
+        PublicationElementKind.DataVisual => "▥",
+        _ => "•"
+    };
+    private static string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+    private static string Seconds(double value) => $"{value:0.##} s";
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+    private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+}

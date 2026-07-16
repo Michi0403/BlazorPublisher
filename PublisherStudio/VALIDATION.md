@@ -120,3 +120,18 @@ When reporting a compiler failure, include the first compiler error and affected
 - Data-visual preview context commands mutate only the editor draft until **Apply changes** is chosen.
 - JavaScript passes `node --check`; project JSON/XML, source delimiters, context-menu handler references, package boundaries, and archive contents are checked.
 - A real `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+
+## v0.9 targeted validation
+
+- The publication format version is `1.8`; older files receive empty element timelines, page-transition defaults, interaction defaults, and playback defaults.
+- Animation IDs are unique per page and animation `Order` is normalized as one page-wide timeline across all element types.
+- Page duplication remaps object IDs, connector endpoints, interaction targets, self-page navigation, and animation IDs while retaining timeline order.
+- Object duplication/paste renews animation IDs and appends cloned steps to the current page timeline.
+- Text, picture, shape, WordArt, connector, and data-visual DOM nodes carry the same animation and interaction metadata in both editor and export surfaces.
+- Hidden-at-presentation-start is distinct from editor visibility, so hidden playback targets remain authorable and exportable.
+- HTML playback supports page transitions, automatic/with/after/click groups, repeat, true auto-reverse cycles, visibility reset on page replay, navigation, safe URL actions, and animation replay.
+- `OnPageEnter` steps remain automatic even when they appear after a click group; only With/After steps following an OnClick step join that click group.
+- Non-entrance animations use forward fill so delayed transform effects do not override earlier transform animations before they begin.
+- Open-URL interaction playback accepts only `http`, `https`, and `mailto` schemes.
+- JavaScript passes `node --check`; C# syntax trees and Razor `@code` blocks parse without syntax errors; JSON/XML files and archive integrity are checked.
+- A real `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.

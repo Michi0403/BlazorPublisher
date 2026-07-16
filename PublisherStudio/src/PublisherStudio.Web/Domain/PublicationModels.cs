@@ -9,12 +9,13 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.7";
+    public string FormatVersion { get; set; } = "1.8";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
     public List<PublicationPage> Pages { get; set; } = [];
     public List<PublicationDataObject> DataObjects { get; set; } = [];
+    public PublicationPlaybackSettings Playback { get; set; } = new();
 
     public static PublicationDocument CreateDefault()
     {
@@ -71,6 +72,7 @@ public sealed class PublicationPage
     public string Background { get; set; } = "#ffffff";
     public List<PublicationElement> Elements { get; set; } = [];
     public List<GuideLine> Guides { get; set; } = [];
+    public PublicationPageTransition Transition { get; set; } = new();
 
     public static PublicationPage CreateA4(string name = "Page 1") => new() { Name = name };
 }
@@ -96,6 +98,13 @@ public enum StoryStorageFormat { Html, OpenXml }
 public enum ImageTintMode { Overlay, Recolor }
 public enum ImageBlendMode { Normal, Multiply, Screen, Darken, Lighten }
 public enum WordArtWarp { None, ArchUp, ArchDown, Wave, Custom }
+public enum PublicationAnimationPhase { Entrance, Emphasis, Exit, Motion }
+public enum PublicationAnimationEffect { Fade, Fly, Float, Zoom, Wipe, Bounce, Pulse, Spin, Shake, GrowShrink, Move }
+public enum PublicationAnimationTrigger { OnPageEnter, WithPrevious, AfterPrevious, OnClick }
+public enum PublicationAnimationEasing { Linear, EaseIn, EaseOut, EaseInOut, BackOut, BounceOut }
+public enum PublicationAnimationDirection { None, Left, Right, Up, Down }
+public enum PublicationPageTransitionKind { None, Fade, Push, Wipe, Zoom, Flip }
+public enum PublicationInteractionAction { None, NextPage, PreviousPage, GoToPage, OpenUrl, ToggleVisibility, Show, Hide, ReplayAnimation }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextFrameElement), "text")]
@@ -117,6 +126,9 @@ public abstract class PublicationElement
     public int ZIndex { get; set; }
     public bool Visible { get; set; } = true;
     public bool Locked { get; set; }
+    public bool HiddenAtPresentationStart { get; set; }
+    public List<PublicationAnimation> Animations { get; set; } = [];
+    public PublicationInteraction Interaction { get; set; } = new();
 }
 
 public sealed class TextFrameElement : PublicationElement
@@ -219,6 +231,53 @@ public sealed class WordArtElement : PublicationElement
     public List<WordArtPathPoint> CustomPathPoints { get; set; } = WordArtPathGeometry.CreatePreset("GentleWave");
     public double PathStartOffsetPercent { get; set; } = 50;
     public double PathBaselineOffset { get; set; }
+}
+
+
+public sealed class PublicationPlaybackSettings
+{
+    public bool LoopPresentation { get; set; }
+    public bool StartAutomatically { get; set; } = true;
+    public bool ShowControls { get; set; } = true;
+}
+
+public sealed class PublicationPageTransition
+{
+    public PublicationPageTransitionKind Kind { get; set; } = PublicationPageTransitionKind.Fade;
+    public PublicationAnimationDirection Direction { get; set; } = PublicationAnimationDirection.Left;
+    public PublicationAnimationEasing Easing { get; set; } = PublicationAnimationEasing.EaseInOut;
+    public double DurationSeconds { get; set; } = .55;
+    public bool AdvanceOnClick { get; set; } = true;
+    public bool AutoAdvance { get; set; }
+    public double AutoAdvanceSeconds { get; set; } = 5;
+}
+
+public sealed class PublicationAnimation
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = "Animation";
+    public int Order { get; set; }
+    public PublicationAnimationPhase Phase { get; set; } = PublicationAnimationPhase.Entrance;
+    public PublicationAnimationEffect Effect { get; set; } = PublicationAnimationEffect.Fade;
+    public PublicationAnimationTrigger Trigger { get; set; } = PublicationAnimationTrigger.AfterPrevious;
+    public PublicationAnimationEasing Easing { get; set; } = PublicationAnimationEasing.EaseOut;
+    public PublicationAnimationDirection Direction { get; set; } = PublicationAnimationDirection.Left;
+    public double DurationSeconds { get; set; } = .6;
+    public double DelaySeconds { get; set; }
+    public double DistancePercent { get; set; } = 18;
+    public double ScalePercent { get; set; } = 20;
+    public double RotationDegrees { get; set; } = 360;
+    public int RepeatCount { get; set; } = 1;
+    public bool AutoReverse { get; set; }
+}
+
+public sealed class PublicationInteraction
+{
+    public PublicationInteractionAction Action { get; set; }
+    public Guid? TargetPageId { get; set; }
+    public Guid? TargetElementId { get; set; }
+    public string Url { get; set; } = string.Empty;
+    public bool OpenInNewWindow { get; set; } = true;
 }
 
 public static class RichTextDocumentFactory

@@ -8,7 +8,7 @@ public sealed class EditorStateService
     private readonly PublicationDataService _data;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
-    private string? _clipboard;
+    private PublicationElement? _clipboard;
     private string? _liveEditKey;
 
     public EditorStateService(PublicationFileService files, PublicationDataService data)
@@ -27,7 +27,7 @@ public sealed class EditorStateService
     public ConnectorToolKind ConnectorTool { get; private set; }
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
-    public bool CanPaste => !string.IsNullOrWhiteSpace(_clipboard);
+    public bool CanPaste => _clipboard is not null;
     public PublicationPage CurrentPage => Document.Pages.First(p => p.Id == SelectedPageId);
     public PublicationElement? SelectedElement => CurrentPage.Elements.FirstOrDefault(e => e.Id == SelectedElementId);
 
@@ -300,7 +300,8 @@ public sealed class EditorStateService
             Name = $"Page {Document.Pages.Count + 1}",
             WidthMm = source.WidthMm,
             HeightMm = source.HeightMm,
-            Background = source.Background
+            Background = source.Background,
+            Transition = CloneTransition(source.Transition)
         };
         Document.Pages.Add(publicationPage);
         SelectedPageId = publicationPage.Id;
@@ -315,7 +316,15 @@ public sealed class EditorStateService
         clone.Id = Guid.NewGuid();
         clone.Name = $"Page {Document.Pages.Count + 1}";
         var idMap = clone.Elements.ToDictionary(item => item.Id, _ => Guid.NewGuid());
-        foreach (var item in clone.Elements) item.Id = idMap[item.Id];
+        foreach (var item in clone.Elements)
+        {
+            item.Id = idMap[item.Id];
+            RenewAnimationIds(item, preserveOrder: true);
+            if (item.Interaction.TargetElementId is { } interactionTarget && idMap.TryGetValue(interactionTarget, out var mappedTarget))
+                item.Interaction.TargetElementId = mappedTarget;
+            if (item.Interaction.TargetPageId == CurrentPage.Id)
+                item.Interaction.TargetPageId = clone.Id;
+        }
         foreach (var connector in clone.Elements.OfType<ConnectorElement>())
         {
             if (idMap.TryGetValue(connector.Source.ElementId, out var sourceId)) connector.Source.ElementId = sourceId;
@@ -333,7 +342,11 @@ public sealed class EditorStateService
         if (Document.Pages.Count <= 1) return;
         Capture();
         var index = Document.Pages.IndexOf(CurrentPage);
+        var deletedPageId = CurrentPage.Id;
         Document.Pages.RemoveAt(index);
+        foreach (var item in Document.Pages.SelectMany(page => page.Elements))
+            if (item.Interaction.TargetPageId == deletedPageId)
+                item.Interaction.TargetPageId = null;
         SelectedPageId = Document.Pages[Math.Clamp(index - 1, 0, Document.Pages.Count - 1)].Id;
         SelectedElementId = null;
         Notify();
@@ -344,10 +357,22 @@ public sealed class EditorStateService
         var element = SelectedElement;
         if (element is null || element.Locked) return;
         Capture();
+        var removedIds = new HashSet<Guid> { element.Id };
         CurrentPage.Elements.Remove(element);
         if (element is not ConnectorElement)
-            CurrentPage.Elements.RemoveAll(item => item is ConnectorElement connector &&
-                (connector.Source.ElementId == element.Id || connector.Target.ElementId == element.Id));
+        {
+            foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>()
+                         .Where(connector => connector.Source.ElementId == element.Id || connector.Target.ElementId == element.Id)
+                         .ToList())
+            {
+                removedIds.Add(connector.Id);
+                CurrentPage.Elements.Remove(connector);
+            }
+        }
+        foreach (var item in CurrentPage.Elements)
+            if (item.Interaction.TargetElementId is { } targetId && removedIds.Contains(targetId))
+                item.Interaction.TargetElementId = null;
+        ReindexAnimations();
         SelectedElementId = null;
         CropMode = false;
         Notify();
@@ -357,16 +382,13 @@ public sealed class EditorStateService
     {
         var element = SelectedElement;
         if (element is null) return;
-        var wrapper = new PublicationDocument { Pages = [new PublicationPage { Elements = [element] }] };
-        _clipboard = _files.Serialize(wrapper);
+        _clipboard = _files.CloneElement(element);
         Notify(false);
     }
 
     public void Paste()
     {
-        if (string.IsNullOrWhiteSpace(_clipboard)) return;
-        var wrapper = _files.Deserialize(_clipboard);
-        var source = wrapper.Pages.SelectMany(item => item.Elements).FirstOrDefault();
+        var source = _clipboard;
         if (source is null) return;
         if (source is ConnectorElement connectorSource &&
             (!CurrentPage.Elements.Any(item => item.Id == connectorSource.Source.ElementId) ||
@@ -374,11 +396,16 @@ public sealed class EditorStateService
         Capture();
         var clone = CloneElement(source);
         clone.Id = Guid.NewGuid();
+        if (clone.Interaction.TargetElementId == source.Id) clone.Interaction.TargetElementId = clone.Id;
+        else if (clone.Interaction.TargetElementId is { } targetId && CurrentPage.Elements.All(item => item.Id != targetId)) clone.Interaction.TargetElementId = null;
+        if (clone.Interaction.TargetPageId is { } targetPageId && Document.Pages.All(page => page.Id != targetPageId)) clone.Interaction.TargetPageId = null;
+        RenewAnimationIds(clone, preserveOrder: false);
         clone.Name = NextName(source.Name);
         clone.X = Math.Clamp(source.X + 5, -clone.Width + 2, CurrentPage.WidthMm - 2);
         clone.Y = Math.Clamp(source.Y + 5, -clone.Height + 2, CurrentPage.HeightMm - 2);
         clone.ZIndex = NextZ();
         CurrentPage.Elements.Add(clone);
+        ReindexAnimations();
         SelectedElementId = clone.Id;
         Notify();
     }
@@ -390,12 +417,144 @@ public sealed class EditorStateService
         Capture();
         var clone = CloneElement(element);
         clone.Id = Guid.NewGuid();
+        if (clone.Interaction.TargetElementId == element.Id) clone.Interaction.TargetElementId = clone.Id;
+        RenewAnimationIds(clone, preserveOrder: false);
         clone.Name = NextName(element.Name);
         clone.X += 5;
         clone.Y += 5;
         clone.ZIndex = NextZ();
         CurrentPage.Elements.Add(clone);
+        ReindexAnimations();
         SelectedElementId = clone.Id;
+        Notify();
+    }
+
+    public PublicationAnimation? AddAnimation(
+        PublicationAnimationEffect effect,
+        PublicationAnimationPhase phase,
+        PublicationAnimationTrigger? trigger = null)
+    {
+        var element = SelectedElement;
+        if (element is null) return null;
+        Capture();
+        var animation = new PublicationAnimation
+        {
+            Name = $"{effect} {phase}",
+            Effect = effect,
+            Phase = phase,
+            Trigger = trigger ?? (CurrentPage.Elements.SelectMany(item => item.Animations).Any()
+                ? PublicationAnimationTrigger.AfterPrevious
+                : phase == PublicationAnimationPhase.Entrance
+                    ? PublicationAnimationTrigger.OnPageEnter
+                    : PublicationAnimationTrigger.OnClick),
+            Order = NextAnimationOrder(),
+            Direction = effect is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move
+                ? PublicationAnimationDirection.Left
+                : PublicationAnimationDirection.None,
+            AutoReverse = phase == PublicationAnimationPhase.Emphasis
+        };
+        element.Animations.Add(animation);
+        Notify();
+        return animation;
+    }
+
+    public void UpdateAnimation(Guid animationId, Action<PublicationAnimation> update)
+    {
+        var animation = FindAnimation(animationId);
+        if (animation is null) return;
+        Capture();
+        update(animation);
+        NormalizeAnimation(animation);
+        Notify();
+    }
+
+    public void UpdateAnimationLive(Guid animationId, string key, Action<PublicationAnimation> update)
+    {
+        var animation = FindAnimation(animationId);
+        if (animation is null) return;
+        var liveKey = $"animation:{animationId}:{key}";
+        if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+        {
+            Capture();
+            _liveEditKey = liveKey;
+        }
+        update(animation);
+        NormalizeAnimation(animation);
+        Notify();
+    }
+
+    public void DeleteAnimation(Guid animationId)
+    {
+        var owner = CurrentPage.Elements.FirstOrDefault(item => item.Animations.Any(animation => animation.Id == animationId));
+        var animation = owner?.Animations.FirstOrDefault(item => item.Id == animationId);
+        if (owner is null || animation is null) return;
+        Capture();
+        owner.Animations.Remove(animation);
+        ReindexAnimations();
+        Notify();
+    }
+
+    public void MoveAnimation(Guid animationId, int offset)
+    {
+        var timeline = CurrentPage.Elements
+            .SelectMany(element => element.Animations.Select(animation => (element, animation)))
+            .OrderBy(item => item.animation.Order)
+            .ToList();
+        var index = timeline.FindIndex(item => item.animation.Id == animationId);
+        if (index < 0) return;
+        var target = Math.Clamp(index + offset, 0, timeline.Count - 1);
+        if (index == target) return;
+        Capture();
+        var moving = timeline[index];
+        timeline.RemoveAt(index);
+        timeline.Insert(target, moving);
+        for (var order = 0; order < timeline.Count; order++)
+            timeline[order].animation.Order = order + 1;
+        Notify();
+    }
+
+    public void ClearSelectedAnimations()
+    {
+        var element = SelectedElement;
+        if (element is null || element.Animations.Count == 0) return;
+        Capture();
+        element.Animations.Clear();
+        ReindexAnimations();
+        Notify();
+    }
+
+    public void UpdateInteraction(Action<PublicationInteraction> update)
+    {
+        var element = SelectedElement;
+        if (element is null) return;
+        Capture();
+        element.Interaction ??= new PublicationInteraction();
+        update(element.Interaction);
+        Notify();
+    }
+
+    public void UpdatePageTransition(Action<PublicationPageTransition> update)
+    {
+        Capture();
+        CurrentPage.Transition ??= new PublicationPageTransition();
+        update(CurrentPage.Transition);
+        CurrentPage.Transition.DurationSeconds = Math.Clamp(CurrentPage.Transition.DurationSeconds, .1, 8);
+        CurrentPage.Transition.AutoAdvanceSeconds = Math.Clamp(CurrentPage.Transition.AutoAdvanceSeconds, .25, 3600);
+        Notify();
+    }
+
+    public void UpdatePageTransitionLive(string key, Action<PublicationPageTransition> update)
+    {
+        var liveKey = $"page-transition:{SelectedPageId}:{key}";
+        if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+        {
+            Capture();
+            _liveEditKey = liveKey;
+        }
+        CurrentPage.Transition ??= new PublicationPageTransition();
+        update(CurrentPage.Transition);
+        CurrentPage.Transition.DurationSeconds = Math.Clamp(CurrentPage.Transition.DurationSeconds, .1, 8);
+        CurrentPage.Transition.AutoAdvanceSeconds = Math.Clamp(CurrentPage.Transition.AutoAdvanceSeconds, .25, 3600);
         Notify();
     }
 
@@ -556,6 +715,13 @@ public sealed class EditorStateService
         Notify(false);
     }
 
+    public void SetPlayback(PublicationPlaybackSettings value)
+    {
+        Capture();
+        Document.Playback = value;
+        Notify();
+    }
+
     public void BringToFront() => ChangeZ(NextZ());
     public void SendToBack() => ChangeZ(CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Min() - 1);
     public void BringForward() => ChangeZ((SelectedElement?.ZIndex ?? 0) + 1);
@@ -603,6 +769,51 @@ public sealed class EditorStateService
         Notify();
     }
 
+    private PublicationAnimation? FindAnimation(Guid id) =>
+        CurrentPage.Elements.SelectMany(item => item.Animations).FirstOrDefault(item => item.Id == id);
+
+    private int NextAnimationOrder() =>
+        CurrentPage.Elements.SelectMany(item => item.Animations).Select(item => item.Order).DefaultIfEmpty(0).Max() + 1;
+
+    private void ReindexAnimations()
+    {
+        var timeline = CurrentPage.Elements.SelectMany(item => item.Animations).OrderBy(item => item.Order).ToList();
+        for (var index = 0; index < timeline.Count; index++) timeline[index].Order = index + 1;
+    }
+
+    private void RenewAnimationIds(PublicationElement element, bool preserveOrder)
+    {
+        var nextOrder = NextAnimationOrder();
+        foreach (var animation in element.Animations)
+        {
+            animation.Id = Guid.NewGuid();
+            if (!preserveOrder) animation.Order = nextOrder++;
+        }
+        if (!preserveOrder) ReindexAnimations();
+    }
+
+    private static void NormalizeAnimation(PublicationAnimation animation)
+    {
+        animation.DurationSeconds = Math.Clamp(animation.DurationSeconds <= 0 ? .6 : animation.DurationSeconds, .05, 60);
+        animation.DelaySeconds = Math.Clamp(animation.DelaySeconds, 0, 60);
+        animation.DistancePercent = Math.Clamp(animation.DistancePercent, 0, 500);
+        animation.ScalePercent = Math.Clamp(animation.ScalePercent, 0, 500);
+        animation.RotationDegrees = Math.Clamp(animation.RotationDegrees, -3600, 3600);
+        animation.RepeatCount = Math.Clamp(animation.RepeatCount <= 0 ? 1 : animation.RepeatCount, 1, 100);
+        if (string.IsNullOrWhiteSpace(animation.Name)) animation.Name = $"{animation.Effect} {animation.Phase}";
+    }
+
+    private static PublicationPageTransition CloneTransition(PublicationPageTransition source) => new()
+    {
+        Kind = source.Kind,
+        Direction = source.Direction,
+        Easing = source.Easing,
+        DurationSeconds = source.DurationSeconds,
+        AdvanceOnClick = source.AdvanceOnClick,
+        AutoAdvance = source.AutoAdvance,
+        AutoAdvanceSeconds = source.AutoAdvanceSeconds
+    };
+
     private void ChangeZ(int value) => UpdateSelected(element => element.ZIndex = value);
     private int NextZ() => CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
     private string NextName(string basis) => $"{basis} {CurrentPage.Elements.Count + 1}";
@@ -620,17 +831,9 @@ public sealed class EditorStateService
         _redo.Clear();
     }
 
-    private PublicationElement CloneElement(PublicationElement element)
-    {
-        var wrapper = new PublicationDocument { Pages = [new PublicationPage { Elements = [element] }] };
-        return _files.Deserialize(_files.Serialize(wrapper)).Pages[0].Elements[0];
-    }
+    private PublicationElement CloneElement(PublicationElement element) => _files.CloneElement(element);
 
-    private PublicationPage ClonePage(PublicationPage publicationPage)
-    {
-        var wrapper = new PublicationDocument { Pages = [publicationPage] };
-        return _files.Deserialize(_files.Serialize(wrapper)).Pages[0];
-    }
+    private PublicationPage ClonePage(PublicationPage publicationPage) => _files.ClonePage(publicationPage);
 
     private void Notify(bool markModified = true)
     {

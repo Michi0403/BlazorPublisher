@@ -29,11 +29,20 @@ public sealed partial class PublicationFileService
         return JsonSerializer.Serialize(document, _options);
     }
 
+    public PublicationElement CloneElement(PublicationElement element) =>
+        JsonSerializer.Deserialize<PublicationElement>(JsonSerializer.Serialize<PublicationElement>(element, _options), _options)
+        ?? throw new InvalidDataException("The publication element could not be cloned.");
+
+    public PublicationPage ClonePage(PublicationPage publicationPage) =>
+        JsonSerializer.Deserialize<PublicationPage>(JsonSerializer.Serialize(publicationPage, _options), _options)
+        ?? throw new InvalidDataException("The publication page could not be cloned.");
+
     public PublicationDocument Deserialize(string json)
     {
         var document = JsonSerializer.Deserialize<PublicationDocument>(json, _options)
             ?? throw new InvalidDataException("The publication file is empty or invalid.");
         document.View ??= new PublicationViewSettings();
+        document.Playback ??= new PublicationPlaybackSettings();
         _data.Normalize(document);
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .8 : document.Zoom, .2, 4);
         document.View.GridSpacingMm = Math.Clamp(document.View.GridSpacingMm <= 0 ? 5 : document.View.GridSpacingMm, .5, 100);
@@ -98,14 +107,63 @@ public sealed partial class PublicationFileService
 
         foreach (var publicationPage in document.Pages)
         {
+            publicationPage.Transition ??= new PublicationPageTransition();
+            publicationPage.Transition.DurationSeconds = Math.Clamp(publicationPage.Transition.DurationSeconds <= 0 ? .55 : publicationPage.Transition.DurationSeconds, .1, 8);
+            publicationPage.Transition.AutoAdvanceSeconds = Math.Clamp(publicationPage.Transition.AutoAdvanceSeconds <= 0 ? 5 : publicationPage.Transition.AutoAdvanceSeconds, .25, 3600);
+
+            foreach (var element in publicationPage.Elements)
+            {
+                element.Animations ??= [];
+                element.Interaction ??= new PublicationInteraction();
+            }
+
+            var usedAnimationIds = new HashSet<Guid>();
+            var timeline = publicationPage.Elements
+                .SelectMany((element, elementIndex) => element.Animations.Select((animation, animationIndex) => new
+                {
+                    Animation = animation,
+                    ElementIndex = elementIndex,
+                    AnimationIndex = animationIndex
+                }))
+                .OrderBy(item => item.Animation.Order <= 0 ? int.MaxValue : item.Animation.Order)
+                .ThenBy(item => item.ElementIndex)
+                .ThenBy(item => item.AnimationIndex)
+                .ToList();
+            for (var index = 0; index < timeline.Count; index++)
+            {
+                var animation = timeline[index].Animation;
+                if (animation.Id == Guid.Empty || !usedAnimationIds.Add(animation.Id))
+                {
+                    animation.Id = Guid.NewGuid();
+                    usedAnimationIds.Add(animation.Id);
+                }
+                animation.Order = index + 1;
+                animation.DurationSeconds = Math.Clamp(animation.DurationSeconds <= 0 ? .6 : animation.DurationSeconds, .05, 60);
+                animation.DelaySeconds = Math.Clamp(animation.DelaySeconds, 0, 60);
+                animation.DistancePercent = Math.Clamp(animation.DistancePercent, 0, 500);
+                animation.ScalePercent = Math.Clamp(animation.ScalePercent, 0, 500);
+                animation.RotationDegrees = Math.Clamp(animation.RotationDegrees, -3600, 3600);
+                animation.RepeatCount = Math.Clamp(animation.RepeatCount <= 0 ? 1 : animation.RepeatCount, 1, 100);
+                if (string.IsNullOrWhiteSpace(animation.Name))
+                    animation.Name = $"{animation.Effect} {animation.Phase}";
+            }
+
+            var elementIds = publicationPage.Elements.Select(item => item.Id).ToHashSet();
             var objectIds = publicationPage.Elements.Where(item => item is not ConnectorElement).Select(item => item.Id).ToHashSet();
+            foreach (var element in publicationPage.Elements)
+            {
+                if (element.Interaction.TargetElementId is { } targetId && !elementIds.Contains(targetId))
+                    element.Interaction.TargetElementId = null;
+                if (element.Interaction.TargetPageId is { } targetPageId && document.Pages.All(page => page.Id != targetPageId))
+                    element.Interaction.TargetPageId = null;
+            }
             publicationPage.Elements.RemoveAll(item => item is ConnectorElement connector &&
                 (!objectIds.Contains(connector.Source.ElementId) || !objectIds.Contains(connector.Target.ElementId) || connector.Source.ElementId == connector.Target.ElementId));
             foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>())
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.7";
+        document.FormatVersion = "1.8";
         return document;
     }
 

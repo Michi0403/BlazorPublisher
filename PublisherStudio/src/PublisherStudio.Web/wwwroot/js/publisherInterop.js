@@ -1253,6 +1253,569 @@ export function disposeWordArtPathEditor(editorId) {
     wordArtPathStates.delete(svg);
 }
 
+
+const publicationAnimationPreviews = new Map();
+
+function parsePublicationData(value, fallback) {
+    if (!value) return fallback;
+    try { return JSON.parse(value); } catch { return fallback; }
+}
+
+function animationName(value) { return String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase(); }
+function publicationReducedMotion() { return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function publicationAnimationSpan(animation) {
+    if (publicationReducedMotion()) return .001;
+    return Math.max(.05, animationNumber(animation.durationSeconds, .6))
+        * Math.max(1, animationNumber(animation.repeatCount, 1))
+        * (animation.autoReverse ? 2 : 1);
+}
+function animationNumber(value, fallback) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+function animationEasing(value) {
+    switch (animationName(value)) {
+        case 'linear': return 'linear';
+        case 'easein': return 'cubic-bezier(.42,0,1,1)';
+        case 'easeout': return 'cubic-bezier(0,0,.2,1)';
+        case 'backout': return 'cubic-bezier(.18,.89,.32,1.28)';
+        case 'bounceout': return 'cubic-bezier(.22,1.3,.36,1)';
+        default: return 'cubic-bezier(.4,0,.2,1)';
+    }
+}
+function animationDirectionVector(direction, distance) {
+    const amount = animationNumber(distance, 18);
+    switch (animationName(direction)) {
+        case 'right': return { x: amount, y: 0 };
+        case 'up': return { x: 0, y: -amount };
+        case 'down': return { x: 0, y: amount };
+        default: return { x: -amount, y: 0 };
+    }
+}
+function baseTransform(node) {
+    const value = getComputedStyle(node).transform;
+    return !value || value === 'none' ? '' : value;
+}
+function withBase(base, transform) { return `${transform} ${base}`.trim(); }
+function publicationAnimationFrames(node, animation) {
+    const effect = animationName(animation.effect);
+    const phase = animationName(animation.phase);
+    const base = baseTransform(node);
+    const vector = animationDirectionVector(animation.direction, animation.distancePercent);
+    const scaleAmount = Math.max(0.01, animationNumber(animation.scalePercent, 20) / 100);
+    const rotation = animationNumber(animation.rotationDegrees, 360);
+    const translated = withBase(base, `translate(${vector.x}%,${vector.y}%)`);
+    const reverse = frames => phase === 'exit' ? [...frames].reverse() : frames;
+
+    switch (effect) {
+        case 'fade':
+            return reverse([{ opacity: 0 }, { opacity: 1 }]);
+        case 'fly':
+            return reverse([{ opacity: 0, transform: translated }, { opacity: 1, transform: base || 'none' }]);
+        case 'float':
+            return reverse([{ opacity: 0, filter: 'blur(6px)', transform: withBase(base, `translate(${vector.x / 2}%,${vector.y / 2}%)`) }, { opacity: 1, filter: 'blur(0)', transform: base || 'none' }]);
+        case 'zoom':
+            return reverse([{ opacity: 0, transform: withBase(base, `scale(${Math.max(.02, 1 - scaleAmount)})`) }, { opacity: 1, transform: base || 'none' }]);
+        case 'wipe': {
+            const direction = animationName(animation.direction);
+            const start = direction === 'right' ? 'inset(0 100% 0 0)' : direction === 'up' ? 'inset(100% 0 0 0)' : direction === 'down' ? 'inset(0 0 100% 0)' : 'inset(0 0 0 100%)';
+            return reverse([{ opacity: 0, clipPath: start }, { opacity: 1, clipPath: 'inset(0 0 0 0)' }]);
+        }
+        case 'bounce':
+            if (phase === 'entrance' || phase === 'exit') return reverse([
+                { opacity: 0, transform: withBase(base, `translate(${vector.x}%,${vector.y}%) scale(${Math.max(.05, 1 - scaleAmount)})`) },
+                { opacity: 1, offset: .62, transform: withBase(base, 'scale(1.08)') },
+                { opacity: 1, transform: base || 'none' }
+            ]);
+            return [
+                { transform: base || 'none' },
+                { offset: .35, transform: withBase(base, `translateY(${-Math.max(8, animationNumber(animation.distancePercent, 18))}%) scale(${1 + scaleAmount / 2})`) },
+                { offset: .7, transform: withBase(base, 'translateY(3%) scale(.98)') },
+                { transform: base || 'none' }
+            ];
+        case 'pulse':
+            return [{ transform: base || 'none' }, { transform: withBase(base, `scale(${1 + scaleAmount})`), offset: .5 }, { transform: base || 'none' }];
+        case 'growshrink':
+            return [{ transform: base || 'none' }, { transform: withBase(base, `scale(${1 + scaleAmount})`), offset: .5 }, { transform: base || 'none' }];
+        case 'spin':
+            return [{ transform: base || 'none' }, { transform: withBase(base, `rotate(${rotation}deg)`) }];
+        case 'shake': {
+            const amount = Math.max(2, animationNumber(animation.distancePercent, 18) / 4);
+            return [0, -.2, .2, -.16, .16, -.08, .08, 0].map((factor, index, values) => ({
+                offset: index / (values.length - 1), transform: withBase(base, `translateX(${amount * factor * 10}%)`)
+            }));
+        }
+        case 'move':
+            return [{ transform: base || 'none' }, { transform: translated }];
+        default:
+            return [{ opacity: 1 }, { opacity: 1 }];
+    }
+}
+function runPublicationAnimation(node, animation, delaySeconds = 0) {
+    const reducedMotion = publicationReducedMotion();
+    const duration = (reducedMotion ? .001 : Math.max(.05, animationNumber(animation.durationSeconds, .6))) * 1000;
+    const repeat = Math.max(1, Math.round(animationNumber(animation.repeatCount, 1)));
+    const iterations = reducedMotion ? 1 : repeat * (animation.autoReverse ? 2 : 1);
+    return node.animate(publicationAnimationFrames(node, animation), {
+        duration,
+        delay: (reducedMotion ? 0 : Math.max(0, delaySeconds)) * 1000,
+        easing: animationEasing(animation.easing),
+        iterations,
+        direction: animation.autoReverse ? 'alternate' : 'normal',
+        fill: animationName(animation.phase) === 'entrance' ? 'both' : 'forwards'
+    });
+}
+function publicationPageTransitionFrames(page, entering = true) {
+    const kind = animationName(page.dataset.transitionKind);
+    const direction = animationName(page.dataset.transitionDirection);
+    const vector = animationDirectionVector(direction, 12);
+    let frames;
+    switch (kind) {
+        case 'push': frames = [{ opacity: .4, transform: `translate(${vector.x}%,${vector.y}%)` }, { opacity: 1, transform: 'translate(0,0)' }]; break;
+        case 'wipe': {
+            const start = direction === 'right' ? 'inset(0 100% 0 0)' : direction === 'up' ? 'inset(100% 0 0 0)' : direction === 'down' ? 'inset(0 0 100% 0)' : 'inset(0 0 0 100%)';
+            frames = [{ clipPath: start, opacity: .3 }, { clipPath: 'inset(0 0 0 0)', opacity: 1 }];
+            break;
+        }
+        case 'zoom': frames = [{ opacity: 0, transform: 'scale(.86)' }, { opacity: 1, transform: 'scale(1)' }]; break;
+        case 'flip': {
+            const axis = direction === 'up' || direction === 'down' ? 'X' : 'Y';
+            const sign = direction === 'right' || direction === 'down' ? 1 : -1;
+            frames = [{ opacity: 0, transform: `perspective(1200px) rotate${axis}(${sign * 75}deg)` }, { opacity: 1, transform: `perspective(1200px) rotate${axis}(0deg)` }];
+            break;
+        }
+        case 'none': frames = [{ opacity: 1 }, { opacity: 1 }]; break;
+        default: frames = [{ opacity: 0 }, { opacity: 1 }]; break;
+    }
+    return entering ? frames : [...frames].reverse();
+}
+function runPublicationPageTransition(page, entering = true) {
+    const duration = (publicationReducedMotion() ? .001 : Math.max(.1, animationNumber(page.dataset.transitionDuration, .55))) * 1000;
+    return page.animate(publicationPageTransitionFrames(page, entering), {
+        duration,
+        easing: animationEasing(page.dataset.transitionEasing),
+        fill: 'both'
+    });
+}
+function animationItems(root) {
+    return [...root.querySelectorAll('[data-publication-element]')].flatMap(node => {
+        const animations = parsePublicationData(node.dataset.animations, []);
+        return animations.map(animation => ({ node, animation }));
+    }).sort((left, right) => animationNumber(left.animation.order, 0) - animationNumber(right.animation.order, 0));
+}
+function clearPublicationPreview(key) {
+    const state = publicationAnimationPreviews.get(key);
+    if (!state) return;
+    for (const animation of state.animations) {
+        try { animation.cancel(); } catch { }
+    }
+    if (state.clickTarget && state.clickHandler) state.clickTarget.removeEventListener('click', state.clickHandler, true);
+    state.root?.classList.remove('pub-animation-previewing', 'pub-animation-click-hint');
+    publicationAnimationPreviews.delete(key);
+}
+function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
+    let previousStart = initialOffset;
+    let previousEnd = initialOffset;
+    for (const item of items) {
+        const trigger = animationName(item.animation.trigger);
+        const ownDelay = publicationReducedMotion() ? 0 : Math.max(0, animationNumber(item.animation.delaySeconds, 0));
+        let start = initialOffset + ownDelay;
+        if (trigger === 'withprevious') start = previousStart + ownDelay;
+        else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
+        state.animations.push(runPublicationAnimation(item.node, item.animation, start));
+        previousStart = start;
+        previousEnd = start + publicationAnimationSpan(item.animation);
+    }
+}
+function previewPublicationItems(root, items, includeTransition) {
+    clearPublicationPreview(root.id || root);
+    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [] };
+    publicationAnimationPreviews.set(root.id || root, state);
+    root.classList.add('pub-animation-previewing');
+    if (includeTransition) state.animations.push(runPublicationPageTransition(root, true));
+
+    const automatic = [];
+    let currentClickGroup = null;
+    for (const item of items) {
+        const trigger = animationName(item.animation.trigger);
+        if (trigger === 'onclick') {
+            currentClickGroup = [item];
+            state.clickGroups.push(currentClickGroup);
+        } else if (trigger === 'onpageenter') {
+            automatic.push(item);
+            currentClickGroup = null;
+        } else if (currentClickGroup) {
+            currentClickGroup.push(item);
+        } else {
+            automatic.push(item);
+        }
+    }
+    schedulePublicationPreviewGroup(state, automatic, includeTransition && !publicationReducedMotion() ? animationNumber(root.dataset.transitionDuration, .55) : 0);
+
+    if (state.clickGroups.length) {
+        root.classList.add('pub-animation-click-hint');
+        state.clickHandler = event => {
+            if (!state.clickGroups.length) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            schedulePublicationPreviewGroup(state, state.clickGroups.shift(), 0);
+            if (!state.clickGroups.length) root.classList.remove('pub-animation-click-hint');
+        };
+        root.addEventListener('click', state.clickHandler, true);
+    }
+    return state;
+}
+function previewPageAnimations(pageId) {
+    const page = document.getElementById(pageId);
+    if (!page) return;
+    previewPublicationItems(page, animationItems(page), true);
+}
+function previewElementAnimations(elementId) {
+    const node = document.getElementById(elementId);
+    if (!node) return;
+    const page = node.closest('.publication-page') || node;
+    const animations = parsePublicationData(node.dataset.animations, []);
+    previewPublicationItems(page, animations.map(animation => ({ node, animation })), false);
+}
+function previewAnimationStep(pageId, animationId) {
+    const page = document.getElementById(pageId);
+    if (!page) return;
+    const item = animationItems(page).find(entry => String(entry.animation.id).toLowerCase() === String(animationId).toLowerCase());
+    if (item) previewPublicationItems(page, [item], false);
+}
+function stopAnimationPreview(pageId) {
+    const page = document.getElementById(pageId);
+    clearPublicationPreview(pageId);
+    if (page) clearPublicationPreview(page);
+}
+
+
+function websitePresentationRuntime() {
+    const publication = document.querySelector('.website-publication');
+    if (!publication) return;
+    const pages = [...publication.querySelectorAll(':scope > .print-page')];
+    if (!pages.length) return;
+    const lower = value => String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const num = (value, fallback) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
+    const bool = value => String(value).toLowerCase() === 'true';
+    const parse = (value, fallback) => { try { return JSON.parse(value || ''); } catch { return fallback; } };
+    const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const animationSpan = animation => reducedMotion ? .001 : Math.max(.05, num(animation.durationSeconds, .6))
+        * Math.max(1, num(animation.repeatCount, 1)) * (animation.autoReverse ? 2 : 1);
+    const easing = value => {
+        switch (lower(value)) {
+            case 'linear': return 'linear';
+            case 'easein': return 'cubic-bezier(.42,0,1,1)';
+            case 'easeout': return 'cubic-bezier(0,0,.2,1)';
+            case 'backout': return 'cubic-bezier(.18,.89,.32,1.28)';
+            case 'bounceout': return 'cubic-bezier(.22,1.3,.36,1)';
+            default: return 'cubic-bezier(.4,0,.2,1)';
+        }
+    };
+    const vector = (direction, distance) => {
+        const amount = num(distance, 18);
+        switch (lower(direction)) {
+            case 'right': return { x: amount, y: 0 };
+            case 'up': return { x: 0, y: -amount };
+            case 'down': return { x: 0, y: amount };
+            default: return { x: -amount, y: 0 };
+        }
+    };
+    const baseTransform = node => { const value = getComputedStyle(node).transform; return !value || value === 'none' ? '' : value; };
+    const compose = (base, extra) => `${extra} ${base}`.trim();
+    const frames = (node, animation) => {
+        const effect = lower(animation.effect);
+        const phase = lower(animation.phase);
+        const base = baseTransform(node);
+        const move = vector(animation.direction, animation.distancePercent);
+        const scale = Math.max(.01, num(animation.scalePercent, 20) / 100);
+        const rotation = num(animation.rotationDegrees, 360);
+        const translated = compose(base, `translate(${move.x}%,${move.y}%)`);
+        const reverse = value => phase === 'exit' ? [...value].reverse() : value;
+        switch (effect) {
+            case 'fade': return reverse([{ opacity: 0 }, { opacity: 1 }]);
+            case 'fly': return reverse([{ opacity: 0, transform: translated }, { opacity: 1, transform: base || 'none' }]);
+            case 'float': return reverse([{ opacity: 0, filter: 'blur(6px)', transform: compose(base, `translate(${move.x / 2}%,${move.y / 2}%)`) }, { opacity: 1, filter: 'blur(0)', transform: base || 'none' }]);
+            case 'zoom': return reverse([{ opacity: 0, transform: compose(base, `scale(${Math.max(.02, 1 - scale)})`) }, { opacity: 1, transform: base || 'none' }]);
+            case 'wipe': {
+                const direction = lower(animation.direction);
+                const start = direction === 'right' ? 'inset(0 100% 0 0)' : direction === 'up' ? 'inset(100% 0 0 0)' : direction === 'down' ? 'inset(0 0 100% 0)' : 'inset(0 0 0 100%)';
+                return reverse([{ opacity: 0, clipPath: start }, { opacity: 1, clipPath: 'inset(0 0 0 0)' }]);
+            }
+            case 'bounce':
+                if (phase === 'entrance' || phase === 'exit') return reverse([
+                    { opacity: 0, transform: compose(base, `translate(${move.x}%,${move.y}%) scale(${Math.max(.05, 1 - scale)})`) },
+                    { opacity: 1, offset: .62, transform: compose(base, 'scale(1.08)') },
+                    { opacity: 1, transform: base || 'none' }
+                ]);
+                return [{ transform: base || 'none' }, { offset: .35, transform: compose(base, `translateY(${-Math.max(8, num(animation.distancePercent, 18))}%) scale(${1 + scale / 2})`) }, { offset: .7, transform: compose(base, 'translateY(3%) scale(.98)') }, { transform: base || 'none' }];
+            case 'pulse':
+            case 'growshrink': return [{ transform: base || 'none' }, { transform: compose(base, `scale(${1 + scale})`), offset: .5 }, { transform: base || 'none' }];
+            case 'spin': return [{ transform: base || 'none' }, { transform: compose(base, `rotate(${rotation}deg)`) }];
+            case 'shake': {
+                const amount = Math.max(2, num(animation.distancePercent, 18) / 4);
+                const positions = [0, -2, 2, -1.6, 1.6, -.8, .8, 0];
+                return positions.map((factor, index) => ({ offset: index / (positions.length - 1), transform: compose(base, `translateX(${amount * factor}%)`) }));
+            }
+            case 'move': return [{ transform: base || 'none' }, { transform: translated }];
+            default: return [{ opacity: 1 }, { opacity: 1 }];
+        }
+    };
+    const playItem = (item, delay = 0) => {
+        item.prestate?.cancel();
+        item.prestate = null;
+        if (lower(item.animation.phase) === 'entrance') item.node.classList.remove('ps-action-hidden');
+        const repeat = Math.max(1, Math.round(num(item.animation.repeatCount, 1)));
+        const animation = item.node.animate(frames(item.node, item.animation), {
+            duration: (reducedMotion ? .001 : Math.max(.05, num(item.animation.durationSeconds, .6))) * 1000,
+            delay: (reducedMotion ? 0 : Math.max(0, delay)) * 1000,
+            easing: easing(item.animation.easing),
+            iterations: reducedMotion ? 1 : repeat * (item.animation.autoReverse ? 2 : 1),
+            direction: item.animation.autoReverse ? 'alternate' : 'normal',
+            fill: lower(item.animation.phase) === 'entrance' ? 'both' : 'forwards'
+        });
+        activeAnimations.push(animation);
+        return animation;
+    };
+    const transitionFrames = (page, entering) => {
+        const kind = lower(page.dataset.transitionKind);
+        const direction = lower(page.dataset.transitionDirection);
+        const move = vector(direction, 12);
+        let value;
+        switch (kind) {
+            case 'push': value = [{ opacity: .35, transform: `translate(${move.x}%,${move.y}%)` }, { opacity: 1, transform: 'translate(0,0)' }]; break;
+            case 'wipe': {
+                const start = direction === 'right' ? 'inset(0 100% 0 0)' : direction === 'up' ? 'inset(100% 0 0 0)' : direction === 'down' ? 'inset(0 0 100% 0)' : 'inset(0 0 0 100%)';
+                value = [{ opacity: .3, clipPath: start }, { opacity: 1, clipPath: 'inset(0 0 0 0)' }];
+                break;
+            }
+            case 'zoom': value = [{ opacity: 0, transform: 'scale(.86)' }, { opacity: 1, transform: 'scale(1)' }]; break;
+            case 'flip': {
+                const axis = direction === 'up' || direction === 'down' ? 'X' : 'Y';
+                const sign = direction === 'right' || direction === 'down' ? 1 : -1;
+                value = [{ opacity: 0, transform: `perspective(1200px) rotate${axis}(${sign * 75}deg)` }, { opacity: 1, transform: `perspective(1200px) rotate${axis}(0deg)` }];
+                break;
+            }
+            case 'none': value = [{ opacity: 1 }, { opacity: 1 }]; break;
+            default: value = [{ opacity: 0 }, { opacity: 1 }]; break;
+        }
+        return entering ? value : [...value].reverse();
+    };
+    const pageItems = page => [...page.querySelectorAll('[data-publication-element]')].flatMap(node => parse(node.dataset.animations, []).map(animation => ({ node, animation, prestate: null }))).sort((a, b) => num(a.animation.order, 0) - num(b.animation.order, 0));
+    const splitTimeline = items => {
+        const automatic = [];
+        const clickGroups = [];
+        let group = null;
+        for (const item of items) {
+            const trigger = lower(item.animation.trigger);
+            if (trigger === 'onclick') {
+                group = [item];
+                clickGroups.push(group);
+            } else if (trigger === 'onpageenter') {
+                automatic.push(item);
+                group = null;
+            } else if (group) {
+                group.push(item);
+            } else {
+                automatic.push(item);
+            }
+        }
+        return { automatic, clickGroups };
+    };
+    const scheduleGroup = items => {
+        let previousStart = 0;
+        let previousEnd = 0;
+        let groupEnd = 0;
+        for (const item of items) {
+            const trigger = lower(item.animation.trigger);
+            const ownDelay = reducedMotion ? 0 : Math.max(0, num(item.animation.delaySeconds, 0));
+            let start = ownDelay;
+            if (trigger === 'withprevious') start = previousStart + ownDelay;
+            else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
+            playItem(item, start);
+            const end = start + animationSpan(item.animation);
+            previousStart = start;
+            previousEnd = end;
+            groupEnd = Math.max(groupEnd, end);
+        }
+        return groupEnd;
+    };
+    const primeClickEntrances = groups => {
+        for (const item of groups.flat()) {
+            if (lower(item.animation.phase) !== 'entrance') continue;
+            item.prestate = item.node.animate(frames(item.node, item.animation), { duration: 1, fill: 'both' });
+            item.prestate.pause();
+            item.prestate.currentTime = 0;
+            activeAnimations.push(item.prestate);
+        }
+    };
+    const resetPageVisibility = page => {
+        for (const node of page.querySelectorAll('[data-publication-element]'))
+            node.classList.toggle('ps-action-hidden', bool(node.dataset.playbackHidden));
+    };
+    const cancelPlayback = () => {
+        clearTimeout(autoTimer);
+        autoTimer = 0;
+        for (const animation of activeAnimations) { try { animation.cancel(); } catch { } }
+        activeAnimations = [];
+        clickGroups = [];
+    };
+    const fitPages = () => {
+        const controlsHeight = controls && !controls.hidden ? 62 : 18;
+        for (const page of pages) {
+            const width = page.offsetWidth || 1;
+            const height = page.offsetHeight || 1;
+            const scale = Math.min((innerWidth - 32) / width, (innerHeight - controlsHeight - 24) / height, 1.75);
+            page.style.transform = `scale(${Math.max(.05, scale)})`;
+        }
+    };
+    const updateControls = () => {
+        if (!counter) return;
+        counter.textContent = `${current + 1} / ${pages.length}`;
+        previousButton.disabled = current <= 0 && !loop;
+        nextButton.disabled = current >= pages.length - 1 && !loop;
+    };
+    const normalizeIndex = value => {
+        if (loop) return (value % pages.length + pages.length) % pages.length;
+        return Math.max(0, Math.min(pages.length - 1, value));
+    };
+    const showPage = async (requested, direction = 1, animate = true) => {
+        const next = normalizeIndex(requested);
+        if (next === current && shells[current].classList.contains('active')) return;
+        cancelPlayback();
+        const previous = shells[current];
+        const target = shells[next];
+        const page = pages[next];
+        target.hidden = false;
+        target.classList.add('active');
+        if (animate) {
+            const duration = (reducedMotion ? .001 : Math.max(.1, num(page.dataset.transitionDuration, .55))) * 1000;
+            const incoming = target.animate(transitionFrames(page, true), { duration, easing: easing(page.dataset.transitionEasing), fill: 'both' });
+            activeAnimations.push(incoming);
+            if (previous && previous !== target && !previous.hidden) {
+                const outgoing = previous.animate(transitionFrames(page, false), { duration, easing: easing(page.dataset.transitionEasing), fill: 'both' });
+                activeAnimations.push(outgoing);
+                try { await Promise.allSettled([incoming.finished, outgoing.finished]); } catch { }
+            }
+        }
+        shells.forEach((shell, index) => {
+            shell.hidden = index !== next;
+            shell.classList.toggle('active', index === next);
+        });
+        current = next;
+        updateControls();
+        runCurrentPage(startAutomatically || animate);
+    };
+    const runCurrentPage = shouldRun => {
+        cancelPlayback();
+        const page = pages[current];
+        resetPageVisibility(page);
+        const timeline = splitTimeline(pageItems(page));
+        clickGroups = timeline.clickGroups;
+        if (shouldRun) scheduleGroup(timeline.automatic);
+        else primeClickEntrances([timeline.automatic]);
+        primeClickEntrances(clickGroups);
+        if (bool(page.dataset.autoAdvance)) {
+            const seconds = Math.max(.25, num(page.dataset.autoAdvanceSeconds, 5));
+            autoTimer = setTimeout(() => showPage(current + 1, 1, true), seconds * 1000);
+        }
+    };
+    const runNextClickGroup = () => {
+        const group = clickGroups.shift();
+        if (!group) return false;
+        scheduleGroup(group);
+        return true;
+    };
+    const replayCurrent = () => runCurrentPage(true);
+    const goNext = () => showPage(current + 1, 1, true);
+    const goPrevious = () => showPage(current - 1, -1, true);
+
+    const shells = pages.map(page => {
+        const shell = document.createElement('div');
+        shell.className = 'ps-slide';
+        page.before(shell);
+        shell.appendChild(page);
+        shell.hidden = true;
+        return shell;
+    });
+    const showControls = bool(publication.dataset.playbackControls);
+    const loop = bool(publication.dataset.playbackLoop);
+    const startAutomatically = publication.dataset.playbackStart !== 'false';
+    let current = 0;
+    let activeAnimations = [];
+    let clickGroups = [];
+    let autoTimer = 0;
+
+    const controls = document.createElement('nav');
+    controls.className = 'ps-controls';
+    controls.hidden = !showControls;
+    controls.innerHTML = '<button type="button" data-ps-previous title="Previous page">‹</button><button type="button" data-ps-replay title="Replay page">↻</button><span data-ps-counter></span><button type="button" data-ps-next title="Next page">›</button><button type="button" data-ps-fullscreen title="Full screen">⛶</button>';
+    document.body.appendChild(controls);
+    const previousButton = controls.querySelector('[data-ps-previous]');
+    const nextButton = controls.querySelector('[data-ps-next]');
+    const counter = controls.querySelector('[data-ps-counter]');
+    previousButton.addEventListener('click', event => { event.stopPropagation(); goPrevious(); });
+    nextButton.addEventListener('click', event => { event.stopPropagation(); goNext(); });
+    controls.querySelector('[data-ps-replay]').addEventListener('click', event => { event.stopPropagation(); replayCurrent(); });
+    controls.querySelector('[data-ps-fullscreen]').addEventListener('click', async event => {
+        event.stopPropagation();
+        try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); } catch { }
+    });
+
+    pages.forEach((page, pageIndex) => {
+        page.addEventListener('click', event => {
+            if (event.defaultPrevented) return;
+            if (runNextClickGroup()) return;
+            if (bool(page.dataset.advanceOnClick)) goNext();
+        });
+        for (const node of page.querySelectorAll('[data-publication-element]')) {
+            const interaction = parse(node.dataset.interaction, {});
+            if (lower(interaction.action) === 'none' || !interaction.action) continue;
+            node.classList.add('ps-interactive');
+            node.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                const action = lower(interaction.action);
+                if (action === 'nextpage') goNext();
+                else if (action === 'previouspage') goPrevious();
+                else if (action === 'gotopage') {
+                    const target = pages.findIndex(item => String(item.dataset.pageId).toLowerCase() === String(interaction.targetPageId || '').toLowerCase());
+                    if (target >= 0) showPage(target, target >= current ? 1 : -1, true);
+                } else if (action === 'openurl') {
+                    const url = String(interaction.url || '').trim();
+                    if (/^(https?:|mailto:)/i.test(url)) window.open(url, interaction.openInNewWindow === false ? '_self' : '_blank', 'noopener');
+                } else {
+                    const targetId = interaction.targetElementId || node.dataset.elementId;
+                    const target = page.querySelector(`[data-element-id="${CSS.escape(String(targetId))}"]`);
+                    if (!target) return;
+                    if (action === 'togglevisibility') target.classList.toggle('ps-action-hidden');
+                    else if (action === 'show') target.classList.remove('ps-action-hidden');
+                    else if (action === 'hide') target.classList.add('ps-action-hidden');
+                    else if (action === 'replayanimation') {
+                        const items = parse(target.dataset.animations, []).map(animation => ({ node: target, animation, prestate: null }));
+                        scheduleGroup(items);
+                    }
+                }
+            });
+        }
+    });
+
+    addEventListener('resize', fitPages);
+    addEventListener('keydown', event => {
+        if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); if (!runNextClickGroup()) goNext(); }
+        else if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); goPrevious(); }
+        else if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); if (!runNextClickGroup()) goNext(); }
+        else if (event.key.toLowerCase() === 'r') replayCurrent();
+        else if (event.key === 'Home') showPage(0, -1, true);
+        else if (event.key === 'End') showPage(pages.length - 1, 1, true);
+    });
+    fitPages();
+    shells[0].hidden = false;
+    shells[0].classList.add('active');
+    updateControls();
+    runCurrentPage(startAutomatically);
+}
+
 window.publisherStudio = {
     clickElement(id) {
         const element = document.getElementById(id);
@@ -1285,6 +1848,11 @@ window.publisherStudio = {
         workspaceStates.set(workspace, state);
         setWorkspaceColumns(workspace, state);
     },
+
+    previewPageAnimations(pageId) { previewPageAnimations(pageId); },
+    previewElementAnimations(elementId) { previewElementAnimations(elementId); },
+    previewAnimationStep(pageId, animationId) { previewAnimationStep(pageId, animationId); },
+    stopAnimationPreview(pageId) { stopAnimationPreview(pageId); },
 
     async downloadStream(fileName, streamReference, mimeType) {
         const buffer = await streamReference.arrayBuffer();
@@ -1346,6 +1914,7 @@ window.publisherStudio = {
         publication.removeAttribute('aria-hidden');
         publication.className = 'website-publication';
         const css = collectExportCss();
+        const runtime = `(${websitePresentationRuntime.toString()})();`;
         const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -1353,17 +1922,41 @@ window.publisherStudio = {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <style>${css}
-html,body{min-height:100%;overflow:auto!important;background:#d4d7dc!important}
-body{margin:0;padding:24px;font-family:Segoe UI,system-ui,sans-serif}
-.website-publication{display:block!important}
-.website-publication .print-page{position:relative;overflow:hidden;margin:0 auto 24px;box-shadow:0 4px 24px #0005;background:#fff}
+:root{color-scheme:dark}
+html,body{width:100%;height:100%;overflow:hidden!important;background:#20242b!important}
+body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:none}
+.website-publication{position:fixed;inset:0;display:block!important;overflow:hidden;visibility:visible!important;pointer-events:auto!important}
+.ps-slide{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;transform-origin:center;will-change:transform,opacity,clip-path}
+.ps-slide[hidden]{display:none!important}
+.website-publication .print-page{position:relative;overflow:hidden;margin:0;box-shadow:0 10px 48px #000a;background-color:#fff;transform-origin:center;will-change:transform}
 .website-publication .print-element{position:absolute;transform-origin:center}
+.website-publication .print-connector{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform-box:fill-box;transform-origin:center}
+.website-publication .print-connector.ps-interactive{pointer-events:none}
+.website-publication .print-connector.ps-interactive .connector-hit{pointer-events:stroke;cursor:pointer}
+.website-publication .print-connector.ps-interactive:hover{outline:none}
+.website-publication .print-connector.ps-interactive:hover .connector-line{filter:drop-shadow(0 0 2px #48a7e8)}
 .website-publication .text-frame-content,.website-publication .image-frame,.website-publication .shape,.website-publication .wordart-svg{width:100%;height:100%;overflow:hidden}
 .website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center}
-@media print{body{padding:0;background:#fff!important}.website-publication .print-page{margin:0 auto;box-shadow:none;break-after:page}}
+.ps-interactive{cursor:pointer}
+.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}
+.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
+.ps-controls{position:fixed;z-index:100000;left:50%;bottom:14px;display:flex;align-items:center;gap:7px;min-height:38px;padding:6px 9px;border:1px solid #ffffff38;border-radius:999px;background:#111827dd;box-shadow:0 6px 24px #0009;transform:translateX(-50%);backdrop-filter:blur(10px)}
+.ps-controls[hidden]{display:none!important}
+.ps-controls button{display:grid;place-items:center;width:31px;height:31px;padding:0;border:1px solid #ffffff38;border-radius:50%;color:#fff;background:#ffffff12;font:600 18px/1 Segoe UI,system-ui,sans-serif;cursor:pointer}
+.ps-controls button:hover{background:#ffffff2c}
+.ps-controls button:disabled{opacity:.35;cursor:default}
+.ps-controls span{min-width:58px;color:#e5e7eb;text-align:center;font-size:12px}
+@media (prefers-reduced-motion:reduce){.ps-slide,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
+@media print{
+html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}
+.website-publication{position:static;overflow:visible}
+.ps-slide,.ps-slide[hidden]{position:relative;display:block!important;inset:auto;overflow:hidden;break-after:page}
+.website-publication .print-page{margin:0 auto;box-shadow:none;transform:none!important}
+.ps-controls{display:none!important}
+}
 </style>
 </head>
-<body>${publication.outerHTML}</body>
+<body>${publication.outerHTML}<script>${runtime}</script></body>
 </html>`;
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
     },

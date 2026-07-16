@@ -1,13 +1,18 @@
 @namespace PublisherStudio.Components.Editor
 
 <aside class="inspector-panel">
-    <div class="inspector-tabs three">
+    <div class="inspector-tabs four">
         <button class="@PropertiesTabClass" @onclick="ShowProperties">Properties</button>
         <button class="@PageTabClass" @onclick="ShowPage">Page</button>
         <button class="@LayersTabClass" @onclick="ShowLayers">Layers</button>
+        <button class="@AnimationsTabClass" @onclick="ShowAnimations">Animations</button>
     </div>
 
-    @if (_tab == "layers")
+    @if (_tab == "animations")
+    {
+        <AnimationPanel State="State" />
+    }
+    else if (_tab == "layers")
     {
         <div class="layers-panel">
             <div class="layer-help"><strong>Objects are layers</strong><span>Higher rows appear in front. Use the eye and lock buttons per object.</span></div>
@@ -371,6 +376,7 @@
     private string PropertiesTabClass => _tab == "properties" ? "active" : string.Empty;
     private string PageTabClass => _tab == "page" ? "active" : string.Empty;
     private string LayersTabClass => _tab == "layers" ? "active" : string.Empty;
+    private string AnimationsTabClass => _tab == "animations" ? "active" : string.Empty;
     private string CurrentPresetKey => PagePreset.All.FirstOrDefault(preset => Nearly(preset.WidthMm, State.CurrentPage.WidthMm) && Nearly(preset.HeightMm, State.CurrentPage.HeightMm))?.Key ?? "custom";
 
     private Task RequestEditStory() => OnEditStory.InvokeAsync();
@@ -385,6 +391,7 @@
     private void ShowProperties() => _tab = "properties";
     private void ShowPage() => _tab = "page";
     private void ShowLayers() => _tab = "layers";
+    private void ShowAnimations() => _tab = "animations";
     private void AddText() => State.AddText();
     private void AddWordArt() => State.AddWordArt();
     private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);

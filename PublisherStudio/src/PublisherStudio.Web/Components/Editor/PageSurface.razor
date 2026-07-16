@@ -26,7 +26,15 @@
              data-px-per-mm="@Inv(PixelsPerMm)"
              data-zoom="@Inv(State.Document.Zoom)"
              data-page-width-mm="@Inv(State.CurrentPage.WidthMm)"
-             data-page-height-mm="@Inv(State.CurrentPage.HeightMm)">
+             data-page-height-mm="@Inv(State.CurrentPage.HeightMm)"
+             data-page-id="@State.CurrentPage.Id"
+             data-transition-kind="@State.CurrentPage.Transition.Kind"
+             data-transition-direction="@State.CurrentPage.Transition.Direction"
+             data-transition-easing="@State.CurrentPage.Transition.Easing"
+             data-transition-duration="@Inv(State.CurrentPage.Transition.DurationSeconds)"
+             data-advance-on-click="@State.CurrentPage.Transition.AdvanceOnClick.ToString().ToLowerInvariant()"
+             data-auto-advance="@State.CurrentPage.Transition.AutoAdvance.ToString().ToLowerInvariant()"
+             data-auto-advance-seconds="@Inv(State.CurrentPage.Transition.AutoAdvanceSeconds)">
             @if (State.Document.View.GuidesVisible)
             {
                 @foreach (var guide in State.CurrentPage.Guides)
@@ -43,10 +51,16 @@
                 if (ConnectorGeometry.TryResolve(State.CurrentPage, connector, out var sourcePoint, out var targetPoint))
                 {
                     var connectorPath = ConnectorGeometry.Path(connector, sourcePoint, targetPoint);
-                    <svg @key="connector.Id" class="pub-connector @(connector.Id == State.SelectedElementId ? "selected" : null) @(connector.Locked ? "locked" : null)"
+                    <svg @key="connector.Id" id="element-@connector.Id" class="pub-connector @(connector.Id == State.SelectedElementId ? "selected" : null) @(connector.Locked ? "locked" : null)"
                          style="z-index:@connector.ZIndex"
                          viewBox="0 0 @Inv(State.CurrentPage.WidthMm) @Inv(State.CurrentPage.HeightMm)"
                          preserveAspectRatio="none"
+                         data-publication-element
+                         data-element-id="@connector.Id"
+                         data-animations="@PublicationAnimationData.Animations(connector)"
+                         data-interaction="@PublicationAnimationData.Interaction(connector)"
+                         data-interaction-action="@connector.Interaction.Action"
+                         data-playback-hidden="@connector.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
                          data-connector-id="@connector.Id"
                          data-source-element-id="@connector.Source.ElementId" data-source-anchor="@connector.Source.Anchor"
                          data-target-element-id="@connector.Target.ElementId" data-target-anchor="@connector.Target.Anchor"
@@ -74,6 +88,10 @@
             @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible && e is not ConnectorElement).OrderBy(e => e.ZIndex))
             {
                 <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
+                     data-animations="@PublicationAnimationData.Animations(element)"
+                     data-interaction="@PublicationAnimationData.Interaction(element)"
+                     data-interaction-action="@element.Interaction.Action"
+                     data-playback-hidden="@element.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
                      class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
                      @ondblclick="() => DoubleClick(element)"
@@ -219,6 +237,16 @@
         }
         @if (State.SelectedElement is not null)
         {
+            <DxContextMenuItem Text="Animations" IconCssClass="pub-icon pub-icon-animation" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="Add fade in" Click="AddFadeInAnimation" />
+                    <DxContextMenuItem Text="Add fly in" Click="AddFlyInAnimation" />
+                    <DxContextMenuItem Text="Add pulse" Click="AddPulseAnimation" />
+                    <DxContextMenuItem Text="Add fade out" Click="AddFadeOutAnimation" />
+                    <DxContextMenuItem Text="Preview object" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="PreviewSelectedAnimations" />
+                    <DxContextMenuItem Text="Remove all object animations" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="ClearSelectedAnimations" />
+                </Items>
+            </DxContextMenuItem>
             <DxContextMenuItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="Copy" />
             <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" Click="Paste" />
             <DxContextMenuItem Text="Duplicate" Click="Duplicate" />
@@ -249,6 +277,17 @@
         }
         else
         {
+            <DxContextMenuItem Text="Preview page animations" IconCssClass="pub-icon pub-icon-animation" Click="PreviewPageAnimations" />
+            <DxContextMenuItem Text="Page transition">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.None, "None"))" Click="TransitionNone" />
+                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Fade, "Fade"))" Click="TransitionFade" />
+                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Push, "Push"))" Click="TransitionPush" />
+                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Wipe, "Wipe"))" Click="TransitionWipe" />
+                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Zoom, "Zoom"))" Click="TransitionZoom" />
+                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Flip, "Flip"))" Click="TransitionFlip" />
+                </Items>
+            </DxContextMenuItem>
             <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" BeginGroup="true" Click="Paste" />
             <DxContextMenuItem Text="Insert text box" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
@@ -474,6 +513,23 @@
     private void RotatePictureRight() => SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation + 90));
     private void FlipPictureHorizontal() => SetImage(image => image.FlipHorizontal = !image.FlipHorizontal);
     private void FlipPictureVertical() => SetImage(image => image.FlipVertical = !image.FlipVertical);
+    private void AddFadeInAnimation() => State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
+    private void AddFlyInAnimation() => State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
+    private void AddPulseAnimation() => State.AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
+    private void AddFadeOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+    private void ClearSelectedAnimations() => State.ClearSelectedAnimations();
+    private Task PreviewSelectedAnimations() => State.SelectedElementId is { } id
+        ? JS.InvokeVoidAsync("publisherStudio.previewElementAnimations", $"element-{id}").AsTask()
+        : Task.CompletedTask;
+    private Task PreviewPageAnimations() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
+    private void SetTransition(PublicationPageTransitionKind kind) => State.UpdatePageTransition(item => item.Kind = kind);
+    private void TransitionNone() => SetTransition(PublicationPageTransitionKind.None);
+    private void TransitionFade() => SetTransition(PublicationPageTransitionKind.Fade);
+    private void TransitionPush() => SetTransition(PublicationPageTransitionKind.Push);
+    private void TransitionWipe() => SetTransition(PublicationPageTransitionKind.Wipe);
+    private void TransitionZoom() => SetTransition(PublicationPageTransitionKind.Zoom);
+    private void TransitionFlip() => SetTransition(PublicationPageTransitionKind.Flip);
+
     private void Copy() => State.CopySelected();
     private void Paste() => State.Paste();
     private void Duplicate() => State.DuplicateSelected();

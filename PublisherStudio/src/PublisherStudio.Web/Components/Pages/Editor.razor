@@ -33,7 +33,10 @@
                        OnResetWorkspace="ResetWorkspace"
                        OnInsertDataVisual="InsertDataVisual"
                        OnEditDataVisual="OpenDataVisualEditor"
-                       OnManageData="OpenDataManager" />
+                       OnManageData="OpenDataManager"
+                       OnPreviewPageAnimations="PreviewPageAnimations"
+                       OnPreviewObjectAnimations="PreviewObjectAnimations"
+                       OnStopAnimations="StopAnimations" />
 
     <div id="publisher-workspace" class="editor-workspace">
         <PageNavigator State="State" />
@@ -182,6 +185,12 @@
     }
 
     private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");
+
+    private Task PreviewPageAnimations() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
+    private Task PreviewObjectAnimations() => State.SelectedElementId is { } id
+        ? JS.InvokeVoidAsync("publisherStudio.previewElementAnimations", $"element-{id}").AsTask()
+        : Task.CompletedTask;
+    private Task StopAnimations() => JS.InvokeVoidAsync("publisherStudio.stopAnimationPreview", "publisher-page").AsTask();
 
     private async Task FitPage()
     {

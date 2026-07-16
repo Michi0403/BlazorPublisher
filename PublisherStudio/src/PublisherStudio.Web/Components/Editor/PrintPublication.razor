@@ -1,21 +1,43 @@
 @namespace PublisherStudio.Components.Editor
 
-<div class="print-publication" aria-hidden="true">
+<div class="print-publication" aria-hidden="true"
+     data-playback-start="@Document.Playback.StartAutomatically.ToString().ToLowerInvariant()"
+     data-playback-loop="@Document.Playback.LoopPresentation.ToString().ToLowerInvariant()"
+     data-playback-controls="@Document.Playback.ShowControls.ToString().ToLowerInvariant()">
     @foreach (var publicationPage in Document.Pages)
     {
-        <section class="print-page" style="@PageStyle(publicationPage)">
+        <section class="print-page" style="@PageStyle(publicationPage)"
+                 data-page-id="@publicationPage.Id"
+                 data-transition-kind="@publicationPage.Transition.Kind"
+                 data-transition-direction="@publicationPage.Transition.Direction"
+                 data-transition-easing="@publicationPage.Transition.Easing"
+                 data-transition-duration="@Inv(publicationPage.Transition.DurationSeconds)"
+                 data-advance-on-click="@publicationPage.Transition.AdvanceOnClick.ToString().ToLowerInvariant()"
+                 data-auto-advance="@publicationPage.Transition.AutoAdvance.ToString().ToLowerInvariant()"
+                 data-auto-advance-seconds="@Inv(publicationPage.Transition.AutoAdvanceSeconds)">
             @foreach (var element in publicationPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
             {
                 @if (element is ConnectorElement connector && ConnectorGeometry.TryResolve(publicationPage, connector, out var sourcePoint, out var targetPoint))
                 {
-                    <svg class="print-connector" style="z-index:@connector.ZIndex" viewBox="0 0 @Inv(publicationPage.WidthMm) @Inv(publicationPage.HeightMm)" preserveAspectRatio="none">
+                    <svg class="print-connector" style="z-index:@connector.ZIndex"
+                         data-publication-element data-element-id="@connector.Id"
+                         data-animations="@PublicationAnimationData.Animations(connector)"
+                         data-interaction="@PublicationAnimationData.Interaction(connector)"
+                         data-interaction-action="@connector.Interaction.Action"
+                         data-playback-hidden="@connector.HiddenAtPresentationStart.ToString().ToLowerInvariant()" viewBox="0 0 @Inv(publicationPage.WidthMm) @Inv(publicationPage.HeightMm)" preserveAspectRatio="none">
                         <defs>@ConnectorMarkerDefinition(connector, true)@ConnectorMarkerDefinition(connector, false)</defs>
-                        <path d="@ConnectorGeometry.Path(connector, sourcePoint, targetPoint)" fill="none" stroke="@connector.Stroke" stroke-width="@Inv(connector.StrokeWidthMm)" stroke-dasharray="@ConnectorGeometry.DashArray(connector)" marker-start="@MarkerUrl(connector, true)" marker-end="@MarkerUrl(connector, false)"></path>
+                        <path class="connector-hit" d="@ConnectorGeometry.Path(connector, sourcePoint, targetPoint)" fill="none" stroke="transparent" stroke-width="4"></path>
+                        <path class="connector-line" d="@ConnectorGeometry.Path(connector, sourcePoint, targetPoint)" fill="none" stroke="@connector.Stroke" stroke-width="@Inv(connector.StrokeWidthMm)" stroke-dasharray="@ConnectorGeometry.DashArray(connector)" marker-start="@MarkerUrl(connector, true)" marker-end="@MarkerUrl(connector, false)"></path>
                     </svg>
                 }
                 else
                 {
-                    <div class="print-element" style="@ElementStyle(element)">
+                    <div class="print-element" style="@ElementStyle(element)"
+                         data-publication-element data-element-id="@element.Id"
+                         data-animations="@PublicationAnimationData.Animations(element)"
+                         data-interaction="@PublicationAnimationData.Interaction(element)"
+                     data-interaction-action="@element.Interaction.Action"
+                     data-playback-hidden="@element.HiddenAtPresentationStart.ToString().ToLowerInvariant()">
                         @switch (element)
                         {
                             case TextFrameElement text:

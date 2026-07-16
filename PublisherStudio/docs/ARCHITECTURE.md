@@ -6,7 +6,7 @@
 - **PublisherStudio.InstallerConsole** remains an optional deployment helper with no UI project dependency. It can install/start published output or publish a source ZIP without Git.
 - **WinUI remains optional and absent.** The browser host is the product core.
 
-v0.6 extends these boundaries without replacing routing, controllers, the installer, or the publication editing model. Picture Studio and publication data visuals are additional scoped subsystems within the existing web host.
+v0.9 extends these boundaries without replacing routing, controllers, the installer, or the publication editing model. Picture Studio, publication data visuals, and presentation animation are additional scoped subsystems within the existing web host.
 
 ## Editing engines
 
@@ -24,7 +24,7 @@ Picture Studio is deliberately separate from both the page surface and RichEdit.
 
 Supported layer types are raster, text, shape, fill, and procedural render. Every layer shares bounds, rotation, opacity, blend mode, lock/visibility, and non-destructive adjustment values. Procedural layers store parameters and seeds, not generated pixel buffers. The renderer currently provides Clouds, Noise, Stripes, and Vignette.
 
-When Picture Studio applies its result, JavaScript returns a PNG as `IJSStreamReference`; Blazor reads the stream and stores the rendered data URL in the normal `ImageFrameElement.DataUrl`. A cloned `PictureDocument` is stored in `ImageFrameElement.PictureSource`. This dual representation keeps all established publication rendering/export code simple while allowing later non-destructive Picture Studio edits. Imported pictures have no `PictureSource` until first applied through Picture Studio.
+When Picture Studio applies its result, JavaScript returns a PNG data URL in bounded chunks; Blazor reassembles it and stores it in the normal `ImageFrameElement.DataUrl`. A cloned `PictureDocument` is stored in `ImageFrameElement.PictureSource`. This dual representation keeps all established publication rendering/export code simple while allowing later non-destructive Picture Studio edits. Imported pictures have no `PictureSource` until first applied through Picture Studio.
 
 ## Publication data and visual subsystem
 
@@ -33,6 +33,14 @@ When Picture Studio applies its result, JavaScript returns a PNG as `IJSStreamRe
 `DataVisualElement` is an ordinary polymorphic publication element. It stores the DevExpress visual kind, selected data-object ID, category/series/value fields, subtype, legend/label/title options, gauge/KPI range, and grid row settings. `DataManager` edits reusable sources; `DataVisualEditor` maps fields and previews the result; `DataVisualView` is shared by the page canvas and print surface. C# data objects remain authoritative, and no external JavaScript chart library is introduced.
 
 The first visual set is deliberately publication-oriented: Cartesian chart, pie/doughnut, polar chart, sparkline, circular bar gauge, data grid, and KPI progress indicator. Maps are not included because useful map rendering generally requires an external GIS/tile provider and often an API key, which conflicts with the self-contained runtime rule. Sankey/dashboard/reporting components remain potential later additions after their document/export semantics are defined.
+
+## Animation and interaction subsystem
+
+Animation remains part of the authoritative C# document model. Each `PublicationElement` owns ordered semantic `PublicationAnimation` records and one `PublicationInteraction`; each page owns a `PublicationPageTransition`; the document owns `PublicationPlaybackSettings`. The animation order is page-wide rather than local to an element, which lets the inspector present one deterministic timeline across text, images, shapes, WordArt, connectors, and data visuals.
+
+The browser preview and website exporter map semantic effects to Web Animations API keyframes. Trigger groups preserve page-entry, with-previous, after-previous, and click behavior. Interactions support page navigation, safe URL opening, target visibility, and replay. `HiddenAtPresentationStart` is separate from editor-layer visibility so an object remains editable while being initially hidden during presentation playback.
+
+The model stores no CSS keyframes or PowerPoint-specific XML. This is deliberate: PowerPoint and video exporters can consume the same normalized timeline and map it to their own timing/rendering systems. See `docs/ANIMATION_EXPORT.md`.
 
 ## Workspace and view model
 
@@ -63,7 +71,7 @@ v0.1/v0.2 stored story bytes as HTML, which limited Office page-layout and forma
 - JSON uses Blazor stream interop.
 - SVG clones the current page and removes all editor-only adorners.
 - PNG/JPEG serialize that clone into an SVG `foreignObject`, then rasterize using `createImageBitmap`, object-URL Image, or data-URL Image fallback. PNG uses an alpha-enabled canvas; JPEG receives a white fill.
-- Website export clones the multi-page print surface into a self-contained HTML file.
+- Website export clones the multi-page print surface into a self-contained animated presentation with a dependency-free playback runtime, transitions, click groups, interactions, controls, and print fallback.
 - Print/PDF uses the hidden print surface and browser print system.
 - Story downloads are produced directly by DevExpress RichEdit as DOCX, RTF, TXT, or HTML.
 
@@ -71,7 +79,7 @@ No runtime package was added. A future server-side prepress exporter can sit beh
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded image data URLs, and optional editable Picture Studio layer documents. Current format version is `1.7`; the loader supplies defaults and migrates older story, image, WordArt path, data-object, and data-visual fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded image data URLs, and optional editable Picture Studio layer documents. Current format version is `1.8`; the loader supplies defaults and migrates older story, image, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
 
 ## Reference and license boundary
 

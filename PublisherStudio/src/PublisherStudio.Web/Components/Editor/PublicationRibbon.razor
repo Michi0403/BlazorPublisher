@@ -105,6 +105,38 @@
         </DxRibbonGroup>
     </DxRibbonTab>
 
+    <DxRibbonTab Text="Animations">
+        <DxRibbonGroup Text="Preview" IconCssClass="pub-icon pub-icon-animation">
+            <DxRibbonItem Text="Preview page" IconCssClass="pub-icon pub-icon-animation" IsPrimary="true" Click="RequestPreviewPageAnimations" />
+            <DxRibbonItem Text="Preview object" Enabled="@(State.SelectedElement?.Animations.Count > 0)" Click="RequestPreviewObjectAnimations" />
+            <DxRibbonItem Text="Stop" Click="RequestStopAnimations" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Entrance">
+            <DxRibbonItem Text="Fade in" Enabled="HasSelection" Click="AnimationFadeIn" />
+            <DxRibbonItem Text="Fly in" Enabled="HasSelection" Click="AnimationFlyIn" />
+            <DxRibbonItem Text="Zoom in" Enabled="HasSelection" Click="AnimationZoomIn" />
+            <DxRibbonItem Text="Wipe in" Enabled="HasSelection" Click="AnimationWipeIn" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Emphasis and motion">
+            <DxRibbonItem Text="Pulse" Enabled="HasSelection" Click="AnimationPulse" />
+            <DxRibbonItem Text="Spin" Enabled="HasSelection" Click="AnimationSpin" />
+            <DxRibbonItem Text="Move" Enabled="HasSelection" Click="AnimationMove" />
+            <DxRibbonItem Text="Remove object animations" Enabled="@(State.SelectedElement?.Animations.Count > 0)" Click="ClearAnimations" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Exit">
+            <DxRibbonItem Text="Fade out" Enabled="HasSelection" Click="AnimationFadeOut" />
+            <DxRibbonItem Text="Fly out" Enabled="HasSelection" Click="AnimationFlyOut" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Page transition">
+            <DxRibbonItem Text="None" Click="TransitionNone" />
+            <DxRibbonItem Text="Fade" Click="TransitionFade" />
+            <DxRibbonItem Text="Push" Click="TransitionPush" />
+            <DxRibbonItem Text="Wipe" Click="TransitionWipe" />
+            <DxRibbonItem Text="Zoom" Click="TransitionZoom" />
+            <DxRibbonItem Text="Flip" Click="TransitionFlip" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
     <DxRibbonTab Text="View">
         <DxRibbonGroup Text="Workspace" IconCssClass="pub-icon pub-icon-panels">
             <DxRibbonItem Text="Pages pane" IconCssClass="pub-icon pub-icon-pages" Click="RequestTogglePagesPane" />
@@ -291,6 +323,9 @@
     [Parameter] public EventCallback<DataVisualKind> OnInsertDataVisual { get; set; }
     [Parameter] public EventCallback OnEditDataVisual { get; set; }
     [Parameter] public EventCallback OnManageData { get; set; }
+    [Parameter] public EventCallback OnPreviewPageAnimations { get; set; }
+    [Parameter] public EventCallback OnPreviewObjectAnimations { get; set; }
+    [Parameter] public EventCallback OnStopAnimations { get; set; }
 
     private string CropCommandText => State.CropMode ? "Finish crop" : "Crop";
     private string RulersText => CheckText(State.Document.View.RulersVisible, "Rulers");
@@ -319,6 +354,9 @@
     private Task RequestResetWorkspace() => OnResetWorkspace.InvokeAsync();
     private Task RequestEditDataVisual() => OnEditDataVisual.InvokeAsync();
     private Task RequestManageData() => OnManageData.InvokeAsync();
+    private Task RequestPreviewPageAnimations() => OnPreviewPageAnimations.InvokeAsync();
+    private Task RequestPreviewObjectAnimations() => OnPreviewObjectAnimations.InvokeAsync();
+    private Task RequestStopAnimations() => OnStopAnimations.InvokeAsync();
 
     private bool HasSelection => State.SelectedElement is not null;
     private bool CanAlign => State.SelectedElement is not null and not ConnectorElement;
@@ -350,6 +388,25 @@
     private void AlignTop() => State.Align("top");
     private void AlignMiddle() => State.Align("middle");
     private void AlignBottom() => State.Align("bottom");
+    private void AddAnimation(PublicationAnimationEffect effect, PublicationAnimationPhase phase) => State.AddAnimation(effect, phase);
+    private void AnimationFadeIn() => AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
+    private void AnimationFlyIn() => AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
+    private void AnimationZoomIn() => AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
+    private void AnimationWipeIn() => AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
+    private void AnimationPulse() => AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
+    private void AnimationSpin() => AddAnimation(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
+    private void AnimationMove() => AddAnimation(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
+    private void AnimationFadeOut() => AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+    private void AnimationFlyOut() => AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Exit);
+    private void ClearAnimations() => State.ClearSelectedAnimations();
+    private void SetTransition(PublicationPageTransitionKind kind) => State.UpdatePageTransition(item => item.Kind = kind);
+    private void TransitionNone() => SetTransition(PublicationPageTransitionKind.None);
+    private void TransitionFade() => SetTransition(PublicationPageTransitionKind.Fade);
+    private void TransitionPush() => SetTransition(PublicationPageTransitionKind.Push);
+    private void TransitionWipe() => SetTransition(PublicationPageTransitionKind.Wipe);
+    private void TransitionZoom() => SetTransition(PublicationPageTransitionKind.Zoom);
+    private void TransitionFlip() => SetTransition(PublicationPageTransitionKind.Flip);
+
     private void AddText() => State.AddText();
     private void AddWordArt() => State.AddWordArt();
     private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);

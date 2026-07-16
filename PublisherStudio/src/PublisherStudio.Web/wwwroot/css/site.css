@@ -213,7 +213,7 @@ button { cursor: pointer; }
 }
 
 .shape { width: 100%; height: 100%; }
-.selection-handle { position: absolute; z-index: 100; width: 8px; height: 8px; border: 1px solid #075985; background: white; border-radius: 1px; }
+.selection-handle { position: absolute; z-index: 140; width: 8px; height: 8px; border: 1px solid #075985; background: white; border-radius: 1px; pointer-events: auto; }
 .handle-nw { left: -5px; top: -5px; cursor: nwse-resize; }
 .handle-n { left: calc(50% - 4px); top: -5px; cursor: ns-resize; }
 .handle-ne { right: -5px; top: -5px; cursor: nesw-resize; }
@@ -405,8 +405,7 @@ button { cursor: pointer; }
     pointer-events: auto;
     cursor: crosshair;
 }
-.connector-tool-active .connector-port,
-.pub-element.selected .connector-port { display: block; }
+.connector-tool-active .connector-port { display: block; }
 .connector-port:hover,
 .connector-port-source { background: #fde047; transform: scale(1.25); }
 .connector-port-target { background: #22c55e; box-shadow: 0 0 0 4px #22c55e44; transform: scale(1.45); }
@@ -1287,3 +1286,41 @@ button { cursor: pointer; }
 .publisher-video-export-publication .wordart-svg,
 .publisher-video-export-publication .barcode-view { width:100%; height:100%; overflow:hidden; }
 .publisher-video-export-publication img { display:block; width:100%; height:100%; max-width:none; transform-origin:center; }
+
+
+/* Beta layout hardening: keep RichEdit ribbon tab changes inside the story window. */
+.story-editor-dialog {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+}
+.story-command-bar {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+.story-command-bar > * { flex: 0 0 auto; }
+.story-editor-host {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    contain: layout;
+}
+.story-rich-edit,
+.story-rich-edit > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+.story-rich-edit { height: 100% !important; overflow: hidden; }
+.data-file-import-row { display:flex; align-items:center; gap:10px; min-width:0; }
+.data-file-import-row > span { min-width:0; overflow:hidden; color:#667085; text-overflow:ellipsis; white-space:nowrap; font-size:10px; }
+.data-file-picker,.barcode-file-picker { display:grid; gap:4px; padding:7px 9px; border:1px dashed #8293a7; border-radius:4px; color:#29445d; background:#f5f9fc; font-size:10px; cursor:pointer; }
+.data-file-picker:hover,.barcode-file-picker:hover { border-color:#2f75b5; background:#eaf4fb; }
+.data-file-picker input,.barcode-file-picker input { font-size:10px; }
+.barcode-import-info { color:#326848; }

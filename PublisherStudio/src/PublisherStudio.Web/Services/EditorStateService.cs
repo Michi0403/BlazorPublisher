@@ -70,13 +70,14 @@ public sealed class EditorStateService
 
     public void SelectElement(Guid? id)
     {
+        var selectionChanged = SelectedElementId != id;
+        var toolChanged = id.HasValue && ConnectorTool != ConnectorToolKind.None;
         SelectedElementId = id;
-        if (id.HasValue)
-            ConnectorTool = ConnectorToolKind.None;
-        if (SelectedElement is not ImageFrameElement)
-            CropMode = false;
+        if (toolChanged) ConnectorTool = ConnectorToolKind.None;
+        var cropChanged = CropMode && SelectedElement is not ImageFrameElement;
+        if (cropChanged) CropMode = false;
         EndLiveEdit();
-        Notify(false);
+        if (selectionChanged || toolChanged || cropChanged) Notify(false);
     }
 
     public TextFrameElement AddText()
@@ -475,6 +476,7 @@ public sealed class EditorStateService
         foreach (var item in CurrentPage.Elements)
             if (item.Interaction.TargetElementId is { } targetId && removedIds.Contains(targetId))
                 item.Interaction.TargetElementId = null;
+        ApplyNormalizedZOrder(OrderedElements());
         ReindexAnimations();
         SelectedElementId = null;
         CropMode = false;
@@ -960,10 +962,26 @@ public sealed class EditorStateService
         Notify();
     }
 
-    public void BringToFront() => ChangeZ(NextZ());
-    public void SendToBack() => ChangeZ(CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Min() - 1);
-    public void BringForward() => ChangeZ((SelectedElement?.ZIndex ?? 0) + 1);
-    public void SendBackward() => ChangeZ((SelectedElement?.ZIndex ?? 0) - 1);
+    public void BringToFront() => ReorderSelected(int.MaxValue);
+    public void SendToBack() => ReorderSelected(int.MinValue);
+    public void BringForward() => ReorderSelected(1);
+    public void SendBackward() => ReorderSelected(-1);
+
+    public void SetSelectedLayerPosition(int position)
+    {
+        var selected = SelectedElement;
+        if (selected is null) return;
+        var ordered = OrderedElements();
+        var currentIndex = ordered.IndexOf(selected);
+        if (currentIndex < 0) return;
+        var targetIndex = Math.Clamp(position - 1, 0, ordered.Count - 1);
+        if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
+        Capture();
+        ordered.RemoveAt(currentIndex);
+        ordered.Insert(targetIndex, selected);
+        ApplyNormalizedZOrder(ordered);
+        Notify();
+    }
 
     public void Align(string mode)
     {
@@ -1080,7 +1098,48 @@ public sealed class EditorStateService
         AutoAdvanceSeconds = source.AutoAdvanceSeconds
     };
 
-    private void ChangeZ(int value) => UpdateSelected(element => element.ZIndex = value);
+    private void ReorderSelected(int movement)
+    {
+        var selected = SelectedElement;
+        if (selected is null) return;
+        var ordered = OrderedElements();
+        var currentIndex = ordered.IndexOf(selected);
+        if (currentIndex < 0) return;
+        var targetIndex = movement switch
+        {
+            int.MaxValue => ordered.Count - 1,
+            int.MinValue => 0,
+            > 0 => Math.Min(ordered.Count - 1, currentIndex + 1),
+            < 0 => Math.Max(0, currentIndex - 1),
+            _ => currentIndex
+        };
+        if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
+        Capture();
+        ordered.RemoveAt(currentIndex);
+        ordered.Insert(targetIndex, selected);
+        ApplyNormalizedZOrder(ordered);
+        Notify();
+    }
+
+    private List<PublicationElement> OrderedElements() => CurrentPage.Elements
+        .Select((element, index) => new { Element = element, Index = index })
+        .OrderBy(item => item.Element.ZIndex)
+        .ThenBy(item => item.Index)
+        .Select(item => item.Element)
+        .ToList();
+
+    private static bool HasNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
+    {
+        for (var index = 0; index < ordered.Count; index++)
+            if (ordered[index].ZIndex != index + 1) return false;
+        return true;
+    }
+
+    private static void ApplyNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
+    {
+        for (var index = 0; index < ordered.Count; index++) ordered[index].ZIndex = index + 1;
+    }
+
     private int NextZ() => CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
     private string NextName(string basis) => $"{basis} {CurrentPage.Elements.Count + 1}";
 

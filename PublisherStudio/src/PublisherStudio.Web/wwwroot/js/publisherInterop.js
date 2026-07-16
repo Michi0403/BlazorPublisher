@@ -404,7 +404,13 @@ function pointerDown(state, event) {
     if (!element || !state.page.contains(element)) return;
 
     const id = element.dataset.elementId;
-    state.dotnet.invokeMethodAsync('SelectElement', id);
+    const wasSelected = element.classList.contains('selected');
+    const activeConnectorTool = connectorToolActive(state);
+    if (!wasSelected || activeConnectorTool) {
+        state.config = { ...state.config, connectorTool: 'None' };
+        state.dotnet.invokeMethodAsync('SelectElement', id)
+            .catch(error => console.warn('Publisher selection update failed.', error));
+    }
     if (element.classList.contains('locked')) return;
 
     const handle = event.target.closest('[data-resize-handle]');
@@ -437,8 +443,18 @@ function pointerDown(state, event) {
         state.operation = { ...base, kind: 'move' };
     }
 
-    element.setPointerCapture(event.pointerId);
+    try { state.stage.setPointerCapture(event.pointerId); } catch { }
     event.preventDefault();
+}
+
+function refreshOperationElement(state, operation) {
+    if (!operation?.id) return operation?.element || null;
+    const current = state.page.querySelector(`[data-element-id="${CSS.escape(operation.id)}"]`);
+    if (current) {
+        operation.element = current;
+        if (operation.kind === 'crop') operation.image = current.querySelector('img') || operation.image;
+    }
+    return operation.element;
 }
 
 function pointerMove(state, event) {
@@ -469,6 +485,7 @@ function pointerMove(state, event) {
     const dy = (event.clientY - operation.startY) / state.config.pxPerMm;
 
     if (operation.kind === 'crop') {
+        refreshOperationElement(state, operation);
         const cropX = clamp(operation.cropX + dx / Math.max(operation.width, 1) * 100, -100, 100);
         const cropY = clamp(operation.cropY + dy / Math.max(operation.height, 1) * 100, -100, 100);
         operation.currentCropX = cropX;
@@ -510,10 +527,12 @@ function pointerMove(state, event) {
     }
 
     operation.current = { x, y, width, height };
-    operation.element.style.left = `${x * state.config.pxPerMm}px`;
-    operation.element.style.top = `${y * state.config.pxPerMm}px`;
-    operation.element.style.width = `${width * state.config.pxPerMm}px`;
-    operation.element.style.height = `${height * state.config.pxPerMm}px`;
+    const operationElement = refreshOperationElement(state, operation);
+    if (!operationElement) return;
+    operationElement.style.left = `${x * state.config.pxPerMm}px`;
+    operationElement.style.top = `${y * state.config.pxPerMm}px`;
+    operationElement.style.width = `${width * state.config.pxPerMm}px`;
+    operationElement.style.height = `${height * state.config.pxPerMm}px`;
     updateAttachedConnectors(state, operation.id);
     event.preventDefault();
 }
@@ -559,6 +578,7 @@ function nearestCandidate(value, candidates, tolerance) {
 function pointerUp(state, event) {
     const operation = state.operation;
     if (!operation || operation.pointerId !== event.pointerId) return;
+    try { state.stage.releasePointerCapture(event.pointerId); } catch { }
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
         finishConnectorDrag(state, operation);
         return;
@@ -2371,8 +2391,12 @@ function generateBarcodeSvg(options) {
 function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
 
 function chooseVideoRecordingMimeType() {
-    const candidates = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
-    return candidates.find(type => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(type)) || '';
+    if (typeof MediaRecorder === 'undefined') return '';
+    const probe = document.createElement('video');
+    const candidates = ['video/webm;codecs=vp8,opus', 'video/webm', 'video/webm;codecs=vp9,opus'];
+    return candidates.find(type => MediaRecorder.isTypeSupported(type) && probe.canPlayType(type) !== '')
+        || candidates.find(type => MediaRecorder.isTypeSupported(type))
+        || '';
 }
 
 function exportedPageDuration(page) {
@@ -2497,8 +2521,98 @@ async function restrictPresentationCapture(capture, target, targetWidth, targetH
     return restricted;
 }
 
+function waitForVideoMetadata(video, timeoutMilliseconds = 12000) {
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA && video.videoWidth > 0 && video.videoHeight > 0)
+        return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => finish(new Error('The selected tab capture did not produce video frames.')), timeoutMilliseconds);
+        const finish = error => {
+            clearTimeout(timeout);
+            video.removeEventListener('loadedmetadata', loaded);
+            video.removeEventListener('canplay', loaded);
+            video.removeEventListener('error', failed);
+            if (error) reject(error); else resolve();
+        };
+        const loaded = () => video.videoWidth > 0 && video.videoHeight > 0 && finish();
+        const failed = () => finish(video.error || new Error('The selected tab capture could not be decoded.'));
+        video.addEventListener('loadedmetadata', loaded);
+        video.addEventListener('canplay', loaded);
+        video.addEventListener('error', failed);
+    });
+}
+
+async function createPageFrameRecordingStream(capture, frame, targetWidth, targetHeight) {
+    const captureVideoTrack = capture.getVideoTracks()[0];
+    if (!captureVideoTrack) throw new Error('The selected capture surface did not provide a video track.');
+    const sourceVideo = document.createElement('video');
+    sourceVideo.muted = true;
+    sourceVideo.playsInline = true;
+    sourceVideo.autoplay = true;
+    sourceVideo.srcObject = new MediaStream([captureVideoTrack]);
+    await sourceVideo.play();
+    await waitForVideoMetadata(sourceVideo);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = evenVideoDimension(targetWidth, 1280);
+    canvas.height = evenVideoDimension(targetHeight, 720);
+    const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    if (!context) throw new Error('The browser could not create the video compositor canvas.');
+    const canvasStream = canvas.captureStream(30);
+    const output = new MediaStream();
+    const canvasTrack = canvasStream.getVideoTracks()[0];
+    if (!canvasTrack) throw new Error('The browser could not create a page-sized video track.');
+    output.addTrack(canvasTrack);
+    capture.getAudioTracks().forEach(track => output.addTrack(track));
+
+    let animationFrame = 0;
+    let stopped = false;
+    const draw = () => {
+        if (stopped) return;
+        const sourceWidth = sourceVideo.videoWidth;
+        const sourceHeight = sourceVideo.videoHeight;
+        const viewportWidth = Math.max(1, window.visualViewport?.width || window.innerWidth);
+        const viewportHeight = Math.max(1, window.visualViewport?.height || window.innerHeight);
+        const frameBounds = frame.getBoundingClientRect();
+        const scaleX = sourceWidth / viewportWidth;
+        const scaleY = sourceHeight / viewportHeight;
+        let sourceX = frameBounds.left * scaleX;
+        let sourceY = frameBounds.top * scaleY;
+        let sourceCropWidth = frameBounds.width * scaleX;
+        let sourceCropHeight = frameBounds.height * scaleY;
+
+        sourceX = clamp(sourceX, 0, Math.max(0, sourceWidth - 1));
+        sourceY = clamp(sourceY, 0, Math.max(0, sourceHeight - 1));
+        sourceCropWidth = clamp(sourceCropWidth, 1, sourceWidth - sourceX);
+        sourceCropHeight = clamp(sourceCropHeight, 1, sourceHeight - sourceY);
+        context.fillStyle = '#090d14';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        try {
+            context.drawImage(sourceVideo, sourceX, sourceY, sourceCropWidth, sourceCropHeight, 0, 0, canvas.width, canvas.height);
+        } catch (error) {
+            console.warn('Publisher video compositor skipped one frame.', error);
+        }
+        animationFrame = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return {
+        stream: output,
+        displaySurface: captureVideoTrack.getSettings?.().displaySurface || '',
+        stop() {
+            stopped = true;
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            try { sourceVideo.pause(); } catch { }
+            sourceVideo.srcObject = null;
+            canvasTrack.stop();
+        }
+    };
+}
+
 async function exportPresentationVideo(containerSelector, fileName, title) {
+    let step = 'initializing';
     if (typeof MediaRecorder === 'undefined') throw new Error('This browser does not support MediaRecorder video export.');
+    if (typeof HTMLCanvasElement.prototype.captureStream !== 'function')
+        throw new Error('This browser cannot record the page-sized compositor canvas.');
     const source = document.querySelector(containerSelector);
     if (!source) throw new Error('The publication export surface is not available.');
     const sourcePages = [...source.querySelectorAll(':scope > .print-page')];
@@ -2522,7 +2636,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
 
     const countdown = document.createElement('div');
     countdown.className = 'publisher-video-export-countdown';
-    countdown.textContent = 'Select This Tab to record at the publication page size. Enable tab audio when needed.';
+    countdown.textContent = 'Select This Tab and enable tab audio when needed.';
     overlay.append(frame, countdown);
     document.body.appendChild(overlay);
 
@@ -2545,7 +2659,9 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         page.style.translate = 'none';
     };
     const fitFrameToViewport = () => {
-        const scale = Math.min((innerWidth - 32) / frameWidth, (innerHeight - 32) / frameHeight, 1);
+        const viewportWidth = window.visualViewport?.width || innerWidth;
+        const viewportHeight = window.visualViewport?.height || innerHeight;
+        const scale = Math.min((viewportWidth - 32) / frameWidth, (viewportHeight - 32) / frameHeight, 1);
         frame.style.transform = `scale(${Math.max(.05, scale)})`;
     };
     pages.forEach(fitPage);
@@ -2553,20 +2669,23 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     window.addEventListener('resize', fitFrameToViewport);
 
     let capture = null;
+    let compositor = null;
     let recorder = null;
     let stopped = null;
     const chunks = [];
     let totalDuration = 0;
-    let restricted = false;
     try {
-        await sleep(80);
+        step = 'requesting tab capture';
+        await sleep(120);
         capture = await requestPresentationCapture();
-        restricted = await restrictPresentationCapture(capture, frame, frameWidth, frameHeight);
+        step = 'creating the page-sized compositor';
+        compositor = await createPageFrameRecordingStream(capture, frame, frameWidth, frameHeight);
 
         const mimeType = chooseVideoRecordingMimeType();
         const pixels = frameWidth * frameHeight;
         const videoBitsPerSecond = Math.max(4_000_000, Math.min(20_000_000, Math.round(pixels * 8)));
-        recorder = new MediaRecorder(capture, mimeType
+        step = 'starting MediaRecorder';
+        recorder = new MediaRecorder(compositor.stream, mimeType
             ? { mimeType, videoBitsPerSecond }
             : { videoBitsPerSecond });
         recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
@@ -2576,46 +2695,113 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         });
 
         for (let count = 3; count > 0; count--) {
-            countdown.textContent = restricted
-                ? `Page-sized recording starts in ${count}`
-                : `Full-tab fallback recording starts in ${count}`;
+            const sourceLabel = compositor.displaySurface && compositor.displaySurface !== 'browser'
+                ? `Selected ${compositor.displaySurface}; This Tab is recommended`
+                : 'Page-sized tab recording';
+            countdown.textContent = `${sourceLabel} starts in ${count}`;
             await sleep(700);
         }
         countdown.remove();
-        recorder.start(1000);
+        recorder.start(500);
+        step = 'recording publication pages';
         for (let index = 0; index < pages.length; index++) {
             const page = pages[index];
             pages.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
             fitPage(page, index);
-            await sleep(80);
+            await sleep(120);
             const duration = exportedPageDuration(page);
             totalDuration += duration;
             previewPublicationItems(page, prepareVideoExportPage(page), true);
             await sleep(duration * 1000);
             clearPublicationPreview(page.id || page);
-            page.querySelectorAll('video,audio').forEach(media => { media.pause(); try { media.currentTime = 0; } catch { } });
+            page.querySelectorAll('video,audio').forEach(media => {
+                try { media.pause(); } catch { }
+                try { media.currentTime = 0; } catch { }
+            });
         }
-        if (recorder.state !== 'inactive') recorder.stop();
-        await stopped;
-        const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+
+        step = 'finalizing WebM';
+        if (recorder.state === 'recording') {
+            try { recorder.requestData(); } catch { }
+            await sleep(120);
+            recorder.stop();
+        }
+        await Promise.race([
+            stopped,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('MediaRecorder did not finish the WebM file.')), 15000))
+        ]);
+        const blobType = String(recorder.mimeType || 'video/webm').split(';', 1)[0] || 'video/webm';
+        const blob = new Blob(chunks, { type: blobType });
         if (!blob.size) throw new Error('The browser completed the capture but produced an empty video.');
+        step = 'downloading WebM';
         downloadBlob(fileName || 'publication.webm', blob);
         return {
             fileName: fileName || 'publication.webm',
             durationSeconds: totalDuration,
             width: frameWidth,
             height: frameHeight,
-            pageSizedCapture: restricted
+            pageSizedCapture: true
         };
+    } catch (error) {
+        const message = error?.message || String(error);
+        console.error(`Publisher video export failed while ${step}.`, error);
+        throw new Error(`Video export failed while ${step}: ${message}`);
     } finally {
         if (recorder && recorder.state !== 'inactive') { try { recorder.stop(); } catch { } }
-        if (capture) capture.getTracks().forEach(track => track.stop());
+        try { compositor?.stop(); } catch { }
+        if (capture) capture.getTracks().forEach(track => { try { track.stop(); } catch { } });
         window.removeEventListener('resize', fitFrameToViewport);
         overlay.remove();
     }
 }
 
+const storyEditorLayouts = new WeakMap();
+
+function initializeStoryEditorLayout(shellId, hostId) {
+    const shell = document.getElementById(shellId);
+    const host = document.getElementById(hostId);
+    if (!shell || !host) return;
+    let state = storyEditorLayouts.get(shell);
+    if (state) {
+        state.host = host;
+        state.schedule();
+        return;
+    }
+    let timer = 0;
+    const refresh = () => {
+        timer = 0;
+        if (!shell.isConnected || !host.isConnected) return;
+        host.style.maxWidth = `${Math.max(1, shell.clientWidth)}px`;
+        host.scrollLeft = 0;
+        const richRoot = host.firstElementChild;
+        if (richRoot instanceof HTMLElement) {
+            richRoot.style.width = '100%';
+            richRoot.style.maxWidth = '100%';
+            richRoot.style.minWidth = '0';
+        }
+        window.dispatchEvent(new Event('resize'));
+    };
+    const schedule = () => {
+        if (timer) clearTimeout(timer);
+        timer = window.setTimeout(refresh, 40);
+    };
+    const click = event => {
+        if (!event.target.closest('button,[role="tab"],[role="button"]')) return;
+        schedule();
+        window.setTimeout(schedule, 120);
+        window.setTimeout(schedule, 320);
+    };
+    shell.addEventListener('click', click, true);
+    const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
+    resizeObserver?.observe(shell);
+    resizeObserver?.observe(host);
+    state = { host, schedule, resizeObserver, click };
+    storyEditorLayouts.set(shell, state);
+    schedule();
+}
+
 window.publisherStudio = {
+    initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
 

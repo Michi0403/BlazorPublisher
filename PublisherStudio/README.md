@@ -14,7 +14,7 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 - Text frames edited with DevExpress Blazor RichEdit and its Office ribbon; stories use DOCX storage, support dynamic fields, and download as DOCX, RTF, TXT, or HTML.
 - Image frames with preserved PNG alpha, replacement, fit/fill, interactive crop panning, wheel-based crop zoom, picture rotation, flipping, opacity, brightness, contrast, saturation, hue, inversion, grayscale, sepia, blur, masks, borders, shadows, tint/full recolor, blend modes, color-key transparency, and frame-ratio presets.
 - A separate **Picture Studio** opened by **Insert > Create picture** or **Picture Tools > Edit in Picture Studio**, with transparent canvases, direct transforms, undo/redo, a layer clipboard, keyboard shortcuts, contextual right-click commands, and editable raster, text, shape, fill, paint, and procedural-render layers.
-- Publication-level reusable data objects sourced from JSON, pasted CSV/TSV/delimited text, or live publication-object metadata.
+- Publication-level reusable data objects sourced from imported or pasted CSV/TSV, JSON, XML, or live publication-object metadata.
 - Insertable live DevExpress data visuals: Cartesian charts, pie/doughnut charts, polar charts, sparklines, circular bar gauges, data tables, and KPI progress indicators.
 - A guided data-visual editor for choosing component type, chart subtype, category, series, numeric fields, labels, legends, ranges, and row limits with a live preview.
 - Picture Studio effects include tint/recolor, soften/blur, tonal and color adjustments, gradients, Clouds, Noise, Stripes, Vignette, Bloom, Neon, Lens Flare, Grain, Motion Blur, Wind, and Ocean Waves; drawing includes brush, pencil, spray, toothbrush, lines, arrows, base forms, area selections, and solid/gradient selection fills.
@@ -134,7 +134,7 @@ See `CHANGELOG-v0.5.md`. A decoupled layered Picture Studio can create transpare
 
 ## v0.6 publication data and DevExpress visuals
 
-See `CHANGELOG-v0.6.md`. Publications can now store reusable data objects and insert live DevExpress Cartesian, pie/doughnut, polar, sparkline, bar-gauge, grid, and KPI visuals. Data can come from JSON, pasted delimited text, or the publication's own page/object metadata.
+See `CHANGELOG-v0.6.md`. Publications can now store reusable data objects and insert live DevExpress Cartesian, pie/doughnut, polar, sparkline, bar-gauge, grid, and KPI visuals. Data can come from CSV/TSV, JSON, XML, or the publication's own page/object metadata.
 
 ## v0.7 Picture Studio drawing and recovery
 
@@ -153,3 +153,8 @@ See `CHANGELOG-v0.9.md`. Every publication element can participate in a page-wid
 ## v1.0 media studios and visual page timeline
 
 See `CHANGELOG-v1.0.md`. Audio and video are first-class publication objects, Video Studio and Audio Studio provide simple browser-native creation and non-destructive editing, and the page timeline provides a second visual way to arrange animations and media.
+
+
+## v1.0.5 beta stabilization
+
+See `CHANGELOG-v1.0.5.md`. Presentation video recording, publisher pointer state, deterministic layer ordering, CSV/XML data import, barcode value import, and Story Editor ribbon sizing were stabilized for beta.

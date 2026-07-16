@@ -4,7 +4,7 @@
 @if (Visible && TextFrame is not null)
 {
     <div class="modal-backdrop" role="presentation">
-        <section class="story-editor-dialog" role="dialog" aria-modal="true" aria-label="Edit text story">
+        <section id="story-editor-shell" class="story-editor-dialog" role="dialog" aria-modal="true" aria-label="Edit text story">
             <header>
                 <div><strong>Edit story</strong><span>@TextFrame.Name</span></div>
                 <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
@@ -46,7 +46,7 @@
                 <button type="button" @onclick="PrintStory">Print</button>
             </div>
 
-            <div class="story-editor-host">
+            <div id="story-editor-host" class="story-editor-host">
                 <DxRichEdit @key="_editorRevision" @ref="_richEdit"
                             DocumentFormat="@_documentFormat"
                             @bind-DocumentContent="_content"
@@ -137,6 +137,11 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (Visible)
+        {
+            try { await JS.InvokeVoidAsync("publisherStudio.initializeStoryEditorLayout", "story-editor-shell", "story-editor-host"); }
+            catch (JSDisconnectedException) { }
+        }
         if (!_legacyConversionPending || _richEdit is null || _upgradingLegacyStory) return;
 
         _upgradingLegacyStory = true;

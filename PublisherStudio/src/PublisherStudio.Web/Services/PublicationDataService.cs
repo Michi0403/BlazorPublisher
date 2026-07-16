@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services;
@@ -55,6 +56,9 @@ public sealed class PublicationDataService
                 break;
             case PublicationDataSourceKind.DelimitedText:
                 ParseDelimited(data);
+                break;
+            case PublicationDataSourceKind.Xml:
+                ParseXml(data);
                 break;
             case PublicationDataSourceKind.DocumentObjects:
                 data.Columns = DocumentObjectColumns();
@@ -185,6 +189,78 @@ public sealed class PublicationDataService
         JsonValueKind.Null or JsonValueKind.Undefined => string.Empty,
         _ => value.GetRawText()
     };
+
+    private static void ParseXml(PublicationDataObject data)
+    {
+        var document = XDocument.Parse(data.RawSource ?? string.Empty, LoadOptions.None);
+        var root = document.Root ?? throw new InvalidDataException("XML must contain a root element.");
+        var direct = root.Elements().ToList();
+        List<XElement> sourceRows;
+        if (direct.Count == 0)
+        {
+            sourceRows = [root];
+        }
+        else
+        {
+            var repeated = direct.GroupBy(element => element.Name.LocalName, StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(group => group.Count())
+                .First();
+            if (repeated.Count() > 1)
+                sourceRows = repeated.ToList();
+            else if (direct.Count == 1 && direct[0].Elements().Any())
+                sourceRows = direct[0].Elements().ToList();
+            else if (direct.All(element => element.Elements().Any() || element.HasAttributes))
+                sourceRows = direct;
+            else
+                sourceRows = [root];
+        }
+
+        var rows = new List<PublicationDataRow>();
+        var names = new List<string>();
+        foreach (var sourceRow in sourceRows)
+        {
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var attribute in sourceRow.Attributes())
+                AddXmlValue(values, names, attribute.Name.LocalName, attribute.Value, attribute: true);
+            var children = sourceRow.Elements().ToList();
+            if (children.Count == 0)
+            {
+                var column = sourceRow == root ? root.Name.LocalName : "Value";
+                AddXmlValue(values, names, column, sourceRow.Value, attribute: false);
+            }
+            else
+            {
+                foreach (var child in children)
+                {
+                    var value = child.HasElements
+                        ? string.Join(" ", child.DescendantNodes().OfType<XText>().Select(node => node.Value).Where(item => !string.IsNullOrWhiteSpace(item))).Trim()
+                        : child.Value;
+                    AddXmlValue(values, names, child.Name.LocalName, value, attribute: false);
+                    foreach (var attribute in child.Attributes())
+                        AddXmlValue(values, names, $"{child.Name.LocalName}.@{attribute.Name.LocalName}", attribute.Value, attribute: true);
+                }
+            }
+            rows.Add(new PublicationDataRow { Values = values });
+        }
+
+        data.Rows = rows;
+        data.Columns = names.Select(name => new PublicationDataColumn
+        {
+            Name = name,
+            ValueKind = InferKind(rows.Select(row => row.Get(name)))
+        }).ToList();
+    }
+
+    private static void AddXmlValue(Dictionary<string, string> values, List<string> names, string name, string value, bool attribute)
+    {
+        var basis = string.IsNullOrWhiteSpace(name) ? (attribute ? "Attribute" : "Value") : name.Trim();
+        var candidate = basis;
+        if (values.ContainsKey(candidate) && attribute) candidate = $"@{basis}";
+        var suffix = 2;
+        while (values.ContainsKey(candidate)) candidate = $"{basis} {suffix++}";
+        values[candidate] = value?.Trim() ?? string.Empty;
+        if (!names.Contains(candidate, StringComparer.OrdinalIgnoreCase)) names.Add(candidate);
+    }
 
     private static void ParseDelimited(PublicationDataObject data)
     {

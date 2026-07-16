@@ -245,7 +245,7 @@
                     @RangeField("Padding", text.PaddingMm, 0, 20, .1, "padding")
                     @ColorField("Background", text.Background, "textBackground")
                     @ColorField("Border", text.BorderColor, "textBorder")
-                    @RangeField("Border width", text.BorderWidth, 0, 5, .05, "textBorderWidth")
+                    @RangeField("Frame border width (mm)", text.BorderWidth, 0, 5, .05, "textBorderWidth")
                     <DxButton Text="Edit story" Click="RequestEditStory" CssClass="wide-button" />
                 </section>
             }
@@ -769,6 +769,11 @@
     private void ChangeNumber(string field, ChangeEventArgs args)
     {
         if (!TryDouble(args, out var value)) return;
+        if (field == "z")
+        {
+            State.SetSelectedLayerPosition((int)Math.Round(value));
+            return;
+        }
         if (State.SelectedElement is PublicationMediaElement media && IsMediaNumberField(field))
         {
             State.UpdateMedia(media.Id, item => ApplyNumber(item, field, value));
@@ -780,6 +785,11 @@
     private void ChangeNumberLive(string field, ChangeEventArgs args)
     {
         if (!TryDouble(args, out var value)) return;
+        if (field == "z")
+        {
+            State.SetSelectedLayerPosition((int)Math.Round(value));
+            return;
+        }
         if (State.SelectedElement is PublicationMediaElement media && IsMediaNumberField(field))
         {
             State.UpdateMediaLive(media.Id, field, item => ApplyNumber(item, field, value));
@@ -832,7 +842,7 @@
         if (element is TextFrameElement text)
         {
             if (field == "padding") text.PaddingMm = value;
-            if (field == "textBorderWidth") text.BorderWidth = value;
+            if (field == "textBorderWidth") text.BorderWidth = Math.Clamp(value, 0, 5);
         }
         if (element is ShapeElement shape)
         {

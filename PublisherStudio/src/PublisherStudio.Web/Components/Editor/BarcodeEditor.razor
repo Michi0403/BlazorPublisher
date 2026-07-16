@@ -1,3 +1,5 @@
+@using System.Text.Json
+@using System.Xml.Linq
 @namespace PublisherStudio.Components.Editor
 @inject IJSRuntime JS
 
@@ -14,6 +16,10 @@
                 <div class="barcode-editor-properties">
                     <label>Format<select value="@_draft.Format" @onchange="ChangeFormat">@foreach (var format in Enum.GetValues<PublicationBarcodeFormat>()) { <option value="@format">@FormatName(format)</option> }</select></label>
                     <label>Value<textarea rows="4" @oninput="ChangeValue">@_draft.Value</textarea></label>
+                    <label class="barcode-file-picker">Import value from CSV, TSV, JSON, XML, or TXT
+                        <InputFile accept=".csv,.tsv,.txt,.json,.xml,text/csv,text/tab-separated-values,application/json,application/xml,text/xml,text/plain" OnChange="ImportValueFile" />
+                    </label>
+                    @if (!string.IsNullOrWhiteSpace(_importInfo)) { <small class="barcode-import-info">@_importInfo</small> }
                     <div class="picture-property-grid"><label>Foreground<input type="color" value="@_draft.ForegroundColor" @oninput="ChangeForeground" /></label><label>Background<input type="color" value="@_draft.BackgroundColor" @oninput="ChangeBackground" /></label></div>
                     <label><input type="checkbox" checked="@_draft.TransparentBackground" @onchange="ChangeTransparent" /> Transparent background</label>
                     @if (_draft.Format == PublicationBarcodeFormat.QrCode)
@@ -54,6 +60,7 @@
     private Guid _loadedId;
     private string _svg = string.Empty;
     private string? _error;
+    private string? _importInfo;
     private bool _refresh;
     private DxContextMenu _menu = default!;
 
@@ -62,6 +69,7 @@
         if (!Visible || Item is null || Item.Id == _loadedId) return;
         _loadedId = Item.Id;
         Copy(Item, _draft);
+        _importInfo = null;
         _refresh = true;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -81,6 +89,105 @@
     private Task ShowContextMenu(MouseEventArgs args) => _menu.ShowAsync(args);
     private async Task Save() { _draft.SvgMarkup = _svg; await Saved.InvokeAsync(Clone(_draft)); }
     private Task Cancel() => Cancelled.InvokeAsync();
+    private async Task ImportValueFile(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            var file = args.File;
+            await using var stream = file.OpenReadStream(4 * 1024 * 1024);
+            using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+            var source = await reader.ReadToEndAsync();
+            var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+            _draft.Value = extension switch
+            {
+                ".json" => FirstJsonScalar(source),
+                ".xml" => FirstXmlScalar(source),
+                ".csv" => FirstDelimitedValue(source, GuessDelimiter(source)),
+                ".tsv" => FirstDelimitedValue(source, '\t'),
+                _ => source.Trim()
+            };
+            if (string.IsNullOrWhiteSpace(_draft.Value)) throw new InvalidDataException("The imported file does not contain a usable barcode value.");
+            _importInfo = $"Loaded first usable value from {file.Name}.";
+            _error = null;
+            Queue();
+        }
+        catch (Exception ex)
+        {
+            _importInfo = null;
+            _error = ex.Message;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private static string FirstJsonScalar(string source)
+    {
+        using var document = JsonDocument.Parse(source, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+        return FindJsonScalar(document.RootElement) ?? string.Empty;
+    }
+
+    private static string? FindJsonScalar(JsonElement value)
+    {
+        return value.ValueKind switch
+        {
+            JsonValueKind.String => value.GetString(),
+            JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False => value.GetRawText(),
+            JsonValueKind.Array => value.EnumerateArray().Select(FindJsonScalar).FirstOrDefault(item => !string.IsNullOrWhiteSpace(item)),
+            JsonValueKind.Object => value.EnumerateObject().Select(property => FindJsonScalar(property.Value)).FirstOrDefault(item => !string.IsNullOrWhiteSpace(item)),
+            _ => null
+        };
+    }
+
+    private static string FirstXmlScalar(string source)
+    {
+        var document = XDocument.Parse(source);
+        var leaf = document.Root?.DescendantsAndSelf().FirstOrDefault(element => !element.HasElements && !string.IsNullOrWhiteSpace(element.Value));
+        return leaf?.Value.Trim() ?? document.Root?.Attributes().FirstOrDefault()?.Value?.Trim() ?? string.Empty;
+    }
+
+    private static char GuessDelimiter(string source)
+    {
+        var firstLine = source.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
+        return new[] { ',', ';', '\t', '|' }.OrderByDescending(candidate => firstLine.Count(character => character == candidate)).First();
+    }
+
+    private static string FirstDelimitedValue(string source, char delimiter)
+    {
+        var rows = source.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => ParseDelimitedLine(line, delimiter))
+            .Where(row => row.Count > 0)
+            .Take(2)
+            .ToList();
+        if (rows.Count == 0) return string.Empty;
+        var headers = rows[0];
+        var preferred = headers.FindIndex(value => value.Trim().Equals("value", StringComparison.OrdinalIgnoreCase)
+            || value.Trim().Equals("barcode", StringComparison.OrdinalIgnoreCase)
+            || value.Trim().Equals("code", StringComparison.OrdinalIgnoreCase)
+            || value.Trim().Equals("content", StringComparison.OrdinalIgnoreCase));
+        if (rows.Count > 1 && preferred >= 0 && preferred < rows[1].Count) return rows[1][preferred].Trim();
+        if (rows.Count > 1 && headers.All(value => value.Any(char.IsLetter))) return rows[1].FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim() ?? string.Empty;
+        return headers.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim() ?? string.Empty;
+    }
+
+    private static List<string> ParseDelimitedLine(string line, char delimiter)
+    {
+        var values = new List<string>();
+        var value = new StringBuilder();
+        var quoted = false;
+        for (var index = 0; index < line.Length; index++)
+        {
+            var character = line[index];
+            if (character == '"')
+            {
+                if (quoted && index + 1 < line.Length && line[index + 1] == '"') { value.Append('"'); index++; }
+                else quoted = !quoted;
+            }
+            else if (character == delimiter && !quoted) { values.Add(value.ToString()); value.Clear(); }
+            else value.Append(character);
+        }
+        values.Add(value.ToString());
+        return values;
+    }
+
     private void ChangeFormat(ChangeEventArgs e) { if (Enum.TryParse<PublicationBarcodeFormat>(e.Value?.ToString(), out var v)) _draft.Format = v; Queue(); }
     private void ChangeValue(ChangeEventArgs e) { _draft.Value = e.Value?.ToString() ?? string.Empty; Queue(); }
     private void ChangeForeground(ChangeEventArgs e) { _draft.ForegroundColor = e.Value?.ToString() ?? "#111827"; Queue(); }

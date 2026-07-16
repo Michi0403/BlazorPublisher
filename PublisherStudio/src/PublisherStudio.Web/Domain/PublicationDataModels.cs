@@ -6,6 +6,7 @@ public enum PublicationDataSourceKind
 {
     Json,
     DelimitedText,
+    Xml,
     DocumentObjects
 }
 

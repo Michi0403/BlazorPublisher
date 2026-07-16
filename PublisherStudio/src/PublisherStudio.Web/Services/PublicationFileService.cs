@@ -52,6 +52,8 @@ public sealed partial class PublicationFileService
         foreach (var text in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<TextFrameElement>())
         {
             text.PreviewHtml = SanitizePreviewHtml(text.PreviewHtml);
+            text.PaddingMm = Math.Clamp(text.PaddingMm, 0, 50);
+            text.BorderWidth = Math.Clamp(text.BorderWidth, 0, 5);
             if (text.DocumentContent is null || text.DocumentContent.Length == 0)
             {
                 text.DocumentContent = RichTextDocumentFactory.CreateOpenXml("Text frame");
@@ -132,6 +134,14 @@ public sealed partial class PublicationFileService
             publicationPage.Transition.AutoAdvanceSeconds = Math.Clamp(publicationPage.Transition.AutoAdvanceSeconds <= 0 ? 5 : publicationPage.Transition.AutoAdvanceSeconds, .25, 3600);
             publicationPage.TimelineDurationSeconds = Math.Clamp(publicationPage.TimelineDurationSeconds <= 0 ? 10 : publicationPage.TimelineDurationSeconds, 1, 3600);
 
+            var orderedElements = publicationPage.Elements
+                .Select((element, index) => new { Element = element, Index = index })
+                .OrderBy(item => item.Element.ZIndex)
+                .ThenBy(item => item.Index)
+                .Select(item => item.Element)
+                .ToList();
+            for (var index = 0; index < orderedElements.Count; index++) orderedElements[index].ZIndex = index + 1;
+
             foreach (var element in publicationPage.Elements)
             {
                 element.Animations ??= [];
@@ -186,7 +196,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.9";
+        document.FormatVersion = "1.10";
         return document;
     }
 

@@ -156,6 +156,7 @@
     private bool _mediaStudioVisible;
     private bool _timelineVisible;
     private bool _barcodeEditorVisible;
+    private bool _videoExporting;
     private Guid? _pendingNewBarcodeId;
     private Guid _mediaStudioSessionId;
     private Guid? _mediaStudioTargetId;
@@ -258,17 +259,23 @@
 
     private async Task ExportVideo()
     {
+        if (_videoExporting) return;
+        _videoExporting = true;
         try
         {
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".webm";
             ShowNotice("Choose this browser tab in the capture dialog and enable tab audio when media sound should be included.");
-            var result = await JS.InvokeAsync<VideoExportResult>("publisherStudio.exportPresentationVideo", ".print-publication", fileName, State.Document.Name);
+            var result = await JS.InvokeAsync<VideoExportResult>(
+                "publisherStudio.exportPresentationVideo",
+                System.Threading.CancellationToken.None,
+                [".print-publication", fileName, State.Document.Name]);
             var frame = result.PageSizedCapture && result.Width > 0 && result.Height > 0
                 ? $" · page frame {result.Width} × {result.Height}"
                 : " · full-tab fallback";
             ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds){frame}.");
         }
         catch (Exception ex) { ShowError(ex); }
+        finally { _videoExporting = false; }
     }
 
     private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");

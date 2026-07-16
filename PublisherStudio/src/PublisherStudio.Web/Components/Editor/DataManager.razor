@@ -8,7 +8,7 @@
             <header>
                 <div>
                     <strong>Publication data</strong>
-                    <span>Store reusable JSON, delimited text, or live document-object data inside the publication.</span>
+                    <span>Store reusable CSV, TSV, JSON, XML, or live document-object data inside the publication.</span>
                 </div>
                 <button type="button" class="window-close" @onclick="Close">×</button>
             </header>
@@ -38,8 +38,9 @@
                         <label>Name<input value="@_draft.Name" @onchange="ChangeName" /></label>
                         <label>Source
                             <select value="@_draft.SourceKind" @onchange="ChangeSourceKind">
-                                <option value="DelimitedText">Delimited text / pasted table</option>
+                                <option value="DelimitedText">CSV / TSV / delimited text</option>
                                 <option value="Json">JSON</option>
+                                <option value="Xml">XML</option>
                                 <option value="DocumentObjects">Publication objects</option>
                             </select>
                         </label>
@@ -74,7 +75,13 @@
                                 <label class="check-row"><input type="checkbox" checked="@_draft.FirstRowContainsHeaders" @onchange="ToggleHeaders" /> First row contains headers</label>
                             </div>
                         }
-                        <label class="data-source-input">@(_draft.SourceKind == PublicationDataSourceKind.Json ? "JSON" : "Text / CSV / TSV")
+                        <div class="data-file-import-row">
+                            <label class="data-file-picker">Import CSV, TSV, JSON, or XML
+                                <InputFile accept=".csv,.tsv,.txt,.json,.xml,text/csv,text/tab-separated-values,application/json,application/xml,text/xml" OnChange="ImportDataFile" />
+                            </label>
+                            <span>Imported text remains embedded in the publication.</span>
+                        </div>
+                        <label class="data-source-input">@SourceInputLabel
                             <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" spellcheck="false"></textarea>
                         </label>
                     }
@@ -148,6 +155,12 @@
     private string? _error;
     private bool ExistingDraft => State.Document.DataObjects.Any(data => data.Id == _draft.Id);
     private string DelimiterKey => _draft.Delimiter == "\t" ? "tab" : _draft.Delimiter;
+    private string SourceInputLabel => _draft.SourceKind switch
+    {
+        PublicationDataSourceKind.Json => "JSON",
+        PublicationDataSourceKind.Xml => "XML",
+        _ => "CSV / TSV / delimited text"
+    };
     private IReadOnlyList<PublicationDataColumn> PreviewColumns => DataService.ResolveColumns(_draft);
     private IReadOnlyList<PublicationDataRow> PreviewRows => DataService.ResolveRows(State.Document, _draft, State.SelectedPageId);
 
@@ -200,6 +213,38 @@
         }
     }
 
+    private async Task ImportDataFile(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            var file = args.File;
+            await using var stream = file.OpenReadStream(16 * 1024 * 1024);
+            using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+            _draft.RawSource = await reader.ReadToEndAsync();
+            var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+            _draft.SourceKind = extension switch
+            {
+                ".json" => PublicationDataSourceKind.Json,
+                ".xml" => PublicationDataSourceKind.Xml,
+                _ => PublicationDataSourceKind.DelimitedText
+            };
+            if (extension == ".tsv") _draft.Delimiter = "\t";
+            else if (extension == ".csv") _draft.Delimiter = GuessCsvDelimiter(_draft.RawSource);
+            ParsePreview();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private static string GuessCsvDelimiter(string source)
+    {
+        var firstLine = (source ?? string.Empty).Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
+        var candidates = new[] { ',', ';', '\t', '|' };
+        return candidates.OrderByDescending(candidate => firstLine.Count(character => character == candidate)).First().ToString();
+    }
+
     private async Task Save()
     {
         try
@@ -240,6 +285,7 @@
         if (!Enum.TryParse<PublicationDataSourceKind>(args.Value?.ToString(), out var value)) return;
         _draft.SourceKind = value;
         if (value == PublicationDataSourceKind.Json && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "[{\"Category\":\"A\",\"Value\":10}]";
+        if (value == PublicationDataSourceKind.Xml && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "<rows><row><Category>A</Category><Value>10</Value></row><row><Category>B</Category><Value>20</Value></row></rows>";
         ParsePreview();
     }
     private void ChangeDocumentScope(ChangeEventArgs args)

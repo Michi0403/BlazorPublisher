@@ -1194,8 +1194,8 @@ button { cursor: pointer; }
 .media-clip.kind-audio { color: #0b3d27; background: linear-gradient(90deg,#bbf7d0,#86efac); border-color: #15803d; }
 .timeline-empty { display: grid; place-items: center; align-content: center; min-height: 68px; color: #667085; font-size: 10px; }
 
-.media-studio-backdrop { position: fixed; z-index: 1200; inset: 0; display: grid; place-items: center; padding: 12px; background: #0f172ad9; }
-.media-studio-window { width: min(1180px,96vw); height: min(760px,94vh); min-width: 680px; min-height: 500px; display: grid; grid-template-rows: auto auto auto minmax(0,1fr) auto; overflow: hidden; border: 1px solid #687384; border-radius: 7px; background: #f5f7fa; box-shadow: 0 24px 70px #000b; }
+.media-studio-backdrop { position: fixed; z-index: 1040; inset: 0; display: grid; place-items: center; padding: 12px; background: #0f172ad9; }
+.media-studio-window { position: relative; z-index: 1; width: min(1180px,96vw); height: min(760px,94vh); min-width: 680px; min-height: 500px; display: grid; grid-template-rows: auto auto auto minmax(0,1fr) auto; overflow: hidden; border: 1px solid #687384; border-radius: 7px; background: #f5f7fa; box-shadow: 0 24px 70px #000b; }
 .media-studio-titlebar, .media-studio-footer { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; background: linear-gradient(#fff,#e8ecf1); }
 .media-studio-titlebar { border-bottom: 1px solid #b3bbc5; }
 .media-studio-titlebar > div { min-width: 0; display: grid; gap: 1px; }
@@ -1421,35 +1421,25 @@ button { cursor: pointer; }
     .timeline-ribbon-host .timeline-playhead-control { border-left: 0; border-top: 1px solid #c3c9d0; }
 }
 
-/* v1.0 beta polish: compact categorized command ribbons and readable primary commands. */
-.categorized-ribbon { min-width:0; max-width:100%; }
+/* v1.0 beta polish: compact categorized command ribbons with reliable contrast.
+   DevExpress changes wrapper classes between patch releases, so command text is fixed at every
+   button/item layer instead of relying on IsPrimary theme colors. */
+.categorized-ribbon { min-width:0; max-width:100%; --publisher-ribbon-text:#273444; --publisher-ribbon-disabled:#7b8490; }
 .publication-ribbon.categorized-ribbon { min-height:104px; }
-.publisher-ribbon-menu { min-width:220px; max-height:min(70vh,560px); overflow:auto; }
-.publication-ribbon [class*="primary"],
-.picture-studio-ribbon [class*="primary"],
-.media-studio-ribbon [class*="primary"],
-.story-editor-ribbon [class*="primary"],
-.barcode-editor-ribbon [class*="primary"],
-.publication-ribbon .dxbl-btn-primary,
-.picture-studio-ribbon .dxbl-btn-primary,
-.media-studio-ribbon .dxbl-btn-primary,
-.story-editor-ribbon .dxbl-btn-primary,
-.barcode-editor-ribbon .dxbl-btn-primary,
-.publication-ribbon [data-render-style="Primary"],
-.picture-studio-ribbon [data-render-style="Primary"],
-.media-studio-ribbon [data-render-style="Primary"],
-.story-editor-ribbon [data-render-style="Primary"],
-.barcode-editor-ribbon [data-render-style="Primary"] { color:#fff !important; }
-.publication-ribbon [class*="primary"] *,
-.picture-studio-ribbon [class*="primary"] *,
-.media-studio-ribbon [class*="primary"] *,
-.story-editor-ribbon [class*="primary"] *,
-.barcode-editor-ribbon [class*="primary"] *,
-.publication-ribbon .dxbl-btn-primary *,
-.picture-studio-ribbon .dxbl-btn-primary *,
-.media-studio-ribbon .dxbl-btn-primary *,
-.story-editor-ribbon .dxbl-btn-primary *,
-.barcode-editor-ribbon .dxbl-btn-primary * { color:inherit !important; }
+.publisher-ribbon-menu { min-width:220px; max-height:min(70vh,560px); overflow:auto; --publisher-ribbon-text:#273444; }
+.categorized-ribbon :is(.dxbl-ribbon-item,.dxbl-ribbon-item-content,.dxbl-btn,button:not([role="tab"]),[role="button"]:not([role="tab"])),
+.categorized-ribbon :is(.dxbl-ribbon-item,.dxbl-ribbon-item-content,.dxbl-btn,button:not([role="tab"]),[role="button"]:not([role="tab"])) *,
+.publisher-ribbon-menu,
+.publisher-ribbon-menu * {
+    color:var(--publisher-ribbon-text,#273444) !important;
+    -webkit-text-fill-color:var(--publisher-ribbon-text,#273444) !important;
+}
+.categorized-ribbon :is(.dxbl-ribbon-item,.dxbl-ribbon-item-content,button:not([role="tab"]),[role="button"]:not([role="tab"])):not(.dxbl-disabled):not(:disabled):not([aria-disabled="true"]) { pointer-events:auto; cursor:pointer; }
+.categorized-ribbon :is(.dxbl-disabled,[aria-disabled="true"],button:disabled),
+.categorized-ribbon :is(.dxbl-disabled,[aria-disabled="true"],button:disabled) * {
+    color:var(--publisher-ribbon-disabled,#7b8490) !important;
+    -webkit-text-fill-color:var(--publisher-ribbon-disabled,#7b8490) !important;
+}
 
 /* Object snapping feedback. It is present only during an active move operation. */
 .publisher-object-alignment-overlay { position:absolute; inset:0; z-index:950; pointer-events:none; color:#16a34a; }

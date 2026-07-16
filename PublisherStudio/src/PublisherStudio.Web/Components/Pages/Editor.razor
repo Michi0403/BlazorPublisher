@@ -24,6 +24,8 @@
                        OnExportPng="ExportPng"
                        OnExportJpeg="ExportJpeg"
                        OnExportSvg="ExportSvg"
+                       OnExportSelectedPng="ExportSelectedPng"
+                       OnExportSelectedSvg="ExportSelectedSvg"
                        OnExportWebsite="ExportWebsite"
                        OnExportVideo="ExportVideo"
                        OnInsertPicture="OpenPicturePicker"
@@ -193,22 +195,35 @@
     private async Task OpenPublicationPicker()
     {
         await CancelPublisherPointerAsync();
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", "publication-file-input");
+        await OpenHiddenFileInput("publication-file-input");
     }
     private async Task OpenPicturePicker()
     {
         await CancelPublisherPointerAsync();
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-file-input");
+        await OpenHiddenFileInput("picture-file-input");
     }
     private async Task OpenVideoPicker()
     {
         await CancelPublisherPointerAsync();
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", "video-file-input");
+        await OpenHiddenFileInput("video-file-input");
     }
     private async Task OpenAudioPicker()
     {
         await CancelPublisherPointerAsync();
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", "audio-file-input");
+        await OpenHiddenFileInput("audio-file-input");
+    }
+
+    private async Task OpenHiddenFileInput(string id)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("publisherStudio.clickElement", id);
+        }
+        catch (JSException)
+        {
+            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
+            await module.InvokeVoidAsync("clickElementById", id);
+        }
     }
 
     private async Task SavePublication()
@@ -224,12 +239,45 @@
     private async Task ExportPng() => await ExportRasterPages("png");
     private async Task ExportJpeg() => await ExportRasterPages("jpeg");
     private async Task ExportSvg() => await ExportPage("svg");
+    private async Task ExportSelectedPng() => await ExportSelectedObject("png");
+    private async Task ExportSelectedSvg() => await ExportSelectedObject("svg");
+
+    private async Task ExportSelectedObject(string format)
+    {
+        try
+        {
+            var selected = State.SelectedElement;
+            if (selected is null) throw new InvalidOperationException("Select an object before exporting it.");
+            if (selected is ConnectorElement) throw new InvalidOperationException("Connector-only export is not supported yet.");
+            var extension = format == "svg" ? "svg" : "png";
+            var baseName = PublicationFileService.SafeFileName(State.Document.Name);
+            var objectName = PublicationFileService.SafeFileName(selected.Name);
+            var fileName = $"{baseName}-{objectName}.{extension}";
+            ShowNotice($"Rendering {selected.Name} as {format.ToUpperInvariant()}…");
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+            await JS.InvokeVoidAsync(
+                "publisherStudio.exportPublicationElement",
+                selected.Id.ToString(),
+                fileName,
+                format,
+                State.Document.View.ExportDpi);
+            ShowNotice($"Exported {selected.Name} as {format.ToUpperInvariant()}.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
 
     private async Task ExportRasterPages(string format)
     {
         try
         {
             var baseName = PublicationFileService.SafeFileName(State.Document.Name);
+            ShowNotice($"Rendering {format.ToUpperInvariant()} page export…");
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
             var result = await JS.InvokeAsync<PageExportResult>(
                 "publisherStudio.exportPublicationPages",
                 ".print-publication",
@@ -251,6 +299,9 @@
         try
         {
             var fileName = $"{PublicationFileService.SafeFileName(State.Document.Name)}-page-{CurrentPageNumber}.{(format == "jpeg" ? "jpg" : format)}";
+            ShowNotice($"Rendering current page as {format.ToUpperInvariant()}…");
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
             await JS.InvokeVoidAsync("publisherStudio.exportPage", "publisher-page", fileName, format, State.Document.View.ExportDpi, State.Document.Zoom);
             ShowNotice($"Exported current page as {format.ToUpperInvariant()}.");
         }
@@ -265,6 +316,9 @@
         try
         {
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".html";
+            ShowNotice("Preparing website export…");
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
             await JS.InvokeVoidAsync("publisherStudio.exportWebsite", fileName, State.Document.Name);
             ShowNotice($"Exported {fileName}");
         }
@@ -378,6 +432,7 @@
     {
         IJSObjectReference? module = null;
         Guid temporaryAssetId = Guid.Empty;
+        var usedMetadataFallback = false;
         try
         {
             var file = args.File;
@@ -386,47 +441,33 @@
             if (!mimeType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format: {Path.GetExtension(file.Name)}.");
 
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
-            MediaSourceInfo? info = null;
-            Exception? browserFileInspectionError = null;
-            try
-            {
-                var inputId = kind == PublicationElementKind.Video ? "video-file-input" : "audio-file-input";
-                info = await module.InvokeAsync<MediaSourceInfo>(
-                    "inspectMediaFileInput",
-                    inputId,
-                    kind == PublicationElementKind.Video ? "video" : "audio");
-            }
-            catch (Exception ex)
-            {
-                browserFileInspectionError = ex;
-            }
-
             await using var stream = file.OpenReadStream(160 * 1024 * 1024);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
             var bytes = buffer.ToArray();
             if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-            // Some Blazor rerenders replace the native input before JS can inspect its File.
-            // In that case, inspect the same bytes through the ranged local media endpoint.
-            if (info is null)
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+            temporaryAssetId = Guid.NewGuid();
+            var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
+            MediaSourceInfo info;
+            try
             {
-                temporaryAssetId = Guid.NewGuid();
-                var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
-                try
+                info = await module.InvokeAsync<MediaSourceInfo>(
+                    "inspectMediaDataUrl",
+                    inspectionUrl,
+                    kind == PublicationElementKind.Video ? "video" : "audio");
+            }
+            catch (Exception metadataError)
+            {
+                usedMetadataFallback = true;
+                info = new MediaSourceInfo
                 {
-                    info = await module.InvokeAsync<MediaSourceInfo>(
-                        "inspectMediaDataUrl",
-                        inspectionUrl,
-                        kind == PublicationElementKind.Video ? "video" : "audio");
-                }
-                catch (Exception endpointError)
-                {
-                    throw new InvalidDataException(
-                        $"The browser could not decode the selected media. File inspection: {browserFileInspectionError?.Message ?? "not available"}. Local inspection: {endpointError.Message}",
-                        endpointError);
-                }
+                    MimeType = mimeType,
+                    DurationSeconds = 5,
+                    WaveformSamples = []
+                };
+                Console.WriteLine($"Media metadata inspection failed: {metadataError.Message}");
             }
 
             mimeType = PublicationMediaData.NormalizeMimeType(
@@ -455,7 +496,9 @@
 
             State.SelectElement(media.Id);
             _timelineVisible = true;
-            ShowNotice($"Inserted {file.Name}. The timeline pane is open for timing and trimming.");
+            ShowNotice(usedMetadataFallback
+                ? $"Inserted {file.Name} without browser duration metadata. The clip uses a 5 second editable fallback."
+                : $"Inserted {file.Name}. The timeline pane is open for timing and trimming.");
         }
         catch (Exception ex)
         {
@@ -469,6 +512,8 @@
                 try { await module.DisposeAsync(); }
                 catch (JSDisconnectedException) { }
                 catch (TaskCanceledException) { }
+                catch (ObjectDisposedException) { }
+                catch (InvalidOperationException) { }
             }
         }
     }

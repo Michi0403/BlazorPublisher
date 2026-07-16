@@ -8,6 +8,11 @@
         <DxRibbonApplicationTabItem Text="Export current page as PNG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportPng" />
         <DxRibbonApplicationTabItem Text="Export current page as JPEG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportJpeg" />
         <DxRibbonApplicationTabItem Text="Export current page as SVG" IconCssClass="pub-icon pub-icon-vector" Click="RequestExportSvg" />
+        @if (CanExportSelection)
+        {
+            <DxRibbonApplicationTabItem Text="Export selected object as PNG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportSelectedPng" />
+            <DxRibbonApplicationTabItem Text="Export selected object as SVG" IconCssClass="pub-icon pub-icon-vector" Click="RequestExportSelectedSvg" />
+        }
         <DxRibbonApplicationTabItem Text="Export publication as website" IconCssClass="pub-icon pub-icon-web" Click="RequestExportWebsite" />
         <DxRibbonApplicationTabItem Text="Export presentation as video" IconCssClass="pub-icon pub-icon-video" Click="RequestExportVideo" />
         <DxRibbonApplicationTabItem Text="Print / Save as PDF" IconCssClass="pub-icon pub-icon-print" Click="RequestPrint" />
@@ -387,6 +392,8 @@
     [Parameter] public EventCallback OnExportPng { get; set; }
     [Parameter] public EventCallback OnExportJpeg { get; set; }
     [Parameter] public EventCallback OnExportSvg { get; set; }
+    [Parameter] public EventCallback OnExportSelectedPng { get; set; }
+    [Parameter] public EventCallback OnExportSelectedSvg { get; set; }
     [Parameter] public EventCallback OnExportWebsite { get; set; }
     [Parameter] public EventCallback OnExportVideo { get; set; }
     [Parameter] public EventCallback OnInsertPicture { get; set; }
@@ -429,6 +436,8 @@
     private Task RequestExportPng() => OnExportPng.InvokeAsync();
     private Task RequestExportJpeg() => OnExportJpeg.InvokeAsync();
     private Task RequestExportSvg() => OnExportSvg.InvokeAsync();
+    private Task RequestExportSelectedPng() => OnExportSelectedPng.InvokeAsync();
+    private Task RequestExportSelectedSvg() => OnExportSelectedSvg.InvokeAsync();
     private Task RequestExportWebsite() => OnExportWebsite.InvokeAsync();
     private Task RequestExportVideo() => OnExportVideo.InvokeAsync();
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
@@ -453,6 +462,7 @@
     private Task RequestStopAnimations() => OnStopAnimations.InvokeAsync();
 
     private bool HasSelection => State.SelectedElement is not null;
+    private bool CanExportSelection => State.SelectedElement is not null and not ConnectorElement;
     private bool CanAlign => State.SelectedElement is not null and not ConnectorElement;
     private bool IsImageSelected => State.SelectedElement is ImageFrameElement;
     private bool IsTextSelected => State.SelectedElement is TextFrameElement;

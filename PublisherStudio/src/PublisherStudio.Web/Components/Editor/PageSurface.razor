@@ -435,6 +435,9 @@
     private DxContextMenu _contextMenu = default!;
     private IJSObjectReference? _module;
     private DotNetObjectReference<PageSurface>? _self;
+    private bool _disposed;
+    private bool _canvasInitializationInProgress;
+    private string? _canvasInitializationKey;
     private static readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
     private static readonly ConnectorAnchor[] ConnectorAnchors =
     [
@@ -470,24 +473,49 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
-        _self ??= DotNetObjectReference.Create(this);
-        await _module.InvokeVoidAsync("initializeCanvas",
-            "publisher-stage", "publisher-scroll-area", "publisher-page", "publisher-horizontal-ruler", "publisher-vertical-ruler", _self,
-            new
-            {
-                pxPerMm = PixelsPerMm,
-                cropMode = State.CropMode,
-                unit = State.Document.View.RulerUnit.ToString(),
-                rulersVisible = State.Document.View.RulersVisible,
-                guidesVisible = State.Document.View.GuidesVisible,
-                snapToGrid = State.Document.View.SnapToGrid,
-                snapToGuides = State.Document.View.SnapToGuides,
-                snapToPage = State.Document.View.SnapToPage,
-                snapToObjects = State.Document.View.SnapToObjects,
-                gridSpacingMm = State.Document.View.GridSpacingMm,
-                connectorTool = State.ConnectorTool.ToString()
-            });
+        if (_disposed || _canvasInitializationInProgress) return;
+        var initializationKey = $"{State.CurrentPage.Id:N}|" +
+            $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.CropMode}|{State.Document.View.RulerUnit}|" +
+            $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
+            $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|" +
+            $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}";
+        if (initializationKey == _canvasInitializationKey) return;
+
+        _canvasInitializationInProgress = true;
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
+            _self ??= DotNetObjectReference.Create(this);
+            var initialized = await _module.InvokeAsync<bool>("initializeCanvas",
+                "publisher-stage", "publisher-scroll-area", "publisher-page", "publisher-horizontal-ruler", "publisher-vertical-ruler", _self,
+                new
+                {
+                    pxPerMm = PixelsPerMm,
+                    cropMode = State.CropMode,
+                    unit = State.Document.View.RulerUnit.ToString(),
+                    rulersVisible = State.Document.View.RulersVisible,
+                    guidesVisible = State.Document.View.GuidesVisible,
+                    snapToGrid = State.Document.View.SnapToGrid,
+                    snapToGuides = State.Document.View.SnapToGuides,
+                    snapToPage = State.Document.View.SnapToPage,
+                    snapToObjects = State.Document.View.SnapToObjects,
+                    gridSpacingMm = State.Document.View.GridSpacingMm,
+                    connectorTool = State.ConnectorTool.ToString()
+                });
+            if (initialized) _canvasInitializationKey = initializationKey;
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (ObjectDisposedException) { }
+        catch (InvalidOperationException) { }
+        catch (JSException ex)
+        {
+            Console.WriteLine($"Publisher canvas initialization failed: {ex.Message}");
+        }
+        finally
+        {
+            _canvasInitializationInProgress = false;
+        }
     }
 
     public async Task FitPageAsync()
@@ -939,12 +967,27 @@
 
     public async ValueTask DisposeAsync()
     {
-        _self?.Dispose();
+        _disposed = true;
+        try
+        {
+            if (_module is not null) await _module.InvokeVoidAsync("disposeCanvas", "publisher-stage");
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (ObjectDisposedException) { }
+        catch (InvalidOperationException) { }
+        finally
+        {
+            _self?.Dispose();
+        }
+
         try
         {
             if (_module is not null) await _module.DisposeAsync();
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
+        catch (ObjectDisposedException) { }
+        catch (InvalidOperationException) { }
     }
 }

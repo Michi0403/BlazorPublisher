@@ -29,6 +29,13 @@ function mediaElement(id) {
     return element instanceof HTMLMediaElement ? element : null;
 }
 
+export function clickElement(id) {
+    const element = document.getElementById(id);
+    if (!element) throw new Error(`Element '${id}' is not available.`);
+    if (element instanceof HTMLInputElement && element.type === 'file') element.value = '';
+    element.click();
+}
+
 export function initializeMediaStudio(id, dotnet) {
     const state = stateFor(id);
     state.dotnet = dotnet;

@@ -22,11 +22,12 @@ function elementMm(element, pxPerMm) {
 }
 
 function nextAnimationFrame(state) {
-    if (state.drawPending) return;
+    if (!state || state.drawPending) return;
     state.drawPending = true;
     requestAnimationFrame(() => {
         state.drawPending = false;
-        drawRulers(state);
+        if (!state.stage?.isConnected || !state.scroll?.isConnected || !state.page?.isConnected) return;
+        try { drawRulers(state); } catch (error) { console.warn('Publisher ruler redraw failed.', error); }
     });
 }
 
@@ -149,7 +150,20 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
     const stage = document.getElementById(stageId);
     const scroll = document.getElementById(scrollId);
     const page = document.getElementById(pageId);
-    if (!stage || !scroll || !page) return;
+    if (!stage || !scroll || !page || !stage.isConnected || !scroll.isConnected || !page.isConnected) return false;
+    const normalizedConfig = {
+        pxPerMm: Math.max(.0001, number(config?.pxPerMm, PX_PER_MM_AT_96_DPI)),
+        cropMode: Boolean(config?.cropMode),
+        unit: String(config?.unit || 'Millimeter'),
+        rulersVisible: config?.rulersVisible !== false,
+        guidesVisible: config?.guidesVisible !== false,
+        snapToGrid: Boolean(config?.snapToGrid),
+        snapToGuides: Boolean(config?.snapToGuides),
+        snapToPage: Boolean(config?.snapToPage),
+        snapToObjects: Boolean(config?.snapToObjects),
+        gridSpacingMm: Math.max(.1, number(config?.gridSpacingMm, 2.5)),
+        connectorTool: String(config?.connectorTool || 'None')
+    };
 
     let state = canvasStates.get(stage);
     if (!state) {
@@ -158,57 +172,110 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             scroll,
             page,
             dotnet,
-            config,
+            config: normalizedConfig,
             operation: null,
             cursorX: null,
             cursorY: null,
             drawPending: false,
             cropTimers: new Map(),
             connectorGhost: null,
-            lastCanvasClick: null
+            lastCanvasClick: null,
+            handlers: {}
         };
 
-        stage.addEventListener('pointerdown', event => pointerDown(state, event));
-        stage.addEventListener('pointermove', event => pointerMove(state, event));
-        stage.addEventListener('pointerup', event => pointerUp(state, event));
-        stage.addEventListener('pointercancel', event => pointerCancel(state, event));
-        stage.addEventListener('lostpointercapture', event => {
+        const handlers = state.handlers;
+        handlers.stagePointerDown = event => pointerDown(state, event);
+        handlers.stagePointerMove = event => pointerMove(state, event);
+        handlers.stagePointerUp = event => pointerUp(state, event);
+        handlers.stagePointerCancel = event => pointerCancel(state, event);
+        handlers.lostPointerCapture = event => {
             if (state.operation?.pointerId === event.pointerId) resetPointerOperation(state, true);
-        });
-        window.addEventListener('pointerdown', event => {
+        };
+        handlers.windowPointerDown = event => {
             if (state.operation && !state.stage.contains(event.target)) resetPointerOperation(state, true);
-        }, true);
-        window.addEventListener('pointerup', event => pointerUp(state, event), true);
-        window.addEventListener('pointercancel', event => pointerCancel(state, event), true);
-        window.addEventListener('blur', () => resetPointerOperation(state, true));
-        document.addEventListener('visibilitychange', () => {
+        };
+        handlers.windowPointerUp = event => pointerUp(state, event);
+        handlers.windowPointerCancel = event => pointerCancel(state, event);
+        handlers.windowBlur = () => resetPointerOperation(state, true);
+        handlers.visibilityChange = () => {
             if (document.hidden) resetPointerOperation(state, true);
-        });
-        stage.addEventListener('pointerleave', () => {
+        };
+        handlers.stagePointerLeave = () => {
             state.cursorX = null;
             state.cursorY = null;
             nextAnimationFrame(state);
-        });
-        stage.addEventListener('wheel', event => cropWheel(state, event), { passive: false });
-        stage.addEventListener('keydown', event => canvasKeyDown(state, event));
-        scroll.addEventListener('scroll', () => nextAnimationFrame(state), { passive: true });
+        };
+        handlers.stageWheel = event => cropWheel(state, event);
+        handlers.stageKeyDown = event => canvasKeyDown(state, event);
+        handlers.scroll = () => nextAnimationFrame(state);
 
-        state.resizeObserver = new ResizeObserver(() => nextAnimationFrame(state));
-        state.resizeObserver.observe(stage);
-        state.resizeObserver.observe(scroll);
+        stage.addEventListener('pointerdown', handlers.stagePointerDown);
+        stage.addEventListener('pointermove', handlers.stagePointerMove);
+        stage.addEventListener('pointerup', handlers.stagePointerUp);
+        stage.addEventListener('pointercancel', handlers.stagePointerCancel);
+        stage.addEventListener('lostpointercapture', handlers.lostPointerCapture);
+        window.addEventListener('pointerdown', handlers.windowPointerDown, true);
+        window.addEventListener('pointerup', handlers.windowPointerUp, true);
+        window.addEventListener('pointercancel', handlers.windowPointerCancel, true);
+        window.addEventListener('blur', handlers.windowBlur);
+        document.addEventListener('visibilitychange', handlers.visibilityChange);
+        stage.addEventListener('pointerleave', handlers.stagePointerLeave);
+        stage.addEventListener('wheel', handlers.stageWheel, { passive: false });
+        stage.addEventListener('keydown', handlers.stageKeyDown);
+        scroll.addEventListener('scroll', handlers.scroll, { passive: true });
+
+        if (typeof ResizeObserver === 'function') {
+            state.resizeObserver = new ResizeObserver(() => nextAnimationFrame(state));
+            state.resizeObserver.observe(stage);
+            state.resizeObserver.observe(scroll);
+        }
         canvasStates.set(stage, state);
     }
 
+    if (state.page !== page && state.operation) resetPointerOperation(state, true);
     state.scroll = scroll;
     state.page = page;
     state.dotnet = dotnet;
-    state.config = config;
+    state.config = normalizedConfig;
     state.horizontalRuler = document.getElementById(horizontalRulerId);
     state.verticalRuler = document.getElementById(verticalRulerId);
 
     bindRuler(state.horizontalRuler, 'Horizontal', state);
     bindRuler(state.verticalRuler, 'Vertical', state);
     nextAnimationFrame(state);
+    return true;
+}
+
+export function disposeCanvas(stageId) {
+    const stage = document.getElementById(stageId);
+    if (!stage) return;
+    const state = canvasStates.get(stage);
+    if (!state) return;
+
+    resetPointerOperation(state, true);
+    clearObjectAlignmentFeedback(state);
+    state.resizeObserver?.disconnect?.();
+    for (const timer of state.cropTimers?.values?.() || []) clearTimeout(timer);
+    state.cropTimers?.clear?.();
+
+    const handlers = state.handlers || {};
+    stage.removeEventListener('pointerdown', handlers.stagePointerDown);
+    stage.removeEventListener('pointermove', handlers.stagePointerMove);
+    stage.removeEventListener('pointerup', handlers.stagePointerUp);
+    stage.removeEventListener('pointercancel', handlers.stagePointerCancel);
+    stage.removeEventListener('lostpointercapture', handlers.lostPointerCapture);
+    stage.removeEventListener('pointerleave', handlers.stagePointerLeave);
+    stage.removeEventListener('wheel', handlers.stageWheel);
+    stage.removeEventListener('keydown', handlers.stageKeyDown);
+    state.scroll?.removeEventListener?.('scroll', handlers.scroll);
+    window.removeEventListener('pointerdown', handlers.windowPointerDown, true);
+    window.removeEventListener('pointerup', handlers.windowPointerUp, true);
+    window.removeEventListener('pointercancel', handlers.windowPointerCancel, true);
+    window.removeEventListener('blur', handlers.windowBlur);
+    document.removeEventListener('visibilitychange', handlers.visibilityChange);
+
+    state.dotnet = null;
+    canvasStates.delete(stage);
 }
 
 function bindRuler(canvas, orientation, state) {
@@ -873,12 +940,14 @@ function configureCanvas(canvas) {
         canvas.height = height;
     }
     const context = canvas.getContext('2d');
+    if (!context) return { context: null, rect };
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     return { context, rect };
 }
 
 function drawRuler(state, canvas, horizontal) {
     const { context, rect } = configureCanvas(canvas);
+    if (!context) return;
     const pageRect = state.page.getBoundingClientRect();
     const unit = unitDefinition(state.config.unit);
     const pixelsPerUnit = state.config.pxPerMm * unit.mmPerUnit;
@@ -987,8 +1056,6 @@ export function calculateFitZoom(stageId, widthMm, heightMm, rulersVisible) {
 function collectExportCss() {
     let css = '';
     for (const sheet of document.styleSheets) {
-        const href = sheet.href || '';
-        if (href && !href.includes('/css/site.css')) continue;
         try {
             for (const rule of sheet.cssRules) {
                 if (rule.type === CSSRule.PAGE_RULE) continue;
@@ -1061,15 +1128,21 @@ function copyComputedStyles(source, clone) {
     if (!(source instanceof Element) || !(clone instanceof Element)) return;
     const computed = getComputedStyle(source);
     const important = [
-        'position','display','left','top','right','bottom','width','height','box-sizing','overflow',
-        'background','background-color','border','border-top','border-right','border-bottom','border-left',
+        'position','display','left','top','right','bottom','width','height','min-width','max-width','min-height','max-height','box-sizing','overflow',
+        'background','background-color','background-image','background-size','background-position','background-repeat','border','border-top','border-right','border-bottom','border-left',
         'border-color','border-radius','box-shadow','text-shadow','opacity','filter',
         'transform','transform-origin','object-fit','object-position','color','font','font-family',
-        'font-size','font-weight','font-style','line-height','letter-spacing','text-align','text-decoration',
-        'white-space','word-break','padding','margin','z-index','clip-path','isolation','mix-blend-mode',
-        'paint-order','stroke','stroke-width','fill'
+        'font-size','font-weight','font-style','font-variant','font-feature-settings','line-height','letter-spacing','word-spacing','text-indent','text-rendering','text-align','text-decoration',
+        'white-space','word-break','overflow-wrap','text-overflow','text-transform','vertical-align','tab-size',
+        'padding','margin','z-index','clip-path','isolation','mix-blend-mode',
+        'align-items','align-content','align-self','justify-content','justify-items','justify-self','place-items','gap','row-gap','column-gap',
+        'flex','flex-basis','flex-direction','flex-flow','flex-grow','flex-shrink','flex-wrap','order',
+        'grid','grid-area','grid-template','grid-template-columns','grid-template-rows','grid-auto-flow','grid-auto-columns','grid-auto-rows',
+        'list-style','columns','column-count','column-gap','table-layout','border-collapse','border-spacing',
+        'paint-order','stroke','stroke-width','stroke-linecap','stroke-linejoin','fill'
     ];
-    let inline = normalizeCssColorFunctions(clone.getAttribute('style') || '');
+    let inline = normalizeCssColorFunctions(clone.getAttribute('style') || '').trim();
+    if (inline && !inline.endsWith(';')) inline += ';';
     for (const property of important) {
         const value = normalizeCssColorFunctions(computed.getPropertyValue(property));
         if (value) inline += `${property}:${value};`;
@@ -1354,76 +1427,145 @@ async function loadSvgImage(svgText) {
     throw lastError || new Error('The browser could not prepare the publication for raster export.');
 }
 
-function canvasLooksBlank(canvas, jpeg) {
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    if (!context || canvas.width < 1 || canvas.height < 1) return true;
-    const points = 32;
-    let visible = 0;
-    let nonWhite = 0;
-    for (let row = 0; row < points; row++) for (let column = 0; column < points; column++) {
-        const x = Math.min(canvas.width - 1, Math.round((column + .5) * canvas.width / points));
-        const y = Math.min(canvas.height - 1, Math.round((row + .5) * canvas.height / points));
-        const pixel = context.getImageData(x, y, 1, 1).data;
-        if (pixel[3] > 4) visible++;
-        if (pixel[0] < 248 || pixel[1] < 248 || pixel[2] < 248) nonWhite++;
+function canvasLooksBlank(canvas) {
+    if (!canvas || canvas.width < 1 || canvas.height < 1) return true;
+    const probe = document.createElement('canvas');
+    probe.width = Math.min(128, canvas.width);
+    probe.height = Math.min(128, canvas.height);
+    const context = probe.getContext('2d', { willReadFrequently: true });
+    if (!context) return false;
+    context.clearRect(0, 0, probe.width, probe.height);
+    context.drawImage(canvas, 0, 0, probe.width, probe.height);
+    const pixels = context.getImageData(0, 0, probe.width, probe.height).data;
+    for (let index = 3; index < pixels.length; index += 4) {
+        if (pixels[index] > 4) return false;
     }
-    return jpeg ? nonWhite === 0 : visible === 0;
+    return true;
 }
 
-async function rasterizePageElement(page, scale, jpeg) {
+function cappedRasterScale(width, height, requestedScale) {
+    const scale = Math.max(.1, number(requestedScale, 1));
+    const requestedPixels = Math.max(1, width * scale) * Math.max(1, height * scale);
+    const maxPixels = 80_000_000;
+    return requestedPixels > maxPixels ? scale * Math.sqrt(maxPixels / requestedPixels) : scale;
+}
+
+async function rasterizePageElement(page, scale) {
     await document.fonts?.ready;
     await waitForImages(page);
     const metrics = pageExportMetrics(page);
     if (metrics.width <= 0 || metrics.height <= 0) throw new Error('The publication page has no measurable export size.');
-    let svgError = null;
+    const effectiveScale = cappedRasterScale(metrics.width, metrics.height, scale);
+    let domError = null;
+
+    if (typeof window.html2canvas === 'function') {
+        const clone = cleanPageClone(page);
+        await freezeMediaForRaster(page, clone);
+        sanitizeInlineColorFunctions(clone);
+        clone.style.visibility = 'visible';
+        clone.style.opacity = '1';
+        canonicalizePageClone(clone, metrics);
+        const frame = document.createElement('div');
+        const rasterId = `publisher-raster-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        frame.dataset.publisherRasterRoot = rasterId;
+        frame.style.cssText = `position:relative;left:0;top:0;width:${metrics.width}px;height:${metrics.height}px;overflow:hidden;visibility:visible;opacity:1;pointer-events:none;background:transparent`;
+        frame.appendChild(clone);
+        const stage = document.createElement('div');
+        stage.setAttribute('aria-hidden', 'true');
+        stage.style.cssText = `position:fixed;left:-100000px;top:0;width:${metrics.width}px;height:${metrics.height}px;overflow:hidden;visibility:visible;opacity:1;pointer-events:none;z-index:0;background:transparent`;
+        stage.appendChild(frame);
+        document.body.appendChild(stage);
+        try {
+            await waitForImages(frame);
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            const options = {
+                backgroundColor: null, scale: effectiveScale, logging: false, useCORS: true, allowTaint: false,
+                imageTimeout: 20000, removeContainer: true, width: metrics.width, height: metrics.height,
+                windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(metrics.width)),
+                windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(metrics.height)), scrollX: 0, scrollY: 0,
+                onclone: documentClone => {
+                    const root = documentClone.querySelector(`[data-publisher-raster-root="${rasterId}"]`);
+                    if (root) sanitizeInlineColorFunctions(root);
+                }
+            };
+            let canvas = null;
+            let firstError = null;
+            try {
+                canvas = await window.html2canvas(frame, { ...options, foreignObjectRendering: false });
+            } catch (error) {
+                firstError = error;
+            }
+            if (!canvas || (page.querySelector('[data-publication-element]') && canvasLooksBlank(canvas))) {
+                try {
+                    canvas = await window.html2canvas(frame, { ...options, foreignObjectRendering: true });
+                } catch (error) {
+                    throw firstError || error;
+                }
+            }
+            if (page.querySelector('[data-publication-element]') && canvasLooksBlank(canvas))
+                throw new Error('The DOM rasterizer returned a transparent image.');
+            return canvas;
+        } catch (error) {
+            domError = error;
+            console.warn('DOM rasterization failed; trying the SVG fallback.', error);
+        } finally {
+            stage.remove();
+        }
+    }
+
     try {
         const serialized = await pageSvg(page, { freezeMedia: true });
-        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, scale, jpeg);
-        if (!page.querySelector('.print-element') || !canvasLooksBlank(canvas, jpeg)) return canvas;
-        svgError = new Error('The browser returned an empty SVG raster.');
-    } catch (error) {
-        svgError = error;
-        console.warn('Browser SVG rasterization failed; trying the local DOM renderer.', error);
-    }
-    if (typeof window.html2canvas !== 'function') throw new Error(`Raster export failed: ${svgError?.message || 'No raster engine is available.'}`);
-
-    const clone = cleanPageClone(page);
-    await freezeMediaForRaster(page, clone);
-    sanitizeInlineColorFunctions(clone);
-    clone.style.visibility = 'visible';
-    clone.style.opacity = '1';
-    canonicalizePageClone(clone, metrics);
-    const frame = document.createElement('div');
-    const rasterId = `publisher-raster-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    frame.dataset.publisherRasterRoot = rasterId;
-    frame.style.cssText = `position:relative;left:0;top:0;width:${metrics.width}px;height:${metrics.height}px;overflow:hidden;visibility:visible;opacity:1;pointer-events:none;background:${jpeg ? '#fff' : 'transparent'}`;
-    frame.appendChild(clone);
-    const stage = document.createElement('div');
-    stage.setAttribute('aria-hidden', 'true');
-    stage.style.cssText = `position:fixed;left:-100000px;top:0;width:${metrics.width}px;height:${metrics.height}px;overflow:hidden;visibility:visible;opacity:1;pointer-events:none;z-index:-2147483648;background:${jpeg ? '#fff' : 'transparent'}`;
-    stage.appendChild(frame);
-    document.body.appendChild(stage);
-    try {
-        await waitForImages(frame);
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        const options = {
-            backgroundColor: jpeg ? '#ffffff' : null, scale, logging: false, useCORS: true, allowTaint: false,
-            imageTimeout: 20000, removeContainer: true, width: metrics.width, height: metrics.height,
-            windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(metrics.width)),
-            windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(metrics.height)), scrollX: 0, scrollY: 0,
-            onclone: documentClone => {
-                const root = documentClone.querySelector(`[data-publisher-raster-root="${rasterId}"]`);
-                if (root) sanitizeInlineColorFunctions(root);
-            }
-        };
-        let canvas;
-        try { canvas = await window.html2canvas(frame, { ...options, foreignObjectRendering: true }); }
-        catch { canvas = await window.html2canvas(frame, { ...options, foreignObjectRendering: false }); }
-        if (page.querySelector('.print-element') && canvasLooksBlank(canvas, jpeg)) throw new Error('The DOM rasterizer returned an empty image.');
+        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, effectiveScale, false);
+        if (page.querySelector('[data-publication-element]') && canvasLooksBlank(canvas))
+            throw new Error('The browser returned a transparent SVG raster.');
         return canvas;
-    } catch (error) {
-        throw new Error(`Raster export failed: ${error?.message || error}. SVG renderer: ${svgError?.message || 'unknown error'}`);
-    } finally { stage.remove(); }
+    } catch (svgError) {
+        throw new Error(`Raster export failed. DOM renderer: ${domError?.message || 'not available'}. SVG renderer: ${svgError?.message || svgError}`);
+    }
+}
+
+function prepareOutputCanvas(canvas, jpeg) {
+    if (!jpeg) return canvas;
+    const output = document.createElement('canvas');
+    output.width = canvas.width;
+    output.height = canvas.height;
+    const context = output.getContext('2d', { alpha: false });
+    if (!context) throw new Error('The browser did not provide a JPEG canvas context.');
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, output.width, output.height);
+    context.drawImage(canvas, 0, 0);
+    return output;
+}
+
+function canvasToEmbeddedSvg(canvas, widthMm = 0, heightMm = 0) {
+    const dataUrl = canvas.toDataURL('image/png');
+    const width = Math.max(1, canvas.width);
+    const height = Math.max(1, canvas.height);
+    const widthAttribute = widthMm > 0 ? `${widthMm}mm` : String(width);
+    const heightAttribute = heightMm > 0 ? `${heightMm}mm` : String(height);
+    return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${widthAttribute}" height="${heightAttribute}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet"><image x="0" y="0" width="${width}" height="${height}" href="${dataUrl}" xlink:href="${dataUrl}"/></svg>`;
+}
+
+function cropCanvasToElement(canvas, page, element, paddingPixels = 2) {
+    const pageRect = page.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    if (pageRect.width <= 0 || pageRect.height <= 0 || elementRect.width <= 0 || elementRect.height <= 0)
+        throw new Error('The selected object has no measurable export area.');
+    const scaleX = canvas.width / pageRect.width;
+    const scaleY = canvas.height / pageRect.height;
+    const padding = Math.max(0, Math.round(paddingPixels));
+    const left = Math.max(0, Math.floor((elementRect.left - pageRect.left) * scaleX) - padding);
+    const top = Math.max(0, Math.floor((elementRect.top - pageRect.top) * scaleY) - padding);
+    const right = Math.min(canvas.width, Math.ceil((elementRect.right - pageRect.left) * scaleX) + padding);
+    const bottom = Math.min(canvas.height, Math.ceil((elementRect.bottom - pageRect.top) * scaleY) + padding);
+    if (right <= left || bottom <= top) throw new Error('The selected object is outside the page export area.');
+    const output = document.createElement('canvas');
+    output.width = right - left;
+    output.height = bottom - top;
+    const context = output.getContext('2d');
+    if (!context) throw new Error('The browser did not provide an object export canvas.');
+    context.drawImage(canvas, left, top, output.width, output.height, 0, 0, output.width, output.height);
+    return output;
 }
 
 async function svgToCanvas(svgText, width, height, scale, jpeg) {
@@ -2708,12 +2850,14 @@ function generateQrSvg(options) {
             if (!qr.isDark(row, column)) continue;
             const x = column + margin;
             const y = row + margin;
-            if (shape === 'dots') cells.push(`<circle cx="${x + .5}" cy="${y + .5}" r=".42"/>`);
-            else cells.push(`<rect x="${x + .04}" y="${y + .04}" width=".92" height=".92"${shape === 'rounded' ? ' rx=".34" ry=".34"' : ''}/>`);
+            if (shape === 'dots') cells.push(`<circle cx="${x + .5}" cy="${y + .5}" r=".39"/>`);
+            else if (shape === 'rounded') cells.push(`<rect x="${x + .04}" y="${y + .04}" width=".92" height=".92" rx=".22" ry=".22"/>`);
+            else cells.push(`<rect x="${x + .02}" y="${y + .02}" width=".96" height=".96"/>`);
         }
     }
     const backgroundMarkup = transparent ? '' : `<rect width="100%" height="100%" fill="${background}"/>`;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="QR code, ${correction} error correction" data-error-correction="${correction}" data-module-shape="${shape}" data-transparent-background="${transparent}">${backgroundMarkup}<g fill="${foreground}">${cells.join('')}</g></svg>`;
+    const rendering = shape === 'square' ? 'crispEdges' : 'geometricPrecision';
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet" shape-rendering="${rendering}" role="img" aria-label="QR code, ${correction} error correction" data-error-correction="${correction}" data-module-count="${count}" data-module-shape="${shape}" data-transparent-background="${transparent}" style="background:transparent"><title>QR code · correction ${correction} · ${shape} modules</title>${backgroundMarkup}<g fill="${foreground}">${cells.join('')}</g></svg>`;
 }
 
 function generateLinearBarcodeSvg(options) {
@@ -2723,26 +2867,40 @@ function generateLinearBarcodeSvg(options) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const transparent = options?.transparentBackground === true;
     let valid = true;
-    window.JsBarcode(svg, value, {
-        format: barcodeFormatName(options?.format),
-        lineColor: barcodeColor(options?.foregroundColor, '#111827'),
-        background: transparent ? 'rgba(0,0,0,0)' : barcodeColor(options?.backgroundColor, '#ffffff'),
-        displayValue: options?.showText !== false,
-        margin: Math.max(0, Math.min(64, Number(options?.margin) || 0)),
-        width: Math.max(1, Math.min(8, Number(options?.lineWidth) || 2)),
-        height: Math.max(24, Math.min(400, Number(options?.barHeight) || 90)),
-        fontSize: Math.max(8, Math.min(72, Number(options?.fontSize) || 16)),
-        textMargin: 4,
-        valid: result => { valid = result; }
-    });
-    if (!valid) throw new Error(`The value "${value}" is invalid for ${barcodeFormatToken(options?.format)}.`);
+    const formatToken = barcodeFormatToken(options?.format);
+    try {
+        window.JsBarcode(svg, value, {
+            format: barcodeFormatName(options?.format),
+            lineColor: barcodeColor(options?.foregroundColor, '#111827'),
+            background: transparent ? 'transparent' : barcodeColor(options?.backgroundColor, '#ffffff'),
+            displayValue: options?.showText !== false,
+            margin: Math.max(0, Math.min(64, Number(options?.margin) || 0)),
+            width: Math.max(1, Math.min(8, Number(options?.lineWidth) || 2)),
+            height: Math.max(24, Math.min(400, Number(options?.barHeight) || 90)),
+            fontSize: Math.max(8, Math.min(72, Number(options?.fontSize) || 16)),
+            textMargin: 4,
+            valid: result => { valid = result; }
+        });
+    } catch (error) {
+        throw new Error(`${formatToken} could not encode "${value}": ${error?.message || error}`);
+    }
+    if (!valid) throw new Error(`The value "${value}" is invalid for ${formatToken}.`);
     const width = Number(svg.getAttribute('width')) || 320;
     const height = Number(svg.getAttribute('height')) || 120;
     if (transparent) {
         svg.querySelectorAll('rect').forEach(rect => {
-            const fill = String(rect.getAttribute('fill') || '').replace(/\s/g,'').toLowerCase();
-            if (fill === 'transparent' || fill === 'rgba(0,0,0,0)' || fill === '#00000000') rect.remove();
+            const fill = String(rect.getAttribute('fill') || rect.style.fill || '').replace(/\s/g,'').toLowerCase();
+            const widthAttribute = rect.getAttribute('width') || '';
+            const heightAttribute = rect.getAttribute('height') || '';
+            const rectWidth = number(widthAttribute, 0);
+            const rectHeight = number(heightAttribute, 0);
+            const x = number(rect.getAttribute('x'), 0);
+            const y = number(rect.getAttribute('y'), 0);
+            const percentageBackground = widthAttribute.includes('%') && heightAttribute.includes('%');
+            const isCanvasBackground = x === 0 && y === 0 && (percentageBackground || (rectWidth >= width * .98 && rectHeight >= height * .98));
+            if (isCanvasBackground || fill === 'transparent' || fill === 'rgba(0,0,0,0)' || fill === '#00000000') rect.remove();
         });
+        svg.style.background = 'transparent';
     }
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('width', '100%');
@@ -2752,7 +2910,14 @@ function generateLinearBarcodeSvg(options) {
     svg.setAttribute('aria-label', `${barcodeFormatToken(options?.format)}: ${value}`);
     svg.setAttribute('data-transparent-background', String(transparent));
     if (barcodeShapeName(options?.moduleShape) === 'rounded')
-        svg.querySelectorAll('rect').forEach(rect => { if (Number(rect.getAttribute('width')) < width * .5) { rect.setAttribute('rx', '1.4'); rect.setAttribute('ry', '1.4'); } });
+        svg.querySelectorAll('rect').forEach(rect => {
+            const barWidth = number(rect.getAttribute('width'), 0);
+            if (barWidth > 0 && barWidth < width * .5) {
+                const radius = Math.min(2, barWidth / 2);
+                rect.setAttribute('rx', String(radius));
+                rect.setAttribute('ry', String(radius));
+            }
+        });
     return svg.outerHTML;
 }
 
@@ -3179,18 +3344,20 @@ export function cancelCanvasInteraction(stageId = 'publisher-stage') {
     if (state) resetPointerOperation(state, true);
 }
 
+export function clickElementById(id) {
+    const element = document.getElementById(id);
+    if (!element) throw new Error(`Element '${id}' is not available.`);
+    if (element instanceof HTMLInputElement && element.type === 'file') element.value = '';
+    element.click();
+}
+
 window.publisherStudio = {
     cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
     initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
 
-    clickElement(id) {
-        const element = document.getElementById(id);
-        if (!element) return;
-        if (element instanceof HTMLInputElement && element.type === 'file') element.value = '';
-        element.click();
-    },
+    clickElement(id) { clickElementById(id); },
 
     initializeWorkspace(id) {
         const workspace = document.getElementById(id);
@@ -3232,22 +3399,46 @@ window.publisherStudio = {
     async exportPage(pageId, fileName, format, dpi, zoom) {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
+        const pageKey = page.dataset.pageId || '';
+        const exportSource = pageKey
+            ? document.querySelector(`.print-publication > .print-page[data-page-id="${CSS.escape(pageKey)}"]`) || page
+            : page;
         const normalized = String(format).toLowerCase();
+        const scale = clamp(number(dpi, 150) / 96, .5, 12);
+        const canvas = await rasterizePageElement(exportSource, scale);
         if (normalized === 'svg') {
-            const pageId = page.dataset.pageId || '';
-            const canonicalPage = pageId
-                ? document.querySelector(`.print-publication > .print-page[data-page-id="${CSS.escape(pageId)}"]`) || page
-                : page;
-            const serialized = await pageSvg(canonicalPage, { freezeMedia: false });
-            downloadBlob(fileName, new Blob([serialized.text], { type: 'image/svg+xml;charset=utf-8' }));
+            const metrics = pageExportMetrics(exportSource);
+            const svg = canvasToEmbeddedSvg(canvas, metrics.widthMm, metrics.heightMm);
+            downloadBlob(fileName, new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
             return;
         }
 
         const jpeg = normalized === 'jpeg' || normalized === 'jpg';
-        const scale = clamp(number(dpi, 150) / (96 * Math.max(number(zoom, 1), .05)), .5, 12);
-        const canvas = await rasterizePageElement(page, scale, jpeg);
-        const blob = await canvasBlob(canvas, jpeg ? 'image/jpeg' : 'image/png', jpeg ? .92 : undefined);
+        if (!jpeg && normalized !== 'png') throw new Error('Only PNG, JPEG, and SVG page export are supported.');
+        const output = prepareOutputCanvas(canvas, jpeg);
+        const blob = await canvasBlob(output, jpeg ? 'image/jpeg' : 'image/png', jpeg ? .92 : undefined);
         downloadBlob(fileName, blob);
+    },
+
+    async exportPublicationElement(elementId, fileName, format, dpi) {
+        const id = String(elementId || '');
+        if (!id) throw new Error('No publication object was selected.');
+        const element = document.querySelector(`.print-publication [data-element-id="${CSS.escape(id)}"]`);
+        if (!element) throw new Error('The selected object is not available on the export surface.');
+        if (element.classList.contains('print-connector')) throw new Error('Connector-only export is not supported yet.');
+        const page = element.closest('.print-page');
+        if (!page) throw new Error('The selected object is not attached to a publication page.');
+        const scale = clamp(number(dpi, 150) / 96, .5, 12);
+        const pageCanvas = await rasterizePageElement(page, scale);
+        const objectCanvas = cropCanvasToElement(pageCanvas, page, element, Math.max(2, scale * 2));
+        const normalized = String(format).toLowerCase();
+        if (normalized === 'svg') {
+            const svg = canvasToEmbeddedSvg(objectCanvas);
+            downloadBlob(fileName, new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+            return;
+        }
+        if (normalized !== 'png') throw new Error('Selected objects can be exported as PNG or SVG.');
+        downloadBlob(fileName, await canvasBlob(objectCanvas, 'image/png'));
     },
 
     async exportPublicationPages(containerSelector, baseName, format, dpi) {
@@ -3265,8 +3456,10 @@ window.publisherStudio = {
         const files = [];
         for (let index = 0; index < pages.length; index++) {
             try {
-                const canvas = await rasterizePageElement(pages[index], scale, jpeg);
-                const blob = await canvasBlob(canvas, mimeType, jpeg ? .92 : undefined);
+                if (index > 0) await new Promise(resolve => requestAnimationFrame(resolve));
+                const canvas = await rasterizePageElement(pages[index], scale);
+                const output = prepareOutputCanvas(canvas, jpeg);
+                const blob = await canvasBlob(output, mimeType, jpeg ? .92 : undefined);
                 files.push({ name: `${safeBase}-page-${index + 1}.${extension}`, blob });
             } catch (error) {
                 console.error(`Page ${index + 1} raster export failed.`, error);
@@ -3314,11 +3507,19 @@ window.publisherStudio = {
     async exportWebsite(fileName, title) {
         const source = document.querySelector('.print-publication');
         if (!source) throw new Error('The publication export surface is not available.');
+        await document.fonts?.ready;
+        await waitForImages(source);
         const publication = source.cloneNode(true);
+        copyComputedStyles(source, publication);
         publication.removeAttribute('aria-hidden');
+        publication.removeAttribute('style');
         publication.className = 'website-publication';
         normalizePublicationPageSizes(publication);
         await inlineLocalMediaSources(publication);
+        publication.querySelectorAll('img').forEach(image => {
+            image.draggable = true;
+            image.removeAttribute('aria-hidden');
+        });
         const css = collectExportCss();
         const runtime = `(${websitePresentationRuntime.toString()})();`;
         const html = `<!doctype html>
@@ -3330,7 +3531,7 @@ window.publisherStudio = {
 <style>${css}
 :root{color-scheme:dark}
 html,body{width:100%;height:100%;overflow:hidden!important;background:#20242b!important}
-body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:none}
+body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
 .website-publication{position:fixed;inset:0;display:block!important;overflow:hidden;visibility:visible!important;pointer-events:auto!important}
 .ps-slide{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;transform-origin:center;will-change:transform,opacity,clip-path}
 .ps-slide[hidden]{display:none!important}
@@ -3342,7 +3543,9 @@ body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:none}
 .website-publication .print-connector.ps-interactive:hover{outline:none}
 .website-publication .print-connector.ps-interactive:hover .connector-line{filter:drop-shadow(0 0 2px #48a7e8)}
 .website-publication .text-frame-content,.website-publication .image-frame,.website-publication .shape,.website-publication .wordart-svg{width:100%;height:100%;overflow:hidden}
-.website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center}
+.website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center;pointer-events:auto;-webkit-user-drag:auto;user-select:auto}
+.website-publication video,.website-publication audio{pointer-events:auto;user-select:auto}
+.website-publication .text-frame-content{user-select:text}
 .ps-interactive{cursor:pointer}
 .ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}
 .ps-action-hidden{visibility:hidden!important;pointer-events:none!important}

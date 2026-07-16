@@ -7,7 +7,7 @@
 {
     <div class="modal-backdrop">
         <section class="barcode-editor-dialog" role="dialog" aria-modal="true" aria-label="Barcode editor">
-            <header><div><strong>Barcode Studio</strong><span>@FormatName(_draft.Format)</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
+            <header><div><strong>Barcode Studio</strong><span>@FormatSummary</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
             <DxRibbon CssClass="barcode-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Barcode">
                     <DxRibbonGroup Text="Format" IconCssClass="pub-icon pub-icon-barcode">
@@ -244,6 +244,9 @@
     }
 
     private string TransparencyCommandText => _draft.TransparentBackground ? "Use solid background" : "Use transparent background";
+    private string FormatSummary => _draft.Format == PublicationBarcodeFormat.QrCode
+        ? $"QR Code · correction {_draft.ErrorCorrection} · {_draft.ModuleShape} · {(_draft.TransparentBackground ? "transparent" : "solid background")}"
+        : $"{FormatName(_draft.Format)} · {_draft.ModuleShape} bars · {(_draft.TransparentBackground ? "transparent" : "solid background")}";
     private void SetFormat(PublicationBarcodeFormat format)
     {
         _draft.Format = format;

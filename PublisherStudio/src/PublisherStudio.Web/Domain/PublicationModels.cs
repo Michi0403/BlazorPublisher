@@ -56,11 +56,11 @@ public sealed class PublicationViewSettings
     public bool RulersVisible { get; set; } = true;
     public bool GridVisible { get; set; } = true;
     public bool GuidesVisible { get; set; } = true;
-    public bool SnapToGrid { get; set; } = true;
+    public bool SnapToGrid { get; set; } = false;
     public bool SnapToGuides { get; set; } = true;
     public bool SnapToPage { get; set; } = true;
     public bool SnapToObjects { get; set; } = true;
-    public double GridSpacingMm { get; set; } = 5;
+    public double GridSpacingMm { get; set; } = 2.5;
     public int ExportDpi { get; set; } = 150;
 }
 

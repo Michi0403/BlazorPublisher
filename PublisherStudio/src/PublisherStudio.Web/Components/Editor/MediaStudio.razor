@@ -230,8 +230,8 @@
         if (InitialMedia is { } media)
         {
             _name = media.Name;
-            _dataUrl = media.DataUrl;
-            _mimeType = media.MimeType;
+            _dataUrl = NormalizeMediaDataUrl(media.DataUrl, IsVideo ? "video/webm" : "audio/webm");
+            _mimeType = NormalizeMimeType(media.MimeType, IsVideo ? "video/webm" : "audio/webm");
             _duration = media.DurationSeconds;
             _trimStart = media.TrimStartSeconds;
             _trimEnd = media.EffectiveTrimEndSeconds;
@@ -305,8 +305,8 @@
             await using var stream = file.OpenReadStream(96 * 1024 * 1024);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
-            _dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
-            _mimeType = file.ContentType;
+            _mimeType = NormalizeMimeType(file.ContentType, IsVideo ? "video/webm" : "audio/webm");
+            _dataUrl = $"data:{_mimeType};base64,{Convert.ToBase64String(buffer.ToArray())}";
             _name = file.Name;
             await InspectSource();
         }
@@ -321,6 +321,9 @@
         if (_module is null || string.IsNullOrWhiteSpace(_dataUrl)) return;
         try
         {
+            var fallbackMimeType = IsVideo ? "video/webm" : "audio/webm";
+            _mimeType = NormalizeMimeType(_mimeType, fallbackMimeType);
+            _dataUrl = NormalizeMediaDataUrl(_dataUrl, _mimeType);
             var info = await _module.InvokeAsync<MediaSourceInfo>("inspectMediaSource", "media-studio-preview", _dataUrl, IsVideo ? "video" : "audio");
             _duration = Math.Max(.01, info.DurationSeconds);
             _trimStart = 0;
@@ -381,7 +384,7 @@
     {
         if (totalLength <= 0 || totalLength > MaxMediaDataUrlLength || chunkCount <= 0 || chunkCount > 100_000) return false;
         _recordingId = transferId;
-        _mimeType = mimeType;
+        _mimeType = NormalizeMimeType(mimeType, IsVideo ? "video/webm" : "audio/webm");
         _recordingBuffer = new StringBuilder(totalLength);
         _recordingExpectedChunks = chunkCount;
         _recordingNextChunk = 0;
@@ -402,7 +405,7 @@
     public async Task CompleteMediaRecordingTransfer(string transferId)
     {
         if (_recordingId != transferId || _recordingBuffer is null || _recordingNextChunk != _recordingExpectedChunks) return;
-        _dataUrl = _recordingBuffer.ToString();
+        _dataUrl = NormalizeMediaDataUrl(_recordingBuffer.ToString(), IsVideo ? "video/webm" : "audio/webm");
         _recordingBuffer = null;
         _recordingId = null;
         _recording = false;
@@ -515,6 +518,25 @@
         }
         writer.Flush();
         return $"data:audio/wav;base64,{Convert.ToBase64String(stream.ToArray())}";
+    }
+
+    private static string NormalizeMimeType(string? mimeType, string fallback)
+    {
+        var value = mimeType?.Trim() ?? string.Empty;
+        var separator = value.IndexOf(';');
+        if (separator >= 0) value = value[..separator].Trim();
+        return value.Contains('/') ? value.ToLowerInvariant() : fallback;
+    }
+
+    private static string NormalizeMediaDataUrl(string? dataUrl, string fallbackMimeType)
+    {
+        if (string.IsNullOrWhiteSpace(dataUrl) || !dataUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            return dataUrl ?? string.Empty;
+        var marker = dataUrl.LastIndexOf(";base64,", StringComparison.OrdinalIgnoreCase);
+        if (marker < 0) return dataUrl;
+        var header = dataUrl.Substring(5, marker - 5);
+        var mimeType = NormalizeMimeType(header, fallbackMimeType);
+        return $"data:{mimeType};base64,{dataUrl[(marker + 8)..]}";
     }
 
     private static string RecordingName(string mimeType, bool isVideo)

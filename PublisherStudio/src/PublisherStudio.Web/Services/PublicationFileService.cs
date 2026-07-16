@@ -87,15 +87,11 @@ public sealed partial class PublicationFileService
             media.FadeOutSeconds = Math.Clamp(media.FadeOutSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
             media.WaveformSamples ??= [];
             if (media.WaveformSamples.Count > 256) media.WaveformSamples = media.WaveformSamples.Take(256).ToList();
-            if (media is VideoElement video)
-            {
-                if (string.IsNullOrWhiteSpace(video.MimeType)) video.MimeType = "video/webm";
-                if (string.IsNullOrWhiteSpace(video.AltText)) video.AltText = video.Name;
-            }
-            else if (media is AudioElement audio && string.IsNullOrWhiteSpace(audio.MimeType))
-            {
-                audio.MimeType = "audio/webm";
-            }
+            var fallbackMimeType = media is VideoElement ? "video/webm" : "audio/webm";
+            media.MimeType = PublicationMediaData.NormalizeMimeType(media.MimeType, fallbackMimeType);
+            media.DataUrl = PublicationMediaData.NormalizeDataUrl(media.DataUrl, media.MimeType);
+            if (media is VideoElement video && string.IsNullOrWhiteSpace(video.AltText))
+                video.AltText = video.Name;
         }
 
         foreach (var wordArt in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<WordArtElement>())

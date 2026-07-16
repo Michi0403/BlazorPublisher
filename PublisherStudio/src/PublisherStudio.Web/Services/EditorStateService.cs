@@ -127,6 +127,8 @@ public sealed class EditorStateService
     public VideoElement AddVideo(string dataUrl, string mimeType, string name, double durationSeconds, string posterDataUrl = "")
     {
         Capture();
+        mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "video/webm");
+        dataUrl = PublicationMediaData.NormalizeDataUrl(dataUrl, mimeType);
         var element = new VideoElement
         {
             Name = NextName(string.IsNullOrWhiteSpace(name) ? "Video" : name),
@@ -152,6 +154,8 @@ public sealed class EditorStateService
     public AudioElement AddAudio(string dataUrl, string mimeType, string name, double durationSeconds, IReadOnlyList<double>? waveformSamples = null)
     {
         Capture();
+        mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "audio/webm");
+        dataUrl = PublicationMediaData.NormalizeDataUrl(dataUrl, mimeType);
         var element = new AudioElement
         {
             Name = NextName(string.IsNullOrWhiteSpace(name) ? "Audio" : name),
@@ -1028,6 +1032,9 @@ public sealed class EditorStateService
         media.FadeOutSeconds = Math.Clamp(media.FadeOutSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
         media.WaveformSamples ??= [];
         if (media.WaveformSamples.Count > 256) media.WaveformSamples = media.WaveformSamples.Take(256).ToList();
+        var fallbackMimeType = media is VideoElement ? "video/webm" : "audio/webm";
+        media.MimeType = PublicationMediaData.NormalizeMimeType(media.MimeType, fallbackMimeType);
+        media.DataUrl = PublicationMediaData.NormalizeDataUrl(media.DataUrl, media.MimeType);
     }
 
     private static void NormalizeAnimation(PublicationAnimation animation)

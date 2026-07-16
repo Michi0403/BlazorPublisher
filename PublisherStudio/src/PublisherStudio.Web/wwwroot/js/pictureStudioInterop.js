@@ -1111,9 +1111,64 @@ async function createPictureStudioBlob(documentModel, mimeType = "image/png", qu
     return await canvasToBlob(canvas, mimeType, quality);
 }
 
-export async function exportPictureStudioBlob(documentModel, mimeType = "image/png", quality = 1) {
-    const blob = await createPictureStudioBlob(documentModel, mimeType, quality);
-    return DotNet.createJSStreamReference(blob);
+const pictureExportChunkSize = 24 * 1024;
+
+export function startPictureStudioDataUrlExport(
+    documentModel,
+    mimeType = "image/png",
+    quality = 1,
+    dotNetReference,
+    exportId) {
+    // Return immediately so the initiating .NET -> JS call is finished before
+    // JavaScript starts invoking .NET with the generated image chunks.
+    void exportPictureStudioDataUrlInChunks(
+        documentModel,
+        mimeType,
+        quality,
+        dotNetReference,
+        exportId);
+}
+
+async function exportPictureStudioDataUrlInChunks(
+    documentModel,
+    mimeType,
+    quality,
+    dotNetReference,
+    exportId) {
+    try {
+        const canvas = await renderExportCanvas(documentModel, mimeType);
+        const dataUrl = canvas.toDataURL(mimeType, quality);
+        if (!dataUrl || dataUrl === "data:," || !dataUrl.startsWith("data:image/"))
+            throw new Error("The browser could not rasterize the picture.");
+
+        const chunkCount = Math.ceil(dataUrl.length / pictureExportChunkSize);
+        const exportAccepted = await dotNetReference.invokeMethodAsync(
+            "BeginPictureExport",
+            exportId,
+            dataUrl.length,
+            chunkCount);
+        if (!exportAccepted) return;
+
+        for (let chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++) {
+            const offset = chunkIndex * pictureExportChunkSize;
+            const chunk = dataUrl.slice(offset, offset + pictureExportChunkSize);
+            const chunkAccepted = await dotNetReference.invokeMethodAsync(
+                "AppendPictureExportChunk",
+                exportId,
+                chunkIndex,
+                chunk);
+            if (!chunkAccepted) return;
+        }
+
+        await dotNetReference.invokeMethodAsync("CompletePictureExport", exportId);
+    } catch (error) {
+        const message = error?.message || String(error);
+        try {
+            await dotNetReference.invokeMethodAsync("FailPictureExport", exportId, message);
+        } catch {
+            // The Blazor circuit may already be gone.
+        }
+    }
 }
 
 export async function downloadPictureStudio(documentModel, fileName, mimeType = "image/png", quality = 1) {

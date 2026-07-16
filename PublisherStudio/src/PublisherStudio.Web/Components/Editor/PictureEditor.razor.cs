@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -45,6 +46,14 @@ public partial class PictureEditor
     private double _drawWidth = 12;
     private double _drawOpacity = 1;
     private double _drawHardness = .8;
+    private const int MaxPictureExportDataUrlLength = 192 * 1024 * 1024;
+    private StringBuilder? _pictureExportBuffer;
+    private string? _pictureExportId;
+    private PictureDocument? _pictureExportSourceDocument;
+    private string? _pictureExportName;
+    private int _pictureExportExpectedChunks;
+    private int _pictureExportNextChunk;
+    private int _pictureExportExpectedLength;
 
     private bool HasSelection => State.SelectedLayer is not null;
     private bool CanDelete => State.SelectedLayer is { Locked: false };
@@ -52,6 +61,7 @@ public partial class PictureEditor
     private bool IsRasterSelected => State.SelectedLayer is RasterPictureLayer;
     private bool IsPaintSelected => State.SelectedLayer is PaintPictureLayer;
     private bool CanDraw => _drawTool != PictureDrawTool.Select;
+    private bool IsPictureExporting => _pictureExportId is not null;
     private string SelectToolText => ToolText(PictureDrawTool.Select, "Select");
     private string BrushToolText => ToolText(PictureDrawTool.Brush, "Brush");
     private string PencilToolText => ToolText(PictureDrawTool.Pencil, "Pencil");
@@ -69,9 +79,11 @@ public partial class PictureEditor
     private string CanvasColor => State.Document.Background.StartsWith('#') && State.Document.Background.Length is 4 or 7
         ? State.Document.Background
         : "#ffffff";
-    private string StatusText => _error ?? (_drawTool != PictureDrawTool.Select
-        ? $"{_drawTool} tool · {_drawWidth:0.#} px · {_drawColor}"
-        : State.SelectedLayer is null ? "No layer selected" : $"{State.SelectedLayer.Kind}: {State.SelectedLayer.Name}");
+    private string StatusText => _error ?? (IsPictureExporting
+        ? "Rendering PNG for the publication…"
+        : _drawTool != PictureDrawTool.Select
+            ? $"{_drawTool} tool · {_drawWidth:0.#} px · {_drawColor}"
+            : State.SelectedLayer is null ? "No layer selected" : $"{State.SelectedLayer.Kind}: {State.SelectedLayer.Name}");
 
     protected override void OnInitialized() => State.Changed += StateChanged;
 
@@ -284,20 +296,133 @@ public partial class PictureEditor
 
     private async Task Apply()
     {
-        if (_module is null) return;
+        if (_module is null || _self is null || _pictureExportId is not null) return;
+
+        var exportId = Guid.NewGuid().ToString("N");
+        var sourceDocument = State.CloneDocument();
+        _pictureExportId = exportId;
+        _pictureExportSourceDocument = sourceDocument;
+        _pictureExportName = State.Document.Name;
+        _pictureExportBuffer = null;
+        _pictureExportExpectedChunks = 0;
+        _pictureExportNextChunk = 0;
+        _pictureExportExpectedLength = 0;
+        _error = null;
+
         try
         {
-            await using var streamReference = await _module.InvokeAsync<IJSStreamReference>("exportPictureStudioBlob", State.Document, "image/png", 1d);
-            await using var stream = await streamReference.OpenReadStreamAsync(128L * 1024 * 1024);
-            using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
-            var dataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer.ToArray())}";
-            await Saved.InvokeAsync(new PictureEditorResult(dataUrl, State.CloneDocument(), State.Document.Name));
+            // Generate the same PNG that the Download button produces, but feed the
+            // data URL back in small chunks. This avoids the failing Blob stream
+            // reference and the 32 KB Interactive Server message-size ceiling.
+            // The JavaScript function starts the export and returns immediately;
+            // CompletePictureExport performs the actual insert after all chunks arrive.
+            await _module.InvokeVoidAsync(
+                "startPictureStudioDataUrlExport",
+                sourceDocument,
+                "image/png",
+                1d,
+                _self,
+                exportId);
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
+            if (IsCurrentPictureExport(exportId))
+            {
+                ResetPictureExport();
+                _error = ex.Message;
+            }
         }
+    }
+
+    [JSInvokable]
+    public bool BeginPictureExport(string exportId, int totalLength, int chunkCount)
+    {
+        if (!IsCurrentPictureExport(exportId)) return false;
+        if (totalLength <= 0 || totalLength > MaxPictureExportDataUrlLength)
+        {
+            FailPictureExport(exportId, "The rendered picture is too large to insert into the publication.");
+            return false;
+        }
+        if (chunkCount <= 0 || chunkCount > 100_000)
+        {
+            FailPictureExport(exportId, "The rendered picture export contains an invalid chunk count.");
+            return false;
+        }
+
+        _pictureExportExpectedLength = totalLength;
+        _pictureExportExpectedChunks = chunkCount;
+        _pictureExportNextChunk = 0;
+        _pictureExportBuffer = new StringBuilder(Math.Min(totalLength, 1024 * 1024));
+        return true;
+    }
+
+    [JSInvokable]
+    public bool AppendPictureExportChunk(string exportId, int chunkIndex, string chunk)
+    {
+        if (!IsCurrentPictureExport(exportId) || _pictureExportBuffer is null) return false;
+        if (chunkIndex != _pictureExportNextChunk)
+        {
+            FailPictureExport(exportId, "The rendered picture chunks arrived out of order.");
+            return false;
+        }
+        if (_pictureExportBuffer.Length + chunk.Length > MaxPictureExportDataUrlLength)
+        {
+            FailPictureExport(exportId, "The rendered picture is too large to insert into the publication.");
+            return false;
+        }
+
+        _pictureExportBuffer.Append(chunk);
+        _pictureExportNextChunk++;
+        return true;
+    }
+
+    [JSInvokable]
+    public async Task CompletePictureExport(string exportId)
+    {
+        if (!IsCurrentPictureExport(exportId) || _pictureExportBuffer is null) return;
+        if (_pictureExportNextChunk != _pictureExportExpectedChunks ||
+            _pictureExportBuffer.Length != _pictureExportExpectedLength)
+        {
+            FailPictureExport(exportId, "The rendered picture export was incomplete.");
+            return;
+        }
+
+        var dataUrl = _pictureExportBuffer.ToString();
+        if (!dataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) ||
+            !dataUrl.Contains(",", StringComparison.Ordinal))
+        {
+            FailPictureExport(exportId, "The browser returned an invalid rendered picture.");
+            return;
+        }
+
+        var sourceDocument = _pictureExportSourceDocument ?? State.CloneDocument();
+        var name = string.IsNullOrWhiteSpace(_pictureExportName) ? State.Document.Name : _pictureExportName!;
+        ResetPictureExport();
+        await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, sourceDocument, name)));
+    }
+
+    [JSInvokable]
+    public void FailPictureExport(string exportId, string? message)
+    {
+        if (!IsCurrentPictureExport(exportId)) return;
+        ResetPictureExport();
+        _error = string.IsNullOrWhiteSpace(message) ? "The browser could not render the picture." : message;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private bool IsCurrentPictureExport(string exportId) =>
+        _pictureExportId is not null &&
+        string.Equals(_pictureExportId, exportId, StringComparison.Ordinal);
+
+    private void ResetPictureExport()
+    {
+        _pictureExportBuffer = null;
+        _pictureExportId = null;
+        _pictureExportSourceDocument = null;
+        _pictureExportName = null;
+        _pictureExportExpectedChunks = 0;
+        _pictureExportNextChunk = 0;
+        _pictureExportExpectedLength = 0;
     }
 
     private async Task DownloadPng() => await Download("image/png", "png", 1d);

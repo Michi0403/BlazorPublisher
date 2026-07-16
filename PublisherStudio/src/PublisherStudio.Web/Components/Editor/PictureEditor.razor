@@ -530,7 +530,7 @@
                     <DxButton Text="Download PNG" Click="DownloadPng" />
                     <DxButton Text="Download JPEG" Click="DownloadJpeg" />
                     <DxButton Text="Cancel" Click="Cancel" />
-                    <DxButton Text="@(EditingExisting ? "Apply to picture" : "Insert into publication")" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
+                    <DxButton Text="@(IsPictureExporting ? "Rendering…" : EditingExisting ? "Apply to picture" : "Insert into publication")" Enabled="@(!IsPictureExporting)" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
                 </div>
             </footer>
         </section>

@@ -15,6 +15,7 @@
                 <button title="Add text box" @onclick="AddText">T</button>
                 <button title="Add WordArt" @onclick="AddWordArt">A★</button>
                 <button title="Add picture" @onclick="RequestInsertPicture">▧</button>
+                <button title="Create picture in Picture Studio" @onclick="RequestCreatePicture">▣</button>
                 <button title="Add rectangle" @onclick="AddRectangle">◇</button>
                 <button title="Draw connector: click, then drag between object ports" @onclick="StartConnector">↝</button>
                 <button title="Delete selected layer" disabled="@(State.SelectedElement is null || State.SelectedElement.Locked)" @onclick="State.DeleteSelected">⌫</button>
@@ -139,6 +140,7 @@
             {
                 <section class="property-section picture-properties">
                     <h3>Picture</h3>
+                    <DxButton Text="Edit in Picture Studio" Click="RequestEditPicture" CssClass="wide-button" />
                     <div class="property-button-row">
                         <DxButton Text="Replace…" Click="RequestReplacePicture" />
                         <DxButton Text="@(State.CropMode ? "Finish crop" : "Crop")" Click="ToggleCrop" />
@@ -333,6 +335,8 @@
     [Parameter] public EventCallback OnEditStory { get; set; }
     [Parameter] public EventCallback OnReplacePicture { get; set; }
     [Parameter] public EventCallback OnInsertPicture { get; set; }
+    [Parameter] public EventCallback OnCreatePicture { get; set; }
+    [Parameter] public EventCallback OnEditPicture { get; set; }
     [Parameter] public EventCallback OnApplyTransparentColor { get; set; }
     [Parameter] public EventCallback OnRestoreOriginalPicture { get; set; }
 
@@ -345,6 +349,8 @@
     private Task RequestEditStory() => OnEditStory.InvokeAsync();
     private Task RequestReplacePicture() => OnReplacePicture.InvokeAsync();
     private Task RequestInsertPicture() => OnInsertPicture.InvokeAsync();
+    private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
+    private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
     private Task RequestApplyTransparentColor() => OnApplyTransparentColor.InvokeAsync();
     private Task RequestRestoreOriginalPicture() => OnRestoreOriginalPicture.InvokeAsync();
     private void ShowProperties() => _tab = "properties";

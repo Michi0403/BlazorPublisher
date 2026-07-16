@@ -1,13 +1,13 @@
 # Validation status
 
-The v0.4 source tree was checked without restoring proprietary packages.
+The v0.5 source tree was checked without restoring proprietary packages.
 
 ## Completed checks
 
 - JSON configuration files parse successfully.
 - Project files are valid XML.
 - JavaScript passes `node --check`.
-- C# files and Razor `@code` blocks pass lexical delimiter scans.
+- C# files and Razor `@code` blocks parse without syntax errors through a Tree-sitter C# grammar; raw-string-aware delimiter scans also pass.
 - Direct `@page.` Razor identifier collisions are absent.
 - The dependency scan finds only `DevExpress.Blazor` and `DevExpress.Blazor.RichEdit`, both constrained to `25.2.*`.
 - Connector references are normalized during publication load; broken/self-referencing connectors are discarded.
@@ -22,7 +22,7 @@ A headless Chromium smoke test was attempted, but the container's Chromium proce
 
 ## Authoritative local validation
 
-A real `dotnet restore` and `dotnet build` could not be run because this environment has neither the .NET 10 SDK nor access to the licensed DevExpress package feed. Run:
+A real `dotnet restore` and `dotnet build` could not be completed because this environment has no installed .NET SDK and no access to the licensed DevExpress package feed. Run:
 
 ```powershell
 dotnet restore PublisherStudio.sln
@@ -65,3 +65,18 @@ When reporting a compiler failure, include the first compiler error and affected
 - `WordArtView.razor` uses `SvgWordArtText` for straight and path-following text, including shadow, extrusion, fallback face, and gradient face layers.
 - The helper escapes text through `RenderTreeBuilder.AddContent` and stores no raw SVG markup.
 - No package, document format, host, service, controller, or InstallerConsole changes were made.
+
+
+## v0.5 targeted validation
+
+- The publication format version is `1.6`; `PictureSource` is optional, so older image frames remain compatible.
+- Picture Studio is registered as a scoped state service and a singleton serializer/normalizer inside the existing ASP.NET Core host. No controller, route, InstallerConsole, or runtime-host replacement was introduced.
+- The final raster and editable layer source are stored separately: `DataUrl` remains the normal publication image while `PictureSource` retains the non-destructive layer model.
+- PNG export uses an alpha-enabled canvas; JPEG export forces a white background.
+- Canvas-to-Blazor apply uses `IJSStreamReference` rather than returning a large base64 JavaScript string.
+- The Picture Studio canvas is rebound after every modal reopen so direct manipulation does not remain attached to a removed DOM element.
+- Existing imported pictures are initialized from their natural pixel dimensions, scaled down only when a side exceeds the 8192-pixel document limit.
+- JavaScript passes `node --check`; project JSON/XML and CSS/C# lexical scans pass.
+- Literal attributed SVG `<text>` tags remain absent from Razor files.
+- No package was added; only the two DevExpress 25.2 package references remain.
+- A Chromium Canvas smoke test was attempted, but the available headless Chromium process again stalled in the container's missing DBus/desktop environment; browser rendering still requires the local Visual Studio/browser smoke test.

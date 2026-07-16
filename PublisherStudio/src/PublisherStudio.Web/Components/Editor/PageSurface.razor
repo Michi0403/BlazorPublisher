@@ -137,6 +137,7 @@
         }
         @if (State.SelectedElement is ImageFrameElement)
         {
+            <DxContextMenuItem Text="Edit in Picture Studio" IconCssClass="pub-icon pub-icon-create-picture" Click="EditSelectedPicture" />
             <DxContextMenuItem Text="Replace picture…" IconCssClass="pub-icon pub-icon-picture" Click="ReplaceSelectedPicture" />
             <DxContextMenuItem Text="@(State.CropMode ? "Finish crop" : "Crop picture")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleCrop" />
             <DxContextMenuItem Text="Fit picture" Click="PictureFit" />
@@ -192,6 +193,7 @@
             <DxContextMenuItem Text="Insert text box" IconCssClass="pub-icon pub-icon-text" BeginGroup="true" Click="AddText" />
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
             <DxContextMenuItem Text="Insert picture…" IconCssClass="pub-icon pub-icon-picture" Click="InsertPicture" />
+            <DxContextMenuItem Text="Create picture…" IconCssClass="pub-icon pub-icon-create-picture" Click="CreatePicture" />
             <DxContextMenuItem Text="Insert rectangle" Click="AddRectangle" />
             <DxContextMenuItem Text="Draw connector" BeginGroup="true" Click="StartConnector" />
             <DxContextMenuItem Text="Draw arrow connector" Click="StartArrowConnector" />
@@ -204,6 +206,8 @@
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public EventCallback<Guid> EditTextRequested { get; set; }
     [Parameter] public EventCallback RequestPicture { get; set; }
+    [Parameter] public EventCallback RequestCreatePicture { get; set; }
+    [Parameter] public EventCallback RequestEditPicture { get; set; }
 
     private DxContextMenu _contextMenu = default!;
     private IJSObjectReference? _module;
@@ -310,6 +314,8 @@
     private Task EditSelectedStory() => State.SelectedElement is TextFrameElement text ? EditTextRequested.InvokeAsync(text.Id) : Task.CompletedTask;
     private Task ReplaceSelectedPicture() => RequestPicture.InvokeAsync();
     private Task InsertPicture() => RequestPicture.InvokeAsync();
+    private Task CreatePicture() => RequestCreatePicture.InvokeAsync();
+    private Task EditSelectedPicture() => RequestEditPicture.InvokeAsync();
     private void ToggleCrop() => State.ToggleCropMode();
     private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
     private void PictureFill() => SetImage(image => image.FitInsideFrame = false);

@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.5";
+    public string FormatVersion { get; set; } = "1.6";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -162,6 +162,7 @@ public sealed class ImageFrameElement : PublicationElement
     public double TintOpacity { get; set; }
     public string TransparentColor { get; set; } = "#ffffff";
     public int TransparentColorTolerance { get; set; } = 24;
+    public PictureDocument? PictureSource { get; set; }
 }
 
 public sealed class ShapeElement : PublicationElement

@@ -24,6 +24,8 @@
                        OnExportSvg="ExportSvg"
                        OnExportWebsite="ExportWebsite"
                        OnInsertPicture="OpenPicturePicker"
+                       OnCreatePicture="CreatePicture"
+                       OnEditPicture="EditSelectedPicture"
                        OnEditStory="OpenStoryEditor"
                        OnFitPage="FitPage"
                        OnTogglePagesPane="TogglePagesPane"
@@ -33,12 +35,14 @@
     <div id="publisher-workspace" class="editor-workspace">
         <PageNavigator State="State" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
-        <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" />
+        <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
         <InspectorPanel State="State"
                         OnEditStory="OpenStoryEditor"
                         OnReplacePicture="OpenPicturePicker"
                         OnInsertPicture="OpenPicturePicker"
+                        OnCreatePicture="CreatePicture"
+                        OnEditPicture="EditSelectedPicture"
                         OnApplyTransparentColor="ApplyTransparentColor"
                         OnRestoreOriginalPicture="RestoreOriginalPicture" />
     </div>
@@ -70,6 +74,15 @@
              Saved="SaveStory"
              Cancelled="CloseStoryEditor" />
 
+<PictureEditor Visible="_pictureEditorVisible"
+               SessionId="_pictureEditorSessionId"
+               InitialDocument="_pictureEditorInitialDocument"
+               InitialRasterDataUrl="_pictureEditorInitialRaster"
+               InitialName="_pictureEditorInitialName"
+               EditingExisting="@(_pictureEditorTargetId is not null)"
+               Saved="SavePictureStudio"
+               Cancelled="ClosePictureStudio" />
+
 @if (!string.IsNullOrWhiteSpace(_error))
 {
     <div class="toast error" @onclick="() => _error = null">@_error</div>
@@ -83,6 +96,12 @@
 @code {
     private PageSurface? _pageSurface;
     private bool _storyEditorVisible;
+    private bool _pictureEditorVisible;
+    private Guid _pictureEditorSessionId;
+    private Guid? _pictureEditorTargetId;
+    private PictureDocument? _pictureEditorInitialDocument;
+    private string? _pictureEditorInitialRaster;
+    private string _pictureEditorInitialName = "Picture";
     private bool _workspaceInitialized;
     private string? _error;
     private string? _notice;
@@ -200,6 +219,7 @@
                     image.CropX = 0;
                     image.CropY = 0;
                     image.CropScale = 1;
+                    image.PictureSource = null;
                 });
             }
             else
@@ -235,6 +255,67 @@
             State.UpdateSelected(_ => image.DataUrl = image.OriginalDataUrl);
             ShowNotice("Original picture restored.");
         }
+        return Task.CompletedTask;
+    }
+
+    private Task CreatePicture()
+    {
+        _pictureEditorTargetId = null;
+        _pictureEditorInitialDocument = null;
+        _pictureEditorInitialRaster = null;
+        _pictureEditorInitialName = "Untitled Picture";
+        _pictureEditorSessionId = Guid.NewGuid();
+        _pictureEditorVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task EditSelectedPicture()
+    {
+        if (State.SelectedElement is not ImageFrameElement image) return Task.CompletedTask;
+        _pictureEditorTargetId = image.Id;
+        _pictureEditorInitialDocument = image.PictureSource;
+        _pictureEditorInitialRaster = image.PictureSource is null ? image.DataUrl : null;
+        _pictureEditorInitialName = string.IsNullOrWhiteSpace(image.Name) ? "Picture" : image.Name;
+        _pictureEditorSessionId = Guid.NewGuid();
+        _pictureEditorVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task SavePictureStudio(PictureEditorResult result)
+    {
+        if (_pictureEditorTargetId is Guid targetId)
+        {
+            State.SelectElement(targetId);
+            if (State.SelectedElement is ImageFrameElement image)
+            {
+                State.UpdateSelected(_ =>
+                {
+                    image.DataUrl = result.DataUrl;
+                    image.OriginalDataUrl = result.DataUrl;
+                    image.PictureSource = result.SourceDocument;
+                    image.Name = result.Name;
+                    image.AltText = result.Name;
+                });
+            }
+        }
+        else
+        {
+            State.AddImage(result.DataUrl, result.Name, result.SourceDocument);
+        }
+        _pictureEditorVisible = false;
+        _pictureEditorTargetId = null;
+        _pictureEditorInitialDocument = null;
+        _pictureEditorInitialRaster = null;
+        ShowNotice("Picture Studio image inserted into the publication.");
+        return Task.CompletedTask;
+    }
+
+    private Task ClosePictureStudio()
+    {
+        _pictureEditorVisible = false;
+        _pictureEditorTargetId = null;
+        _pictureEditorInitialDocument = null;
+        _pictureEditorInitialRaster = null;
         return Task.CompletedTask;
     }
 

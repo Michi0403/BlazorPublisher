@@ -7,6 +7,7 @@ namespace PublisherStudio.Services;
 
 public sealed partial class PublicationFileService
 {
+    private readonly PictureDocumentService _pictures;
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -14,6 +15,8 @@ public sealed partial class PublicationFileService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter() }
     };
+
+    public PublicationFileService(PictureDocumentService pictures) => _pictures = pictures;
 
     public string Serialize(PublicationDocument document)
     {
@@ -52,6 +55,8 @@ public sealed partial class PublicationFileService
             image.Opacity = Math.Clamp(image.Opacity, 0, 1);
             image.TintOpacity = Math.Clamp(image.TintOpacity, 0, 1);
             image.TransparentColorTolerance = Math.Clamp(image.TransparentColorTolerance, 0, 255);
+            if (image.PictureSource is not null)
+                _pictures.Normalize(image.PictureSource);
         }
 
         foreach (var wordArt in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<WordArtElement>())
@@ -73,7 +78,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.5";
+        document.FormatVersion = "1.6";
         return document;
     }
 

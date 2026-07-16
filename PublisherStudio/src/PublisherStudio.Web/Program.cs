@@ -37,8 +37,10 @@ public static class Program
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = DevExpress.Blazor.SizeMode.Small);
+        builder.Services.AddSingleton<PictureDocumentService>();
         builder.Services.AddSingleton<PublicationFileService>();
         builder.Services.AddScoped<EditorStateService>();
+        builder.Services.AddScoped<PictureEditorStateService>();
 
         var app = builder.Build();
         if (!app.Environment.IsDevelopment())

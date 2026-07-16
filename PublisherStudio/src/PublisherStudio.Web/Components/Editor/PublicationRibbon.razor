@@ -44,6 +44,7 @@
             <DxRibbonItem Text="Text box" IconCssClass="pub-icon pub-icon-text" IsPrimary="true" Click="AddText" AdaptivePriority="-5" />
             <DxRibbonItem Text="WordArt" IconCssClass="pub-icon pub-icon-wordart" IsPrimary="true" Click="AddWordArt" AdaptivePriority="-5" />
             <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" IsPrimary="true" Click="RequestPicture" AdaptivePriority="-5" />
+            <DxRibbonItem Text="Create picture" IconCssClass="pub-icon pub-icon-create-picture" IsPrimary="true" Click="RequestCreatePicture" AdaptivePriority="-5" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Shapes" IconCssClass="pub-icon pub-icon-shape">
             <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
@@ -128,6 +129,7 @@
 
     <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsImageSelected">
         <DxRibbonGroup Text="Picture" IconCssClass="pub-icon pub-icon-picture">
+            <DxRibbonItem Text="Edit in Picture Studio" IconCssClass="pub-icon pub-icon-create-picture" IsPrimary="true" Click="RequestEditPicture" />
             <DxRibbonItem Text="Replace" IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
             <DxRibbonItem Text="@CropCommandText" IconCssClass="pub-icon pub-icon-crop" Click="ToggleCrop" />
             <DxRibbonItem Text="Fit" Click="PictureFit" />
@@ -253,6 +255,8 @@
     [Parameter] public EventCallback OnExportSvg { get; set; }
     [Parameter] public EventCallback OnExportWebsite { get; set; }
     [Parameter] public EventCallback OnInsertPicture { get; set; }
+    [Parameter] public EventCallback OnCreatePicture { get; set; }
+    [Parameter] public EventCallback OnEditPicture { get; set; }
     [Parameter] public EventCallback OnEditStory { get; set; }
     [Parameter] public EventCallback OnFitPage { get; set; }
     [Parameter] public EventCallback OnTogglePagesPane { get; set; }
@@ -277,6 +281,8 @@
     private Task RequestExportSvg() => OnExportSvg.InvokeAsync();
     private Task RequestExportWebsite() => OnExportWebsite.InvokeAsync();
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
+    private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
+    private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
     private Task RequestStoryEditor() => OnEditStory.InvokeAsync();
     private Task RequestFitPage() => OnFitPage.InvokeAsync();
     private Task RequestTogglePagesPane() => OnTogglePagesPane.InvokeAsync();

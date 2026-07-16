@@ -1,0 +1,414 @@
+@namespace PublisherStudio.Components.Editor
+@implements IDisposable
+@implements IAsyncDisposable
+
+@if (Visible)
+{
+    <div class="modal-backdrop picture-studio-backdrop">
+        <section class="picture-studio-dialog" role="dialog" aria-modal="true" aria-label="Picture Studio">
+            <header class="picture-studio-titlebar">
+                <div>
+                    <strong>Picture Studio</strong>
+                    <span>@State.Document.Name · @State.Document.WidthPx × @State.Document.HeightPx px</span>
+                </div>
+                <button type="button" class="window-close" title="Close" @onclick="Cancel">×</button>
+            </header>
+
+            <div class="picture-studio-toolbar">
+                <div class="picture-tool-group">
+                    <strong>History</strong>
+                    <DxButton Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
+                    <DxButton Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
+                </div>
+                <div class="picture-tool-group">
+                    <strong>Add layer</strong>
+                    <DxButton Text="Image" Click="RequestImage" />
+                    <DxButton Text="Text" Click="AddTextLayer" />
+                    <DxButton Text="Shape" Click="AddRectangle" />
+                    <DxButton Text="Fill" Click="AddGradient" />
+                    <DxButton Text="Clouds" Click="AddClouds" />
+                    <DxButton Text="Noise" Click="AddNoise" />
+                </div>
+                <div class="picture-tool-group">
+                    <strong>Arrange</strong>
+                    <DxButton Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
+                    <DxButton Text="Up" Enabled="HasSelection" Click="MoveUp" />
+                    <DxButton Text="Down" Enabled="HasSelection" Click="MoveDown" />
+                    <DxButton Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                </div>
+                <div class="picture-tool-group picture-zoom-tools">
+                    <strong>View</strong>
+                    <DxButton Text="Fit" Click="FitCanvas" />
+                    <DxButton Text="100%" Click="Zoom100" />
+                    <label><input type="checkbox" checked="@State.Document.GridVisible" @onchange="ToggleGrid" /> Grid</label>
+                    <label><input type="checkbox" checked="@State.Document.SnapToGrid" @onchange="ToggleSnap" /> Snap</label>
+                </div>
+            </div>
+
+            <div class="picture-studio-workspace">
+                <aside class="picture-studio-layers">
+                    <div class="picture-pane-heading">
+                        <strong>Layers</strong>
+                        <span>@State.Document.Layers.Count</span>
+                    </div>
+                    <div class="picture-layer-actions">
+                        <button type="button" title="Add image" @onclick="RequestImage">▧</button>
+                        <button type="button" title="Add text" @onclick="AddTextLayer">T</button>
+                        <button type="button" title="Add shape" @onclick="AddRectangle">◇</button>
+                        <button type="button" title="Add gradient" @onclick="AddGradient">◩</button>
+                        <button type="button" title="Add render layer" @onclick="AddClouds">☁</button>
+                    </div>
+                    <div class="picture-layer-list">
+                        @foreach (var layer in State.Document.Layers.AsEnumerable().Reverse())
+                        {
+                            <div class="picture-layer-row @(layer.Id == State.SelectedLayerId ? "selected" : null)">
+                                <button type="button" class="picture-layer-select" @onclick="() => State.SelectLayer(layer.Id)">
+                                    <span class="picture-layer-icon">@LayerIcon(layer)</span>
+                                    <span>
+                                        <b>@layer.Name</b>
+                                        <small>@LayerDescription(layer)</small>
+                                    </span>
+                                </button>
+                                <button type="button" class="picture-layer-toggle" title="Show or hide" @onclick="() => State.ToggleVisibility(layer.Id)">@(layer.Visible ? "●" : "○")</button>
+                                <button type="button" class="picture-layer-toggle" title="Lock or unlock" @onclick="() => State.ToggleLock(layer.Id)">@(layer.Locked ? "🔒" : "🔓")</button>
+                            </div>
+                        }
+                        @if (State.Document.Layers.Count == 0)
+                        {
+                            <div class="picture-empty-layers">
+                                <strong>Transparent canvas</strong>
+                                <span>Add an image, text, shape, fill, or procedural render layer.</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="picture-layer-footer">
+                        <DxButton Text="Back" Enabled="HasSelection" Click="State.SendSelectedToBack" />
+                        <DxButton Text="Front" Enabled="HasSelection" Click="State.BringSelectedToFront" />
+                    </div>
+                </aside>
+
+                <main id="picture-studio-canvas-host" class="picture-studio-canvas-host">
+                    <div class="picture-canvas-scroll">
+                        <div class="picture-canvas-mat">
+                            <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label="Picture canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="picture-canvas-hint">Drag layers directly. Corner handles resize; the round handle rotates.</div>
+                </main>
+
+                <aside class="picture-studio-properties">
+                    <div class="picture-pane-heading">
+                        <strong>Properties</strong>
+                        <span>@(State.SelectedLayer?.Kind.ToString() ?? "Canvas")</span>
+                    </div>
+                    <div class="picture-property-scroll">
+                        <section class="picture-property-section">
+                            <h3>Canvas</h3>
+                            <label>Name
+                                <input value="@State.Document.Name" @onchange="ChangeDocumentName" />
+                            </label>
+                            <div class="picture-property-grid">
+                                <label>Width (px)
+                                    <input type="number" min="16" max="8192" value="@State.Document.WidthPx" @onchange="ChangeCanvasWidth" />
+                                </label>
+                                <label>Height (px)
+                                    <input type="number" min="16" max="8192" value="@State.Document.HeightPx" @onchange="ChangeCanvasHeight" />
+                                </label>
+                            </div>
+                            <label>Background
+                                <select value="@State.Document.Background" @onchange="ChangeBackgroundPreset">
+                                    <option value="transparent">Transparent</option>
+                                    <option value="#ffffff">White</option>
+                                    <option value="#000000">Black</option>
+                                    <option value="#f1f5f9">Light gray</option>
+                                </select>
+                            </label>
+                            <label>Custom background
+                                <input type="color" value="@CanvasColor" @onchange="ChangeCanvasColor" />
+                            </label>
+                            <div class="picture-preset-buttons">
+                                <button type="button" @onclick="PresetSquare">Square</button>
+                                <button type="button" @onclick="PresetLandscape">Landscape</button>
+                                <button type="button" @onclick="PresetFullHd">Full HD</button>
+                                <button type="button" @onclick="PresetA4">A4 @ 300 DPI</button>
+                            </div>
+                            <label>Grid spacing (px)
+                                <input type="number" min="2" max="1000" value="@State.Document.GridSpacingPx" @onchange="ChangeGridSpacing" />
+                            </label>
+                        </section>
+
+                        @if (State.SelectedLayer is PictureLayer selected)
+                        {
+                            <section class="picture-property-section">
+                                <h3>Layer</h3>
+                                <label>Name
+                                    <input value="@selected.Name" @onchange="ChangeLayerName" />
+                                </label>
+                                <div class="picture-property-grid">
+                                    <label>X
+                                        <input type="number" step="1" value="@Inv(selected.X)" @onchange="ChangeLayerX" />
+                                    </label>
+                                    <label>Y
+                                        <input type="number" step="1" value="@Inv(selected.Y)" @onchange="ChangeLayerY" />
+                                    </label>
+                                    <label>Width
+                                        <input type="number" min="1" step="1" value="@Inv(selected.Width)" @onchange="ChangeLayerWidth" />
+                                    </label>
+                                    <label>Height
+                                        <input type="number" min="1" step="1" value="@Inv(selected.Height)" @onchange="ChangeLayerHeight" />
+                                    </label>
+                                </div>
+                                <label>Rotation
+                                    <input type="range" min="0" max="359" step="1" value="@Inv(selected.Rotation)" @oninput="ChangeLayerRotation" @onchange="EndLiveEdit" />
+                                    <span class="picture-range-value">@Math.Round(selected.Rotation)°</span>
+                                </label>
+                                <label>Opacity
+                                    <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Opacity)" @oninput="ChangeLayerOpacity" @onchange="EndLiveEdit" />
+                                    <span class="picture-range-value">@Math.Round(selected.Opacity * 100)%</span>
+                                </label>
+                                <label>Blend mode
+                                    <select value="@selected.BlendMode" @onchange="ChangeBlendMode">
+                                        @foreach (var mode in Enum.GetValues<PictureBlendMode>())
+                                        {
+                                            <option value="@mode">@mode</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div class="picture-check-grid">
+                                    <label><input type="checkbox" checked="@selected.Visible" @onchange="ToggleSelectedVisibility" /> Visible</label>
+                                    <label><input type="checkbox" checked="@selected.Locked" @onchange="ToggleSelectedLock" /> Locked</label>
+                                </div>
+                            </section>
+
+                            @switch (selected)
+                            {
+                                case RasterPictureLayer raster:
+                                    <section class="picture-property-section">
+                                        <h3>Image</h3>
+                                        <label>Fit
+                                            <select value="@raster.FitMode" @onchange="ChangeRasterFit">
+                                                @foreach (var fit in Enum.GetValues<PictureRasterFitMode>())
+                                                {
+                                                    <option value="@fit">@fit</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <div class="picture-check-grid">
+                                            <label><input type="checkbox" checked="@raster.FlipHorizontal" @onchange="ToggleRasterFlipHorizontal" /> Flip horizontal</label>
+                                            <label><input type="checkbox" checked="@raster.FlipVertical" @onchange="ToggleRasterFlipVertical" /> Flip vertical</label>
+                                        </div>
+                                        <label>Tint color
+                                            <input type="color" value="@SafeColor(raster.TintColor)" @onchange="ChangeRasterTintColor" />
+                                        </label>
+                                        <label>Tint / recolor strength
+                                            <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.TintOpacity)" @oninput="ChangeRasterTintOpacity" @onchange="EndLiveEdit" />
+                                            <span class="picture-range-value">@Math.Round(raster.TintOpacity * 100)%</span>
+                                        </label>
+                                    </section>
+                                    break;
+                                case TextPictureLayer textLayer:
+                                    <section class="picture-property-section">
+                                        <h3>Text</h3>
+                                        <label>Content
+                                            <textarea rows="4" @onchange="ChangeTextContent">@textLayer.Text</textarea>
+                                        </label>
+                                        <label>Font
+                                            <select value="@textLayer.FontFamily" @onchange="ChangeTextFont">
+                                                @foreach (var font in PictureFonts)
+                                                {
+                                                    <option value="@font">@font</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <div class="picture-property-grid">
+                                            <label>Size
+                                                <input type="number" min="4" max="1024" value="@Inv(textLayer.FontSizePx)" @onchange="ChangeTextSize" />
+                                            </label>
+                                            <label>Alignment
+                                                <select value="@textLayer.Alignment" @onchange="ChangeTextAlignment">
+                                                    @foreach (var alignment in Enum.GetValues<PictureTextAlignment>())
+                                                    {
+                                                        <option value="@alignment">@alignment</option>
+                                                    }
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="picture-check-grid">
+                                            <label><input type="checkbox" checked="@textLayer.Bold" @onchange="ToggleTextBold" /> Bold</label>
+                                            <label><input type="checkbox" checked="@textLayer.Italic" @onchange="ToggleTextItalic" /> Italic</label>
+                                            <label><input type="checkbox" checked="@textLayer.ShadowEnabled" @onchange="ToggleTextShadow" /> Shadow</label>
+                                        </div>
+                                        <div class="picture-property-grid">
+                                            <label>Fill
+                                                <input type="color" value="@SafeColor(textLayer.FillColor)" @onchange="ChangeTextFill" />
+                                            </label>
+                                            <label>Outline
+                                                <input type="color" value="@SafeColor(textLayer.OutlineColor)" @onchange="ChangeTextOutline" />
+                                            </label>
+                                            <label>Outline width
+                                                <input type="number" min="0" max="64" step="1" value="@Inv(textLayer.OutlineWidthPx)" @onchange="ChangeTextOutlineWidth" />
+                                            </label>
+                                            <label>Shadow blur
+                                                <input type="number" min="0" max="200" step="1" value="@Inv(textLayer.ShadowBlurPx)" @onchange="ChangeTextShadowBlur" />
+                                            </label>
+                                        </div>
+                                    </section>
+                                    break;
+                                case ShapePictureLayer shapeLayer:
+                                    <section class="picture-property-section">
+                                        <h3>Shape</h3>
+                                        <label>Shape
+                                            <select value="@shapeLayer.Shape" @onchange="ChangeShapeKind">
+                                                @foreach (var shape in Enum.GetValues<PictureShapeKind>())
+                                                {
+                                                    <option value="@shape">@shape</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <div class="picture-property-grid">
+                                            <label>Fill
+                                                <input type="color" value="@SafeColor(shapeLayer.FillColor)" @onchange="ChangeShapeFill" />
+                                            </label>
+                                            <label>Stroke
+                                                <input type="color" value="@SafeColor(shapeLayer.StrokeColor)" @onchange="ChangeShapeStroke" />
+                                            </label>
+                                            <label>Stroke width
+                                                <input type="number" min="0" max="200" value="@Inv(shapeLayer.StrokeWidthPx)" @onchange="ChangeShapeStrokeWidth" />
+                                            </label>
+                                            <label>Corner radius
+                                                <input type="number" min="0" max="2000" value="@Inv(shapeLayer.CornerRadiusPx)" @onchange="ChangeShapeRadius" />
+                                            </label>
+                                        </div>
+                                    </section>
+                                    break;
+                                case FillPictureLayer fillLayer:
+                                    <section class="picture-property-section">
+                                        <h3>Fill</h3>
+                                        <label>Type
+                                            <select value="@fillLayer.FillKind" @onchange="ChangeFillKind">
+                                                @foreach (var kind in Enum.GetValues<PictureFillKind>())
+                                                {
+                                                    <option value="@kind">@kind</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <div class="picture-property-grid">
+                                            <label>Color 1
+                                                <input type="color" value="@SafeColor(fillLayer.PrimaryColor)" @onchange="ChangeFillPrimary" />
+                                            </label>
+                                            <label>Color 2
+                                                <input type="color" value="@SafeColor(fillLayer.SecondaryColor)" @onchange="ChangeFillSecondary" />
+                                            </label>
+                                        </div>
+                                        <label>Angle
+                                            <input type="range" min="0" max="360" step="1" value="@Inv(fillLayer.AngleDegrees)" @oninput="ChangeFillAngle" @onchange="EndLiveEdit" />
+                                            <span class="picture-range-value">@Math.Round(fillLayer.AngleDegrees)°</span>
+                                        </label>
+                                    </section>
+                                    break;
+                                case RenderPictureLayer renderLayer:
+                                    <section class="picture-property-section">
+                                        <h3>Procedural render</h3>
+                                        <label>Renderer
+                                            <select value="@renderLayer.RenderKind" @onchange="ChangeRenderKind">
+                                                @foreach (var kind in Enum.GetValues<PictureRenderKind>())
+                                                {
+                                                    <option value="@kind">@kind</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <div class="picture-property-grid">
+                                            <label>Color 1
+                                                <input type="color" value="@SafeColor(renderLayer.PrimaryColor)" @onchange="ChangeRenderPrimary" />
+                                            </label>
+                                            <label>Color 2
+                                                <input type="color" value="@SafeColor(renderLayer.SecondaryColor)" @onchange="ChangeRenderSecondary" />
+                                            </label>
+                                            <label>Seed
+                                                <input type="number" value="@renderLayer.Seed" @onchange="ChangeRenderSeed" />
+                                            </label>
+                                            <label>Scale
+                                                <input type="number" min="4" max="2000" value="@Inv(renderLayer.Scale)" @onchange="ChangeRenderScale" />
+                                            </label>
+                                            <label>Detail
+                                                <input type="number" min="1" max="8" value="@renderLayer.Detail" @onchange="ChangeRenderDetail" />
+                                            </label>
+                                            <label>Softness
+                                                <input type="number" min="0" max="1" step="0.05" value="@Inv(renderLayer.Softness)" @onchange="ChangeRenderSoftness" />
+                                            </label>
+                                            <label>Contrast
+                                                <input type="number" min="0.1" max="5" step="0.1" value="@Inv(renderLayer.RenderContrast)" @onchange="ChangeRenderContrast" />
+                                            </label>
+                                            <label>Stripe width
+                                                <input type="number" min="1" max="1000" value="@Inv(renderLayer.StripeWidthPx)" @onchange="ChangeRenderStripeWidth" />
+                                            </label>
+                                        </div>
+                                        <label>Angle
+                                            <input type="range" min="0" max="360" step="1" value="@Inv(renderLayer.AngleDegrees)" @oninput="ChangeRenderAngle" @onchange="EndLiveEdit" />
+                                            <span class="picture-range-value">@Math.Round(renderLayer.AngleDegrees)°</span>
+                                        </label>
+                                        <DxButton Text="New random seed" Click="RandomizeRender" CssClass="wide-button" />
+                                    </section>
+                                    break;
+                            }
+
+                            <section class="picture-property-section">
+                                <h3>Adjustments</h3>
+                                <label>Brightness
+                                    <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Brightness)" @oninput="ChangeBrightness" @onchange="EndLiveEdit" />
+                                    <span class="picture-range-value">@Math.Round(selected.Brightness * 100)%</span>
+                                </label>
+                                <label>Contrast
+                                    <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Contrast)" @oninput="ChangeContrast" @onchange="EndLiveEdit" />
+                                    <span class="picture-range-value">@Math.Round(selected.Contrast * 100)%</span>
+                                </label>
+                                <label>Saturation
+                                    <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Saturation)" @oninput="ChangeSaturation" @onchange="EndLiveEdit" />
+                                    <span class="picture-range-value">@Math.Round(selected.Saturation * 100)%</span>
+                                </label>
+                                <label>Hue
+                                    <input type="range" min="-180" max="180" step="1" value="@Inv(selected.HueRotation)" @oninput="ChangeHue" @onchange="EndLiveEdit" />
+                                    <span class="picture-range-value">@Math.Round(selected.HueRotation)°</span>
+                                </label>
+                                <label>Soften / blur
+                                    <input type="range" min="0" max="50" step="0.25" value="@Inv(selected.Blur)" @oninput="ChangeBlur" @onchange="EndLiveEdit" />
+                                    <span class="picture-range-value">@selected.Blur.ToString("0.##", CultureInfo.InvariantCulture) px</span>
+                                </label>
+                                <div class="picture-property-grid">
+                                    <label>Grayscale
+                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Grayscale)" @oninput="ChangeGrayscale" @onchange="EndLiveEdit" />
+                                    </label>
+                                    <label>Sepia
+                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Sepia)" @oninput="ChangeSepia" @onchange="EndLiveEdit" />
+                                    </label>
+                                    <label>Invert
+                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Invert)" @oninput="ChangeInvert" @onchange="EndLiveEdit" />
+                                    </label>
+                                </div>
+                                <DxButton Text="Reset adjustments" Click="ResetAdjustments" CssClass="wide-button" />
+                            </section>
+                        }
+                    </div>
+                </aside>
+            </div>
+
+            <footer class="picture-studio-footer">
+                <div>
+                    <span>@StatusText</span>
+                    <label>Zoom
+                        <input type="range" min="0.05" max="2" step="0.05" value="@Inv(State.Document.Zoom)" @oninput="ChangeZoom" />
+                        <b>@Math.Round(State.Document.Zoom * 100)%</b>
+                    </label>
+                </div>
+                <div>
+                    <DxButton Text="Download PNG" Click="DownloadPng" />
+                    <DxButton Text="Download JPEG" Click="DownloadJpeg" />
+                    <DxButton Text="Cancel" Click="Cancel" />
+                    <DxButton Text="@(EditingExisting ? "Apply to picture" : "Insert into publication")" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
+                </div>
+            </footer>
+        </section>
+    </div>
+
+    <InputFile id="picture-studio-image-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="ImportImage" />
+}

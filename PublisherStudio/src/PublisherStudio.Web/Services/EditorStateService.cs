@@ -96,7 +96,7 @@ public sealed class EditorStateService
         return element;
     }
 
-    public ImageFrameElement AddImage(string dataUrl, string name)
+    public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null)
     {
         Capture();
         var element = new ImageFrameElement
@@ -104,11 +104,14 @@ public sealed class EditorStateService
             Name = NextName(name),
             DataUrl = dataUrl,
             OriginalDataUrl = dataUrl,
+            PictureSource = pictureSource,
             AltText = name,
             X = 30,
             Y = 35,
             Width = 90,
-            Height = 65,
+            Height = pictureSource is { WidthPx: > 0, HeightPx: > 0 }
+                ? Math.Clamp(90d * pictureSource.HeightPx / pictureSource.WidthPx, 20, 140)
+                : 65,
             ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);

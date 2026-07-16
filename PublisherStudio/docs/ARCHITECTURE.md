@@ -6,7 +6,7 @@
 - **PublisherStudio.InstallerConsole** remains an optional deployment helper with no UI project dependency. It can install/start published output or publish a source ZIP without Git.
 - **WinUI remains optional and absent.** The browser host is the product core.
 
-v0.3 extends these boundaries without replacing routing, dependency injection, controllers, services, the installer, or the document model.
+v0.5 extends these boundaries without replacing routing, controllers, the installer, or the publication editing model. Picture Studio is an additional scoped subsystem within the existing web host.
 
 ## Editing engines
 
@@ -15,6 +15,15 @@ v0.3 extends these boundaries without replacing routing, dependency injection, c
 - DevExpress `DxRichEdit` owns rich story editing, DOCX persistence, fields, page layout, printing, and DOCX/RTF/TXT/HTML downloads.
 - The publication surface is an absolute-positioned HTML/SVG canvas. Native JavaScript performs pointer previews, rulers, guides, crop gestures, snapping, connector reconnection, and browser export.
 - C# is authoritative. JavaScript commits final millimetre values/endpoints through JS interop.
+
+
+## Picture Studio subsystem
+
+Picture Studio is deliberately separate from both the page surface and RichEdit. `PictureEditorStateService` owns a scoped `PictureDocument`, selection, history, and layer operations. `PictureDocumentService` owns polymorphic JSON cloning/normalization. The `PictureEditor` Blazor component presents the shell and properties, while `pictureStudioInterop.js` owns Canvas 2D drawing, hit testing, direct transforms, procedural rendering, and raster output.
+
+Supported layer types are raster, text, shape, fill, and procedural render. Every layer shares bounds, rotation, opacity, blend mode, lock/visibility, and non-destructive adjustment values. Procedural layers store parameters and seeds, not generated pixel buffers. The renderer currently provides Clouds, Noise, Stripes, and Vignette.
+
+When Picture Studio applies its result, JavaScript returns a PNG as `IJSStreamReference`; Blazor reads the stream and stores the rendered data URL in the normal `ImageFrameElement.DataUrl`. A cloned `PictureDocument` is stored in `ImageFrameElement.PictureSource`. This dual representation keeps all established publication rendering/export code simple while allowing later non-destructive Picture Studio edits. Imported pictures have no `PictureSource` until first applied through Picture Studio.
 
 ## Workspace and view model
 
@@ -53,7 +62,7 @@ No runtime package was added. A future server-side prepress exporter can sit beh
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, and embedded image data URLs. Current format version is `1.5`; the loader supplies defaults and migrates older story, image, and WordArt path fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded image data URLs, and optional editable Picture Studio layer documents. Current format version is `1.6`; the loader supplies defaults and migrates older story, image, and WordArt path fields.
 
 ## Reference and license boundary
 

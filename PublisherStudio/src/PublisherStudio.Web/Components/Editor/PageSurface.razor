@@ -143,6 +143,11 @@
             <DxContextMenuItem Text="Fill frame" Click="PictureFill" />
             <DxContextMenuItem Text="Reset picture" Click="ResetPicture" />
         }
+        @if (State.SelectedElement is WordArtElement)
+        {
+            <DxContextMenuItem Text="Use custom text path" IconCssClass="pub-icon pub-icon-path" Click="WordArtCustomPath" />
+            <DxContextMenuItem Text="Reverse text path" Click="WordArtReversePath" />
+        }
         @if (State.SelectedElement is ConnectorElement)
         {
             <DxContextMenuItem Text="Straight connector" BeginGroup="true" Click="ConnectorStraight" />
@@ -333,6 +338,26 @@
     private void CycleRulerUnit() => State.CycleRulerUnit();
 
     private void SetConnector(Action<ConnectorElement> update) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); }
+    private void WordArtCustomPath()
+    {
+        if (State.SelectedElement is not WordArtElement item) return;
+        State.UpdateSelected(_ =>
+        {
+            item.Warp = WordArtWarp.Custom;
+            item.CustomPathPoints = WordArtPathGeometry.Normalize(item.CustomPathPoints);
+        });
+    }
+
+    private void WordArtReversePath()
+    {
+        if (State.SelectedElement is not WordArtElement item) return;
+        State.UpdateSelected(_ =>
+        {
+            item.Warp = WordArtWarp.Custom;
+            item.CustomPathPoints = WordArtPathGeometry.Reverse(item.CustomPathPoints);
+        });
+    }
+
     private void ConnectorStraight() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Straight);
     private void ConnectorElbow() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Elbow);
     private void ConnectorCurved() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Curved);

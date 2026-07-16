@@ -547,3 +547,26 @@ button { cursor: pointer; }
 .story-field-help span { display: grid; grid-template-columns: 105px 1fr; gap: 7px; }
 .story-field-help code { font-size: 10px; }
 .story-field-help small { margin-top: 4px; color: #5b6470; line-height: 1.35; }
+
+/* v0.4: free-form WordArt text paths. */
+.pub-icon-path::before { content: "∿"; font-size: 13px; }
+.wordart-path-editor { display: grid; gap: 8px; padding: 8px; border: 1px solid #c6ccd3; border-radius: 4px; background: #f8fafc; }
+.wordart-path-heading { display: grid; gap: 2px; }
+.wordart-path-heading strong { font-size: 12px; color: #1e3a5f; }
+.wordart-path-heading span { font-size: 10px; line-height: 1.35; color: #5b6470; }
+.wordart-path-presets { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; }
+.wordart-path-presets button { min-width: 0; height: 27px; padding: 0; border: 1px solid #adb7c2; border-radius: 3px; background: #fff; color: #234; font: 600 14px/1 Segoe UI, sans-serif; cursor: pointer; }
+.wordart-path-presets button:hover { border-color: #2f75b5; background: #e7f4fd; }
+.wordart-path-canvas { display: block; width: 100%; height: 116px; box-sizing: border-box; border: 1px solid #9fa9b5; border-radius: 3px; background: #fff; cursor: default; touch-action: none; user-select: none; }
+.wordart-path-canvas.drawing-armed { cursor: crosshair; border-color: #f97316; box-shadow: 0 0 0 2px #fed7aa; }
+.wordart-path-background { fill: #fff; }
+.wordart-path-grid-line { fill: none; stroke: #e3e8ee; stroke-width: 1; }
+.wordart-path-center-line { stroke: #b8c2cc; stroke-width: 1; stroke-dasharray: 8 8; }
+.wordart-path-preview { fill: none; stroke: #17689b; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.wordart-path-point { fill: #fff; stroke: #17689b; stroke-width: 4; cursor: grab; vector-effect: non-scaling-stroke; }
+.wordart-path-point.start { fill: #dcfce7; stroke: #15803d; }
+.wordart-path-point.end { fill: #ffedd5; stroke: #ea580c; }
+.wordart-path-point:active { cursor: grabbing; }
+.wordart-path-actions { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 4px; }
+.wordart-path-actions .dxbl-btn { min-width: 0; }
+.wordart-path-actions .path-action-primary { font-weight: 600; }

@@ -53,7 +53,7 @@ No runtime package was added. A future server-side prepress exporter can sit beh
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, and embedded image data URLs. Current format version is `1.4`; the loader supplies defaults and migrates older story/image fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, and embedded image data URLs. Current format version is `1.5`; the loader supplies defaults and migrates older story, image, and WordArt path fields.
 
 ## Reference and license boundary
 

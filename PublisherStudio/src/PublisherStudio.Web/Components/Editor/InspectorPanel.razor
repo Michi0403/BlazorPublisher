@@ -244,8 +244,18 @@
                             <option value="ArchUp">Arch up</option>
                             <option value="ArchDown">Arch down</option>
                             <option value="Wave">Wave</option>
+                            <option value="Custom">Custom drawn path</option>
                         </select>
                     </label>
+                    @if (wordArt.Warp == WordArtWarp.Custom)
+                    {
+                        <WordArtPathEditor @key="wordArt.Id" Item="wordArt" PathChanged="ChangeWordArtPath" />
+                    }
+                    @if (wordArt.Warp != WordArtWarp.None)
+                    {
+                        @RangeField("Text position on path", wordArt.PathStartOffsetPercent, 0, 100, 1, "wordPathStart")
+                        @RangeField("Distance from path", wordArt.PathBaselineOffset, -80, 80, 1, "wordPathOffset")
+                    }
                     <label class="check-row"><input type="checkbox" checked="@wordArt.Bold" @onchange="ToggleWordArtBold" /> Bold</label>
                     <label class="check-row"><input type="checkbox" checked="@wordArt.Italic" @onchange="ToggleWordArtItalic" /> Italic</label>
                     <label class="check-row"><input type="checkbox" checked="@wordArt.GradientFill" @onchange="ToggleWordArtGradient" /> Gradient fill</label>
@@ -478,7 +488,22 @@
 
     private void ChangeWordArtText(ChangeEventArgs args) => SetWordArt(item => item.Text = args.Value?.ToString() ?? string.Empty);
     private void ChangeWordArtFont(ChangeEventArgs args) => SetWordArt(item => item.FontFamily = args.Value?.ToString() ?? "Arial Black");
-    private void ChangeWordArtWarp(ChangeEventArgs args) { if (Enum.TryParse<WordArtWarp>(args.Value?.ToString(), out var warp)) SetWordArt(item => item.Warp = warp); }
+    private void ChangeWordArtWarp(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<WordArtWarp>(args.Value?.ToString(), out var warp)) return;
+        SetWordArt(item =>
+        {
+            item.Warp = warp;
+            if (warp == WordArtWarp.Custom)
+                item.CustomPathPoints = WordArtPathGeometry.Normalize(item.CustomPathPoints);
+        });
+    }
+
+    private void ChangeWordArtPath(List<WordArtPathPoint> points) => SetWordArt(item =>
+    {
+        item.Warp = WordArtWarp.Custom;
+        item.CustomPathPoints = WordArtPathGeometry.Normalize(points);
+    });
     private void ToggleWordArtBold(ChangeEventArgs args) => SetWordArt(item => item.Bold = ReadBool(args));
     private void ToggleWordArtItalic(ChangeEventArgs args) => SetWordArt(item => item.Italic = ReadBool(args));
     private void ToggleWordArtGradient(ChangeEventArgs args) => SetWordArt(item => item.GradientFill = ReadBool(args));
@@ -560,6 +585,8 @@
             if (field == "wordLetterSpacing") word.LetterSpacing = value;
             if (field == "wordOutlineWidth") word.OutlineWidth = value;
             if (field == "wordExtrudeDepth") word.ExtrudeDepth = value;
+            if (field == "wordPathStart") word.PathStartOffsetPercent = Math.Clamp(value, 0, 100);
+            if (field == "wordPathOffset") word.PathBaselineOffset = Math.Clamp(value, -80, 80);
         }
     }
 

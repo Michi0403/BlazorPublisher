@@ -1,6 +1,6 @@
 # Validation status
 
-The v0.3 source tree was checked without restoring proprietary packages.
+The v0.4 source tree was checked without restoring proprietary packages.
 
 ## Completed checks
 
@@ -47,3 +47,21 @@ When reporting a compiler failure, include the first compiler error and affected
 - The existing z-index 10000 declaration is absent.
 - The StoryEditor Razor component contains the field catalogue and retains the existing Quick Fields and download handlers.
 - No package references or host wiring changed.
+
+
+## v0.4 targeted validation
+
+- The publication format version is 1.5; older documents remain loadable because custom path fields have defaults.
+- Custom WordArt paths are stored as normalized points rather than executable SVG markup.
+- Path points are clamped to the 1000 × 300 WordArt view box and limited to 32 points.
+- Freehand input is simplified and limited in JavaScript before one undoable model update is committed.
+- Canvas, print, SVG, website, and raster exports all use the same `WordArtView` component.
+- JavaScript passes `node --check`; JSON/XML and delimiter scans pass.
+- No package references or host/installer wiring changed.
+
+## v0.4.1 targeted validation
+
+- No attributed literal `<text>` tag remains in any `.razor` file.
+- `WordArtView.razor` uses `SvgWordArtText` for straight and path-following text, including shadow, extrusion, fallback face, and gradient face layers.
+- The helper escapes text through `RenderTreeBuilder.AddContent` and stores no raw SVG markup.
+- No package, document format, host, service, controller, or InstallerConsole changes were made.

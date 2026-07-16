@@ -195,6 +195,8 @@
             <DxRibbonItem Text="Arch up" Click="WordArtArchUp" />
             <DxRibbonItem Text="Arch down" Click="WordArtArchDown" />
             <DxRibbonItem Text="Wave" Click="WordArtWave" />
+            <DxRibbonItem Text="Draw path" IconCssClass="pub-icon pub-icon-path" IsPrimary="true" Click="WordArtCustomPath" />
+            <DxRibbonItem Text="Reverse path" Click="WordArtReversePath" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Depth">
             <DxRibbonItem Text="More 3D" Click="WordArtMoreDepth" />
@@ -397,6 +399,16 @@
     private void WordArtArchUp() => SetWordArt(item => item.Warp = WordArtWarp.ArchUp);
     private void WordArtArchDown() => SetWordArt(item => item.Warp = WordArtWarp.ArchDown);
     private void WordArtWave() => SetWordArt(item => item.Warp = WordArtWarp.Wave);
+    private void WordArtCustomPath() => SetWordArt(item =>
+    {
+        item.Warp = WordArtWarp.Custom;
+        item.CustomPathPoints = WordArtPathGeometry.Normalize(item.CustomPathPoints);
+    });
+    private void WordArtReversePath() => SetWordArt(item =>
+    {
+        item.Warp = WordArtWarp.Custom;
+        item.CustomPathPoints = WordArtPathGeometry.Reverse(item.CustomPathPoints);
+    });
     private void WordArtMoreDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Min(18, item.ExtrudeDepth + 2));
     private void WordArtLessDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Max(0, item.ExtrudeDepth - 2));
     private void WordArtShadow() => SetWordArt(item => item.ShadowEnabled = !item.ShadowEnabled);

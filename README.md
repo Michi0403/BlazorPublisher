@@ -13,7 +13,7 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 - A larger preset catalogue: A3, A4, A5, Letter, Legal, Tabloid, business card, landscape variants, and square, plus custom dimensions.
 - Text frames edited with DevExpress Blazor RichEdit and its Office ribbon; stories use DOCX storage, support dynamic fields, and download as DOCX, RTF, TXT, or HTML.
 - Image frames with preserved PNG alpha, replacement, fit/fill, interactive crop panning, wheel-based crop zoom, picture rotation, flipping, opacity, brightness, contrast, saturation, hue, inversion, grayscale, sepia, blur, masks, borders, shadows, tint/full recolor, blend modes, color-key transparency, and frame-ratio presets.
-- Rectangles, rounded rectangles, ellipses, lines, and WordArt/LogoArt.
+- Rectangles, rounded rectangles, ellipses, lines, and WordArt/LogoArt with fixed transforms plus freely drawn text paths.
 - Attached straight, elbow, and curved connectors with eight ports per object, reconnectable endpoints, line styles, and arrow/triangle/diamond markers.
 - Native self-contained JSON publication format (`.pubstudio.json`).
 - Current-page PNG, JPEG, and browser-oriented SVG export.
@@ -60,7 +60,8 @@ Without a supplied port, Kestrel asks the operating system for a loopback port a
 4. Open the right-hand **Properties** tab for live picture adjustments.
 5. Drag from a ruler onto the page to create a guide.
 6. Choose **Insert > Connector** or **Arrow connector**, then drag from one round object port to another. Drag a selected endpoint to reconnect it; Esc stops the tool.
-7. Use **File** for JSON save/open and PNG, JPEG, SVG, website, or print/PDF output.
+7. Select WordArt and choose **WordArt Tools > Draw path**. Pick a preset or click **Draw freehand**, then drag the control points to refine the baseline.
+8. Use **File** for JSON save/open and PNG, JPEG, SVG, website, or print/PDF output.
 
 The file picker is reset before every picture/open command, so selecting the same file again also triggers replacement.
 
@@ -87,7 +88,7 @@ dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip
 
 ## Deliberate limits
 
-This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, free Bézier path editing, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
+This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, full pen-tool Bézier handles, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
 
 See [`CHANGELOG-v0.3.md`](CHANGELOG-v0.3.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`VALIDATION.md`](VALIDATION.md).
 
@@ -99,3 +100,12 @@ See `CHANGELOG-v0.3.1.md`.
 ## v0.3.2 RichEdit popup hotfix
 
 See `CHANGELOG-v0.3.2.md`. The custom Edit Story backdrop now stays below DevExpress popup layers, so RichEdit ribbon drop-downs and dialogs remain visible and interactive.
+
+
+## v0.4 custom WordArt paths
+
+See `CHANGELOG-v0.4.md`. WordArt can follow eight presets or a freehand path with draggable points, reversible direction, text-position control, and path-distance control.
+
+## v0.4.1 Razor SVG text hotfix
+
+See `CHANGELOG-v0.4.1.md`. WordArt SVG text nodes are emitted by a small Blazor render component so Razor no longer mistakes SVG `<text>` elements for its reserved pseudo-element.

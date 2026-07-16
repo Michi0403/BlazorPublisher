@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.4";
+    public string FormatVersion { get; set; } = "1.5";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -94,7 +94,7 @@ public enum ImageMaskShape { Rectangle, RoundedRectangle, Ellipse }
 public enum StoryStorageFormat { Html, OpenXml }
 public enum ImageTintMode { Overlay, Recolor }
 public enum ImageBlendMode { Normal, Multiply, Screen, Darken, Lighten }
-public enum WordArtWarp { None, ArchUp, ArchDown, Wave }
+public enum WordArtWarp { None, ArchUp, ArchDown, Wave, Custom }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextFrameElement), "text")]
@@ -213,6 +213,9 @@ public sealed class WordArtElement : PublicationElement
     public double ExtrudeDepth { get; set; } = 4;
     public string ExtrudeColor { get; set; } = "#17365d";
     public WordArtWarp Warp { get; set; }
+    public List<WordArtPathPoint> CustomPathPoints { get; set; } = WordArtPathGeometry.CreatePreset("GentleWave");
+    public double PathStartOffsetPercent { get; set; } = 50;
+    public double PathBaselineOffset { get; set; }
 }
 
 public static class RichTextDocumentFactory

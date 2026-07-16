@@ -1,5 +1,6 @@
 const canvasStates = new WeakMap();
 const boundRulers = new WeakSet();
+const wordArtPathStates = new WeakMap();
 const PX_PER_MM_AT_96_DPI = 96 / 25.4;
 
 function number(value, fallback = 0) {
@@ -1040,6 +1041,216 @@ function bindWorkspaceSplitter(workspace, splitter, side) {
         splitter.addEventListener('pointercancel', up);
         event.preventDefault();
     });
+}
+
+
+function normalizeWordArtPoints(points) {
+    const normalized = Array.isArray(points)
+        ? points
+            .map(point => ({ x: clamp(number(point?.x ?? point?.X), 0, 1000), y: clamp(number(point?.y ?? point?.Y), 0, 300) }))
+            .filter(point => Number.isFinite(point.x) && Number.isFinite(point.y))
+            .slice(0, 32)
+        : [];
+    return normalized.length >= 2 ? normalized : [{ x: 60, y: 150 }, { x: 940, y: 150 }];
+}
+
+function wordArtPathFromPoints(points) {
+    const safe = normalizeWordArtPoints(points);
+    if (safe.length === 2)
+        return `M ${safe[0].x} ${safe[0].y} L ${safe[1].x} ${safe[1].y}`;
+
+    let path = `M ${safe[0].x} ${safe[0].y}`;
+    for (let index = 0; index < safe.length - 1; index++) {
+        const previous = index === 0 ? safe[index] : safe[index - 1];
+        const current = safe[index];
+        const next = safe[index + 1];
+        const following = index + 2 < safe.length ? safe[index + 2] : next;
+        const control1 = {
+            x: current.x + (next.x - previous.x) / 6,
+            y: current.y + (next.y - previous.y) / 6
+        };
+        const control2 = {
+            x: next.x - (following.x - current.x) / 6,
+            y: next.y - (following.y - current.y) / 6
+        };
+        path += ` C ${control1.x} ${control1.y} ${control2.x} ${control2.y} ${next.x} ${next.y}`;
+    }
+    return path;
+}
+
+function wordArtEditorPoint(svg, event) {
+    const matrix = svg.getScreenCTM();
+    if (!matrix) return { x: 0, y: 0 };
+    const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+    return { x: clamp(point.x, 0, 1000), y: clamp(point.y, 0, 300) };
+}
+
+function wordArtDistance(left, right) {
+    return Math.hypot(left.x - right.x, left.y - right.y);
+}
+
+function perpendicularDistance(point, start, end) {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    if (dx === 0 && dy === 0) return wordArtDistance(point, start);
+    const t = clamp(((point.x - start.x) * dx + (point.y - start.y) * dy) / (dx * dx + dy * dy), 0, 1);
+    return wordArtDistance(point, { x: start.x + t * dx, y: start.y + t * dy });
+}
+
+function simplifyWordArtPoints(points, tolerance = 8) {
+    if (points.length <= 2) return points.slice();
+    let maximumDistance = 0;
+    let splitIndex = 0;
+    for (let index = 1; index < points.length - 1; index++) {
+        const distance = perpendicularDistance(points[index], points[0], points[points.length - 1]);
+        if (distance > maximumDistance) {
+            maximumDistance = distance;
+            splitIndex = index;
+        }
+    }
+    if (maximumDistance <= tolerance) return [points[0], points[points.length - 1]];
+    const left = simplifyWordArtPoints(points.slice(0, splitIndex + 1), tolerance);
+    const right = simplifyWordArtPoints(points.slice(splitIndex), tolerance);
+    return [...left.slice(0, -1), ...right];
+}
+
+function limitWordArtPoints(points, maximum = 18) {
+    if (points.length <= maximum) return points;
+    const result = [points[0]];
+    for (let index = 1; index < maximum - 1; index++) {
+        const sourceIndex = Math.round(index * (points.length - 1) / (maximum - 1));
+        result.push(points[sourceIndex]);
+    }
+    result.push(points[points.length - 1]);
+    return result;
+}
+
+function renderWordArtPathEditor(state) {
+    state.path?.setAttribute('d', wordArtPathFromPoints(state.points));
+    if (!state.pointLayer) return;
+    state.pointLayer.replaceChildren();
+    state.points.forEach((point, index) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', String(point.x));
+        circle.setAttribute('cy', String(point.y));
+        circle.setAttribute('r', index === 0 || index === state.points.length - 1 ? '11' : '8');
+        circle.classList.add('wordart-path-point');
+        if (index === 0) circle.classList.add('start');
+        if (index === state.points.length - 1) circle.classList.add('end');
+        circle.dataset.wordartPointIndex = String(index);
+        state.pointLayer.appendChild(circle);
+    });
+}
+
+function commitWordArtPath(state) {
+    return state.dotnet.invokeMethodAsync('CommitWordArtPath', state.points.map(point => ({ x: point.x, y: point.y })));
+}
+
+function wordArtPathPointerDown(state, event) {
+    if (event.button !== 0) return;
+    const pointIndex = event.target?.dataset?.wordartPointIndex;
+    if (pointIndex !== undefined) {
+        state.operation = { kind: 'point', index: Number.parseInt(pointIndex, 10), pointerId: event.pointerId };
+    } else if (state.drawMode) {
+        state.operation = { kind: 'draw', pointerId: event.pointerId };
+        state.points = [wordArtEditorPoint(state.svg, event)];
+        renderWordArtPathEditor(state);
+    } else {
+        return;
+    }
+    state.svg.setPointerCapture(event.pointerId);
+    event.preventDefault();
+    event.stopPropagation();
+}
+
+function wordArtPathPointerMove(state, event) {
+    if (!state.operation || state.operation.pointerId !== event.pointerId) return;
+    const point = wordArtEditorPoint(state.svg, event);
+    if (state.operation.kind === 'point') {
+        state.points[state.operation.index] = point;
+    } else {
+        const previous = state.points[state.points.length - 1];
+        if (state.points.length < 512 && (!previous || wordArtDistance(previous, point) >= 7)) state.points.push(point);
+    }
+    renderWordArtPathEditor(state);
+    event.preventDefault();
+}
+
+async function wordArtPathPointerUp(state, event) {
+    if (!state.operation || state.operation.pointerId !== event.pointerId) return;
+    if (state.operation.kind === 'draw') {
+        if (state.points.length < 2) {
+            const start = state.points[0] || { x: 60, y: 150 };
+            state.points = [start, { x: clamp(start.x + 220, 0, 1000), y: start.y }];
+        }
+        state.points = limitWordArtPoints(simplifyWordArtPoints(state.points, 7));
+        state.drawMode = false;
+        state.svg.classList.remove('drawing-armed');
+    }
+    state.operation = null;
+    renderWordArtPathEditor(state);
+    try { state.svg.releasePointerCapture(event.pointerId); } catch { }
+    await commitWordArtPath(state);
+    event.preventDefault();
+}
+
+export function initializeWordArtPathEditor(editorId, dotnet, points) {
+    const svg = document.getElementById(editorId);
+    if (!svg) return;
+    let state = wordArtPathStates.get(svg);
+    if (!state) {
+        state = {
+            svg,
+            dotnet,
+            points: normalizeWordArtPoints(points),
+            path: svg.querySelector('[data-wordart-editor-path]'),
+            pointLayer: svg.querySelector('[data-wordart-editor-points]'),
+            drawMode: false,
+            operation: null
+        };
+        state.pointerDown = event => wordArtPathPointerDown(state, event);
+        state.pointerMove = event => wordArtPathPointerMove(state, event);
+        state.pointerUp = event => wordArtPathPointerUp(state, event);
+        svg.addEventListener('pointerdown', state.pointerDown);
+        svg.addEventListener('pointermove', state.pointerMove);
+        svg.addEventListener('pointerup', state.pointerUp);
+        svg.addEventListener('pointercancel', state.pointerUp);
+        wordArtPathStates.set(svg, state);
+    }
+    state.dotnet = dotnet;
+    state.points = normalizeWordArtPoints(points);
+    state.path = svg.querySelector('[data-wordart-editor-path]');
+    state.pointLayer = svg.querySelector('[data-wordart-editor-points]');
+    renderWordArtPathEditor(state);
+}
+
+export function updateWordArtPathEditor(editorId, points) {
+    const svg = document.getElementById(editorId);
+    const state = svg ? wordArtPathStates.get(svg) : null;
+    if (!state || state.operation) return;
+    state.points = normalizeWordArtPoints(points);
+    state.path = svg.querySelector('[data-wordart-editor-path]');
+    state.pointLayer = svg.querySelector('[data-wordart-editor-points]');
+    renderWordArtPathEditor(state);
+}
+
+export function setWordArtPathDrawMode(editorId, enabled) {
+    const svg = document.getElementById(editorId);
+    const state = svg ? wordArtPathStates.get(svg) : null;
+    if (!state) return;
+    state.drawMode = Boolean(enabled);
+    svg.classList.toggle('drawing-armed', state.drawMode);
+}
+
+export function disposeWordArtPathEditor(editorId) {
+    const svg = document.getElementById(editorId);
+    const state = svg ? wordArtPathStates.get(svg) : null;
+    if (!state) return;
+    svg.removeEventListener('pointerdown', state.pointerDown);
+    svg.removeEventListener('pointermove', state.pointerMove);
+    svg.removeEventListener('pointerup', state.pointerUp);
+    svg.removeEventListener('pointercancel', state.pointerUp);
+    wordArtPathStates.delete(svg);
 }
 
 window.publisherStudio = {

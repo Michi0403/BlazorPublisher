@@ -23,30 +23,35 @@
     {
         @if (Item.Warp == WordArtWarp.None)
         {
-            <text class="wordart-shadow-face"
-                  x="500" y="150" dx="10" dy="12"
-                  text-anchor="middle"
-                  dominant-baseline="middle"
-                  font-family="@FontFamily"
-                  font-size="@FontSize"
-                  font-weight="@FontWeight"
-                  font-style="@FontStyle"
-                  letter-spacing="@LetterSpacing"
-                  fill="@ShadowColor" fill-opacity="0.45">@DisplayText</text>
+            <SvgWordArtText CssClass="wordart-shadow-face"
+                            X="500" Y="150" Dx="10" Dy="12"
+                            TextAnchor="middle"
+                            DominantBaseline="middle"
+                            FontFamily="@FontFamily"
+                            FontSize="@FontSize"
+                            FontWeight="@FontWeight"
+                            FontStyle="@FontStyle"
+                            LetterSpacing="@LetterSpacing"
+                            Fill="@ShadowColor"
+                            FillOpacity="0.45"
+                            Text="@DisplayText" />
         }
         else
         {
-            <text class="wordart-shadow-face"
-                  x="0" y="0" dx="10" dy="12"
-                  text-anchor="middle"
-                  font-family="@FontFamily"
-                  font-size="@FontSize"
-                  font-weight="@FontWeight"
-                  font-style="@FontStyle"
-                  letter-spacing="@LetterSpacing"
-                  fill="@ShadowColor" fill-opacity="0.45">
-                <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
-            </text>
+            <SvgWordArtText CssClass="wordart-shadow-face"
+                            X="0" Y="0" Dx="10" Dy="@Inv(Item.PathBaselineOffset + 12)"
+                            TextAnchor="middle"
+                            FontFamily="@FontFamily"
+                            FontSize="@FontSize"
+                            FontWeight="@FontWeight"
+                            FontStyle="@FontStyle"
+                            LetterSpacing="@LetterSpacing"
+                            Fill="@ShadowColor"
+                            FillOpacity="0.45"
+                            PathHref="@PathHref"
+                            PathStartOffset="@PathStartOffset"
+                            PathTextAnchor="middle"
+                            Text="@DisplayText" />
         }
     }
 
@@ -54,32 +59,35 @@
     {
         @if (Item.Warp == WordArtWarp.None)
         {
-            <text class="wordart-extrusion"
-                  x="500" y="150"
-                  dx="@Inv(depth * 4)" dy="@Inv(depth * 4)"
-                  text-anchor="middle"
-                  dominant-baseline="middle"
-                  font-family="@FontFamily"
-                  font-size="@FontSize"
-                  font-weight="@FontWeight"
-                  font-style="@FontStyle"
-                  letter-spacing="@LetterSpacing"
-                  fill="@ExtrudeColor">@DisplayText</text>
+            <SvgWordArtText CssClass="wordart-extrusion"
+                            X="500" Y="150"
+                            Dx="@Inv(depth * 4)" Dy="@Inv(Item.PathBaselineOffset + depth * 4)"
+                            TextAnchor="middle"
+                            DominantBaseline="middle"
+                            FontFamily="@FontFamily"
+                            FontSize="@FontSize"
+                            FontWeight="@FontWeight"
+                            FontStyle="@FontStyle"
+                            LetterSpacing="@LetterSpacing"
+                            Fill="@ExtrudeColor"
+                            Text="@DisplayText" />
         }
         else
         {
-            <text class="wordart-extrusion"
-                  x="0" y="0"
-                  dx="@Inv(depth * 4)" dy="@Inv(depth * 4)"
-                  text-anchor="middle"
-                  font-family="@FontFamily"
-                  font-size="@FontSize"
-                  font-weight="@FontWeight"
-                  font-style="@FontStyle"
-                  letter-spacing="@LetterSpacing"
-                  fill="@ExtrudeColor">
-                <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
-            </text>
+            <SvgWordArtText CssClass="wordart-extrusion"
+                            X="0" Y="0"
+                            Dx="@Inv(depth * 4)" Dy="@Inv(Item.PathBaselineOffset + depth * 4)"
+                            TextAnchor="middle"
+                            FontFamily="@FontFamily"
+                            FontSize="@FontSize"
+                            FontWeight="@FontWeight"
+                            FontStyle="@FontStyle"
+                            LetterSpacing="@LetterSpacing"
+                            Fill="@ExtrudeColor"
+                            PathHref="@PathHref"
+                            PathStartOffset="@PathStartOffset"
+                            PathTextAnchor="middle"
+                            Text="@DisplayText" />
         }
     }
 
@@ -87,64 +95,70 @@
        print engine, or rasterizer rejects the local SVG gradient paint server. *@
     @if (Item.Warp == WordArtWarp.None)
     {
-        <text class="wordart-face wordart-face-fallback"
-              x="500" y="150"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              font-family="@FontFamily"
-              font-size="@FontSize"
-              font-weight="@FontWeight"
-              font-style="@FontStyle"
-              letter-spacing="@LetterSpacing"
-              fill="@FillColor"
-              stroke="@OutlineColor"
-              stroke-width="@OutlineWidth"
-              paint-order="stroke fill">@DisplayText</text>
+        <SvgWordArtText CssClass="wordart-face wordart-face-fallback"
+                        X="500" Y="150"
+                        TextAnchor="middle"
+                        DominantBaseline="middle"
+                        FontFamily="@FontFamily"
+                        FontSize="@FontSize"
+                        FontWeight="@FontWeight"
+                        FontStyle="@FontStyle"
+                        LetterSpacing="@LetterSpacing"
+                        Fill="@FillColor"
+                        Stroke="@OutlineColor"
+                        StrokeWidth="@OutlineWidth"
+                        PaintOrder="stroke fill"
+                        Text="@DisplayText" />
 
         @if (Item.GradientFill)
         {
-            <text class="wordart-face wordart-face-gradient"
-                  x="500" y="150"
-                  text-anchor="middle"
-                  dominant-baseline="middle"
-                  font-family="@FontFamily"
-                  font-size="@FontSize"
-                  font-weight="@FontWeight"
-                  font-style="@FontStyle"
-                  letter-spacing="@LetterSpacing"
-                  fill="@GradientFill">@DisplayText</text>
+            <SvgWordArtText CssClass="wordart-face wordart-face-gradient"
+                            X="500" Y="150"
+                            TextAnchor="middle"
+                            DominantBaseline="middle"
+                            FontFamily="@FontFamily"
+                            FontSize="@FontSize"
+                            FontWeight="@FontWeight"
+                            FontStyle="@FontStyle"
+                            LetterSpacing="@LetterSpacing"
+                            Fill="@GradientFill"
+                            Text="@DisplayText" />
         }
     }
     else
     {
-        <text class="wordart-face wordart-face-fallback"
-              x="0" y="0"
-              text-anchor="middle"
-              font-family="@FontFamily"
-              font-size="@FontSize"
-              font-weight="@FontWeight"
-              font-style="@FontStyle"
-              letter-spacing="@LetterSpacing"
-              fill="@FillColor"
-              stroke="@OutlineColor"
-              stroke-width="@OutlineWidth"
-              paint-order="stroke fill">
-            <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
-        </text>
+        <SvgWordArtText CssClass="wordart-face wordart-face-fallback"
+                        X="0" Y="0" Dy="@Inv(Item.PathBaselineOffset)"
+                        TextAnchor="middle"
+                        FontFamily="@FontFamily"
+                        FontSize="@FontSize"
+                        FontWeight="@FontWeight"
+                        FontStyle="@FontStyle"
+                        LetterSpacing="@LetterSpacing"
+                        Fill="@FillColor"
+                        Stroke="@OutlineColor"
+                        StrokeWidth="@OutlineWidth"
+                        PaintOrder="stroke fill"
+                        PathHref="@PathHref"
+                        PathStartOffset="@PathStartOffset"
+                        PathTextAnchor="middle"
+                        Text="@DisplayText" />
 
         @if (Item.GradientFill)
         {
-            <text class="wordart-face wordart-face-gradient"
-                  x="0" y="0"
-                  text-anchor="middle"
-                  font-family="@FontFamily"
-                  font-size="@FontSize"
-                  font-weight="@FontWeight"
-                  font-style="@FontStyle"
-                  letter-spacing="@LetterSpacing"
-                  fill="@GradientFill">
-                <textPath href="@PathHref" startOffset="50%" text-anchor="middle">@DisplayText</textPath>
-            </text>
+            <SvgWordArtText CssClass="wordart-face wordart-face-gradient"
+                            X="0" Y="0" Dy="@Inv(Item.PathBaselineOffset)"
+                            TextAnchor="middle"
+                            FontFamily="@FontFamily"
+                            FontSize="@FontSize"
+                            FontWeight="@FontWeight"
+                            FontStyle="@FontStyle"
+                            LetterSpacing="@LetterSpacing"
+                            Fill="@GradientFill"
+                            PathHref="@PathHref"
+                            PathStartOffset="@PathStartOffset"
+                            PathTextAnchor="middle"
+                            Text="@DisplayText" />
         }
     }
 </svg>
@@ -171,13 +185,8 @@
     private string OutlineWidth => Inv(Math.Clamp(Item.OutlineWidth, 0, 20));
     private IEnumerable<int> ExtrusionLayers => Enumerable.Range(1, Math.Clamp((int)Math.Round(Item.ExtrudeDepth), 0, 18)).Reverse();
 
-    private string WarpPath => Item.Warp switch
-    {
-        WordArtWarp.ArchUp => "M 80 225 Q 500 5 920 225",
-        WordArtWarp.ArchDown => "M 80 75 Q 500 295 920 75",
-        WordArtWarp.Wave => "M 40 165 C 220 20 350 290 520 145 C 690 0 810 280 960 125",
-        _ => "M 50 150 L 950 150"
-    };
+    private string WarpPath => WordArtPathGeometry.Build(Item);
+    private string PathStartOffset => $"{Math.Clamp(Item.PathStartOffsetPercent, 0, 100).ToString("0.##", CultureInfo.InvariantCulture)}%";
 
     private static string SafeColor(string? value, string fallback)
     {

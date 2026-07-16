@@ -59,6 +59,9 @@ public sealed partial class PublicationFileService
             wordArt.FontSizePt = Math.Clamp(wordArt.FontSizePt, 6, 300);
             wordArt.OutlineWidth = Math.Clamp(wordArt.OutlineWidth, 0, 20);
             wordArt.ExtrudeDepth = Math.Clamp(wordArt.ExtrudeDepth, 0, 24);
+            wordArt.CustomPathPoints = WordArtPathGeometry.Normalize(wordArt.CustomPathPoints);
+            wordArt.PathStartOffsetPercent = Math.Clamp(wordArt.PathStartOffsetPercent, 0, 100);
+            wordArt.PathBaselineOffset = Math.Clamp(wordArt.PathBaselineOffset, -80, 80);
         }
 
         foreach (var publicationPage in document.Pages)
@@ -70,7 +73,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.4";
+        document.FormatVersion = "1.5";
         return document;
     }
 

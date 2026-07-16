@@ -113,6 +113,7 @@
                 <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToGrid" @onchange="ToggleSnapGrid" /> Snap to grid</label>
                 <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToGuides" @onchange="ToggleSnapGuides" /> Snap to guides</label>
                 <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToPage" @onchange="ToggleSnapPage" /> Snap to page edges</label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToObjects" @onchange="ToggleSnapObjects" /> Snap to other objects</label>
                 <div class="property-button-row">
                     <DxButton Text="Vertical guide" Click="AddVerticalGuide" />
                     <DxButton Text="Horizontal guide" Click="AddHorizontalGuide" />
@@ -675,6 +676,7 @@
     private void ToggleSnapGrid(ChangeEventArgs args) => State.SetViewOption(view => view.SnapToGrid = ReadBool(args));
     private void ToggleSnapGuides(ChangeEventArgs args) => State.SetViewOption(view => view.SnapToGuides = ReadBool(args));
     private void ToggleSnapPage(ChangeEventArgs args) => State.SetViewOption(view => view.SnapToPage = ReadBool(args));
+    private void ToggleSnapObjects(ChangeEventArgs args) => State.SetViewOption(view => view.SnapToObjects = ReadBool(args));
     private void AddVerticalGuide() => State.AddGuide(GuideOrientation.Vertical);
     private void AddHorizontalGuide() => State.AddGuide(GuideOrientation.Horizontal);
     private void ClearGuides() => State.ClearGuides();

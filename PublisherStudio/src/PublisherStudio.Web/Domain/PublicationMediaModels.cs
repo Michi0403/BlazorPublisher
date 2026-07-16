@@ -24,6 +24,7 @@ public sealed class MediaEditorResult
 
 public sealed class MediaSourceInfo
 {
+    public string MimeType { get; set; } = string.Empty;
     public double DurationSeconds { get; set; }
     public string PosterDataUrl { get; set; } = string.Empty;
     public List<double> WaveformSamples { get; set; } = [];

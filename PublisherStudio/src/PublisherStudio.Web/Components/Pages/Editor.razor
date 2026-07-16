@@ -376,6 +376,8 @@
 
     private async Task InsertMediaFile(InputFileChangeEventArgs args, PublicationElementKind kind)
     {
+        IJSObjectReference? module = null;
+        Guid temporaryAssetId = Guid.Empty;
         try
         {
             var file = args.File;
@@ -384,64 +386,90 @@
             if (!mimeType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format: {Path.GetExtension(file.Name)}.");
 
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+            MediaSourceInfo? info = null;
+            Exception? browserFileInspectionError = null;
+            try
+            {
+                var inputId = kind == PublicationElementKind.Video ? "video-file-input" : "audio-file-input";
+                info = await module.InvokeAsync<MediaSourceInfo>(
+                    "inspectMediaFileInput",
+                    inputId,
+                    kind == PublicationElementKind.Video ? "video" : "audio");
+            }
+            catch (Exception ex)
+            {
+                browserFileInspectionError = ex;
+            }
+
             await using var stream = file.OpenReadStream(160 * 1024 * 1024);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
             var bytes = buffer.ToArray();
             if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
+            // Some Blazor rerenders replace the native input before JS can inspect its File.
+            // In that case, inspect the same bytes through the ranged local media endpoint.
+            if (info is null)
+            {
+                temporaryAssetId = Guid.NewGuid();
+                var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
+                try
+                {
+                    info = await module.InvokeAsync<MediaSourceInfo>(
+                        "inspectMediaDataUrl",
+                        inspectionUrl,
+                        kind == PublicationElementKind.Video ? "video" : "audio");
+                }
+                catch (Exception endpointError)
+                {
+                    throw new InvalidDataException(
+                        $"The browser could not decode the selected media. File inspection: {browserFileInspectionError?.Message ?? "not available"}. Local inspection: {endpointError.Message}",
+                        endpointError);
+                }
+            }
+
             mimeType = PublicationMediaData.NormalizeMimeType(
-                mimeType,
+                string.IsNullOrWhiteSpace(info.MimeType) ? mimeType : info.MimeType,
                 kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg");
             var dataUrl = PublicationMediaData.NormalizeDataUrl(
                 $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}",
                 mimeType);
 
-            // Inspect the exact bytes through the local ranged media endpoint. This avoids
-            // depending on the transient DOM file-input state and avoids sending a very large
-            // data URL through JS interop merely to read duration/poster metadata.
-            var inspectionAssetId = Guid.NewGuid();
-            var inspectionUrl = MediaAssets.RegisterBytes(inspectionAssetId, bytes, mimeType);
-            IJSObjectReference? module = null;
-            try
+            PublicationMediaElement media;
+            if (kind == PublicationElementKind.Video)
             {
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
-                var info = await module.InvokeAsync<MediaSourceInfo>(
-                    "inspectMediaDataUrl",
-                    inspectionUrl,
-                    kind == PublicationElementKind.Video ? "video" : "audio");
-
-                PublicationMediaElement media;
-                if (kind == PublicationElementKind.Video)
-                {
-                    media = State.AddVideo(dataUrl, mimeType, file.Name, info.DurationSeconds, info.PosterDataUrl);
-                    State.UpdateMedia(media.Id, item => item.WaveformSamples = info.WaveformSamples ?? [], capture: false);
-                }
-                else
-                {
-                    media = State.AddAudio(dataUrl, mimeType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
-                }
-
-                if (!MediaAssets.Copy(inspectionAssetId, media.Id))
-                    MediaAssets.RegisterBytes(media.Id, bytes, mimeType);
-                State.SelectElement(media.Id);
+                media = State.AddVideo(dataUrl, mimeType, file.Name, info.DurationSeconds, info.PosterDataUrl);
+                State.UpdateMedia(media.Id, item => item.WaveformSamples = info.WaveformSamples ?? [], capture: false);
             }
-            finally
+            else
             {
-                MediaAssets.Remove(inspectionAssetId);
-                if (module is not null)
-                {
-                    try { await module.DisposeAsync(); }
-                    catch (JSDisconnectedException) { }
-                    catch (TaskCanceledException) { }
-                }
+                media = State.AddAudio(dataUrl, mimeType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
             }
+
+            if (temporaryAssetId != Guid.Empty && MediaAssets.Copy(temporaryAssetId, media.Id))
+                MediaAssets.Remove(temporaryAssetId);
+            else
+                MediaAssets.RegisterBytes(media.Id, bytes, mimeType);
+            temporaryAssetId = Guid.Empty;
+
+            State.SelectElement(media.Id);
             _timelineVisible = true;
             ShowNotice($"Inserted {file.Name}. The timeline pane is open for timing and trimming.");
         }
         catch (Exception ex)
         {
             ShowError(ex);
+        }
+        finally
+        {
+            if (temporaryAssetId != Guid.Empty) MediaAssets.Remove(temporaryAssetId);
+            if (module is not null)
+            {
+                try { await module.DisposeAsync(); }
+                catch (JSDisconnectedException) { }
+                catch (TaskCanceledException) { }
+            }
         }
     }
 

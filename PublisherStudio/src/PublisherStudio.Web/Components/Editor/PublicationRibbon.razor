@@ -1,6 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 
-<DxRibbon CssClass="publication-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
+<DxRibbon CssClass="publication-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text="File">
         <DxRibbonApplicationTabItem Text="New publication" IconCssClass="pub-icon pub-icon-newpage" Click="RequestNew" />
         <DxRibbonApplicationTabItem Text="Open publication" IconCssClass="pub-icon pub-icon-open" Click="RequestOpen" />
@@ -18,270 +18,305 @@
             <DxRibbonItem Text="Undo" IconCssClass="pub-icon pub-icon-undo" Enabled="State.CanUndo" Click="Undo" />
             <DxRibbonItem Text="Redo" IconCssClass="pub-icon pub-icon-redo" Enabled="State.CanRedo" Click="Redo" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Clipboard" IconCssClass="pub-icon pub-icon-copy">
-            <DxRibbonItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" Enabled="HasSelection" Click="Copy" />
-            <DxRibbonItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="State.CanPaste" Click="Paste" />
-            <DxRibbonItem Text="Duplicate" IconCssClass="pub-icon pub-icon-duplicate" Enabled="HasSelection" Click="Duplicate" />
-            <DxRibbonItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Enabled="HasSelection" Click="Delete" />
+        <DxRibbonGroup Text="Edit" IconCssClass="pub-icon pub-icon-copy">
+            <DxRibbonItem Text="Clipboard" IconCssClass="pub-icon pub-icon-copy" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" Enabled="HasSelection" Click="Copy" />
+                <DxRibbonItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="State.CanPaste" Click="Paste" />
+                <DxRibbonItem Text="Duplicate" IconCssClass="pub-icon pub-icon-duplicate" Enabled="HasSelection" Click="Duplicate" />
+                <DxRibbonItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Enabled="HasSelection" Click="Delete" />
+            </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Arrange" IconCssClass="pub-icon pub-icon-layers">
-            <DxRibbonItem Text="To front" IconCssClass="pub-icon pub-icon-front" Enabled="HasSelection" Click="BringToFront" />
-            <DxRibbonItem Text="Forward" Enabled="HasSelection" Click="BringForward" />
-            <DxRibbonItem Text="Backward" Enabled="HasSelection" Click="SendBackward" />
-            <DxRibbonItem Text="To back" Enabled="HasSelection" Click="SendToBack" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Align to page" IconCssClass="pub-icon pub-icon-align">
-            <DxRibbonItem Text="Left" Enabled="CanAlign" Click="AlignLeft" />
-            <DxRibbonItem Text="Center" Enabled="CanAlign" Click="AlignCenter" />
-            <DxRibbonItem Text="Right" Enabled="CanAlign" Click="AlignRight" />
-            <DxRibbonItem Text="Top" Enabled="CanAlign" Click="AlignTop" />
-            <DxRibbonItem Text="Middle" Enabled="CanAlign" Click="AlignMiddle" />
-            <DxRibbonItem Text="Bottom" Enabled="CanAlign" Click="AlignBottom" />
+            <DxRibbonItem Text="Layer order" IconCssClass="pub-icon pub-icon-layers" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Bring to front" IconCssClass="pub-icon pub-icon-front" Enabled="HasSelection" Click="BringToFront" />
+                <DxRibbonItem Text="Bring forward" Enabled="HasSelection" Click="BringForward" />
+                <DxRibbonItem Text="Send backward" Enabled="HasSelection" Click="SendBackward" />
+                <DxRibbonItem Text="Send to back" Enabled="HasSelection" Click="SendToBack" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Align" IconCssClass="pub-icon pub-icon-align" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Left" Enabled="CanAlign" Click="AlignLeft" />
+                <DxRibbonItem Text="Horizontal center" Enabled="CanAlign" Click="AlignCenter" />
+                <DxRibbonItem Text="Right" Enabled="CanAlign" Click="AlignRight" />
+                <DxRibbonItem Text="Top" Enabled="CanAlign" Click="AlignTop" />
+                <DxRibbonItem Text="Vertical middle" Enabled="CanAlign" Click="AlignMiddle" />
+                <DxRibbonItem Text="Bottom" Enabled="CanAlign" Click="AlignBottom" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Insert">
-        <DxRibbonGroup Text="Objects" IconCssClass="pub-icon pub-icon-insert">
-            <DxRibbonItem Text="Text box" IconCssClass="pub-icon pub-icon-text" IsPrimary="true" Click="AddText" AdaptivePriority="-5" />
-            <DxRibbonItem Text="WordArt" IconCssClass="pub-icon pub-icon-wordart" IsPrimary="true" Click="AddWordArt" AdaptivePriority="-5" />
-            <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" IsPrimary="true" Click="RequestPicture" AdaptivePriority="-5" />
-            <DxRibbonItem Text="Create picture" IconCssClass="pub-icon pub-icon-create-picture" IsPrimary="true" Click="RequestCreatePicture" AdaptivePriority="-5" />
+        <DxRibbonGroup Text="Content" IconCssClass="pub-icon pub-icon-insert">
+            <DxRibbonItem Text="Objects" IconCssClass="pub-icon pub-icon-insert" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Text box" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
+                <DxRibbonItem Text="WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
+                <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
+                <DxRibbonItem Text="Create picture" IconCssClass="pub-icon pub-icon-create-picture" Click="RequestCreatePicture" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Media" IconCssClass="pub-icon pub-icon-media" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Insert video" IconCssClass="pub-icon pub-icon-video" Click="RequestVideo" />
+                <DxRibbonItem Text="Insert audio" IconCssClass="pub-icon pub-icon-audio" Click="RequestAudio" />
+                <DxRibbonItem Text="Create video" Click="RequestCreateVideo" />
+                <DxRibbonItem Text="Create audio" Click="RequestCreateAudio" />
+            </DxRibbonItem>
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Media" IconCssClass="pub-icon pub-icon-media">
-            <DxRibbonItem Text="Video" IconCssClass="pub-icon pub-icon-video" IsPrimary="true" Click="RequestVideo" AdaptivePriority="-5" />
-            <DxRibbonItem Text="Audio" IconCssClass="pub-icon pub-icon-audio" IsPrimary="true" Click="RequestAudio" AdaptivePriority="-5" />
-            <DxRibbonItem Text="Create video" Click="RequestCreateVideo" />
-            <DxRibbonItem Text="Create audio" Click="RequestCreateAudio" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Data and diagrams" IconCssClass="pub-icon pub-icon-chart">
-            <DxRibbonItem Text="Chart" IconCssClass="pub-icon pub-icon-chart" IsPrimary="true" Click="AddChart" AdaptivePriority="-4" />
-            <DxRibbonItem Text="Pie / doughnut" IconCssClass="pub-icon pub-icon-pie" Click="AddPieChart" />
-            <DxRibbonItem Text="Polar chart" Click="AddPolarChart" />
-            <DxRibbonItem Text="Sparkline" Click="AddSparkline" />
-            <DxRibbonItem Text="Bar gauge" Click="AddBarGauge" />
-            <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-table" Click="AddDataTable" />
-            <DxRibbonItem Text="KPI progress" Click="AddKpi" />
-            <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
+        <DxRibbonGroup Text="Data" IconCssClass="pub-icon pub-icon-chart">
+            <DxRibbonItem Text="Charts and data" IconCssClass="pub-icon pub-icon-chart" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Bar / line chart" Click="AddChart" />
+                <DxRibbonItem Text="Pie / doughnut" IconCssClass="pub-icon pub-icon-pie" Click="AddPieChart" />
+                <DxRibbonItem Text="Polar chart" Click="AddPolarChart" />
+                <DxRibbonItem Text="Sparkline" Click="AddSparkline" />
+                <DxRibbonItem Text="Bar gauge" Click="AddBarGauge" />
+                <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-table" Click="AddDataTable" />
+                <DxRibbonItem Text="KPI progress" Click="AddKpi" />
+                <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
+            </DxRibbonItem>
             <DxRibbonItem Text="Barcode / QR" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" Click="RequestBarcode" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Shapes" IconCssClass="pub-icon pub-icon-shape">
-            <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
-            <DxRibbonItem Text="Rounded rectangle" Click="AddRoundedRectangle" />
-            <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
-            <DxRibbonItem Text="Line" Click="AddLine" />
-            <DxRibbonItem Text="Connector" IconCssClass="pub-icon pub-icon-connector" IsPrimary="true" Click="StartConnector" />
-            <DxRibbonItem Text="Arrow connector" IconCssClass="pub-icon pub-icon-arrow" IsPrimary="true" Click="StartArrowConnector" />
+        <DxRibbonGroup Text="Drawing" IconCssClass="pub-icon pub-icon-shape">
+            <DxRibbonItem Text="Shapes" IconCssClass="pub-icon pub-icon-shape" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
+                <DxRibbonItem Text="Rounded rectangle" Click="AddRoundedRectangle" />
+                <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
+                <DxRibbonItem Text="Line" Click="AddLine" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Connectors" IconCssClass="pub-icon pub-icon-connector" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Connector" Click="StartConnector" />
+                <DxRibbonItem Text="Arrow connector" IconCssClass="pub-icon pub-icon-arrow" Click="StartArrowConnector" />
+            </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Pages" IconCssClass="pub-icon pub-icon-page">
-            <DxRibbonItem Text="New page" IconCssClass="pub-icon pub-icon-newpage" Click="AddPage" />
-            <DxRibbonItem Text="Duplicate page" Click="DuplicatePage" />
-            <DxRibbonItem Text="Delete page" Enabled="@(State.Document.Pages.Count > 1)" Click="DeletePage" />
+            <DxRibbonItem Text="Page" IconCssClass="pub-icon pub-icon-page" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="New page" IconCssClass="pub-icon pub-icon-newpage" Click="AddPage" />
+                <DxRibbonItem Text="Duplicate page" Click="DuplicatePage" />
+                <DxRibbonItem Text="Delete page" Enabled="@(State.Document.Pages.Count > 1)" Click="DeletePage" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Page Design">
-        <DxRibbonGroup Text="ISO page sizes">
-            <DxRibbonItem Text="A3 portrait" Click="SetA3Portrait" />
-            <DxRibbonItem Text="A3 landscape" Click="SetA3Landscape" />
-            <DxRibbonItem Text="A4 portrait" Click="SetA4Portrait" />
-            <DxRibbonItem Text="A4 landscape" Click="SetA4Landscape" />
-            <DxRibbonItem Text="A5 portrait" Click="SetA5Portrait" />
-            <DxRibbonItem Text="A5 landscape" Click="SetA5Landscape" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="US and special">
-            <DxRibbonItem Text="Letter portrait" Click="SetLetterPortrait" />
-            <DxRibbonItem Text="Letter landscape" Click="SetLetterLandscape" />
-            <DxRibbonItem Text="Legal portrait" Click="SetLegalPortrait" />
-            <DxRibbonItem Text="Tabloid landscape" Click="SetTabloidLandscape" />
-            <DxRibbonItem Text="Business card" Click="SetBusinessCard" />
-            <DxRibbonItem Text="Square" Click="SetSquare" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Orientation">
-            <DxRibbonItem Text="Swap width / height" IconCssClass="pub-icon pub-icon-rotate" Click="SwapOrientation" />
+        <DxRibbonGroup Text="Page setup">
+            <DxRibbonItem Text="Page size" IconCssClass="pub-icon pub-icon-page" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="A3 portrait" Click="SetA3Portrait" />
+                <DxRibbonItem Text="A3 landscape" Click="SetA3Landscape" />
+                <DxRibbonItem Text="A4 portrait" Click="SetA4Portrait" />
+                <DxRibbonItem Text="A4 landscape" Click="SetA4Landscape" />
+                <DxRibbonItem Text="A5 portrait" Click="SetA5Portrait" />
+                <DxRibbonItem Text="A5 landscape" Click="SetA5Landscape" />
+                <DxRibbonItem Text="Letter portrait" Click="SetLetterPortrait" />
+                <DxRibbonItem Text="Letter landscape" Click="SetLetterLandscape" />
+                <DxRibbonItem Text="Legal portrait" Click="SetLegalPortrait" />
+                <DxRibbonItem Text="Tabloid landscape" Click="SetTabloidLandscape" />
+                <DxRibbonItem Text="Business card" Click="SetBusinessCard" />
+                <DxRibbonItem Text="Square" Click="SetSquare" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Swap orientation" IconCssClass="pub-icon pub-icon-rotate" Click="SwapOrientation" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Background">
             <DxRibbonColorPaletteItem Text="Page color" Value="@PagePaletteColor" ValueChanged="OnPageColorChanged">
                 <Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups>
             </DxRibbonColorPaletteItem>
-            <DxRibbonItem Text="Transparent page" Click="SetTransparentPage" />
-            <DxRibbonItem Text="White page" Click="SetWhitePage" />
+            <DxRibbonItem Text="Background options" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Transparent page" Click="SetTransparentPage" />
+                <DxRibbonItem Text="White page" Click="SetWhitePage" />
+            </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Guides">
-            <DxRibbonItem Text="Vertical center" Click="AddVerticalGuide" />
-            <DxRibbonItem Text="Horizontal center" Click="AddHorizontalGuide" />
-            <DxRibbonItem Text="Clear guides" Click="ClearGuides" />
+            <DxRibbonItem Text="Guide commands" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Vertical center" Click="AddVerticalGuide" />
+                <DxRibbonItem Text="Horizontal center" Click="AddHorizontalGuide" />
+                <DxRibbonItem Text="Clear guides" Click="ClearGuides" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Animations">
         <DxRibbonGroup Text="Preview" IconCssClass="pub-icon pub-icon-animation">
             <DxRibbonItem Text="Preview page" IconCssClass="pub-icon pub-icon-animation" IsPrimary="true" Click="RequestPreviewPageAnimations" />
-            <DxRibbonItem Text="Preview object" Enabled="@(State.SelectedElement?.Animations.Count > 0)" Click="RequestPreviewObjectAnimations" />
-            <DxRibbonItem Text="Stop" Click="RequestStopAnimations" />
+            <DxRibbonItem Text="Preview options" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Preview selected object" Enabled="@(State.SelectedElement?.Animations.Count > 0)" Click="RequestPreviewObjectAnimations" />
+                <DxRibbonItem Text="Stop preview" Click="RequestStopAnimations" />
+                <DxRibbonItem Text="@TimelinePaneText" IconCssClass="pub-icon pub-icon-timeline" Click="RequestToggleTimeline" />
+                <DxRibbonItem Text="Edit selected media" Enabled="IsMediaSelected" Click="RequestEditMedia" />
+            </DxRibbonItem>
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Timeline" IconCssClass="pub-icon pub-icon-timeline">
-            <DxRibbonItem Text="@TimelinePaneText" IsPrimary="true" Click="RequestToggleTimeline" />
-            <DxRibbonItem Text="Edit selected media" Enabled="IsMediaSelected" Click="RequestEditMedia" />
+        <DxRibbonGroup Text="Add animation">
+            <DxRibbonItem Text="Entrance" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Fade in" Enabled="HasSelection" Click="AnimationFadeIn" />
+                <DxRibbonItem Text="Fly in" Enabled="HasSelection" Click="AnimationFlyIn" />
+                <DxRibbonItem Text="Zoom in" Enabled="HasSelection" Click="AnimationZoomIn" />
+                <DxRibbonItem Text="Wipe in" Enabled="HasSelection" Click="AnimationWipeIn" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Emphasis / motion" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Pulse" Enabled="HasSelection" Click="AnimationPulse" />
+                <DxRibbonItem Text="Spin" Enabled="HasSelection" Click="AnimationSpin" />
+                <DxRibbonItem Text="Move" Enabled="HasSelection" Click="AnimationMove" />
+                <DxRibbonItem Text="Remove object animations" Enabled="HasSelection" Click="ClearAnimations" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Exit" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Fade out" Enabled="HasSelection" Click="AnimationFadeOut" />
+                <DxRibbonItem Text="Fly out" Enabled="HasSelection" Click="AnimationFlyOut" />
+            </DxRibbonItem>
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Entrance">
-            <DxRibbonItem Text="Fade in" Enabled="HasSelection" Click="AnimationFadeIn" />
-            <DxRibbonItem Text="Fly in" Enabled="HasSelection" Click="AnimationFlyIn" />
-            <DxRibbonItem Text="Zoom in" Enabled="HasSelection" Click="AnimationZoomIn" />
-            <DxRibbonItem Text="Wipe in" Enabled="HasSelection" Click="AnimationWipeIn" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Emphasis and motion">
-            <DxRibbonItem Text="Pulse" Enabled="HasSelection" Click="AnimationPulse" />
-            <DxRibbonItem Text="Spin" Enabled="HasSelection" Click="AnimationSpin" />
-            <DxRibbonItem Text="Move" Enabled="HasSelection" Click="AnimationMove" />
-            <DxRibbonItem Text="Remove object animations" Enabled="@(State.SelectedElement?.Animations.Count > 0)" Click="ClearAnimations" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Exit">
-            <DxRibbonItem Text="Fade out" Enabled="HasSelection" Click="AnimationFadeOut" />
-            <DxRibbonItem Text="Fly out" Enabled="HasSelection" Click="AnimationFlyOut" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Page transition">
-            <DxRibbonItem Text="None" Click="TransitionNone" />
-            <DxRibbonItem Text="Fade" Click="TransitionFade" />
-            <DxRibbonItem Text="Push" Click="TransitionPush" />
-            <DxRibbonItem Text="Wipe" Click="TransitionWipe" />
-            <DxRibbonItem Text="Zoom" Click="TransitionZoom" />
-            <DxRibbonItem Text="Flip" Click="TransitionFlip" />
+        <DxRibbonGroup Text="Transition">
+            <DxRibbonItem Text="Page transition" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="None" Click="TransitionNone" />
+                <DxRibbonItem Text="Fade" Click="TransitionFade" />
+                <DxRibbonItem Text="Push" Click="TransitionPush" />
+                <DxRibbonItem Text="Wipe" Click="TransitionWipe" />
+                <DxRibbonItem Text="Zoom" Click="TransitionZoom" />
+                <DxRibbonItem Text="Flip" Click="TransitionFlip" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="View">
         <DxRibbonGroup Text="Workspace" IconCssClass="pub-icon pub-icon-panels">
-            <DxRibbonItem Text="Pages pane" IconCssClass="pub-icon pub-icon-pages" Click="RequestTogglePagesPane" />
-            <DxRibbonItem Text="Properties pane" IconCssClass="pub-icon pub-icon-properties" Click="RequestToggleInspectorPane" />
-            <DxRibbonItem Text="@TimelinePaneText" IconCssClass="pub-icon pub-icon-timeline" Click="RequestToggleTimeline" />
-            <DxRibbonItem Text="Reset layout" Click="RequestResetWorkspace" />
+            <DxRibbonItem Text="Panes" IconCssClass="pub-icon pub-icon-panels" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Pages pane" IconCssClass="pub-icon pub-icon-pages" Click="RequestTogglePagesPane" />
+                <DxRibbonItem Text="Properties pane" IconCssClass="pub-icon pub-icon-properties" Click="RequestToggleInspectorPane" />
+                <DxRibbonItem Text="@TimelinePaneText" IconCssClass="pub-icon pub-icon-timeline" Click="RequestToggleTimeline" />
+                <DxRibbonItem Text="Reset layout" Click="RequestResetWorkspace" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Show" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="@RulersText" Click="ToggleRulers" />
+                <DxRibbonItem Text="@GridText" Click="ToggleGrid" />
+                <DxRibbonItem Text="@GuidesText" Click="ToggleGuides" />
+            </DxRibbonItem>
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Show">
-            <DxRibbonItem Text="@RulersText" Click="ToggleRulers" />
-            <DxRibbonItem Text="@GridText" Click="ToggleGrid" />
-            <DxRibbonItem Text="@GuidesText" Click="ToggleGuides" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Ruler units">
-            <DxRibbonItem Text="Millimetres" Click="UnitMillimeter" />
-            <DxRibbonItem Text="Centimetres" Click="UnitCentimeter" />
-            <DxRibbonItem Text="Inches" Click="UnitInch" />
-            <DxRibbonItem Text="Pixels" Click="UnitPixel" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Snapping">
-            <DxRibbonItem Text="@SnapGridText" Click="ToggleSnapGrid" />
-            <DxRibbonItem Text="@SnapGuidesText" Click="ToggleSnapGuides" />
-            <DxRibbonItem Text="@SnapPageText" Click="ToggleSnapPage" />
+        <DxRibbonGroup Text="Measurement">
+            <DxRibbonItem Text="Units" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Millimetres" Click="UnitMillimeter" />
+                <DxRibbonItem Text="Centimetres" Click="UnitCentimeter" />
+                <DxRibbonItem Text="Inches" Click="UnitInch" />
+                <DxRibbonItem Text="Pixels" Click="UnitPixel" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Snapping" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="@SnapGridText" Click="ToggleSnapGrid" />
+                <DxRibbonItem Text="@SnapGuidesText" Click="ToggleSnapGuides" />
+                <DxRibbonItem Text="@SnapPageText" Click="ToggleSnapPage" />
+                <DxRibbonItem Text="@SnapObjectsText" Click="ToggleSnapObjects" />
+            </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Zoom" IconCssClass="pub-icon pub-icon-zoom">
-            <DxRibbonItem Text="Fit page" IconCssClass="pub-icon pub-icon-fit" Click="RequestFitPage" />
-            <DxRibbonItem Text="50%" Click="Zoom50" />
-            <DxRibbonItem Text="75%" Click="Zoom75" />
-            <DxRibbonItem Text="100%" Click="Zoom100" />
-            <DxRibbonItem Text="125%" Click="Zoom125" />
-            <DxRibbonItem Text="150%" Click="Zoom150" />
+            <DxRibbonItem Text="Zoom" IconCssClass="pub-icon pub-icon-zoom" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Fit page" IconCssClass="pub-icon pub-icon-fit" Click="RequestFitPage" />
+                <DxRibbonItem Text="50%" Click="Zoom50" />
+                <DxRibbonItem Text="75%" Click="Zoom75" />
+                <DxRibbonItem Text="100%" Click="Zoom100" />
+                <DxRibbonItem Text="125%" Click="Zoom125" />
+                <DxRibbonItem Text="150%" Click="Zoom150" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsImageSelected">
         <DxRibbonGroup Text="Picture" IconCssClass="pub-icon pub-icon-picture">
-            <DxRibbonItem Text="Edit in Picture Studio" IconCssClass="pub-icon pub-icon-create-picture" IsPrimary="true" Click="RequestEditPicture" />
-            <DxRibbonItem Text="Replace" IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
-            <DxRibbonItem Text="@CropCommandText" IconCssClass="pub-icon pub-icon-crop" Click="ToggleCrop" />
-            <DxRibbonItem Text="Fit" Click="PictureFit" />
-            <DxRibbonItem Text="Fill" Click="PictureFill" />
-            <DxRibbonItem Text="Reset" Click="ResetPicture" />
+            <DxRibbonItem Text="Edit picture" IconCssClass="pub-icon pub-icon-create-picture" IsPrimary="true" Click="RequestEditPicture" />
+            <DxRibbonItem Text="Picture commands" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Replace" Click="RequestPicture" />
+                <DxRibbonItem Text="@CropCommandText" Click="ToggleCrop" />
+                <DxRibbonItem Text="Fit" Click="PictureFit" />
+                <DxRibbonItem Text="Fill" Click="PictureFill" />
+                <DxRibbonItem Text="Reset" Click="ResetPicture" />
+            </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Adjust">
-            <DxRibbonItem Text="Brighter" Click="BrightenPicture" />
-            <DxRibbonItem Text="Darker" Click="DarkenPicture" />
-            <DxRibbonItem Text="More contrast" Click="ContrastPicture" />
-            <DxRibbonItem Text="Less contrast" Click="ReduceContrastPicture" />
-            <DxRibbonItem Text="More color" Click="SaturatePicture" />
-            <DxRibbonItem Text="Less color" Click="DesaturatePicture" />
-            <DxRibbonItem Text="Grayscale" Click="ToggleGrayscale" />
-            <DxRibbonItem Text="Sepia" Click="ToggleSepia" />
-            <DxRibbonItem Text="Invert" Click="ToggleInvert" />
+            <DxRibbonItem Text="Tone and color" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Brighter" Click="BrightenPicture" />
+                <DxRibbonItem Text="Darker" Click="DarkenPicture" />
+                <DxRibbonItem Text="More contrast" Click="ContrastPicture" />
+                <DxRibbonItem Text="Less contrast" Click="ReduceContrastPicture" />
+                <DxRibbonItem Text="More color" Click="SaturatePicture" />
+                <DxRibbonItem Text="Less color" Click="DesaturatePicture" />
+                <DxRibbonItem Text="Grayscale" Click="ToggleGrayscale" />
+                <DxRibbonItem Text="Sepia" Click="ToggleSepia" />
+                <DxRibbonItem Text="Invert" Click="ToggleInvert" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Recolor" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Blue tint" Click="TintBlue" />
+                <DxRibbonItem Text="Warm tint" Click="TintWarm" />
+                <DxRibbonItem Text="Green tint" Click="TintGreen" />
+                <DxRibbonItem Text="Full recolor" Click="FullRecolor" />
+                <DxRibbonItem Text="Clear color" Click="ClearTint" />
+            </DxRibbonItem>
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Recolor" IconCssClass="pub-icon pub-icon-color">
-            <DxRibbonItem Text="Blue tint" Click="TintBlue" />
-            <DxRibbonItem Text="Warm tint" Click="TintWarm" />
-            <DxRibbonItem Text="Green tint" Click="TintGreen" />
-            <DxRibbonItem Text="Full recolor" Click="FullRecolor" />
-            <DxRibbonItem Text="Clear color" Click="ClearTint" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Picture styles">
-            <DxRibbonItem Text="Rectangle" Click="MaskRectangle" />
-            <DxRibbonItem Text="Rounded" Click="MaskRounded" />
-            <DxRibbonItem Text="Ellipse" Click="MaskEllipse" />
-            <DxRibbonItem Text="Shadow" Click="ToggleShadow" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Frame ratio">
-            <DxRibbonItem Text="1:1" Click="RatioSquare" />
-            <DxRibbonItem Text="4:3" Click="RatioFourThree" />
-            <DxRibbonItem Text="16:9" Click="RatioSixteenNine" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Rotate">
-            <DxRibbonItem Text="Rotate frame left" Click="RotateLeft" />
-            <DxRibbonItem Text="Rotate frame right" Click="RotateRight" />
-            <DxRibbonItem Text="Rotate picture left" Click="RotatePictureLeft" />
-            <DxRibbonItem Text="Rotate picture right" Click="RotatePictureRight" />
-            <DxRibbonItem Text="Flip horizontal" Click="FlipHorizontal" />
-            <DxRibbonItem Text="Flip vertical" Click="FlipVertical" />
+        <DxRibbonGroup Text="Frame">
+            <DxRibbonItem Text="Style and ratio" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Rectangle" Click="MaskRectangle" />
+                <DxRibbonItem Text="Rounded" Click="MaskRounded" />
+                <DxRibbonItem Text="Ellipse" Click="MaskEllipse" />
+                <DxRibbonItem Text="Shadow" Click="ToggleShadow" />
+                <DxRibbonItem Text="Ratio 1:1" Click="RatioSquare" />
+                <DxRibbonItem Text="Ratio 4:3" Click="RatioFourThree" />
+                <DxRibbonItem Text="Ratio 16:9" Click="RatioSixteenNine" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Rotate / flip" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Rotate frame left" Click="RotateLeft" />
+                <DxRibbonItem Text="Rotate frame right" Click="RotateRight" />
+                <DxRibbonItem Text="Rotate picture left" Click="RotatePictureLeft" />
+                <DxRibbonItem Text="Rotate picture right" Click="RotatePictureRight" />
+                <DxRibbonItem Text="Flip horizontal" Click="FlipHorizontal" />
+                <DxRibbonItem Text="Flip vertical" Click="FlipVertical" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Text Box Tools" Contextual="true" Visible="IsTextSelected">
         <DxRibbonGroup Text="Text"><DxRibbonItem Text="Edit story" IconCssClass="pub-icon pub-icon-edit" IsPrimary="true" Click="RequestStoryEditor" /></DxRibbonGroup>
         <DxRibbonGroup Text="Frame">
-            <DxRibbonItem Text="No fill" Click="TextNoFill" />
-            <DxRibbonItem Text="White fill" Click="TextWhiteFill" />
-            <DxRibbonItem Text="Rotate left" Click="RotateLeft" />
-            <DxRibbonItem Text="Rotate right" Click="RotateRight" />
+            <DxRibbonItem Text="Frame options" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="No fill" Click="TextNoFill" />
+                <DxRibbonItem Text="White fill" Click="TextWhiteFill" />
+                <DxRibbonItem Text="Rotate left" Click="RotateLeft" />
+                <DxRibbonItem Text="Rotate right" Click="RotateRight" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="WordArt Tools" Contextual="true" Visible="IsWordArtSelected">
-        <DxRibbonGroup Text="Style" IconCssClass="pub-icon pub-icon-wordart">
-            <DxRibbonItem Text="Blue gradient" Click="WordArtBlue" />
-            <DxRibbonItem Text="Gold gradient" Click="WordArtGold" />
-            <DxRibbonItem Text="Green gradient" Click="WordArtGreen" />
-            <DxRibbonItem Text="Flat fill" Click="WordArtFlat" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Transform">
-            <DxRibbonItem Text="Straight" Click="WordArtStraight" />
-            <DxRibbonItem Text="Arch up" Click="WordArtArchUp" />
-            <DxRibbonItem Text="Arch down" Click="WordArtArchDown" />
-            <DxRibbonItem Text="Wave" Click="WordArtWave" />
-            <DxRibbonItem Text="Draw path" IconCssClass="pub-icon pub-icon-path" IsPrimary="true" Click="WordArtCustomPath" />
-            <DxRibbonItem Text="Reverse path" Click="WordArtReversePath" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Depth">
-            <DxRibbonItem Text="More 3D" Click="WordArtMoreDepth" />
-            <DxRibbonItem Text="Less 3D" Click="WordArtLessDepth" />
-            <DxRibbonItem Text="Shadow" Click="WordArtShadow" />
+        <DxRibbonGroup Text="WordArt" IconCssClass="pub-icon pub-icon-wordart">
+            <DxRibbonItem Text="Style" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Blue gradient" Click="WordArtBlue" />
+                <DxRibbonItem Text="Gold gradient" Click="WordArtGold" />
+                <DxRibbonItem Text="Green gradient" Click="WordArtGreen" />
+                <DxRibbonItem Text="Flat fill" Click="WordArtFlat" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Transform" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Straight" Click="WordArtStraight" />
+                <DxRibbonItem Text="Arch up" Click="WordArtArchUp" />
+                <DxRibbonItem Text="Arch down" Click="WordArtArchDown" />
+                <DxRibbonItem Text="Wave" Click="WordArtWave" />
+                <DxRibbonItem Text="Draw path" Click="WordArtCustomPath" />
+                <DxRibbonItem Text="Reverse path" Click="WordArtReversePath" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Depth" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="More 3D" Click="WordArtMoreDepth" />
+                <DxRibbonItem Text="Less 3D" Click="WordArtLessDepth" />
+                <DxRibbonItem Text="Shadow" Click="WordArtShadow" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Connector Tools" Contextual="true" Visible="IsConnectorSelected">
-        <DxRibbonGroup Text="Path" IconCssClass="pub-icon pub-icon-connector">
-            <DxRibbonItem Text="Straight" Click="ConnectorStraight" />
-            <DxRibbonItem Text="Elbow" Click="ConnectorElbow" />
-            <DxRibbonItem Text="Curved" Click="ConnectorCurved" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Line style">
-            <DxRibbonItem Text="Solid" Click="ConnectorSolid" />
-            <DxRibbonItem Text="Dashed" Click="ConnectorDashed" />
-            <DxRibbonItem Text="Dotted" Click="ConnectorDotted" />
-            <DxRibbonItem Text="Thicker" Click="ConnectorThicker" />
-            <DxRibbonItem Text="Thinner" Click="ConnectorThinner" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Arrowheads" IconCssClass="pub-icon pub-icon-arrow">
-            <DxRibbonItem Text="No arrows" Click="ConnectorNoArrows" />
-            <DxRibbonItem Text="Arrow end" Click="ConnectorArrowEnd" />
-            <DxRibbonItem Text="Arrows both ends" Click="ConnectorArrowsBoth" />
-            <DxRibbonItem Text="Diamond start" Click="ConnectorDiamondStart" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Color">
+        <DxRibbonGroup Text="Connector" IconCssClass="pub-icon pub-icon-connector">
+            <DxRibbonItem Text="Path" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Straight" Click="ConnectorStraight" />
+                <DxRibbonItem Text="Elbow" Click="ConnectorElbow" />
+                <DxRibbonItem Text="Curved" Click="ConnectorCurved" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Line style" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Solid" Click="ConnectorSolid" />
+                <DxRibbonItem Text="Dashed" Click="ConnectorDashed" />
+                <DxRibbonItem Text="Dotted" Click="ConnectorDotted" />
+                <DxRibbonItem Text="Thicker" Click="ConnectorThicker" />
+                <DxRibbonItem Text="Thinner" Click="ConnectorThinner" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Arrowheads" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="No arrows" Click="ConnectorNoArrows" />
+                <DxRibbonItem Text="Arrow end" Click="ConnectorArrowEnd" />
+                <DxRibbonItem Text="Arrows both ends" Click="ConnectorArrowsBoth" />
+                <DxRibbonItem Text="Diamond start" Click="ConnectorDiamondStart" />
+            </DxRibbonItem>
             <DxRibbonColorPaletteItem Text="Line color" Value="@ConnectorStroke" ValueChanged="OnConnectorStrokeChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
         </DxRibbonGroup>
     </DxRibbonTab>
@@ -289,45 +324,56 @@
     <DxRibbonTab Text="Data Tools" Contextual="true" Visible="IsDataVisualSelected">
         <DxRibbonGroup Text="Data visual" IconCssClass="pub-icon pub-icon-chart">
             <DxRibbonItem Text="Edit visual" IconCssClass="pub-icon pub-icon-edit" IsPrimary="true" Click="RequestEditDataVisual" />
-            <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
-            <DxRibbonItem Text="Barcode / QR" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" Click="RequestBarcode" />
-            <DxRibbonItem Text="Refresh" Click="RefreshData" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Quick type">
-            <DxRibbonItem Text="Bar / line chart" Click="MakeCartesian" />
-            <DxRibbonItem Text="Pie" Click="MakePie" />
-            <DxRibbonItem Text="Sparkline" Click="MakeSparkline" />
-            <DxRibbonItem Text="Gauge" Click="MakeGauge" />
-            <DxRibbonItem Text="Table" Click="MakeTable" />
-            <DxRibbonItem Text="KPI" Click="MakeKpi" />
+            <DxRibbonItem Text="Data commands" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Manage data" Click="RequestManageData" />
+                <DxRibbonItem Text="Barcode / QR" Click="RequestBarcode" />
+                <DxRibbonItem Text="Refresh" Click="RefreshData" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Quick type" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Bar / line chart" Click="MakeCartesian" />
+                <DxRibbonItem Text="Pie" Click="MakePie" />
+                <DxRibbonItem Text="Sparkline" Click="MakeSparkline" />
+                <DxRibbonItem Text="Gauge" Click="MakeGauge" />
+                <DxRibbonItem Text="Table" Click="MakeTable" />
+                <DxRibbonItem Text="KPI" Click="MakeKpi" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Media Tools" Contextual="true" Visible="IsMediaSelected">
-        <DxRibbonGroup Text="Clip" IconCssClass="pub-icon pub-icon-media">
+        <DxRibbonGroup Text="Media" IconCssClass="pub-icon pub-icon-media">
             <DxRibbonItem Text="Edit in Media Studio" IsPrimary="true" Click="RequestEditMedia" />
-            <DxRibbonItem Text="@MediaMutedText" Click="ToggleMediaMuted" />
-            <DxRibbonItem Text="@MediaLoopText" Click="ToggleMediaLoop" />
-            <DxRibbonItem Text="@MediaAutoPlayText" Click="ToggleMediaAutoPlay" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Timeline">
-            <DxRibbonItem Text="@TimelinePaneText" Click="RequestToggleTimeline" />
-            <DxRibbonItem Text="Start at page entry" Click="MediaStartAtPageEntry" />
-            <DxRibbonItem Text="Start on click" Click="MediaStartOnClick" />
-            <DxRibbonItem Text="Start with animation" Click="MediaStartWithAnimation" />
+            <DxRibbonItem Text="Playback" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="@MediaMutedText" Click="ToggleMediaMuted" />
+                <DxRibbonItem Text="@MediaLoopText" Click="ToggleMediaLoop" />
+                <DxRibbonItem Text="@MediaAutoPlayText" Click="ToggleMediaAutoPlay" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Start behavior" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="@TimelinePaneText" Click="RequestToggleTimeline" />
+                <DxRibbonItem Text="Start at page entry" Click="MediaStartAtPageEntry" />
+                <DxRibbonItem Text="Start on click" Click="MediaStartOnClick" />
+                <DxRibbonItem Text="Start with animation" Click="MediaStartWithAnimation" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Shape Tools" Contextual="true" Visible="IsShapeSelected">
-        <DxRibbonGroup Text="Shape">
+        <DxRibbonGroup Text="Shape" IconCssClass="pub-icon pub-icon-shape">
             <DxRibbonColorPaletteItem Text="Fill" Value="@ShapeFill" ValueChanged="OnShapeFillChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
             <DxRibbonColorPaletteItem Text="Outline" Value="@ShapeStroke" ValueChanged="OnShapeStrokeChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
+            <DxRibbonItem Text="Change shape" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Rectangle" Click="SelectedShapeRectangle" />
+                <DxRibbonItem Text="Rounded rectangle" Click="SelectedShapeRoundedRectangle" />
+                <DxRibbonItem Text="Ellipse" Click="SelectedShapeEllipse" />
+                <DxRibbonItem Text="Line" Click="SelectedShapeLine" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Shape commands" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Draw connector" Click="StartConnector" />
+                <DxRibbonItem Text="Draw arrow" Click="StartArrowConnector" />
+                <DxRibbonItem Text="Rotate left" Click="RotateLeft" />
+                <DxRibbonItem Text="Rotate right" Click="RotateRight" />
+            </DxRibbonItem>
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Connections" IconCssClass="pub-icon pub-icon-connector">
-            <DxRibbonItem Text="Draw connector" IconCssClass="pub-icon pub-icon-connector" IsPrimary="true" Click="StartConnector" />
-            <DxRibbonItem Text="Draw arrow" IconCssClass="pub-icon pub-icon-arrow" IsPrimary="true" Click="StartArrowConnector" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Rotate"><DxRibbonItem Text="Rotate left" Click="RotateLeft" /><DxRibbonItem Text="Rotate right" Click="RotateRight" /></DxRibbonGroup>
     </DxRibbonTab>
 </DxRibbon>
 
@@ -372,6 +418,7 @@
     private string SnapGridText => CheckText(State.Document.View.SnapToGrid, "Snap to grid");
     private string SnapGuidesText => CheckText(State.Document.View.SnapToGuides, "Snap to guides");
     private string SnapPageText => CheckText(State.Document.View.SnapToPage, "Snap to page");
+    private string SnapObjectsText => CheckText(State.Document.View.SnapToObjects, "Snap to objects");
     private string TimelinePaneText => CheckText(TimelineVisible, "Timeline pane");
     private static string CheckText(bool value, string text) => value ? $"✓ {text}" : text;
 
@@ -520,6 +567,7 @@
     private void ToggleSnapGrid() => State.SetViewOption(view => view.SnapToGrid = !view.SnapToGrid);
     private void ToggleSnapGuides() => State.SetViewOption(view => view.SnapToGuides = !view.SnapToGuides);
     private void ToggleSnapPage() => State.SetViewOption(view => view.SnapToPage = !view.SnapToPage);
+    private void ToggleSnapObjects() => State.SetViewOption(view => view.SnapToObjects = !view.SnapToObjects);
     private void UnitMillimeter() => State.SetRulerUnit(MeasurementUnit.Millimeter);
     private void UnitCentimeter() => State.SetRulerUnit(MeasurementUnit.Centimeter);
     private void UnitInch() => State.SetRulerUnit(MeasurementUnit.Inch);
@@ -610,6 +658,20 @@
     private void OnPageColorChanged(string value) => State.UpdatePage(publicationPage => publicationPage.Background = value);
     private void SetTransparentPage() => State.UpdatePage(publicationPage => publicationPage.Background = "transparent");
     private void SetWhitePage() => State.UpdatePage(publicationPage => publicationPage.Background = "#ffffff");
+    private void SetSelectedShape(PublicationShape shapeKind)
+    {
+        if (State.SelectedElement is not ShapeElement shape) return;
+        State.UpdateSelected(_ =>
+        {
+            shape.Shape = shapeKind;
+            if (shapeKind == PublicationShape.RoundedRectangle && shape.CornerRadiusMm < 1) shape.CornerRadiusMm = 3;
+            if (shapeKind == PublicationShape.Line && shape.Height > 3) shape.Height = 2;
+        });
+    }
+    private void SelectedShapeRectangle() => SetSelectedShape(PublicationShape.Rectangle);
+    private void SelectedShapeRoundedRectangle() => SetSelectedShape(PublicationShape.RoundedRectangle);
+    private void SelectedShapeEllipse() => SetSelectedShape(PublicationShape.Ellipse);
+    private void SelectedShapeLine() => SetSelectedShape(PublicationShape.Line);
     private void OnShapeFillChanged(string value) { if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Fill = value); }
     private void OnShapeStrokeChanged(string value) { if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Stroke = value); }
 

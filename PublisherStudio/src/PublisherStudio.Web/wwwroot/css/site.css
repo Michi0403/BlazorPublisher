@@ -1420,3 +1420,70 @@ button { cursor: pointer; }
     .timeline-ribbon-host { grid-template-columns: 1fr; }
     .timeline-ribbon-host .timeline-playhead-control { border-left: 0; border-top: 1px solid #c3c9d0; }
 }
+
+/* v1.0 beta polish: compact categorized command ribbons and readable primary commands. */
+.categorized-ribbon { min-width:0; max-width:100%; }
+.publication-ribbon.categorized-ribbon { min-height:104px; }
+.publisher-ribbon-menu { min-width:220px; max-height:min(70vh,560px); overflow:auto; }
+.publication-ribbon [class*="primary"],
+.picture-studio-ribbon [class*="primary"],
+.media-studio-ribbon [class*="primary"],
+.story-editor-ribbon [class*="primary"],
+.barcode-editor-ribbon [class*="primary"],
+.publication-ribbon .dxbl-btn-primary,
+.picture-studio-ribbon .dxbl-btn-primary,
+.media-studio-ribbon .dxbl-btn-primary,
+.story-editor-ribbon .dxbl-btn-primary,
+.barcode-editor-ribbon .dxbl-btn-primary,
+.publication-ribbon [data-render-style="Primary"],
+.picture-studio-ribbon [data-render-style="Primary"],
+.media-studio-ribbon [data-render-style="Primary"],
+.story-editor-ribbon [data-render-style="Primary"],
+.barcode-editor-ribbon [data-render-style="Primary"] { color:#fff !important; }
+.publication-ribbon [class*="primary"] *,
+.picture-studio-ribbon [class*="primary"] *,
+.media-studio-ribbon [class*="primary"] *,
+.story-editor-ribbon [class*="primary"] *,
+.barcode-editor-ribbon [class*="primary"] *,
+.publication-ribbon .dxbl-btn-primary *,
+.picture-studio-ribbon .dxbl-btn-primary *,
+.media-studio-ribbon .dxbl-btn-primary *,
+.story-editor-ribbon .dxbl-btn-primary *,
+.barcode-editor-ribbon .dxbl-btn-primary * { color:inherit !important; }
+
+/* Object snapping feedback. It is present only during an active move operation. */
+.publisher-object-alignment-overlay { position:absolute; inset:0; z-index:950; pointer-events:none; color:#16a34a; }
+.publisher-object-alignment-overlay.status-orange { color:#f59e0b; }
+.publisher-object-alignment-overlay.status-red { color:#dc2626; }
+.publisher-object-alignment-line { position:absolute; display:block; background:currentColor; box-shadow:0 0 0 1px #fff9; }
+.publisher-object-alignment-line.vertical { top:-2000px; bottom:-2000px; width:1px; }
+.publisher-object-alignment-line.horizontal { left:-2000px; right:-2000px; height:1px; }
+.publisher-object-alignment-crosshair { position:absolute; width:18px; height:18px; translate:-50% -50%; border:2px solid currentColor; border-radius:50%; box-shadow:0 0 0 2px #fff9; }
+.publisher-object-alignment-crosshair::before,.publisher-object-alignment-crosshair::after { content:""; position:absolute; left:50%; top:50%; background:currentColor; translate:-50% -50%; }
+.publisher-object-alignment-crosshair::before { width:30px; height:2px; }
+.publisher-object-alignment-crosshair::after { width:2px; height:30px; }
+.alignment-moving-green,.alignment-target-green { outline:2px solid #16a34a !important; outline-offset:2px; }
+.alignment-moving-orange,.alignment-target-orange { outline:2px solid #f59e0b !important; outline-offset:2px; }
+.alignment-moving-red,.alignment-target-red { outline:2px solid #dc2626 !important; outline-offset:2px; }
+
+/* Barcode transparency is represented by the checkerboard, not an opaque preview card. */
+.barcode-editor-preview > svg { background:transparent !important; }
+.barcode-view > svg[data-transparent-background="true"] { background:transparent !important; }
+
+/* Printing is isolated from open application menus and export popups. */
+body.publisher-printing [class*="dxbl-popup"],
+body.publisher-printing [class*="dxbl-dropdown"],
+body.publisher-printing [class*="dxbl-overlay"],
+body.publisher-printing [class*="dxbs-popup"],
+body.publisher-printing .modal-backdrop,
+body.publisher-printing .notice-toast,
+body.publisher-printing .error-banner,
+body.publisher-printing .pointer-state-indicator,
+body.publisher-printing .connector-tool-hint { display:none !important; }
+@media print {
+    [class*="dxbl-popup"], [class*="dxbl-dropdown"], [class*="dxbl-overlay"], [class*="dxbs-popup"],
+    .modal-backdrop, .notice-toast, .error-banner, .pointer-state-indicator, .connector-tool-hint { display:none !important; }
+    .print-publication { display:block !important; visibility:visible !important; }
+}
+body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"][class*="popup"] { display:none !important; }
+@media print { [role="menu"], [class*="ribbon"][class*="popup"] { display:none !important; } }

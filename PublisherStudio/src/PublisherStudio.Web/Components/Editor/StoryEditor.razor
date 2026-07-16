@@ -10,33 +10,35 @@
                 <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
             </header>
 
-            <DxRibbon CssClass="story-editor-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+            <DxRibbon CssClass="story-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Story">
-                    <DxRibbonGroup Text="Quick fields">
-                        <DxRibbonItem Text="Date" Click="InsertDateField" />
-                        <DxRibbonItem Text="Time" Click="InsertTimeField" />
-                        <DxRibbonItem Text="Page" Click="InsertPageField" />
-                        <DxRibbonItem Text="Pages" Click="InsertPageCountField" />
-                        <DxRibbonItem Text="Publication" Click="InsertPublicationField" />
-                        <DxRibbonItem Text="Page name" Click="InsertPageNameField" />
-                        <DxRibbonItem Text="Story name" Click="InsertStoryNameField" />
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Fields">
+                    <DxRibbonGroup Text="Dynamic fields">
+                        <DxRibbonItem Text="Insert field" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Date" Click="InsertDateField" />
+                            <DxRibbonItem Text="Time" Click="InsertTimeField" />
+                            <DxRibbonItem Text="Page number" Click="InsertPageField" />
+                            <DxRibbonItem Text="Page count" Click="InsertPageCountField" />
+                            <DxRibbonItem Text="Publication name" Click="InsertPublicationField" />
+                            <DxRibbonItem Text="Page name" Click="InsertPageNameField" />
+                            <DxRibbonItem Text="Story name" Click="InsertStoryNameField" />
+                        </DxRibbonItem>
                         <DxRibbonItem Text="Update fields" IsPrimary="true" Click="UpdateFields" />
-                        <DxRibbonItem Text="Show results" Click="ShowFieldResults" />
-                        <DxRibbonItem Text="Show codes" Click="ShowFieldCodes" />
+                        <DxRibbonItem Text="Field display" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Show results" Click="ShowFieldResults" />
+                            <DxRibbonItem Text="Show codes" Click="ShowFieldCodes" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Export">
                     <DxRibbonGroup Text="Download">
-                        <DxRibbonItem Text="DOCX" IsPrimary="true" Click="ExportDocx" />
-                        <DxRibbonItem Text="RTF" Click="ExportRtf" />
-                        <DxRibbonItem Text="Text" Click="ExportText" />
-                        <DxRibbonItem Text="HTML" Click="ExportHtml" />
+                        <DxRibbonItem Text="Download document" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="DOCX" Click="ExportDocx" />
+                            <DxRibbonItem Text="RTF" Click="ExportRtf" />
+                            <DxRibbonItem Text="Plain text" Click="ExportText" />
+                            <DxRibbonItem Text="HTML" Click="ExportHtml" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Output">
-                        <DxRibbonItem Text="Print" IconCssClass="pub-icon pub-icon-print" Click="PrintStory" />
-                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Output"><DxRibbonItem Text="Print" IconCssClass="pub-icon pub-icon-print" Click="PrintStory" /></DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
             <details class="story-field-help story-field-help-strip">

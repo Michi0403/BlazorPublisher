@@ -8,30 +8,40 @@
     <div class="modal-backdrop">
         <section class="barcode-editor-dialog" role="dialog" aria-modal="true" aria-label="Barcode editor">
             <header><div><strong>Barcode Studio</strong><span>@FormatName(_draft.Format)</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
-            <DxRibbon CssClass="barcode-editor-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+            <DxRibbon CssClass="barcode-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Barcode">
                     <DxRibbonGroup Text="Format" IconCssClass="pub-icon pub-icon-barcode">
-                        <DxRibbonItem Text="QR Code" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetQrCode" />
-                        <DxRibbonItem Text="Code 128" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Code128)" Click="SetCode128" />
-                        <DxRibbonItem Text="Code 39" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Code39)" Click="SetCode39" />
-                        <DxRibbonItem Text="EAN-13" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Ean13)" Click="SetEan13" />
-                        <DxRibbonItem Text="UPC-A" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.UpcA)" Click="SetUpcA" />
-                        <DxRibbonItem Text="ITF-14" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Itf14)" Click="SetItf14" />
-                        <DxRibbonItem Text="Codabar" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Codabar)" Click="SetCodabar" />
+                        <DxRibbonItem Text="@FormatName(_draft.Format)" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="QR Code" Click="SetQrCode" />
+                            <DxRibbonItem Text="Code 128" Click="SetCode128" />
+                            <DxRibbonItem Text="Code 39" Click="SetCode39" />
+                            <DxRibbonItem Text="EAN-13" Click="SetEan13" />
+                            <DxRibbonItem Text="UPC-A" Click="SetUpcA" />
+                            <DxRibbonItem Text="ITF-14" Click="SetItf14" />
+                            <DxRibbonItem Text="Codabar" Click="SetCodabar" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Design">
                         <DxRibbonItem Text="Regenerate" Click="RefreshNow" />
-                        <DxRibbonItem Text="Swap colors" Click="SwapColors" />
-                        <DxRibbonItem Text="Rounded" Click="SetRounded" />
-                        <DxRibbonItem Text="Dots" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetDots" />
+                        <DxRibbonItem Text="Colors" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Swap foreground / background" Click="SwapColors" />
+                            <DxRibbonItem Text="@TransparencyCommandText" Click="ToggleTransparency" />
+                        </DxRibbonItem>
+                        <DxRibbonItem Text="Module / bar design" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Square" Click="SetSquare" />
+                            <DxRibbonItem Text="Rounded" Click="SetRounded" />
+                            <DxRibbonItem Text="Dots" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetDots" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                     @if (_draft.Format == PublicationBarcodeFormat.QrCode)
                     {
-                        <DxRibbonGroup Text="QR correction">
-                            <DxRibbonItem Text="Low" Click="SetLowCorrection" />
-                            <DxRibbonItem Text="Medium" Click="SetMediumCorrection" />
-                            <DxRibbonItem Text="Quartile" Click="SetQuartileCorrection" />
-                            <DxRibbonItem Text="High" Click="SetHighCorrection" />
+                        <DxRibbonGroup Text="QR options">
+                            <DxRibbonItem Text="@($"Correction: {_draft.ErrorCorrection}")" DropDownCssClass="publisher-ribbon-menu">
+                                <DxRibbonItem Text="Low (L)" Click="SetLowCorrection" />
+                                <DxRibbonItem Text="Medium (M)" Click="SetMediumCorrection" />
+                                <DxRibbonItem Text="Quartile (Q)" Click="SetQuartileCorrection" />
+                                <DxRibbonItem Text="High (H)" Click="SetHighCorrection" />
+                            </DxRibbonItem>
                         </DxRibbonGroup>
                     }
                 </DxRibbonTab>
@@ -70,9 +80,11 @@
     <DxContextMenu @ref="_menu"><Items>
         <DxContextMenuItem Text="Regenerate" Click="RefreshNow" />
         <DxContextMenuItem Text="Swap colors" Click="SwapColors" />
+        <DxContextMenuItem Text="@TransparencyCommandText" Click="ToggleTransparency" />
         @if (_draft.Format == PublicationBarcodeFormat.QrCode)
         {
             <DxContextMenuItem Text="High error correction" Click="SetHighCorrection" />
+            <DxContextMenuItem Text="Square modules" Click="SetSquare" />
             <DxContextMenuItem Text="Rounded modules" Click="SetRounded" />
             <DxContextMenuItem Text="Dot modules" Click="SetDots" />
         }
@@ -149,7 +161,8 @@
                 _ => source.Trim()
             };
             if (string.IsNullOrWhiteSpace(_draft.Value)) throw new InvalidDataException("The imported file does not contain a usable barcode value.");
-            _importInfo = $"Loaded first usable value from {file.Name}.";
+            _draft.Value = NormalizeValueForFormat(_draft.Format, _draft.Value, out var adjusted);
+            _importInfo = adjusted ? $"Loaded and adjusted a value from {file.Name} for {FormatName(_draft.Format)}." : $"Loaded first usable value from {file.Name}.";
             _error = null;
             Queue();
         }
@@ -230,7 +243,16 @@
         return values;
     }
 
-    private void SetFormat(PublicationBarcodeFormat format) { _draft.Format = format; Queue(); }
+    private string TransparencyCommandText => _draft.TransparentBackground ? "Use solid background" : "Use transparent background";
+    private void SetFormat(PublicationBarcodeFormat format)
+    {
+        _draft.Format = format;
+        _draft.Value = NormalizeValueForFormat(format, _draft.Value, out var adjusted);
+        _importInfo = adjusted ? $"Value adjusted to a valid {FormatName(format)} example. You can replace it now." : null;
+        if (format != PublicationBarcodeFormat.QrCode && _draft.ModuleShape == PublicationBarcodeModuleShape.Dots)
+            _draft.ModuleShape = PublicationBarcodeModuleShape.Square;
+        Queue();
+    }
     private void SetQrCode() => SetFormat(PublicationBarcodeFormat.QrCode);
     private void SetCode128() => SetFormat(PublicationBarcodeFormat.Code128);
     private void SetCode39() => SetFormat(PublicationBarcodeFormat.Code39);
@@ -238,7 +260,7 @@
     private void SetUpcA() => SetFormat(PublicationBarcodeFormat.UpcA);
     private void SetItf14() => SetFormat(PublicationBarcodeFormat.Itf14);
     private void SetCodabar() => SetFormat(PublicationBarcodeFormat.Codabar);
-    private void ChangeFormat(ChangeEventArgs e) { if (Enum.TryParse<PublicationBarcodeFormat>(e.Value?.ToString(), out var v)) _draft.Format = v; Queue(); }
+    private void ChangeFormat(ChangeEventArgs e) { if (Enum.TryParse<PublicationBarcodeFormat>(e.Value?.ToString(), out var v)) SetFormat(v); }
     private void ChangeValue(ChangeEventArgs e) { _draft.Value = e.Value?.ToString() ?? string.Empty; Queue(); }
     private void ChangeForeground(ChangeEventArgs e) { _draft.ForegroundColor = e.Value?.ToString() ?? "#111827"; Queue(); }
     private void ChangeBackground(ChangeEventArgs e) { _draft.BackgroundColor = e.Value?.ToString() ?? "#ffffff"; Queue(); }
@@ -251,12 +273,50 @@
     private void ChangeBarHeight(ChangeEventArgs e) { _draft.BarHeight = Int(e, _draft.BarHeight); Queue(); }
     private void ChangeFontSize(ChangeEventArgs e) { _draft.FontSize = Int(e, _draft.FontSize); Queue(); }
     private void SwapColors() { (_draft.ForegroundColor, _draft.BackgroundColor) = (_draft.BackgroundColor, _draft.ForegroundColor); Queue(); }
+    private void ToggleTransparency() { _draft.TransparentBackground = !_draft.TransparentBackground; Queue(); }
     private void SetLowCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.L; Queue(); }
     private void SetMediumCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.M; Queue(); }
     private void SetQuartileCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.Q; Queue(); }
     private void SetHighCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.H; Queue(); }
+    private void SetSquare() { _draft.ModuleShape = PublicationBarcodeModuleShape.Square; Queue(); }
     private void SetRounded() { _draft.ModuleShape = PublicationBarcodeModuleShape.Rounded; Queue(); }
     private void SetDots() { _draft.ModuleShape = PublicationBarcodeModuleShape.Dots; Queue(); }
+    private static string NormalizeValueForFormat(PublicationBarcodeFormat format, string? source, out bool adjusted)
+    {
+        var original = source?.Trim() ?? string.Empty;
+        string value;
+        switch (format)
+        {
+            case PublicationBarcodeFormat.Code39:
+                value = new string(original.ToUpperInvariant().Where(character => char.IsAsciiLetterOrDigit(character) || "-. $/+%".Contains(character)).ToArray());
+                if (string.IsNullOrWhiteSpace(value)) value = "PUBLISHER";
+                break;
+            case PublicationBarcodeFormat.Ean13:
+                value = Digits(original);
+                if (value.Length is not (12 or 13)) value = "590123412345";
+                break;
+            case PublicationBarcodeFormat.UpcA:
+                value = Digits(original);
+                if (value.Length is not (11 or 12)) value = "123456789012";
+                break;
+            case PublicationBarcodeFormat.Itf14:
+                value = Digits(original);
+                if (value.Length != 14) value = "10012345000017";
+                break;
+            case PublicationBarcodeFormat.Codabar:
+                value = original.ToUpperInvariant();
+                var body = new string(value.Where(character => char.IsDigit(character) || "-$:/.+".Contains(character)).ToArray());
+                if (string.IsNullOrWhiteSpace(body)) body = "123456";
+                value = $"A{body}A";
+                break;
+            default:
+                value = string.IsNullOrWhiteSpace(original) ? (format == PublicationBarcodeFormat.QrCode ? "https://github.com/Michi0403/BlazorPublisher" : "PublisherStudio") : original;
+                break;
+        }
+        adjusted = !string.Equals(original, value, StringComparison.Ordinal);
+        return value;
+    }
+    private static string Digits(string value) => new(value.Where(char.IsDigit).ToArray());
     private static int Int(ChangeEventArgs e, int fallback) => int.TryParse(e.Value?.ToString(), out var v) ? v : fallback;
     private static string FormatName(PublicationBarcodeFormat f) => f switch { PublicationBarcodeFormat.QrCode => "QR Code", PublicationBarcodeFormat.Code128 => "Code 128", PublicationBarcodeFormat.Code39 => "Code 39", PublicationBarcodeFormat.Ean13 => "EAN-13", PublicationBarcodeFormat.UpcA => "UPC-A", PublicationBarcodeFormat.Itf14 => "ITF-14", _ => "Codabar" };
     private static BarcodeElement Clone(BarcodeElement source) { var target = new BarcodeElement(); Copy(source, target); target.Id = source.Id; return target; }

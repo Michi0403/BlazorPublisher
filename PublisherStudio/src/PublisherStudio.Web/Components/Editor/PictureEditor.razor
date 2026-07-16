@@ -14,173 +14,188 @@
                 <button type="button" class="window-close" title="Close" @onclick="Cancel">×</button>
             </header>
 
-            <DxRibbon CssClass="picture-studio-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
+            <DxRibbon CssClass="picture-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Home">
                     <DxRibbonGroup Text="History">
                         <DxRibbonItem Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
                         <DxRibbonItem Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Clipboard and arrange">
-                        <DxRibbonItem Text="Copy" Enabled="HasSelection" Click="State.CopySelected" />
-                        <DxRibbonItem Text="Paste" Enabled="State.CanPaste" Click="State.Paste" />
-                        <DxRibbonItem Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
-                        <DxRibbonItem Text="Up" Enabled="HasSelection" Click="MoveUp" />
-                        <DxRibbonItem Text="Down" Enabled="HasSelection" Click="MoveDown" />
-                        <DxRibbonItem Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                    <DxRibbonGroup Text="Edit">
+                        <DxRibbonItem Text="Clipboard & layers" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Copy" Enabled="HasSelection" Click="State.CopySelected" />
+                            <DxRibbonItem Text="Paste" Enabled="State.CanPaste" Click="State.Paste" />
+                            <DxRibbonItem Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
+                            <DxRibbonItem Text="Move layer up" Enabled="HasSelection" Click="MoveUp" />
+                            <DxRibbonItem Text="Move layer down" Enabled="HasSelection" Click="MoveDown" />
+                            <DxRibbonItem Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="View">
-                        <DxRibbonItem Text="Fit" Click="FitCanvas" />
-                        <DxRibbonItem Text="100%" Click="Zoom100" />
-                        <DxRibbonItem Text="@GridText" Click="ToggleGridRibbon" />
-                        <DxRibbonItem Text="@SnapText" Click="ToggleSnapRibbon" />
+                        <DxRibbonItem Text="Canvas view" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Fit canvas" Click="FitCanvas" />
+                            <DxRibbonItem Text="100%" Click="Zoom100" />
+                            <DxRibbonItem Text="@GridText" Click="ToggleGridRibbon" />
+                            <DxRibbonItem Text="@SnapText" Click="ToggleSnapRibbon" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-
                 <DxRibbonTab Text="Insert">
                     <DxRibbonGroup Text="Content">
-                        <DxRibbonItem Text="Image" IsPrimary="true" Click="RequestImage" />
-                        <DxRibbonItem Text="Text" IsPrimary="true" Click="AddTextLayer" />
-                        <DxRibbonItem Text="Paint layer" IsPrimary="true" Click="AddPaintLayer" />
+                        <DxRibbonItem Text="Add content" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Image" Click="RequestImage" />
+                            <DxRibbonItem Text="Text" Click="AddTextLayer" />
+                            <DxRibbonItem Text="Paint layer" Click="AddPaintLayer" />
+                            <DxRibbonItem Text="Solid fill" Click="AddSolidFill" />
+                            <DxRibbonItem Text="Gradient fill" Click="AddGradient" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Shapes">
-                        <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
-                        <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
-                        <DxRibbonItem Text="Arrow" Click="AddArrowShape" />
-                        <DxRibbonItem Text="Line" Click="AddLineShape" />
+                        <DxRibbonItem Text="Basic shapes" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
+                            <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
+                            <DxRibbonItem Text="Arrow" Click="AddArrowShape" />
+                            <DxRibbonItem Text="Line" Click="AddLineShape" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Fills">
-                        <DxRibbonItem Text="Solid" Click="AddSolidFill" />
-                        <DxRibbonItem Text="Gradient" Click="AddGradient" />
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Procedural render">
-                        <DxRibbonItem Text="Clouds" Click="AddClouds" />
-                        <DxRibbonItem Text="Noise" Click="AddNoise" />
-                        <DxRibbonItem Text="Stripes" Click="AddStripes" />
-                        <DxRibbonItem Text="Vignette" Click="AddVignette" />
-                        <DxRibbonItem Text="Bloom" Click="AddBloom" />
-                        <DxRibbonItem Text="Neon" Click="AddNeon" />
-                        <DxRibbonItem Text="Lens flare" Click="AddLensFlare" />
-                        <DxRibbonItem Text="Grain noise" Click="AddGrainNoise" />
-                        <DxRibbonItem Text="Motion blur" Click="AddMotionBlur" />
-                        <DxRibbonItem Text="Wind" Click="AddWind" />
-                        <DxRibbonItem Text="Ocean waves" Click="AddOceanWaves" />
+                    <DxRibbonGroup Text="Renderers">
+                        <DxRibbonItem Text="Texture & light" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Clouds" Click="AddClouds" />
+                            <DxRibbonItem Text="Noise" Click="AddNoise" />
+                            <DxRibbonItem Text="Grain noise" Click="AddGrainNoise" />
+                            <DxRibbonItem Text="Stripes" Click="AddStripes" />
+                            <DxRibbonItem Text="Vignette" Click="AddVignette" />
+                            <DxRibbonItem Text="Bloom" Click="AddBloom" />
+                            <DxRibbonItem Text="Neon" Click="AddNeon" />
+                            <DxRibbonItem Text="Lens flare" Click="AddLensFlare" />
+                        </DxRibbonItem>
+                        <DxRibbonItem Text="Motion & surfaces" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Motion blur" Click="AddMotionBlur" />
+                            <DxRibbonItem Text="Wind" Click="AddWind" />
+                            <DxRibbonItem Text="Ocean waves" Click="AddOceanWaves" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-
                 <DxRibbonTab Text="Draw">
-                    <DxRibbonGroup Text="Tools">
-                        <DxRibbonItem Text="@SelectToolText" IsPrimary="true" Click="SelectTool" />
-                        <DxRibbonItem Text="@BrushToolText" IsPrimary="true" Click="BrushTool" />
-                        <DxRibbonItem Text="@PencilToolText" Click="PencilTool" />
-                        <DxRibbonItem Text="@SprayToolText" Click="SprayTool" />
-                        <DxRibbonItem Text="@ToothbrushToolText" Click="ToothbrushTool" />
-                        <DxRibbonItem Text="@SquareToolText" Click="SquareTool" />
-                        <DxRibbonItem Text="@RectangleToolText" Click="RectangleTool" />
-                        <DxRibbonItem Text="@EllipseToolText" Click="EllipseTool" />
-                        <DxRibbonItem Text="@ArrowToolText" Click="ArrowTool" />
-                        <DxRibbonItem Text="@LineToolText" Click="LineTool" />
-                        <DxRibbonItem Text="@EraserToolText" Click="EraserTool" />
-                        <DxRibbonItem Text="@EyedropperToolText" Click="EyedropperTool" />
+                    <DxRibbonGroup Text="Drawing">
+                        <DxRibbonItem Text="Drawing tools" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="@SelectToolText" Click="SelectTool" />
+                            <DxRibbonItem Text="@BrushToolText" Click="BrushTool" />
+                            <DxRibbonItem Text="@PencilToolText" Click="PencilTool" />
+                            <DxRibbonItem Text="@SprayToolText" Click="SprayTool" />
+                            <DxRibbonItem Text="@ToothbrushToolText" Click="ToothbrushTool" />
+                            <DxRibbonItem Text="@SquareToolText" Click="SquareTool" />
+                            <DxRibbonItem Text="@RectangleToolText" Click="RectangleTool" />
+                            <DxRibbonItem Text="@EllipseToolText" Click="EllipseTool" />
+                            <DxRibbonItem Text="@ArrowToolText" Click="ArrowTool" />
+                            <DxRibbonItem Text="@LineToolText" Click="LineTool" />
+                            <DxRibbonItem Text="@EraserToolText" Click="EraserTool" />
+                            <DxRibbonItem Text="@EyedropperToolText" Click="EyedropperTool" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Selections">
-                        <DxRibbonItem Text="@RectangleSelectToolText" Click="RectangleSelectTool" />
-                        <DxRibbonItem Text="@EllipseSelectToolText" Click="EllipseSelectTool" />
-                        <DxRibbonItem Text="@FreeSelectToolText" Click="FreeSelectTool" />
-                        <DxRibbonItem Text="@MagneticSelectToolText" Click="MagneticSelectTool" />
-                        <DxRibbonItem Text="Clear selection" Click="ClearAreaSelection" />
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Area fill">
-                        <DxRibbonItem Text="@FillSolidToolText" IsPrimary="true" Click="FillSolidTool" />
-                        <DxRibbonItem Text="@FillGradientToolText" IsPrimary="true" Click="FillGradientTool" />
+                    <DxRibbonGroup Text="Selection & fill">
+                        <DxRibbonItem Text="Selection tools" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="@RectangleSelectToolText" Click="RectangleSelectTool" />
+                            <DxRibbonItem Text="@EllipseSelectToolText" Click="EllipseSelectTool" />
+                            <DxRibbonItem Text="@FreeSelectToolText" Click="FreeSelectTool" />
+                            <DxRibbonItem Text="@MagneticSelectToolText" Click="MagneticSelectTool" />
+                            <DxRibbonItem Text="Clear selection" Click="ClearAreaSelection" />
+                        </DxRibbonItem>
+                        <DxRibbonItem Text="Area fill" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="@FillSolidToolText" Click="FillSolidTool" />
+                            <DxRibbonItem Text="@FillGradientToolText" Click="FillGradientTool" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Color">
-                        <DxRibbonColorPaletteItem Text="Primary" Value="@_drawColor" ValueChanged="ChangeDrawColor">
-                            <Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups>
-                        </DxRibbonColorPaletteItem>
-                        <DxRibbonColorPaletteItem Text="Secondary" Value="@_drawSecondaryColor" ValueChanged="ChangeDrawSecondaryColor">
-                            <Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups>
-                        </DxRibbonColorPaletteItem>
+                        <DxRibbonColorPaletteItem Text="Primary" Value="@_drawColor" ValueChanged="ChangeDrawColor"><Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups></DxRibbonColorPaletteItem>
+                        <DxRibbonColorPaletteItem Text="Secondary" Value="@_drawSecondaryColor" ValueChanged="ChangeDrawSecondaryColor"><Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups></DxRibbonColorPaletteItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Width">
-                        <DxRibbonItem Text="@DrawWidthText(1)" Click="DrawWidth1" />
-                        <DxRibbonItem Text="@DrawWidthText(3)" Click="DrawWidth3" />
-                        <DxRibbonItem Text="@DrawWidthText(8)" Click="DrawWidth8" />
-                        <DxRibbonItem Text="@DrawWidthText(16)" Click="DrawWidth16" />
-                        <DxRibbonItem Text="@DrawWidthText(32)" Click="DrawWidth32" />
+                        <DxRibbonItem Text="Brush width" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="@DrawWidthText(1)" Click="DrawWidth1" />
+                            <DxRibbonItem Text="@DrawWidthText(3)" Click="DrawWidth3" />
+                            <DxRibbonItem Text="@DrawWidthText(8)" Click="DrawWidth8" />
+                            <DxRibbonItem Text="@DrawWidthText(16)" Click="DrawWidth16" />
+                            <DxRibbonItem Text="@DrawWidthText(32)" Click="DrawWidth32" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-
                 <DxRibbonTab Text="Output">
                     <DxRibbonGroup Text="Export">
-                        <DxRibbonItem Text="Download PNG" IconCssClass="pub-icon pub-icon-image" IsPrimary="true" Click="DownloadPng" />
-                        <DxRibbonItem Text="Download JPEG" IconCssClass="pub-icon pub-icon-image" Click="DownloadJpeg" />
+                        <DxRibbonItem Text="Download" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Download PNG" Click="DownloadPng" />
+                            <DxRibbonItem Text="Download JPEG" Click="DownloadJpeg" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Publication">
                         <DxRibbonItem Text="@(EditingExisting ? "Apply to picture" : "Insert into publication")" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="Apply" />
                         <DxRibbonItem Text="Cancel" Click="Cancel" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
-
                 <DxRibbonTab Text="Effects">
-                    <DxRibbonGroup Text="Tone">
-                        <DxRibbonItem Text="Brighten" Enabled="HasSelection" Click="Brighten" />
-                        <DxRibbonItem Text="Darken" Enabled="HasSelection" Click="Darken" />
-                        <DxRibbonItem Text="More contrast" Enabled="HasSelection" Click="MoreContrast" />
-                        <DxRibbonItem Text="More saturation" Enabled="HasSelection" Click="MoreSaturation" />
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Soften">
-                        <DxRibbonItem Text="Light soften" Enabled="HasSelection" Click="SoftenLight" />
-                        <DxRibbonItem Text="Medium soften" Enabled="HasSelection" Click="SoftenMedium" />
-                        <DxRibbonItem Text="Remove soften" Enabled="HasSelection" Click="RemoveSoftening" />
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Color effects">
-                        <DxRibbonItem Text="Grayscale" Enabled="HasSelection" Click="ToggleGrayscalePreset" />
-                        <DxRibbonItem Text="Sepia" Enabled="HasSelection" Click="ToggleSepiaPreset" />
-                        <DxRibbonItem Text="Invert" Enabled="HasSelection" Click="ToggleInvertPreset" />
-                        <DxRibbonItem Text="Reset all" Enabled="HasSelection" Click="ResetAdjustments" />
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Glow and flare">
-                        <DxRibbonItem Text="Bloom glow" Enabled="HasSelection" Click="ApplyBloomEffect" />
-                        <DxRibbonItem Text="Neon glow" Enabled="HasSelection" Click="ApplyNeonEffect" />
-                        <DxRibbonItem Text="Lens flare" Enabled="HasSelection" Click="ApplyLensFlareEffect" />
+                    <DxRibbonGroup Text="Adjust">
+                        <DxRibbonItem Text="Tone" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Brighten" Enabled="HasSelection" Click="Brighten" />
+                            <DxRibbonItem Text="Darken" Enabled="HasSelection" Click="Darken" />
+                            <DxRibbonItem Text="More contrast" Enabled="HasSelection" Click="MoreContrast" />
+                            <DxRibbonItem Text="More saturation" Enabled="HasSelection" Click="MoreSaturation" />
+                        </DxRibbonItem>
+                        <DxRibbonItem Text="Soften" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Light soften" Enabled="HasSelection" Click="SoftenLight" />
+                            <DxRibbonItem Text="Medium soften" Enabled="HasSelection" Click="SoftenMedium" />
+                            <DxRibbonItem Text="Remove soften" Enabled="HasSelection" Click="RemoveSoftening" />
+                        </DxRibbonItem>
+                        <DxRibbonItem Text="Color effects" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Grayscale" Enabled="HasSelection" Click="ToggleGrayscalePreset" />
+                            <DxRibbonItem Text="Sepia" Enabled="HasSelection" Click="ToggleSepiaPreset" />
+                            <DxRibbonItem Text="Invert" Enabled="HasSelection" Click="ToggleInvertPreset" />
+                            <DxRibbonItem Text="Reset all" Enabled="HasSelection" Click="ResetAdjustments" />
+                        </DxRibbonItem>
+                        <DxRibbonItem Text="Glow & flare" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Bloom glow" Enabled="HasSelection" Click="ApplyBloomEffect" />
+                            <DxRibbonItem Text="Neon glow" Enabled="HasSelection" Click="ApplyNeonEffect" />
+                            <DxRibbonItem Text="Lens flare" Enabled="HasSelection" Click="ApplyLensFlareEffect" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-
                 <DxRibbonTab Text="Render Tools" Contextual="true" Visible="IsRenderSelected">
                     <DxRibbonGroup Text="Renderer">
-                        <DxRibbonItem Text="Clouds" Click="MakeRenderClouds" />
-                        <DxRibbonItem Text="Noise" Click="MakeRenderNoise" />
-                        <DxRibbonItem Text="Stripes" Click="MakeRenderStripes" />
-                        <DxRibbonItem Text="Vignette" Click="MakeRenderVignette" />
-                        <DxRibbonItem Text="Bloom" Click="MakeRenderBloom" />
-                        <DxRibbonItem Text="Neon" Click="MakeRenderNeon" />
-                        <DxRibbonItem Text="Lens flare" Click="MakeRenderLensFlare" />
-                        <DxRibbonItem Text="Grain noise" Click="MakeRenderGrainNoise" />
-                        <DxRibbonItem Text="Motion blur" Click="MakeRenderMotionBlur" />
-                        <DxRibbonItem Text="Wind" Click="MakeRenderWind" />
-                        <DxRibbonItem Text="Ocean waves" Click="MakeRenderOceanWaves" />
+                        <DxRibbonItem Text="Change renderer" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Clouds" Click="MakeRenderClouds" />
+                            <DxRibbonItem Text="Noise" Click="MakeRenderNoise" />
+                            <DxRibbonItem Text="Stripes" Click="MakeRenderStripes" />
+                            <DxRibbonItem Text="Vignette" Click="MakeRenderVignette" />
+                            <DxRibbonItem Text="Bloom" Click="MakeRenderBloom" />
+                            <DxRibbonItem Text="Neon" Click="MakeRenderNeon" />
+                            <DxRibbonItem Text="Lens flare" Click="MakeRenderLensFlare" />
+                            <DxRibbonItem Text="Grain noise" Click="MakeRenderGrainNoise" />
+                            <DxRibbonItem Text="Motion blur" Click="MakeRenderMotionBlur" />
+                            <DxRibbonItem Text="Wind" Click="MakeRenderWind" />
+                            <DxRibbonItem Text="Ocean waves" Click="MakeRenderOceanWaves" />
+                        </DxRibbonItem>
                         <DxRibbonItem Text="New seed" IsPrimary="true" Click="RandomizeRender" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
-
                 <DxRibbonTab Text="Paint Tools" Contextual="true" Visible="IsPaintSelected">
                     <DxRibbonGroup Text="Paint layer">
-                        <DxRibbonItem Text="Brush" IsPrimary="true" Click="BrushTool" />
-                        <DxRibbonItem Text="Spray can" Click="SprayTool" />
-                        <DxRibbonItem Text="Toothbrush" Click="ToothbrushTool" />
-                        <DxRibbonItem Text="Eraser" Click="EraserTool" />
+                        <DxRibbonItem Text="Paint tool" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Brush" Click="BrushTool" />
+                            <DxRibbonItem Text="Spray can" Click="SprayTool" />
+                            <DxRibbonItem Text="Toothbrush" Click="ToothbrushTool" />
+                            <DxRibbonItem Text="Eraser" Click="EraserTool" />
+                        </DxRibbonItem>
                         <DxRibbonItem Text="Clear strokes" Enabled="CanDelete" Click="State.ClearSelectedPaint" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
-
                 <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsRasterSelected">
                     <DxRibbonGroup Text="Raster">
                         <DxRibbonItem Text="Replace" IsPrimary="true" Enabled="CanDelete" Click="RequestRasterReplacement" />
-                        <DxRibbonItem Text="Contain" Enabled="CanDelete" Click="RasterContain" />
-                        <DxRibbonItem Text="Cover" Enabled="CanDelete" Click="RasterCover" />
-                        <DxRibbonItem Text="Stretch" Enabled="CanDelete" Click="RasterStretch" />
-                        <DxRibbonItem Text="Flip horizontal" Enabled="CanDelete" Click="RasterFlipHorizontal" />
-                        <DxRibbonItem Text="Flip vertical" Enabled="CanDelete" Click="RasterFlipVertical" />
+                        <DxRibbonItem Text="Fit and flip" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Contain" Enabled="CanDelete" Click="RasterContain" />
+                            <DxRibbonItem Text="Cover" Enabled="CanDelete" Click="RasterCover" />
+                            <DxRibbonItem Text="Stretch" Enabled="CanDelete" Click="RasterStretch" />
+                            <DxRibbonItem Text="Flip horizontal" Enabled="CanDelete" Click="RasterFlipHorizontal" />
+                            <DxRibbonItem Text="Flip vertical" Enabled="CanDelete" Click="RasterFlipVertical" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>

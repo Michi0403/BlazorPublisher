@@ -39,7 +39,93 @@ function safeDotNet(state, method, ...args) {
     });
 }
 
+function clearObjectAlignmentFeedback(state) {
+    if (!state?.page) return;
+    state.page.querySelectorAll('.alignment-moving-green,.alignment-moving-orange,.alignment-moving-red,.alignment-target-green,.alignment-target-orange,.alignment-target-red')
+        .forEach(element => element.classList.remove('alignment-moving-green','alignment-moving-orange','alignment-moving-red','alignment-target-green','alignment-target-orange','alignment-target-red'));
+    state.page.querySelectorAll('.publisher-object-alignment-overlay').forEach(element => element.remove());
+}
+
+function publicationObjectBounds(state, excludedId) {
+    return [...state.page.querySelectorAll('[data-publication-element][data-element-id]')]
+        .filter(element => element.dataset.elementId !== excludedId && !element.matches('[data-connector-id]') && !element.classList.contains('locked-hidden'))
+        .map(element => ({ element, ...elementMm(element, state.config.pxPerMm) }));
+}
+
+function rectanglesOverlap(a, b) {
+    return Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) > .15
+        && Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y) > .15;
+}
+
+function objectSnapResult(state, operation, x, y, width, height) {
+    const targets = publicationObjectBounds(state, operation.id);
+    const tolerance = 7 / state.config.pxPerMm;
+    const nearTolerance = tolerance * 2.2;
+    let bestX = null;
+    let bestY = null;
+    for (const target of targets) {
+        const movingX = [x, x + width / 2, x + width];
+        const targetX = [target.x, target.x + target.width / 2, target.x + target.width];
+        for (const source of movingX) for (const destination of targetX) {
+            const delta = destination - source;
+            if (Math.abs(delta) <= tolerance && (!bestX || Math.abs(delta) < Math.abs(bestX.delta))) bestX = { delta, line: destination, target };
+        }
+        const movingY = [y, y + height / 2, y + height];
+        const targetY = [target.y, target.y + target.height / 2, target.y + target.height];
+        for (const source of movingY) for (const destination of targetY) {
+            const delta = destination - source;
+            if (Math.abs(delta) <= tolerance && (!bestY || Math.abs(delta) < Math.abs(bestY.delta))) bestY = { delta, line: destination, target };
+        }
+    }
+    if (bestX) x += bestX.delta;
+    if (bestY) y += bestY.delta;
+    const moved = { x, y, width, height };
+    const collisions = targets.filter(target => rectanglesOverlap(moved, target));
+    const alignedTargets = new Set([bestX?.target, bestY?.target].filter(Boolean));
+    let nearTarget = null;
+    let nearestDistance = Infinity;
+    for (const target of targets) {
+        const horizontalGap = Math.max(target.x - (x + width), x - (target.x + target.width), 0);
+        const verticalGap = Math.max(target.y - (y + height), y - (target.y + target.height), 0);
+        const distance = Math.hypot(horizontalGap, verticalGap);
+        if (distance < nearestDistance) { nearestDistance = distance; nearTarget = target; }
+    }
+    const status = collisions.length ? 'red' : (bestX || bestY) ? 'green' : nearestDistance <= nearTolerance ? 'orange' : null;
+    return { x, y, width, height, bestX, bestY, collisions, alignedTargets, nearTarget, status };
+}
+
+function showObjectAlignmentFeedback(state, operation, result) {
+    clearObjectAlignmentFeedback(state);
+    if (!result?.status) return;
+    const operationElement = refreshOperationElement(state, operation);
+    operationElement?.classList.add(`alignment-moving-${result.status}`);
+    const highlighted = result.status === 'red' ? result.collisions : result.status === 'green' ? [...result.alignedTargets] : [result.nearTarget].filter(Boolean);
+    highlighted.forEach(target => target?.element?.classList.add(`alignment-target-${result.status}`));
+    const overlay = document.createElement('div');
+    overlay.className = `publisher-object-alignment-overlay status-${result.status}`;
+    overlay.setAttribute('aria-hidden', 'true');
+    if (result.bestX) {
+        const line = document.createElement('i');
+        line.className = 'publisher-object-alignment-line vertical';
+        line.style.left = `${result.bestX.line * state.config.pxPerMm}px`;
+        overlay.appendChild(line);
+    }
+    if (result.bestY) {
+        const line = document.createElement('i');
+        line.className = 'publisher-object-alignment-line horizontal';
+        line.style.top = `${result.bestY.line * state.config.pxPerMm}px`;
+        overlay.appendChild(line);
+    }
+    const crosshair = document.createElement('b');
+    crosshair.className = 'publisher-object-alignment-crosshair';
+    crosshair.style.left = `${(result.x + result.width / 2) * state.config.pxPerMm}px`;
+    crosshair.style.top = `${(result.y + result.height / 2) * state.config.pxPerMm}px`;
+    overlay.appendChild(crosshair);
+    state.page.appendChild(overlay);
+}
+
 function resetPointerOperation(state, restoreDom = false) {
+    clearObjectAlignmentFeedback(state);
     const operation = state?.operation;
     if (!operation) return;
     state.operation = null;
@@ -594,6 +680,14 @@ function pointerMove(state, event) {
     if (operation.kind === 'move') {
         x = snapAxis(operation.x + dx, operation.width, pageWidth, verticalGuides, state.config);
         y = snapAxis(operation.y + dy, operation.height, pageHeight, horizontalGuides, state.config);
+        if (state.config.snapToObjects) {
+            const snapped = objectSnapResult(state, operation, x, y, width, height);
+            x = snapped.x;
+            y = snapped.y;
+            showObjectAlignmentFeedback(state, operation, snapped);
+        } else {
+            clearObjectAlignmentFeedback(state);
+        }
     } else {
         const handle = operation.handle;
         if (handle.includes('e')) width = Math.max(2, snapSize(operation.width + dx, state.config));
@@ -661,6 +755,7 @@ function pointerUp(state, event) {
     const operation = state.operation;
     if (!operation || operation.pointerId !== event.pointerId) return;
     state.operation = null;
+    clearObjectAlignmentFeedback(state);
     try { state.stage.releasePointerCapture(event.pointerId); } catch { }
 
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
@@ -1259,14 +1354,38 @@ async function loadSvgImage(svgText) {
     throw lastError || new Error('The browser could not prepare the publication for raster export.');
 }
 
+function canvasLooksBlank(canvas, jpeg) {
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context || canvas.width < 1 || canvas.height < 1) return true;
+    const points = 32;
+    let visible = 0;
+    let nonWhite = 0;
+    for (let row = 0; row < points; row++) for (let column = 0; column < points; column++) {
+        const x = Math.min(canvas.width - 1, Math.round((column + .5) * canvas.width / points));
+        const y = Math.min(canvas.height - 1, Math.round((row + .5) * canvas.height / points));
+        const pixel = context.getImageData(x, y, 1, 1).data;
+        if (pixel[3] > 4) visible++;
+        if (pixel[0] < 248 || pixel[1] < 248 || pixel[2] < 248) nonWhite++;
+    }
+    return jpeg ? nonWhite === 0 : visible === 0;
+}
+
 async function rasterizePageElement(page, scale, jpeg) {
-    if (typeof window.html2canvas !== 'function')
-        throw new Error('The local raster export engine did not load. Refresh the application and try again.');
     await document.fonts?.ready;
     await waitForImages(page);
     const metrics = pageExportMetrics(page);
-    if (metrics.width <= 0 || metrics.height <= 0)
-        throw new Error('The publication page has no measurable export size.');
+    if (metrics.width <= 0 || metrics.height <= 0) throw new Error('The publication page has no measurable export size.');
+    let svgError = null;
+    try {
+        const serialized = await pageSvg(page, { freezeMedia: true });
+        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, scale, jpeg);
+        if (!page.querySelector('.print-element') || !canvasLooksBlank(canvas, jpeg)) return canvas;
+        svgError = new Error('The browser returned an empty SVG raster.');
+    } catch (error) {
+        svgError = error;
+        console.warn('Browser SVG rasterization failed; trying the local DOM renderer.', error);
+    }
+    if (typeof window.html2canvas !== 'function') throw new Error(`Raster export failed: ${svgError?.message || 'No raster engine is available.'}`);
 
     const clone = cleanPageClone(page);
     await freezeMediaForRaster(page, clone);
@@ -1274,78 +1393,37 @@ async function rasterizePageElement(page, scale, jpeg) {
     clone.style.visibility = 'visible';
     clone.style.opacity = '1';
     canonicalizePageClone(clone, metrics);
-
     const frame = document.createElement('div');
     const rasterId = `publisher-raster-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     frame.dataset.publisherRasterRoot = rasterId;
-    frame.style.cssText = [
-        'position:relative', 'left:0', 'top:0', `width:${metrics.width}px`, `height:${metrics.height}px`,
-        'overflow:hidden', 'visibility:visible', 'opacity:1', 'pointer-events:none',
-        jpeg ? 'background:#fff' : 'background:transparent'
-    ].join(';');
+    frame.style.cssText = `position:relative;left:0;top:0;width:${metrics.width}px;height:${metrics.height}px;overflow:hidden;visibility:visible;opacity:1;pointer-events:none;background:${jpeg ? '#fff' : 'transparent'}`;
     frame.appendChild(clone);
-
     const stage = document.createElement('div');
     stage.setAttribute('aria-hidden', 'true');
-    stage.style.cssText = [
-        'position:fixed', 'left:-100000px', 'top:0', `width:${metrics.width}px`, `height:${metrics.height}px`,
-        'overflow:hidden', 'visibility:visible', 'opacity:1', 'pointer-events:none', 'z-index:-2147483648',
-        jpeg ? 'background:#fff' : 'background:transparent'
-    ].join(';');
+    stage.style.cssText = `position:fixed;left:-100000px;top:0;width:${metrics.width}px;height:${metrics.height}px;overflow:hidden;visibility:visible;opacity:1;pointer-events:none;z-index:-2147483648;background:${jpeg ? '#fff' : 'transparent'}`;
     stage.appendChild(frame);
     document.body.appendChild(stage);
     try {
         await waitForImages(frame);
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        const requestedWidth = Math.max(1, Math.round(metrics.width * scale));
-        const requestedHeight = Math.max(1, Math.round(metrics.height * scale));
-        const maxPixels = 80_000_000;
-        const reduction = requestedWidth * requestedHeight > maxPixels
-            ? Math.sqrt(maxPixels / (requestedWidth * requestedHeight))
-            : 1;
-        const effectiveScale = scale * reduction;
-        const html2canvasOptions = {
-            backgroundColor: jpeg ? '#ffffff' : null,
-            scale: effectiveScale,
-            logging: false,
-            useCORS: true,
-            allowTaint: false,
-            imageTimeout: 20000,
-            removeContainer: true,
-            width: metrics.width,
-            height: metrics.height,
+        const options = {
+            backgroundColor: jpeg ? '#ffffff' : null, scale, logging: false, useCORS: true, allowTaint: false,
+            imageTimeout: 20000, removeContainer: true, width: metrics.width, height: metrics.height,
             windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(metrics.width)),
-            windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(metrics.height)),
-            scrollX: 0,
-            scrollY: 0,
-            onclone: clonedDocument => {
-                clonedDocument.documentElement.style.backgroundColor = jpeg ? '#ffffff' : 'transparent';
-                clonedDocument.body.style.backgroundColor = jpeg ? '#ffffff' : 'transparent';
-                clonedDocument.body.style.color = '#111827';
-                const clonedRoot = clonedDocument.querySelector(`[data-publisher-raster-root="${rasterId}"]`);
-                if (clonedRoot) sanitizeInlineColorFunctions(clonedRoot);
+            windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(metrics.height)), scrollX: 0, scrollY: 0,
+            onclone: documentClone => {
+                const root = documentClone.querySelector(`[data-publisher-raster-root="${rasterId}"]`);
+                if (root) sanitizeInlineColorFunctions(root);
             }
         };
-        try {
-            // Let Chromium render modern CSS colors itself. The computed html2canvas renderer
-            // currently rejects CSS Color 4 values such as color(display-p3 ...).
-            return await window.html2canvas(frame, { ...html2canvasOptions, foreignObjectRendering: true });
-        } catch (foreignObjectError) {
-            console.warn('Foreign-object rasterization failed. Retrying with the sanitized computed renderer.', foreignObjectError);
-            try {
-                return await window.html2canvas(frame, { ...html2canvasOptions, foreignObjectRendering: false });
-            } catch (computedError) {
-                if (!/unsupported color function/i.test(String(computedError?.message || computedError))) throw computedError;
-                console.warn('html2canvas still rejected a CSS Color 4 value. Falling back to browser SVG rasterization.', computedError);
-                const serialized = await pageSvg(page, { freezeMedia: true });
-                return await svgToCanvas(serialized.text, serialized.width, serialized.height, effectiveScale, jpeg);
-            }
-        }
+        let canvas;
+        try { canvas = await window.html2canvas(frame, { ...options, foreignObjectRendering: true }); }
+        catch { canvas = await window.html2canvas(frame, { ...options, foreignObjectRendering: false }); }
+        if (page.querySelector('.print-element') && canvasLooksBlank(canvas, jpeg)) throw new Error('The DOM rasterizer returned an empty image.');
+        return canvas;
     } catch (error) {
-        throw new Error(`Raster export failed: ${error?.message || error}`);
-    } finally {
-        stage.remove();
-    }
+        throw new Error(`Raster export failed: ${error?.message || error}. SVG renderer: ${svgError?.message || 'unknown error'}`);
+    } finally { stage.remove(); }
 }
 
 async function svgToCanvas(svgText, width, height, scale, jpeg) {
@@ -2614,14 +2692,15 @@ function generateQrSvg(options) {
     const value = String(options?.value || '').trim();
     if (!value) throw new Error('Barcode value cannot be empty.');
     const correction = barcodeCorrectionName(options?.errorCorrection);
-    const qr = window.qrcode(0, ['L','M','Q','H'].includes(correction) ? correction : 'M');
+    const qr = window.qrcode(0, correction);
     qr.addData(value, 'Byte');
     qr.make();
     const count = qr.getModuleCount();
     const margin = Math.max(0, Math.min(32, Number(options?.margin) || 0));
     const size = count + margin * 2;
     const foreground = barcodeColor(options?.foregroundColor, '#111827');
-    const background = options?.transparentBackground ? 'transparent' : barcodeColor(options?.backgroundColor, '#ffffff');
+    const transparent = options?.transparentBackground === true;
+    const background = barcodeColor(options?.backgroundColor, '#ffffff');
     const shape = barcodeShapeName(options?.moduleShape);
     const cells = [];
     for (let row = 0; row < count; row++) {
@@ -2629,11 +2708,12 @@ function generateQrSvg(options) {
             if (!qr.isDark(row, column)) continue;
             const x = column + margin;
             const y = row + margin;
-            if (shape === 'dots') cells.push(`<circle cx="${x + .5}" cy="${y + .5}" r=".43"/>`);
-            else cells.push(`<rect x="${x}" y="${y}" width="1" height="1"${shape === 'rounded' ? ' rx=".22" ry=".22"' : ''}/>`);
+            if (shape === 'dots') cells.push(`<circle cx="${x + .5}" cy="${y + .5}" r=".42"/>`);
+            else cells.push(`<rect x="${x + .04}" y="${y + .04}" width=".92" height=".92"${shape === 'rounded' ? ' rx=".34" ry=".34"' : ''}/>`);
         }
     }
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="QR code"><rect width="100%" height="100%" fill="${background}"/><g fill="${foreground}">${cells.join('')}</g></svg>`;
+    const backgroundMarkup = transparent ? '' : `<rect width="100%" height="100%" fill="${background}"/>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="QR code, ${correction} error correction" data-error-correction="${correction}" data-module-shape="${shape}" data-transparent-background="${transparent}">${backgroundMarkup}<g fill="${foreground}">${cells.join('')}</g></svg>`;
 }
 
 function generateLinearBarcodeSvg(options) {
@@ -2641,29 +2721,38 @@ function generateLinearBarcodeSvg(options) {
     const value = String(options?.value || '').trim();
     if (!value) throw new Error('Barcode value cannot be empty.');
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    const background = options?.transparentBackground ? 'transparent' : barcodeColor(options?.backgroundColor, '#ffffff');
+    const transparent = options?.transparentBackground === true;
+    let valid = true;
     window.JsBarcode(svg, value, {
         format: barcodeFormatName(options?.format),
         lineColor: barcodeColor(options?.foregroundColor, '#111827'),
-        background,
+        background: transparent ? 'rgba(0,0,0,0)' : barcodeColor(options?.backgroundColor, '#ffffff'),
         displayValue: options?.showText !== false,
         margin: Math.max(0, Math.min(64, Number(options?.margin) || 0)),
         width: Math.max(1, Math.min(8, Number(options?.lineWidth) || 2)),
         height: Math.max(24, Math.min(400, Number(options?.barHeight) || 90)),
         fontSize: Math.max(8, Math.min(72, Number(options?.fontSize) || 16)),
         textMargin: 4,
-        valid: valid => { if (!valid) throw new Error('The value is invalid for the selected barcode format.'); }
+        valid: result => { valid = result; }
     });
+    if (!valid) throw new Error(`The value "${value}" is invalid for ${barcodeFormatToken(options?.format)}.`);
     const width = Number(svg.getAttribute('width')) || 320;
     const height = Number(svg.getAttribute('height')) || 120;
+    if (transparent) {
+        svg.querySelectorAll('rect').forEach(rect => {
+            const fill = String(rect.getAttribute('fill') || '').replace(/\s/g,'').toLowerCase();
+            if (fill === 'transparent' || fill === 'rgba(0,0,0,0)' || fill === '#00000000') rect.remove();
+        });
+    }
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', '100%');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', `${options?.format || 'Barcode'}: ${value}`);
+    svg.setAttribute('aria-label', `${barcodeFormatToken(options?.format)}: ${value}`);
+    svg.setAttribute('data-transparent-background', String(transparent));
     if (barcodeShapeName(options?.moduleShape) === 'rounded')
-        svg.querySelectorAll('rect').forEach(rect => { if (Number(rect.getAttribute('width')) < width * .5) { rect.setAttribute('rx', '1'); rect.setAttribute('ry', '1'); } });
+        svg.querySelectorAll('rect').forEach(rect => { if (Number(rect.getAttribute('width')) < width * .5) { rect.setAttribute('rx', '1.4'); rect.setAttribute('ry', '1.4'); } });
     return svg.outerHTML;
 }
 
@@ -3278,5 +3367,14 @@ html,body{width:auto;height:auto;overflow:visible!important;background:#fff!impo
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
     },
 
-    printPublication() { window.print(); }
+    async printPublication() {
+        const active = document.activeElement;
+        try { active?.blur?.(); } catch { }
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        document.body.classList.add('publisher-printing');
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const cleanup = () => document.body.classList.remove('publisher-printing');
+        window.addEventListener('afterprint', cleanup, { once: true });
+        try { window.print(); } finally { setTimeout(cleanup, 1500); }
+    }
 };

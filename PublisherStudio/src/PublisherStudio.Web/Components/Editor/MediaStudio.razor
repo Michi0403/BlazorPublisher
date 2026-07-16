@@ -15,31 +15,37 @@
                 <button type="button" title="Close" @onclick="Cancel">×</button>
             </header>
 
-            <DxRibbon CssClass="media-studio-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+            <DxRibbon CssClass="media-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Home">
                     <DxRibbonGroup Text="Source" IconCssClass="pub-icon pub-icon-media">
-                        <DxRibbonItem Text="@ImportMenuText" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Enabled="@(!_recording)" Click="OpenMediaPicker" />
-                        @if (IsVideo)
-                        {
-                            <DxRibbonItem Text="Record camera" IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordCamera" />
-                            <DxRibbonItem Text="Record screen" Enabled="@(!_recording)" Click="RecordScreen" />
-                        }
-                        else
-                        {
-                            <DxRibbonItem Text="Record microphone" IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="RecordMicrophone" />
-                            <DxRibbonItem Text="Generate tone" Enabled="@(!_recording)" Click="GenerateTone" />
-                        }
+                        <DxRibbonItem Text="Add source" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Enabled="@(!_recording)" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="@ImportMenuText" Click="OpenMediaPicker" />
+                            @if (IsVideo)
+                            {
+                                <DxRibbonItem Text="Record camera" Click="RecordCamera" />
+                                <DxRibbonItem Text="Record screen" Click="RecordScreen" />
+                            }
+                            else
+                            {
+                                <DxRibbonItem Text="Record microphone" Click="RecordMicrophone" />
+                                <DxRibbonItem Text="Generate tone" Click="GenerateTone" />
+                            }
+                        </DxRibbonItem>
                         <DxRibbonItem Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Playback">
-                        <DxRibbonItem Text="Play range" Enabled="@HasSource" Click="PlaySelection" />
-                        <DxRibbonItem Text="Pause" Enabled="@HasSource" Click="PausePreview" />
-                        <DxRibbonItem Text="To trim start" Enabled="@HasSource" Click="SeekStart" />
+                        <DxRibbonItem Text="Transport" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Play selected range" Enabled="@HasSource" Click="PlaySelection" />
+                            <DxRibbonItem Text="Pause" Enabled="@HasSource" Click="PausePreview" />
+                            <DxRibbonItem Text="Go to trim start" Enabled="@HasSource" Click="SeekStart" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Trim">
-                        <DxRibbonItem Text="Start at playhead" Enabled="@HasSource" Click="SetTrimStartAtPlayhead" />
-                        <DxRibbonItem Text="End at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
-                        <DxRibbonItem Text="Reset trim" Enabled="@HasSource" Click="ResetTrim" />
+                        <DxRibbonItem Text="Trim commands" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem Text="Start at playhead" Enabled="@HasSource" Click="SetTrimStartAtPlayhead" />
+                            <DxRibbonItem Text="End at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
+                            <DxRibbonItem Text="Reset trim" Enabled="@HasSource" Click="ResetTrim" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
@@ -318,6 +324,7 @@
 
     private async Task LoadFile(InputFileChangeEventArgs args)
     {
+        Guid inspectionAssetId = Guid.Empty;
         try
         {
             var file = args.File;
@@ -325,17 +332,66 @@
             var expectedPrefix = IsVideo ? "video/" : "audio/";
             if (!_mimeType.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Select a supported {(IsVideo ? "video" : "audio")} file.");
+            if (_module is null)
+                _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+
+            MediaSourceInfo? info = null;
+            Exception? inputInspectionError = null;
+            try
+            {
+                info = await _module.InvokeAsync<MediaSourceInfo>(
+                    "inspectMediaFileInput",
+                    "media-studio-file-input",
+                    IsVideo ? "video" : "audio");
+            }
+            catch (Exception ex)
+            {
+                inputInspectionError = ex;
+            }
+
             await using var stream = file.OpenReadStream(160 * 1024 * 1024);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
-            _dataUrl = $"data:{_mimeType};base64,{Convert.ToBase64String(buffer.ToArray())}";
+            var bytes = buffer.ToArray();
+            if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
+
+            if (info is null)
+            {
+                inspectionAssetId = Guid.NewGuid();
+                var localUrl = MediaAssets.RegisterBytes(inspectionAssetId, bytes, _mimeType);
+                try
+                {
+                    info = await _module.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", localUrl, IsVideo ? "video" : "audio");
+                }
+                catch (Exception endpointError)
+                {
+                    throw new InvalidDataException(
+                        $"The browser could not decode this media. File inspection: {inputInspectionError?.Message ?? "not available"}. Local inspection: {endpointError.Message}",
+                        endpointError);
+                }
+            }
+
+            _mimeType = NormalizeMimeType(
+                string.IsNullOrWhiteSpace(info.MimeType) ? _mimeType : info.MimeType,
+                IsVideo ? "video/mp4" : "audio/mpeg");
+            _dataUrl = NormalizeMediaDataUrl($"data:{_mimeType};base64,{Convert.ToBase64String(bytes)}", _mimeType);
             _name = file.Name;
+            _duration = Math.Max(.01, info.DurationSeconds);
+            _trimStart = 0;
+            _trimEnd = _duration;
+            _posterDataUrl = info.PosterDataUrl ?? string.Empty;
+            _waveform = info.WaveformSamples ?? [];
+            _fadeIn = _fadeOut = 0;
+            _error = null;
             RefreshPreviewSource();
-            await InspectSource();
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
+            _error = $"The media source could not be decoded: {ex.Message}";
+        }
+        finally
+        {
+            if (inspectionAssetId != Guid.Empty) MediaAssets.Remove(inspectionAssetId);
         }
     }
 

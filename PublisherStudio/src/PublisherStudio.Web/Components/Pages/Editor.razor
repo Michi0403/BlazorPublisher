@@ -190,10 +190,26 @@
 
     private void StateChanged() => InvokeAsync(StateHasChanged);
     private void NewDocument() => State.NewDocument();
-    private async Task OpenPublicationPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "publication-file-input");
-    private async Task OpenPicturePicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-file-input");
-    private async Task OpenVideoPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "video-file-input");
-    private async Task OpenAudioPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "audio-file-input");
+    private async Task OpenPublicationPicker()
+    {
+        await CancelPublisherPointerAsync();
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", "publication-file-input");
+    }
+    private async Task OpenPicturePicker()
+    {
+        await CancelPublisherPointerAsync();
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-file-input");
+    }
+    private async Task OpenVideoPicker()
+    {
+        await CancelPublisherPointerAsync();
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", "video-file-input");
+    }
+    private async Task OpenAudioPicker()
+    {
+        await CancelPublisherPointerAsync();
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", "audio-file-input");
+    }
 
     private async Task SavePublication()
     {
@@ -368,42 +384,57 @@
             if (!mimeType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format: {Path.GetExtension(file.Name)}.");
 
-            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+            await using var stream = file.OpenReadStream(160 * 1024 * 1024);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            var bytes = buffer.ToArray();
+            if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
+
+            mimeType = PublicationMediaData.NormalizeMimeType(
+                mimeType,
+                kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg");
+            var dataUrl = PublicationMediaData.NormalizeDataUrl(
+                $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}",
+                mimeType);
+
+            // Inspect the exact bytes through the local ranged media endpoint. This avoids
+            // depending on the transient DOM file-input state and avoids sending a very large
+            // data URL through JS interop merely to read duration/poster metadata.
+            var inspectionAssetId = Guid.NewGuid();
+            var inspectionUrl = MediaAssets.RegisterBytes(inspectionAssetId, bytes, mimeType);
+            IJSObjectReference? module = null;
             try
             {
-                // Read metadata directly from the browser File object. Sending a multi-megabyte
-                // base64 data URL back to JavaScript merely to inspect it can corrupt or overload
-                // an Interactive Server render/interop message. The embedded bytes are transferred
-                // to .NET only once, after the browser has confirmed that it can decode the file.
-                var inputId = kind == PublicationElementKind.Video ? "video-file-input" : "audio-file-input";
-                var info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaFileInput", inputId, kind == PublicationElementKind.Video ? "video" : "audio");
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+                var info = await module.InvokeAsync<MediaSourceInfo>(
+                    "inspectMediaDataUrl",
+                    inspectionUrl,
+                    kind == PublicationElementKind.Video ? "video" : "audio");
 
-                await using var stream = file.OpenReadStream(160 * 1024 * 1024);
-                using var buffer = new MemoryStream();
-                await stream.CopyToAsync(buffer);
-                var dataUrl = PublicationMediaData.NormalizeDataUrl(
-                    $"data:{mimeType};base64,{Convert.ToBase64String(buffer.ToArray())}",
-                    kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg");
-                mimeType = PublicationMediaData.NormalizeMimeType(mimeType, kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg");
-
+                PublicationMediaElement media;
                 if (kind == PublicationElementKind.Video)
                 {
-                    var media = State.AddVideo(dataUrl, mimeType, file.Name, info.DurationSeconds, info.PosterDataUrl);
+                    media = State.AddVideo(dataUrl, mimeType, file.Name, info.DurationSeconds, info.PosterDataUrl);
                     State.UpdateMedia(media.Id, item => item.WaveformSamples = info.WaveformSamples ?? [], capture: false);
-                    MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
                 }
                 else
                 {
-                    var media = State.AddAudio(dataUrl, mimeType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
-                    MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
-                    State.SelectElement(media.Id);
+                    media = State.AddAudio(dataUrl, mimeType, file.Name, info.DurationSeconds, info.WaveformSamples ?? []);
                 }
+
+                if (!MediaAssets.Copy(inspectionAssetId, media.Id))
+                    MediaAssets.RegisterBytes(media.Id, bytes, mimeType);
+                State.SelectElement(media.Id);
             }
             finally
             {
-                try { await module.DisposeAsync(); }
-                catch (JSDisconnectedException) { }
-                catch (TaskCanceledException) { }
+                MediaAssets.Remove(inspectionAssetId);
+                if (module is not null)
+                {
+                    try { await module.DisposeAsync(); }
+                    catch (JSDisconnectedException) { }
+                    catch (TaskCanceledException) { }
+                }
             }
             _timelineVisible = true;
             ShowNotice($"Inserted {file.Name}. The timeline pane is open for timing and trimming.");
@@ -461,9 +492,6 @@
     private Task SaveMediaStudio(MediaEditorResult result)
     {
         var targetId = _mediaStudioTargetId;
-        _mediaStudioVisible = false;
-        _mediaStudioTargetId = null;
-        _mediaStudioInitial = null;
 
         try
         {
@@ -488,12 +516,16 @@
             if (!MediaAssets.Copy(result.PreviewAssetId, media.Id))
                 MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
             State.SelectElement(media.Id);
+            _mediaStudioVisible = false;
+            _mediaStudioTargetId = null;
+            _mediaStudioInitial = null;
             _timelineVisible = true;
             ShowNotice($"{(result.Kind == PublicationElementKind.Video ? "Video" : "Audio")} applied to the publication timeline.");
         }
         catch (Exception ex)
         {
             ShowError(ex);
+            throw;
         }
         return Task.CompletedTask;
     }
@@ -567,18 +599,19 @@
         return Task.CompletedTask;
     }
 
-    private Task InsertBarcode()
+    private async Task InsertBarcode()
     {
+        await CancelPublisherPointerAsync();
         var item = State.AddBarcode();
         _pendingNewBarcodeId = item.Id;
         _barcodeEditorVisible = true;
-        return Task.CompletedTask;
     }
 
-    private Task EditBarcode()
+    private async Task EditBarcode()
     {
-        if (State.SelectedElement is BarcodeElement) _barcodeEditorVisible = true;
-        return Task.CompletedTask;
+        if (State.SelectedElement is not BarcodeElement) return;
+        await CancelPublisherPointerAsync();
+        _barcodeEditorVisible = true;
     }
 
     private Task SaveBarcode(BarcodeElement result)
@@ -683,22 +716,20 @@
         return Task.CompletedTask;
     }
 
-    private Task InsertDataVisual(DataVisualKind kind)
+    private async Task InsertDataVisual(DataVisualKind kind)
     {
+        await CancelPublisherPointerAsync();
         var visual = State.AddDataVisual(kind);
         _pendingNewDataVisualId = visual.Id;
         _dataVisualEditorVisible = true;
-        return Task.CompletedTask;
     }
 
-    private Task OpenDataVisualEditor()
+    private async Task OpenDataVisualEditor()
     {
-        if (State.SelectedElement is DataVisualElement)
-        {
-            _pendingNewDataVisualId = null;
-            _dataVisualEditorVisible = true;
-        }
-        return Task.CompletedTask;
+        if (State.SelectedElement is not DataVisualElement) return;
+        await CancelPublisherPointerAsync();
+        _pendingNewDataVisualId = null;
+        _dataVisualEditorVisible = true;
     }
 
     private Task SaveDataVisualEditor()
@@ -722,10 +753,10 @@
         return Task.CompletedTask;
     }
 
-    private Task OpenDataManager()
+    private async Task OpenDataManager()
     {
+        await CancelPublisherPointerAsync();
         _dataManagerVisible = true;
-        return Task.CompletedTask;
     }
 
     private Task OpenDataManagerFromVisual()
@@ -758,10 +789,11 @@
         return OpenStoryEditor();
     }
 
-    private Task OpenStoryEditor()
+    private async Task OpenStoryEditor()
     {
-        if (State.SelectedElement is TextFrameElement) _storyEditorVisible = true;
-        return Task.CompletedTask;
+        if (State.SelectedElement is not TextFrameElement) return;
+        await CancelPublisherPointerAsync();
+        _storyEditorVisible = true;
     }
 
     private Task CloseStoryEditor()

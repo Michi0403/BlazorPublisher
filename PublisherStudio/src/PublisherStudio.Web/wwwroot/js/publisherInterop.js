@@ -78,7 +78,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             cursorY: null,
             drawPending: false,
             cropTimers: new Map(),
-            connectorGhost: null
+            connectorGhost: null,
+            lastCanvasClick: null
         };
 
         stage.addEventListener('pointerdown', event => pointerDown(state, event));
@@ -380,6 +381,24 @@ function mediaPointerTargetsControls(event) {
     return relativeY >= rect.height - controlBand;
 }
 
+function registerCanvasClick(state, operation, event) {
+    if (!operation?.id || operation.kind === 'resize' || operation.kind?.startsWith('connector-')) return;
+    const now = performance.now();
+    const previous = state.lastCanvasClick;
+    const sameElement = previous?.id === operation.id;
+    const closeInTime = previous && now - previous.time <= 520;
+    const closeInSpace = previous && Math.hypot(event.clientX - previous.x, event.clientY - previous.y) <= 10;
+    if (sameElement && closeInTime && closeInSpace) {
+        state.lastCanvasClick = null;
+        resetPointerOperation(state, false);
+        safeDotNet(state, 'ActivateElement', operation.id);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
+    state.lastCanvasClick = { id: operation.id, time: now, x: event.clientX, y: event.clientY };
+}
+
 function pointerDown(state, event) {
     if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
     if (state.operation) resetPointerOperation(state, true);
@@ -409,6 +428,7 @@ function pointerDown(state, event) {
 
     const connectorPort = event.target.closest('[data-connector-port]');
     if (connectorPort && state.page.contains(connectorPort) && connectorToolActive(state)) {
+        state.lastCanvasClick = null;
         const sourceOwnerId = connectorPort.dataset.ownerId;
         connectorPort.classList.add('connector-port-source');
         state.operation = {
@@ -445,7 +465,8 @@ function pointerDown(state, event) {
     const element = event.target.closest('[data-publication-element]');
     if (!element || !state.page.contains(element)) {
         if (state.page.contains(event.target) || state.scroll.contains(event.target)) {
-            safeDotNet(state, 'ClearSelectionFromCanvas');
+            state.lastCanvasClick = null;
+            if (!connectorToolActive(state)) safeDotNet(state, 'ClearSelectionFromCanvas');
             event.preventDefault();
         }
         return;
@@ -454,19 +475,17 @@ function pointerDown(state, event) {
     const id = element.dataset.elementId;
     const wasSelected = element.classList.contains('selected');
     const activeConnectorTool = connectorToolActive(state);
-    if (!wasSelected || activeConnectorTool) {
-        state.config = { ...state.config, connectorTool: 'None' };
-        safeDotNet(state, 'SelectElement', id);
+    if (activeConnectorTool) {
+        // Connector mode owns the canvas until the user completes it or presses Esc.
+        // A slightly missed port must not silently switch back to selection mode.
+        event.preventDefault();
+        return;
     }
+    if (!wasSelected) safeDotNet(state, 'SelectElement', id);
     if (element.classList.contains('locked')) return;
     if (element.matches('[data-connector-id]')) return;
 
     const handle = event.target.closest('[data-resize-handle]');
-    if (!handle && event.detail >= 2) {
-        safeDotNet(state, 'ActivateElement', id);
-        event.preventDefault();
-        return;
-    }
     const image = element.querySelector('img');
     const bounds = elementMm(element, state.config.pxPerMm);
     const base = {
@@ -526,6 +545,7 @@ function pointerMove(state, event) {
     }
 
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
+        state.lastCanvasClick = null;
         updateConnectorDrag(state, event, operation);
         event.preventDefault();
         return;
@@ -644,12 +664,17 @@ function pointerUp(state, event) {
     try { state.stage.releasePointerCapture(event.pointerId); } catch { }
 
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
+        state.lastCanvasClick = null;
+        // Pointerup can be the first event that reaches the destination port during
+        // a fast drag, so resolve the target once more before committing.
+        updateConnectorDrag(state, event, operation);
         state.operation = operation;
         finishConnectorDrag(state, operation);
         return;
     }
 
     if (operation.kind === 'guide') {
+        state.lastCanvasClick = null;
         const max = operation.orientation === 'Horizontal'
             ? number(state.page.dataset.pageHeightMm)
             : number(state.page.dataset.pageWidthMm);
@@ -661,7 +686,11 @@ function pointerUp(state, event) {
         return;
     }
 
-    if (!operation.moved) return;
+    if (!operation.moved) {
+        registerCanvasClick(state, operation, event);
+        return;
+    }
+    state.lastCanvasClick = null;
     if (operation.kind === 'crop') {
         safeDotNet(
             state,
@@ -2555,16 +2584,36 @@ function barcodeColor(value, fallback) {
     return /^#[0-9a-f]{3,8}$/i.test(text) || /^(rgb|hsl)a?\(/i.test(text) || /^[a-z]+$/i.test(text) ? text : fallback;
 }
 
+function barcodeEnumName(value, names, fallback) {
+    if (Number.isInteger(value) && value >= 0 && value < names.length) return names[value];
+    const numeric = Number(value);
+    if (Number.isInteger(numeric) && String(value).trim() !== '' && numeric >= 0 && numeric < names.length) return names[numeric];
+    const normalized = String(value ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    return names.find(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase() === normalized) || fallback;
+}
+
+function barcodeFormatToken(value) {
+    return barcodeEnumName(value, ['QrCode', 'Code128', 'Code39', 'Ean13', 'UpcA', 'Itf14', 'Codabar'], 'Code128');
+}
+
 function barcodeFormatName(value) {
-    const normalized = String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const normalized = barcodeFormatToken(value).toLowerCase();
     return ({ qrcode: 'QR', code128: 'CODE128', code39: 'CODE39', ean13: 'EAN13', upca: 'UPC', itf14: 'ITF14', codabar: 'codabar' })[normalized] || 'CODE128';
+}
+
+function barcodeCorrectionName(value) {
+    return barcodeEnumName(value, ['L', 'M', 'Q', 'H'], 'M').toUpperCase();
+}
+
+function barcodeShapeName(value) {
+    return barcodeEnumName(value, ['Square', 'Rounded', 'Dots'], 'Square').toLowerCase();
 }
 
 function generateQrSvg(options) {
     if (typeof window.qrcode !== 'function') throw new Error('QR-code generator did not load.');
     const value = String(options?.value || '').trim();
     if (!value) throw new Error('Barcode value cannot be empty.');
-    const correction = String(options?.errorCorrection || 'M').toUpperCase();
+    const correction = barcodeCorrectionName(options?.errorCorrection);
     const qr = window.qrcode(0, ['L','M','Q','H'].includes(correction) ? correction : 'M');
     qr.addData(value, 'Byte');
     qr.make();
@@ -2573,7 +2622,7 @@ function generateQrSvg(options) {
     const size = count + margin * 2;
     const foreground = barcodeColor(options?.foregroundColor, '#111827');
     const background = options?.transparentBackground ? 'transparent' : barcodeColor(options?.backgroundColor, '#ffffff');
-    const shape = String(options?.moduleShape || 'Square').toLowerCase();
+    const shape = barcodeShapeName(options?.moduleShape);
     const cells = [];
     for (let row = 0; row < count; row++) {
         for (let column = 0; column < count; column++) {
@@ -2613,13 +2662,13 @@ function generateLinearBarcodeSvg(options) {
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', `${options?.format || 'Barcode'}: ${value}`);
-    if (String(options?.moduleShape || '').toLowerCase() === 'rounded')
+    if (barcodeShapeName(options?.moduleShape) === 'rounded')
         svg.querySelectorAll('rect').forEach(rect => { if (Number(rect.getAttribute('width')) < width * .5) { rect.setAttribute('rx', '1'); rect.setAttribute('ry', '1'); } });
     return svg.outerHTML;
 }
 
 function generateBarcodeSvg(options) {
-    const format = String(options?.format || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const format = barcodeFormatToken(options?.format).toLowerCase();
     return format === 'qrcode' ? generateQrSvg(options) : generateLinearBarcodeSvg(options);
 }
 

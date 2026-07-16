@@ -15,21 +15,35 @@
                 <button type="button" title="Close" @onclick="Cancel">×</button>
             </header>
 
-            <div class="media-studio-toolbar">
-                <button type="button" disabled="@_recording" @onclick="OpenMediaPicker">▣ Import @(IsVideo ? "video" : "audio")</button>
-                @if (IsVideo)
-                {
-                    <button type="button" disabled="@_recording" @onclick="RecordCamera">● Record camera</button>
-                    <button type="button" disabled="@_recording" @onclick="RecordScreen">▤ Record screen</button>
-                }
-                else
-                {
-                    <button type="button" disabled="@_recording" @onclick="RecordMicrophone">● Record microphone</button>
-                    <button type="button" disabled="@_recording" @onclick="GenerateTone">♪ Generate tone</button>
-                }
-                <button type="button" disabled="@(!_recording)" @onclick="StopRecording">■ Stop recording</button>
-                <span class="media-studio-source-state">@SourceStatus</span>
-            </div>
+            <DxRibbon CssClass="media-studio-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Home">
+                    <DxRibbonGroup Text="Source" IconCssClass="pub-icon pub-icon-media">
+                        <DxRibbonItem Text="@ImportMenuText" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Enabled="@(!_recording)" Click="OpenMediaPicker" />
+                        @if (IsVideo)
+                        {
+                            <DxRibbonItem Text="Record camera" IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordCamera" />
+                            <DxRibbonItem Text="Record screen" Enabled="@(!_recording)" Click="RecordScreen" />
+                        }
+                        else
+                        {
+                            <DxRibbonItem Text="Record microphone" IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="RecordMicrophone" />
+                            <DxRibbonItem Text="Generate tone" Enabled="@(!_recording)" Click="GenerateTone" />
+                        }
+                        <DxRibbonItem Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Playback">
+                        <DxRibbonItem Text="Play range" Enabled="@HasSource" Click="PlaySelection" />
+                        <DxRibbonItem Text="Pause" Enabled="@HasSource" Click="PausePreview" />
+                        <DxRibbonItem Text="To trim start" Enabled="@HasSource" Click="SeekStart" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Trim">
+                        <DxRibbonItem Text="Start at playhead" Enabled="@HasSource" Click="SetTrimStartAtPlayhead" />
+                        <DxRibbonItem Text="End at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
+                        <DxRibbonItem Text="Reset trim" Enabled="@HasSource" Click="ResetTrim" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
+            <div class="media-studio-source-state" role="status">@SourceStatus</div>
 
             <div class="media-studio-body">
                 <div class="media-studio-preview-column">
@@ -53,10 +67,8 @@
                         }
                     </div>
 
-                    <div class="media-transport">
-                        <button type="button" disabled="@(!HasSource)" title="Play selected range" @onclick="PlaySelection">▶</button>
-                        <button type="button" disabled="@(!HasSource)" title="Pause" @onclick="PausePreview">Ⅱ</button>
-                        <button type="button" disabled="@(!HasSource)" title="Jump to trim start" @onclick="SeekStart">|◀</button>
+                    <div class="media-transport-status" role="status">
+                        <strong>Selected range</strong>
                         <span>@Time(_trimStart) — @Time(_trimEnd) / @Time(_duration)</span>
                     </div>
 

@@ -167,3 +167,17 @@ Recommended local media smoke tests:
 - Picture Studio selection/fill and shape tools use bounded coordinates and create editable shape layers rather than flattening the result.
 - Installer source parses without C# syntax errors and includes safe ZIP traversal checks, GitHub release/pre-release asset resolution, per-user AppData installation, generated launch commands, and Start Menu provisioning.
 - `node --check`, C# syntax-tree parsing, and Razor `@code` block parsing pass. A full `dotnet build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+
+## v1.0.9 targeted validation
+
+- Publisher double-click is detected by element ID, time, and pointer distance after pointer release, so the first-click Blazor rerender cannot destroy the second-click gesture.
+- No-op clicks do not commit bounds; move, resize, crop, guide, and connector operations clear the pending double-click candidate.
+- Connector mode remains explicit until Done, Escape, or command toggle. Object selection no longer cancels it as a side effect.
+- Connector ports render above object content and normal resize handles are hidden only while connector mode is active.
+- Connector target geometry is recalculated on pointer release before the connector is committed.
+- Direct media insertion reads the uploaded bytes once, inspects them through the ranged local media endpoint, then copies the inspected asset to the inserted element.
+- Media Studio closes only after the parent has applied the result and copied its preview asset, preserving insertion of newly imported and recorded clips.
+- Barcode enum values were checked as both numeric .NET values and string names for QR, Code 128, Code 39, EAN-13, UPC-A, ITF-14, and Codabar. QR correction and module-shape mappings were checked for every enum value.
+- Media Studio, Picture Studio output, Story Editor, Barcode Studio, Publication Data, Data Visual Editor, and Timeline command surfaces use DevExpress ribbons; property forms and standard dialog confirmation buttons remain conventional controls.
+- JavaScript passes `node --check`; all C# files and Razor `@code` blocks parse with the C# tree-sitter grammar; JSON/XML files parse successfully.
+- A full `dotnet restore`/`build` and real browser pointer/media permission test remain unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.

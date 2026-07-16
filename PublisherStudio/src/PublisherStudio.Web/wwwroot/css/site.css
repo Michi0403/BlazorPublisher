@@ -60,7 +60,7 @@ button { cursor: pointer; }
     overflow: hidden;
 }
 .editor-workspace.timeline-open {
-    grid-template-rows: minmax(0, 1fr) minmax(170px, min(280px, 32vh));
+    grid-template-rows: minmax(0, 1fr) minmax(260px, min(340px, 42vh));
 }
 .editor-workspace.pages-collapsed { --pages-pane-width: 0px; }
 .editor-workspace.inspector-collapsed { --inspector-pane-width: 0px; }
@@ -393,7 +393,7 @@ button { cursor: pointer; }
 .connector-ghost-line { fill: none; stroke: currentColor; stroke-width: .8mm; stroke-dasharray: 2.5 1.4; vector-effect: non-scaling-stroke; }
 .connector-port {
     position: absolute;
-    z-index: 120;
+    z-index: 180;
     display: none;
     width: 10px;
     height: 10px;
@@ -406,6 +406,7 @@ button { cursor: pointer; }
     cursor: crosshair;
 }
 .connector-tool-active .connector-port { display: block; }
+.connector-tool-active .selection-handle { display: none; }
 .connector-port:hover,
 .connector-port-source { background: #fde047; transform: scale(1.25); }
 .connector-port-target { background: #22c55e; box-shadow: 0 0 0 4px #22c55e44; transform: scale(1.45); }
@@ -442,7 +443,7 @@ button { cursor: pointer; }
 .pub-icon-connector::before { content: "↝"; }
 .pub-icon-arrow::before { content: "➜"; }
 
-.story-editor-dialog { grid-template-rows: 48px auto minmax(0, 1fr) 52px; }
+
 .story-command-bar {
     display: flex;
     flex-wrap: wrap;
@@ -963,8 +964,8 @@ button { cursor: pointer; }
 
 .data-modal-backdrop { padding: 16px; }
 .data-manager-dialog, .data-visual-editor-dialog { position: relative; z-index: 1; display: grid; width: min(1380px, 97vw); height: min(900px, 95vh); overflow: hidden; border-radius: 6px; background: white; box-shadow: 0 24px 80px #000a; }
-.data-manager-dialog { grid-template-rows: 58px minmax(0,1fr) 52px; }
-.data-visual-editor-dialog { grid-template-rows: 58px minmax(0,1fr) 52px; }
+.data-manager-dialog { grid-template-rows: 58px auto minmax(0,1fr) 52px; }
+.data-visual-editor-dialog { grid-template-rows: 58px auto minmax(0,1fr) 52px; }
 .data-manager-dialog > header, .data-visual-editor-dialog > header,
 .data-manager-dialog > footer, .data-visual-editor-dialog > footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 14px; border-color: #d6dce3; }
 .data-manager-dialog > header, .data-visual-editor-dialog > header { border-bottom: 1px solid #d6dce3; }
@@ -1194,7 +1195,7 @@ button { cursor: pointer; }
 .timeline-empty { display: grid; place-items: center; align-content: center; min-height: 68px; color: #667085; font-size: 10px; }
 
 .media-studio-backdrop { position: fixed; z-index: 1200; inset: 0; display: grid; place-items: center; padding: 12px; background: #0f172ad9; }
-.media-studio-window { width: min(1180px,96vw); height: min(760px,94vh); min-width: 680px; min-height: 500px; display: grid; grid-template-rows: auto auto minmax(0,1fr) auto; overflow: hidden; border: 1px solid #687384; border-radius: 7px; background: #f5f7fa; box-shadow: 0 24px 70px #000b; }
+.media-studio-window { width: min(1180px,96vw); height: min(760px,94vh); min-width: 680px; min-height: 500px; display: grid; grid-template-rows: auto auto auto minmax(0,1fr) auto; overflow: hidden; border: 1px solid #687384; border-radius: 7px; background: #f5f7fa; box-shadow: 0 24px 70px #000b; }
 .media-studio-titlebar, .media-studio-footer { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; background: linear-gradient(#fff,#e8ecf1); }
 .media-studio-titlebar { border-bottom: 1px solid #b3bbc5; }
 .media-studio-titlebar > div { min-width: 0; display: grid; gap: 1px; }
@@ -1229,7 +1230,7 @@ button { cursor: pointer; }
 @media (max-width: 920px) {
     .timeline-toolbar { grid-template-columns: auto minmax(130px,1fr); }
     .timeline-toolbar-actions { grid-column: 1 / -1; overflow-x: auto; }
-    .editor-workspace.timeline-open { grid-template-rows: minmax(0,1fr) minmax(160px, min(250px, 36vh)); }
+    .editor-workspace.timeline-open { grid-template-rows: minmax(0,1fr) minmax(240px, min(320px, 42vh)); }
     .media-studio-body { grid-template-columns: minmax(320px,1fr) 260px; }
 }
 
@@ -1244,7 +1245,7 @@ button { cursor: pointer; }
 .barcode-view > svg { width:100%; height:100%; display:block; }
 .barcode-placeholder { width:100%; height:100%; display:grid; place-content:center; gap:4px; border:1px dashed #718096; color:#475569; background:#fff; text-align:center; }
 .barcode-placeholder span { max-width:95%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; }
-.barcode-editor-dialog { width:min(920px,calc(100vw - 36px)); height:min(620px,calc(100vh - 36px)); display:grid; grid-template-rows:auto minmax(0,1fr) auto; overflow:hidden; border:1px solid #727c88; border-radius:5px; background:#f5f6f8; box-shadow:0 18px 60px #0007; }
+.barcode-editor-dialog { width:min(920px,calc(100vw - 36px)); height:min(680px,calc(100vh - 36px)); display:grid; grid-template-rows:auto auto minmax(0,1fr) auto; overflow:hidden; border:1px solid #727c88; border-radius:5px; background:#f5f6f8; box-shadow:0 18px 60px #0007; }
 .barcode-editor-dialog > header { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #aeb5bf; background:#e8ebef; }
 .barcode-editor-dialog > header > div { display:grid; gap:1px; }
 .barcode-editor-dialog > header span { color:#64748b; font-size:10px; }
@@ -1324,3 +1325,98 @@ button { cursor: pointer; }
 .data-file-picker:hover,.barcode-file-picker:hover { border-color:#2f75b5; background:#eaf4fb; }
 .data-file-picker input,.barcode-file-picker input { font-size:10px; }
 .barcode-import-info { color:#326848; }
+
+/* Unified desktop command surfaces: editor command bars use DevExpress ribbons. */
+.media-studio-ribbon,
+.timeline-ribbon,
+.story-editor-ribbon,
+.barcode-editor-ribbon,
+.data-manager-ribbon,
+.data-visual-editor-ribbon,
+.picture-studio-ribbon {
+    min-width: 0;
+    max-width: 100%;
+    border-bottom: 1px solid #c2c8d0;
+    background: #f5f7fa;
+}
+.media-studio-ribbon button:not([role="tab"]),
+.timeline-ribbon button:not([role="tab"]),
+.story-editor-ribbon button:not([role="tab"]),
+.barcode-editor-ribbon button:not([role="tab"]),
+.data-manager-ribbon button:not([role="tab"]),
+.data-visual-editor-ribbon button:not([role="tab"]),
+.picture-studio-ribbon button:not([role="tab"]) {
+    border: 1px solid #d3d8df;
+    border-radius: 3px;
+    background: #fbfcfd;
+    box-shadow: 0 1px 0 #fff inset;
+}
+.media-studio-ribbon button:not([role="tab"]):hover,
+.timeline-ribbon button:not([role="tab"]):hover,
+.story-editor-ribbon button:not([role="tab"]):hover,
+.barcode-editor-ribbon button:not([role="tab"]):hover,
+.data-manager-ribbon button:not([role="tab"]):hover,
+.data-visual-editor-ribbon button:not([role="tab"]):hover,
+.picture-studio-ribbon button:not([role="tab"]):hover {
+    border-color: #8eb6d4;
+    background: #e8f3fb;
+}
+
+.media-studio-window {
+    grid-template-rows: auto auto auto minmax(0,1fr) auto;
+}
+.media-studio-source-state {
+    margin: 0;
+    padding: 4px 11px;
+    border-bottom: 1px solid #cbd1d8;
+    background: #eef1f5;
+}
+.media-transport-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 8px;
+    border: 1px solid #bdc5cf;
+    border-radius: 4px;
+    color: #475467;
+    background: #fff;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.timeline-ribbon-host {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(240px,34%);
+    align-items: stretch;
+    border-bottom: 1px solid #c1c7cf;
+    background: #eef1f5;
+}
+.timeline-ribbon-host .timeline-playhead-control {
+    padding: 5px 10px;
+    border-left: 1px solid #c3c9d0;
+    background: #f8fafc;
+}
+.timeline-ribbon { border-bottom: 0; }
+
+.story-editor-dialog {
+    grid-template-rows: 48px auto auto minmax(0,1fr) 52px;
+}
+.story-field-help-strip {
+    min-width: 0;
+    padding: 4px 10px;
+    border-bottom: 1px solid #ccd2d9;
+    background: #f7f9fb;
+    font-size: 10px;
+}
+.story-field-help-strip > summary { cursor: pointer; font-weight: 600; }
+
+.barcode-editor-dialog {
+    grid-template-rows: auto auto minmax(0,1fr) auto;
+}
+
+@media (max-width: 920px) {
+    .timeline-ribbon-host { grid-template-columns: 1fr; }
+    .timeline-ribbon-host .timeline-playhead-control { border-left: 0; border-top: 1px solid #c3c9d0; }
+}

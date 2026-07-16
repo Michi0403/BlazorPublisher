@@ -13,6 +13,18 @@
                 <button type="button" class="window-close" @onclick="Cancel">×</button>
             </header>
 
+            <DxRibbon CssClass="data-visual-editor-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Visual">
+                    <DxRibbonGroup Text="Data" IconCssClass="pub-icon pub-icon-data">
+                        <DxRibbonItem Text="Manage publication data" IsPrimary="true" Click="RequestManage" />
+                        <DxRibbonItem Text="Refresh live data" Click="Refresh" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Options">
+                        <DxRibbonItem Text="Reset visual options" Click="ResetVisualOptions" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
+
             <div class="data-visual-editor-body">
                 <aside class="visual-type-list">
                     @foreach (var kind in Enum.GetValues<DataVisualKind>())
@@ -36,11 +48,6 @@
                                 }
                             </select>
                         </label>
-                    </div>
-
-                    <div class="data-editor-actions compact-actions">
-                        <DxButton Text="Manage publication data" Click="RequestManage" />
-                        <DxButton Text="Refresh live document data" Click="Refresh" />
                     </div>
 
                     @if (CurrentData is null)

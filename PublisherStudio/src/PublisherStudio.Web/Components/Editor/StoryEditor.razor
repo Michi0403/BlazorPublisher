@@ -10,41 +10,49 @@
                 <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
             </header>
 
-            <div class="story-command-bar" aria-label="Story fields and export">
-                <strong>Quick fields</strong>
-                <button type="button" @onclick="InsertDateField">Date</button>
-                <button type="button" @onclick="InsertTimeField">Time</button>
-                <button type="button" @onclick="InsertPageField">Page</button>
-                <button type="button" @onclick="InsertPageCountField">Pages</button>
-                <button type="button" @onclick="InsertPublicationField">Publication</button>
-                <button type="button" @onclick="InsertPageNameField">Page name</button>
-                <button type="button" @onclick="InsertStoryNameField">Story name</button>
-                <span class="story-command-separator"></span>
-                <button type="button" @onclick="UpdateFields">Update fields</button>
-                <button type="button" @onclick="ShowFieldResults">Results</button>
-                <button type="button" @onclick="ShowFieldCodes">Codes</button>
-                <details class="story-field-help">
-                    <summary>Field list</summary>
-                    <div>
-                        <strong>Dynamic fields in this publication</strong>
-                        <span><code>DATE</code> Current date</span>
-                        <span><code>TIME</code> Current time</span>
-                        <span><code>PAGE</code> Current story page</span>
-                        <span><code>NUMPAGES</code> Story page count</span>
-                        <span><code>PublicationName</code> Publication title</span>
-                        <span><code>PageName</code> Canvas page name</span>
-                        <span><code>StoryName</code> Text-frame name</span>
-                        <small>The RichEdit References → Add Text menu contains the additional built-in field commands.</small>
-                    </div>
-                </details>
-                <span class="story-command-separator"></span>
-                <strong>Download</strong>
-                <button type="button" @onclick="ExportDocx">DOCX</button>
-                <button type="button" @onclick="ExportRtf">RTF</button>
-                <button type="button" @onclick="ExportText">TXT</button>
-                <button type="button" @onclick="ExportHtml">HTML</button>
-                <button type="button" @onclick="PrintStory">Print</button>
-            </div>
+            <DxRibbon CssClass="story-editor-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Story">
+                    <DxRibbonGroup Text="Quick fields">
+                        <DxRibbonItem Text="Date" Click="InsertDateField" />
+                        <DxRibbonItem Text="Time" Click="InsertTimeField" />
+                        <DxRibbonItem Text="Page" Click="InsertPageField" />
+                        <DxRibbonItem Text="Pages" Click="InsertPageCountField" />
+                        <DxRibbonItem Text="Publication" Click="InsertPublicationField" />
+                        <DxRibbonItem Text="Page name" Click="InsertPageNameField" />
+                        <DxRibbonItem Text="Story name" Click="InsertStoryNameField" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Fields">
+                        <DxRibbonItem Text="Update fields" IsPrimary="true" Click="UpdateFields" />
+                        <DxRibbonItem Text="Show results" Click="ShowFieldResults" />
+                        <DxRibbonItem Text="Show codes" Click="ShowFieldCodes" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+                <DxRibbonTab Text="Export">
+                    <DxRibbonGroup Text="Download">
+                        <DxRibbonItem Text="DOCX" IsPrimary="true" Click="ExportDocx" />
+                        <DxRibbonItem Text="RTF" Click="ExportRtf" />
+                        <DxRibbonItem Text="Text" Click="ExportText" />
+                        <DxRibbonItem Text="HTML" Click="ExportHtml" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Output">
+                        <DxRibbonItem Text="Print" IconCssClass="pub-icon pub-icon-print" Click="PrintStory" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
+            <details class="story-field-help story-field-help-strip">
+                <summary>Available dynamic fields</summary>
+                <div>
+                    <strong>Dynamic fields in this publication</strong>
+                    <span><code>DATE</code> Current date</span>
+                    <span><code>TIME</code> Current time</span>
+                    <span><code>PAGE</code> Current story page</span>
+                    <span><code>NUMPAGES</code> Story page count</span>
+                    <span><code>PublicationName</code> Publication title</span>
+                    <span><code>PageName</code> Canvas page name</span>
+                    <span><code>StoryName</code> Text-frame name</span>
+                    <small>The RichEdit References → Add Text menu contains the additional built-in field commands.</small>
+                </div>
+            </details>
 
             <div id="story-editor-host" class="story-editor-host">
                 <DxRichEdit @key="_editorRevision" @ref="_richEdit"

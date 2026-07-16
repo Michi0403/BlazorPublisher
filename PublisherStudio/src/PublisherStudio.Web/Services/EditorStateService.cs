@@ -76,13 +76,13 @@ public sealed class EditorStateService
     public void SelectElement(Guid? id)
     {
         var selectionChanged = SelectedElementId != id;
-        var toolChanged = id.HasValue && ConnectorTool != ConnectorToolKind.None;
         SelectedElementId = id;
-        if (toolChanged) ConnectorTool = ConnectorToolKind.None;
         var cropChanged = CropMode && SelectedElement is not ImageFrameElement;
         if (cropChanged) CropMode = false;
         EndLiveEdit();
-        if (selectionChanged || toolChanged || cropChanged) Notify(false);
+        // Connector mode is an explicit mouse mode. It is ended only by Done, Escape,
+        // or toggling the connector command, never as a side effect of selection.
+        if (selectionChanged || cropChanged) Notify(false);
     }
 
     public TextFrameElement AddText()

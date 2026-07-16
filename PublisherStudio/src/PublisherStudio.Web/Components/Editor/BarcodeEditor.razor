@@ -7,7 +7,35 @@
 {
     <div class="modal-backdrop">
         <section class="barcode-editor-dialog" role="dialog" aria-modal="true" aria-label="Barcode editor">
-            <header><div><strong>Barcode Studio</strong><span>@_draft.Format</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
+            <header><div><strong>Barcode Studio</strong><span>@FormatName(_draft.Format)</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
+            <DxRibbon CssClass="barcode-editor-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Barcode">
+                    <DxRibbonGroup Text="Format" IconCssClass="pub-icon pub-icon-barcode">
+                        <DxRibbonItem Text="QR Code" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetQrCode" />
+                        <DxRibbonItem Text="Code 128" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Code128)" Click="SetCode128" />
+                        <DxRibbonItem Text="Code 39" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Code39)" Click="SetCode39" />
+                        <DxRibbonItem Text="EAN-13" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Ean13)" Click="SetEan13" />
+                        <DxRibbonItem Text="UPC-A" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.UpcA)" Click="SetUpcA" />
+                        <DxRibbonItem Text="ITF-14" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Itf14)" Click="SetItf14" />
+                        <DxRibbonItem Text="Codabar" IsPrimary="@(_draft.Format == PublicationBarcodeFormat.Codabar)" Click="SetCodabar" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Design">
+                        <DxRibbonItem Text="Regenerate" Click="RefreshNow" />
+                        <DxRibbonItem Text="Swap colors" Click="SwapColors" />
+                        <DxRibbonItem Text="Rounded" Click="SetRounded" />
+                        <DxRibbonItem Text="Dots" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetDots" />
+                    </DxRibbonGroup>
+                    @if (_draft.Format == PublicationBarcodeFormat.QrCode)
+                    {
+                        <DxRibbonGroup Text="QR correction">
+                            <DxRibbonItem Text="Low" Click="SetLowCorrection" />
+                            <DxRibbonItem Text="Medium" Click="SetMediumCorrection" />
+                            <DxRibbonItem Text="Quartile" Click="SetQuartileCorrection" />
+                            <DxRibbonItem Text="High" Click="SetHighCorrection" />
+                        </DxRibbonGroup>
+                    }
+                </DxRibbonTab>
+            </DxRibbon>
             <div class="barcode-editor-body">
                 <div class="barcode-editor-preview" @oncontextmenu="ShowContextMenu" @oncontextmenu:preventDefault>
                     @if (!string.IsNullOrWhiteSpace(_error)) { <div class="barcode-error">@_error</div> }
@@ -62,6 +90,7 @@
     private string? _error;
     private string? _importInfo;
     private bool _refresh;
+    private int _generationRequest;
     private DxContextMenu _menu = default!;
 
     protected override void OnParametersSet()
@@ -70,6 +99,7 @@
         _loadedId = Item.Id;
         Copy(Item, _draft);
         _importInfo = null;
+        _generationRequest++;
         _refresh = true;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -80,12 +110,24 @@
     }
     private async Task Generate()
     {
-        try { _svg = await JS.InvokeAsync<string>("publisherStudio.generateBarcodeSvg", _draft); _error = null; }
-        catch (Exception ex) { _svg = string.Empty; _error = ex.Message; }
+        var request = _generationRequest;
+        try
+        {
+            var svg = await JS.InvokeAsync<string>("publisherStudio.generateBarcodeSvg", _draft);
+            if (request != _generationRequest) return;
+            _svg = svg;
+            _error = null;
+        }
+        catch (Exception ex)
+        {
+            if (request != _generationRequest) return;
+            _svg = string.Empty;
+            _error = ex.Message;
+        }
         await InvokeAsync(StateHasChanged);
     }
-    private void Queue() { _refresh = true; StateHasChanged(); }
-    private Task RefreshNow() => Generate();
+    private void Queue() { _generationRequest++; _refresh = true; StateHasChanged(); }
+    private Task RefreshNow() { _generationRequest++; return Generate(); }
     private Task ShowContextMenu(MouseEventArgs args) => _menu.ShowAsync(args);
     private async Task Save() { _draft.SvgMarkup = _svg; await Saved.InvokeAsync(Clone(_draft)); }
     private Task Cancel() => Cancelled.InvokeAsync();
@@ -188,6 +230,14 @@
         return values;
     }
 
+    private void SetFormat(PublicationBarcodeFormat format) { _draft.Format = format; Queue(); }
+    private void SetQrCode() => SetFormat(PublicationBarcodeFormat.QrCode);
+    private void SetCode128() => SetFormat(PublicationBarcodeFormat.Code128);
+    private void SetCode39() => SetFormat(PublicationBarcodeFormat.Code39);
+    private void SetEan13() => SetFormat(PublicationBarcodeFormat.Ean13);
+    private void SetUpcA() => SetFormat(PublicationBarcodeFormat.UpcA);
+    private void SetItf14() => SetFormat(PublicationBarcodeFormat.Itf14);
+    private void SetCodabar() => SetFormat(PublicationBarcodeFormat.Codabar);
     private void ChangeFormat(ChangeEventArgs e) { if (Enum.TryParse<PublicationBarcodeFormat>(e.Value?.ToString(), out var v)) _draft.Format = v; Queue(); }
     private void ChangeValue(ChangeEventArgs e) { _draft.Value = e.Value?.ToString() ?? string.Empty; Queue(); }
     private void ChangeForeground(ChangeEventArgs e) { _draft.ForegroundColor = e.Value?.ToString() ?? "#111827"; Queue(); }
@@ -201,6 +251,9 @@
     private void ChangeBarHeight(ChangeEventArgs e) { _draft.BarHeight = Int(e, _draft.BarHeight); Queue(); }
     private void ChangeFontSize(ChangeEventArgs e) { _draft.FontSize = Int(e, _draft.FontSize); Queue(); }
     private void SwapColors() { (_draft.ForegroundColor, _draft.BackgroundColor) = (_draft.BackgroundColor, _draft.ForegroundColor); Queue(); }
+    private void SetLowCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.L; Queue(); }
+    private void SetMediumCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.M; Queue(); }
+    private void SetQuartileCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.Q; Queue(); }
     private void SetHighCorrection() { _draft.ErrorCorrection = PublicationBarcodeErrorCorrection.H; Queue(); }
     private void SetRounded() { _draft.ModuleShape = PublicationBarcodeModuleShape.Rounded; Queue(); }
     private void SetDots() { _draft.ModuleShape = PublicationBarcodeModuleShape.Dots; Queue(); }

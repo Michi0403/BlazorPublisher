@@ -3,24 +3,30 @@
 @inject IJSRuntime JS
 
 <section id="publisher-timeline" class="publication-timeline">
-    <header class="timeline-toolbar" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
-        <div class="timeline-transport">
-            <button type="button" title="Play page timeline" @onclick="PlayTimeline">▶</button>
-            <button type="button" title="Pause page timeline" @onclick="PauseTimeline">Ⅱ</button>
-            <button type="button" title="Stop and rewind" @onclick="StopTimeline">■</button>
-            <button type="button" title="Replay the page with transitions and click groups" @onclick="PreviewPage">Page preview</button>
-        </div>
+    <header class="timeline-ribbon-host" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
+        <DxRibbon CssClass="timeline-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+            <DxRibbonTab Text="Timeline">
+                <DxRibbonGroup Text="Playback">
+                    <DxRibbonItem Text="Play" IsPrimary="true" Click="PlayTimeline" />
+                    <DxRibbonItem Text="Pause" Click="PauseTimeline" />
+                    <DxRibbonItem Text="Stop" Click="StopTimeline" />
+                    <DxRibbonItem Text="Page preview" Click="PreviewPage" />
+                </DxRibbonGroup>
+                <DxRibbonGroup Text="Media">
+                    <DxRibbonItem Text="Insert audio" IconCssClass="pub-icon pub-icon-audio" Click="InsertAudio" />
+                    <DxRibbonItem Text="Insert video" IconCssClass="pub-icon pub-icon-video" Click="InsertVideo" />
+                    <DxRibbonItem Text="Create audio" Click="CreateAudio" />
+                    <DxRibbonItem Text="Create video" Click="CreateVideo" />
+                </DxRibbonGroup>
+                <DxRibbonGroup Text="Pane">
+                    <DxRibbonItem Text="Close timeline" Click="CloseTimeline" />
+                </DxRibbonGroup>
+            </DxRibbonTab>
+        </DxRibbon>
         <label class="timeline-playhead-control">Playhead
             <input type="range" min="0" max="@Inv(TimelineDuration)" step="0.01" value="@Inv(_playhead)" @oninput="ChangePlayhead" />
             <b>@Time(_playhead)</b>
         </label>
-        <div class="timeline-toolbar-actions">
-            <button type="button" title="Insert audio" @onclick="InsertAudio">+ Audio</button>
-            <button type="button" title="Insert video" @onclick="InsertVideo">+ Video</button>
-            <button type="button" title="Create audio" @onclick="CreateAudio">Create audio</button>
-            <button type="button" title="Create video" @onclick="CreateVideo">Create video</button>
-            <button type="button" class="timeline-close-button" title="Close timeline pane" aria-label="Close timeline pane" @onclick="CloseTimeline">×</button>
-        </div>
     </header>
 
     <div class="timeline-overview" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>

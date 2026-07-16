@@ -13,11 +13,25 @@
                 <button type="button" class="window-close" @onclick="Close">×</button>
             </header>
 
+            <DxRibbon CssClass="data-manager-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Data">
+                    <DxRibbonGroup Text="Objects" IconCssClass="pub-icon pub-icon-data">
+                        <DxRibbonItem Text="New data object" IsPrimary="true" Click="CreateNew" />
+                        <DxRibbonItem Text="Sample sales data" Click="CreateSample" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Source">
+                        <DxRibbonItem Text="Parse / refresh preview" Click="ParsePreview" />
+                        <DxRibbonItem Text="Save data object" IsPrimary="true" Click="Save" />
+                        <DxRibbonItem Text="Delete" Enabled="@ExistingDraft" Click="Delete" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
+
             <div class="data-manager-body">
                 <aside class="data-object-list">
                     <div class="data-list-heading">
                         <strong>Data objects</strong>
-                        <button type="button" @onclick="CreateNew">＋</button>
+                        <span>@State.Document.DataObjects.Count</span>
                     </div>
                     @if (State.Document.DataObjects.Count == 0)
                     {
@@ -30,7 +44,6 @@
                             <span>@data.SourceKind · @ResolvedRowCount(data) rows</span>
                         </button>
                     }
-                    <DxButton Text="Sample sales data" Click="CreateSample" CssClass="wide-button" />
                 </aside>
 
                 <main class="data-object-editor">
@@ -85,12 +98,6 @@
                             <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" spellcheck="false"></textarea>
                         </label>
                     }
-
-                    <div class="data-editor-actions">
-                        <DxButton Text="Parse / refresh preview" Click="ParsePreview" />
-                        <DxButton Text="Save data object" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
-                        <DxButton Text="Delete" Click="Delete" Enabled="@ExistingDraft" />
-                    </div>
 
                     @if (!string.IsNullOrWhiteSpace(_error))
                     {

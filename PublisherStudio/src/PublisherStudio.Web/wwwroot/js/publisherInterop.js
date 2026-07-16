@@ -2429,6 +2429,74 @@ async function requestPresentationCapture() {
     }
 }
 
+function evenVideoDimension(value, fallback) {
+    const rounded = Math.max(2, Math.round(Number(value) || fallback || 2));
+    return rounded % 2 === 0 ? rounded : rounded + 1;
+}
+
+function pageIntrinsicSize(page) {
+    const previousTransform = page.style.transform;
+    const previousTranslate = page.style.translate;
+    const wasHidden = page.hidden;
+    page.hidden = false;
+    page.style.transform = 'none';
+    page.style.translate = 'none';
+    const bounds = page.getBoundingClientRect();
+    const computed = getComputedStyle(page);
+    const width = Math.max(1, bounds.width || parseFloat(computed.width) || number(page.style.width, 800));
+    const height = Math.max(1, bounds.height || parseFloat(computed.height) || number(page.style.height, 600));
+    page.style.transform = previousTransform;
+    page.style.translate = previousTranslate;
+    page.hidden = wasHidden;
+    return { width, height, area: width * height };
+}
+
+function largestVideoPageFrame(pages) {
+    const measured = pages.map(pageIntrinsicSize);
+    let largest = measured[0] || { width: 1280, height: 720, area: 1280 * 720 };
+    for (const size of measured) {
+        if (size.area > largest.area || (Math.abs(size.area - largest.area) < .5 && size.width > largest.width))
+            largest = size;
+    }
+    return {
+        width: evenVideoDimension(largest.width, 1280),
+        height: evenVideoDimension(largest.height, 720),
+        pageSizes: measured
+    };
+}
+
+async function restrictPresentationCapture(capture, target, targetWidth, targetHeight) {
+    const videoTrack = capture.getVideoTracks()[0];
+    if (!videoTrack) throw new Error('The selected capture surface did not provide a video track.');
+    let restricted = false;
+    try {
+        if (typeof RestrictionTarget !== 'undefined' && typeof RestrictionTarget.fromElement === 'function' && typeof videoTrack.restrictTo === 'function') {
+            const restrictionTarget = await RestrictionTarget.fromElement(target);
+            await videoTrack.restrictTo(restrictionTarget);
+            restricted = true;
+        } else if (typeof CropTarget !== 'undefined' && typeof CropTarget.fromElement === 'function' && typeof videoTrack.cropTo === 'function') {
+            const cropTarget = await CropTarget.fromElement(target);
+            await videoTrack.cropTo(cropTarget);
+            restricted = true;
+        }
+    } catch (error) {
+        console.warn('Publisher video export could not crop the capture to the publication frame. Falling back to full-tab capture.', error);
+    }
+
+    if (restricted && typeof videoTrack.applyConstraints === 'function') {
+        try {
+            await videoTrack.applyConstraints({
+                width: { ideal: targetWidth },
+                height: { ideal: targetHeight },
+                frameRate: { ideal: 30, max: 60 }
+            });
+        } catch (error) {
+            console.warn('Publisher video export could not request the publication frame resolution.', error);
+        }
+    }
+    return restricted;
+}
+
 async function exportPresentationVideo(containerSelector, fileName, title) {
     if (typeof MediaRecorder === 'undefined') throw new Error('This browser does not support MediaRecorder video export.');
     const source = document.querySelector(containerSelector);
@@ -2436,53 +2504,89 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     const sourcePages = [...source.querySelectorAll(':scope > .print-page')];
     if (!sourcePages.length) throw new Error('The publication does not contain any pages.');
 
-    const capture = await requestPresentationCapture();
-    const chunks = [];
-    const mimeType = chooseVideoRecordingMimeType();
-    const recorder = new MediaRecorder(capture, mimeType ? { mimeType, videoBitsPerSecond: 8_000_000 } : { videoBitsPerSecond: 8_000_000 });
-    recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
-    const stopped = new Promise((resolve, reject) => {
-        recorder.addEventListener('stop', resolve, { once: true });
-        recorder.addEventListener('error', event => reject(event.error || new Error('Video recording failed.')), { once: true });
-    });
-
     const overlay = document.createElement('div');
     overlay.className = 'publisher-video-export-overlay';
     overlay.setAttribute('aria-label', `${title || 'Publication'} video export`);
+
+    const frame = document.createElement('div');
+    frame.className = 'publisher-video-export-frame';
     const publication = source.cloneNode(true);
     publication.removeAttribute('aria-hidden');
     publication.className = 'publisher-video-export-publication';
     const pages = [...publication.querySelectorAll(':scope > .print-page')];
     pages.forEach((page, index) => {
         page.id = `publisher-video-export-page-${index}-${Date.now()}`;
-        page.hidden = index !== 0;
         page.querySelectorAll('video,audio').forEach(media => { media.controls = false; media.preload = 'auto'; });
     });
+    frame.appendChild(publication);
+
     const countdown = document.createElement('div');
     countdown.className = 'publisher-video-export-countdown';
-    overlay.append(publication, countdown);
+    countdown.textContent = 'Select This Tab to record at the publication page size. Enable tab audio when needed.';
+    overlay.append(frame, countdown);
     document.body.appendChild(overlay);
 
-    const fit = page => {
-        const width = Math.max(1, page.getBoundingClientRect().width || number(page.style.width, 800));
-        const height = Math.max(1, page.getBoundingClientRect().height || number(page.style.height, 600));
-        const scale = Math.min((innerWidth - 40) / width, (innerHeight - 40) / height);
-        page.style.transform = `scale(${Math.max(.05, scale)})`;
-        page.style.transformOrigin = 'center';
-    };
-    const resize = () => pages.forEach(fit);
-    window.addEventListener('resize', resize);
-    resize();
+    const frameDefinition = largestVideoPageFrame(pages);
+    pages.forEach((page, index) => page.hidden = index !== 0);
+    const frameWidth = frameDefinition.width;
+    const frameHeight = frameDefinition.height;
+    frame.style.width = `${frameWidth}px`;
+    frame.style.height = `${frameHeight}px`;
+    frame.style.setProperty('--publisher-video-frame-width', `${frameWidth}px`);
+    frame.style.setProperty('--publisher-video-frame-height', `${frameHeight}px`);
 
+    const fitPage = (page, pageIndex = pages.indexOf(page)) => {
+        const measured = frameDefinition.pageSizes[pageIndex] || pageIntrinsicSize(page);
+        const scale = Math.min(frameWidth / measured.width, frameHeight / measured.height);
+        page.style.width = `${measured.width}px`;
+        page.style.height = `${measured.height}px`;
+        page.style.transform = `translate(-50%, -50%) scale(${Math.max(.01, scale)})`;
+        page.style.transformOrigin = 'center center';
+        page.style.translate = 'none';
+    };
+    const fitFrameToViewport = () => {
+        const scale = Math.min((innerWidth - 32) / frameWidth, (innerHeight - 32) / frameHeight, 1);
+        frame.style.transform = `scale(${Math.max(.05, scale)})`;
+    };
+    pages.forEach(fitPage);
+    fitFrameToViewport();
+    window.addEventListener('resize', fitFrameToViewport);
+
+    let capture = null;
+    let recorder = null;
+    let stopped = null;
+    const chunks = [];
     let totalDuration = 0;
+    let restricted = false;
     try {
-        for (let count = 3; count > 0; count--) { countdown.textContent = `Recording starts in ${count}`; await sleep(700); }
+        await sleep(80);
+        capture = await requestPresentationCapture();
+        restricted = await restrictPresentationCapture(capture, frame, frameWidth, frameHeight);
+
+        const mimeType = chooseVideoRecordingMimeType();
+        const pixels = frameWidth * frameHeight;
+        const videoBitsPerSecond = Math.max(4_000_000, Math.min(20_000_000, Math.round(pixels * 8)));
+        recorder = new MediaRecorder(capture, mimeType
+            ? { mimeType, videoBitsPerSecond }
+            : { videoBitsPerSecond });
+        recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
+        stopped = new Promise((resolve, reject) => {
+            recorder.addEventListener('stop', resolve, { once: true });
+            recorder.addEventListener('error', event => reject(event.error || new Error('Video recording failed.')), { once: true });
+        });
+
+        for (let count = 3; count > 0; count--) {
+            countdown.textContent = restricted
+                ? `Page-sized recording starts in ${count}`
+                : `Full-tab fallback recording starts in ${count}`;
+            await sleep(700);
+        }
         countdown.remove();
         recorder.start(1000);
         for (let index = 0; index < pages.length; index++) {
             const page = pages[index];
             pages.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
-            fit(page);
+            fitPage(page, index);
             await sleep(80);
             const duration = exportedPageDuration(page);
             totalDuration += duration;
@@ -2496,11 +2600,17 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
         if (!blob.size) throw new Error('The browser completed the capture but produced an empty video.');
         downloadBlob(fileName || 'publication.webm', blob);
-        return { fileName: fileName || 'publication.webm', durationSeconds: totalDuration };
+        return {
+            fileName: fileName || 'publication.webm',
+            durationSeconds: totalDuration,
+            width: frameWidth,
+            height: frameHeight,
+            pageSizedCapture: restricted
+        };
     } finally {
-        if (recorder.state !== 'inactive') { try { recorder.stop(); } catch { } }
-        capture.getTracks().forEach(track => track.stop());
-        window.removeEventListener('resize', resize);
+        if (recorder && recorder.state !== 'inactive') { try { recorder.stop(); } catch { } }
+        if (capture) capture.getTracks().forEach(track => track.stop());
+        window.removeEventListener('resize', fitFrameToViewport);
         overlay.remove();
     }
 }

@@ -263,7 +263,10 @@
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".webm";
             ShowNotice("Choose this browser tab in the capture dialog and enable tab audio when media sound should be included.");
             var result = await JS.InvokeAsync<VideoExportResult>("publisherStudio.exportPresentationVideo", ".print-publication", fileName, State.Document.Name);
-            ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds).");
+            var frame = result.PageSizedCapture && result.Width > 0 && result.Height > 0
+                ? $" · page frame {result.Width} × {result.Height}"
+                : " · full-tab fallback";
+            ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds){frame}.");
         }
         catch (Exception ex) { ShowError(ex); }
     }
@@ -774,6 +777,9 @@
     {
         public string FileName { get; set; } = string.Empty;
         public double DurationSeconds { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public bool PageSizedCapture { get; set; }
     }
 
     private sealed class PageExportResult

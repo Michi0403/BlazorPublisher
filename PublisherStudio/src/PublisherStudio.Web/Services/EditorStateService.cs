@@ -7,6 +7,8 @@ public sealed class EditorStateService
     private readonly PublicationFileService _files;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
+    private string? _clipboard;
+    private string? _liveEditKey;
 
     public EditorStateService(PublicationFileService files)
     {
@@ -22,6 +24,7 @@ public sealed class EditorStateService
     public bool CropMode { get; private set; }
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
+    public bool CanPaste => !string.IsNullOrWhiteSpace(_clipboard);
     public PublicationPage CurrentPage => Document.Pages.First(p => p.Id == SelectedPageId);
     public PublicationElement? SelectedElement => CurrentPage.Elements.FirstOrDefault(e => e.Id == SelectedElementId);
 
@@ -33,6 +36,7 @@ public sealed class EditorStateService
         CropMode = false;
         _undo.Clear();
         _redo.Clear();
+        _liveEditKey = null;
         Notify();
     }
 
@@ -44,6 +48,7 @@ public sealed class EditorStateService
         CropMode = false;
         _undo.Clear();
         _redo.Clear();
+        _liveEditKey = null;
         Notify();
     }
 
@@ -53,6 +58,7 @@ public sealed class EditorStateService
         SelectedPageId = id;
         SelectedElementId = null;
         CropMode = false;
+        EndLiveEdit();
         Notify(false);
     }
 
@@ -61,6 +67,7 @@ public sealed class EditorStateService
         SelectedElementId = id;
         if (SelectedElement is not ImageFrameElement)
             CropMode = false;
+        EndLiveEdit();
         Notify(false);
     }
 
@@ -70,7 +77,10 @@ public sealed class EditorStateService
         var element = new TextFrameElement
         {
             Name = NextName("Text Box"),
-            X = 25, Y = 25, Width = 90, Height = 45,
+            X = 25,
+            Y = 25,
+            Width = 90,
+            Height = 45,
             ZIndex = NextZ(),
             PreviewHtml = "<p style=\"margin:0;font:12pt Segoe UI\">New text box</p>",
             DocumentContent = System.Text.Encoding.UTF8.GetBytes("<!DOCTYPE html><html><body><p>New text box</p></body></html>")
@@ -86,8 +96,14 @@ public sealed class EditorStateService
         Capture();
         var element = new ImageFrameElement
         {
-            Name = NextName(name), DataUrl = dataUrl, AltText = name,
-            X = 30, Y = 35, Width = 90, Height = 65, ZIndex = NextZ()
+            Name = NextName(name),
+            DataUrl = dataUrl,
+            AltText = name,
+            X = 30,
+            Y = 35,
+            Width = 90,
+            Height = 65,
+            ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);
         SelectedElementId = element.Id;
@@ -100,9 +116,13 @@ public sealed class EditorStateService
         Capture();
         var element = new ShapeElement
         {
-            Name = NextName(shape.ToString()), Shape = shape,
-            X = 30, Y = 40, Width = shape == PublicationShape.Line ? 80 : 55,
-            Height = shape == PublicationShape.Line ? 1 : 40, ZIndex = NextZ()
+            Name = NextName(shape.ToString()),
+            Shape = shape,
+            X = 30,
+            Y = 40,
+            Width = shape == PublicationShape.Line ? 80 : 55,
+            Height = shape == PublicationShape.Line ? 1 : 40,
+            ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);
         SelectedElementId = element.Id;
@@ -114,13 +134,15 @@ public sealed class EditorStateService
     {
         Capture();
         var source = CurrentPage;
-        var page = new PublicationPage
+        var publicationPage = new PublicationPage
         {
-            Name = $"Page {Document.Pages.Count + 1}", WidthMm = source.WidthMm,
-            HeightMm = source.HeightMm, Background = source.Background
+            Name = $"Page {Document.Pages.Count + 1}",
+            WidthMm = source.WidthMm,
+            HeightMm = source.HeightMm,
+            Background = source.Background
         };
-        Document.Pages.Add(page);
-        SelectedPageId = page.Id;
+        Document.Pages.Add(publicationPage);
+        SelectedPageId = publicationPage.Id;
         SelectedElementId = null;
         Notify();
     }
@@ -161,6 +183,33 @@ public sealed class EditorStateService
         Notify();
     }
 
+    public void CopySelected()
+    {
+        var element = SelectedElement;
+        if (element is null) return;
+        var wrapper = new PublicationDocument { Pages = [new PublicationPage { Elements = [element] }] };
+        _clipboard = _files.Serialize(wrapper);
+        Notify(false);
+    }
+
+    public void Paste()
+    {
+        if (string.IsNullOrWhiteSpace(_clipboard)) return;
+        var wrapper = _files.Deserialize(_clipboard);
+        var source = wrapper.Pages.SelectMany(item => item.Elements).FirstOrDefault();
+        if (source is null) return;
+        Capture();
+        var clone = CloneElement(source);
+        clone.Id = Guid.NewGuid();
+        clone.Name = NextName(source.Name);
+        clone.X = Math.Clamp(source.X + 5, -clone.Width + 2, CurrentPage.WidthMm - 2);
+        clone.Y = Math.Clamp(source.Y + 5, -clone.Height + 2, CurrentPage.HeightMm - 2);
+        clone.ZIndex = NextZ();
+        CurrentPage.Elements.Add(clone);
+        SelectedElementId = clone.Id;
+        Notify();
+    }
+
     public void DuplicateSelected()
     {
         var element = SelectedElement;
@@ -182,20 +231,21 @@ public sealed class EditorStateService
         var element = CurrentPage.Elements.FirstOrDefault(e => e.Id == id);
         if (element is null || element.Locked) return;
         Capture();
-        element.Width = Math.Max(2, Math.Min(width, CurrentPage.WidthMm));
-        element.Height = Math.Max(2, Math.Min(height, CurrentPage.HeightMm));
+        element.Width = Math.Max(2, Math.Min(width, CurrentPage.WidthMm * 2));
+        element.Height = Math.Max(2, Math.Min(height, CurrentPage.HeightMm * 2));
         element.X = Math.Clamp(x, -element.Width + 2, CurrentPage.WidthMm - 2);
         element.Y = Math.Clamp(y, -element.Height + 2, CurrentPage.HeightMm - 2);
         Notify();
     }
 
-    public void CommitCrop(Guid id, double cropX, double cropY)
+    public void CommitCrop(Guid id, double cropX, double cropY, double cropScale)
     {
         var image = CurrentPage.Elements.OfType<ImageFrameElement>().FirstOrDefault(e => e.Id == id);
         if (image is null || image.Locked) return;
         Capture();
         image.CropX = Math.Clamp(cropX, -100, 100);
         image.CropY = Math.Clamp(cropY, -100, 100);
+        image.CropScale = Math.Clamp(cropScale, .2, 8);
         Notify();
     }
 
@@ -208,12 +258,39 @@ public sealed class EditorStateService
         Notify();
     }
 
+    public void UpdateSelectedLive(string key, Action<PublicationElement> update)
+    {
+        var element = SelectedElement;
+        if (element is null || element.Locked) return;
+        if (!string.Equals(_liveEditKey, key, StringComparison.Ordinal))
+        {
+            Capture();
+            _liveEditKey = key;
+        }
+        update(element);
+        Notify();
+    }
+
+    public void EndLiveEdit() => _liveEditKey = null;
+
     public void UpdatePage(Action<PublicationPage> update)
     {
         Capture();
         update(CurrentPage);
         Notify();
     }
+
+    public void SetPageSize(double widthMm, double heightMm)
+    {
+        if (widthMm is < 10 or > 2000 || heightMm is < 10 or > 2000) return;
+        UpdatePage(publicationPage =>
+        {
+            publicationPage.WidthMm = widthMm;
+            publicationPage.HeightMm = heightMm;
+        });
+    }
+
+    public void SwapPageOrientation() => SetPageSize(CurrentPage.HeightMm, CurrentPage.WidthMm);
 
     public void UpdateTextDocument(byte[] content, string previewHtml)
     {
@@ -233,12 +310,38 @@ public sealed class EditorStateService
 
     public void AddGuide(GuideOrientation orientation)
     {
+        AddGuideAt(orientation, orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm / 2 : CurrentPage.HeightMm / 2);
+    }
+
+    public void AddGuideAt(GuideOrientation orientation, double positionMm)
+    {
+        var max = orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm : CurrentPage.HeightMm;
+        if (positionMm < 0 || positionMm > max) return;
         Capture();
         CurrentPage.Guides.Add(new GuideLine
         {
             Orientation = orientation,
-            PositionMm = orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm / 2 : CurrentPage.HeightMm / 2
+            PositionMm = Math.Clamp(positionMm, 0, max)
         });
+        Notify();
+    }
+
+    public void CommitGuide(Guid id, double positionMm)
+    {
+        var guide = CurrentPage.Guides.FirstOrDefault(item => item.Id == id);
+        if (guide is null) return;
+        var max = guide.Orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm : CurrentPage.HeightMm;
+        Capture();
+        guide.PositionMm = Math.Clamp(positionMm, 0, max);
+        Notify();
+    }
+
+    public void DeleteGuide(Guid id)
+    {
+        var guide = CurrentPage.Guides.FirstOrDefault(item => item.Id == id);
+        if (guide is null) return;
+        Capture();
+        CurrentPage.Guides.Remove(guide);
         Notify();
     }
 
@@ -248,6 +351,35 @@ public sealed class EditorStateService
         Capture();
         CurrentPage.Guides.Clear();
         Notify();
+    }
+
+    public void SetZoom(double zoom)
+    {
+        Document.Zoom = Math.Clamp(zoom, .2, 4);
+        Notify(false);
+    }
+
+    public void ZoomBy(double factor) => SetZoom(Document.Zoom * factor);
+
+    public void SetRulerUnit(MeasurementUnit unit)
+    {
+        Document.View.RulerUnit = unit;
+        Notify(false);
+    }
+
+    public void CycleRulerUnit()
+    {
+        var values = Enum.GetValues<MeasurementUnit>();
+        var index = Array.IndexOf(values, Document.View.RulerUnit);
+        SetRulerUnit(values[(index + 1) % values.Length]);
+    }
+
+    public void SetViewOption(Action<PublicationViewSettings> update)
+    {
+        update(Document.View);
+        Document.View.GridSpacingMm = Math.Clamp(Document.View.GridSpacingMm, .5, 100);
+        Document.View.ExportDpi = Math.Clamp(Document.View.ExportDpi, 72, 600);
+        Notify(false);
     }
 
     public void BringToFront() => ChangeZ(NextZ());
@@ -292,14 +424,17 @@ public sealed class EditorStateService
         SelectedPageId = Document.Pages[Math.Min(selectedPageIndex, Document.Pages.Count - 1)].Id;
         SelectedElementId = null;
         CropMode = false;
+        _liveEditKey = null;
         Notify();
     }
 
     private void ChangeZ(int value) => UpdateSelected(element => element.ZIndex = value);
     private int NextZ() => CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
     private string NextName(string basis) => $"{basis} {CurrentPage.Elements.Count + 1}";
+
     private void Capture()
     {
+        _liveEditKey = null;
         _undo.Push(_files.Serialize(Document));
         if (_undo.Count > 100)
         {
@@ -309,16 +444,19 @@ public sealed class EditorStateService
         }
         _redo.Clear();
     }
+
     private PublicationElement CloneElement(PublicationElement element)
     {
         var wrapper = new PublicationDocument { Pages = [new PublicationPage { Elements = [element] }] };
         return _files.Deserialize(_files.Serialize(wrapper)).Pages[0].Elements[0];
     }
-    private PublicationPage ClonePage(PublicationPage page)
+
+    private PublicationPage ClonePage(PublicationPage publicationPage)
     {
-        var wrapper = new PublicationDocument { Pages = [page] };
+        var wrapper = new PublicationDocument { Pages = [publicationPage] };
         return _files.Deserialize(_files.Serialize(wrapper)).Pages[0];
     }
+
     private void Notify(bool markModified = true)
     {
         if (markModified) Document.ModifiedUtc = DateTimeOffset.UtcNow;

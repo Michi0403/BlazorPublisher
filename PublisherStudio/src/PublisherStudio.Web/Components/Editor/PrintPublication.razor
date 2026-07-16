@@ -1,10 +1,10 @@
 @namespace PublisherStudio.Components.Editor
 
 <div class="print-publication" aria-hidden="true">
-    @foreach (var page in Document.Pages)
+    @foreach (var publicationPage in Document.Pages)
     {
-        <section class="print-page" style="@PageStyle(page)">
-            @foreach (var element in page.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
+        <section class="print-page" style="@PageStyle(publicationPage)">
+            @foreach (var element in publicationPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
             {
                 <div class="print-element" style="@ElementStyle(element)">
                     @switch (element)
@@ -47,7 +47,7 @@
         var fit = i.FitInsideFrame ? "contain" : "cover";
         var sx = i.FlipHorizontal ? -i.CropScale : i.CropScale;
         var sy = i.FlipVertical ? -i.CropScale : i.CropScale;
-        return $"object-fit:{fit};transform:translate({Inv(i.CropX)}%,{Inv(i.CropY)}%) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(i.Opacity)};filter:brightness({Inv(i.Brightness)}) contrast({Inv(i.Contrast)}) saturate({Inv(i.Saturation)}) hue-rotate({Inv(i.HueRotation)}deg) invert({Inv(i.Invert)}) grayscale({Inv(i.Grayscale)}) sepia({Inv(i.Sepia)}) blur({Inv(i.Blur)}px)";
+        return $"object-fit:{fit};transform:translate({Inv(i.CropX)}%,{Inv(i.CropY)}%) rotate({Inv(i.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(i.Opacity)};filter:brightness({Inv(i.Brightness)}) contrast({Inv(i.Contrast)}) saturate({Inv(i.Saturation)}) hue-rotate({Inv(i.HueRotation)}deg) invert({Inv(i.Invert)}) grayscale({Inv(i.Grayscale)}) sepia({Inv(i.Sepia)}) blur({Inv(i.Blur)}px)";
     }
     private static string Mm(double value) => $"{Inv(value)}mm";
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);

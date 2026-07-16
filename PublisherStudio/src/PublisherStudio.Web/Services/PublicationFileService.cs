@@ -25,9 +25,13 @@ public sealed partial class PublicationFileService
     {
         var document = JsonSerializer.Deserialize<PublicationDocument>(json, _options)
             ?? throw new InvalidDataException("The publication file is empty or invalid.");
+        document.View ??= new PublicationViewSettings();
+        document.Zoom = Math.Clamp(document.Zoom <= 0 ? .8 : document.Zoom, .2, 4);
+        document.View.GridSpacingMm = Math.Clamp(document.View.GridSpacingMm <= 0 ? 5 : document.View.GridSpacingMm, .5, 100);
+        document.View.ExportDpi = Math.Clamp(document.View.ExportDpi <= 0 ? 150 : document.View.ExportDpi, 72, 600);
         if (document.Pages.Count == 0)
             document.Pages.Add(PublicationPage.CreateA4());
-        foreach (var text in document.Pages.SelectMany(p => p.Elements).OfType<TextFrameElement>())
+        foreach (var text in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<TextFrameElement>())
             text.PreviewHtml = SanitizePreviewHtml(text.PreviewHtml);
         return document;
     }

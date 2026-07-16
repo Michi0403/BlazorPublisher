@@ -2,33 +2,43 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div class="publication-stage" @onclick="ClearSelection">
-    <div class="corner-ruler">mm</div>
-    <div class="horizontal-ruler" style="width:@PageWidthPx">
-        @foreach (var tick in HorizontalTicks)
-        {
-            <span class="ruler-tick major" style="left:@Px(tick * PixelsPerMm)"><b>@tick</b></span>
-        }
-    </div>
-    <div class="vertical-ruler" style="height:@PageHeightPx">
-        @foreach (var tick in VerticalTicks)
-        {
-            <span class="ruler-tick major" style="top:@Px(tick * PixelsPerMm)"><b>@tick</b></span>
-        }
-    </div>
-    <div class="page-scroll-area">
+<div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden")"
+     tabindex="0" @onclick="ClearSelection" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
+    @if (State.Document.View.RulersVisible)
+    {
+        <button class="corner-ruler" title="Change ruler unit" @onclick:stopPropagation="true" @onclick="CycleRulerUnit">@UnitLabel</button>
+        <canvas id="publisher-horizontal-ruler" class="ruler-canvas horizontal-ruler" aria-label="Horizontal ruler"></canvas>
+        <canvas id="publisher-vertical-ruler" class="ruler-canvas vertical-ruler" aria-label="Vertical ruler"></canvas>
+    }
+
+    <div id="publisher-scroll-area" class="page-scroll-area">
         <div id="publisher-page" class="publication-page @(State.CropMode ? "crop-mode" : null)"
-             style="width:@PageWidthPx;height:@PageHeightPx;background:@State.CurrentPage.Background"
-             data-px-per-mm="@PixelsPerMm.ToString(CultureInfo.InvariantCulture)">
-            @foreach (var guide in State.CurrentPage.Guides)
+             style="@PageStyle"
+             data-px-per-mm="@Inv(PixelsPerMm)"
+             data-zoom="@Inv(State.Document.Zoom)"
+             data-page-width-mm="@Inv(State.CurrentPage.WidthMm)"
+             data-page-height-mm="@Inv(State.CurrentPage.HeightMm)">
+            @if (State.Document.View.GuidesVisible)
             {
-                <div class="guide-line @guide.Orientation.ToString().ToLowerInvariant()" style="@GuideStyle(guide)"></div>
+                @foreach (var guide in State.CurrentPage.Guides)
+                {
+                    <div class="guide-line @guide.Orientation.ToString().ToLowerInvariant()"
+                         data-guide-id="@guide.Id"
+                         data-guide-orientation="@guide.Orientation"
+                         style="@GuideStyle(guide)"></div>
+                }
             }
+
             @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
             {
                 <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
                      class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
-                     style="@ElementStyle(element)" @ondblclick="() => DoubleClick(element)" @onclick:stopPropagation="true">
+                     style="@ElementStyle(element)"
+                     @ondblclick="() => DoubleClick(element)"
+                     @onclick:stopPropagation="true"
+                     @oncontextmenu="args => ShowElementContextMenu(element, args)"
+                     @oncontextmenu:preventDefault
+                     @oncontextmenu:stopPropagation>
                     @switch (element)
                     {
                         case TextFrameElement text:
@@ -40,14 +50,20 @@
                             <div class="image-frame" style="@ImageFrameStyle(image)">
                                 <img src="@image.DataUrl" alt="@image.AltText" draggable="false" style="@ImageStyle(image)"
                                      data-crop-x="@Inv(image.CropX)" data-crop-y="@Inv(image.CropY)" data-crop-scale="@Inv(image.CropScale)"
+                                     data-image-rotation="@Inv(image.ImageRotation)"
                                      data-flip-x="@(image.FlipHorizontal ? -1 : 1)" data-flip-y="@(image.FlipVertical ? -1 : 1)" />
+                                @if (State.CropMode && element.Id == State.SelectedElementId)
+                                {
+                                    <div class="crop-thirds" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                                    <div class="crop-help">Drag picture · mouse wheel zooms · double-click finishes</div>
+                                }
                             </div>
                             break;
                         case ShapeElement shape:
                             <div class="shape shape-@shape.Shape.ToString().ToLowerInvariant()" style="@ShapeStyle(shape)"></div>
                             break;
                     }
-                    @if (element.Id == State.SelectedElementId && !element.Locked)
+                    @if (element.Id == State.SelectedElementId && !element.Locked && !(State.CropMode && element is ImageFrameElement))
                     {
                         foreach (var handle in Handles)
                         {
@@ -60,61 +76,265 @@
     </div>
 </div>
 
+<DxContextMenu @ref="_contextMenu">
+    <Items>
+        @if (State.SelectedElement is TextFrameElement)
+        {
+            <DxContextMenuItem Text="Edit story" Click="EditSelectedStory" />
+        }
+        @if (State.SelectedElement is ImageFrameElement)
+        {
+            <DxContextMenuItem Text="Replace picture…" Click="ReplaceSelectedPicture" />
+            <DxContextMenuItem Text="@(State.CropMode ? "Finish crop" : "Crop picture")" Click="ToggleCrop" />
+            <DxContextMenuItem Text="Fit picture" Click="PictureFit" />
+            <DxContextMenuItem Text="Fill frame" Click="PictureFill" />
+            <DxContextMenuItem Text="Reset picture" Click="ResetPicture" />
+        }
+        @if (State.SelectedElement is not null)
+        {
+            <DxContextMenuItem Text="Copy" BeginGroup="true" Click="Copy" />
+            <DxContextMenuItem Text="Paste" Enabled="@State.CanPaste" Click="Paste" />
+            <DxContextMenuItem Text="Duplicate" Click="Duplicate" />
+            <DxContextMenuItem Text="Delete" Click="Delete" />
+            <DxContextMenuItem Text="Arrange" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="Bring to front" Click="BringToFront" />
+                    <DxContextMenuItem Text="Bring forward" Click="BringForward" />
+                    <DxContextMenuItem Text="Send backward" Click="SendBackward" />
+                    <DxContextMenuItem Text="Send to back" Click="SendToBack" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="Align to page">
+                <Items>
+                    <DxContextMenuItem Text="Left" Click="AlignLeft" />
+                    <DxContextMenuItem Text="Center" Click="AlignCenter" />
+                    <DxContextMenuItem Text="Right" Click="AlignRight" />
+                    <DxContextMenuItem Text="Top" Click="AlignTop" />
+                    <DxContextMenuItem Text="Middle" Click="AlignMiddle" />
+                    <DxContextMenuItem Text="Bottom" Click="AlignBottom" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="@(State.SelectedElement.Locked ? "Unlock" : "Lock")" BeginGroup="true" Click="ToggleLock" />
+            <DxContextMenuItem Text="@(State.SelectedElement.Visible ? "Hide" : "Show")" Click="ToggleVisibility" />
+        }
+        else
+        {
+            <DxContextMenuItem Text="Paste" Enabled="@State.CanPaste" Click="Paste" />
+            <DxContextMenuItem Text="Insert text box" BeginGroup="true" Click="AddText" />
+            <DxContextMenuItem Text="Insert picture…" Click="InsertPicture" />
+            <DxContextMenuItem Text="Insert rectangle" Click="AddRectangle" />
+            <DxContextMenuItem Text="Add page" BeginGroup="true" Click="AddPage" />
+        }
+    </Items>
+</DxContextMenu>
+
 @code {
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public EventCallback<Guid> EditTextRequested { get; set; }
+    [Parameter] public EventCallback RequestPicture { get; set; }
+
+    private DxContextMenu _contextMenu = default!;
     private IJSObjectReference? _module;
     private DotNetObjectReference<PageSurface>? _self;
     private static readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
     private double PixelsPerMm => 3.7795275591 * State.Document.Zoom;
-    private string PageWidthPx => Px(State.CurrentPage.WidthMm * PixelsPerMm);
-    private string PageHeightPx => Px(State.CurrentPage.HeightMm * PixelsPerMm);
-    private IEnumerable<int> HorizontalTicks => Enumerable.Range(0, (int)Math.Floor(State.CurrentPage.WidthMm / 10) + 1).Select(i => i * 10);
-    private IEnumerable<int> VerticalTicks => Enumerable.Range(0, (int)Math.Floor(State.CurrentPage.HeightMm / 10) + 1).Select(i => i * 10);
+    private string UnitLabel => State.Document.View.RulerUnit switch
+    {
+        MeasurementUnit.Millimeter => "mm",
+        MeasurementUnit.Centimeter => "cm",
+        MeasurementUnit.Inch => "in",
+        MeasurementUnit.Pixel => "px",
+        _ => "mm"
+    };
+
+    private string PageStyle
+    {
+        get
+        {
+            var grid = Math.Max(.5, State.Document.View.GridSpacingMm) * PixelsPerMm;
+            var gridStyle = State.Document.View.GridVisible
+                ? $"background-image:linear-gradient(#0000 calc(100% - 1px),#00000010 calc(100% - 1px)),linear-gradient(90deg,#0000 calc(100% - 1px),#00000010 calc(100% - 1px));background-size:{Px(grid)} {Px(grid)};"
+                : "background-image:none;";
+            return $"width:{Px(State.CurrentPage.WidthMm * PixelsPerMm)};height:{Px(State.CurrentPage.HeightMm * PixelsPerMm)};background-color:{State.CurrentPage.Background};{gridStyle}";
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
         _self ??= DotNetObjectReference.Create(this);
-        await _module.InvokeVoidAsync("initializeCanvas", "publisher-page", _self, PixelsPerMm, State.CropMode);
+        await _module.InvokeVoidAsync("initializeCanvas",
+            "publisher-stage",
+            "publisher-scroll-area",
+            "publisher-page",
+            "publisher-horizontal-ruler",
+            "publisher-vertical-ruler",
+            _self,
+            new
+            {
+                pxPerMm = PixelsPerMm,
+                cropMode = State.CropMode,
+                unit = State.Document.View.RulerUnit.ToString(),
+                rulersVisible = State.Document.View.RulersVisible,
+                guidesVisible = State.Document.View.GuidesVisible,
+                snapToGrid = State.Document.View.SnapToGrid,
+                snapToGuides = State.Document.View.SnapToGuides,
+                snapToPage = State.Document.View.SnapToPage,
+                gridSpacingMm = State.Document.View.GridSpacingMm
+            });
     }
 
-    [JSInvokable] public void SelectElement(string id)
+    public async Task FitPageAsync()
+    {
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
+        var zoom = await _module.InvokeAsync<double>("calculateFitZoom", "publisher-stage", State.CurrentPage.WidthMm, State.CurrentPage.HeightMm, State.Document.View.RulersVisible);
+        State.SetZoom(zoom);
+    }
+
+    [JSInvokable]
+    public void SelectElement(string id)
     {
         if (Guid.TryParse(id, out var guid)) State.SelectElement(guid);
     }
-    [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height)
+
+    [JSInvokable]
+    public void CommitBounds(string id, double x, double y, double width, double height)
     {
         if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height);
     }
-    [JSInvokable] public void CommitCrop(string id, double cropX, double cropY)
+
+    [JSInvokable]
+    public void CommitCrop(string id, double cropX, double cropY, double cropScale)
     {
-        if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY);
+        if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale);
+    }
+
+    [JSInvokable]
+    public void AddGuideAt(string orientation, double positionMm)
+    {
+        if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed))
+            State.AddGuideAt(parsed, positionMm);
+    }
+
+    [JSInvokable]
+    public void CommitGuide(string id, double positionMm)
+    {
+        if (Guid.TryParse(id, out var guid)) State.CommitGuide(guid, positionMm);
+    }
+
+    [JSInvokable]
+    public void DeleteGuide(string id)
+    {
+        if (Guid.TryParse(id, out var guid)) State.DeleteGuide(guid);
     }
 
     private void ClearSelection() => State.SelectElement(null);
-    private Task DoubleClick(PublicationElement element) => element is TextFrameElement ? EditTextRequested.InvokeAsync(element.Id) : Task.CompletedTask;
-    private string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({e.Rotation.ToString(CultureInfo.InvariantCulture)}deg)";
-    private string ShapeStyle(ShapeElement s) => s.Shape == PublicationShape.Line
-        ? $"background:{s.Stroke};height:{Mm(Math.Max(s.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
-        : $"background:{s.Fill};border:{Mm(s.StrokeWidth)} solid {s.Stroke};border-radius:{(s.Shape == PublicationShape.Ellipse ? "50%" : s.Shape == PublicationShape.RoundedRectangle ? Mm(s.CornerRadiusMm) : "0")}";
-    private string ImageFrameStyle(ImageFrameElement i)
+
+    private Task DoubleClick(PublicationElement element)
     {
-        var radius = i.MaskShape == ImageMaskShape.Ellipse ? "50%" : i.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(i.CornerRadiusMm) : "0";
-        var shadow = i.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
-        return $"border-radius:{radius};border:{Mm(i.BorderWidthMm)} solid {i.BorderColor};box-shadow:{shadow}";
+        if (element is TextFrameElement)
+            return EditTextRequested.InvokeAsync(element.Id);
+        if (element is ImageFrameElement)
+            State.ToggleCropMode();
+        return Task.CompletedTask;
     }
-    private string ImageStyle(ImageFrameElement i)
+
+    private async Task ShowElementContextMenu(PublicationElement element, MouseEventArgs args)
     {
-        var fit = i.FitInsideFrame ? "contain" : "cover";
-        var sx = i.FlipHorizontal ? -i.CropScale : i.CropScale;
-        var sy = i.FlipVertical ? -i.CropScale : i.CropScale;
-        return $"object-fit:{fit};transform:translate({i.CropX.ToString(CultureInfo.InvariantCulture)}%,{i.CropY.ToString(CultureInfo.InvariantCulture)}%) scale({sx.ToString(CultureInfo.InvariantCulture)},{sy.ToString(CultureInfo.InvariantCulture)});opacity:{i.Opacity.ToString(CultureInfo.InvariantCulture)};filter:brightness({i.Brightness.ToString(CultureInfo.InvariantCulture)}) contrast({i.Contrast.ToString(CultureInfo.InvariantCulture)}) saturate({i.Saturation.ToString(CultureInfo.InvariantCulture)}) hue-rotate({i.HueRotation.ToString(CultureInfo.InvariantCulture)}deg) invert({i.Invert.ToString(CultureInfo.InvariantCulture)}) grayscale({i.Grayscale.ToString(CultureInfo.InvariantCulture)}) sepia({i.Sepia.ToString(CultureInfo.InvariantCulture)}) blur({i.Blur.ToString(CultureInfo.InvariantCulture)}px)";
+        State.SelectElement(element.Id);
+        await InvokeAsync(StateHasChanged);
+        await _contextMenu.ShowAsync(args);
     }
-    private static string Inv(double value) => value.ToString(CultureInfo.InvariantCulture);
+
+    private async Task ShowPageContextMenu(MouseEventArgs args)
+    {
+        State.SelectElement(null);
+        await InvokeAsync(StateHasChanged);
+        await _contextMenu.ShowAsync(args);
+    }
+
+    private Task EditSelectedStory() => State.SelectedElement is TextFrameElement text ? EditTextRequested.InvokeAsync(text.Id) : Task.CompletedTask;
+    private Task ReplaceSelectedPicture() => RequestPicture.InvokeAsync();
+    private Task InsertPicture() => RequestPicture.InvokeAsync();
+    private void ToggleCrop() => State.ToggleCropMode();
+    private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
+    private void PictureFill() => SetImage(image => image.FitInsideFrame = false);
+    private void Copy() => State.CopySelected();
+    private void Paste() => State.Paste();
+    private void Duplicate() => State.DuplicateSelected();
+    private void Delete() => State.DeleteSelected();
+    private void BringToFront() => State.BringToFront();
+    private void BringForward() => State.BringForward();
+    private void SendBackward() => State.SendBackward();
+    private void SendToBack() => State.SendToBack();
+    private void AlignLeft() => State.Align("left");
+    private void AlignCenter() => State.Align("center");
+    private void AlignRight() => State.Align("right");
+    private void AlignTop() => State.Align("top");
+    private void AlignMiddle() => State.Align("middle");
+    private void AlignBottom() => State.Align("bottom");
+    private void ToggleLock() => State.UpdateSelected(element => element.Locked = !element.Locked, allowLocked: true);
+    private void ToggleVisibility() => State.UpdateSelected(element => element.Visible = !element.Visible, allowLocked: true);
+    private void AddText() => State.AddText();
+    private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
+    private void AddPage() => State.AddPage();
+    private void CycleRulerUnit() => State.CycleRulerUnit();
+
+    private void SetImage(Action<ImageFrameElement> update)
+    {
+        if (State.SelectedElement is ImageFrameElement image)
+            State.UpdateSelected(_ => update(image));
+    }
+
+    private void ResetPicture()
+    {
+        SetImage(image =>
+        {
+            image.CropX = 0;
+            image.CropY = 0;
+            image.CropScale = 1;
+            image.ImageRotation = 0;
+            image.Opacity = 1;
+            image.Brightness = 1;
+            image.Contrast = 1;
+            image.Saturation = 1;
+            image.HueRotation = 0;
+            image.Invert = 0;
+            image.Grayscale = 0;
+            image.Sepia = 0;
+            image.Blur = 0;
+            image.FlipHorizontal = false;
+            image.FlipVertical = false;
+            image.FitInsideFrame = false;
+        });
+    }
+
+    private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
+
+    private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
+        ? $"background:{shape.Stroke};height:{Mm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
+        : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";
+
+    private string ImageFrameStyle(ImageFrameElement image)
+    {
+        var radius = image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(image.CornerRadiusMm) : "0";
+        var shadow = image.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
+        return $"border-radius:{radius};border:{Mm(image.BorderWidthMm)} solid {image.BorderColor};box-shadow:{shadow}";
+    }
+
+    private string ImageStyle(ImageFrameElement image)
+    {
+        var fit = image.FitInsideFrame ? "contain" : "cover";
+        var sx = image.FlipHorizontal ? -image.CropScale : image.CropScale;
+        var sy = image.FlipVertical ? -image.CropScale : image.CropScale;
+        return $"object-fit:{fit};transform:translate({Inv(image.CropX)}%,{Inv(image.CropY)}%) rotate({Inv(image.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(image.Opacity)};filter:brightness({Inv(image.Brightness)}) contrast({Inv(image.Contrast)}) saturate({Inv(image.Saturation)}) hue-rotate({Inv(image.HueRotation)}deg) invert({Inv(image.Invert)}) grayscale({Inv(image.Grayscale)}) sepia({Inv(image.Sepia)}) blur({Inv(image.Blur)}px)";
+    }
+
     private string GuideStyle(GuideLine guide) => guide.Orientation == GuideOrientation.Horizontal ? $"top:{Mm(guide.PositionMm)}" : $"left:{Mm(guide.PositionMm)}";
     private string Mm(double mm) => Px(mm * PixelsPerMm);
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string Px(double px) => $"{px.ToString("0.###", CultureInfo.InvariantCulture)}px";
+
     public async ValueTask DisposeAsync()
     {
         _self?.Dispose();

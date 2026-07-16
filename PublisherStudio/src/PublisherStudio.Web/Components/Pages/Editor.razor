@@ -14,20 +14,33 @@
         <span class="modified-label">Modified @State.Document.ModifiedUtc.LocalDateTime.ToString("g")</span>
     </header>
 
-    <PublicationRibbon State="State" OnNew="NewDocument" OnOpen="OpenPublicationPicker" OnSave="SavePublication"
-                       OnPrint="Print" OnInsertPicture="OpenPicturePicker" OnEditStory="OpenStoryEditor" />
+    <PublicationRibbon State="State"
+                       OnNew="NewDocument"
+                       OnOpen="OpenPublicationPicker"
+                       OnSave="SavePublication"
+                       OnPrint="Print"
+                       OnExportPng="ExportPng"
+                       OnExportJpeg="ExportJpeg"
+                       OnExportSvg="ExportSvg"
+                       OnExportWebsite="ExportWebsite"
+                       OnInsertPicture="OpenPicturePicker"
+                       OnEditStory="OpenStoryEditor"
+                       OnFitPage="FitPage" />
 
     <div class="editor-workspace">
         <PageNavigator State="State" />
-        <PageSurface State="State" EditTextRequested="OpenStoryEditorById" />
-        <InspectorPanel State="State" OnEditStory="OpenStoryEditor" />
+        <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" />
+        <InspectorPanel State="State" OnEditStory="OpenStoryEditor" OnReplacePicture="OpenPicturePicker" />
     </div>
 
     <footer class="status-bar">
         <span>Page @(State.Document.Pages.FindIndex(p => p.Id == State.SelectedPageId) + 1) of @State.Document.Pages.Count</span>
         <span>@SelectionStatus</span>
+        <span>@State.CurrentPage.WidthMm.ToString("0.#", CultureInfo.InvariantCulture) × @State.CurrentPage.HeightMm.ToString("0.#", CultureInfo.InvariantCulture) mm</span>
         <label class="zoom-control">Zoom
-            <input type="range" min="0.35" max="2" step="0.05" value="@State.Document.Zoom.ToString(CultureInfo.InvariantCulture)" @onchange="ChangeZoom" />
+            <button type="button" title="Zoom out" @onclick="ZoomOut">−</button>
+            <input type="range" min="0.2" max="4" step="0.05" value="@State.Document.Zoom.ToString(CultureInfo.InvariantCulture)" @oninput="ChangeZoom" />
+            <button type="button" title="Zoom in" @onclick="ZoomIn">+</button>
             <b>@Math.Round(State.Document.Zoom * 100)%</b>
         </label>
     </footer>
@@ -45,9 +58,16 @@
     <div class="toast error" @onclick="() => _error = null">@_error</div>
 }
 
+@if (!string.IsNullOrWhiteSpace(_notice))
+{
+    <div class="toast notice" @onclick="() => _notice = null">@_notice</div>
+}
+
 @code {
+    private PageSurface? _pageSurface;
     private bool _storyEditorVisible;
     private string? _error;
+    private string? _notice;
     private string SelectionStatus => State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
 
     protected override void OnInitialized() => State.Changed += StateChanged;
@@ -56,6 +76,7 @@
     private void NewDocument() => State.NewDocument();
     private async Task OpenPublicationPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "publication-file-input");
     private async Task OpenPicturePicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-file-input");
+
     private async Task SavePublication()
     {
         var json = Files.Serialize(State.Document);
@@ -63,8 +84,49 @@
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
         using var streamReference = new DotNetStreamReference(stream);
         await JS.InvokeVoidAsync("publisherStudio.downloadStream", name, streamReference, "application/json");
+        ShowNotice($"Saved {name}");
     }
+
+    private async Task ExportPng() => await ExportPage("png");
+    private async Task ExportJpeg() => await ExportPage("jpeg");
+    private async Task ExportSvg() => await ExportPage("svg");
+
+    private async Task ExportPage(string format)
+    {
+        try
+        {
+            var fileName = $"{PublicationFileService.SafeFileName(State.Document.Name)}-page-{CurrentPageNumber}.{(format == "jpeg" ? "jpg" : format)}";
+            await JS.InvokeVoidAsync("publisherStudio.exportPage", "publisher-page", fileName, format, State.Document.View.ExportDpi, State.Document.Zoom);
+            ShowNotice($"Exported current page as {format.ToUpperInvariant()}.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
+
+    private async Task ExportWebsite()
+    {
+        try
+        {
+            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".html";
+            await JS.InvokeVoidAsync("publisherStudio.exportWebsite", fileName, State.Document.Name);
+            ShowNotice($"Exported {fileName}");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
+
     private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");
+    private async Task FitPage()
+    {
+        if (_pageSurface is not null)
+            await _pageSurface.FitPageAsync();
+    }
+
+    private int CurrentPageNumber => Math.Max(1, State.Document.Pages.FindIndex(publicationPage => publicationPage.Id == State.SelectedPageId) + 1);
 
     private async Task OpenPublication(InputFileChangeEventArgs args)
     {
@@ -74,7 +136,10 @@
             using var reader = new StreamReader(stream);
             State.Load(await reader.ReadToEndAsync());
         }
-        catch (Exception ex) { ShowError(ex); }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
     }
 
     private async Task InsertPicture(InputFileChangeEventArgs args)
@@ -85,16 +150,32 @@
             var allowed = new[] { "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml" };
             if (!allowed.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
                 throw new InvalidDataException("Unsupported picture format.");
+
             await using var stream = file.OpenReadStream(64 * 1024 * 1024);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
             var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
             if (State.SelectedElement is ImageFrameElement image)
-                State.UpdateSelected(_ => { image.DataUrl = dataUrl; image.AltText = file.Name; image.Name = file.Name; });
+            {
+                State.UpdateSelected(_ =>
+                {
+                    image.DataUrl = dataUrl;
+                    image.AltText = file.Name;
+                    image.Name = file.Name;
+                    image.CropX = 0;
+                    image.CropY = 0;
+                    image.CropScale = 1;
+                });
+            }
             else
+            {
                 State.AddImage(dataUrl, file.Name);
+            }
         }
-        catch (Exception ex) { ShowError(ex); }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
     }
 
     private Task OpenStoryEditorById(Guid id)
@@ -102,40 +183,55 @@
         State.SelectElement(id);
         return OpenStoryEditor();
     }
+
     private Task OpenStoryEditor()
     {
         if (State.SelectedElement is TextFrameElement) _storyEditorVisible = true;
         return Task.CompletedTask;
     }
+
     private Task CloseStoryEditor()
     {
         _storyEditorVisible = false;
         return Task.CompletedTask;
     }
+
     private Task SaveStory((byte[] Content, string PreviewHtml) result)
     {
         State.UpdateTextDocument(result.Content, result.PreviewHtml);
         _storyEditorVisible = false;
         return Task.CompletedTask;
     }
+
     private void RenameDocument(ChangeEventArgs args)
     {
         State.Document.Name = string.IsNullOrWhiteSpace(args.Value?.ToString()) ? "Untitled Publication" : args.Value!.ToString()!;
         State.Document.ModifiedUtc = DateTimeOffset.UtcNow;
         StateChanged();
     }
+
     private void ChangeZoom(ChangeEventArgs args)
     {
         if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var zoom))
-        {
-            State.Document.Zoom = Math.Clamp(zoom, .35, 2);
-            StateChanged();
-        }
+            State.SetZoom(zoom);
     }
+
+    private void ZoomIn() => State.ZoomBy(1.15);
+    private void ZoomOut() => State.ZoomBy(1 / 1.15);
+
     private void ShowError(Exception ex)
     {
         _error = ex.Message;
+        _notice = null;
         StateChanged();
     }
+
+    private void ShowNotice(string message)
+    {
+        _notice = message;
+        _error = null;
+        StateChanged();
+    }
+
     public void Dispose() => State.Changed -= StateChanged;
 }

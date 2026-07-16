@@ -7,16 +7,17 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.0";
+    public string FormatVersion { get; set; } = "1.1";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
+    public PublicationViewSettings View { get; set; } = new();
     public List<PublicationPage> Pages { get; set; } = [];
 
     public static PublicationDocument CreateDefault()
     {
         var document = new PublicationDocument();
-        var page = PublicationPage.CreateA4();
-        page.Elements.Add(new TextFrameElement
+        var publicationPage = PublicationPage.CreateA4();
+        publicationPage.Elements.Add(new TextFrameElement
         {
             Name = "Title",
             X = 20,
@@ -27,7 +28,7 @@ public sealed class PublicationDocument
             DocumentContent = Encoding.UTF8.GetBytes("<!DOCTYPE html><html><body><h1>Your publication</h1><p>Double-click this frame to edit it with DevExpress RichEdit.</p></body></html>"),
             ZIndex = 2
         });
-        page.Elements.Add(new ShapeElement
+        publicationPage.Elements.Add(new ShapeElement
         {
             Name = "Accent",
             Shape = PublicationShape.Rectangle,
@@ -39,9 +40,22 @@ public sealed class PublicationDocument
             Stroke = "transparent",
             ZIndex = 1
         });
-        document.Pages.Add(page);
+        document.Pages.Add(publicationPage);
         return document;
     }
+}
+
+public sealed class PublicationViewSettings
+{
+    public MeasurementUnit RulerUnit { get; set; } = MeasurementUnit.Millimeter;
+    public bool RulersVisible { get; set; } = true;
+    public bool GridVisible { get; set; } = true;
+    public bool GuidesVisible { get; set; } = true;
+    public bool SnapToGrid { get; set; } = true;
+    public bool SnapToGuides { get; set; } = true;
+    public bool SnapToPage { get; set; } = true;
+    public double GridSpacingMm { get; set; } = 5;
+    public int ExportDpi { get; set; } = 150;
 }
 
 public sealed class PublicationPage
@@ -65,6 +79,7 @@ public sealed class GuideLine
 }
 
 public enum GuideOrientation { Horizontal, Vertical }
+public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
 public enum PublicationElementKind { Text, Image, Shape }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ImageMaskShape { Rectangle, RoundedRectangle, Ellipse }
@@ -107,6 +122,7 @@ public sealed class ImageFrameElement : PublicationElement
     public double CropX { get; set; }
     public double CropY { get; set; }
     public double CropScale { get; set; } = 1;
+    public double ImageRotation { get; set; }
     public double Opacity { get; set; } = 1;
     public double Brightness { get; set; } = 1;
     public double Contrast { get; set; } = 1;

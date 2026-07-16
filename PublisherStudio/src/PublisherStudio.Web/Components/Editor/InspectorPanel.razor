@@ -9,19 +9,39 @@
 
     @if (_tab == "layers")
     {
-        <div class="layers-list">
-            @foreach (var item in State.CurrentPage.Elements.OrderByDescending(element => element.ZIndex))
-            {
-                <button class="layer-row @(item.Id == State.SelectedElementId ? "selected" : null)" @onclick="() => State.SelectElement(item.Id)">
-                    <span class="layer-kind">@KindGlyph(item)</span>
-                    <span class="layer-name">@item.Name</span>
-                    <span class="layer-state">@(item.Locked ? "🔒" : "") @(item.Visible ? "" : "◌")</span>
-                </button>
-            }
-            @if (State.CurrentPage.Elements.Count == 0)
-            {
-                <div class="empty-panel">This page has no objects.</div>
-            }
+        <div class="layers-panel">
+            <div class="layer-help"><strong>Objects are layers</strong><span>Higher rows appear in front. Use the eye and lock buttons per object.</span></div>
+            <div class="layer-create-bar">
+                <button title="Add text box" @onclick="AddText">T</button>
+                <button title="Add WordArt" @onclick="AddWordArt">A★</button>
+                <button title="Add picture" @onclick="RequestInsertPicture">▧</button>
+                <button title="Add rectangle" @onclick="AddRectangle">◇</button>
+                <button title="Draw connector: click, then drag between object ports" @onclick="StartConnector">↝</button>
+                <button title="Delete selected layer" disabled="@(State.SelectedElement is null || State.SelectedElement.Locked)" @onclick="State.DeleteSelected">⌫</button>
+            </div>
+            <div class="layer-arrange-bar">
+                <button title="Bring to front" disabled="@(State.SelectedElement is null)" @onclick="State.BringToFront">Front</button>
+                <button title="Bring forward" disabled="@(State.SelectedElement is null)" @onclick="State.BringForward">Up</button>
+                <button title="Send backward" disabled="@(State.SelectedElement is null)" @onclick="State.SendBackward">Down</button>
+                <button title="Send to back" disabled="@(State.SelectedElement is null)" @onclick="State.SendToBack">Back</button>
+            </div>
+            <div class="layers-list">
+                @foreach (var item in State.CurrentPage.Elements.OrderByDescending(element => element.ZIndex))
+                {
+                    <div class="layer-row @(item.Id == State.SelectedElementId ? "selected" : null)">
+                        <button class="layer-select" title="Select @item.Name" @onclick="() => State.SelectElement(item.Id)">
+                            <span class="layer-kind">@KindGlyph(item)</span>
+                            <span class="layer-name">@item.Name</span>
+                        </button>
+                        <button class="layer-toggle" title="@(item.Visible ? "Hide" : "Show")" @onclick="() => ToggleLayerVisibility(item)">@(item.Visible ? "◉" : "○")</button>
+                        <button class="layer-toggle" title="@(item.Locked ? "Unlock" : "Lock")" @onclick="() => ToggleLayerLock(item)">@(item.Locked ? "🔒" : "🔓")</button>
+                    </div>
+                }
+                @if (State.CurrentPage.Elements.Count == 0)
+                {
+                    <div class="empty-panel">This page has no objects.</div>
+                }
+            </div>
         </div>
     }
     else if (_tab == "page")
@@ -46,6 +66,10 @@
                 <label>Background
                     <span class="color-field"><input type="color" value="@UsableColor(State.CurrentPage.Background)" @onchange="ChangePageBackground" /><code>@State.CurrentPage.Background</code></span>
                 </label>
+                <div class="property-button-row">
+                    <DxButton Text="Transparent" Click="SetTransparentPage" />
+                    <DxButton Text="White" Click="SetWhitePage" />
+                </div>
             </section>
 
             <section class="property-section">
@@ -82,7 +106,7 @@
                         <option value="600">600 DPI — high resolution</option>
                     </select>
                 </label>
-                <p class="property-note">PNG and JPEG export the current page. Website export contains every page and embedded image.</p>
+                <p class="property-note">PNG preserves page and image transparency. JPEG always receives a white background.</p>
             </section>
         </div>
     }
@@ -92,14 +116,21 @@
             <section class="property-section">
                 <h3>Object</h3>
                 <label>Name<input value="@element.Name" @onchange="ChangeName" /></label>
-                <div class="property-grid two">
-                    @NumberField("X", element.X, "x")
-                    @NumberField("Y", element.Y, "y")
-                    @NumberField("Width", element.Width, "width")
-                    @NumberField("Height", element.Height, "height")
-                    @NumberField("Rotation", element.Rotation, "rotation")
-                    @NumberField("Layer", element.ZIndex, "z")
-                </div>
+                @if (element is not ConnectorElement)
+                {
+                    <div class="property-grid two">
+                        @NumberField("X", element.X, "x")
+                        @NumberField("Y", element.Y, "y")
+                        @NumberField("Width", element.Width, "width")
+                        @NumberField("Height", element.Height, "height")
+                        @NumberField("Rotation", element.Rotation, "rotation")
+                        @NumberField("Layer", element.ZIndex, "z")
+                    </div>
+                }
+                else
+                {
+                    <div class="property-grid two">@NumberField("Layer", element.ZIndex, "z")</div>
+                }
                 <label class="check-row"><input type="checkbox" checked="@element.Visible" @onchange="ToggleVisible" /> Visible</label>
                 <label class="check-row"><input type="checkbox" checked="@element.Locked" @onchange="ToggleLocked" /> Locked</label>
             </section>
@@ -128,6 +159,44 @@
                     @RangeField("Grayscale", image.Grayscale, 0, 1, .01, "grayscale")
                     @RangeField("Sepia", image.Sepia, 0, 1, .01, "sepia")
                     @RangeField("Blur", image.Blur, 0, 12, .1, "blur")
+                </section>
+
+                <section class="property-section picture-color-tools">
+                    <h3>Recolor and transparency</h3>
+                    <label>Color treatment
+                        <select value="@image.TintMode" @onchange="ChangeTintMode">
+                            <option value="Overlay">Tint overlay</option>
+                            <option value="Recolor">Full recolor</option>
+                        </select>
+                    </label>
+                    <label>Blend mode
+                        <select value="@image.BlendMode" @onchange="ChangeBlendMode">
+                            <option value="Normal">Normal</option>
+                            <option value="Multiply">Multiply</option>
+                            <option value="Screen">Screen</option>
+                            <option value="Darken">Darken</option>
+                            <option value="Lighten">Lighten</option>
+                        </select>
+                    </label>
+                    @ColorField("Tint color", image.TintColor, "tintColor")
+                    @RangeField("Tint strength", image.TintOpacity, 0, 1, .01, "tintOpacity")
+                    <div class="color-preset-row">
+                        <button @onclick="TintBlue">Blue</button>
+                        <button @onclick="TintWarm">Warm</button>
+                        <button @onclick="TintGreen">Green</button>
+                        <button @onclick="ClearTint">Clear</button>
+                    </div>
+                    @ColorField("Color to remove", image.TransparentColor, "transparentColor")
+                    @RangeField("Color tolerance", image.TransparentColorTolerance, 0, 255, 1, "transparentTolerance")
+                    <div class="property-button-row">
+                        <DxButton Text="Make transparent" Click="RequestApplyTransparentColor" />
+                        <DxButton Text="Restore original" Click="RequestRestoreOriginalPicture" />
+                    </div>
+                    <p class="property-note">Recolor and tint preserve the picture's alpha channel. “Make transparent” edits a copy; Restore Original keeps the imported source.</p>
+                </section>
+
+                <section class="property-section">
+                    <h3>Picture frame</h3>
                     <label>Mask
                         <select value="@image.MaskShape" @onchange="ChangeImageMask">
                             <option value="Rectangle">Rectangle</option>
@@ -155,6 +224,79 @@
                     <DxButton Text="Edit story" Click="RequestEditStory" CssClass="wide-button" />
                 </section>
             }
+            else if (element is WordArtElement wordArt)
+            {
+                <section class="property-section wordart-properties">
+                    <h3>WordArt / LogoArt</h3>
+                    <label>Text<textarea rows="3" value="@wordArt.Text" @onchange="ChangeWordArtText"></textarea></label>
+                    <label>Font family<input value="@wordArt.FontFamily" @onchange="ChangeWordArtFont" /></label>
+                    @RangeField("Font size", wordArt.FontSizePt, 8, 180, 1, "wordFontSize")
+                    @RangeField("Letter spacing", wordArt.LetterSpacing, -5, 30, .5, "wordLetterSpacing")
+                    @ColorField("Fill", wordArt.FillColor, "wordFill")
+                    @ColorField("Second color", wordArt.SecondaryColor, "wordSecondary")
+                    @ColorField("Outline", wordArt.OutlineColor, "wordOutline")
+                    @RangeField("Outline width", wordArt.OutlineWidth, 0, 12, .25, "wordOutlineWidth")
+                    @ColorField("3D color", wordArt.ExtrudeColor, "wordExtrude")
+                    @RangeField("3D depth", wordArt.ExtrudeDepth, 0, 18, .5, "wordExtrudeDepth")
+                    <label>Warp
+                        <select value="@wordArt.Warp" @onchange="ChangeWordArtWarp">
+                            <option value="None">Straight</option>
+                            <option value="ArchUp">Arch up</option>
+                            <option value="ArchDown">Arch down</option>
+                            <option value="Wave">Wave</option>
+                        </select>
+                    </label>
+                    <label class="check-row"><input type="checkbox" checked="@wordArt.Bold" @onchange="ToggleWordArtBold" /> Bold</label>
+                    <label class="check-row"><input type="checkbox" checked="@wordArt.Italic" @onchange="ToggleWordArtItalic" /> Italic</label>
+                    <label class="check-row"><input type="checkbox" checked="@wordArt.GradientFill" @onchange="ToggleWordArtGradient" /> Gradient fill</label>
+                    <label class="check-row"><input type="checkbox" checked="@wordArt.ShadowEnabled" @onchange="ToggleWordArtShadow" /> Shadow</label>
+                </section>
+            }
+            else if (element is ConnectorElement connector)
+            {
+                <section class="property-section connector-properties">
+                    <h3>Connector</h3>
+                    <p class="property-note">Drag either round endpoint to another snap port. While no valid port is in range, the preview disappears; releasing restores the original connection.</p>
+                    <label>Path
+                        <select value="@connector.PathKind" @onchange="ChangeConnectorPath">
+                            <option value="Straight">Straight</option>
+                            <option value="Elbow">Elbow</option>
+                            <option value="Curved">Curved</option>
+                        </select>
+                    </label>
+                    <label>Line style
+                        <select value="@connector.DashStyle" @onchange="ChangeConnectorDash">
+                            <option value="Solid">Solid</option>
+                            <option value="Dash">Dashed</option>
+                            <option value="Dot">Dotted</option>
+                        </select>
+                    </label>
+                    @ColorField("Line color", connector.Stroke, "connectorStroke")
+                    @RangeField("Line width", connector.StrokeWidthMm, .15, 6, .05, "connectorWidth")
+                    <div class="property-grid two">
+                        <label>Start marker
+                            <select value="@connector.StartMarker" @onchange="ChangeConnectorStartMarker">
+                                <option value="None">None</option>
+                                <option value="Arrow">Arrow</option>
+                                <option value="Triangle">Triangle</option>
+                                <option value="Diamond">Diamond</option>
+                            </select>
+                        </label>
+                        <label>End marker
+                            <select value="@connector.EndMarker" @onchange="ChangeConnectorEndMarker">
+                                <option value="None">None</option>
+                                <option value="Arrow">Arrow</option>
+                                <option value="Triangle">Triangle</option>
+                                <option value="Diamond">Diamond</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="connector-endpoint-summary">
+                        <span><b>From:</b> @EndpointName(connector.Source)</span>
+                        <span><b>To:</b> @EndpointName(connector.Target)</span>
+                    </div>
+                </section>
+            }
             else if (element is ShapeElement shape)
             {
                 <section class="property-section">
@@ -171,7 +313,7 @@
     {
         <div class="empty-panel selection-help">
             <strong>No object selected</strong>
-            <span>Select a text box, picture, or shape. Page and ruler settings are available on the Page tab.</span>
+            <span>Select a text box, picture, WordArt, or shape. Page and ruler settings are available on the Page tab.</span>
         </div>
     }
 </aside>
@@ -180,6 +322,9 @@
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public EventCallback OnEditStory { get; set; }
     [Parameter] public EventCallback OnReplacePicture { get; set; }
+    [Parameter] public EventCallback OnInsertPicture { get; set; }
+    [Parameter] public EventCallback OnApplyTransparentColor { get; set; }
+    [Parameter] public EventCallback OnRestoreOriginalPicture { get; set; }
 
     private string _tab = "properties";
     private string PropertiesTabClass => _tab == "properties" ? "active" : string.Empty;
@@ -189,16 +334,43 @@
 
     private Task RequestEditStory() => OnEditStory.InvokeAsync();
     private Task RequestReplacePicture() => OnReplacePicture.InvokeAsync();
+    private Task RequestInsertPicture() => OnInsertPicture.InvokeAsync();
+    private Task RequestApplyTransparentColor() => OnApplyTransparentColor.InvokeAsync();
+    private Task RequestRestoreOriginalPicture() => OnRestoreOriginalPicture.InvokeAsync();
     private void ShowProperties() => _tab = "properties";
     private void ShowPage() => _tab = "page";
     private void ShowLayers() => _tab = "layers";
+    private void AddText() => State.AddText();
+    private void AddWordArt() => State.AddWordArt();
+    private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
+    private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
+
+    private void ToggleLayerVisibility(PublicationElement item)
+    {
+        State.SelectElement(item.Id);
+        State.UpdateSelected(element => element.Visible = !element.Visible, allowLocked: true);
+    }
+
+    private void ToggleLayerLock(PublicationElement item)
+    {
+        State.SelectElement(item.Id);
+        State.UpdateSelected(element => element.Locked = !element.Locked, allowLocked: true);
+    }
 
     private static string KindGlyph(PublicationElement item) => item.Kind switch
     {
         PublicationElementKind.Text => "T",
         PublicationElementKind.Image => "▧",
+        PublicationElementKind.WordArt => "A★",
+        PublicationElementKind.Connector => "↝",
         _ => "◇"
     };
+
+    private string EndpointName(ConnectorEndpoint endpoint)
+    {
+        var owner = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == endpoint.ElementId);
+        return $"{owner?.Name ?? "Missing object"} · {endpoint.Anchor}";
+    }
 
     private RenderFragment NumberField(string label, double value, string field) => builder =>
     {
@@ -262,35 +434,15 @@
         if (preset is not null) State.SetPageSize(preset.WidthMm, preset.HeightMm);
     }
 
-    private void ChangePageWidth(ChangeEventArgs args)
-    {
-        if (TryDouble(args, out var value)) State.SetPageSize(value, State.CurrentPage.HeightMm);
-    }
-
-    private void ChangePageHeight(ChangeEventArgs args)
-    {
-        if (TryDouble(args, out var value)) State.SetPageSize(State.CurrentPage.WidthMm, value);
-    }
-
+    private void ChangePageWidth(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.SetPageSize(value, State.CurrentPage.HeightMm); }
+    private void ChangePageHeight(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.SetPageSize(State.CurrentPage.WidthMm, value); }
     private void SwapOrientation() => State.SwapPageOrientation();
     private void ChangePageBackground(ChangeEventArgs args) => State.UpdatePage(publicationPage => publicationPage.Background = args.Value?.ToString() ?? "#ffffff");
-
-    private void ChangeRulerUnit(ChangeEventArgs args)
-    {
-        if (Enum.TryParse<MeasurementUnit>(args.Value?.ToString(), out var unit)) State.SetRulerUnit(unit);
-    }
-
-    private void ChangeGridSpacing(ChangeEventArgs args)
-    {
-        if (TryDouble(args, out var value)) State.SetViewOption(view => view.GridSpacingMm = value);
-    }
-
-    private void ChangeExportDpi(ChangeEventArgs args)
-    {
-        if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
-            State.SetViewOption(view => view.ExportDpi = value);
-    }
-
+    private void SetTransparentPage() => State.UpdatePage(publicationPage => publicationPage.Background = "transparent");
+    private void SetWhitePage() => State.UpdatePage(publicationPage => publicationPage.Background = "#ffffff");
+    private void ChangeRulerUnit(ChangeEventArgs args) { if (Enum.TryParse<MeasurementUnit>(args.Value?.ToString(), out var unit)) State.SetRulerUnit(unit); }
+    private void ChangeGridSpacing(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.SetViewOption(view => view.GridSpacingMm = value); }
+    private void ChangeExportDpi(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) State.SetViewOption(view => view.ExportDpi = value); }
     private void ToggleRulers(ChangeEventArgs args) => State.SetViewOption(view => view.RulersVisible = ReadBool(args));
     private void ToggleGrid(ChangeEventArgs args) => State.SetViewOption(view => view.GridVisible = ReadBool(args));
     private void ToggleGuides(ChangeEventArgs args) => State.SetViewOption(view => view.GuidesVisible = ReadBool(args));
@@ -300,22 +452,17 @@
     private void AddVerticalGuide() => State.AddGuide(GuideOrientation.Vertical);
     private void AddHorizontalGuide() => State.AddGuide(GuideOrientation.Horizontal);
     private void ClearGuides() => State.ClearGuides();
-
     private void ChangeName(ChangeEventArgs args) => State.UpdateSelected(element => element.Name = args.Value?.ToString() ?? element.Name);
     private void ToggleVisible(ChangeEventArgs args) => State.UpdateSelected(element => element.Visible = ReadBool(args), allowLocked: true);
     private void ToggleLocked(ChangeEventArgs args) => State.UpdateSelected(element => element.Locked = ReadBool(args), allowLocked: true);
-
-    private void ChangeAltText(ChangeEventArgs args)
-    {
-        if (State.SelectedElement is ImageFrameElement image)
-            State.UpdateSelected(_ => image.AltText = args.Value?.ToString() ?? string.Empty);
-    }
-
-    private void ChangeImageMask(ChangeEventArgs args)
-    {
-        if (State.SelectedElement is ImageFrameElement image && Enum.TryParse<ImageMaskShape>(args.Value?.ToString(), out var mask))
-            State.UpdateSelected(_ => image.MaskShape = mask);
-    }
+    private void ChangeAltText(ChangeEventArgs args) { if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => image.AltText = args.Value?.ToString() ?? string.Empty); }
+    private void ChangeImageMask(ChangeEventArgs args) { if (State.SelectedElement is ImageFrameElement image && Enum.TryParse<ImageMaskShape>(args.Value?.ToString(), out var mask)) State.UpdateSelected(_ => image.MaskShape = mask); }
+    private void ChangeTintMode(ChangeEventArgs args) { if (State.SelectedElement is ImageFrameElement image && Enum.TryParse<ImageTintMode>(args.Value?.ToString(), out var mode)) State.UpdateSelected(_ => image.TintMode = mode); }
+    private void ChangeBlendMode(ChangeEventArgs args) { if (State.SelectedElement is ImageFrameElement image && Enum.TryParse<ImageBlendMode>(args.Value?.ToString(), out var mode)) State.UpdateSelected(_ => image.BlendMode = mode); }
+    private void ChangeConnectorPath(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector && Enum.TryParse<ConnectorPathKind>(args.Value?.ToString(), out var value)) State.UpdateSelected(_ => connector.PathKind = value); }
+    private void ChangeConnectorDash(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector && Enum.TryParse<ConnectorDashStyle>(args.Value?.ToString(), out var value)) State.UpdateSelected(_ => connector.DashStyle = value); }
+    private void ChangeConnectorStartMarker(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector && Enum.TryParse<ConnectorMarker>(args.Value?.ToString(), out var value)) State.UpdateSelected(_ => connector.StartMarker = value); }
+    private void ChangeConnectorEndMarker(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector && Enum.TryParse<ConnectorMarker>(args.Value?.ToString(), out var value)) State.UpdateSelected(_ => connector.EndMarker = value); }
 
     private void ToggleImageShadow(ChangeEventArgs args) => SetImage(image => image.ShadowEnabled = ReadBool(args));
     private void ToggleFlipHorizontal(ChangeEventArgs args) => SetImage(image => image.FlipHorizontal = ReadBool(args));
@@ -323,6 +470,19 @@
     private void ToggleCrop() => State.ToggleCropMode();
     private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
     private void PictureFill() => SetImage(image => image.FitInsideFrame = false);
+    private void ApplyTintPreset(string color) => SetImage(image => { image.TintColor = color; image.TintOpacity = .55; });
+    private void TintBlue() => ApplyTintPreset("#2f75b5");
+    private void TintWarm() => ApplyTintPreset("#d97706");
+    private void TintGreen() => ApplyTintPreset("#16a34a");
+    private void ClearTint() => SetImage(image => image.TintOpacity = 0);
+
+    private void ChangeWordArtText(ChangeEventArgs args) => SetWordArt(item => item.Text = args.Value?.ToString() ?? string.Empty);
+    private void ChangeWordArtFont(ChangeEventArgs args) => SetWordArt(item => item.FontFamily = args.Value?.ToString() ?? "Arial Black");
+    private void ChangeWordArtWarp(ChangeEventArgs args) { if (Enum.TryParse<WordArtWarp>(args.Value?.ToString(), out var warp)) SetWordArt(item => item.Warp = warp); }
+    private void ToggleWordArtBold(ChangeEventArgs args) => SetWordArt(item => item.Bold = ReadBool(args));
+    private void ToggleWordArtItalic(ChangeEventArgs args) => SetWordArt(item => item.Italic = ReadBool(args));
+    private void ToggleWordArtGradient(ChangeEventArgs args) => SetWordArt(item => item.GradientFill = ReadBool(args));
+    private void ToggleWordArtShadow(ChangeEventArgs args) => SetWordArt(item => item.ShadowEnabled = ReadBool(args));
 
     private void ChangeColor(string field, ChangeEventArgs args)
     {
@@ -330,25 +490,22 @@
         State.UpdateSelected(element =>
         {
             if (element is ImageFrameElement image && field == "imageBorder") image.BorderColor = value;
+            if (element is ImageFrameElement tint && field == "tintColor") tint.TintColor = value;
+            if (element is ImageFrameElement transparent && field == "transparentColor") transparent.TransparentColor = value;
             if (element is TextFrameElement text && field == "textBackground") text.Background = value;
             if (element is TextFrameElement textBorder && field == "textBorder") textBorder.BorderColor = value;
             if (element is ShapeElement shape && field == "shapeFill") shape.Fill = value;
             if (element is ShapeElement shapeStroke && field == "shapeStroke") shapeStroke.Stroke = value;
+            if (element is WordArtElement word && field == "wordFill") word.FillColor = value;
+            if (element is WordArtElement wordSecondary && field == "wordSecondary") wordSecondary.SecondaryColor = value;
+            if (element is WordArtElement wordOutline && field == "wordOutline") wordOutline.OutlineColor = value;
+            if (element is WordArtElement wordExtrude && field == "wordExtrude") wordExtrude.ExtrudeColor = value;
+            if (element is ConnectorElement connector && field == "connectorStroke") connector.Stroke = value;
         });
     }
 
-    private void ChangeNumber(string field, ChangeEventArgs args)
-    {
-        if (!TryDouble(args, out var value)) return;
-        State.UpdateSelected(element => ApplyNumber(element, field, value));
-    }
-
-    private void ChangeNumberLive(string field, ChangeEventArgs args)
-    {
-        if (!TryDouble(args, out var value)) return;
-        State.UpdateSelectedLive(field, element => ApplyNumber(element, field, value));
-    }
-
+    private void ChangeNumber(string field, ChangeEventArgs args) { if (TryDouble(args, out var value)) State.UpdateSelected(element => ApplyNumber(element, field, value)); }
+    private void ChangeNumberLive(string field, ChangeEventArgs args) { if (TryDouble(args, out var value)) State.UpdateSelectedLive(field, element => ApplyNumber(element, field, value)); }
     private void EndLiveEdit(ChangeEventArgs _) => State.EndLiveEdit();
 
     private static void ApplyNumber(PublicationElement element, string field, double value)
@@ -362,7 +519,6 @@
             case "rotation": element.Rotation = value; return;
             case "z": element.ZIndex = (int)Math.Round(value); return;
         }
-
         if (element is ImageFrameElement image)
         {
             switch (field)
@@ -380,48 +536,44 @@
                 case "blur": image.Blur = value; break;
                 case "corner": image.CornerRadiusMm = value; break;
                 case "imageBorderWidth": image.BorderWidthMm = value; break;
+                case "tintOpacity": image.TintOpacity = value; break;
+                case "transparentTolerance": image.TransparentColorTolerance = (int)Math.Round(value); break;
             }
         }
-
         if (element is TextFrameElement text)
         {
             if (field == "padding") text.PaddingMm = value;
             if (field == "textBorderWidth") text.BorderWidth = value;
         }
-
         if (element is ShapeElement shape)
         {
             if (field == "shapeStrokeWidth") shape.StrokeWidth = value;
             if (field == "shapeCorner") shape.CornerRadiusMm = value;
         }
+        if (element is ConnectorElement connector)
+        {
+            if (field == "connectorWidth") connector.StrokeWidthMm = value;
+        }
+        if (element is WordArtElement word)
+        {
+            if (field == "wordFontSize") word.FontSizePt = value;
+            if (field == "wordLetterSpacing") word.LetterSpacing = value;
+            if (field == "wordOutlineWidth") word.OutlineWidth = value;
+            if (field == "wordExtrudeDepth") word.ExtrudeDepth = value;
+        }
     }
 
-    private void SetImage(Action<ImageFrameElement> update)
-    {
-        if (State.SelectedElement is ImageFrameElement image)
-            State.UpdateSelected(_ => update(image));
-    }
+    private void SetImage(Action<ImageFrameElement> update) { if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); }
+    private void SetWordArt(Action<WordArtElement> update) { if (State.SelectedElement is WordArtElement item) State.UpdateSelected(_ => update(item)); }
 
     private void ResetPicture()
     {
         SetImage(image =>
         {
-            image.CropX = 0;
-            image.CropY = 0;
-            image.CropScale = 1;
-            image.ImageRotation = 0;
-            image.Opacity = 1;
-            image.Brightness = 1;
-            image.Contrast = 1;
-            image.Saturation = 1;
-            image.HueRotation = 0;
-            image.Invert = 0;
-            image.Grayscale = 0;
-            image.Sepia = 0;
-            image.Blur = 0;
-            image.FlipHorizontal = false;
-            image.FlipVertical = false;
-            image.FitInsideFrame = false;
+            image.CropX = 0; image.CropY = 0; image.CropScale = 1; image.ImageRotation = 0;
+            image.Opacity = 1; image.Brightness = 1; image.Contrast = 1; image.Saturation = 1;
+            image.HueRotation = 0; image.Invert = 0; image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
+            image.FlipHorizontal = false; image.FlipVertical = false; image.FitInsideFrame = false; image.TintOpacity = 0;
         });
     }
 
@@ -429,5 +581,5 @@
     private static bool ReadBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
     private static bool Nearly(double left, double right) => Math.Abs(left - right) < .05;
     private static string Inv(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
-    private static string UsableColor(string value) => value.StartsWith('#') ? value : "#ffffff";
+    private static string UsableColor(string value) => value.StartsWith('#') && value.Length >= 7 ? value[..7] : "#ffffff";
 }

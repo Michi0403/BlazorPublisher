@@ -1,4 +1,5 @@
 @namespace PublisherStudio.Components.Editor
+@inject IJSRuntime JS
 
 @if (Visible && TextFrame is not null)
 {
@@ -8,15 +9,54 @@
                 <div><strong>Edit story</strong><span>@TextFrame.Name</span></div>
                 <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
             </header>
+
+            <div class="story-command-bar" aria-label="Story fields and export">
+                <strong>Quick fields</strong>
+                <button type="button" @onclick="InsertDateField">Date</button>
+                <button type="button" @onclick="InsertTimeField">Time</button>
+                <button type="button" @onclick="InsertPageField">Page</button>
+                <button type="button" @onclick="InsertPageCountField">Pages</button>
+                <button type="button" @onclick="InsertPublicationField">Publication</button>
+                <button type="button" @onclick="InsertPageNameField">Page name</button>
+                <button type="button" @onclick="InsertStoryNameField">Story name</button>
+                <span class="story-command-separator"></span>
+                <button type="button" @onclick="UpdateFields">Update fields</button>
+                <button type="button" @onclick="ShowFieldResults">Results</button>
+                <button type="button" @onclick="ShowFieldCodes">Codes</button>
+                <span class="story-command-separator"></span>
+                <strong>Download</strong>
+                <button type="button" @onclick="ExportDocx">DOCX</button>
+                <button type="button" @onclick="ExportRtf">RTF</button>
+                <button type="button" @onclick="ExportText">TXT</button>
+                <button type="button" @onclick="ExportHtml">HTML</button>
+                <button type="button" @onclick="PrintStory">Print</button>
+            </div>
+
             <div class="story-editor-host">
-                <DxRichEdit @ref="_richEdit"
-                            DocumentFormat="DocumentFormat.Html"
-                            DocumentContent="@_content"
-                            DocumentContentChanged="ContentChanged"
-                            CssClass="story-rich-edit" />
+                <DxRichEdit @key="_editorRevision" @ref="_richEdit"
+                            DocumentFormat="@_documentFormat"
+                            @bind-DocumentContent="_content"
+                            @bind-Selection="_selection"
+                            BarMode="BarMode.Ribbon"
+                            ViewType="ViewType.PrintLayout"
+                            ReadOnly="false"
+                            HorizontalRulerVisible="true"
+                            CssClass="story-rich-edit">
+                    <MailMergeSettings>
+                        <DxMailMergeSettings Data="@_fieldData" ViewMergedData="true" ActiveRecord="0" />
+                    </MailMergeSettings>
+                </DxRichEdit>
+                @if (_upgradingLegacyStory)
+                {
+                    <div class="story-upgrade-notice">Upgrading this legacy HTML story to DOCX so page layout, fonts, fields, colors, headers, and footers work correctly…</div>
+                }
             </div>
             <footer>
-                <span>Rich text is stored inside the publication as HTML bytes.</span>
+                <span>Stories are stored as Office Open XML (DOCX). The canvas preview is generated as HTML.</span>
+                @if (!string.IsNullOrWhiteSpace(_error))
+                {
+                    <strong class="story-error">@_error</strong>
+                }
                 <div>
                     <DxButton Text="Cancel" Click="Cancel" />
                     <DxButton Text="Apply to frame" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
@@ -29,29 +69,171 @@
 @code {
     [Parameter] public bool Visible { get; set; }
     [Parameter] public TextFrameElement? TextFrame { get; set; }
-    [Parameter] public EventCallback<(byte[] Content, string PreviewHtml)> Saved { get; set; }
+    [Parameter] public string PublicationName { get; set; } = "Publication";
+    [Parameter] public string PageName { get; set; } = "Page";
+    [Parameter] public int PageNumber { get; set; } = 1;
+    [Parameter] public int PageCount { get; set; } = 1;
+    [Parameter] public EventCallback<(byte[] Content, string PreviewHtml, StoryStorageFormat Format)> Saved { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private DxRichEdit? _richEdit;
+    private Selection _selection = default!;
     private byte[] _content = [];
     private Guid? _loadedId;
+    private DocumentFormat _documentFormat = DocumentFormat.OpenXml;
+    private int _editorRevision;
+    private bool _legacyConversionPending;
+    private bool _upgradingLegacyStory;
+    private string? _error;
+    private IReadOnlyList<PublicationFieldRecord> _fieldData = [];
 
     protected override void OnParametersSet()
     {
         if (Visible && TextFrame is not null && _loadedId != TextFrame.Id)
         {
+            _editorRevision++;
             _content = TextFrame.DocumentContent.ToArray();
+            _documentFormat = TextFrame.StoryFormat == StoryStorageFormat.Html ? DocumentFormat.Html : DocumentFormat.OpenXml;
+            _legacyConversionPending = TextFrame.StoryFormat == StoryStorageFormat.Html;
             _loadedId = TextFrame.Id;
+            _error = null;
+            _fieldData =
+            [
+                new PublicationFieldRecord
+                {
+                    PublicationName = PublicationName,
+                    PageName = PageName,
+                    StoryName = TextFrame.Name,
+                    PageNumber = PageNumber,
+                    PageCount = PageCount,
+                    CurrentDate = DateTime.Today,
+                    CurrentDateTime = DateTime.Now
+                }
+            ];
         }
-        if (!Visible) _loadedId = null;
+
+        if (!Visible)
+        {
+            _loadedId = null;
+            _legacyConversionPending = false;
+            _upgradingLegacyStory = false;
+            _error = null;
+        }
     }
 
-    private void ContentChanged(byte[] content) => _content = content;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_legacyConversionPending || _richEdit is null || _upgradingLegacyStory) return;
+
+        _upgradingLegacyStory = true;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
+            _documentFormat = DocumentFormat.OpenXml;
+            _content = openXml;
+            _legacyConversionPending = false;
+            _editorRevision++;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Legacy story conversion failed: {ex.Message}";
+        }
+        finally
+        {
+            _upgradingLegacyStory = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private async Task Apply()
     {
-        if (_richEdit is null) return;
-        await _richEdit.SaveDocumentAsync();
-        await Saved.InvokeAsync((_content, PublicationFileService.ExtractHtmlBody(_content)));
+        if (_richEdit is null || _upgradingLegacyStory) return;
+        _error = null;
+        try
+        {
+            await _richEdit.SaveDocumentAsync();
+            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
+            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
+            await Saved.InvokeAsync((openXml, PublicationFileService.ExtractHtmlBody(html), StoryStorageFormat.OpenXml));
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
     }
+
+    private async Task InsertField(string code)
+    {
+        if (_richEdit is null || _selection is null) return;
+        try
+        {
+            var field = await _selection.ActiveSubDocument.Fields.CreateAsync(_selection.CaretPosition, code);
+            await _selection.ActiveSubDocument.Fields.UpdateAsync(field);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private Task InsertDateField() => InsertField("DATE");
+    private Task InsertTimeField() => InsertField("TIME");
+    private Task InsertPageField() => InsertField("PAGE");
+    private Task InsertPageCountField() => InsertField("NUMPAGES");
+    private Task InsertPublicationField() => InsertField("MERGEFIELD PublicationName");
+    private Task InsertPageNameField() => InsertField("MERGEFIELD PageName");
+    private Task InsertStoryNameField() => InsertField("MERGEFIELD StoryName");
+
+    private async Task UpdateFields()
+    {
+        if (_richEdit is null) return;
+        try { await _richEdit.DocumentAPI.Fields.UpdateAllAsync(true); }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private async Task ShowFieldCodes()
+    {
+        if (_richEdit is null) return;
+        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldCodesAsync(true); }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private async Task ShowFieldResults()
+    {
+        if (_richEdit is null) return;
+        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldResultsAsync(true); }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private Task ExportDocx() => ExportStory(DocumentFormat.OpenXml, ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    private Task ExportRtf() => ExportStory(DocumentFormat.Rtf, ".rtf", "application/rtf");
+    private Task ExportText() => ExportStory(DocumentFormat.PlainText, ".txt", "text/plain;charset=utf-8");
+    private Task ExportHtml() => ExportStory(DocumentFormat.Html, ".html", "text/html;charset=utf-8");
+
+    private async Task ExportStory(DocumentFormat format, string extension, string mimeType)
+    {
+        if (_richEdit is null || TextFrame is null) return;
+        try
+        {
+            var content = await _richEdit.ExportDocumentAsync(format);
+            var baseName = PublicationFileService.SafeFileName($"{PublicationName}-{TextFrame.Name}");
+            await using var stream = new MemoryStream(content);
+            using var reference = new DotNetStreamReference(stream);
+            await JS.InvokeVoidAsync("publisherStudio.downloadStream", baseName + extension, reference, mimeType);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task PrintStory()
+    {
+        if (_richEdit is null) return;
+        try { await _richEdit.PrintDocumentAsync(); }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
     private Task Cancel() => Cancelled.InvokeAsync();
 }

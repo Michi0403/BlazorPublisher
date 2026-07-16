@@ -12,7 +12,16 @@
             <button class="page-thumbnail @(publicationPage.Id == State.SelectedPageId ? "selected" : null)" @onclick="() => State.SelectPage(publicationPage.Id)">
                 <span class="page-number">@(index + 1)</span>
                 <span class="mini-page" style="@MiniPageStyle(publicationPage)">
-                    @foreach (var item in publicationPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
+                    @foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>().Where(e => e.Visible).OrderBy(e => e.ZIndex))
+                    {
+                        if (ConnectorGeometry.TryResolve(publicationPage, connector, out var sourcePoint, out var targetPoint))
+                        {
+                            <svg class="mini-connectors" viewBox="0 0 @Inv(publicationPage.WidthMm) @Inv(publicationPage.HeightMm)" preserveAspectRatio="none">
+                                <path d="@ConnectorGeometry.Path(connector, sourcePoint, targetPoint)" fill="none" stroke="@connector.Stroke" stroke-width="@Inv(Math.Max(.8, connector.StrokeWidthMm * 2))"></path>
+                            </svg>
+                        }
+                    }
+                    @foreach (var item in publicationPage.Elements.Where(e => e.Visible && e is not ConnectorElement).OrderBy(e => e.ZIndex))
                     {
                         <span class="mini-element mini-@item.Kind.ToString().ToLowerInvariant()" style="@MiniElementStyle(item, publicationPage)"></span>
                     }

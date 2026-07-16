@@ -22,6 +22,7 @@ public sealed class EditorStateService
     public Guid SelectedPageId { get; private set; }
     public Guid? SelectedElementId { get; private set; }
     public bool CropMode { get; private set; }
+    public ConnectorToolKind ConnectorTool { get; private set; }
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
     public bool CanPaste => !string.IsNullOrWhiteSpace(_clipboard);
@@ -34,6 +35,7 @@ public sealed class EditorStateService
         SelectedPageId = Document.Pages[0].Id;
         SelectedElementId = null;
         CropMode = false;
+        ConnectorTool = ConnectorToolKind.None;
         _undo.Clear();
         _redo.Clear();
         _liveEditKey = null;
@@ -46,6 +48,7 @@ public sealed class EditorStateService
         SelectedPageId = Document.Pages[0].Id;
         SelectedElementId = null;
         CropMode = false;
+        ConnectorTool = ConnectorToolKind.None;
         _undo.Clear();
         _redo.Clear();
         _liveEditKey = null;
@@ -58,6 +61,7 @@ public sealed class EditorStateService
         SelectedPageId = id;
         SelectedElementId = null;
         CropMode = false;
+        ConnectorTool = ConnectorToolKind.None;
         EndLiveEdit();
         Notify(false);
     }
@@ -83,7 +87,8 @@ public sealed class EditorStateService
             Height = 45,
             ZIndex = NextZ(),
             PreviewHtml = "<p style=\"margin:0;font:12pt Segoe UI\">New text box</p>",
-            DocumentContent = System.Text.Encoding.UTF8.GetBytes("<!DOCTYPE html><html><body><p>New text box</p></body></html>")
+            DocumentContent = RichTextDocumentFactory.CreateOpenXml("New text box"),
+            StoryFormat = StoryStorageFormat.OpenXml
         };
         CurrentPage.Elements.Add(element);
         SelectedElementId = element.Id;
@@ -98,6 +103,7 @@ public sealed class EditorStateService
         {
             Name = NextName(name),
             DataUrl = dataUrl,
+            OriginalDataUrl = dataUrl,
             AltText = name,
             X = 30,
             Y = 35,
@@ -109,6 +115,77 @@ public sealed class EditorStateService
         SelectedElementId = element.Id;
         Notify();
         return element;
+    }
+
+
+    public WordArtElement AddWordArt()
+    {
+        Capture();
+        var element = new WordArtElement
+        {
+            Name = NextName("WordArt"),
+            Text = "Your headline",
+            X = 25,
+            Y = 28,
+            Width = 120,
+            Height = 35,
+            ZIndex = NextZ()
+        };
+        CurrentPage.Elements.Add(element);
+        SelectedElementId = element.Id;
+        Notify();
+        return element;
+    }
+
+    public ConnectorElement? AddConnector(Guid sourceElementId, ConnectorAnchor sourceAnchor, Guid targetElementId, ConnectorAnchor targetAnchor, ConnectorMarker endMarker = ConnectorMarker.Arrow)
+    {
+        if (sourceElementId == targetElementId) return null;
+        var source = CurrentPage.Elements.FirstOrDefault(item => item.Id == sourceElementId && item is not ConnectorElement);
+        var target = CurrentPage.Elements.FirstOrDefault(item => item.Id == targetElementId && item is not ConnectorElement);
+        if (source is null || target is null) return null;
+        Capture();
+        var connector = new ConnectorElement
+        {
+            Name = NextName(endMarker == ConnectorMarker.None ? "Connector" : "Arrow Connector"),
+            Source = new ConnectorEndpoint { ElementId = sourceElementId, Anchor = sourceAnchor },
+            Target = new ConnectorEndpoint { ElementId = targetElementId, Anchor = targetAnchor },
+            EndMarker = endMarker,
+            PathKind = ConnectorPathKind.Curved,
+            ZIndex = NextZ()
+        };
+        CurrentPage.Elements.Add(connector);
+        SelectedElementId = connector.Id;
+        Notify();
+        return connector;
+    }
+
+    public void ReconnectConnector(Guid connectorId, bool sourceEnd, Guid elementId, ConnectorAnchor anchor)
+    {
+        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+        var target = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
+        if (connector is null || target is null || connector.Locked) return;
+        var otherId = sourceEnd ? connector.Target.ElementId : connector.Source.ElementId;
+        if (otherId == elementId) return;
+        Capture();
+        var endpoint = sourceEnd ? connector.Source : connector.Target;
+        endpoint.ElementId = elementId;
+        endpoint.Anchor = anchor;
+        SelectedElementId = connector.Id;
+        Notify();
+    }
+
+    public void SetConnectorTool(ConnectorToolKind tool)
+    {
+        ConnectorTool = ConnectorTool == tool ? ConnectorToolKind.None : tool;
+        CropMode = false;
+        Notify(false);
+    }
+
+    public void CancelActiveTool()
+    {
+        ConnectorTool = ConnectorToolKind.None;
+        CropMode = false;
+        Notify(false);
     }
 
     public ShapeElement AddShape(PublicationShape shape)
@@ -153,7 +230,13 @@ public sealed class EditorStateService
         var clone = ClonePage(CurrentPage);
         clone.Id = Guid.NewGuid();
         clone.Name = $"Page {Document.Pages.Count + 1}";
-        foreach (var item in clone.Elements) item.Id = Guid.NewGuid();
+        var idMap = clone.Elements.ToDictionary(item => item.Id, _ => Guid.NewGuid());
+        foreach (var item in clone.Elements) item.Id = idMap[item.Id];
+        foreach (var connector in clone.Elements.OfType<ConnectorElement>())
+        {
+            if (idMap.TryGetValue(connector.Source.ElementId, out var sourceId)) connector.Source.ElementId = sourceId;
+            if (idMap.TryGetValue(connector.Target.ElementId, out var targetId)) connector.Target.ElementId = targetId;
+        }
         foreach (var guide in clone.Guides) guide.Id = Guid.NewGuid();
         Document.Pages.Insert(Document.Pages.IndexOf(CurrentPage) + 1, clone);
         SelectedPageId = clone.Id;
@@ -178,6 +261,9 @@ public sealed class EditorStateService
         if (element is null || element.Locked) return;
         Capture();
         CurrentPage.Elements.Remove(element);
+        if (element is not ConnectorElement)
+            CurrentPage.Elements.RemoveAll(item => item is ConnectorElement connector &&
+                (connector.Source.ElementId == element.Id || connector.Target.ElementId == element.Id));
         SelectedElementId = null;
         CropMode = false;
         Notify();
@@ -198,6 +284,9 @@ public sealed class EditorStateService
         var wrapper = _files.Deserialize(_clipboard);
         var source = wrapper.Pages.SelectMany(item => item.Elements).FirstOrDefault();
         if (source is null) return;
+        if (source is ConnectorElement connectorSource &&
+            (!CurrentPage.Elements.Any(item => item.Id == connectorSource.Source.ElementId) ||
+             !CurrentPage.Elements.Any(item => item.Id == connectorSource.Target.ElementId))) return;
         Capture();
         var clone = CloneElement(source);
         clone.Id = Guid.NewGuid();
@@ -229,7 +318,7 @@ public sealed class EditorStateService
     public void CommitBounds(Guid id, double x, double y, double width, double height)
     {
         var element = CurrentPage.Elements.FirstOrDefault(e => e.Id == id);
-        if (element is null || element.Locked) return;
+        if (element is null || element.Locked || element is ConnectorElement) return;
         Capture();
         element.Width = Math.Max(2, Math.Min(width, CurrentPage.WidthMm * 2));
         element.Height = Math.Max(2, Math.Min(height, CurrentPage.HeightMm * 2));
@@ -292,12 +381,13 @@ public sealed class EditorStateService
 
     public void SwapPageOrientation() => SetPageSize(CurrentPage.HeightMm, CurrentPage.WidthMm);
 
-    public void UpdateTextDocument(byte[] content, string previewHtml)
+    public void UpdateTextDocument(byte[] content, string previewHtml, StoryStorageFormat format = StoryStorageFormat.OpenXml)
     {
         if (SelectedElement is not TextFrameElement text || text.Locked) return;
         Capture();
         text.DocumentContent = content;
         text.PreviewHtml = PublicationFileService.SanitizePreviewHtml(previewHtml);
+        text.StoryFormat = format;
         Notify();
     }
 
@@ -424,6 +514,7 @@ public sealed class EditorStateService
         SelectedPageId = Document.Pages[Math.Min(selectedPageIndex, Document.Pages.Count - 1)].Id;
         SelectedElementId = null;
         CropMode = false;
+        ConnectorTool = ConnectorToolKind.None;
         _liveEditKey = null;
         Notify();
     }

@@ -1,25 +1,28 @@
 # Validation status
 
-The source tree was checked without restoring proprietary packages.
+The v0.3 source tree was checked without restoring proprietary packages.
 
 ## Completed checks
 
 - JSON configuration files parse successfully.
 - Project files are valid XML.
 - JavaScript passes `node --check`.
-- C# and Razor files pass lexical delimiter scans.
-- Razor component tags pass a structural balance scan.
+- C# files and Razor `@code` blocks pass lexical delimiter scans.
 - Direct `@page.` Razor identifier collisions are absent.
-- CSS delimiter structure is balanced.
 - The dependency scan finds only `DevExpress.Blazor` and `DevExpress.Blazor.RichEdit`, both constrained to `25.2.*`.
-- No GIMP/Inkscape source, package, executable, or asset is included.
+- Connector references are normalized during publication load; broken/self-referencing connectors are discarded.
+- Export clones remove guides, selection handles, connector ports/endpoints/hit areas, crop overlays, and temporary connector previews.
+- No GIMP, Inkscape, or Blazor.Diagrams source/package/binary/asset is included.
 - No `bin`, `obj`, `.vs`, compiled assemblies, symbols, DevExpress binaries, license keys, databases, or AI/Ollama/EF/WinUI dependencies are included.
+- The final ZIP is tested with the system archive verifier and accompanied by a SHA-256 checksum.
 
-## Not completed in the generation environment
+## Browser raster test limitation
 
-A real `dotnet restore` and `dotnet build` could not be run because this environment has neither the .NET 10 SDK nor access to the licensed DevExpress package feed. Static validation cannot replace your compiler.
+A headless Chromium smoke test was attempted, but the container's Chromium process could not complete because its desktop/DBus environment is unavailable. PNG export therefore has code-level validation only here. The implementation now uses three rasterization paths in order: `createImageBitmap`, SVG object URL, and SVG data URL.
 
-Run the authoritative validation on a machine with the DevExpress feed configured:
+## Authoritative local validation
+
+A real `dotnet restore` and `dotnet build` could not be run because this environment has neither the .NET 10 SDK nor access to the licensed DevExpress package feed. Run:
 
 ```powershell
 dotnet restore PublisherStudio.sln
@@ -27,4 +30,12 @@ dotnet build PublisherStudio.sln -c Debug
 dotnet run --project src/PublisherStudio.Web
 ```
 
-When reporting a failure, include the first compiler error and the affected source line. Later errors are often cascading Razor diagnostics.
+Recommended smoke tests:
+
+1. Open an older v0.2 publication and edit a story; verify font, font size, Page Layout, and DOCX/RTF/TXT/HTML downloads.
+2. Import a transparent PNG over a colored shape; verify alpha, tint overlay, full recolor, and PNG export.
+3. Set the page background to Transparent and export PNG; verify page alpha. Export JPEG and verify its white background.
+4. Draw an arrow connector between two objects, move/resize/rotate the objects, then reconnect either endpoint.
+5. Resize and collapse both side panes and verify the rulers and canvas consume the remaining workspace.
+
+When reporting a compiler failure, include the first compiler error and affected source line; later Razor errors are commonly cascading diagnostics.

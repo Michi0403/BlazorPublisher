@@ -2,13 +2,22 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden")"
+<div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null)"
      tabindex="0" @onclick="ClearSelection" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
     @if (State.Document.View.RulersVisible)
     {
         <button class="corner-ruler" title="Change ruler unit" @onclick:stopPropagation="true" @onclick="CycleRulerUnit">@UnitLabel</button>
         <canvas id="publisher-horizontal-ruler" class="ruler-canvas horizontal-ruler" aria-label="Horizontal ruler"></canvas>
         <canvas id="publisher-vertical-ruler" class="ruler-canvas vertical-ruler" aria-label="Vertical ruler"></canvas>
+    }
+
+    @if (State.ConnectorTool != ConnectorToolKind.None)
+    {
+        <div class="connector-tool-hint" @onclick:stopPropagation="true">
+            <strong>@(State.ConnectorTool == ConnectorToolKind.Arrow ? "Arrow connector" : "Connector")</strong>
+            <span>Drag from a round object port to another port. Press Esc to stop.</span>
+            <button type="button" @onclick="State.CancelActiveTool">Done</button>
+        </div>
     }
 
     <div id="publisher-scroll-area" class="page-scroll-area">
@@ -29,7 +38,40 @@
                 }
             }
 
-            @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
+            @foreach (var connector in State.CurrentPage.Elements.OfType<ConnectorElement>().Where(e => e.Visible).OrderBy(e => e.ZIndex))
+            {
+                if (ConnectorGeometry.TryResolve(State.CurrentPage, connector, out var sourcePoint, out var targetPoint))
+                {
+                    var connectorPath = ConnectorGeometry.Path(connector, sourcePoint, targetPoint);
+                    <svg @key="connector.Id" class="pub-connector @(connector.Id == State.SelectedElementId ? "selected" : null) @(connector.Locked ? "locked" : null)"
+                         style="z-index:@connector.ZIndex"
+                         viewBox="0 0 @Inv(State.CurrentPage.WidthMm) @Inv(State.CurrentPage.HeightMm)"
+                         preserveAspectRatio="none"
+                         data-connector-id="@connector.Id"
+                         data-source-element-id="@connector.Source.ElementId" data-source-anchor="@connector.Source.Anchor"
+                         data-target-element-id="@connector.Target.ElementId" data-target-anchor="@connector.Target.Anchor"
+                         data-path-kind="@connector.PathKind" data-start-marker="@connector.StartMarker" data-end-marker="@connector.EndMarker"
+                         data-stroke="@connector.Stroke" data-stroke-width="@Inv(connector.StrokeWidthMm)" data-dash-style="@connector.DashStyle"
+                         @onclick:stopPropagation="true" @onclick="() => State.SelectElement(connector.Id)"
+                         @oncontextmenu="args => ShowElementContextMenu(connector, args)" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
+                        <defs>
+                            @ConnectorMarkerDefinition(connector, true)
+                            @ConnectorMarkerDefinition(connector, false)
+                        </defs>
+                        <path class="connector-hit" d="@connectorPath"></path>
+                        <path class="connector-line" d="@connectorPath" stroke="@connector.Stroke" stroke-width="@Inv(connector.StrokeWidthMm)"
+                              stroke-dasharray="@ConnectorGeometry.DashArray(connector)"
+                              marker-start="@MarkerUrl(connector, true)" marker-end="@MarkerUrl(connector, false)"></path>
+                        @if (connector.Id == State.SelectedElementId && !connector.Locked)
+                        {
+                            <circle class="connector-endpoint" cx="@Inv(sourcePoint.X)" cy="@Inv(sourcePoint.Y)" r="@Inv(5 / PixelsPerMm)" data-connector-end="source"></circle>
+                            <circle class="connector-endpoint" cx="@Inv(targetPoint.X)" cy="@Inv(targetPoint.Y)" r="@Inv(5 / PixelsPerMm)" data-connector-end="target"></circle>
+                        }
+                    </svg>
+                }
+            }
+
+            @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible && e is not ConnectorElement).OrderBy(e => e.ZIndex))
             {
                 <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
                      class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
@@ -48,6 +90,7 @@
                             break;
                         case ImageFrameElement image:
                             <div class="image-frame" style="@ImageFrameStyle(image)">
+                                @PictureFilter(image)
                                 <img src="@image.DataUrl" alt="@image.AltText" draggable="false" style="@ImageStyle(image)"
                                      data-crop-x="@Inv(image.CropX)" data-crop-y="@Inv(image.CropY)" data-crop-scale="@Inv(image.CropScale)"
                                      data-image-rotation="@Inv(image.ImageRotation)"
@@ -62,6 +105,16 @@
                         case ShapeElement shape:
                             <div class="shape shape-@shape.Shape.ToString().ToLowerInvariant()" style="@ShapeStyle(shape)"></div>
                             break;
+                        case WordArtElement wordArt:
+                            @WordArt(wordArt)
+                            break;
+                    }
+                    @if (!element.Locked)
+                    {
+                        foreach (var anchor in ConnectorAnchors)
+                        {
+                            <span class="connector-port connector-port-@AnchorCss(anchor)" data-connector-port data-owner-id="@element.Id" data-anchor="@anchor" title="Connect at @anchor"></span>
+                        }
                     }
                     @if (element.Id == State.SelectedElementId && !element.Locked && !(State.CropMode && element is ImageFrameElement))
                     {
@@ -80,22 +133,30 @@
     <Items>
         @if (State.SelectedElement is TextFrameElement)
         {
-            <DxContextMenuItem Text="Edit story" Click="EditSelectedStory" />
+            <DxContextMenuItem Text="Edit story" IconCssClass="pub-icon pub-icon-edit" Click="EditSelectedStory" />
         }
         @if (State.SelectedElement is ImageFrameElement)
         {
-            <DxContextMenuItem Text="Replace picture…" Click="ReplaceSelectedPicture" />
-            <DxContextMenuItem Text="@(State.CropMode ? "Finish crop" : "Crop picture")" Click="ToggleCrop" />
+            <DxContextMenuItem Text="Replace picture…" IconCssClass="pub-icon pub-icon-picture" Click="ReplaceSelectedPicture" />
+            <DxContextMenuItem Text="@(State.CropMode ? "Finish crop" : "Crop picture")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleCrop" />
             <DxContextMenuItem Text="Fit picture" Click="PictureFit" />
             <DxContextMenuItem Text="Fill frame" Click="PictureFill" />
             <DxContextMenuItem Text="Reset picture" Click="ResetPicture" />
         }
+        @if (State.SelectedElement is ConnectorElement)
+        {
+            <DxContextMenuItem Text="Straight connector" BeginGroup="true" Click="ConnectorStraight" />
+            <DxContextMenuItem Text="Elbow connector" Click="ConnectorElbow" />
+            <DxContextMenuItem Text="Curved connector" Click="ConnectorCurved" />
+            <DxContextMenuItem Text="Arrow at end" Click="ConnectorArrowEnd" />
+            <DxContextMenuItem Text="No arrow" Click="ConnectorNoArrow" />
+        }
         @if (State.SelectedElement is not null)
         {
-            <DxContextMenuItem Text="Copy" BeginGroup="true" Click="Copy" />
-            <DxContextMenuItem Text="Paste" Enabled="@State.CanPaste" Click="Paste" />
+            <DxContextMenuItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="Copy" />
+            <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" Click="Paste" />
             <DxContextMenuItem Text="Duplicate" Click="Duplicate" />
-            <DxContextMenuItem Text="Delete" Click="Delete" />
+            <DxContextMenuItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Click="Delete" />
             <DxContextMenuItem Text="Arrange" BeginGroup="true">
                 <Items>
                     <DxContextMenuItem Text="Bring to front" Click="BringToFront" />
@@ -104,6 +165,8 @@
                     <DxContextMenuItem Text="Send to back" Click="SendToBack" />
                 </Items>
             </DxContextMenuItem>
+            @if (State.SelectedElement is not ConnectorElement)
+            {
             <DxContextMenuItem Text="Align to page">
                 <Items>
                     <DxContextMenuItem Text="Left" Click="AlignLeft" />
@@ -114,15 +177,19 @@
                     <DxContextMenuItem Text="Bottom" Click="AlignBottom" />
                 </Items>
             </DxContextMenuItem>
+            }
             <DxContextMenuItem Text="@(State.SelectedElement.Locked ? "Unlock" : "Lock")" BeginGroup="true" Click="ToggleLock" />
             <DxContextMenuItem Text="@(State.SelectedElement.Visible ? "Hide" : "Show")" Click="ToggleVisibility" />
         }
         else
         {
-            <DxContextMenuItem Text="Paste" Enabled="@State.CanPaste" Click="Paste" />
-            <DxContextMenuItem Text="Insert text box" BeginGroup="true" Click="AddText" />
-            <DxContextMenuItem Text="Insert picture…" Click="InsertPicture" />
+            <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" Click="Paste" />
+            <DxContextMenuItem Text="Insert text box" IconCssClass="pub-icon pub-icon-text" BeginGroup="true" Click="AddText" />
+            <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
+            <DxContextMenuItem Text="Insert picture…" IconCssClass="pub-icon pub-icon-picture" Click="InsertPicture" />
             <DxContextMenuItem Text="Insert rectangle" Click="AddRectangle" />
+            <DxContextMenuItem Text="Draw connector" BeginGroup="true" Click="StartConnector" />
+            <DxContextMenuItem Text="Draw arrow connector" Click="StartArrowConnector" />
             <DxContextMenuItem Text="Add page" BeginGroup="true" Click="AddPage" />
         }
     </Items>
@@ -137,6 +204,11 @@
     private IJSObjectReference? _module;
     private DotNetObjectReference<PageSurface>? _self;
     private static readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+    private static readonly ConnectorAnchor[] ConnectorAnchors =
+    [
+        ConnectorAnchor.TopLeft, ConnectorAnchor.Top, ConnectorAnchor.TopRight, ConnectorAnchor.Right,
+        ConnectorAnchor.BottomRight, ConnectorAnchor.Bottom, ConnectorAnchor.BottomLeft, ConnectorAnchor.Left
+    ];
     private double PixelsPerMm => 3.7795275591 * State.Document.Zoom;
     private string UnitLabel => State.Document.View.RulerUnit switch
     {
@@ -164,12 +236,7 @@
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
         _self ??= DotNetObjectReference.Create(this);
         await _module.InvokeVoidAsync("initializeCanvas",
-            "publisher-stage",
-            "publisher-scroll-area",
-            "publisher-page",
-            "publisher-horizontal-ruler",
-            "publisher-vertical-ruler",
-            _self,
+            "publisher-stage", "publisher-scroll-area", "publisher-page", "publisher-horizontal-ruler", "publisher-vertical-ruler", _self,
             new
             {
                 pxPerMm = PixelsPerMm,
@@ -180,7 +247,8 @@
                 snapToGrid = State.Document.View.SnapToGrid,
                 snapToGuides = State.Document.View.SnapToGuides,
                 snapToPage = State.Document.View.SnapToPage,
-                gridSpacingMm = State.Document.View.GridSpacingMm
+                gridSpacingMm = State.Document.View.GridSpacingMm,
+                connectorTool = State.ConnectorTool.ToString()
             });
     }
 
@@ -191,51 +259,32 @@
         State.SetZoom(zoom);
     }
 
-    [JSInvokable]
-    public void SelectElement(string id)
+    [JSInvokable] public void SelectElement(string id) { if (Guid.TryParse(id, out var guid)) State.SelectElement(guid); }
+    [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) { if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height); }
+    [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) { if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale); }
+    [JSInvokable] public void AddGuideAt(string orientation, double positionMm) { if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed)) State.AddGuideAt(parsed, positionMm); }
+    [JSInvokable] public void CommitGuide(string id, double positionMm) { if (Guid.TryParse(id, out var guid)) State.CommitGuide(guid, positionMm); }
+    [JSInvokable] public void DeleteGuide(string id) { if (Guid.TryParse(id, out var guid)) State.DeleteGuide(guid); }
+    [JSInvokable] public void CommitConnector(string sourceId, string sourceAnchor, string targetId, string targetAnchor, string tool)
     {
-        if (Guid.TryParse(id, out var guid)) State.SelectElement(guid);
+        if (!Guid.TryParse(sourceId, out var sourceGuid) || !Guid.TryParse(targetId, out var targetGuid)) return;
+        if (!Enum.TryParse<ConnectorAnchor>(sourceAnchor, true, out var parsedSource) || !Enum.TryParse<ConnectorAnchor>(targetAnchor, true, out var parsedTarget)) return;
+        var marker = string.Equals(tool, nameof(ConnectorToolKind.Arrow), StringComparison.OrdinalIgnoreCase) ? ConnectorMarker.Arrow : ConnectorMarker.None;
+        State.AddConnector(sourceGuid, parsedSource, targetGuid, parsedTarget, marker);
     }
-
-    [JSInvokable]
-    public void CommitBounds(string id, double x, double y, double width, double height)
+    [JSInvokable] public void ReconnectConnector(string connectorId, string endpoint, string elementId, string anchor)
     {
-        if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height);
+        if (!Guid.TryParse(connectorId, out var connectorGuid) || !Guid.TryParse(elementId, out var elementGuid)) return;
+        if (!Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor)) return;
+        State.ReconnectConnector(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), elementGuid, parsedAnchor);
     }
-
-    [JSInvokable]
-    public void CommitCrop(string id, double cropX, double cropY, double cropScale)
-    {
-        if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale);
-    }
-
-    [JSInvokable]
-    public void AddGuideAt(string orientation, double positionMm)
-    {
-        if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed))
-            State.AddGuideAt(parsed, positionMm);
-    }
-
-    [JSInvokable]
-    public void CommitGuide(string id, double positionMm)
-    {
-        if (Guid.TryParse(id, out var guid)) State.CommitGuide(guid, positionMm);
-    }
-
-    [JSInvokable]
-    public void DeleteGuide(string id)
-    {
-        if (Guid.TryParse(id, out var guid)) State.DeleteGuide(guid);
-    }
+    [JSInvokable] public void CancelActiveTool() => State.CancelActiveTool();
 
     private void ClearSelection() => State.SelectElement(null);
-
     private Task DoubleClick(PublicationElement element)
     {
-        if (element is TextFrameElement)
-            return EditTextRequested.InvokeAsync(element.Id);
-        if (element is ImageFrameElement)
-            State.ToggleCropMode();
+        if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
+        if (element is ImageFrameElement) State.ToggleCropMode();
         return Task.CompletedTask;
     }
 
@@ -276,41 +325,182 @@
     private void ToggleLock() => State.UpdateSelected(element => element.Locked = !element.Locked, allowLocked: true);
     private void ToggleVisibility() => State.UpdateSelected(element => element.Visible = !element.Visible, allowLocked: true);
     private void AddText() => State.AddText();
+    private void AddWordArt() => State.AddWordArt();
     private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
+    private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
+    private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
     private void AddPage() => State.AddPage();
     private void CycleRulerUnit() => State.CycleRulerUnit();
 
-    private void SetImage(Action<ImageFrameElement> update)
-    {
-        if (State.SelectedElement is ImageFrameElement image)
-            State.UpdateSelected(_ => update(image));
-    }
+    private void SetConnector(Action<ConnectorElement> update) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); }
+    private void ConnectorStraight() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Straight);
+    private void ConnectorElbow() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Elbow);
+    private void ConnectorCurved() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Curved);
+    private void ConnectorArrowEnd() => SetConnector(connector => connector.EndMarker = ConnectorMarker.Arrow);
+    private void ConnectorNoArrow() => SetConnector(connector => connector.EndMarker = ConnectorMarker.None);
+
+    private void SetImage(Action<ImageFrameElement> update) { if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); }
 
     private void ResetPicture()
     {
         SetImage(image =>
         {
-            image.CropX = 0;
-            image.CropY = 0;
-            image.CropScale = 1;
-            image.ImageRotation = 0;
-            image.Opacity = 1;
-            image.Brightness = 1;
-            image.Contrast = 1;
-            image.Saturation = 1;
-            image.HueRotation = 0;
-            image.Invert = 0;
-            image.Grayscale = 0;
-            image.Sepia = 0;
-            image.Blur = 0;
-            image.FlipHorizontal = false;
-            image.FlipVertical = false;
-            image.FitInsideFrame = false;
+            image.CropX = 0; image.CropY = 0; image.CropScale = 1; image.ImageRotation = 0;
+            image.Opacity = 1; image.Brightness = 1; image.Contrast = 1; image.Saturation = 1;
+            image.HueRotation = 0; image.Invert = 0; image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
+            image.FlipHorizontal = false; image.FlipVertical = false; image.FitInsideFrame = false; image.TintOpacity = 0;
         });
     }
 
-    private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
+    private RenderFragment PictureFilter(ImageFrameElement image) => builder =>
+    {
+        var sequence = 0;
+        var id = PictureFilterId(image);
+        builder.OpenElement(sequence++, "svg");
+        builder.AddAttribute(sequence++, "class", "picture-filter-defs");
+        builder.AddAttribute(sequence++, "aria-hidden", "true");
+        builder.OpenElement(sequence++, "defs");
+        builder.OpenElement(sequence++, "filter");
+        builder.AddAttribute(sequence++, "id", id);
+        builder.AddAttribute(sequence++, "x", "-20%");
+        builder.AddAttribute(sequence++, "y", "-20%");
+        builder.AddAttribute(sequence++, "width", "140%");
+        builder.AddAttribute(sequence++, "height", "140%");
+        builder.OpenElement(sequence++, "feFlood");
+        builder.AddAttribute(sequence++, "flood-color", image.TintColor);
+        builder.AddAttribute(sequence++, "flood-opacity", Inv(image.TintOpacity));
+        builder.AddAttribute(sequence++, "result", "tint");
+        builder.CloseElement();
+        builder.OpenElement(sequence++, "feComposite");
+        builder.AddAttribute(sequence++, "in", "tint");
+        builder.AddAttribute(sequence++, "in2", "SourceAlpha");
+        builder.AddAttribute(sequence++, "operator", "in");
+        builder.AddAttribute(sequence++, "result", "colored");
+        builder.CloseElement();
+        if (image.TintMode == ImageTintMode.Overlay)
+        {
+            builder.OpenElement(sequence++, "feBlend");
+            builder.AddAttribute(sequence++, "in", "SourceGraphic");
+            builder.AddAttribute(sequence++, "in2", "colored");
+            builder.AddAttribute(sequence++, "mode", BlendMode(image.BlendMode));
+            builder.CloseElement();
+        }
+        else
+        {
+            builder.OpenElement(sequence++, "feComposite");
+            builder.AddAttribute(sequence++, "in", "colored");
+            builder.AddAttribute(sequence++, "in2", "SourceGraphic");
+            builder.AddAttribute(sequence++, "operator", "over");
+            builder.CloseElement();
+        }
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.CloseElement();
+    };
 
+    private RenderFragment WordArt(WordArtElement item) => builder =>
+    {
+        var sequence = 0;
+        var gradientId = $"wordart-gradient-{item.Id:N}";
+        var pathId = $"wordart-path-{item.Id:N}";
+        builder.OpenElement(sequence++, "svg");
+        builder.AddAttribute(sequence++, "class", "wordart-svg");
+        builder.AddAttribute(sequence++, "viewBox", "0 0 1000 300");
+        builder.AddAttribute(sequence++, "preserveAspectRatio", "xMidYMid meet");
+        builder.OpenElement(sequence++, "defs");
+        builder.OpenElement(sequence++, "linearGradient");
+        builder.AddAttribute(sequence++, "id", gradientId);
+        builder.AddAttribute(sequence++, "x1", "0"); builder.AddAttribute(sequence++, "y1", "0");
+        builder.AddAttribute(sequence++, "x2", "0"); builder.AddAttribute(sequence++, "y2", "1");
+        builder.OpenElement(sequence++, "stop"); builder.AddAttribute(sequence++, "offset", "0%"); builder.AddAttribute(sequence++, "stop-color", item.SecondaryColor); builder.CloseElement();
+        builder.OpenElement(sequence++, "stop"); builder.AddAttribute(sequence++, "offset", "100%"); builder.AddAttribute(sequence++, "stop-color", item.FillColor); builder.CloseElement();
+        builder.CloseElement();
+        if (item.Warp != WordArtWarp.None)
+        {
+            builder.OpenElement(sequence++, "path");
+            builder.AddAttribute(sequence++, "id", pathId);
+            builder.AddAttribute(sequence++, "d", WordArtPath(item.Warp));
+            builder.CloseElement();
+        }
+        builder.CloseElement();
+
+        foreach (var depth in Enumerable.Range(1, Math.Clamp((int)Math.Round(item.ExtrudeDepth), 0, 18)).Reverse())
+            AddWordArtText(builder, ref sequence, item, pathId, item.ExtrudeColor, depth * 4, depth * 4, 0, false);
+        AddWordArtText(builder, ref sequence, item, pathId, item.GradientFill ? $"url(#{gradientId})" : item.FillColor, 0, 0, item.OutlineWidth, true);
+        builder.CloseElement();
+    };
+
+    private static void AddWordArtText(RenderTreeBuilder builder, ref int sequence, WordArtElement item, string pathId, string fill, double dx, double dy, double outline, bool main)
+    {
+        builder.OpenElement(sequence++, "text");
+        builder.AddAttribute(sequence++, "x", "500");
+        builder.AddAttribute(sequence++, "y", item.Warp == WordArtWarp.None ? "185" : "0");
+        builder.AddAttribute(sequence++, "dx", Inv(dx));
+        builder.AddAttribute(sequence++, "dy", Inv(dy));
+        builder.AddAttribute(sequence++, "text-anchor", "middle");
+        builder.AddAttribute(sequence++, "dominant-baseline", "middle");
+        builder.AddAttribute(sequence++, "font-family", item.FontFamily);
+        builder.AddAttribute(sequence++, "font-size", Inv(item.FontSizePt * 3.5));
+        builder.AddAttribute(sequence++, "font-weight", item.Bold ? "700" : "400");
+        builder.AddAttribute(sequence++, "font-style", item.Italic ? "italic" : "normal");
+        builder.AddAttribute(sequence++, "letter-spacing", Inv(item.LetterSpacing * 2));
+        builder.AddAttribute(sequence++, "fill", fill);
+        builder.AddAttribute(sequence++, "stroke", main ? item.OutlineColor : "none");
+        builder.AddAttribute(sequence++, "stroke-width", Inv(outline));
+        builder.AddAttribute(sequence++, "paint-order", "stroke fill");
+        if (main && item.ShadowEnabled) builder.AddAttribute(sequence++, "class", "wordart-main wordart-shadow");
+        else if (main) builder.AddAttribute(sequence++, "class", "wordart-main");
+        if (item.Warp == WordArtWarp.None)
+        {
+            builder.AddContent(sequence++, item.Text);
+        }
+        else
+        {
+            builder.OpenElement(sequence++, "textPath");
+            builder.AddAttribute(sequence++, "href", $"#{pathId}");
+            builder.AddAttribute(sequence++, "startOffset", "50%");
+            builder.AddAttribute(sequence++, "text-anchor", "middle");
+            builder.AddContent(sequence++, item.Text);
+            builder.CloseElement();
+        }
+        builder.CloseElement();
+    }
+
+
+    private RenderFragment ConnectorMarkerDefinition(ConnectorElement connector, bool start) => builder =>
+    {
+        var marker = start ? connector.StartMarker : connector.EndMarker;
+        if (marker == ConnectorMarker.None) return;
+        var sequence = 0;
+        builder.OpenElement(sequence++, "marker");
+        builder.AddAttribute(sequence++, "id", MarkerId(connector, start));
+        builder.AddAttribute(sequence++, "markerWidth", "8");
+        builder.AddAttribute(sequence++, "markerHeight", "8");
+        builder.AddAttribute(sequence++, "refX", start ? "1" : "7");
+        builder.AddAttribute(sequence++, "refY", "4");
+        builder.AddAttribute(sequence++, "orient", "auto-start-reverse");
+        builder.AddAttribute(sequence++, "markerUnits", "strokeWidth");
+        builder.OpenElement(sequence++, marker == ConnectorMarker.Diamond ? "path" : "path");
+        builder.AddAttribute(sequence++, "d", marker switch
+        {
+            ConnectorMarker.Diamond => "M 0 4 L 4 0 L 8 4 L 4 8 Z",
+            ConnectorMarker.Triangle => "M 0 0 L 8 4 L 0 8 Z",
+            _ => "M 0 0 L 8 4 L 0 8 L 2 4 Z"
+        });
+        builder.AddAttribute(sequence++, "fill", connector.Stroke);
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private static string MarkerId(ConnectorElement connector, bool start) => $"connector-{connector.Id:N}-{(start ? "start" : "end")}";
+    private static string MarkerUrl(ConnectorElement connector, bool start)
+    {
+        var marker = start ? connector.StartMarker : connector.EndMarker;
+        return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
+    }
+    private static string AnchorCss(ConnectorAnchor anchor) => anchor.ToString().ToLowerInvariant();
+
+    private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
     private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{Mm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";
@@ -327,8 +517,19 @@
         var fit = image.FitInsideFrame ? "contain" : "cover";
         var sx = image.FlipHorizontal ? -image.CropScale : image.CropScale;
         var sy = image.FlipVertical ? -image.CropScale : image.CropScale;
-        return $"object-fit:{fit};transform:translate({Inv(image.CropX)}%,{Inv(image.CropY)}%) rotate({Inv(image.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(image.Opacity)};filter:brightness({Inv(image.Brightness)}) contrast({Inv(image.Contrast)}) saturate({Inv(image.Saturation)}) hue-rotate({Inv(image.HueRotation)}deg) invert({Inv(image.Invert)}) grayscale({Inv(image.Grayscale)}) sepia({Inv(image.Sepia)}) blur({Inv(image.Blur)}px)";
+        var tint = image.TintOpacity > .001 ? $"url(#{PictureFilterId(image)}) " : string.Empty;
+        return $"object-fit:{fit};transform:translate({Inv(image.CropX)}%,{Inv(image.CropY)}%) rotate({Inv(image.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(image.Opacity)};filter:{tint}brightness({Inv(image.Brightness)}) contrast({Inv(image.Contrast)}) saturate({Inv(image.Saturation)}) hue-rotate({Inv(image.HueRotation)}deg) invert({Inv(image.Invert)}) grayscale({Inv(image.Grayscale)}) sepia({Inv(image.Sepia)}) blur({Inv(image.Blur)}px)";
     }
+
+    private static string PictureFilterId(ImageFrameElement image) => $"picture-filter-{image.Id:N}";
+    private static string BlendMode(ImageBlendMode mode) => mode.ToString().ToLowerInvariant();
+    private static string WordArtPath(WordArtWarp warp) => warp switch
+    {
+        WordArtWarp.ArchUp => "M 80 225 Q 500 5 920 225",
+        WordArtWarp.ArchDown => "M 80 75 Q 500 295 920 75",
+        WordArtWarp.Wave => "M 40 165 C 220 20 350 290 520 145 C 690 0 810 280 960 125",
+        _ => "M 50 170 L 950 170"
+    };
 
     private string GuideStyle(GuideLine guide) => guide.Orientation == GuideOrientation.Horizontal ? $"top:{Mm(guide.PositionMm)}" : $"left:{Mm(guide.PositionMm)}";
     private string Mm(double mm) => Px(mm * PixelsPerMm);

@@ -5,7 +5,7 @@
 @inject PublicationFileService Files
 @inject IJSRuntime JS
 
-<PageTitle>PublisherStudio</PageTitle>
+<PageTitle>BlazorPublisher</PageTitle>
 
 <div class="publisher-shell">
     <header class="title-bar">
@@ -25,12 +25,22 @@
                        OnExportWebsite="ExportWebsite"
                        OnInsertPicture="OpenPicturePicker"
                        OnEditStory="OpenStoryEditor"
-                       OnFitPage="FitPage" />
+                       OnFitPage="FitPage"
+                       OnTogglePagesPane="TogglePagesPane"
+                       OnToggleInspectorPane="ToggleInspectorPane"
+                       OnResetWorkspace="ResetWorkspace" />
 
-    <div class="editor-workspace">
+    <div id="publisher-workspace" class="editor-workspace">
         <PageNavigator State="State" />
+        <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
         <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" />
-        <InspectorPanel State="State" OnEditStory="OpenStoryEditor" OnReplacePicture="OpenPicturePicker" />
+        <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
+        <InspectorPanel State="State"
+                        OnEditStory="OpenStoryEditor"
+                        OnReplacePicture="OpenPicturePicker"
+                        OnInsertPicture="OpenPicturePicker"
+                        OnApplyTransparentColor="ApplyTransparentColor"
+                        OnRestoreOriginalPicture="RestoreOriginalPicture" />
     </div>
 
     <footer class="status-bar">
@@ -51,7 +61,14 @@
 
 <PrintPublication Document="State.Document" />
 
-<StoryEditor Visible="_storyEditorVisible" TextFrame="@(State.SelectedElement as TextFrameElement)" Saved="SaveStory" Cancelled="CloseStoryEditor" />
+<StoryEditor Visible="_storyEditorVisible"
+             TextFrame="@(State.SelectedElement as TextFrameElement)"
+             PublicationName="@State.Document.Name"
+             PageName="@State.CurrentPage.Name"
+             PageNumber="@CurrentPageNumber"
+             PageCount="@State.Document.Pages.Count"
+             Saved="SaveStory"
+             Cancelled="CloseStoryEditor" />
 
 @if (!string.IsNullOrWhiteSpace(_error))
 {
@@ -66,13 +83,25 @@
 @code {
     private PageSurface? _pageSurface;
     private bool _storyEditorVisible;
+    private bool _workspaceInitialized;
     private string? _error;
     private string? _notice;
-    private string SelectionStatus => State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
+    private string SelectionStatus => State.ConnectorTool != ConnectorToolKind.None
+        ? $"{State.ConnectorTool} connector tool — drag from one object port to another; Esc cancels"
+        : State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
 
     protected override void OnInitialized() => State.Changed += StateChanged;
-    private void StateChanged() => InvokeAsync(StateHasChanged);
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_workspaceInitialized)
+        {
+            _workspaceInitialized = true;
+            await JS.InvokeVoidAsync("publisherStudio.initializeWorkspace", "publisher-workspace");
+        }
+    }
+
+    private void StateChanged() => InvokeAsync(StateHasChanged);
     private void NewDocument() => State.NewDocument();
     private async Task OpenPublicationPicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "publication-file-input");
     private async Task OpenPicturePicker() => await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-file-input");
@@ -120,11 +149,16 @@
     }
 
     private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");
+
     private async Task FitPage()
     {
         if (_pageSurface is not null)
             await _pageSurface.FitPageAsync();
     }
+
+    private Task TogglePagesPane() => JS.InvokeVoidAsync("publisherStudio.toggleWorkspacePane", "publisher-workspace", "left").AsTask();
+    private Task ToggleInspectorPane() => JS.InvokeVoidAsync("publisherStudio.toggleWorkspacePane", "publisher-workspace", "right").AsTask();
+    private Task ResetWorkspace() => JS.InvokeVoidAsync("publisherStudio.resetWorkspaceLayout", "publisher-workspace").AsTask();
 
     private int CurrentPageNumber => Math.Max(1, State.Document.Pages.FindIndex(publicationPage => publicationPage.Id == State.SelectedPageId) + 1);
 
@@ -160,6 +194,7 @@
                 State.UpdateSelected(_ =>
                 {
                     image.DataUrl = dataUrl;
+                    image.OriginalDataUrl = dataUrl;
                     image.AltText = file.Name;
                     image.Name = file.Name;
                     image.CropX = 0;
@@ -176,6 +211,31 @@
         {
             ShowError(ex);
         }
+    }
+
+    private async Task ApplyTransparentColor()
+    {
+        if (State.SelectedElement is not ImageFrameElement image) return;
+        try
+        {
+            var result = await JS.InvokeAsync<string>("publisherStudio.makeColorTransparent", image.DataUrl, image.TransparentColor, image.TransparentColorTolerance);
+            State.UpdateSelected(_ => image.DataUrl = result);
+            ShowNotice("The selected color was made transparent. Restore Original remains available.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
+
+    private Task RestoreOriginalPicture()
+    {
+        if (State.SelectedElement is ImageFrameElement image && !string.IsNullOrWhiteSpace(image.OriginalDataUrl))
+        {
+            State.UpdateSelected(_ => image.DataUrl = image.OriginalDataUrl);
+            ShowNotice("Original picture restored.");
+        }
+        return Task.CompletedTask;
     }
 
     private Task OpenStoryEditorById(Guid id)
@@ -196,9 +256,9 @@
         return Task.CompletedTask;
     }
 
-    private Task SaveStory((byte[] Content, string PreviewHtml) result)
+    private Task SaveStory((byte[] Content, string PreviewHtml, StoryStorageFormat Format) result)
     {
-        State.UpdateTextDocument(result.Content, result.PreviewHtml);
+        State.UpdateTextDocument(result.Content, result.PreviewHtml, result.Format);
         _storyEditorVisible = false;
         return Task.CompletedTask;
     }

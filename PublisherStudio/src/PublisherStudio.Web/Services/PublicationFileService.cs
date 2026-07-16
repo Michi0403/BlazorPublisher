@@ -32,8 +32,56 @@ public sealed partial class PublicationFileService
         if (document.Pages.Count == 0)
             document.Pages.Add(PublicationPage.CreateA4());
         foreach (var text in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<TextFrameElement>())
+        {
             text.PreviewHtml = SanitizePreviewHtml(text.PreviewHtml);
+            if (text.DocumentContent is null || text.DocumentContent.Length == 0)
+            {
+                text.DocumentContent = RichTextDocumentFactory.CreateOpenXml("Text frame");
+                text.StoryFormat = StoryStorageFormat.OpenXml;
+            }
+            else if (LooksLikeHtml(text.DocumentContent))
+            {
+                // Files created by v0.1/v0.2 stored stories as HTML. StoryEditor upgrades them to DOCX on first open.
+                text.StoryFormat = StoryStorageFormat.Html;
+            }
+        }
+
+        foreach (var image in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<ImageFrameElement>())
+        {
+            if (string.IsNullOrWhiteSpace(image.OriginalDataUrl)) image.OriginalDataUrl = image.DataUrl;
+            image.Opacity = Math.Clamp(image.Opacity, 0, 1);
+            image.TintOpacity = Math.Clamp(image.TintOpacity, 0, 1);
+            image.TransparentColorTolerance = Math.Clamp(image.TransparentColorTolerance, 0, 255);
+        }
+
+        foreach (var wordArt in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<WordArtElement>())
+        {
+            wordArt.FontSizePt = Math.Clamp(wordArt.FontSizePt, 6, 300);
+            wordArt.OutlineWidth = Math.Clamp(wordArt.OutlineWidth, 0, 20);
+            wordArt.ExtrudeDepth = Math.Clamp(wordArt.ExtrudeDepth, 0, 24);
+        }
+
+        foreach (var publicationPage in document.Pages)
+        {
+            var objectIds = publicationPage.Elements.Where(item => item is not ConnectorElement).Select(item => item.Id).ToHashSet();
+            publicationPage.Elements.RemoveAll(item => item is ConnectorElement connector &&
+                (!objectIds.Contains(connector.Source.ElementId) || !objectIds.Contains(connector.Target.ElementId) || connector.Source.ElementId == connector.Target.ElementId));
+            foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>())
+                connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
+        }
+
+        document.FormatVersion = "1.4";
         return document;
+    }
+
+    private static bool LooksLikeHtml(byte[] content)
+    {
+        var prefix = System.Text.Encoding.UTF8.GetString(content, 0, Math.Min(content.Length, 128)).TrimStart();
+        return prefix.StartsWith("<!DOCTYPE", StringComparison.OrdinalIgnoreCase)
+            || prefix.StartsWith("<html", StringComparison.OrdinalIgnoreCase)
+            || prefix.StartsWith("<body", StringComparison.OrdinalIgnoreCase)
+            || prefix.StartsWith("<p", StringComparison.OrdinalIgnoreCase)
+            || prefix.StartsWith("<div", StringComparison.OrdinalIgnoreCase);
     }
 
     public static string SafeFileName(string value)

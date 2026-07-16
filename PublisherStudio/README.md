@@ -4,16 +4,17 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 
 ## Implemented in this source package
 
-- DevExpress Blazor `DxRibbon` with File, Home, Insert, Page Design, View, Picture Tools, Text Box Tools, and Shape Tools tabs.
+- DevExpress Blazor `DxRibbon` with File, Home, Insert, Page Design, View, Picture Tools, Text Box Tools, WordArt Tools, Connector Tools, and Shape Tools tabs.
 - DevExpress `DxContextMenu` on the page and on selected objects.
 - Multi-page workspace with page thumbnails, layers, selection handles, drag, resize, rotation, ordering, alignment, duplication, copy/paste, undo, and redo.
 - Canvas-linked horizontal and vertical rulers that follow page position, scroll, zoom, and the selected unit.
 - Millimetre, centimetre, inch, and pixel ruler units.
 - Guides created by dragging from either ruler, movable guides, guide deletion by dragging outside the page, grid display, and snap options.
 - A larger preset catalogue: A3, A4, A5, Letter, Legal, Tabloid, business card, landscape variants, and square, plus custom dimensions.
-- Text frames edited with DevExpress Blazor RichEdit and its Office ribbon.
-- Image frames with replacement, fit/fill, interactive crop panning, wheel-based crop zoom, picture rotation, flipping, opacity, brightness, contrast, saturation, hue, inversion, grayscale, sepia, blur, masks, borders, shadows, and frame-ratio presets.
-- Rectangles, rounded rectangles, ellipses, and lines.
+- Text frames edited with DevExpress Blazor RichEdit and its Office ribbon; stories use DOCX storage, support dynamic fields, and download as DOCX, RTF, TXT, or HTML.
+- Image frames with preserved PNG alpha, replacement, fit/fill, interactive crop panning, wheel-based crop zoom, picture rotation, flipping, opacity, brightness, contrast, saturation, hue, inversion, grayscale, sepia, blur, masks, borders, shadows, tint/full recolor, blend modes, color-key transparency, and frame-ratio presets.
+- Rectangles, rounded rectangles, ellipses, lines, and WordArt/LogoArt.
+- Attached straight, elbow, and curved connectors with eight ports per object, reconnectable endpoints, line styles, and arrow/triangle/diamond markers.
 - Native self-contained JSON publication format (`.pubstudio.json`).
 - Current-page PNG, JPEG, and browser-oriented SVG export.
 - Self-contained multi-page HTML website export.
@@ -22,7 +23,7 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 
 ## Design reference boundary
 
-GIMP and Inkscape were used only as behavioural references for rulers, guides, crop interaction, and non-destructive image adjustments. No GIMP or Inkscape source code, binaries, packages, or assets are included. The implementation remains native Blazor/C#/JavaScript and keeps the Apache-2.0 project boundary.
+GIMP and Inkscape were used only as behavioural references for rulers, guides, crop interaction, and non-destructive image adjustments. Blazor.Diagrams was used only as a behavioural reference for ports, snapping, routing, and endpoint reconnection. No source code, binaries, packages, or assets from those projects are included. The implementation remains native Blazor/C#/JavaScript and keeps the Apache-2.0 project boundary.
 
 ## Requirements
 
@@ -58,7 +59,8 @@ Without a supplied port, Kestrel asks the operating system for a loopback port a
 3. Double-click the picture or choose **Finish crop** to leave crop mode.
 4. Open the right-hand **Properties** tab for live picture adjustments.
 5. Drag from a ruler onto the page to create a guide.
-6. Use **File** for JSON save/open and PNG, JPEG, SVG, website, or print/PDF output.
+6. Choose **Insert > Connector** or **Arrow connector**, then drag from one round object port to another. Drag a selected endpoint to reconnect it; Esc stops the tool.
+7. Use **File** for JSON save/open and PNG, JPEG, SVG, website, or print/PDF output.
 
 The file picker is reset before every picture/open command, so selecting the same file again also triggers replacement.
 
@@ -85,6 +87,6 @@ dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip
 
 ## Deliberate limits
 
-This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, Bézier path editing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
+This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, free Bézier path editing, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
 
-See [`CHANGELOG-v0.2.md`](CHANGELOG-v0.2.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`VALIDATION.md`](VALIDATION.md).
+See [`CHANGELOG-v0.3.md`](CHANGELOG-v0.3.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`VALIDATION.md`](VALIDATION.md).

@@ -47,7 +47,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             cursorX: null,
             cursorY: null,
             drawPending: false,
-            cropTimers: new Map()
+            cropTimers: new Map(),
+            connectorGhost: null
         };
 
         stage.addEventListener('pointerdown', event => pointerDown(state, event));
@@ -60,6 +61,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             nextAnimationFrame(state);
         });
         stage.addEventListener('wheel', event => cropWheel(state, event), { passive: false });
+        stage.addEventListener('keydown', event => canvasKeyDown(state, event));
         scroll.addEventListener('scroll', () => nextAnimationFrame(state), { passive: true });
 
         state.resizeObserver = new ResizeObserver(() => nextAnimationFrame(state));
@@ -143,8 +145,228 @@ function finishRulerGuide(state, orientation, event) {
         state.dotnet.invokeMethodAsync('AddGuideAt', orientation, position);
 }
 
+
+function canvasKeyDown(state, event) {
+    if (event.key !== 'Escape') return;
+    clearConnectorOperation(state, true);
+    state.dotnet.invokeMethodAsync('CancelActiveTool');
+    event.preventDefault();
+}
+
+function connectorToolActive(state) {
+    return state.config.connectorTool && state.config.connectorTool !== 'None';
+}
+
+function connectorPath(kind, source, target) {
+    if (kind === 'Elbow') {
+        const middleX = (source.x + target.x) / 2;
+        return `M ${source.x} ${source.y} L ${middleX} ${source.y} L ${middleX} ${target.y} L ${target.x} ${target.y}`;
+    }
+    if (kind === 'Curved') {
+        const dx = Math.max(12, Math.abs(target.x - source.x) * .48);
+        const direction = target.x >= source.x ? 1 : -1;
+        return `M ${source.x} ${source.y} C ${source.x + dx * direction} ${source.y}, ${target.x - dx * direction} ${target.y}, ${target.x} ${target.y}`;
+    }
+    return `M ${source.x} ${source.y} L ${target.x} ${target.y}`;
+}
+
+function portPointMm(state, port) {
+    const pageRect = state.page.getBoundingClientRect();
+    const rect = port.getBoundingClientRect();
+    return {
+        x: (rect.left + rect.width / 2 - pageRect.left) / state.config.pxPerMm,
+        y: (rect.top + rect.height / 2 - pageRect.top) / state.config.pxPerMm
+    };
+}
+
+function findConnectorTarget(state, event, excludedIds = []) {
+    const excluded = new Set(excludedIds.filter(Boolean));
+    let best = null;
+    let bestDistance = 22;
+    for (const port of state.page.querySelectorAll('[data-connector-port]')) {
+        if (excluded.has(port.dataset.ownerId)) continue;
+        const owner = port.closest('[data-publication-element]');
+        if (!owner || owner.classList.contains('locked')) continue;
+        const rect = port.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const distance = Math.hypot(event.clientX - x, event.clientY - y);
+        if (distance <= bestDistance) {
+            bestDistance = distance;
+            best = {
+                port,
+                ownerId: port.dataset.ownerId,
+                anchor: port.dataset.anchor,
+                point: portPointMm(state, port)
+            };
+        }
+    }
+    return best;
+}
+
+function ensureConnectorGhost(state, markerEnd) {
+    if (state.connectorGhost) return state.connectorGhost;
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.classList.add('connector-ghost');
+    svg.setAttribute('viewBox', `0 0 ${number(state.page.dataset.pageWidthMm)} ${number(state.page.dataset.pageHeightMm)}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const defs = document.createElementNS(ns, 'defs');
+    const marker = document.createElementNS(ns, 'marker');
+    marker.setAttribute('id', 'publisher-connector-ghost-arrow');
+    marker.setAttribute('markerWidth', '7');
+    marker.setAttribute('markerHeight', '7');
+    marker.setAttribute('refX', '6');
+    marker.setAttribute('refY', '3.5');
+    marker.setAttribute('orient', 'auto-start-reverse');
+    marker.setAttribute('markerUnits', 'strokeWidth');
+    const triangle = document.createElementNS(ns, 'path');
+    triangle.setAttribute('d', 'M 0 0 L 7 3.5 L 0 7 z');
+    triangle.setAttribute('fill', 'currentColor');
+    marker.appendChild(triangle);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+    const path = document.createElementNS(ns, 'path');
+    path.classList.add('connector-ghost-line');
+    if (markerEnd) path.setAttribute('marker-end', 'url(#publisher-connector-ghost-arrow)');
+    svg.appendChild(path);
+    state.page.appendChild(svg);
+    state.connectorGhost = { svg, path };
+    return state.connectorGhost;
+}
+
+function showConnectorGhost(state, operation, target) {
+    const ghost = ensureConnectorGhost(state, operation.markerEnd);
+    ghost.path.setAttribute('d', connectorPath(operation.pathKind || 'Curved', operation.fixedPoint, target.point));
+    ghost.svg.classList.add('visible');
+    operation.target = target;
+}
+
+function hideConnectorGhost(state) {
+    state.connectorGhost?.svg.classList.remove('visible');
+}
+
+function clearConnectorOperation(state, restoreOriginal) {
+    const operation = state.operation;
+    if (operation?.kind === 'connector-reconnect' && operation.connector && restoreOriginal)
+        operation.connector.style.visibility = '';
+    if (state.connectorGhost) {
+        state.connectorGhost.svg.remove();
+        state.connectorGhost = null;
+    }
+    if (operation?.target?.port) operation.target.port.classList.remove('connector-port-target');
+    if (operation?.sourcePort) operation.sourcePort.classList.remove('connector-port-source');
+    if (operation?.kind?.startsWith('connector-')) state.operation = null;
+}
+
+function updateConnectorDrag(state, event, operation) {
+    operation.target?.port?.classList.remove('connector-port-target');
+    const target = findConnectorTarget(state, event, operation.excludedIds);
+    if (!target) {
+        operation.target = null;
+        hideConnectorGhost(state);
+        return;
+    }
+    target.port.classList.add('connector-port-target');
+    showConnectorGhost(state, operation, target);
+}
+
+function finishConnectorDrag(state, operation) {
+    const target = operation.target;
+    if (target) {
+        if (operation.kind === 'connector-new') {
+            state.dotnet.invokeMethodAsync(
+                'CommitConnector',
+                operation.sourceOwnerId, operation.sourceAnchor,
+                target.ownerId, target.anchor, operation.tool);
+        } else {
+            state.dotnet.invokeMethodAsync(
+                'ReconnectConnector', operation.connectorId, operation.endpoint, target.ownerId, target.anchor);
+        }
+    }
+    clearConnectorOperation(state, true);
+}
+
+function parseRotation(element) {
+    const match = /rotate\(([-+0-9.]+)deg\)/i.exec(element.style.transform || '');
+    return match ? number(match[1]) : 0;
+}
+
+function anchorPointForElement(element, anchor, pxPerMm) {
+    const bounds = elementMm(element, pxPerMm);
+    const local = {
+        TopLeft: [0, 0], Top: [.5, 0], TopRight: [1, 0], Right: [1, .5],
+        BottomRight: [1, 1], Bottom: [.5, 1], BottomLeft: [0, 1], Left: [0, .5], Center: [.5, .5]
+    }[anchor] || [.5, .5];
+    const centerX = bounds.x + bounds.width / 2;
+    const centerY = bounds.y + bounds.height / 2;
+    const rawX = bounds.x + bounds.width * local[0];
+    const rawY = bounds.y + bounds.height * local[1];
+    const radians = parseRotation(element) * Math.PI / 180;
+    const dx = rawX - centerX;
+    const dy = rawY - centerY;
+    return {
+        x: centerX + dx * Math.cos(radians) - dy * Math.sin(radians),
+        y: centerY + dx * Math.sin(radians) + dy * Math.cos(radians)
+    };
+}
+
+function updateAttachedConnectors(state, movedId) {
+    for (const connector of state.page.querySelectorAll('[data-connector-id]')) {
+        if (connector.dataset.sourceElementId !== movedId && connector.dataset.targetElementId !== movedId) continue;
+        const sourceElement = state.page.querySelector(`[data-element-id="${CSS.escape(connector.dataset.sourceElementId)}"]`);
+        const targetElement = state.page.querySelector(`[data-element-id="${CSS.escape(connector.dataset.targetElementId)}"]`);
+        if (!sourceElement || !targetElement) continue;
+        const source = anchorPointForElement(sourceElement, connector.dataset.sourceAnchor, state.config.pxPerMm);
+        const target = anchorPointForElement(targetElement, connector.dataset.targetAnchor, state.config.pxPerMm);
+        const path = connectorPath(connector.dataset.pathKind || 'Curved', source, target);
+        connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
+        const ends = connector.querySelectorAll('.connector-endpoint');
+        if (ends[0]) { ends[0].setAttribute('cx', source.x); ends[0].setAttribute('cy', source.y); }
+        if (ends[1]) { ends[1].setAttribute('cx', target.x); ends[1].setAttribute('cy', target.y); }
+    }
+}
+
 function pointerDown(state, event) {
     if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
+    state.stage.focus({ preventScroll: true });
+
+    const endpoint = event.target.closest('[data-connector-end]');
+    if (endpoint && state.page.contains(endpoint)) {
+        const connector = endpoint.closest('[data-connector-id]');
+        if (!connector || connector.classList.contains('locked')) return;
+        const endpointName = endpoint.dataset.connectorEnd;
+        const otherId = endpointName === 'source' ? connector.dataset.targetElementId : connector.dataset.sourceElementId;
+        const fixedElement = state.page.querySelector(`[data-element-id="${CSS.escape(otherId)}"]`);
+        const fixedAnchor = endpointName === 'source' ? connector.dataset.targetAnchor : connector.dataset.sourceAnchor;
+        if (!fixedElement) return;
+        connector.style.visibility = 'hidden';
+        state.operation = {
+            kind: 'connector-reconnect', pointerId: event.pointerId, connector, connectorId: connector.dataset.connectorId,
+            endpoint: endpointName, fixedPoint: anchorPointForElement(fixedElement, fixedAnchor, state.config.pxPerMm),
+            pathKind: connector.dataset.pathKind || 'Curved', markerEnd: endpointName !== 'source', excludedIds: [otherId]
+        };
+        state.stage.setPointerCapture(event.pointerId);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
+
+    const connectorPort = event.target.closest('[data-connector-port]');
+    if (connectorPort && state.page.contains(connectorPort) && connectorToolActive(state)) {
+        const sourceOwnerId = connectorPort.dataset.ownerId;
+        connectorPort.classList.add('connector-port-source');
+        state.operation = {
+            kind: 'connector-new', pointerId: event.pointerId, sourcePort: connectorPort,
+            sourceOwnerId, sourceAnchor: connectorPort.dataset.anchor, fixedPoint: portPointMm(state, connectorPort),
+            pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow', tool: state.config.connectorTool,
+            excludedIds: [sourceOwnerId]
+        };
+        state.stage.setPointerCapture(event.pointerId);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
 
     const guide = event.target.closest('[data-guide-id]');
     if (guide && state.page.contains(guide)) {
@@ -215,6 +437,12 @@ function pointerMove(state, event) {
     const operation = state.operation;
     if (!operation || operation.pointerId !== event.pointerId) return;
 
+    if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
+        updateConnectorDrag(state, event, operation);
+        event.preventDefault();
+        return;
+    }
+
     if (operation.kind === 'guide') {
         const position = guidePositionFromPointer(state, operation.orientation, event);
         operation.currentPosition = position;
@@ -273,6 +501,7 @@ function pointerMove(state, event) {
     operation.element.style.top = `${y * state.config.pxPerMm}px`;
     operation.element.style.width = `${width * state.config.pxPerMm}px`;
     operation.element.style.height = `${height * state.config.pxPerMm}px`;
+    updateAttachedConnectors(state, operation.id);
     event.preventDefault();
 }
 
@@ -317,6 +546,10 @@ function nearestCandidate(value, candidates, tolerance) {
 function pointerUp(state, event) {
     const operation = state.operation;
     if (!operation || operation.pointerId !== event.pointerId) return;
+    if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
+        finishConnectorDrag(state, operation);
+        return;
+    }
     state.operation = null;
 
     if (operation.kind === 'guide') {
@@ -529,7 +762,10 @@ function collectExportCss() {
         const href = sheet.href || '';
         if (href && !href.includes('/css/site.css')) continue;
         try {
-            for (const rule of sheet.cssRules) css += `${rule.cssText}\n`;
+            for (const rule of sheet.cssRules) {
+                if (rule.type === CSSRule.PAGE_RULE) continue;
+                css += `${rule.cssText}\n`;
+            }
         } catch {
             // Cross-origin component styles are not required for publication page export.
         }
@@ -537,24 +773,68 @@ function collectExportCss() {
     return css;
 }
 
+function waitForImages(root) {
+    return Promise.all([...root.querySelectorAll('img')].map(async image => {
+        if (image.complete && image.naturalWidth > 0) return;
+        try {
+            if (typeof image.decode === 'function') await image.decode();
+            else await new Promise((resolve, reject) => {
+                image.addEventListener('load', resolve, { once: true });
+                image.addEventListener('error', reject, { once: true });
+            });
+        } catch {
+            throw new Error(`Picture '${image.alt || image.src.slice(0, 48)}' could not be decoded for export.`);
+        }
+    }));
+}
+
+function copyComputedStyles(source, clone) {
+    if (!(source instanceof Element) || !(clone instanceof Element)) return;
+    const computed = getComputedStyle(source);
+    const important = [
+        'position','display','left','top','right','bottom','width','height','box-sizing','overflow',
+        'background','background-color','border','border-radius','box-shadow','opacity','filter',
+        'transform','transform-origin','object-fit','object-position','color','font','font-family',
+        'font-size','font-weight','font-style','line-height','letter-spacing','text-align','text-decoration',
+        'white-space','word-break','padding','margin','z-index','clip-path','isolation','mix-blend-mode',
+        'paint-order','stroke','stroke-width','fill'
+    ];
+    let inline = clone.getAttribute('style') || '';
+    for (const property of important) {
+        const value = computed.getPropertyValue(property);
+        if (value) inline += `${property}:${value};`;
+    }
+    clone.setAttribute('style', inline);
+    const sourceChildren = [...source.children];
+    const cloneChildren = [...clone.children];
+    for (let index = 0; index < Math.min(sourceChildren.length, cloneChildren.length); index++)
+        copyComputedStyles(sourceChildren[index], cloneChildren[index]);
+}
+
 function cleanPageClone(page) {
     const clone = page.cloneNode(true);
+    copyComputedStyles(page, clone);
     clone.removeAttribute('id');
     clone.classList.remove('crop-mode');
     clone.style.margin = '0';
     clone.style.boxShadow = 'none';
     clone.style.backgroundImage = 'none';
-    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help').forEach(item => item.remove());
-    clone.querySelectorAll('.selected').forEach(item => item.classList.remove('selected'));
-    clone.querySelectorAll('[id]').forEach(item => item.removeAttribute('id'));
+    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help,.connector-port,.connector-endpoint,.connector-hit,.connector-ghost').forEach(item => item.remove());
+    clone.querySelectorAll('.selected').forEach(item => {
+        item.classList.remove('selected');
+        item.style.outline = 'none';
+    });
     return clone;
 }
 
-function pageSvg(page) {
+async function pageSvg(page) {
+    await document.fonts?.ready;
+    await waitForImages(page);
     const rect = page.getBoundingClientRect();
     const clone = cleanPageClone(page);
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     svg.setAttribute('width', String(rect.width));
     svg.setAttribute('height', String(rect.height));
     svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
@@ -562,49 +842,99 @@ function pageSvg(page) {
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     foreignObject.setAttribute('x', '0');
     foreignObject.setAttribute('y', '0');
-    foreignObject.setAttribute('width', '100%');
-    foreignObject.setAttribute('height', '100%');
+    foreignObject.setAttribute('width', String(rect.width));
+    foreignObject.setAttribute('height', String(rect.height));
 
     const host = document.createElement('div');
     host.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
     host.style.width = `${rect.width}px`;
     host.style.height = `${rect.height}px`;
-    const style = document.createElement('style');
-    style.textContent = collectExportCss();
-    host.appendChild(style);
+    host.style.margin = '0';
+    host.style.padding = '0';
     host.appendChild(clone);
     foreignObject.appendChild(host);
     svg.appendChild(foreignObject);
     return { text: new XMLSerializer().serializeToString(svg), width: rect.width, height: rect.height };
 }
 
-async function svgToCanvas(svgText, width, height, scale) {
-    await document.fonts?.ready;
+async function loadSvgImage(svgText) {
+    const attempts = [];
     const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    try {
+
+    // Chromium's ImageBitmap path is the most reliable way to rasterize an SVG that contains
+    // XHTML foreignObject content. Keep two Image fallbacks for browsers that reject it.
+    if (typeof createImageBitmap === 'function') {
+        try {
+            const bitmap = await createImageBitmap(blob);
+            return { image: bitmap, cleanup: () => bitmap.close() };
+        } catch {
+            // Continue with object/data URL fallbacks.
+        }
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
+    attempts.push({ url: objectUrl, revoke: () => URL.revokeObjectURL(objectUrl) });
+    attempts.push({ url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`, revoke: null });
+
+    let lastError = null;
+    for (const attempt of attempts) {
         const image = new Image();
-        await new Promise((resolve, reject) => {
-            image.onload = resolve;
-            image.onerror = () => reject(new Error('The browser could not render the publication page.'));
-            image.src = url;
-        });
+        image.decoding = 'sync';
+        try {
+            await new Promise((resolve, reject) => {
+                const timer = setTimeout(() => reject(new Error('SVG rasterization timed out.')), 15000);
+                image.onload = () => { clearTimeout(timer); resolve(); };
+                image.onerror = () => { clearTimeout(timer); reject(new Error('The browser could not render the SVG export surface.')); };
+                image.src = attempt.url;
+            });
+            return { image, cleanup: attempt.revoke };
+        } catch (error) {
+            lastError = error;
+            if (attempt.revoke) attempt.revoke();
+        }
+    }
+    throw lastError || new Error('The browser could not prepare the publication for raster export.');
+}
+
+async function svgToCanvas(svgText, width, height, scale, jpeg) {
+    const loaded = await loadSvgImage(svgText);
+    try {
+        const requestedWidth = Math.max(1, Math.round(width * scale));
+        const requestedHeight = Math.max(1, Math.round(height * scale));
+        const maxPixels = 80_000_000;
+        const reduction = requestedWidth * requestedHeight > maxPixels
+            ? Math.sqrt(maxPixels / (requestedWidth * requestedHeight))
+            : 1;
+        const effectiveScale = scale * reduction;
+
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(width * scale));
-        canvas.height = Math.max(1, Math.round(height * scale));
-        const context = canvas.getContext('2d');
-        context.setTransform(scale, 0, 0, scale, 0, 0);
-        context.drawImage(image, 0, 0, width, height);
+        canvas.width = Math.max(1, Math.round(width * effectiveScale));
+        canvas.height = Math.max(1, Math.round(height * effectiveScale));
+        const context = canvas.getContext('2d', { alpha: !jpeg });
+        if (!context) throw new Error('The browser did not provide a 2D canvas context.');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if (jpeg) {
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        context.setTransform(effectiveScale, 0, 0, effectiveScale, 0, 0);
+        context.drawImage(loaded.image, 0, 0, width, height);
         return canvas;
     } finally {
-        URL.revokeObjectURL(url);
+        if (loaded.cleanup) loaded.cleanup();
     }
 }
 
-function canvasBlob(canvas, mimeType, quality) {
-    return new Promise((resolve, reject) => {
-        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('The browser could not create the image file.')), mimeType, quality);
-    });
+async function canvasBlob(canvas, mimeType, quality) {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+    if (blob) return blob;
+    try {
+        const dataUrl = canvas.toDataURL(mimeType, quality);
+        const response = await fetch(dataUrl);
+        return await response.blob();
+    } catch {
+        throw new Error('The browser could not create the raster image. Try SVG export or a lower DPI.');
+    }
 }
 
 function downloadBlob(fileName, blob) {
@@ -626,13 +956,123 @@ function escapeHtml(value) {
         .replaceAll('"', '&quot;');
 }
 
+function parseHexColor(value) {
+    const text = String(value || '#ffffff').trim().replace('#', '');
+    const normalized = text.length === 3 ? [...text].map(x => x + x).join('') : text.padEnd(6, 'f').slice(0, 6);
+    return {
+        r: Number.parseInt(normalized.slice(0, 2), 16),
+        g: Number.parseInt(normalized.slice(2, 4), 16),
+        b: Number.parseInt(normalized.slice(4, 6), 16)
+    };
+}
+
+async function imageFromDataUrl(dataUrl) {
+    const image = new Image();
+    image.decoding = 'async';
+    await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error('The selected picture could not be decoded.'));
+        image.src = dataUrl;
+    });
+    return image;
+}
+
+const workspaceStates = new WeakMap();
+
+function setWorkspaceColumns(workspace, state) {
+    workspace.style.setProperty('--pages-pane-width', state.leftCollapsed ? '0px' : `${state.left}px`);
+    workspace.style.setProperty('--inspector-pane-width', state.rightCollapsed ? '0px' : `${state.right}px`);
+    workspace.classList.toggle('pages-collapsed', state.leftCollapsed);
+    workspace.classList.toggle('inspector-collapsed', state.rightCollapsed);
+    localStorage.setItem('blazorPublisher.workspace', JSON.stringify(state));
+    window.dispatchEvent(new Event('resize'));
+}
+
+function createWorkspaceState(workspace) {
+    let stored = {};
+    try { stored = JSON.parse(localStorage.getItem('blazorPublisher.workspace') || '{}'); } catch { stored = {}; }
+    const state = {
+        left: clamp(number(stored.left, 172), 120, 420),
+        right: clamp(number(stored.right, 292), 220, 560),
+        leftCollapsed: !!stored.leftCollapsed,
+        rightCollapsed: !!stored.rightCollapsed
+    };
+    if (!localStorage.getItem('blazorPublisher.workspace')) {
+        if (workspace.clientWidth < 920) state.rightCollapsed = true;
+        if (workspace.clientWidth < 680) state.leftCollapsed = true;
+    }
+    workspaceStates.set(workspace, state);
+    setWorkspaceColumns(workspace, state);
+    return state;
+}
+
+function bindWorkspaceSplitter(workspace, splitter, side) {
+    if (!splitter || splitter.dataset.bound === 'true') return;
+    splitter.dataset.bound = 'true';
+    splitter.addEventListener('dblclick', () => window.publisherStudio.toggleWorkspacePane(workspace.id, side));
+    splitter.addEventListener('pointerdown', event => {
+        if (event.button !== 0) return;
+        const state = workspaceStates.get(workspace) || createWorkspaceState(workspace);
+        const startX = event.clientX;
+        const initial = side === 'left' ? state.left : state.right;
+        splitter.classList.add('dragging');
+        splitter.setPointerCapture(event.pointerId);
+        const move = moveEvent => {
+            const delta = moveEvent.clientX - startX;
+            if (side === 'left') {
+                state.leftCollapsed = false;
+                state.left = clamp(initial + delta, 120, Math.max(120, workspace.clientWidth * .42));
+            } else {
+                state.rightCollapsed = false;
+                state.right = clamp(initial - delta, 220, Math.max(220, workspace.clientWidth * .48));
+            }
+            setWorkspaceColumns(workspace, state);
+        };
+        const up = upEvent => {
+            splitter.classList.remove('dragging');
+            splitter.removeEventListener('pointermove', move);
+            splitter.removeEventListener('pointerup', up);
+            splitter.removeEventListener('pointercancel', up);
+            try { splitter.releasePointerCapture(upEvent.pointerId); } catch { }
+        };
+        splitter.addEventListener('pointermove', move);
+        splitter.addEventListener('pointerup', up);
+        splitter.addEventListener('pointercancel', up);
+        event.preventDefault();
+    });
+}
+
 window.publisherStudio = {
     clickElement(id) {
         const element = document.getElementById(id);
         if (!element) return;
-        if (element instanceof HTMLInputElement && element.type === 'file')
-            element.value = '';
+        if (element instanceof HTMLInputElement && element.type === 'file') element.value = '';
         element.click();
+    },
+
+    initializeWorkspace(id) {
+        const workspace = document.getElementById(id);
+        if (!workspace) return;
+        if (!workspaceStates.has(workspace)) createWorkspaceState(workspace);
+        bindWorkspaceSplitter(workspace, workspace.querySelector('[data-workspace-splitter="left"]'), 'left');
+        bindWorkspaceSplitter(workspace, workspace.querySelector('[data-workspace-splitter="right"]'), 'right');
+    },
+
+    toggleWorkspacePane(id, side) {
+        const workspace = document.getElementById(id);
+        if (!workspace) return;
+        const state = workspaceStates.get(workspace) || createWorkspaceState(workspace);
+        if (side === 'left') state.leftCollapsed = !state.leftCollapsed;
+        else state.rightCollapsed = !state.rightCollapsed;
+        setWorkspaceColumns(workspace, state);
+    },
+
+    resetWorkspaceLayout(id) {
+        const workspace = document.getElementById(id);
+        if (!workspace) return;
+        const state = { left: 172, right: 292, leftCollapsed: false, rightCollapsed: false };
+        workspaceStates.set(workspace, state);
+        setWorkspaceColumns(workspace, state);
     },
 
     async downloadStream(fileName, streamReference, mimeType) {
@@ -643,7 +1083,7 @@ window.publisherStudio = {
     async exportPage(pageId, fileName, format, dpi, zoom) {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
-        const serialized = pageSvg(page);
+        const serialized = await pageSvg(page);
         const normalized = String(format).toLowerCase();
 
         if (normalized === 'svg') {
@@ -651,11 +1091,41 @@ window.publisherStudio = {
             return;
         }
 
-        const scale = clamp(number(dpi, 150) / (96 * Math.max(number(zoom, 1), .05)), .5, 12);
-        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, scale);
         const jpeg = normalized === 'jpeg' || normalized === 'jpg';
+        const scale = clamp(number(dpi, 150) / (96 * Math.max(number(zoom, 1), .05)), .5, 12);
+        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, scale, jpeg);
         const blob = await canvasBlob(canvas, jpeg ? 'image/jpeg' : 'image/png', jpeg ? .92 : undefined);
         downloadBlob(fileName, blob);
+    },
+
+    async verifyPageRaster(pageId) {
+        const page = document.getElementById(pageId);
+        if (!page) throw new Error('The publication page is not available.');
+        const serialized = await pageSvg(page);
+        const canvas = await svgToCanvas(serialized.text, serialized.width, serialized.height, 1, false);
+        return { width: canvas.width, height: canvas.height, prefix: canvas.toDataURL('image/png').slice(0, 22) };
+    },
+
+    async makeColorTransparent(dataUrl, color, tolerance) {
+        const image = await imageFromDataUrl(dataUrl);
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) throw new Error('The browser did not provide an image editing canvas.');
+        context.drawImage(image, 0, 0);
+        const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+        const target = parseHexColor(color);
+        const threshold = clamp(number(tolerance, 24), 0, 255);
+        const thresholdSquared = threshold * threshold * 3;
+        for (let index = 0; index < pixels.data.length; index += 4) {
+            const dr = pixels.data[index] - target.r;
+            const dg = pixels.data[index + 1] - target.g;
+            const db = pixels.data[index + 2] - target.b;
+            if (dr * dr + dg * dg + db * db <= thresholdSquared) pixels.data[index + 3] = 0;
+        }
+        context.putImageData(pixels, 0, 0);
+        return canvas.toDataURL('image/png');
     },
 
     exportWebsite(fileName, title) {
@@ -677,7 +1147,7 @@ body{margin:0;padding:24px;font-family:Segoe UI,system-ui,sans-serif}
 .website-publication{display:block!important}
 .website-publication .print-page{position:relative;overflow:hidden;margin:0 auto 24px;box-shadow:0 4px 24px #0005;background:#fff}
 .website-publication .print-element{position:absolute;transform-origin:center}
-.website-publication .text-frame-content,.website-publication .image-frame,.website-publication .shape{width:100%;height:100%;overflow:hidden}
+.website-publication .text-frame-content,.website-publication .image-frame,.website-publication .shape,.website-publication .wordart-svg{width:100%;height:100%;overflow:hidden}
 .website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center}
 @media print{body{padding:0;background:#fff!important}.website-publication .print-page{margin:0 auto;box-shadow:none;break-after:page}}
 </style>
@@ -687,7 +1157,5 @@ body{margin:0;padding:24px;font-family:Segoe UI,system-ui,sans-serif}
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
     },
 
-    printPublication() {
-        window.print();
-    }
+    printPublication() { window.print(); }
 };

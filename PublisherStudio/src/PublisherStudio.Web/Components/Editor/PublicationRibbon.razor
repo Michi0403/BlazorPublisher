@@ -2,56 +2,59 @@
 
 <DxRibbon CssClass="publication-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text="File">
-        <DxRibbonApplicationTabItem Text="New publication" Click="RequestNew" />
-        <DxRibbonApplicationTabItem Text="Open publication" Click="RequestOpen" />
-        <DxRibbonApplicationTabItem Text="Save publication" Click="RequestSave" />
-        <DxRibbonApplicationTabItem Text="Export current page as PNG" Click="RequestExportPng" />
-        <DxRibbonApplicationTabItem Text="Export current page as JPEG" Click="RequestExportJpeg" />
-        <DxRibbonApplicationTabItem Text="Export current page as SVG" Click="RequestExportSvg" />
-        <DxRibbonApplicationTabItem Text="Export publication as website" Click="RequestExportWebsite" />
-        <DxRibbonApplicationTabItem Text="Print / Save as PDF" Click="RequestPrint" />
+        <DxRibbonApplicationTabItem Text="New publication" IconCssClass="pub-icon pub-icon-newpage" Click="RequestNew" />
+        <DxRibbonApplicationTabItem Text="Open publication" IconCssClass="pub-icon pub-icon-open" Click="RequestOpen" />
+        <DxRibbonApplicationTabItem Text="Save publication" IconCssClass="pub-icon pub-icon-save" Click="RequestSave" />
+        <DxRibbonApplicationTabItem Text="Export current page as PNG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportPng" />
+        <DxRibbonApplicationTabItem Text="Export current page as JPEG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportJpeg" />
+        <DxRibbonApplicationTabItem Text="Export current page as SVG" IconCssClass="pub-icon pub-icon-vector" Click="RequestExportSvg" />
+        <DxRibbonApplicationTabItem Text="Export publication as website" IconCssClass="pub-icon pub-icon-web" Click="RequestExportWebsite" />
+        <DxRibbonApplicationTabItem Text="Print / Save as PDF" IconCssClass="pub-icon pub-icon-print" Click="RequestPrint" />
     </DxRibbonApplicationTab>
 
     <DxRibbonTab Text="Home">
-        <DxRibbonGroup Text="History">
-            <DxRibbonItem Text="Undo" Enabled="State.CanUndo" Click="Undo" />
-            <DxRibbonItem Text="Redo" Enabled="State.CanRedo" Click="Redo" />
+        <DxRibbonGroup Text="History" IconCssClass="pub-icon pub-icon-undo">
+            <DxRibbonItem Text="Undo" IconCssClass="pub-icon pub-icon-undo" Enabled="State.CanUndo" Click="Undo" />
+            <DxRibbonItem Text="Redo" IconCssClass="pub-icon pub-icon-redo" Enabled="State.CanRedo" Click="Redo" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Clipboard">
-            <DxRibbonItem Text="Copy" Enabled="HasSelection" Click="Copy" />
-            <DxRibbonItem Text="Paste" Enabled="State.CanPaste" Click="Paste" />
-            <DxRibbonItem Text="Duplicate" Enabled="HasSelection" Click="Duplicate" />
-            <DxRibbonItem Text="Delete" Enabled="HasSelection" Click="Delete" />
+        <DxRibbonGroup Text="Clipboard" IconCssClass="pub-icon pub-icon-copy">
+            <DxRibbonItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" Enabled="HasSelection" Click="Copy" />
+            <DxRibbonItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="State.CanPaste" Click="Paste" />
+            <DxRibbonItem Text="Duplicate" IconCssClass="pub-icon pub-icon-duplicate" Enabled="HasSelection" Click="Duplicate" />
+            <DxRibbonItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Enabled="HasSelection" Click="Delete" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Arrange">
-            <DxRibbonItem Text="To front" Enabled="HasSelection" Click="BringToFront" />
+        <DxRibbonGroup Text="Arrange" IconCssClass="pub-icon pub-icon-layers">
+            <DxRibbonItem Text="To front" IconCssClass="pub-icon pub-icon-front" Enabled="HasSelection" Click="BringToFront" />
             <DxRibbonItem Text="Forward" Enabled="HasSelection" Click="BringForward" />
             <DxRibbonItem Text="Backward" Enabled="HasSelection" Click="SendBackward" />
             <DxRibbonItem Text="To back" Enabled="HasSelection" Click="SendToBack" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Align to page">
-            <DxRibbonItem Text="Left" Enabled="HasSelection" Click="AlignLeft" />
-            <DxRibbonItem Text="Center" Enabled="HasSelection" Click="AlignCenter" />
-            <DxRibbonItem Text="Right" Enabled="HasSelection" Click="AlignRight" />
-            <DxRibbonItem Text="Top" Enabled="HasSelection" Click="AlignTop" />
-            <DxRibbonItem Text="Middle" Enabled="HasSelection" Click="AlignMiddle" />
-            <DxRibbonItem Text="Bottom" Enabled="HasSelection" Click="AlignBottom" />
+        <DxRibbonGroup Text="Align to page" IconCssClass="pub-icon pub-icon-align">
+            <DxRibbonItem Text="Left" Enabled="CanAlign" Click="AlignLeft" />
+            <DxRibbonItem Text="Center" Enabled="CanAlign" Click="AlignCenter" />
+            <DxRibbonItem Text="Right" Enabled="CanAlign" Click="AlignRight" />
+            <DxRibbonItem Text="Top" Enabled="CanAlign" Click="AlignTop" />
+            <DxRibbonItem Text="Middle" Enabled="CanAlign" Click="AlignMiddle" />
+            <DxRibbonItem Text="Bottom" Enabled="CanAlign" Click="AlignBottom" />
         </DxRibbonGroup>
     </DxRibbonTab>
 
     <DxRibbonTab Text="Insert">
-        <DxRibbonGroup Text="Objects">
-            <DxRibbonItem Text="Text box" Click="AddText" />
-            <DxRibbonItem Text="Picture" Click="RequestPicture" />
+        <DxRibbonGroup Text="Objects" IconCssClass="pub-icon pub-icon-insert">
+            <DxRibbonItem Text="Text box" IconCssClass="pub-icon pub-icon-text" IsPrimary="true" Click="AddText" AdaptivePriority="-5" />
+            <DxRibbonItem Text="WordArt" IconCssClass="pub-icon pub-icon-wordart" IsPrimary="true" Click="AddWordArt" AdaptivePriority="-5" />
+            <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" IsPrimary="true" Click="RequestPicture" AdaptivePriority="-5" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Shapes">
+        <DxRibbonGroup Text="Shapes" IconCssClass="pub-icon pub-icon-shape">
             <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
             <DxRibbonItem Text="Rounded rectangle" Click="AddRoundedRectangle" />
             <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
             <DxRibbonItem Text="Line" Click="AddLine" />
+            <DxRibbonItem Text="Connector" IconCssClass="pub-icon pub-icon-connector" IsPrimary="true" Click="StartConnector" />
+            <DxRibbonItem Text="Arrow connector" IconCssClass="pub-icon pub-icon-arrow" IsPrimary="true" Click="StartArrowConnector" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Pages">
-            <DxRibbonItem Text="New page" Click="AddPage" />
+        <DxRibbonGroup Text="Pages" IconCssClass="pub-icon pub-icon-page">
+            <DxRibbonItem Text="New page" IconCssClass="pub-icon pub-icon-newpage" Click="AddPage" />
             <DxRibbonItem Text="Duplicate page" Click="DuplicatePage" />
             <DxRibbonItem Text="Delete page" Enabled="@(State.Document.Pages.Count > 1)" Click="DeletePage" />
         </DxRibbonGroup>
@@ -75,14 +78,14 @@
             <DxRibbonItem Text="Square" Click="SetSquare" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Orientation">
-            <DxRibbonItem Text="Swap width / height" Click="SwapOrientation" />
+            <DxRibbonItem Text="Swap width / height" IconCssClass="pub-icon pub-icon-rotate" Click="SwapOrientation" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Background">
-            <DxRibbonColorPaletteItem Text="Page color" Value="@State.CurrentPage.Background" ValueChanged="OnPageColorChanged">
-                <Groups>
-                    <DxRibbonColorGroup Header="Publication" Colors="@PageColors" />
-                </Groups>
+            <DxRibbonColorPaletteItem Text="Page color" Value="@PagePaletteColor" ValueChanged="OnPageColorChanged">
+                <Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups>
             </DxRibbonColorPaletteItem>
+            <DxRibbonItem Text="Transparent page" Click="SetTransparentPage" />
+            <DxRibbonItem Text="White page" Click="SetWhitePage" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Guides">
             <DxRibbonItem Text="Vertical center" Click="AddVerticalGuide" />
@@ -92,6 +95,11 @@
     </DxRibbonTab>
 
     <DxRibbonTab Text="View">
+        <DxRibbonGroup Text="Workspace" IconCssClass="pub-icon pub-icon-panels">
+            <DxRibbonItem Text="Pages pane" IconCssClass="pub-icon pub-icon-pages" Click="RequestTogglePagesPane" />
+            <DxRibbonItem Text="Properties pane" IconCssClass="pub-icon pub-icon-properties" Click="RequestToggleInspectorPane" />
+            <DxRibbonItem Text="Reset layout" Click="RequestResetWorkspace" />
+        </DxRibbonGroup>
         <DxRibbonGroup Text="Show">
             <DxRibbonItem Text="@RulersText" Click="ToggleRulers" />
             <DxRibbonItem Text="@GridText" Click="ToggleGrid" />
@@ -108,8 +116,8 @@
             <DxRibbonItem Text="@SnapGuidesText" Click="ToggleSnapGuides" />
             <DxRibbonItem Text="@SnapPageText" Click="ToggleSnapPage" />
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Zoom">
-            <DxRibbonItem Text="Fit page" Click="RequestFitPage" />
+        <DxRibbonGroup Text="Zoom" IconCssClass="pub-icon pub-icon-zoom">
+            <DxRibbonItem Text="Fit page" IconCssClass="pub-icon pub-icon-fit" Click="RequestFitPage" />
             <DxRibbonItem Text="50%" Click="Zoom50" />
             <DxRibbonItem Text="75%" Click="Zoom75" />
             <DxRibbonItem Text="100%" Click="Zoom100" />
@@ -119,9 +127,9 @@
     </DxRibbonTab>
 
     <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsImageSelected">
-        <DxRibbonGroup Text="Picture">
-            <DxRibbonItem Text="Replace" Click="RequestPicture" />
-            <DxRibbonItem Text="@CropCommandText" Click="ToggleCrop" />
+        <DxRibbonGroup Text="Picture" IconCssClass="pub-icon pub-icon-picture">
+            <DxRibbonItem Text="Replace" IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
+            <DxRibbonItem Text="@CropCommandText" IconCssClass="pub-icon pub-icon-crop" Click="ToggleCrop" />
             <DxRibbonItem Text="Fit" Click="PictureFit" />
             <DxRibbonItem Text="Fill" Click="PictureFill" />
             <DxRibbonItem Text="Reset" Click="ResetPicture" />
@@ -136,6 +144,13 @@
             <DxRibbonItem Text="Grayscale" Click="ToggleGrayscale" />
             <DxRibbonItem Text="Sepia" Click="ToggleSepia" />
             <DxRibbonItem Text="Invert" Click="ToggleInvert" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Recolor" IconCssClass="pub-icon pub-icon-color">
+            <DxRibbonItem Text="Blue tint" Click="TintBlue" />
+            <DxRibbonItem Text="Warm tint" Click="TintWarm" />
+            <DxRibbonItem Text="Green tint" Click="TintGreen" />
+            <DxRibbonItem Text="Full recolor" Click="FullRecolor" />
+            <DxRibbonItem Text="Clear color" Click="ClearTint" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Picture styles">
             <DxRibbonItem Text="Rectangle" Click="MaskRectangle" />
@@ -159,9 +174,7 @@
     </DxRibbonTab>
 
     <DxRibbonTab Text="Text Box Tools" Contextual="true" Visible="IsTextSelected">
-        <DxRibbonGroup Text="Text">
-            <DxRibbonItem Text="Edit story" Click="RequestStoryEditor" />
-        </DxRibbonGroup>
+        <DxRibbonGroup Text="Text"><DxRibbonItem Text="Edit story" IconCssClass="pub-icon pub-icon-edit" IsPrimary="true" Click="RequestStoryEditor" /></DxRibbonGroup>
         <DxRibbonGroup Text="Frame">
             <DxRibbonItem Text="No fill" Click="TextNoFill" />
             <DxRibbonItem Text="White fill" Click="TextWhiteFill" />
@@ -170,23 +183,60 @@
         </DxRibbonGroup>
     </DxRibbonTab>
 
+    <DxRibbonTab Text="WordArt Tools" Contextual="true" Visible="IsWordArtSelected">
+        <DxRibbonGroup Text="Style" IconCssClass="pub-icon pub-icon-wordart">
+            <DxRibbonItem Text="Blue gradient" Click="WordArtBlue" />
+            <DxRibbonItem Text="Gold gradient" Click="WordArtGold" />
+            <DxRibbonItem Text="Green gradient" Click="WordArtGreen" />
+            <DxRibbonItem Text="Flat fill" Click="WordArtFlat" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Transform">
+            <DxRibbonItem Text="Straight" Click="WordArtStraight" />
+            <DxRibbonItem Text="Arch up" Click="WordArtArchUp" />
+            <DxRibbonItem Text="Arch down" Click="WordArtArchDown" />
+            <DxRibbonItem Text="Wave" Click="WordArtWave" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Depth">
+            <DxRibbonItem Text="More 3D" Click="WordArtMoreDepth" />
+            <DxRibbonItem Text="Less 3D" Click="WordArtLessDepth" />
+            <DxRibbonItem Text="Shadow" Click="WordArtShadow" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
+    <DxRibbonTab Text="Connector Tools" Contextual="true" Visible="IsConnectorSelected">
+        <DxRibbonGroup Text="Path" IconCssClass="pub-icon pub-icon-connector">
+            <DxRibbonItem Text="Straight" Click="ConnectorStraight" />
+            <DxRibbonItem Text="Elbow" Click="ConnectorElbow" />
+            <DxRibbonItem Text="Curved" Click="ConnectorCurved" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Line style">
+            <DxRibbonItem Text="Solid" Click="ConnectorSolid" />
+            <DxRibbonItem Text="Dashed" Click="ConnectorDashed" />
+            <DxRibbonItem Text="Dotted" Click="ConnectorDotted" />
+            <DxRibbonItem Text="Thicker" Click="ConnectorThicker" />
+            <DxRibbonItem Text="Thinner" Click="ConnectorThinner" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Arrowheads" IconCssClass="pub-icon pub-icon-arrow">
+            <DxRibbonItem Text="No arrows" Click="ConnectorNoArrows" />
+            <DxRibbonItem Text="Arrow end" Click="ConnectorArrowEnd" />
+            <DxRibbonItem Text="Arrows both ends" Click="ConnectorArrowsBoth" />
+            <DxRibbonItem Text="Diamond start" Click="ConnectorDiamondStart" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Color">
+            <DxRibbonColorPaletteItem Text="Line color" Value="@ConnectorStroke" ValueChanged="OnConnectorStrokeChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
     <DxRibbonTab Text="Shape Tools" Contextual="true" Visible="IsShapeSelected">
         <DxRibbonGroup Text="Shape">
-            <DxRibbonColorPaletteItem Text="Fill" Value="@ShapeFill" ValueChanged="OnShapeFillChanged">
-                <Groups>
-                    <DxRibbonColorGroup Header="Publication" Colors="@PageColors" />
-                </Groups>
-            </DxRibbonColorPaletteItem>
-            <DxRibbonColorPaletteItem Text="Outline" Value="@ShapeStroke" ValueChanged="OnShapeStrokeChanged">
-                <Groups>
-                    <DxRibbonColorGroup Header="Publication" Colors="@PageColors" />
-                </Groups>
-            </DxRibbonColorPaletteItem>
+            <DxRibbonColorPaletteItem Text="Fill" Value="@ShapeFill" ValueChanged="OnShapeFillChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
+            <DxRibbonColorPaletteItem Text="Outline" Value="@ShapeStroke" ValueChanged="OnShapeStrokeChanged"><Groups><DxRibbonColorGroup Header="Publication" Colors="@PageColors" /></Groups></DxRibbonColorPaletteItem>
         </DxRibbonGroup>
-        <DxRibbonGroup Text="Rotate">
-            <DxRibbonItem Text="Rotate left" Click="RotateLeft" />
-            <DxRibbonItem Text="Rotate right" Click="RotateRight" />
+        <DxRibbonGroup Text="Connections" IconCssClass="pub-icon pub-icon-connector">
+            <DxRibbonItem Text="Draw connector" IconCssClass="pub-icon pub-icon-connector" IsPrimary="true" Click="StartConnector" />
+            <DxRibbonItem Text="Draw arrow" IconCssClass="pub-icon pub-icon-arrow" IsPrimary="true" Click="StartArrowConnector" />
         </DxRibbonGroup>
+        <DxRibbonGroup Text="Rotate"><DxRibbonItem Text="Rotate left" Click="RotateLeft" /><DxRibbonItem Text="Rotate right" Click="RotateRight" /></DxRibbonGroup>
     </DxRibbonTab>
 </DxRibbon>
 
@@ -203,6 +253,9 @@
     [Parameter] public EventCallback OnInsertPicture { get; set; }
     [Parameter] public EventCallback OnEditStory { get; set; }
     [Parameter] public EventCallback OnFitPage { get; set; }
+    [Parameter] public EventCallback OnTogglePagesPane { get; set; }
+    [Parameter] public EventCallback OnToggleInspectorPane { get; set; }
+    [Parameter] public EventCallback OnResetWorkspace { get; set; }
 
     private string CropCommandText => State.CropMode ? "Finish crop" : "Crop";
     private string RulersText => CheckText(State.Document.View.RulersVisible, "Rulers");
@@ -224,13 +277,21 @@
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
     private Task RequestStoryEditor() => OnEditStory.InvokeAsync();
     private Task RequestFitPage() => OnFitPage.InvokeAsync();
+    private Task RequestTogglePagesPane() => OnTogglePagesPane.InvokeAsync();
+    private Task RequestToggleInspectorPane() => OnToggleInspectorPane.InvokeAsync();
+    private Task RequestResetWorkspace() => OnResetWorkspace.InvokeAsync();
 
     private bool HasSelection => State.SelectedElement is not null;
+    private bool CanAlign => State.SelectedElement is not null and not ConnectorElement;
     private bool IsImageSelected => State.SelectedElement is ImageFrameElement;
     private bool IsTextSelected => State.SelectedElement is TextFrameElement;
     private bool IsShapeSelected => State.SelectedElement is ShapeElement;
+    private bool IsWordArtSelected => State.SelectedElement is WordArtElement;
+    private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
     private string ShapeFill => (State.SelectedElement as ShapeElement)?.Fill ?? "#ffffff";
     private string ShapeStroke => (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
+    private string ConnectorStroke => (State.SelectedElement as ConnectorElement)?.Stroke ?? "#245b85";
+    private string PagePaletteColor => State.CurrentPage.Background.StartsWith('#') ? State.CurrentPage.Background : "#ffffff";
     private static readonly string[] PageColors = ["#ffffff", "#f8fafc", "#fef3c7", "#fee2e2", "#dcfce7", "#dbeafe", "#ede9fe", "#111827"];
 
     private void Undo() => State.Undo();
@@ -250,10 +311,13 @@
     private void AlignMiddle() => State.Align("middle");
     private void AlignBottom() => State.Align("bottom");
     private void AddText() => State.AddText();
+    private void AddWordArt() => State.AddWordArt();
     private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
     private void AddRoundedRectangle() => State.AddShape(PublicationShape.RoundedRectangle);
     private void AddEllipse() => State.AddShape(PublicationShape.Ellipse);
     private void AddLine() => State.AddShape(PublicationShape.Line);
+    private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
+    private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
     private void AddPage() => State.AddPage();
     private void DuplicatePage() => State.DuplicatePage();
     private void DeletePage() => State.DeletePage();
@@ -303,6 +367,12 @@
     private void ToggleGrayscale() => SetImage(image => image.Grayscale = image.Grayscale > 0 ? 0 : 1);
     private void ToggleSepia() => SetImage(image => image.Sepia = image.Sepia > 0 ? 0 : .85);
     private void ToggleInvert() => SetImage(image => image.Invert = image.Invert > 0 ? 0 : 1);
+    private void TintBlue() => Tint("#2f75b5", ImageTintMode.Overlay);
+    private void TintWarm() => Tint("#d97706", ImageTintMode.Overlay);
+    private void TintGreen() => Tint("#16a34a", ImageTintMode.Overlay);
+    private void FullRecolor() => SetImage(image => { image.TintMode = ImageTintMode.Recolor; image.TintOpacity = 1; });
+    private void ClearTint() => SetImage(image => image.TintOpacity = 0);
+    private void Tint(string color, ImageTintMode mode) => SetImage(image => { image.TintColor = color; image.TintMode = mode; image.TintOpacity = .55; });
     private void MaskRectangle() => SetImage(image => image.MaskShape = ImageMaskShape.Rectangle);
     private void MaskRounded() => SetImage(image => image.MaskShape = ImageMaskShape.RoundedRectangle);
     private void MaskEllipse() => SetImage(image => image.MaskShape = ImageMaskShape.Ellipse);
@@ -318,63 +388,57 @@
     private void FlipVertical() => SetImage(image => image.FlipVertical = !image.FlipVertical);
     private void TextNoFill() => SetText(text => text.Background = "transparent");
     private void TextWhiteFill() => SetText(text => text.Background = "#ffffff");
+
+    private void WordArtBlue() => SetWordArt(item => { item.FillColor = "#175b9c"; item.SecondaryColor = "#8ec5ff"; item.GradientFill = true; });
+    private void WordArtGold() => SetWordArt(item => { item.FillColor = "#b45309"; item.SecondaryColor = "#fde68a"; item.GradientFill = true; item.ExtrudeColor = "#78350f"; });
+    private void WordArtGreen() => SetWordArt(item => { item.FillColor = "#15803d"; item.SecondaryColor = "#86efac"; item.GradientFill = true; });
+    private void WordArtFlat() => SetWordArt(item => item.GradientFill = false);
+    private void WordArtStraight() => SetWordArt(item => item.Warp = WordArtWarp.None);
+    private void WordArtArchUp() => SetWordArt(item => item.Warp = WordArtWarp.ArchUp);
+    private void WordArtArchDown() => SetWordArt(item => item.Warp = WordArtWarp.ArchDown);
+    private void WordArtWave() => SetWordArt(item => item.Warp = WordArtWarp.Wave);
+    private void WordArtMoreDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Min(18, item.ExtrudeDepth + 2));
+    private void WordArtLessDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Max(0, item.ExtrudeDepth - 2));
+    private void WordArtShadow() => SetWordArt(item => item.ShadowEnabled = !item.ShadowEnabled);
+
+    private void SetConnector(Action<ConnectorElement> update) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); }
+    private void ConnectorStraight() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Straight);
+    private void ConnectorElbow() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Elbow);
+    private void ConnectorCurved() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Curved);
+    private void ConnectorSolid() => SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Solid);
+    private void ConnectorDashed() => SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Dash);
+    private void ConnectorDotted() => SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Dot);
+    private void ConnectorThicker() => SetConnector(connector => connector.StrokeWidthMm = Math.Min(6, connector.StrokeWidthMm + .2));
+    private void ConnectorThinner() => SetConnector(connector => connector.StrokeWidthMm = Math.Max(.15, connector.StrokeWidthMm - .2));
+    private void ConnectorNoArrows() => SetConnector(connector => { connector.StartMarker = ConnectorMarker.None; connector.EndMarker = ConnectorMarker.None; });
+    private void ConnectorArrowEnd() => SetConnector(connector => { connector.StartMarker = ConnectorMarker.None; connector.EndMarker = ConnectorMarker.Arrow; });
+    private void ConnectorArrowsBoth() => SetConnector(connector => { connector.StartMarker = ConnectorMarker.Arrow; connector.EndMarker = ConnectorMarker.Arrow; });
+    private void ConnectorDiamondStart() => SetConnector(connector => connector.StartMarker = ConnectorMarker.Diamond);
+    private void OnConnectorStrokeChanged(string value) => SetConnector(connector => connector.Stroke = value);
+
     private void SetPage(double width, double height) => State.SetPageSize(width, height);
     private void Rotate(double amount) => State.UpdateSelected(element => element.Rotation = NormalizeAngle(element.Rotation + amount));
     private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;
-
-    private void SetImage(Action<ImageFrameElement> update)
-    {
-        if (State.SelectedElement is ImageFrameElement image)
-            State.UpdateSelected(_ => update(image));
-    }
-
+    private void SetImage(Action<ImageFrameElement> update) { if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); }
     private void SetImageRatio(double ratio) => SetImage(image => image.Height = Math.Max(2, image.Width / ratio));
-
-    private void SetText(Action<TextFrameElement> update)
-    {
-        if (State.SelectedElement is TextFrameElement text)
-            State.UpdateSelected(_ => update(text));
-    }
-
+    private void SetText(Action<TextFrameElement> update) { if (State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => update(text)); }
+    private void SetWordArt(Action<WordArtElement> update) { if (State.SelectedElement is WordArtElement item) State.UpdateSelected(_ => update(item)); }
     private void OnPageColorChanged(string value) => State.UpdatePage(publicationPage => publicationPage.Background = value);
-
-    private void OnShapeFillChanged(string value)
-    {
-        if (State.SelectedElement is ShapeElement shape)
-            State.UpdateSelected(_ => shape.Fill = value);
-    }
-
-    private void OnShapeStrokeChanged(string value)
-    {
-        if (State.SelectedElement is ShapeElement shape)
-            State.UpdateSelected(_ => shape.Stroke = value);
-    }
+    private void SetTransparentPage() => State.UpdatePage(publicationPage => publicationPage.Background = "transparent");
+    private void SetWhitePage() => State.UpdatePage(publicationPage => publicationPage.Background = "#ffffff");
+    private void OnShapeFillChanged(string value) { if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Fill = value); }
+    private void OnShapeStrokeChanged(string value) { if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Stroke = value); }
 
     private void ResetPicture()
     {
         SetImage(image =>
         {
-            image.CropX = 0;
-            image.CropY = 0;
-            image.CropScale = 1;
-            image.ImageRotation = 0;
-            image.Opacity = 1;
-            image.Brightness = 1;
-            image.Contrast = 1;
-            image.Saturation = 1;
-            image.HueRotation = 0;
-            image.Invert = 0;
-            image.Grayscale = 0;
-            image.Sepia = 0;
-            image.Blur = 0;
-            image.FlipHorizontal = false;
-            image.FlipVertical = false;
-            image.MaskShape = ImageMaskShape.Rectangle;
-            image.CornerRadiusMm = 4;
-            image.BorderColor = "transparent";
-            image.BorderWidthMm = 0;
-            image.ShadowEnabled = false;
-            image.FitInsideFrame = false;
+            image.CropX = 0; image.CropY = 0; image.CropScale = 1; image.ImageRotation = 0;
+            image.Opacity = 1; image.Brightness = 1; image.Contrast = 1; image.Saturation = 1;
+            image.HueRotation = 0; image.Invert = 0; image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
+            image.FlipHorizontal = false; image.FlipVertical = false; image.MaskShape = ImageMaskShape.Rectangle;
+            image.CornerRadiusMm = 4; image.BorderColor = "transparent"; image.BorderWidthMm = 0;
+            image.ShadowEnabled = false; image.FitInsideFrame = false; image.TintOpacity = 0;
         });
     }
 }

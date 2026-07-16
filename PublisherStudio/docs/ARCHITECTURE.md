@@ -2,62 +2,63 @@
 
 ## Stable boundaries
 
-- **PublisherStudio.Web** remains the product host. It owns ASP.NET Core loopback hosting, Interactive Blazor Server, DevExpress integration, the publication model, export interop, services, and local API endpoints.
-- **PublisherStudio.InstallerConsole** remains an optional deployment helper with no project reference to the web UI. It installs or launches published output and can publish a source ZIP without Git.
-- **WinUI remains optional and absent from this solution.** Nothing in the editor requires a desktop shell.
+- **PublisherStudio.Web** remains the ASP.NET Core loopback host and Interactive Blazor Server application. It owns DevExpress integration, publication state, browser interop, controllers, and exports.
+- **PublisherStudio.InstallerConsole** remains an optional deployment helper with no UI project dependency. It can install/start published output or publish a source ZIP without Git.
+- **WinUI remains optional and absent.** The browser host is the product core.
 
-The v0.2 work extends these boundaries; it does not replace the host, routing, dependency injection, controllers, or installer wiring.
+v0.3 extends these boundaries without replacing routing, dependency injection, controllers, services, the installer, or the document model.
 
 ## Editing engines
 
-- DevExpress `DxRibbon` is the primary command surface.
-- DevExpress `DxContextMenu` provides object/page commands on right-click.
-- DevExpress `DxRichEdit` edits the rich-text story stored by a selected text frame.
-- The publication page is an absolute-positioned HTML object surface. A small native JavaScript module performs pointer tracking, resize, crop, snapping, ruler rendering, guide manipulation, and browser export.
-- C# remains authoritative. JavaScript only previews an active pointer operation and commits final millimetre values through JS interop.
+- DevExpress `DxRibbon` is the main command surface.
+- DevExpress `DxContextMenu` provides page/object right-click workflows.
+- DevExpress `DxRichEdit` owns rich story editing, DOCX persistence, fields, page layout, printing, and DOCX/RTF/TXT/HTML downloads.
+- The publication surface is an absolute-positioned HTML/SVG canvas. Native JavaScript performs pointer previews, rulers, guides, crop gestures, snapping, connector reconnection, and browser export.
+- C# is authoritative. JavaScript commits final millimetre values/endpoints through JS interop.
 
-## Canvas view model
+## Workspace and view model
 
-`PublicationViewSettings` stores user-facing canvas state separately from page content:
+`PublicationViewSettings` stores rulers, unit, grid/guides, snapping, zoom-related preferences, and raster DPI separately from page content. The five-column workspace allocates fixed/resizable side panes and gives all remaining width to the canvas; panes can collapse without overlaying the rulers.
 
-- ruler unit and visibility
-- grid and guide visibility
-- grid spacing
-- snap-to-grid, snap-to-guides, and snap-to-page
-- raster export DPI
+The page stays millimetre-based. Zoom only changes millimetres-to-CSS-pixels conversion. Rulers derive their origin and ticks from the live page rectangle, so they follow zoom, scrolling, viewport changes, and page dimensions.
 
-The page itself stays millimetre-based. Zoom changes only the conversion from millimetres to CSS pixels. Rulers derive their ticks from the live page rectangle and therefore follow zoom, scrolling, viewport size, and page format.
+## Object/layer model
+
+Every publication object is a layer with visibility, lock state, and Z index. Supported polymorphic elements are text frame, image frame, shape, WordArt, and connector. The Layers UI is a direct view over that list rather than a second layer subsystem.
 
 ## Picture model
 
-Picture editing is non-destructive. The original image data URL remains unchanged while the model stores crop translation, crop scale, picture rotation, frame fit mode, filters, opacity, flips, mask, border, and shadow. Interactive crop gestures update the DOM for immediate feedback and commit to the model at gesture completion.
+Picture editing is non-destructive. `OriginalDataUrl` retains the imported source, including PNG alpha. The active model stores crop, scale, image rotation, fit/fill, opacity, CSS adjustments, flips, mask, border, shadow, tint/recolor mode, blend mode, and color-key transparency parameters. Color-key removal produces a new PNG data URL while Restore Original remains available.
+
+## Connector model
+
+A connector stores source and target element IDs plus one of eight anchors per endpoint. Geometry is resolved from live object bounds and rotation. Straight, elbow, and cubic paths are generated without a third-party diagram package. During move/resize, JavaScript updates attached paths immediately; the C# model remains authoritative after commit. Reconnection hides the existing path and only displays a temporary path when a valid target port is within the snap radius. Invalid release restores the old endpoints.
+
+Connectors are ordinary polymorphic publication elements for ordering, visibility, lock state, serialization, duplication, thumbnails, export, and print. Deleting an object removes its attached connectors.
+
+## RichEdit story migration
+
+v0.1/v0.2 stored story bytes as HTML, which limited Office page-layout and formatting commands. The loader detects legacy HTML. On first editor open, RichEdit exports it to Office Open XML and recreates the component in DOCX mode. New stories start as a minimal valid DOCX package. The canvas stores a sanitized HTML preview beside the DOCX source.
 
 ## Export pipeline
 
-- JSON is generated from the C# model and downloaded through Blazor stream interop.
-- PNG/JPEG clone the current page, remove editor-only adorners, serialize it into an SVG `foreignObject`, render that SVG to a browser canvas at the selected DPI, and download the resulting bitmap.
-- SVG downloads the same self-contained current-page representation.
-- Website export clones the hidden multi-page print representation into a self-contained HTML document with embedded image data.
-- Print/PDF uses the hidden print representation and the browser print system.
+- JSON uses Blazor stream interop.
+- SVG clones the current page and removes all editor-only adorners.
+- PNG/JPEG serialize that clone into an SVG `foreignObject`, then rasterize using `createImageBitmap`, object-URL Image, or data-URL Image fallback. PNG uses an alpha-enabled canvas; JPEG receives a white fill.
+- Website export clones the multi-page print surface into a self-contained HTML file.
+- Print/PDF uses the hidden print surface and browser print system.
+- Story downloads are produced directly by DevExpress RichEdit as DOCX, RTF, TXT, or HTML.
 
-The pipeline adds no runtime package. A future production exporter can be introduced behind an export service without changing the editor model.
+No runtime package was added. A future server-side prepress exporter can sit behind an export service without changing the editor model.
 
 ## File model
 
-A `.pubstudio.json` file contains:
-
-- document metadata and view settings
-- pages and guides
-- polymorphic text, image, and shape elements
-- RichEdit HTML bytes for text stories
-- self-contained image data URLs
-
-Format version `1.1` remains backward-compatible with the previous file because absent view/picture properties receive defaults during deserialization.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, and embedded image data URLs. Current format version is `1.4`; the loader supplies defaults and migrates older story/image fields.
 
 ## Reference and license boundary
 
-GIMP and Inkscape are behavioural references only. No source from those projects is copied or linked. This avoids coupling the Apache-2.0 application to their GPL implementation while still applying familiar interaction principles such as ruler-origin page coordinates, draggable guides, non-destructive adjustments, and crop-inside-frame editing.
+GIMP and Inkscape are behavioural references for familiar image/ruler workflows. Blazor.Diagrams is a behavioural reference for ports, snapping, and reconnection. No code or runtime dependency is copied from any of them, preserving the Apache-2.0 boundary.
 
 ## Security boundary
 
-Imported preview HTML is stripped of active elements, event-handler attributes, and `javascript:` URLs before rendering. RichEdit document bytes remain the editable story source. Image imports are limited to supported browser image MIME types and bounded stream sizes.
+Imported preview HTML is stripped of active elements, event-handler attributes, and `javascript:` URLs before rendering. Image MIME types and stream sizes are bounded. RichEdit document bytes are treated as the editable story source rather than injected HTML.

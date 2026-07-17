@@ -1,6 +1,6 @@
 # Installer
 
-For windows I have that working installer and bootstrapper [https://github.com/Michi0403/BlazorPublisher/releases/download/v113/PublisherStudio.Setup.exe](https://github.com/Michi0403/BlazorPublisher/releases/download/v114/PublisherStudio.Setup.exe)
+For windows I have that working installer and bootstrapper https://github.com/Michi0403/BlazorPublisher/releases/download/v114/PublisherStudio.Setup.exe
 anyone else better gets build for his architecture and possible needs to visit the website, port and so on should be configureable via command
 
 # PublisherStudio / BlazorPublisher foundation

@@ -1546,6 +1546,33 @@ function canvasToEmbeddedSvg(canvas, widthMm = 0, heightMm = 0) {
     return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${widthAttribute}" height="${heightAttribute}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet"><image x="0" y="0" width="${width}" height="${height}" href="${dataUrl}" xlink:href="${dataUrl}"/></svg>`;
 }
 
+async function rasterizeIsolatedPublicationElement(page, element, scale) {
+    const hidden = [];
+    const pageStyle = page.getAttribute('style');
+    for (const node of page.querySelectorAll('[data-publication-element]')) {
+        if (node === element) continue;
+        hidden.push({
+            node,
+            value: node.style.getPropertyValue('visibility'),
+            priority: node.style.getPropertyPriority('visibility')
+        });
+        node.style.setProperty('visibility', 'hidden', 'important');
+    }
+    page.style.setProperty('background', 'transparent', 'important');
+    page.style.setProperty('background-color', 'transparent', 'important');
+    page.style.setProperty('background-image', 'none', 'important');
+    try {
+        return await rasterizePageElement(page, scale);
+    } finally {
+        for (const item of hidden) {
+            if (item.value) item.node.style.setProperty('visibility', item.value, item.priority);
+            else item.node.style.removeProperty('visibility');
+        }
+        if (pageStyle === null) page.removeAttribute('style');
+        else page.setAttribute('style', pageStyle);
+    }
+}
+
 function cropCanvasToElement(canvas, page, element, paddingPixels = 2) {
     const pageRect = page.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
@@ -2921,8 +2948,19 @@ function generateLinearBarcodeSvg(options) {
     return svg.outerHTML;
 }
 
-function generateBarcodeSvg(options) {
+async function waitForBarcodeGenerator(format, timeoutMilliseconds = 5000) {
+    const qr = format === 'qrcode';
+    const available = () => qr ? typeof window.qrcode === 'function' : typeof window.JsBarcode === 'function';
+    if (available()) return;
+    const started = Date.now();
+    while (!available() && Date.now() - started < timeoutMilliseconds)
+        await new Promise(resolve => setTimeout(resolve, 40));
+    if (!available()) throw new Error(qr ? 'QR-code generator did not load.' : 'Barcode generator did not load.');
+}
+
+export async function generateBarcodeSvg(options) {
     const format = barcodeFormatToken(options?.format).toLowerCase();
+    await waitForBarcodeGenerator(format);
     return format === 'qrcode' ? generateQrSvg(options) : generateLinearBarcodeSvg(options);
 }
 
@@ -3429,8 +3467,8 @@ window.publisherStudio = {
         const page = element.closest('.print-page');
         if (!page) throw new Error('The selected object is not attached to a publication page.');
         const scale = clamp(number(dpi, 150) / 96, .5, 12);
-        const pageCanvas = await rasterizePageElement(page, scale);
-        const objectCanvas = cropCanvasToElement(pageCanvas, page, element, Math.max(2, scale * 2));
+        const pageCanvas = await rasterizeIsolatedPublicationElement(page, element, scale);
+        const objectCanvas = cropCanvasToElement(pageCanvas, page, element, Math.max(2, Math.ceil(scale * 1.5)));
         const normalized = String(format).toLowerCase();
         if (normalized === 'svg') {
             const svg = canvasToEmbeddedSvg(objectCanvas);

@@ -202,11 +202,7 @@
         await CancelPublisherPointerAsync();
         await OpenHiddenFileInput("picture-file-input");
     }
-    private async Task OpenVideoPicker()
-    {
-        await CancelPublisherPointerAsync();
-        await OpenHiddenFileInput("video-file-input");
-    }
+    private Task OpenVideoPicker() => OpenMediaStudio(PublicationElementKind.Video, null);
     private async Task OpenAudioPicker()
     {
         await CancelPublisherPointerAsync();

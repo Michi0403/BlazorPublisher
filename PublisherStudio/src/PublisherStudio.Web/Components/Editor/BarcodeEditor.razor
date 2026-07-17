@@ -1,6 +1,7 @@
 @using System.Text.Json
 @using System.Xml.Linq
 @namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 
 @if (Visible && Item is not null)
@@ -8,42 +9,39 @@
     <div class="modal-backdrop">
         <section class="barcode-editor-dialog" role="dialog" aria-modal="true" aria-label="Barcode editor">
             <header><div><strong>Barcode Studio</strong><span>@FormatSummary</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
-            <DxRibbon CssClass="barcode-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+            <DxRibbon CssClass="barcode-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="false">
                 <DxRibbonTab Text="Barcode">
                     <DxRibbonGroup Text="Format" IconCssClass="pub-icon pub-icon-barcode">
-                        <DxRibbonItem Text="@FormatName(_draft.Format)" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="QR Code" Click="SetQrCode" />
-                            <DxRibbonItem Text="Code 128" Click="SetCode128" />
-                            <DxRibbonItem Text="Code 39" Click="SetCode39" />
-                            <DxRibbonItem Text="EAN-13" Click="SetEan13" />
-                            <DxRibbonItem Text="UPC-A" Click="SetUpcA" />
-                            <DxRibbonItem Text="ITF-14" Click="SetItf14" />
-                            <DxRibbonItem Text="Codabar" Click="SetCodabar" />
-                        </DxRibbonItem>
+                        <DxRibbonItem Text="QR Code" IconCssClass="pub-icon pub-icon-barcode" Click="SetQrCode" />
+                        <DxRibbonItem Text="Code 128" Click="SetCode128" />
+                        <DxRibbonItem Text="Code 39" Click="SetCode39" />
+                        <DxRibbonItem Text="EAN-13" Click="SetEan13" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Design">
+                    <DxRibbonGroup Text="More formats">
+                        <DxRibbonItem Text="UPC-A" Click="SetUpcA" />
+                        <DxRibbonItem Text="ITF-14" Click="SetItf14" />
+                        <DxRibbonItem Text="Codabar" Click="SetCodabar" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Generate">
                         <DxRibbonItem Text="Regenerate" Click="RefreshNow" />
-                        <DxRibbonItem Text="Colors" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Swap foreground / background" Click="SwapColors" />
-                            <DxRibbonItem Text="@TransparencyCommandText" Click="ToggleTransparency" />
-                        </DxRibbonItem>
-                        <DxRibbonItem Text="Module / bar design" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Square" Click="SetSquare" />
-                            <DxRibbonItem Text="Rounded" Click="SetRounded" />
-                            <DxRibbonItem Text="Dots" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetDots" />
-                        </DxRibbonItem>
                     </DxRibbonGroup>
-                    @if (_draft.Format == PublicationBarcodeFormat.QrCode)
-                    {
-                        <DxRibbonGroup Text="QR options">
-                            <DxRibbonItem Text="@($"Correction: {_draft.ErrorCorrection}")" DropDownCssClass="publisher-ribbon-menu">
-                                <DxRibbonItem Text="Low (L)" Click="SetLowCorrection" />
-                                <DxRibbonItem Text="Medium (M)" Click="SetMediumCorrection" />
-                                <DxRibbonItem Text="Quartile (Q)" Click="SetQuartileCorrection" />
-                                <DxRibbonItem Text="High (H)" Click="SetHighCorrection" />
-                            </DxRibbonItem>
-                        </DxRibbonGroup>
-                    }
+                </DxRibbonTab>
+                <DxRibbonTab Text="Design">
+                    <DxRibbonGroup Text="Colors">
+                        <DxRibbonItem Text="Swap foreground / background" Click="SwapColors" />
+                        <DxRibbonItem Text="@TransparencyCommandText" Click="ToggleTransparency" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Module / bar design">
+                        <DxRibbonItem Text="Square" Click="SetSquare" />
+                        <DxRibbonItem Text="Rounded" Click="SetRounded" />
+                        <DxRibbonItem Text="Dots" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetDots" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="QR correction">
+                        <DxRibbonItem Text="Low (L)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetLowCorrection" />
+                        <DxRibbonItem Text="Medium (M)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetMediumCorrection" />
+                        <DxRibbonItem Text="Quartile (Q)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetQuartileCorrection" />
+                        <DxRibbonItem Text="High (H)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetHighCorrection" />
+                    </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
             <div class="barcode-editor-body">
@@ -104,12 +102,14 @@
     private bool _refresh;
     private int _generationRequest;
     private DxContextMenu _menu = default!;
+    private IJSObjectReference? _module;
 
     protected override void OnParametersSet()
     {
         if (!Visible || Item is null || Item.Id == _loadedId) return;
         _loadedId = Item.Id;
         Copy(Item, _draft);
+        _svg = Item.SvgMarkup ?? string.Empty;
         _importInfo = null;
         _generationRequest++;
         _refresh = true;
@@ -125,7 +125,8 @@
         var request = _generationRequest;
         try
         {
-            var svg = await JS.InvokeAsync<string>("publisherStudio.generateBarcodeSvg", _draft);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
+            var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft);
             if (request != _generationRequest) return;
             _svg = svg;
             _error = null;
@@ -300,7 +301,8 @@
                 break;
             case PublicationBarcodeFormat.UpcA:
                 value = Digits(original);
-                if (value.Length is not (11 or 12)) value = "123456789012";
+                if (value.Length == 12 && !HasValidUpcAChecksum(value)) value = value[..11];
+                if (value.Length is not (11 or 12)) value = "12345678901";
                 break;
             case PublicationBarcodeFormat.Itf14:
                 value = Digits(original);
@@ -319,9 +321,29 @@
         adjusted = !string.Equals(original, value, StringComparison.Ordinal);
         return value;
     }
-    private static string Digits(string value) => new(value.Where(char.IsDigit).ToArray());
+    private static string Digits(string value) => new(value.Where(char.IsAsciiDigit).ToArray());
+    private static bool HasValidUpcAChecksum(string value)
+    {
+        if (value.Length != 12 || value.Any(character => !char.IsAsciiDigit(character))) return false;
+        var sum = 0;
+        for (var index = 0; index < 11; index++)
+        {
+            var digit = value[index] - '0';
+            sum += index % 2 == 0 ? digit * 3 : digit;
+        }
+        var check = (10 - sum % 10) % 10;
+        return check == value[11] - '0';
+    }
     private static int Int(ChangeEventArgs e, int fallback) => int.TryParse(e.Value?.ToString(), out var v) ? v : fallback;
     private static string FormatName(PublicationBarcodeFormat f) => f switch { PublicationBarcodeFormat.QrCode => "QR Code", PublicationBarcodeFormat.Code128 => "Code 128", PublicationBarcodeFormat.Code39 => "Code 39", PublicationBarcodeFormat.Ean13 => "EAN-13", PublicationBarcodeFormat.UpcA => "UPC-A", PublicationBarcodeFormat.Itf14 => "ITF-14", _ => "Codabar" };
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null) return;
+        try { await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (ObjectDisposedException) { }
+    }
     private static BarcodeElement Clone(BarcodeElement source) { var target = new BarcodeElement(); Copy(source, target); target.Id = source.Id; return target; }
     private static void Copy(BarcodeElement s, BarcodeElement t) { t.Id=s.Id;t.Name=s.Name;t.X=s.X;t.Y=s.Y;t.Width=s.Width;t.Height=s.Height;t.Rotation=s.Rotation;t.ZIndex=s.ZIndex;t.Visible=s.Visible;t.Locked=s.Locked;t.Format=s.Format;t.Value=s.Value;t.ForegroundColor=s.ForegroundColor;t.BackgroundColor=s.BackgroundColor;t.TransparentBackground=s.TransparentBackground;t.ShowText=s.ShowText;t.Margin=s.Margin;t.LineWidth=s.LineWidth;t.BarHeight=s.BarHeight;t.FontSize=s.FontSize;t.ErrorCorrection=s.ErrorCorrection;t.ModuleShape=s.ModuleShape;t.SvgMarkup=s.SvgMarkup; }
 }

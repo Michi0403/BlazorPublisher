@@ -75,7 +75,7 @@ internal static class Program
             ClearApplicationPayload(installDirectory);
             CopyDirectory(payload, installDirectory, overwrite: true);
             CopySetupExecutableIfPossible(installDirectory);
-            WriteCommandFiles(installDirectory, options);
+            WriteCommandFiles(installDirectory);
             WriteInstallMetadata(installDirectory, release);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && options.CreateShortcuts)
                 ProvisionStartMenu(installDirectory);
@@ -159,7 +159,10 @@ internal static class Program
     private static async Task<ReleaseAsset> ResolveReleaseAssetAsync(Options options)
     {
         var runtime = CurrentRuntimeIdentifier();
-        WriteLine($"Detected runtime: {runtime} (OS architecture: {RuntimeInformation.OSArchitecture}, process architecture: {RuntimeInformation.ProcessArchitecture})", ConsoleColor.DarkGray);
+        WriteLine(
+            $"Detected runtime: {runtime} (OS architecture: {RuntimeInformation.OSArchitecture}, process architecture: {RuntimeInformation.ProcessArchitecture})",
+            ConsoleColor.DarkGray);
+
         if (!string.IsNullOrWhiteSpace(options.AssetUrl))
         {
             var name = Path.GetFileName(new Uri(options.AssetUrl).AbsolutePath);
@@ -169,55 +172,142 @@ internal static class Program
         }
 
         ValidateRepository(options.Repository);
-        var api = $"https://api.github.com/repos/{options.Repository}/releases?per_page=30";
-        WriteLine($"Reading published releases: {api}", ConsoleColor.DarkGray);
-        using var response = await Http.GetAsync(api, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        using var json = await JsonDocument.ParseAsync(stream);
-        if (json.RootElement.ValueKind != JsonValueKind.Array || json.RootElement.GetArrayLength() == 0)
-            throw new InvalidOperationException("No published GitHub release exists yet. Create a release and upload the application ZIP plus the setup EXE.");
 
-        var releaseIndex = 0;
-        foreach (var release in json.RootElement.EnumerateArray())
+        // Read exactly GitHub's latest release and select the first asset that
+        // contains both this repository's platform token and architecture token.
+        var latestUrl = $"https://api.github.com/repos/{options.Repository}/releases/latest";
+        WriteLine($"Reading latest release: {latestUrl}", ConsoleColor.DarkGray);
+
+        using var stream = await Http.GetStreamAsync(latestUrl).ConfigureAwait(false);
+        using var json = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+
+        var root = json.RootElement;
+        var tagName = root.TryGetProperty("tag_name", out var tag)
+            ? tag.GetString() ?? "unknown"
+            : "unknown";
+
+        WriteLine($"Latest {options.Repository} release: {tagName}", ConsoleColor.DarkGray);
+
+        if (!root.TryGetProperty("assets", out var assets)
+            || assets.ValueKind != JsonValueKind.Array
+            || assets.GetArrayLength() == 0)
         {
-            if (release.TryGetProperty("draft", out var draft) && draft.GetBoolean()) continue;
-            releaseIndex++;
-            var tag = release.TryGetProperty("tag_name", out var tagValue) ? tagValue.GetString() ?? "release" : "release";
-            if (!release.TryGetProperty("assets", out var assets) || assets.ValueKind != JsonValueKind.Array) continue;
-
-            var candidates = assets.EnumerateArray().Select(asset => new
-            {
-                Name = asset.GetProperty("name").GetString() ?? string.Empty,
-                Url = asset.GetProperty("browser_download_url").GetString() ?? string.Empty
-            }).Where(asset => asset.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)
-                && !asset.Name.Contains("source", StringComparison.OrdinalIgnoreCase)
-                && !asset.Name.Contains("installer", StringComparison.OrdinalIgnoreCase)
-                && !asset.Name.Contains("setup", StringComparison.OrdinalIgnoreCase)).ToList();
-
-            var selected = !string.IsNullOrWhiteSpace(options.ReleaseAssetName)
-                ? candidates.FirstOrDefault(asset => asset.Name.Equals(options.ReleaseAssetName, StringComparison.OrdinalIgnoreCase))
-                : candidates
-                    .Select(asset => new { Asset = asset, Score = ScoreReleaseAsset(asset.Name, runtime) })
-                    .Where(candidate => candidate.Score >= 0)
-                    .OrderByDescending(candidate => candidate.Score)
-                    .ThenBy(candidate => candidate.Asset.Name.Length)
-                    .Select(candidate => candidate.Asset)
-                    .FirstOrDefault();
-            if (selected is not null && !string.IsNullOrWhiteSpace(selected.Url))
-            {
-                EnsureAssetNameIsNotIncompatible(selected.Name, runtime);
-                var prerelease = release.TryGetProperty("prerelease", out var prereleaseValue) && prereleaseValue.GetBoolean();
-                WriteLine($"Selected {(prerelease ? "pre-release" : "release")} {tag}: {selected.Name}", ConsoleColor.DarkGray);
-                return new ReleaseAsset(tag, selected.Name, selected.Url, runtime);
-            }
-
-            if (releaseIndex <= 3 && candidates.Count > 0)
-                WriteLine($"Skipping {tag}: no compatible {runtime} application ZIP. Assets: {string.Join(", ", candidates.Select(candidate => candidate.Name))}", ConsoleColor.DarkYellow);
+            throw new InvalidOperationException(
+                $"No downloadable release assets found for {options.Repository}.");
         }
 
-        throw new InvalidOperationException($"No application ZIP was found in the published releases. Expected an asset such as BlazorPublisher-{runtime}.zip.");
+        var platform = GetPlatformToken();
+        var architecture = GetArchitectureToken();
+
+        if (string.IsNullOrWhiteSpace(platform) || string.IsNullOrWhiteSpace(architecture))
+        {
+            throw new PlatformNotSupportedException(
+                $"Unsupported platform or architecture: {RuntimeInformation.OSDescription} / {RuntimeInformation.OSArchitecture}.");
+        }
+
+        JsonElement? selected = null;
+
+        if (!string.IsNullOrWhiteSpace(options.ReleaseAssetName))
+        {
+            foreach (var asset in assets.EnumerateArray())
+            {
+                var name = asset.GetProperty("name").GetString() ?? string.Empty;
+                if (name.Equals(options.ReleaseAssetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    selected = asset;
+                    break;
+                }
+            }
+
+            if (selected is null)
+            {
+                throw new InvalidOperationException(
+                    $"Release {tagName} does not contain the requested asset '{options.ReleaseAssetName}'.");
+            }
+        }
+        else
+        {
+            foreach (var asset in assets.EnumerateArray())
+            {
+                var name = asset.GetProperty("name").GetString() ?? string.Empty;
+
+                var isPlatformMatch =
+                    name.Contains(platform, StringComparison.OrdinalIgnoreCase)
+                    && name.Contains(architecture, StringComparison.OrdinalIgnoreCase);
+
+                var isSetupAsset =
+                    name.Contains("setup", StringComparison.OrdinalIgnoreCase)
+                    || name.Contains("installer", StringComparison.OrdinalIgnoreCase)
+                    || name.Contains("bootstrap", StringComparison.OrdinalIgnoreCase);
+
+                WriteLine(
+                    $"Checking asset '{name}'. PlatformMatch={isPlatformMatch}, SetupAsset={isSetupAsset}, WantedSetupAsset=False",
+                    ConsoleColor.DarkGray);
+
+                if (isPlatformMatch && !isSetupAsset)
+                {
+                    selected = asset;
+                    break;
+                }
+            }
+
+            // Preserve the reference installer's fallback sequence.
+            if (selected is null)
+            {
+                WriteLine(
+                    $"No exact asset match found for platform={platform}, architecture={architecture}. Falling back to the first non-setup asset.",
+                    ConsoleColor.DarkYellow);
+
+                foreach (var asset in assets.EnumerateArray())
+                {
+                    var name = asset.GetProperty("name").GetString() ?? string.Empty;
+                    var isSetupAsset =
+                        name.Contains("setup", StringComparison.OrdinalIgnoreCase)
+                        || name.Contains("installer", StringComparison.OrdinalIgnoreCase)
+                        || name.Contains("bootstrap", StringComparison.OrdinalIgnoreCase);
+
+                    if (!isSetupAsset)
+                    {
+                        selected = asset;
+                        break;
+                    }
+                }
+            }
+
+            selected ??= assets.EnumerateArray().First();
+        }
+
+        var downloadUrl = selected.Value.GetProperty("browser_download_url").GetString();
+        var assetName = selected.Value.GetProperty("name").GetString();
+
+        if (string.IsNullOrWhiteSpace(downloadUrl) || string.IsNullOrWhiteSpace(assetName))
+        {
+            throw new InvalidOperationException(
+                $"Selected release asset for {options.Repository} has no valid name or download URL.");
+        }
+
+        EnsureAssetNameIsNotIncompatible(assetName, runtime);
+
+        WriteLine($"Selected asset: {assetName}", ConsoleColor.DarkGray);
+        return new ReleaseAsset(tagName, assetName, downloadUrl, runtime);
     }
+
+    private static string GetPlatformToken()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "win";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "lin";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macos";
+        return string.Empty;
+    }
+
+    private static string GetArchitectureToken() => RuntimeInformation.OSArchitecture switch
+    {
+        Architecture.X64 => "x64",
+        Architecture.X86 => "x86",
+        Architecture.Arm => "arm",
+        Architecture.Arm64 => "arm64",
+        _ => string.Empty
+    };
 
     private static string CurrentRuntimeIdentifier()
     {
@@ -308,30 +398,161 @@ internal static class Program
 
     private static async Task DownloadFileAsync(string url, string destination)
     {
-        WriteLine($"Downloading {url}", ConsoleColor.Cyan);
-        using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-        var length = response.Content.Headers.ContentLength;
-        await using var input = await response.Content.ReadAsStreamAsync();
-        await using var output = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024, useAsync: true);
-        var buffer = new byte[1024 * 1024];
-        long total = 0;
-        var nextReport = 0L;
-        while (true)
+        const int maxAttempts = 3;
+        var temporaryFile = destination + ".part";
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            var read = await input.ReadAsync(buffer);
-            if (read == 0) break;
-            await output.WriteAsync(buffer.AsMemory(0, read));
-            total += read;
-            if (total >= nextReport)
+            try
             {
-                var text = length is > 0 ? $"{total * 100d / length.Value:0.0}%" : FormatBytes(total);
-                Console.Write($"\r{text,-12}");
-                nextReport = total + 4L * 1024 * 1024;
+                var directory = Path.GetDirectoryName(Path.GetFullPath(destination));
+                if (!string.IsNullOrWhiteSpace(directory))
+                    Directory.CreateDirectory(directory);
+
+                if (File.Exists(temporaryFile))
+                    File.Delete(temporaryFile);
+
+                WriteLine($"Downloading attempt {attempt}/{maxAttempts}: {url}", ConsoleColor.Cyan);
+                WriteLine($"Target: {destination}", ConsoleColor.DarkGray);
+
+                using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(30));
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.UserAgent.ParseAdd("BlazorPublisherSetupTool/1.0");
+                request.Headers.Accept.ParseAdd("*/*");
+
+                using var response = await Http.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead,
+                    cancellation.Token).ConfigureAwait(false);
+
+                response.EnsureSuccessStatusCode();
+
+                var contentLength = response.Content.Headers.ContentLength;
+                WriteLine(
+                    contentLength.HasValue
+                        ? $"Remote size: {FormatBytes(contentLength.Value)}"
+                        : "Remote size: unknown",
+                    ConsoleColor.DarkGray);
+
+                long totalRead = 0;
+
+                await using (var input = await response.Content
+                    .ReadAsStreamAsync(cancellation.Token)
+                    .ConfigureAwait(false))
+                await using (var output = new FileStream(
+                    temporaryFile,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None,
+                    bufferSize: 4 * 1024 * 1024,
+                    useAsync: true))
+                {
+                    var buffer = new byte[4 * 1024 * 1024];
+                    var lastReport = DateTimeOffset.UtcNow;
+
+                    while (true)
+                    {
+                        var read = await input
+                            .ReadAsync(buffer.AsMemory(0, buffer.Length), cancellation.Token)
+                            .ConfigureAwait(false);
+
+                        if (read == 0)
+                            break;
+
+                        await output
+                            .WriteAsync(buffer.AsMemory(0, read), cancellation.Token)
+                            .ConfigureAwait(false);
+
+                        totalRead += read;
+
+                        var now = DateTimeOffset.UtcNow;
+                        if (now - lastReport >= TimeSpan.FromSeconds(5))
+                        {
+                            var progress = contentLength is > 0
+                                ? $"Downloaded {FormatBytes(totalRead)} / {FormatBytes(contentLength.Value)} ({totalRead * 100.0 / contentLength.Value:F1}%)"
+                                : $"Downloaded {FormatBytes(totalRead)}";
+
+                            WriteLine(progress, ConsoleColor.DarkGray);
+                            lastReport = now;
+                        }
+                    }
+
+                    await output.FlushAsync(cancellation.Token).ConfigureAwait(false);
+                }
+
+                if (!File.Exists(temporaryFile))
+                {
+                    throw new FileNotFoundException(
+                        $"Temporary download file does not exist after download: {temporaryFile}");
+                }
+
+                var actualSize = new FileInfo(temporaryFile).Length;
+                if (actualSize == 0)
+                    throw new IOException("Downloaded file is empty.");
+
+                if (contentLength.HasValue && actualSize != contentLength.Value)
+                {
+                    var missing = contentLength.Value - actualSize;
+                    throw new IOException(
+                        $"Incomplete download. Got {actualSize:N0} bytes, expected {contentLength.Value:N0} bytes. Missing {missing:N0} bytes.");
+                }
+
+                await MoveFileWithRetryAsync(temporaryFile, destination).ConfigureAwait(false);
+                WriteLine($"Download complete: {destination} ({FormatBytes(actualSize)})", ConsoleColor.Green);
+                return;
+            }
+            catch (Exception ex)
+            {
+                WriteLine(
+                    $"Download attempt {attempt}/{maxAttempts} failed: {ex.Message}",
+                    ConsoleColor.Yellow);
+
+                try
+                {
+                    if (File.Exists(temporaryFile))
+                        File.Delete(temporaryFile);
+                }
+                catch
+                {
+                    // Best-effort cleanup.
+                }
+
+                if (attempt == maxAttempts)
+                    throw;
+
+                await Task.Delay(TimeSpan.FromSeconds(2 * attempt)).ConfigureAwait(false);
             }
         }
-        Console.WriteLine();
-        if (total == 0) throw new IOException("The downloaded release asset is empty.");
+    }
+
+    private static async Task MoveFileWithRetryAsync(string source, string destination)
+    {
+        for (var attempt = 1; attempt <= 10; attempt++)
+        {
+            try
+            {
+                if (!File.Exists(source))
+                    throw new FileNotFoundException($"Source file for move does not exist: {source}", source);
+
+                if (File.Exists(destination))
+                    File.Delete(destination);
+
+                File.Move(source, destination, overwrite: true);
+                return;
+            }
+            catch (IOException ex) when (attempt < 10)
+            {
+                WriteLine(
+                    $"Move failed because the file is locked. Retry {attempt}/10: {ex.Message}",
+                    ConsoleColor.Yellow);
+                await Task.Delay(300).ConfigureAwait(false);
+            }
+        }
+
+        if (File.Exists(destination))
+            File.Delete(destination);
+
+        File.Move(source, destination, overwrite: true);
     }
 
     private static void ExtractZipSafe(string archive, string destination)
@@ -439,7 +660,7 @@ internal static class Program
         File.Copy(source, destination, overwrite: true);
     }
 
-    private static void WriteCommandFiles(string installDirectory, Options options)
+    private static void WriteCommandFiles(string installDirectory)
     {
         var setup = Path.Combine(installDirectory, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SetupFileName : Path.GetFileName(Environment.ProcessPath ?? "PublisherStudio.Setup"));
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;

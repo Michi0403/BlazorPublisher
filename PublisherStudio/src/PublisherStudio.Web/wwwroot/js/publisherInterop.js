@@ -1171,6 +1171,48 @@ function cleanPageClone(page) {
     return clone;
 }
 
+function normalizeObjectFitImages(root) {
+    for (const image of root.querySelectorAll('.image-frame > img')) {
+        const source = image.currentSrc || image.getAttribute('src') || '';
+        if (!source) continue;
+
+        // html2canvas' computed renderer stretches replaced images in some Chromium builds
+        // even when object-fit is present. Inline SVG preserveAspectRatio gives both the DOM
+        // renderer and the SVG fallback an explicit, deterministic cover/contain instruction.
+        const fit = String(image.style.objectFit || 'fill').toLowerCase();
+        const preserveAspectRatio = fit === 'contain'
+            ? 'xMidYMid meet'
+            : fit === 'cover'
+                ? 'xMidYMid slice'
+                : 'none';
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        svg.setAttribute('preserveAspectRatio', 'none');
+        svg.setAttribute('aria-label', image.getAttribute('alt') || 'Publication picture');
+        svg.style.cssText = image.getAttribute('style') || '';
+        svg.style.objectFit = '';
+        svg.style.objectPosition = '';
+        svg.style.display = 'block';
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.maxWidth = 'none';
+        svg.style.overflow = 'visible';
+
+        const svgImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        svgImage.setAttribute('x', '0');
+        svgImage.setAttribute('y', '0');
+        svgImage.setAttribute('width', '100');
+        svgImage.setAttribute('height', '100');
+        svgImage.setAttribute('preserveAspectRatio', preserveAspectRatio);
+        svgImage.setAttribute('href', source);
+        svgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', source);
+        svg.appendChild(svgImage);
+        image.replaceWith(svg);
+    }
+}
+
 function pageExportMetrics(page) {
     const rect = page.getBoundingClientRect();
     const widthMm = number(page.dataset.pageWidthMm, 0);
@@ -1355,6 +1397,7 @@ async function pageSvg(page, options = {}) {
     await waitForImages(page);
     const metrics = pageExportMetrics(page);
     const clone = cleanPageClone(page);
+    normalizeObjectFitImages(clone);
     if (options.freezeMedia) await freezeMediaForRaster(page, clone);
     else await inlineLocalMediaSources(clone);
     sanitizeInlineColorFunctions(clone);
@@ -1460,6 +1503,7 @@ async function rasterizePageElement(page, scale) {
 
     if (typeof window.html2canvas === 'function') {
         const clone = cleanPageClone(page);
+        normalizeObjectFitImages(clone);
         await freezeMediaForRaster(page, clone);
         sanitizeInlineColorFunctions(clone);
         clone.style.visibility = 'visible';
@@ -2948,14 +2992,58 @@ function generateLinearBarcodeSvg(options) {
     return svg.outerHTML;
 }
 
-async function waitForBarcodeGenerator(format, timeoutMilliseconds = 5000) {
+const barcodeLibraryLoads = new Map();
+
+function loadBarcodeLibrary(src, available, errorMessage, timeoutMilliseconds = 5000) {
+    if (available()) return Promise.resolve();
+    if (barcodeLibraryLoads.has(src)) return barcodeLibraryLoads.get(src);
+
+    const promise = new Promise((resolve, reject) => {
+        let script = [...document.scripts].find(item => {
+            try { return new URL(item.src, document.baseURI).pathname.endsWith(src); }
+            catch { return false; }
+        });
+        let settled = false;
+        const finish = error => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            script?.removeEventListener('load', loaded);
+            script?.removeEventListener('error', failed);
+            if (error || !available()) reject(error || new Error(errorMessage));
+            else resolve();
+        };
+        const loaded = () => finish();
+        const failed = () => finish(new Error(errorMessage));
+        const timer = setTimeout(() => finish(new Error(errorMessage)), timeoutMilliseconds);
+
+        if (!script) {
+            script = document.createElement('script');
+            script.src = new URL(src, document.baseURI).href;
+            script.async = true;
+            document.head.appendChild(script);
+        }
+        script.addEventListener('load', loaded, { once: true });
+        script.addEventListener('error', failed, { once: true });
+
+        // The normal application path preloads the libraries before Blazor starts. Resolve
+        // immediately in that case instead of waiting for a load event that already fired.
+        queueMicrotask(() => { if (available()) finish(); });
+    });
+    barcodeLibraryLoads.set(src, promise);
+    promise.catch(() => barcodeLibraryLoads.delete(src));
+    return promise;
+}
+
+async function waitForBarcodeGenerator(format) {
     const qr = format === 'qrcode';
-    const available = () => qr ? typeof window.qrcode === 'function' : typeof window.JsBarcode === 'function';
-    if (available()) return;
-    const started = Date.now();
-    while (!available() && Date.now() - started < timeoutMilliseconds)
-        await new Promise(resolve => setTimeout(resolve, 40));
-    if (!available()) throw new Error(qr ? 'QR-code generator did not load.' : 'Barcode generator did not load.');
+    if (qr) {
+        await loadBarcodeLibrary('js/vendor/qrcode-generator.js',
+            () => typeof window.qrcode === 'function', 'QR-code generator did not load.');
+        return;
+    }
+    await loadBarcodeLibrary('js/vendor/JsBarcode.all.min.js',
+        () => typeof window.JsBarcode === 'function', 'Barcode generator did not load.');
 }
 
 export async function generateBarcodeSvg(options) {

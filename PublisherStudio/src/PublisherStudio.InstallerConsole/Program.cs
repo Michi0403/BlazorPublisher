@@ -68,6 +68,7 @@ internal static class Program
             var extracted = Path.Combine(tempRoot, "extracted");
             ExtractZipSafe(archive, extracted);
             var payload = ResolvePayloadRoot(extracted);
+            ValidatePayload(payload, release.RuntimeIdentifier, release.AssetName);
 
             StopPublisherProcesses();
             Directory.CreateDirectory(installDirectory);
@@ -157,10 +158,14 @@ internal static class Program
 
     private static async Task<ReleaseAsset> ResolveReleaseAssetAsync(Options options)
     {
+        var runtime = CurrentRuntimeIdentifier();
+        WriteLine($"Detected runtime: {runtime} (OS architecture: {RuntimeInformation.OSArchitecture}, process architecture: {RuntimeInformation.ProcessArchitecture})", ConsoleColor.DarkGray);
         if (!string.IsNullOrWhiteSpace(options.AssetUrl))
         {
             var name = Path.GetFileName(new Uri(options.AssetUrl).AbsolutePath);
-            return new ReleaseAsset("explicit", string.IsNullOrWhiteSpace(name) ? "BlazorPublisher.zip" : name, options.AssetUrl);
+            name = string.IsNullOrWhiteSpace(name) ? "BlazorPublisher.zip" : name;
+            EnsureAssetNameIsNotIncompatible(name, runtime);
+            return new ReleaseAsset("explicit", name, options.AssetUrl, runtime);
         }
 
         ValidateRepository(options.Repository);
@@ -173,10 +178,11 @@ internal static class Program
         if (json.RootElement.ValueKind != JsonValueKind.Array || json.RootElement.GetArrayLength() == 0)
             throw new InvalidOperationException("No published GitHub release exists yet. Create a release and upload the application ZIP plus the setup EXE.");
 
-        var runtime = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "win-arm64" : "win-x64";
+        var releaseIndex = 0;
         foreach (var release in json.RootElement.EnumerateArray())
         {
             if (release.TryGetProperty("draft", out var draft) && draft.GetBoolean()) continue;
+            releaseIndex++;
             var tag = release.TryGetProperty("tag_name", out var tagValue) ? tagValue.GetString() ?? "release" : "release";
             if (!release.TryGetProperty("assets", out var assets) || assets.ValueKind != JsonValueKind.Array) continue;
 
@@ -191,18 +197,113 @@ internal static class Program
 
             var selected = !string.IsNullOrWhiteSpace(options.ReleaseAssetName)
                 ? candidates.FirstOrDefault(asset => asset.Name.Equals(options.ReleaseAssetName, StringComparison.OrdinalIgnoreCase))
-                : candidates.FirstOrDefault(asset => asset.Name.Contains(runtime, StringComparison.OrdinalIgnoreCase))
-                    ?? candidates.FirstOrDefault(asset => asset.Name.Contains("win", StringComparison.OrdinalIgnoreCase))
-                    ?? candidates.FirstOrDefault();
+                : candidates
+                    .Select(asset => new { Asset = asset, Score = ScoreReleaseAsset(asset.Name, runtime) })
+                    .Where(candidate => candidate.Score >= 0)
+                    .OrderByDescending(candidate => candidate.Score)
+                    .ThenBy(candidate => candidate.Asset.Name.Length)
+                    .Select(candidate => candidate.Asset)
+                    .FirstOrDefault();
             if (selected is not null && !string.IsNullOrWhiteSpace(selected.Url))
             {
+                EnsureAssetNameIsNotIncompatible(selected.Name, runtime);
                 var prerelease = release.TryGetProperty("prerelease", out var prereleaseValue) && prereleaseValue.GetBoolean();
                 WriteLine($"Selected {(prerelease ? "pre-release" : "release")} {tag}: {selected.Name}", ConsoleColor.DarkGray);
-                return new ReleaseAsset(tag, selected.Name, selected.Url);
+                return new ReleaseAsset(tag, selected.Name, selected.Url, runtime);
             }
+
+            if (releaseIndex <= 3 && candidates.Count > 0)
+                WriteLine($"Skipping {tag}: no compatible {runtime} application ZIP. Assets: {string.Join(", ", candidates.Select(candidate => candidate.Name))}", ConsoleColor.DarkYellow);
         }
 
         throw new InvalidOperationException($"No application ZIP was found in the published releases. Expected an asset such as BlazorPublisher-{runtime}.zip.");
+    }
+
+    private static string CurrentRuntimeIdentifier()
+    {
+        var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win"
+            : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux"
+            : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx"
+            : throw new PlatformNotSupportedException("BlazorPublisher setup supports Windows, Linux, and macOS.");
+        var architecture = RuntimeInformation.OSArchitecture switch
+        {
+            Architecture.X64 => "x64",
+            Architecture.Arm64 => "arm64",
+            Architecture.X86 => "x86",
+            Architecture.Arm => "arm",
+            _ => throw new PlatformNotSupportedException($"Unsupported processor architecture: {RuntimeInformation.OSArchitecture}.")
+        };
+        return $"{os}-{architecture}";
+    }
+
+    private static int ScoreReleaseAsset(string assetName, string runtime)
+    {
+        var name = NormalizeAssetName(assetName);
+        var expected = NormalizeAssetName(runtime);
+        if (name.Contains(expected, StringComparison.Ordinal)) return 110;
+
+        var (expectedOs, expectedArchitecture) = SplitRuntime(runtime);
+        var osHint = DetectAssetOperatingSystem(name);
+        var architectureHint = DetectAssetArchitecture(name);
+        if (osHint is null || architectureHint is null) return -1;
+        if (!osHint.Equals(expectedOs, StringComparison.Ordinal)) return -1;
+        if (!architectureHint.Equals(expectedArchitecture, StringComparison.Ordinal)) return -1;
+        return 100;
+    }
+
+    private static void EnsureAssetNameIsNotIncompatible(string assetName, string runtime)
+    {
+        var normalizedName = NormalizeAssetName(assetName);
+        var osHint = DetectAssetOperatingSystem(normalizedName);
+        var architectureHint = DetectAssetArchitecture(normalizedName);
+        var (expectedOs, expectedArchitecture) = SplitRuntime(runtime);
+        if (osHint is not null && !osHint.Equals(expectedOs, StringComparison.Ordinal))
+            throw new InvalidDataException($"Release asset '{assetName}' targets {osHint}, but this computer requires {runtime}.");
+        if (architectureHint is not null && !architectureHint.Equals(expectedArchitecture, StringComparison.Ordinal))
+            throw new InvalidDataException($"Release asset '{assetName}' targets {architectureHint}, but this computer requires {runtime}.");
+    }
+
+    private static (string OperatingSystem, string Architecture) SplitRuntime(string runtime)
+    {
+        var separator = runtime.LastIndexOf('-');
+        return separator > 0
+            ? (runtime[..separator], runtime[(separator + 1)..])
+            : (runtime, string.Empty);
+    }
+
+    private static string NormalizeAssetName(string value) => new(value.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
+
+    private static string? DetectAssetOperatingSystem(string normalizedName)
+    {
+        if (normalizedName.Contains("windows", StringComparison.Ordinal)
+            || normalizedName.Contains("winx64", StringComparison.Ordinal)
+            || normalizedName.Contains("winarm64", StringComparison.Ordinal)
+            || normalizedName.StartsWith("win", StringComparison.Ordinal)) return "win";
+        if (normalizedName.Contains("linux", StringComparison.Ordinal)
+            || normalizedName.Contains("linx64", StringComparison.Ordinal)
+            || normalizedName.Contains("linarm64", StringComparison.Ordinal)
+            || normalizedName.StartsWith("lin", StringComparison.Ordinal)) return "linux";
+        if (normalizedName.Contains("macos", StringComparison.Ordinal)
+            || normalizedName.Contains("darwin", StringComparison.Ordinal)
+            || normalizedName.Contains("osxx64", StringComparison.Ordinal)
+            || normalizedName.Contains("osxarm64", StringComparison.Ordinal)
+            || normalizedName.StartsWith("osx", StringComparison.Ordinal)
+            || normalizedName.StartsWith("mac", StringComparison.Ordinal)) return "osx";
+        return null;
+    }
+
+    private static string? DetectAssetArchitecture(string normalizedName)
+    {
+        if (normalizedName.Contains("arm64", StringComparison.Ordinal) || normalizedName.Contains("aarch64", StringComparison.Ordinal)) return "arm64";
+        if (normalizedName.Contains("x64", StringComparison.Ordinal)
+            || normalizedName.Contains("amd64", StringComparison.Ordinal)
+            || normalizedName.Contains("win64", StringComparison.Ordinal)
+            || normalizedName.Contains("linux64", StringComparison.Ordinal)
+            || normalizedName.Contains("lin64", StringComparison.Ordinal)
+            || normalizedName.Contains("macos64", StringComparison.Ordinal)
+            || normalizedName.Contains("osx64", StringComparison.Ordinal)) return "x64";
+        if (normalizedName.Contains("x86", StringComparison.Ordinal) || normalizedName.Contains("i386", StringComparison.Ordinal) || normalizedName.Contains("win32", StringComparison.Ordinal)) return "x86";
+        return null;
     }
 
     private static async Task DownloadFileAsync(string url, string destination)
@@ -257,6 +358,65 @@ internal static class Program
         return Path.GetDirectoryName(marker)!;
     }
 
+    private static void ValidatePayload(string payload, string runtime, string assetName)
+    {
+        var runtimeConfig = Path.Combine(payload, "PublisherStudio.Web.runtimeconfig.json");
+        var dependencies = Path.Combine(payload, "PublisherStudio.Web.deps.json");
+        var applicationDll = Path.Combine(payload, "PublisherStudio.Web.dll");
+        var missing = new List<string>();
+        if (!File.Exists(runtimeConfig)) missing.Add(Path.GetFileName(runtimeConfig));
+        if (!File.Exists(dependencies)) missing.Add(Path.GetFileName(dependencies));
+        if (!File.Exists(applicationDll)) missing.Add(Path.GetFileName(applicationDll));
+        if (missing.Count > 0)
+            throw new InvalidDataException($"Release asset '{assetName}' is not a complete BlazorPublisher publish for {runtime}. Missing: {string.Join(", ", missing)}.");
+
+        var payloadRuntime = ReadPayloadRuntimeIdentifier(dependencies);
+        if (!string.IsNullOrWhiteSpace(payloadRuntime) && ScoreReleaseAsset(payloadRuntime, runtime) < 0)
+            throw new InvalidDataException(
+                $"Release asset '{assetName}' contains a {payloadRuntime} publish, but this computer requires {runtime}. " +
+                "The existing installation was not changed.");
+
+        using var document = JsonDocument.Parse(File.ReadAllText(runtimeConfig));
+        if (!document.RootElement.TryGetProperty("runtimeOptions", out var runtimeOptions))
+            throw new InvalidDataException($"Release asset '{assetName}' has an invalid PublisherStudio.Web.runtimeconfig.json.");
+        var frameworkDependent = runtimeOptions.TryGetProperty("framework", out _)
+            || runtimeOptions.TryGetProperty("frameworks", out _);
+        if (frameworkDependent) return;
+
+        var nativeFiles = runtime.StartsWith("win-", StringComparison.Ordinal)
+            ? new[] { "PublisherStudio.Web.exe", "hostfxr.dll", "hostpolicy.dll" }
+            : runtime.StartsWith("linux-", StringComparison.Ordinal)
+                ? new[] { "PublisherStudio.Web", "libhostfxr.so", "libhostpolicy.so" }
+                : new[] { "PublisherStudio.Web", "libhostfxr.dylib", "libhostpolicy.dylib" };
+        missing = nativeFiles.Where(file => !File.Exists(Path.Combine(payload, file))).ToList();
+        if (missing.Count > 0)
+            throw new InvalidDataException(
+                $"Release asset '{assetName}' claims to be self-contained but is incomplete for {runtime}. Missing: {string.Join(", ", missing)}. " +
+                $"Rebuild it with Build-Release.ps1 -Runtime {runtime}; the existing installation was not changed.");
+    }
+
+    private static string? ReadPayloadRuntimeIdentifier(string dependenciesFile)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(dependenciesFile));
+            if (!document.RootElement.TryGetProperty("runtimeTarget", out var runtimeTarget)
+                || !runtimeTarget.TryGetProperty("name", out var nameValue)) return null;
+            var name = nameValue.GetString();
+            if (string.IsNullOrWhiteSpace(name)) return null;
+            var separator = name.LastIndexOf('/');
+            var candidate = separator >= 0 && separator < name.Length - 1 ? name[(separator + 1)..] : name;
+            var normalized = NormalizeAssetName(candidate);
+            return DetectAssetOperatingSystem(normalized) is not null && DetectAssetArchitecture(normalized) is not null
+                ? candidate
+                : null;
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidDataException("PublisherStudio.Web.deps.json is invalid.", ex);
+        }
+    }
+
     private static void ClearApplicationPayload(string target)
     {
         var preserved = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -298,21 +458,26 @@ internal static class Program
     {
         var folder = StartMenuFolder();
         Directory.CreateDirectory(folder);
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Start.url"), Path.Combine(installDirectory, "Start.cmd"));
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Update.url"), Path.Combine(installDirectory, "Update.cmd"));
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Install or Repair.url"), Path.Combine(installDirectory, "Install.cmd"));
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Uninstall.url"), Path.Combine(installDirectory, "Uninstall.cmd"));
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Folder.url"), installDirectory);
+        var productIcon = FirstExistingPath(
+            Path.Combine(installDirectory, "PublisherStudio.ico"),
+            Path.Combine(installDirectory, "PublisherStudio.Web.exe"),
+            Path.Combine(installDirectory, SetupFileName));
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Start.url"), Path.Combine(installDirectory, "Start.cmd"), productIcon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Update.url"), Path.Combine(installDirectory, "Update.cmd"), productIcon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Install or Repair.url"), Path.Combine(installDirectory, "Install.cmd"), productIcon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Uninstall.url"), Path.Combine(installDirectory, "Uninstall.cmd"), productIcon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Folder.url"), installDirectory, productIcon);
         WriteLine($"Start Menu entries created in '{StartMenuGroup}'.", ConsoleColor.Green);
     }
 
-    private static void CreateUrlShortcut(string shortcutPath, string targetPath)
+    private static string? FirstExistingPath(params string?[] paths) => paths.FirstOrDefault(path => !string.IsNullOrWhiteSpace(path) && File.Exists(path));
+
+    private static void CreateUrlShortcut(string shortcutPath, string targetPath, string? iconPath)
     {
         var builder = new StringBuilder();
         builder.AppendLine("[InternetShortcut]");
         builder.AppendLine($"URL={new Uri(Path.GetFullPath(targetPath)).AbsoluteUri}");
-        var icon = Directory.EnumerateFiles(Path.GetDirectoryName(targetPath) ?? string.Empty, "*.ico", SearchOption.AllDirectories).FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(icon)) { builder.AppendLine($"IconFile={icon}"); builder.AppendLine("IconIndex=0"); }
+        if (!string.IsNullOrWhiteSpace(iconPath)) { builder.AppendLine($"IconFile={Path.GetFullPath(iconPath)}"); builder.AppendLine("IconIndex=0"); }
         File.WriteAllText(shortcutPath, builder.ToString(), new UTF8Encoding(false));
     }
 
@@ -392,7 +557,7 @@ internal static class Program
 
     private static void WriteInstallMetadata(string target, ReleaseAsset release)
     {
-        var metadata = new { Product = ProductName, InstalledUtc = DateTimeOffset.UtcNow, release.TagName, release.AssetName, InstallerVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() };
+        var metadata = new { Product = ProductName, InstalledUtc = DateTimeOffset.UtcNow, release.TagName, release.AssetName, release.RuntimeIdentifier, InstallerVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() };
         File.WriteAllText(Path.Combine(target, "installation.json"), JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
     }
 
@@ -407,7 +572,7 @@ internal static class Program
     private static HttpClient CreateClient() { var client = new HttpClient { Timeout = TimeSpan.FromMinutes(30) }; client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("BlazorPublisher-Setup", "1.0")); client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json")); return client; }
     private static void WriteLine(string value, ConsoleColor color) { var previous = Console.ForegroundColor; Console.ForegroundColor = color; Console.WriteLine(value); Console.ForegroundColor = previous; }
 
-    private sealed record ReleaseAsset(string TagName, string AssetName, string DownloadUrl);
+    private sealed record ReleaseAsset(string TagName, string AssetName, string DownloadUrl, string RuntimeIdentifier);
     private sealed record LaunchInfo(string FileName, string WorkingDirectory, bool UseShellExecute, string[] PrefixArguments);
     private enum SetupAction { Install, Update, Start, Uninstall, Help }
 

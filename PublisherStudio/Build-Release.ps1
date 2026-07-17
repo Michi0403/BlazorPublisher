@@ -16,9 +16,55 @@ New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
 
 $selfContained = if ($FrameworkDependent) { "false" } else { "true" }
 
+function Assert-PublishedPayload {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$RuntimeIdentifier,
+        [Parameter(Mandatory = $true)][bool]$IsSelfContained
+    )
+
+    $required = @(
+        "PublisherStudio.Web.dll",
+        "PublisherStudio.Web.deps.json",
+        "PublisherStudio.Web.runtimeconfig.json",
+        "PublisherStudio.ico"
+    )
+    if ($IsSelfContained) {
+        if ($RuntimeIdentifier.StartsWith("win-")) {
+            $required += @("PublisherStudio.Web.exe", "hostfxr.dll", "hostpolicy.dll")
+        }
+        elseif ($RuntimeIdentifier.StartsWith("linux-")) {
+            $required += @("PublisherStudio.Web", "libhostfxr.so", "libhostpolicy.so")
+        }
+        elseif ($RuntimeIdentifier.StartsWith("osx-")) {
+            $required += @("PublisherStudio.Web", "libhostfxr.dylib", "libhostpolicy.dylib")
+        }
+        else {
+            throw "Unsupported release runtime: $RuntimeIdentifier"
+        }
+    }
+
+    $missing = @($required | Where-Object { -not (Test-Path (Join-Path $Path $_)) })
+    if ($missing.Count -gt 0) {
+        throw "Published payload for $RuntimeIdentifier is incomplete. Missing: $($missing -join ', ')"
+    }
+
+    $runtimeConfig = Get-Content (Join-Path $Path "PublisherStudio.Web.runtimeconfig.json") -Raw | ConvertFrom-Json
+    $hasFramework = $null -ne $runtimeConfig.runtimeOptions.framework -or $null -ne $runtimeConfig.runtimeOptions.frameworks
+    if ($IsSelfContained -and $hasFramework) {
+        throw "The $RuntimeIdentifier payload was requested as self-contained, but its runtimeconfig is framework-dependent."
+    }
+    if (-not $IsSelfContained -and -not $hasFramework) {
+        throw "The $RuntimeIdentifier payload was requested as framework-dependent, but its runtimeconfig does not declare a framework."
+    }
+}
+
 dotnet publish (Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj") `
-    -c $Configuration -r $Runtime --self-contained $selfContained -o $payload
+    -c $Configuration -r $Runtime --self-contained $selfContained `
+    -p:SelfContained=$selfContained -p:UseAppHost=true -o $payload
 if ($LASTEXITCODE -ne 0) { throw "Web publish failed." }
+
+Assert-PublishedPayload -Path $payload -RuntimeIdentifier $Runtime -IsSelfContained (-not $FrameworkDependent)
 
 dotnet publish (Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj") `
     -c $Configuration -r $Runtime --self-contained true `

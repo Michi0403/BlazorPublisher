@@ -16,3 +16,6 @@
 - Added snap-to-object movement with temporary green alignment, orange proximity, and red collision feedback.
 - Added shape conversion commands for rectangle, rounded rectangle, ellipse, and line objects.
 - Isolated printing from open File/export menus and application overlays.
+- Fixed setup release selection to require the current operating system and CPU architecture, including compact asset names such as `winx64.zip`, and reject mismatched payload RIDs before replacing an installation.
+- Added release-payload validation for missing self-contained runtime files such as `hostpolicy.dll`.
+- Added a PublisherStudio application icon and pinned all setup and Start Menu shortcuts to it instead of selecting an arbitrary bundled icon.

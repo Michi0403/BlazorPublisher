@@ -1,47 +1,31 @@
-# GitHub release
+# GitHub beta release
 
-Build one runtime at a time:
+Run:
 
 ```powershell
 .\Build-Release.ps1 -Runtime win-x64
 ```
 
-The compact application asset names are:
+Upload these two generated files from `artifacts/release` to the same GitHub release:
 
-- `winx64.zip`
-- `winarm64.zip`
-- `linx64.zip`
-- `linarm64.zip`
-- `macosx64.zip`
-- `macosarm64.zip`
+- `BlazorPublisher-win-x64.zip`
+- `PublisherStudio.Setup-win-x64.exe`
 
-The setup assets are runtime-specific, for example
-`PublisherStudio.Setup-winx64.exe`. The Windows x64 build additionally creates the
-public bootstrap name `PublisherStudio.Setup.exe`.
+Keep the runtime name in every application ZIP. As in the LocalGPT installer, both
+the platform token and processor token must match. Names such as
+`BlazorPublisher-win-x64.zip` and `winx64.zip` are accepted; `linarm64.zip`,
+`winarm64.zip`, and generic unrelated ZIP files are not used on Windows x64. The
+installer also verifies the runtime recorded inside `PublisherStudio.Web.deps.json`
+before replacing an existing installation. Do not rename a runtime-specific archive
+to a generic name.
 
-Upload the application ZIP and matching setup executable to the same GitHub
-release. The installer reads only `releases/latest`; it does not fall back to an
-older release or another architecture.
+Users download and double-click the setup EXE. The setup executable scans the newest published GitHub releases (including pre-releases), selects the matching application ZIP, installs it into `%LOCALAPPDATA%\Programs\BlazorPublisher`, creates Start Menu commands for Start, Install/Repair, Update, Uninstall, and opens the application.
 
-The application and setup are published self-contained and single-file. The setup
-publish also keeps `Install.cmd`, `Update.cmd`, `Start.cmd`, `Uninstall.cmd`, and the
-Publisher icon in its local publish directory. After installation the structure is:
+`Build-Release.ps1` now validates the publish output before creating the ZIP. A
+self-contained Windows package must contain `PublisherStudio.Web.exe`,
+`hostfxr.dll`, and `hostpolicy.dll`; a broken package is stopped before upload. The
+PublisherStudio icon is embedded into the app and setup executable and copied into
+the payload so every Start Menu entry uses the product icon instead of an arbitrary
+third-party `.ico` file.
 
-```text
-%LOCALAPPDATA%\BlazorPublisher\
-├─ Application\
-├─ Setup\PublisherStudio.Setup.exe
-├─ BlazorPublisher.ico
-├─ Install.cmd
-├─ Update.cmd
-├─ Start.cmd
-├─ Uninstall.cmd
-└─ installation.json
-```
-
-The command files resolve the setup executable and let the installed setup infer
-the installation root from its own `Setup\` directory. They forward `%*` and
-preserve the `--port` startup option, so no trailing-backslash path is passed by
-the default command flow. `ResolveLaunch` prefers `Application\` and then searches the
-entire installation tree, so an existing compatible extracted layout remains
-startable.
+The DevExpress package source and license must already be available on the build machine when the release assets are created.

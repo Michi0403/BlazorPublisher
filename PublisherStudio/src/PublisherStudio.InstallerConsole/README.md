@@ -1,29 +1,20 @@
 # BlazorPublisher InstallerConsole
 
-`PublisherStudio.Setup.exe` is the self-contained bootstrapper for BlazorPublisher.
-It follows the same release/bootstrap pattern as the LocalGPT installer, with only
-Publisher-specific names and actions.
+`PublisherStudio.Setup.exe` is a Git-free release installer for Windows.
 
-A double-click with no arguments:
+A double-click with no arguments downloads the latest application ZIP from `Michi0403/BlazorPublisher`, installs it to `%LOCALAPPDATA%\Programs\BlazorPublisher`, generates `Install.cmd`, `Update.cmd`, `Start.cmd`, and `Uninstall.cmd`, creates a Start Menu folder, starts the web host, and opens its detected loopback URL.
 
-1. reads `Michi0403/BlazorPublisher/releases/latest`;
-2. selects the application ZIP for the current OS and CPU architecture;
-3. installs to `%LOCALAPPDATA%\BlazorPublisher`;
-4. stores the app in `Application\` and the bootstrapper in `Setup\`;
-5. creates `Install.cmd`, `Update.cmd`, `Start.cmd`, and `Uninstall.cmd`;
-6. creates the four Start Menu entries using `BlazorPublisher.ico`;
-7. starts `PublisherStudio.Web` on the requested port (`0` means an available port);
-8. opens the URL reported by the running application.
+Expected release asset name:
 
-Supported application asset names are `winx64.zip`, `winarm64.zip`, `linx64.zip`,
-`linarm64.zip`, `macosx64.zip`, and `macosarm64.zip`.
-
-```powershell
-PublisherStudio.Setup.exe --install --start --port 0
-PublisherStudio.Setup.exe --update --start --port 0
-PublisherStudio.Setup.exe --start --port 0
-PublisherStudio.Setup.exe --uninstall --force
+```text
+BlazorPublisher-win-x64.zip
 ```
 
-The installed command files discover `PublisherStudio.Setup.exe` recursively and
-forward additional arguments. They do not depend on a hard-coded absolute path.
+The ZIP must contain the output of `dotnet publish` for `PublisherStudio.Web`.
+
+```powershell
+PublisherStudio.Setup.exe --install
+PublisherStudio.Setup.exe --update
+PublisherStudio.Setup.exe --start
+PublisherStudio.Setup.exe --uninstall --force
+```

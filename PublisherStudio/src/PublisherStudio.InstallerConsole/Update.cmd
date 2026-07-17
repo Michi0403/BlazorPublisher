@@ -2,20 +2,16 @@
 setlocal
 cd /d "%~dp0"
 
-set "SETUP_EXE=%~dp0PublisherStudio.Setup.exe"
-if not exist "%SETUP_EXE%" for /r "%~dp0" %%F in (PublisherStudio.Setup.exe) do if not defined SETUP_EXE_FOUND set "SETUP_EXE=%%~fF"& set "SETUP_EXE_FOUND=1"
-if not exist "%SETUP_EXE%" (
-    echo PublisherStudio.Setup.exe was not found below "%~dp0".
-    pause
-    exit /b 2
-)
-
-echo Starting: "%SETUP_EXE%" --update --start --port 0 %*
-call "%SETUP_EXE%" --update --start --port 0 %*
+call "%~dp0PublisherStudio.Setup.exe" --update-blazorpublisher --start-blazorpublisher --port 58071 --shortcuts
 set "EXITCODE=%ERRORLEVEL%"
 
+echo.
 if not "%EXITCODE%"=="0" (
     echo PublisherStudio.Setup failed with exit code %EXITCODE%.
-    pause
+) else (
+    echo BlazorPublisher update/start finished.
 )
+
+echo.
+pause
 exit /b %EXITCODE%

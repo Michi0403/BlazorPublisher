@@ -10,14 +10,13 @@
     <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <SelfContained>false</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
-    <PublishSingleFile>true</PublishSingleFile>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <PublishSingleFile>false</PublishSingleFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="25.2.*" />
     <PackageReference Include="DevExpress.Blazor.RichEdit" Version="25.2.*" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\assets\PublisherStudio.ico" Link="BlazorPublisher.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -80,22 +80,42 @@ function Assert-PublishedPayload {
 
 dotnet publish (Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj") `
     -c $Configuration -r $Runtime --self-contained $selfContained `
-    -p:SelfContained=$selfContained -p:UseAppHost=true -o $payload
+    -p:SelfContained=$selfContained -p:UseAppHost=true `
+    -p:PublishSingleFile=false -p:PublishTrimmed=false -o $payload
 if ($LASTEXITCODE -ne 0) { throw "Web publish failed." }
 
 Assert-PublishedPayload -Path $payload -RuntimeIdentifier $Runtime -IsSelfContained (-not $FrameworkDependent)
 
 dotnet publish (Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj") `
     -c $Configuration -r $Runtime --self-contained true `
-    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:SelfContained=true -p:PublishSingleFile=true `
+    -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
+    -p:PublishTrimmed=false -p:PublishReadyToRun=false `
     -p:DebugType=None -p:DebugSymbols=false -o $setup
 if ($LASTEXITCODE -ne 0) { throw "Installer publish failed." }
-
-Compress-Archive -Path (Join-Path $payload "*") -DestinationPath $appZip -CompressionLevel Optimal
 
 $setupExecutableName = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Setup.exe" } else { "PublisherStudio.Setup" }
 $setupExecutable = Join-Path $setup $setupExecutableName
 if (-not (Test-Path $setupExecutable)) { throw "Installer executable not found: $setupExecutable" }
+
+# A copied apphost without its managed DLL is exactly what broke Start.cmd.
+# The release setup asset must be one independently runnable single file.
+$forbiddenSidecars = @(
+    (Join-Path $setup "PublisherStudio.Setup.dll"),
+    (Join-Path $setup "PublisherStudio.Setup.deps.json"),
+    (Join-Path $setup "PublisherStudio.Setup.runtimeconfig.json")
+)
+$foundSidecars = @($forbiddenSidecars | Where-Object { Test-Path $_ })
+if ($foundSidecars.Count -gt 0) {
+    throw "Installer publish is not a standalone single file. Unexpected sidecars: $($foundSidecars -join ', ')"
+}
+
+$minimumSetupSize = 1MB
+if ((Get-Item $setupExecutable).Length -lt $minimumSetupSize) {
+    throw "Installer executable is suspiciously small and probably only an apphost: $setupExecutable"
+}
+
+Compress-Archive -Path (Join-Path $payload "*") -DestinationPath $appZip -CompressionLevel Optimal
 Copy-Item $setupExecutable $runtimeSetupAsset -Force
 
 # The current public release layout uses one generic Windows setup filename.

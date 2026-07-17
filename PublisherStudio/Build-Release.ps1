@@ -44,78 +44,58 @@ function Assert-PublishedPayload {
         [Parameter(Mandatory = $true)][bool]$IsSelfContained
     )
 
-    $required = @(
-        "PublisherStudio.Web.dll",
-        "PublisherStudio.Web.deps.json",
-        "PublisherStudio.Web.runtimeconfig.json",
-        "PublisherStudio.ico"
-    )
-
-    if ($IsSelfContained) {
-        if ($RuntimeIdentifier.StartsWith("win-")) {
-            $required += @("PublisherStudio.Web.exe", "hostfxr.dll", "hostpolicy.dll")
-        }
-        elseif ($RuntimeIdentifier.StartsWith("linux-")) {
-            $required += @("PublisherStudio.Web", "libhostfxr.so", "libhostpolicy.so")
-        }
-        elseif ($RuntimeIdentifier.StartsWith("osx-")) {
-            $required += @("PublisherStudio.Web", "libhostfxr.dylib", "libhostpolicy.dylib")
-        }
-    }
-
+    $appHost = if ($RuntimeIdentifier.StartsWith("win-")) { "PublisherStudio.Web.exe" } else { "PublisherStudio.Web" }
+    $required = @($appHost, "BlazorPublisher.ico")
     $missing = @($required | Where-Object { -not (Test-Path (Join-Path $Path $_)) })
     if ($missing.Count -gt 0) {
         throw "Published payload for $RuntimeIdentifier is incomplete. Missing: $($missing -join ', ')"
     }
 
-    $runtimeConfig = Get-Content (Join-Path $Path "PublisherStudio.Web.runtimeconfig.json") -Raw | ConvertFrom-Json
-    $hasFramework = $null -ne $runtimeConfig.runtimeOptions.framework -or $null -ne $runtimeConfig.runtimeOptions.frameworks
-    if ($IsSelfContained -and $hasFramework) {
-        throw "The $RuntimeIdentifier payload was requested as self-contained, but its runtimeconfig is framework-dependent."
+    $appHostPath = Join-Path $Path $appHost
+    if ((Get-Item $appHostPath).Length -lt 1MB) {
+        throw "Published application host is unexpectedly small and is not a valid self-contained single-file build: $appHostPath"
     }
-    if (-not $IsSelfContained -and -not $hasFramework) {
-        throw "The $RuntimeIdentifier payload was requested as framework-dependent, but its runtimeconfig does not declare a framework."
+
+    if (-not $IsSelfContained) {
+        $frameworkFiles = @(
+            "PublisherStudio.Web.dll",
+            "PublisherStudio.Web.deps.json",
+            "PublisherStudio.Web.runtimeconfig.json"
+        )
+        $frameworkMissing = @($frameworkFiles | Where-Object { -not (Test-Path (Join-Path $Path $_)) })
+        if ($frameworkMissing.Count -gt 0) {
+            throw "Framework-dependent payload for $RuntimeIdentifier is incomplete. Missing: $($frameworkMissing -join ', ')"
+        }
     }
 }
+
 
 dotnet publish (Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj") `
     -c $Configuration -r $Runtime --self-contained $selfContained `
     -p:SelfContained=$selfContained -p:UseAppHost=true `
-    -p:PublishSingleFile=false -p:PublishTrimmed=false -o $payload
+    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:PublishTrimmed=false -o $payload
 if ($LASTEXITCODE -ne 0) { throw "Web publish failed." }
 
 Assert-PublishedPayload -Path $payload -RuntimeIdentifier $Runtime -IsSelfContained (-not $FrameworkDependent)
 
 dotnet publish (Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj") `
     -c $Configuration -r $Runtime --self-contained true `
-    -p:SelfContained=true -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
-    -p:PublishTrimmed=false -p:PublishReadyToRun=false `
+    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
     -p:DebugType=None -p:DebugSymbols=false -o $setup
 if ($LASTEXITCODE -ne 0) { throw "Installer publish failed." }
+
+$setupSupportFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "PublisherStudio.ico")
+$missingSetupSupport = @($setupSupportFiles | Where-Object { -not (Test-Path (Join-Path $setup $_)) })
+if ($missingSetupSupport.Count -gt 0) {
+    throw "Installer publish did not copy its command files/icon. Missing: $($missingSetupSupport -join ', ')"
+}
+
+Compress-Archive -Path (Join-Path $payload "*") -DestinationPath $appZip -CompressionLevel Optimal
 
 $setupExecutableName = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Setup.exe" } else { "PublisherStudio.Setup" }
 $setupExecutable = Join-Path $setup $setupExecutableName
 if (-not (Test-Path $setupExecutable)) { throw "Installer executable not found: $setupExecutable" }
-
-# A copied apphost without its managed DLL is exactly what broke Start.cmd.
-# The release setup asset must be one independently runnable single file.
-$forbiddenSidecars = @(
-    (Join-Path $setup "PublisherStudio.Setup.dll"),
-    (Join-Path $setup "PublisherStudio.Setup.deps.json"),
-    (Join-Path $setup "PublisherStudio.Setup.runtimeconfig.json")
-)
-$foundSidecars = @($forbiddenSidecars | Where-Object { Test-Path $_ })
-if ($foundSidecars.Count -gt 0) {
-    throw "Installer publish is not a standalone single file. Unexpected sidecars: $($foundSidecars -join ', ')"
-}
-
-$minimumSetupSize = 1MB
-if ((Get-Item $setupExecutable).Length -lt $minimumSetupSize) {
-    throw "Installer executable is suspiciously small and probably only an apphost: $setupExecutable"
-}
-
-Compress-Archive -Path (Join-Path $payload "*") -DestinationPath $appZip -CompressionLevel Optimal
 Copy-Item $setupExecutable $runtimeSetupAsset -Force
 
 # The current public release layout uses one generic Windows setup filename.
@@ -127,6 +107,7 @@ if ($Runtime -eq "win-x64") {
 Write-Host "Release assets:" -ForegroundColor Green
 Write-Host "  $appZip"
 Write-Host "  $runtimeSetupAsset"
+Write-Host "  Setup support files: $setup"
 if ($Runtime -eq "win-x64") {
     Write-Host "  $genericWindowsSetupAsset"
 }

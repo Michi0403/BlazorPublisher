@@ -1,4 +1,4 @@
-# GitHub beta release
+# GitHub release
 
 Build one runtime at a time:
 
@@ -15,18 +15,33 @@ The compact application asset names are:
 - `macosx64.zip`
 - `macosarm64.zip`
 
-The script also creates a runtime-specific standalone setup executable. For `win-x64` it additionally creates the public generic asset `PublisherStudio.Setup.exe`.
+The setup assets are runtime-specific, for example
+`PublisherStudio.Setup-winx64.exe`. The Windows x64 build additionally creates the
+public bootstrap name `PublisherStudio.Setup.exe`.
 
-The installer reads only `releases/latest`, then matches both the current platform and CPU architecture. It does not scan older releases and does not fall back to another operating system or architecture.
+Upload the application ZIP and matching setup executable to the same GitHub
+release. The installer reads only `releases/latest`; it does not fall back to an
+older release or another architecture.
 
-The application is installed below `%LOCALAPPDATA%\BlazorPublisher\Application`; the independently runnable single-file installer is stored below `%LOCALAPPDATA%\BlazorPublisher\Setup`. `Install.cmd`, `Update.cmd`, `Start.cmd`, and `Uninstall.cmd` remain in the installation root and locate the setup recursively.
+The application and setup are published self-contained and single-file. The setup
+publish also keeps `Install.cmd`, `Update.cmd`, `Start.cmd`, `Uninstall.cmd`, and the
+Publisher icon in its local publish directory. After installation the structure is:
 
-`Build-Release.ps1` rejects:
+```text
+%LOCALAPPDATA%\BlazorPublisher\
+├─ Application\
+├─ Setup\PublisherStudio.Setup.exe
+├─ BlazorPublisher.ico
+├─ Install.cmd
+├─ Update.cmd
+├─ Start.cmd
+├─ Uninstall.cmd
+└─ installation.json
+```
 
-- incomplete self-contained application payloads,
-- setup output containing `PublisherStudio.Setup.dll`, `.deps.json`, or `.runtimeconfig.json` sidecars,
-- and suspiciously small setup apphosts.
-
-The setup also runs an isolated `--help` self-test before it replaces the installed installer. This prevents the previous broken state where `PublisherStudio.Setup.exe` was copied without its required `PublisherStudio.Setup.dll`.
-
-All application and Start Menu icons use `assets\PublisherStudio.ico`. The shortcut copy is named `BlazorPublisher.ico` to avoid reusing the old cached llama icon path.
+The command files resolve the setup executable and let the installed setup infer
+the installation root from its own `Setup\` directory. They forward `%*` and
+preserve the `--port` startup option, so no trailing-backslash path is passed by
+the default command flow. `ResolveLaunch` prefers `Application\` and then searches the
+entire installation tree, so an existing compatible extracted layout remains
+startable.

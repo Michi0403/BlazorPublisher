@@ -1,14 +1,11 @@
 @echo off
 setlocal
-set "SEARCH_ROOT=%~dp0"
-set "SETUP_EXE="
+cd /d "%~dp0"
 
-if exist "%SEARCH_ROOT%PublisherStudio.Setup.exe" set "SETUP_EXE=%SEARCH_ROOT%PublisherStudio.Setup.exe"
-if not defined SETUP_EXE if exist "%SEARCH_ROOT%Setup\PublisherStudio.Setup.exe" set "SETUP_EXE=%SEARCH_ROOT%Setup\PublisherStudio.Setup.exe"
-if not defined SETUP_EXE for /r "%SEARCH_ROOT%" %%F in (PublisherStudio.Setup.exe) do if not defined SETUP_EXE set "SETUP_EXE=%%~fF"
-
-if not defined SETUP_EXE (
-    echo PublisherStudio.Setup.exe was not found below "%SEARCH_ROOT%".
+set "SETUP_EXE=%~dp0PublisherStudio.Setup.exe"
+if not exist "%SETUP_EXE%" for /r "%~dp0" %%F in (PublisherStudio.Setup.exe) do if not defined SETUP_EXE_FOUND set "SETUP_EXE=%%~fF"& set "SETUP_EXE_FOUND=1"
+if not exist "%SETUP_EXE%" (
+    echo PublisherStudio.Setup.exe was not found below "%~dp0".
     pause
     exit /b 2
 )
@@ -18,7 +15,7 @@ call "%SETUP_EXE%" --uninstall --force %*
 set "EXITCODE=%ERRORLEVEL%"
 
 if not "%EXITCODE%"=="0" (
-    echo BlazorPublisher uninstall failed with exit code %EXITCODE%.
+    echo PublisherStudio.Setup failed with exit code %EXITCODE%.
     pause
 )
 exit /b %EXITCODE%

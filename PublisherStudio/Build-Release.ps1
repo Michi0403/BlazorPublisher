@@ -9,9 +9,30 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $artifacts = Join-Path $root "artifacts\release"
 $payload = Join-Path $artifacts "payload-$Runtime"
 $setup = Join-Path $artifacts "setup-$Runtime"
-$appZip = Join-Path $artifacts "BlazorPublisher-$Runtime.zip"
 
-Remove-Item $payload,$setup,$appZip -Recurse -Force -ErrorAction SilentlyContinue
+$assetToken = switch ($Runtime) {
+    "win-x64"     { "winx64" }
+    "win-arm64"   { "winarm64" }
+    "linux-x64"   { "linx64" }
+    "linux-arm64" { "linarm64" }
+    "osx-x64"     { "macosx64" }
+    "osx-arm64"   { "macosarm64" }
+    default { throw "Unsupported release runtime: $Runtime" }
+}
+
+$appZip = Join-Path $artifacts "$assetToken.zip"
+$runtimeSetupName = if ($Runtime.StartsWith("win-")) {
+    "PublisherStudio.Setup-$assetToken.exe"
+} else {
+    "PublisherStudio.Setup-$assetToken"
+}
+$runtimeSetupAsset = Join-Path $artifacts $runtimeSetupName
+$genericWindowsSetupAsset = Join-Path $artifacts "PublisherStudio.Setup.exe"
+
+Remove-Item $payload,$setup,$appZip,$runtimeSetupAsset -Recurse -Force -ErrorAction SilentlyContinue
+if ($Runtime -eq "win-x64") {
+    Remove-Item $genericWindowsSetupAsset -Force -ErrorAction SilentlyContinue
+}
 New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
 
 $selfContained = if ($FrameworkDependent) { "false" } else { "true" }
@@ -29,6 +50,7 @@ function Assert-PublishedPayload {
         "PublisherStudio.Web.runtimeconfig.json",
         "PublisherStudio.ico"
     )
+
     if ($IsSelfContained) {
         if ($RuntimeIdentifier.StartsWith("win-")) {
             $required += @("PublisherStudio.Web.exe", "hostfxr.dll", "hostpolicy.dll")
@@ -38,9 +60,6 @@ function Assert-PublishedPayload {
         }
         elseif ($RuntimeIdentifier.StartsWith("osx-")) {
             $required += @("PublisherStudio.Web", "libhostfxr.dylib", "libhostpolicy.dylib")
-        }
-        else {
-            throw "Unsupported release runtime: $RuntimeIdentifier"
         }
     }
 
@@ -68,15 +87,27 @@ Assert-PublishedPayload -Path $payload -RuntimeIdentifier $Runtime -IsSelfContai
 
 dotnet publish (Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj") `
     -c $Configuration -r $Runtime --self-contained true `
-    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o $setup
+    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:DebugType=None -p:DebugSymbols=false -o $setup
 if ($LASTEXITCODE -ne 0) { throw "Installer publish failed." }
 
 Compress-Archive -Path (Join-Path $payload "*") -DestinationPath $appZip -CompressionLevel Optimal
-$setupExe = Join-Path $setup "PublisherStudio.Setup.exe"
-if (-not (Test-Path $setupExe)) { throw "Installer executable not found: $setupExe" }
-Copy-Item $setupExe (Join-Path $artifacts "PublisherStudio.Setup-$Runtime.exe") -Force
+
+$setupExecutableName = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Setup.exe" } else { "PublisherStudio.Setup" }
+$setupExecutable = Join-Path $setup $setupExecutableName
+if (-not (Test-Path $setupExecutable)) { throw "Installer executable not found: $setupExecutable" }
+Copy-Item $setupExecutable $runtimeSetupAsset -Force
+
+# The current public release layout uses one generic Windows setup filename.
+# Keep that exact name for win-x64 while also producing a runtime-specific copy.
+if ($Runtime -eq "win-x64") {
+    Copy-Item $setupExecutable $genericWindowsSetupAsset -Force
+}
 
 Write-Host "Release assets:" -ForegroundColor Green
 Write-Host "  $appZip"
-Write-Host "  $(Join-Path $artifacts "PublisherStudio.Setup-$Runtime.exe")"
-Write-Host "Upload both files to the same GitHub release."
+Write-Host "  $runtimeSetupAsset"
+if ($Runtime -eq "win-x64") {
+    Write-Host "  $genericWindowsSetupAsset"
+}
+Write-Host "Upload the application ZIP and the matching setup executable to the same GitHub release."

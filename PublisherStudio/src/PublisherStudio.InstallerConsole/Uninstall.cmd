@@ -1,17 +1,8 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-
-call "%~dp0PublisherStudio.Setup.exe" --uninstall
+call "%~dp0Setup\PublisherStudio.Setup.exe" --uninstall --force --install-dir "%~dp0"
 set "EXITCODE=%ERRORLEVEL%"
-
-echo.
-if not "%EXITCODE%"=="0" (
-    echo PublisherStudio.Setup.exe Uninstall failed with exit code %EXITCODE%.
-) else (
-    echo PublisherStudio.Setup.exe Uninstall finished.
-)
-
-echo.
-pause
+if not "%EXITCODE%"=="0" echo PublisherStudio.Setup uninstall failed with exit code %EXITCODE%.
+if not "%EXITCODE%"=="0" pause
 exit /b %EXITCODE%

@@ -1,8 +1,3 @@
-# Installer
-
-For windows I have that working installer and bootstrapper https://github.com/Michi0403/BlazorPublisher/releases/download/v114/PublisherStudio.Setup.exe
-anyone else better gets build for his architecture and possible needs to visit the website, port and so on should be configureable via command
-
 # PublisherStudio / BlazorPublisher foundation
 
 PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It keeps the existing ASP.NET Core host and optional InstallerConsole architecture, while the product UI is a Publisher-style document and picture editor built with DevExpress DXperience 25.2.

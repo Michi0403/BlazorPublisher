@@ -1,17 +1,8 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-
-call "%~dp0PublisherStudio.Setup.exe" --install --start
+call "%~dp0Setup\PublisherStudio.Setup.exe" --install --start --install-dir "%~dp0"
 set "EXITCODE=%ERRORLEVEL%"
-
-echo.
-if not "%EXITCODE%"=="0" (
-    echo PublisherStudio.Setup.exe failed with exit code %EXITCODE%.
-) else (
-    echo PublisherStudio.Setup.exe install/start finished.
-)
-
-echo.
-pause
+if not "%EXITCODE%"=="0" echo PublisherStudio.Setup install failed with exit code %EXITCODE%.
+if not "%EXITCODE%"=="0" pause
 exit /b %EXITCODE%

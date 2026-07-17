@@ -8,17 +8,21 @@ using System.Text.Json;
 
 internal static class Program
 {
-    private const string DefaultRepository = "Michi0403/BlazorPublisher";
+    private const string Repository = "Michi0403/BlazorPublisher";
     private const string ProductName = "BlazorPublisher";
     private const string SetupFileName = "PublisherStudio.Setup.exe";
+    private const string IconFileName = "PublisherStudio.ico";
+    private const string ApplicationFolderName = "Application";
+    private const string SetupFolderName = "Setup";
     private const string StartMenuGroup = "BlazorPublisher by Michi0403";
-    private static readonly HttpClient Http = CreateClient();
+    private static readonly HttpClient Http = CreateHttpClient();
 
     public static async Task<int> Main(string[] args)
     {
         Console.OutputEncoding = Encoding.UTF8;
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
         Options? options = null;
+
         try
         {
             options = Options.Parse(args);
@@ -55,33 +59,45 @@ internal static class Program
 
     private static async Task<int> InstallOrUpdateAsync(Options options, bool update)
     {
-        var installDirectory = options.InstallDirectory;
-        Directory.CreateDirectory(Path.GetDirectoryName(installDirectory)!);
+        var installRoot = options.InstallDirectory;
         var tempRoot = Path.Combine(Path.GetTempPath(), $"BlazorPublisher-Setup-{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempRoot);
+
         try
         {
             WriteLine(update ? "Updating BlazorPublisher..." : "Installing BlazorPublisher...", ConsoleColor.Cyan);
-            var release = await ResolveReleaseAssetAsync(options);
-            var archive = Path.Combine(tempRoot, release.AssetName);
-            await DownloadFileAsync(release.DownloadUrl, archive);
+
+            var applicationRelease = await ResolveLatestReleaseAssetAsync(options, setupAsset: false);
+            var setupRelease = await ResolveLatestReleaseAssetAsync(options, setupAsset: true);
+
+            var applicationArchive = Path.Combine(tempRoot, applicationRelease.AssetName);
+            var setupDownload = Path.Combine(tempRoot, SetupFileName);
+            await DownloadFileAsync(applicationRelease.DownloadUrl, applicationArchive);
+            await DownloadFileAsync(setupRelease.DownloadUrl, setupDownload);
+            ValidateSetupExecutable(setupDownload, setupRelease.AssetName);
+
             var extracted = Path.Combine(tempRoot, "extracted");
-            ExtractZipSafe(archive, extracted);
+            ExtractZipSafe(applicationArchive, extracted);
             var payload = ResolvePayloadRoot(extracted);
-            ValidatePayload(payload, release.RuntimeIdentifier, release.AssetName);
+            ValidatePayload(payload, applicationRelease.RuntimeIdentifier, applicationRelease.AssetName);
 
             StopPublisherProcesses();
-            Directory.CreateDirectory(installDirectory);
-            ClearApplicationPayload(installDirectory);
-            CopyDirectory(payload, installDirectory, overwrite: true);
-            CopySetupExecutableIfPossible(installDirectory);
-            WriteCommandFiles(installDirectory);
-            WriteInstallMetadata(installDirectory, release);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && options.CreateShortcuts)
-                ProvisionStartMenu(installDirectory);
+            Directory.CreateDirectory(installRoot);
+            ReplaceApplicationDirectory(payload, ApplicationDirectory(installRoot));
+            InstallSetupExecutable(setupDownload, SetupDirectory(installRoot));
+            RemoveLegacyFlatLayout(installRoot);
+            InstallProductIcon(installRoot);
+            WriteCommandFiles(installRoot);
+            WriteInstallMetadata(installRoot, applicationRelease, setupRelease);
 
-            WriteLine($"BlazorPublisher installed to: {installDirectory}", ConsoleColor.Green);
-            WriteLine($"Release: {release.TagName} / {release.AssetName}", ConsoleColor.DarkGray);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && options.CreateShortcuts)
+                ProvisionStartMenu(installRoot);
+
+            WriteLine($"BlazorPublisher installed to: {installRoot}", ConsoleColor.Green);
+            WriteLine($"Application: {ApplicationDirectory(installRoot)}", ConsoleColor.DarkGray);
+            WriteLine($"Setup: {SetupDirectory(installRoot)}", ConsoleColor.DarkGray);
+            WriteLine($"Release: {applicationRelease.TagName} / {applicationRelease.AssetName}", ConsoleColor.DarkGray);
+
             return options.StartAfter ? await StartAsync(options) : 0;
         }
         finally
@@ -102,27 +118,36 @@ internal static class Program
 
         var launch = ResolveLaunch(options.InstallDirectory);
         try { File.Delete(endpointFile); } catch { }
+
         var startInfo = new ProcessStartInfo
         {
             FileName = launch.FileName,
             WorkingDirectory = launch.WorkingDirectory,
             UseShellExecute = launch.UseShellExecute
         };
-        foreach (var argument in launch.PrefixArguments) startInfo.ArgumentList.Add(argument);
+        foreach (var argument in launch.PrefixArguments)
+            startInfo.ArgumentList.Add(argument);
         if (options.Port is int port)
         {
             startInfo.ArgumentList.Add("--port");
             startInfo.ArgumentList.Add(port.ToString());
         }
-        var process = Process.Start(startInfo) ?? throw new InvalidOperationException("BlazorPublisher could not be started.");
+
+        var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("BlazorPublisher could not be started.");
         WriteLine($"Started BlazorPublisher (PID {process.Id}).", ConsoleColor.Green);
+
         var url = await WaitForEndpointAsync(endpointFile, process);
         if (!string.IsNullOrWhiteSpace(url))
         {
             WriteLine($"Opening {url}", ConsoleColor.Cyan);
             OpenBrowser(url);
         }
-        else WriteLine("The host started, but its endpoint file was not available yet.", ConsoleColor.Yellow);
+        else
+        {
+            WriteLine("The host started, but its endpoint file was not available yet.", ConsoleColor.Yellow);
+        }
+
         return 0;
     }
 
@@ -130,396 +155,236 @@ internal static class Program
     {
         if (!options.Force)
             throw new InvalidOperationException("Use --force to confirm uninstall.");
+
         StopPublisherProcesses();
         RemoveStartMenu();
-        var target = options.InstallDirectory;
-        if (!Directory.Exists(target))
+
+        var installRoot = options.InstallDirectory;
+        if (!Directory.Exists(installRoot))
         {
             WriteLine("BlazorPublisher is not installed.", ConsoleColor.Yellow);
             return 0;
         }
 
-        var current = Environment.ProcessPath is { Length: > 0 } path ? Path.GetFullPath(path) : string.Empty;
-        var targetFull = Path.GetFullPath(target).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        if (current.StartsWith(targetFull, StringComparison.OrdinalIgnoreCase) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (IsCurrentCodeInside(installRoot) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             var cleanup = Path.Combine(Path.GetTempPath(), $"BlazorPublisher-Uninstall-{Guid.NewGuid():N}.cmd");
-            await File.WriteAllTextAsync(cleanup, $"@echo off\r\nping 127.0.0.1 -n 3 >nul\r\nrmdir /s /q \"{target}\"\r\ndel /q \"%~f0\"\r\n");
-            Process.Start(new ProcessStartInfo("cmd.exe", $"/c start \"\" /min \"{cleanup}\"") { UseShellExecute = false, CreateNoWindow = true });
+            await File.WriteAllTextAsync(cleanup,
+                $"@echo off\r\nping 127.0.0.1 -n 3 >nul\r\nrmdir /s /q \"{installRoot}\"\r\ndel /q \"%~f0\"\r\n",
+                new UTF8Encoding(false));
+            Process.Start(new ProcessStartInfo("cmd.exe", $"/c start \"\" /min \"{cleanup}\"")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true
+            });
             WriteLine("Uninstall scheduled. The installation folder will be removed after this setup process closes.", ConsoleColor.Green);
         }
         else
         {
-            Directory.Delete(target, recursive: true);
-            WriteLine($"Removed {target}", ConsoleColor.Green);
+            Directory.Delete(installRoot, recursive: true);
+            WriteLine($"Removed {installRoot}", ConsoleColor.Green);
         }
+
         return 0;
     }
 
-    private static async Task<ReleaseAsset> ResolveReleaseAssetAsync(Options options)
+    private static async Task<ReleaseAsset> ResolveLatestReleaseAssetAsync(Options options, bool setupAsset)
     {
         var runtime = CurrentRuntimeIdentifier();
-        WriteLine(
-            $"Detected runtime: {runtime} (OS architecture: {RuntimeInformation.OSArchitecture}, process architecture: {RuntimeInformation.ProcessArchitecture})",
-            ConsoleColor.DarkGray);
+        var explicitUrl = setupAsset ? options.SetupAssetUrl : options.AssetUrl;
+        var explicitName = setupAsset ? options.SetupAssetName : options.ReleaseAssetName;
 
-        if (!string.IsNullOrWhiteSpace(options.AssetUrl))
+        if (!string.IsNullOrWhiteSpace(explicitUrl))
         {
-            var name = Path.GetFileName(new Uri(options.AssetUrl).AbsolutePath);
-            name = string.IsNullOrWhiteSpace(name) ? "BlazorPublisher.zip" : name;
-            EnsureAssetNameIsNotIncompatible(name, runtime);
-            return new ReleaseAsset("explicit", name, options.AssetUrl, runtime);
+            var name = Path.GetFileName(new Uri(explicitUrl).AbsolutePath);
+            if (string.IsNullOrWhiteSpace(name))
+                name = setupAsset ? SetupFileName : ExpectedApplicationNames(runtime)[0];
+            if (!setupAsset)
+                EnsureApplicationAssetCompatible(name, runtime);
+            return new ReleaseAsset("explicit", name, explicitUrl, runtime);
         }
 
-        ValidateRepository(options.Repository);
-
-        // Read exactly GitHub's latest release and select the first asset that
-        // contains both this repository's platform token and architecture token.
-        var latestUrl = $"https://api.github.com/repos/{options.Repository}/releases/latest";
+        var latestUrl = $"https://api.github.com/repos/{Repository}/releases/latest";
         WriteLine($"Reading latest release: {latestUrl}", ConsoleColor.DarkGray);
-
-        using var stream = await Http.GetStreamAsync(latestUrl).ConfigureAwait(false);
+        using var response = await Http.GetAsync(latestUrl, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         using var json = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
 
         var root = json.RootElement;
-        var tagName = root.TryGetProperty("tag_name", out var tag)
-            ? tag.GetString() ?? "unknown"
-            : "unknown";
+        var tagName = root.TryGetProperty("tag_name", out var tag) ? tag.GetString() ?? "unknown" : "unknown";
+        WriteLine($"Latest {Repository} release: {tagName}", ConsoleColor.DarkGray);
 
-        WriteLine($"Latest {options.Repository} release: {tagName}", ConsoleColor.DarkGray);
-
-        if (!root.TryGetProperty("assets", out var assets)
-            || assets.ValueKind != JsonValueKind.Array
-            || assets.GetArrayLength() == 0)
-        {
-            throw new InvalidOperationException(
-                $"No downloadable release assets found for {options.Repository}.");
-        }
-
-        var platform = GetPlatformToken();
-        var architecture = GetArchitectureToken();
-
-        if (string.IsNullOrWhiteSpace(platform) || string.IsNullOrWhiteSpace(architecture))
-        {
-            throw new PlatformNotSupportedException(
-                $"Unsupported platform or architecture: {RuntimeInformation.OSDescription} / {RuntimeInformation.OSArchitecture}.");
-        }
+        if (!root.TryGetProperty("assets", out var assets) || assets.GetArrayLength() == 0)
+            throw new InvalidOperationException($"No downloadable release assets found for {Repository}.");
 
         JsonElement? selected = null;
+        foreach (var asset in assets.EnumerateArray())
+        {
+            var name = asset.GetProperty("name").GetString() ?? string.Empty;
+            var exactNameMatch = !string.IsNullOrWhiteSpace(explicitName)
+                && name.Equals(explicitName, StringComparison.OrdinalIgnoreCase);
+            var match = setupAsset
+                ? IsRuntimeSpecificSetupAsset(name, runtime)
+                : IsApplicationAsset(name, runtime);
 
-        if (!string.IsNullOrWhiteSpace(options.ReleaseAssetName))
+            WriteLine($"Checking asset '{name}'. Match={match}, SetupAsset={setupAsset}", ConsoleColor.DarkGray);
+            if (exactNameMatch || (string.IsNullOrWhiteSpace(explicitName) && match))
+            {
+                selected = asset;
+                break;
+            }
+        }
+
+        if (selected is null && setupAsset && string.IsNullOrWhiteSpace(explicitName))
         {
             foreach (var asset in assets.EnumerateArray())
             {
                 var name = asset.GetProperty("name").GetString() ?? string.Empty;
-                if (name.Equals(options.ReleaseAssetName, StringComparison.OrdinalIgnoreCase))
+                if (name.Equals(SetupFileName, StringComparison.OrdinalIgnoreCase))
                 {
                     selected = asset;
                     break;
                 }
             }
-
-            if (selected is null)
-            {
-                throw new InvalidOperationException(
-                    $"Release {tagName} does not contain the requested asset '{options.ReleaseAssetName}'.");
-            }
         }
-        else
+
+        if (selected is null)
         {
-            foreach (var asset in assets.EnumerateArray())
-            {
-                var name = asset.GetProperty("name").GetString() ?? string.Empty;
-
-                var isPlatformMatch =
-                    name.Contains(platform, StringComparison.OrdinalIgnoreCase)
-                    && name.Contains(architecture, StringComparison.OrdinalIgnoreCase);
-
-                var isSetupAsset =
-                    name.Contains("setup", StringComparison.OrdinalIgnoreCase)
-                    || name.Contains("installer", StringComparison.OrdinalIgnoreCase)
-                    || name.Contains("bootstrap", StringComparison.OrdinalIgnoreCase);
-
-                WriteLine(
-                    $"Checking asset '{name}'. PlatformMatch={isPlatformMatch}, SetupAsset={isSetupAsset}, WantedSetupAsset=False",
-                    ConsoleColor.DarkGray);
-
-                if (isPlatformMatch && !isSetupAsset)
-                {
-                    selected = asset;
-                    break;
-                }
-            }
-
-            // Preserve the reference installer's fallback sequence.
-            if (selected is null)
-            {
-                WriteLine(
-                    $"No exact asset match found for platform={platform}, architecture={architecture}. Falling back to the first non-setup asset.",
-                    ConsoleColor.DarkYellow);
-
-                foreach (var asset in assets.EnumerateArray())
-                {
-                    var name = asset.GetProperty("name").GetString() ?? string.Empty;
-                    var isSetupAsset =
-                        name.Contains("setup", StringComparison.OrdinalIgnoreCase)
-                        || name.Contains("installer", StringComparison.OrdinalIgnoreCase)
-                        || name.Contains("bootstrap", StringComparison.OrdinalIgnoreCase);
-
-                    if (!isSetupAsset)
-                    {
-                        selected = asset;
-                        break;
-                    }
-                }
-            }
-
-            selected ??= assets.EnumerateArray().First();
+            var expected = setupAsset
+                ? $"'{SetupFileName}' or a runtime-specific setup executable"
+                : string.Join(", ", ExpectedApplicationNames(runtime));
+            throw new InvalidOperationException($"Latest release {tagName} does not contain {expected}.");
         }
 
+        var assetName = selected.Value.GetProperty("name").GetString() ?? string.Empty;
         var downloadUrl = selected.Value.GetProperty("browser_download_url").GetString();
-        var assetName = selected.Value.GetProperty("name").GetString();
+        if (string.IsNullOrWhiteSpace(downloadUrl))
+            throw new InvalidOperationException($"Selected release asset '{assetName}' has no download URL.");
+        if (!setupAsset)
+            EnsureApplicationAssetCompatible(assetName, runtime);
 
-        if (string.IsNullOrWhiteSpace(downloadUrl) || string.IsNullOrWhiteSpace(assetName))
-        {
-            throw new InvalidOperationException(
-                $"Selected release asset for {options.Repository} has no valid name or download URL.");
-        }
-
-        EnsureAssetNameIsNotIncompatible(assetName, runtime);
-
-        WriteLine($"Selected asset: {assetName}", ConsoleColor.DarkGray);
+        WriteLine($"Selected asset: {assetName}", ConsoleColor.Green);
         return new ReleaseAsset(tagName, assetName, downloadUrl, runtime);
     }
 
-    private static string GetPlatformToken()
+    private static bool IsApplicationAsset(string assetName, string runtime)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "win";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "lin";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macos";
-        return string.Empty;
+        if (!assetName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) || IsSetupName(assetName))
+            return false;
+        var normalized = NormalizeName(assetName);
+        return RuntimeTokens(runtime).Any(token => normalized.Contains(token, StringComparison.Ordinal));
     }
 
-    private static string GetArchitectureToken() => RuntimeInformation.OSArchitecture switch
+    private static bool IsRuntimeSpecificSetupAsset(string assetName, string runtime)
     {
-        Architecture.X64 => "x64",
-        Architecture.X86 => "x86",
-        Architecture.Arm => "arm",
-        Architecture.Arm64 => "arm64",
-        _ => string.Empty
+        if (assetName.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) || !IsSetupName(assetName))
+            return false;
+        var normalized = NormalizeName(assetName);
+        return RuntimeTokens(runtime).Any(token => normalized.Contains(token, StringComparison.Ordinal));
+    }
+
+    private static bool IsSetupName(string name)
+    {
+        var normalized = NormalizeName(name);
+        return normalized.Contains("setup", StringComparison.Ordinal)
+            || normalized.Contains("installer", StringComparison.Ordinal)
+            || normalized.Contains("bootstrap", StringComparison.Ordinal);
+    }
+
+    private static void EnsureApplicationAssetCompatible(string assetName, string runtime)
+    {
+        if (!IsApplicationAsset(assetName, runtime))
+            throw new InvalidDataException(
+                $"Release asset '{assetName}' does not match {runtime}. Expected: {string.Join(", ", ExpectedApplicationNames(runtime))}.");
+    }
+
+    private static string[] RuntimeTokens(string runtime) => runtime switch
+    {
+        "win-x64" => ["winx64", "windowsx64"],
+        "win-arm64" => ["winarm64", "windowsarm64"],
+        "linux-x64" => ["linx64", "linuxx64"],
+        "linux-arm64" => ["linarm64", "linuxarm64"],
+        "osx-x64" => ["macosx64", "osxx64", "darwinx64"],
+        "osx-arm64" => ["macosarm64", "osxarm64", "darwinarm64"],
+        _ => throw new PlatformNotSupportedException($"Unsupported runtime: {runtime}")
+    };
+
+    private static string[] ExpectedApplicationNames(string runtime) => runtime switch
+    {
+        "win-x64" => ["winx64.zip", "BlazorPublisher-win-x64.zip"],
+        "win-arm64" => ["winarm64.zip", "BlazorPublisher-win-arm64.zip"],
+        "linux-x64" => ["linx64.zip", "linuxx64.zip", "BlazorPublisher-linux-x64.zip"],
+        "linux-arm64" => ["linarm64.zip", "linuxarm64.zip", "BlazorPublisher-linux-arm64.zip"],
+        "osx-x64" => ["macosx64.zip", "osxx64.zip", "BlazorPublisher-osx-x64.zip"],
+        "osx-arm64" => ["macosarm64.zip", "osxarm64.zip", "BlazorPublisher-osx-arm64.zip"],
+        _ => throw new PlatformNotSupportedException($"Unsupported runtime: {runtime}")
     };
 
     private static string CurrentRuntimeIdentifier()
     {
-        var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win"
+        var platform = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win"
             : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux"
             : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx"
-            : throw new PlatformNotSupportedException("BlazorPublisher setup supports Windows, Linux, and macOS.");
+            : throw new PlatformNotSupportedException("BlazorPublisher supports Windows, Linux, and macOS.");
         var architecture = RuntimeInformation.OSArchitecture switch
         {
             Architecture.X64 => "x64",
             Architecture.Arm64 => "arm64",
-            Architecture.X86 => "x86",
-            Architecture.Arm => "arm",
-            _ => throw new PlatformNotSupportedException($"Unsupported processor architecture: {RuntimeInformation.OSArchitecture}.")
+            _ => throw new PlatformNotSupportedException($"Unsupported architecture: {RuntimeInformation.OSArchitecture}.")
         };
-        return $"{os}-{architecture}";
-    }
-
-    private static int ScoreReleaseAsset(string assetName, string runtime)
-    {
-        var name = NormalizeAssetName(assetName);
-        var expected = NormalizeAssetName(runtime);
-        if (name.Contains(expected, StringComparison.Ordinal)) return 110;
-
-        var (expectedOs, expectedArchitecture) = SplitRuntime(runtime);
-        var osHint = DetectAssetOperatingSystem(name);
-        var architectureHint = DetectAssetArchitecture(name);
-        if (osHint is null || architectureHint is null) return -1;
-        if (!osHint.Equals(expectedOs, StringComparison.Ordinal)) return -1;
-        if (!architectureHint.Equals(expectedArchitecture, StringComparison.Ordinal)) return -1;
-        return 100;
-    }
-
-    private static void EnsureAssetNameIsNotIncompatible(string assetName, string runtime)
-    {
-        var normalizedName = NormalizeAssetName(assetName);
-        var osHint = DetectAssetOperatingSystem(normalizedName);
-        var architectureHint = DetectAssetArchitecture(normalizedName);
-        var (expectedOs, expectedArchitecture) = SplitRuntime(runtime);
-        if (osHint is not null && !osHint.Equals(expectedOs, StringComparison.Ordinal))
-            throw new InvalidDataException($"Release asset '{assetName}' targets {osHint}, but this computer requires {runtime}.");
-        if (architectureHint is not null && !architectureHint.Equals(expectedArchitecture, StringComparison.Ordinal))
-            throw new InvalidDataException($"Release asset '{assetName}' targets {architectureHint}, but this computer requires {runtime}.");
-    }
-
-    private static (string OperatingSystem, string Architecture) SplitRuntime(string runtime)
-    {
-        var separator = runtime.LastIndexOf('-');
-        return separator > 0
-            ? (runtime[..separator], runtime[(separator + 1)..])
-            : (runtime, string.Empty);
-    }
-
-    private static string NormalizeAssetName(string value) => new(value.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
-
-    private static string? DetectAssetOperatingSystem(string normalizedName)
-    {
-        if (normalizedName.Contains("windows", StringComparison.Ordinal)
-            || normalizedName.Contains("winx64", StringComparison.Ordinal)
-            || normalizedName.Contains("winarm64", StringComparison.Ordinal)
-            || normalizedName.StartsWith("win", StringComparison.Ordinal)) return "win";
-        if (normalizedName.Contains("linux", StringComparison.Ordinal)
-            || normalizedName.Contains("linx64", StringComparison.Ordinal)
-            || normalizedName.Contains("linarm64", StringComparison.Ordinal)
-            || normalizedName.StartsWith("lin", StringComparison.Ordinal)) return "linux";
-        if (normalizedName.Contains("macos", StringComparison.Ordinal)
-            || normalizedName.Contains("darwin", StringComparison.Ordinal)
-            || normalizedName.Contains("osxx64", StringComparison.Ordinal)
-            || normalizedName.Contains("osxarm64", StringComparison.Ordinal)
-            || normalizedName.StartsWith("osx", StringComparison.Ordinal)
-            || normalizedName.StartsWith("mac", StringComparison.Ordinal)) return "osx";
-        return null;
-    }
-
-    private static string? DetectAssetArchitecture(string normalizedName)
-    {
-        if (normalizedName.Contains("arm64", StringComparison.Ordinal) || normalizedName.Contains("aarch64", StringComparison.Ordinal)) return "arm64";
-        if (normalizedName.Contains("x64", StringComparison.Ordinal)
-            || normalizedName.Contains("amd64", StringComparison.Ordinal)
-            || normalizedName.Contains("win64", StringComparison.Ordinal)
-            || normalizedName.Contains("linux64", StringComparison.Ordinal)
-            || normalizedName.Contains("lin64", StringComparison.Ordinal)
-            || normalizedName.Contains("macos64", StringComparison.Ordinal)
-            || normalizedName.Contains("osx64", StringComparison.Ordinal)) return "x64";
-        if (normalizedName.Contains("x86", StringComparison.Ordinal) || normalizedName.Contains("i386", StringComparison.Ordinal) || normalizedName.Contains("win32", StringComparison.Ordinal)) return "x86";
-        return null;
+        var runtime = $"{platform}-{architecture}";
+        WriteLine($"Detected runtime: {runtime}", ConsoleColor.DarkGray);
+        return runtime;
     }
 
     private static async Task DownloadFileAsync(string url, string destination)
     {
         const int maxAttempts = 3;
-        var temporaryFile = destination + ".part";
+        var temporary = destination + ".part";
 
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
             {
-                var directory = Path.GetDirectoryName(Path.GetFullPath(destination));
-                if (!string.IsNullOrWhiteSpace(directory))
-                    Directory.CreateDirectory(directory);
-
-                if (File.Exists(temporaryFile))
-                    File.Delete(temporaryFile);
-
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(destination))!);
+                TryDeleteFile(temporary);
                 WriteLine($"Downloading attempt {attempt}/{maxAttempts}: {url}", ConsoleColor.Cyan);
-                WriteLine($"Target: {destination}", ConsoleColor.DarkGray);
 
                 using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(30));
-                using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.UserAgent.ParseAdd("BlazorPublisherSetupTool/1.0");
-                request.Headers.Accept.ParseAdd("*/*");
-
-                using var response = await Http.SendAsync(
-                    request,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    cancellation.Token).ConfigureAwait(false);
-
+                using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellation.Token).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
+                var expectedLength = response.Content.Headers.ContentLength;
+                long total = 0;
 
-                var contentLength = response.Content.Headers.ContentLength;
-                WriteLine(
-                    contentLength.HasValue
-                        ? $"Remote size: {FormatBytes(contentLength.Value)}"
-                        : "Remote size: unknown",
-                    ConsoleColor.DarkGray);
-
-                long totalRead = 0;
-
-                await using (var input = await response.Content
-                    .ReadAsStreamAsync(cancellation.Token)
-                    .ConfigureAwait(false))
-                await using (var output = new FileStream(
-                    temporaryFile,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None,
-                    bufferSize: 4 * 1024 * 1024,
-                    useAsync: true))
+                await using (var input = await response.Content.ReadAsStreamAsync(cancellation.Token).ConfigureAwait(false))
+                await using (var output = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None, 4 * 1024 * 1024, true))
                 {
                     var buffer = new byte[4 * 1024 * 1024];
-                    var lastReport = DateTimeOffset.UtcNow;
-
                     while (true)
                     {
-                        var read = await input
-                            .ReadAsync(buffer.AsMemory(0, buffer.Length), cancellation.Token)
-                            .ConfigureAwait(false);
-
-                        if (read == 0)
-                            break;
-
-                        await output
-                            .WriteAsync(buffer.AsMemory(0, read), cancellation.Token)
-                            .ConfigureAwait(false);
-
-                        totalRead += read;
-
-                        var now = DateTimeOffset.UtcNow;
-                        if (now - lastReport >= TimeSpan.FromSeconds(5))
-                        {
-                            var progress = contentLength is > 0
-                                ? $"Downloaded {FormatBytes(totalRead)} / {FormatBytes(contentLength.Value)} ({totalRead * 100.0 / contentLength.Value:F1}%)"
-                                : $"Downloaded {FormatBytes(totalRead)}";
-
-                            WriteLine(progress, ConsoleColor.DarkGray);
-                            lastReport = now;
-                        }
+                        var read = await input.ReadAsync(buffer.AsMemory(), cancellation.Token).ConfigureAwait(false);
+                        if (read == 0) break;
+                        await output.WriteAsync(buffer.AsMemory(0, read), cancellation.Token).ConfigureAwait(false);
+                        total += read;
+                        if (expectedLength is > 0)
+                            Console.Write($"\r{total * 100d / expectedLength.Value:0.0}%   ");
                     }
-
-                    await output.FlushAsync(cancellation.Token).ConfigureAwait(false);
                 }
+                Console.WriteLine();
 
-                if (!File.Exists(temporaryFile))
-                {
-                    throw new FileNotFoundException(
-                        $"Temporary download file does not exist after download: {temporaryFile}");
-                }
-
-                var actualSize = new FileInfo(temporaryFile).Length;
-                if (actualSize == 0)
+                if (total == 0)
                     throw new IOException("Downloaded file is empty.");
+                if (expectedLength.HasValue && total != expectedLength.Value)
+                    throw new IOException($"Incomplete download: {total:N0} of {expectedLength.Value:N0} bytes.");
 
-                if (contentLength.HasValue && actualSize != contentLength.Value)
-                {
-                    var missing = contentLength.Value - actualSize;
-                    throw new IOException(
-                        $"Incomplete download. Got {actualSize:N0} bytes, expected {contentLength.Value:N0} bytes. Missing {missing:N0} bytes.");
-                }
-
-                await MoveFileWithRetryAsync(temporaryFile, destination).ConfigureAwait(false);
-                WriteLine($"Download complete: {destination} ({FormatBytes(actualSize)})", ConsoleColor.Green);
+                await MoveFileWithRetryAsync(temporary, destination).ConfigureAwait(false);
                 return;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (attempt < maxAttempts)
             {
-                WriteLine(
-                    $"Download attempt {attempt}/{maxAttempts} failed: {ex.Message}",
-                    ConsoleColor.Yellow);
-
-                try
-                {
-                    if (File.Exists(temporaryFile))
-                        File.Delete(temporaryFile);
-                }
-                catch
-                {
-                    // Best-effort cleanup.
-                }
-
-                if (attempt == maxAttempts)
-                    throw;
-
+                WriteLine($"Download attempt {attempt} failed: {ex.Message}", ConsoleColor.Yellow);
+                TryDeleteFile(temporary);
                 await Task.Delay(TimeSpan.FromSeconds(2 * attempt)).ConfigureAwait(false);
             }
         }
@@ -531,28 +396,15 @@ internal static class Program
         {
             try
             {
-                if (!File.Exists(source))
-                    throw new FileNotFoundException($"Source file for move does not exist: {source}", source);
-
-                if (File.Exists(destination))
-                    File.Delete(destination);
-
-                File.Move(source, destination, overwrite: true);
+                if (File.Exists(destination)) File.Delete(destination);
+                File.Move(source, destination);
                 return;
             }
-            catch (IOException ex) when (attempt < 10)
+            catch (IOException) when (attempt < 10)
             {
-                WriteLine(
-                    $"Move failed because the file is locked. Retry {attempt}/10: {ex.Message}",
-                    ConsoleColor.Yellow);
                 await Task.Delay(300).ConfigureAwait(false);
             }
         }
-
-        if (File.Exists(destination))
-            File.Delete(destination);
-
-        File.Move(source, destination, overwrite: true);
     }
 
     private static void ExtractZipSafe(string archive, string destination)
@@ -565,7 +417,11 @@ internal static class Program
             var target = Path.GetFullPath(Path.Combine(destination, entry.FullName));
             if (!target.StartsWith(root, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Unsafe ZIP entry: {entry.FullName}");
-            if (string.IsNullOrEmpty(entry.Name)) { Directory.CreateDirectory(target); continue; }
+            if (string.IsNullOrEmpty(entry.Name))
+            {
+                Directory.CreateDirectory(target);
+                continue;
+            }
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             entry.ExtractToFile(target, overwrite: true);
         }
@@ -573,162 +429,199 @@ internal static class Program
 
     private static string ResolvePayloadRoot(string extracted)
     {
-        var executable = Directory.EnumerateFiles(extracted, "PublisherStudio.Web.exe", SearchOption.AllDirectories).FirstOrDefault();
-        var dll = executable is null ? Directory.EnumerateFiles(extracted, "PublisherStudio.Web.dll", SearchOption.AllDirectories).FirstOrDefault() : null;
-        var marker = executable ?? dll ?? throw new FileNotFoundException("The release ZIP does not contain PublisherStudio.Web.exe or PublisherStudio.Web.dll.");
+        var marker = Directory.EnumerateFiles(extracted, "PublisherStudio.Web.exe", SearchOption.AllDirectories).FirstOrDefault()
+            ?? Directory.EnumerateFiles(extracted, "PublisherStudio.Web", SearchOption.AllDirectories).FirstOrDefault()
+            ?? Directory.EnumerateFiles(extracted, "PublisherStudio.Web.dll", SearchOption.AllDirectories).FirstOrDefault()
+            ?? throw new FileNotFoundException("The release ZIP does not contain PublisherStudio.Web.");
         return Path.GetDirectoryName(marker)!;
     }
 
     private static void ValidatePayload(string payload, string runtime, string assetName)
     {
-        var runtimeConfig = Path.Combine(payload, "PublisherStudio.Web.runtimeconfig.json");
-        var dependencies = Path.Combine(payload, "PublisherStudio.Web.deps.json");
-        var applicationDll = Path.Combine(payload, "PublisherStudio.Web.dll");
-        var missing = new List<string>();
-        if (!File.Exists(runtimeConfig)) missing.Add(Path.GetFileName(runtimeConfig));
-        if (!File.Exists(dependencies)) missing.Add(Path.GetFileName(dependencies));
-        if (!File.Exists(applicationDll)) missing.Add(Path.GetFileName(applicationDll));
+        var required = new List<string>
+        {
+            "PublisherStudio.Web.dll",
+            "PublisherStudio.Web.deps.json",
+            "PublisherStudio.Web.runtimeconfig.json"
+        };
+        var missing = required.Where(file => !File.Exists(Path.Combine(payload, file))).ToList();
         if (missing.Count > 0)
-            throw new InvalidDataException($"Release asset '{assetName}' is not a complete BlazorPublisher publish for {runtime}. Missing: {string.Join(", ", missing)}.");
+            throw new InvalidDataException($"'{assetName}' is incomplete. Missing: {string.Join(", ", missing)}.");
 
-        var payloadRuntime = ReadPayloadRuntimeIdentifier(dependencies);
-        if (!string.IsNullOrWhiteSpace(payloadRuntime) && ScoreReleaseAsset(payloadRuntime, runtime) < 0)
-            throw new InvalidDataException(
-                $"Release asset '{assetName}' contains a {payloadRuntime} publish, but this computer requires {runtime}. " +
-                "The existing installation was not changed.");
-
-        using var document = JsonDocument.Parse(File.ReadAllText(runtimeConfig));
-        if (!document.RootElement.TryGetProperty("runtimeOptions", out var runtimeOptions))
-            throw new InvalidDataException($"Release asset '{assetName}' has an invalid PublisherStudio.Web.runtimeconfig.json.");
+        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(payload, "PublisherStudio.Web.runtimeconfig.json")));
+        var runtimeOptions = document.RootElement.GetProperty("runtimeOptions");
         var frameworkDependent = runtimeOptions.TryGetProperty("framework", out _)
             || runtimeOptions.TryGetProperty("frameworks", out _);
         if (frameworkDependent) return;
 
-        var nativeFiles = runtime.StartsWith("win-", StringComparison.Ordinal)
+        var native = runtime.StartsWith("win-", StringComparison.Ordinal)
             ? new[] { "PublisherStudio.Web.exe", "hostfxr.dll", "hostpolicy.dll" }
             : runtime.StartsWith("linux-", StringComparison.Ordinal)
                 ? new[] { "PublisherStudio.Web", "libhostfxr.so", "libhostpolicy.so" }
                 : new[] { "PublisherStudio.Web", "libhostfxr.dylib", "libhostpolicy.dylib" };
-        missing = nativeFiles.Where(file => !File.Exists(Path.Combine(payload, file))).ToList();
+        missing = native.Where(file => !File.Exists(Path.Combine(payload, file))).ToList();
         if (missing.Count > 0)
-            throw new InvalidDataException(
-                $"Release asset '{assetName}' claims to be self-contained but is incomplete for {runtime}. Missing: {string.Join(", ", missing)}. " +
-                $"Rebuild it with Build-Release.ps1 -Runtime {runtime}; the existing installation was not changed.");
+            throw new InvalidDataException($"'{assetName}' is not a complete self-contained {runtime} publish. Missing: {string.Join(", ", missing)}.");
     }
 
-    private static string? ReadPayloadRuntimeIdentifier(string dependenciesFile)
+    private static void ValidateSetupExecutable(string path, string assetName)
     {
+        if (!File.Exists(path) || new FileInfo(path).Length < 64 * 1024)
+            throw new InvalidDataException($"Setup asset '{assetName}' is missing or incomplete.");
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        using var stream = File.OpenRead(path);
+        if (stream.ReadByte() != 'M' || stream.ReadByte() != 'Z')
+            throw new InvalidDataException($"Setup asset '{assetName}' is not a Windows executable.");
+    }
+
+    private static void ReplaceApplicationDirectory(string payload, string destination)
+    {
+        var incoming = destination + ".incoming";
+        var backup = destination + ".backup";
+        TryDeleteDirectory(incoming);
+        TryDeleteDirectory(backup);
+        CopyDirectory(payload, incoming);
+
         try
         {
-            using var document = JsonDocument.Parse(File.ReadAllText(dependenciesFile));
-            if (!document.RootElement.TryGetProperty("runtimeTarget", out var runtimeTarget)
-                || !runtimeTarget.TryGetProperty("name", out var nameValue)) return null;
-            var name = nameValue.GetString();
-            if (string.IsNullOrWhiteSpace(name)) return null;
-            var separator = name.LastIndexOf('/');
-            var candidate = separator >= 0 && separator < name.Length - 1 ? name[(separator + 1)..] : name;
-            var normalized = NormalizeAssetName(candidate);
-            return DetectAssetOperatingSystem(normalized) is not null && DetectAssetArchitecture(normalized) is not null
-                ? candidate
-                : null;
+            if (Directory.Exists(destination)) Directory.Move(destination, backup);
+            Directory.Move(incoming, destination);
+            TryDeleteDirectory(backup);
         }
-        catch (JsonException ex)
+        catch
         {
-            throw new InvalidDataException("PublisherStudio.Web.deps.json is invalid.", ex);
+            TryDeleteDirectory(destination);
+            if (Directory.Exists(backup)) Directory.Move(backup, destination);
+            throw;
         }
     }
 
-    private static void ClearApplicationPayload(string target)
+    private static void InstallSetupExecutable(string source, string setupDirectory)
     {
-        var preserved = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        Directory.CreateDirectory(setupDirectory);
+        var destination = Path.Combine(setupDirectory, SetupFileName);
+        if (!CurrentCodeLocations().Any(path => PathsEqual(path, destination)))
         {
-            SetupFileName, "Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "installation.json"
+            File.Copy(source, destination, overwrite: true);
+            return;
+        }
+
+        var next = destination + ".next";
+        File.Copy(source, next, overwrite: true);
+        var script = Path.Combine(Path.GetTempPath(), $"BlazorPublisher-Setup-Replace-{Guid.NewGuid():N}.cmd");
+        File.WriteAllText(script,
+            $"@echo off\r\nping 127.0.0.1 -n 3 >nul\r\nmove /y \"{next}\" \"{destination}\" >nul\r\ndel /q \"%~f0\"\r\n",
+            new UTF8Encoding(false));
+        Process.Start(new ProcessStartInfo("cmd.exe", $"/c start \"\" /min \"{script}\"")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true
+        });
+    }
+
+    private static void RemoveLegacyFlatLayout(string installRoot)
+    {
+        var keptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "installation.json"
         };
-        foreach (var file in Directory.EnumerateFiles(target))
-            if (!preserved.Contains(Path.GetFileName(file))) TryDeleteFile(file);
-        foreach (var directory in Directory.EnumerateDirectories(target))
-            try { Directory.Delete(directory, recursive: true); } catch (Exception ex) { WriteLine($"Could not remove old directory '{directory}': {ex.Message}", ConsoleColor.Yellow); }
+        var keptDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ApplicationFolderName, SetupFolderName
+        };
+
+        foreach (var file in Directory.EnumerateFiles(installRoot))
+            if (!keptFiles.Contains(Path.GetFileName(file))) TryDeleteFile(file);
+        foreach (var directory in Directory.EnumerateDirectories(installRoot))
+            if (!keptDirectories.Contains(Path.GetFileName(directory))) TryDeleteDirectory(directory);
     }
 
-    private static void CopySetupExecutableIfPossible(string installDirectory)
+    private static void InstallProductIcon(string installRoot)
+    {
+        var source = Directory.EnumerateFiles(ApplicationDirectory(installRoot), IconFileName, SearchOption.AllDirectories)
+            .OrderBy(path => RelativeDepth(ApplicationDirectory(installRoot), path))
+            .FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(source))
+            File.Copy(source, Path.Combine(installRoot, IconFileName), overwrite: true);
+    }
+
+    private static void WriteCommandFiles(string installRoot)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
-        var source = Environment.ProcessPath;
-        if (string.IsNullOrWhiteSpace(source) || !File.Exists(source)) return;
-        var destination = Path.Combine(installDirectory, SetupFileName);
-        if (Path.GetFullPath(source).Equals(Path.GetFullPath(destination), StringComparison.OrdinalIgnoreCase)) return;
-        File.Copy(source, destination, overwrite: true);
+        WriteCommand(Path.Combine(installRoot, "Install.cmd"), "--install --start");
+        WriteCommand(Path.Combine(installRoot, "Update.cmd"), "--update --start");
+        WriteCommand(Path.Combine(installRoot, "Start.cmd"), "--start");
+        WriteCommand(Path.Combine(installRoot, "Uninstall.cmd"), "--uninstall --force");
     }
 
-    private static void WriteCommandFiles(string installDirectory)
+    private static void WriteCommand(string path, string arguments)
     {
-        var setup = Path.Combine(installDirectory, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SetupFileName : Path.GetFileName(Environment.ProcessPath ?? "PublisherStudio.Setup"));
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
-        WriteCommand(Path.Combine(installDirectory, "Install.cmd"), $"\"{setup}\" --install --start");
-        WriteCommand(Path.Combine(installDirectory, "Update.cmd"), $"\"{setup}\" --update --start");
-        WriteCommand(Path.Combine(installDirectory, "Start.cmd"), $"\"{setup}\" --start");
-        WriteCommand(Path.Combine(installDirectory, "Uninstall.cmd"), $"\"{setup}\" --uninstall --force");
+        var setup = $"%~dp0{SetupFolderName}\\{SetupFileName}";
+        File.WriteAllText(path,
+            $"@echo off\r\nsetlocal\r\ncd /d \"%~dp0\"\r\ncall \"{setup}\" {arguments} --install-dir \"%~dp0\"\r\n" +
+            "set \"EXITCODE=%ERRORLEVEL%\"\r\nif not \"%EXITCODE%\"==\"0\" echo Command failed with exit code %EXITCODE%.\r\n" +
+            "if not \"%EXITCODE%\"==\"0\" pause\r\nexit /b %EXITCODE%\r\n",
+            new UTF8Encoding(false));
     }
 
-    private static void WriteCommand(string path, string command)
-    {
-        File.WriteAllText(path, $"@echo off\r\nsetlocal\r\ncd /d \"%~dp0\"\r\ncall {command}\r\nset \"EXITCODE=%ERRORLEVEL%\"\r\nif not \"%EXITCODE%\"==\"0\" echo Command failed with exit code %EXITCODE%.\r\nif not \"%EXITCODE%\"==\"0\" pause\r\nexit /b %EXITCODE%\r\n", new UTF8Encoding(false));
-    }
-
-    private static void ProvisionStartMenu(string installDirectory)
+    private static void ProvisionStartMenu(string installRoot)
     {
         var folder = StartMenuFolder();
+        if (Directory.Exists(folder)) Directory.Delete(folder, recursive: true);
         Directory.CreateDirectory(folder);
-        var productIcon = FirstExistingPath(
-            Path.Combine(installDirectory, "PublisherStudio.ico"),
-            Path.Combine(installDirectory, "PublisherStudio.Web.exe"),
-            Path.Combine(installDirectory, SetupFileName));
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Start.url"), Path.Combine(installDirectory, "Start.cmd"), productIcon);
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Update.url"), Path.Combine(installDirectory, "Update.cmd"), productIcon);
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Install or Repair.url"), Path.Combine(installDirectory, "Install.cmd"), productIcon);
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Uninstall.url"), Path.Combine(installDirectory, "Uninstall.cmd"), productIcon);
-        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Folder.url"), installDirectory, productIcon);
+        var icon = File.Exists(Path.Combine(installRoot, IconFileName))
+            ? Path.Combine(installRoot, IconFileName)
+            : Path.Combine(SetupDirectory(installRoot), SetupFileName);
+
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Start.url"), Path.Combine(installRoot, "Start.cmd"), icon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Update.url"), Path.Combine(installRoot, "Update.cmd"), icon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Install or Repair.url"), Path.Combine(installRoot, "Install.cmd"), icon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Uninstall.url"), Path.Combine(installRoot, "Uninstall.cmd"), icon);
+        CreateUrlShortcut(Path.Combine(folder, "BlazorPublisher Folder.url"), installRoot, icon);
         WriteLine($"Start Menu entries created in '{StartMenuGroup}'.", ConsoleColor.Green);
     }
 
-    private static string? FirstExistingPath(params string?[] paths) => paths.FirstOrDefault(path => !string.IsNullOrWhiteSpace(path) && File.Exists(path));
-
-    private static void CreateUrlShortcut(string shortcutPath, string targetPath, string? iconPath)
+    private static void CreateUrlShortcut(string shortcutPath, string targetPath, string iconPath)
     {
         var builder = new StringBuilder();
         builder.AppendLine("[InternetShortcut]");
         builder.AppendLine($"URL={new Uri(Path.GetFullPath(targetPath)).AbsoluteUri}");
-        if (!string.IsNullOrWhiteSpace(iconPath)) { builder.AppendLine($"IconFile={Path.GetFullPath(iconPath)}"); builder.AppendLine("IconIndex=0"); }
+        if (File.Exists(iconPath))
+        {
+            builder.AppendLine($"IconFile={Path.GetFullPath(iconPath)}");
+            builder.AppendLine("IconIndex=0");
+        }
         File.WriteAllText(shortcutPath, builder.ToString(), new UTF8Encoding(false));
     }
 
-    private static void RemoveStartMenu()
+    private static LaunchInfo ResolveLaunch(string installRoot)
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
-        var folder = StartMenuFolder();
-        if (Directory.Exists(folder)) try { Directory.Delete(folder, recursive: true); } catch { }
-    }
+        var appRoot = ApplicationDirectory(installRoot);
+        if (!Directory.Exists(appRoot))
+            throw new DirectoryNotFoundException($"Application directory not found: {appRoot}");
 
-    private static string StartMenuFolder() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", StartMenuGroup);
+        var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "PublisherStudio.Web.exe" : "PublisherStudio.Web";
+        var executable = Directory.EnumerateFiles(appRoot, executableName, SearchOption.AllDirectories)
+            .OrderBy(path => RelativeDepth(appRoot, path)).FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(executable))
+            return new LaunchInfo(executable, Path.GetDirectoryName(executable)!, true, []);
 
-    private static LaunchInfo ResolveLaunch(string installDirectory)
-    {
-        var executable = Directory.Exists(installDirectory)
-            ? Directory.EnumerateFiles(installDirectory, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "PublisherStudio.Web.exe" : "PublisherStudio.Web", SearchOption.AllDirectories).FirstOrDefault()
-            : null;
-        if (!string.IsNullOrWhiteSpace(executable)) return new LaunchInfo(executable, Path.GetDirectoryName(executable)!, true, []);
-        var dll = Directory.Exists(installDirectory) ? Directory.EnumerateFiles(installDirectory, "PublisherStudio.Web.dll", SearchOption.AllDirectories).FirstOrDefault() : null;
-        if (!string.IsNullOrWhiteSpace(dll)) return new LaunchInfo("dotnet", Path.GetDirectoryName(dll)!, false, [dll]);
-        throw new FileNotFoundException($"BlazorPublisher is not installed in '{installDirectory}'. Run Install first.");
+        var dll = Directory.EnumerateFiles(appRoot, "PublisherStudio.Web.dll", SearchOption.AllDirectories)
+            .OrderBy(path => RelativeDepth(appRoot, path)).FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(dll))
+            return new LaunchInfo("dotnet", Path.GetDirectoryName(dll)!, false, [dll]);
+
+        throw new FileNotFoundException($"PublisherStudio.Web was not found under '{appRoot}'.");
     }
 
     private static async Task<string?> WaitForEndpointAsync(string endpointFile, Process process)
     {
-        for (var attempt = 0; attempt < 120; attempt++)
+        for (var attempt = 0; attempt < 160; attempt++)
         {
-            if (process.HasExited) throw new InvalidOperationException($"BlazorPublisher exited with code {process.ExitCode}.");
+            if (process.HasExited)
+                throw new InvalidOperationException($"BlazorPublisher exited with code {process.ExitCode}.");
             if (TryReadEndpoint(endpointFile, out var url)) return url;
-            await Task.Delay(125);
+            await Task.Delay(125).ConfigureAwait(false);
         }
         return null;
     }
@@ -752,7 +645,6 @@ internal static class Program
         {
             try
             {
-                WriteLine($"Stopping PublisherStudio.Web PID {process.Id}...", ConsoleColor.Yellow);
                 if (!process.CloseMainWindow() || !process.WaitForExit(2500)) process.Kill(entireProcessTree: true);
             }
             catch { }
@@ -760,38 +652,104 @@ internal static class Program
         }
     }
 
-    private static bool IsPublisherRunning() => Process.GetProcessesByName("PublisherStudio.Web").Any();
-    private static string RuntimeEndpointFile() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "runtime", "server.json");
-    private static void OpenBrowser(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-
-    private static void CopyDirectory(string source, string target, bool overwrite)
+    private static bool IsPublisherRunning()
     {
+        var processes = Process.GetProcessesByName("PublisherStudio.Web");
+        try { return processes.Length > 0; }
+        finally { foreach (var process in processes) process.Dispose(); }
+    }
+
+    private static IEnumerable<string> CurrentCodeLocations()
+    {
+        if (!string.IsNullOrWhiteSpace(Environment.ProcessPath) && File.Exists(Environment.ProcessPath))
+            yield return Environment.ProcessPath;
+        var assembly = Assembly.GetExecutingAssembly().Location;
+        if (!string.IsNullOrWhiteSpace(assembly) && File.Exists(assembly)) yield return assembly;
+        var command = Environment.GetCommandLineArgs().FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(command) && File.Exists(command)) yield return command;
+    }
+
+    private static bool IsCurrentCodeInside(string root)
+    {
+        var prefix = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        return CurrentCodeLocations().Any(path => Path.GetFullPath(path).StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static void CopyDirectory(string source, string target)
+    {
+        Directory.CreateDirectory(target);
         foreach (var directory in Directory.EnumerateDirectories(source, "*", SearchOption.AllDirectories))
             Directory.CreateDirectory(Path.Combine(target, Path.GetRelativePath(source, directory)));
         foreach (var file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories))
         {
             var destination = Path.Combine(target, Path.GetRelativePath(source, file));
             Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-            File.Copy(file, destination, overwrite);
+            File.Copy(file, destination, overwrite: true);
         }
     }
 
-    private static void WriteInstallMetadata(string target, ReleaseAsset release)
+    private static void WriteInstallMetadata(string installRoot, ReleaseAsset application, ReleaseAsset setup)
     {
-        var metadata = new { Product = ProductName, InstalledUtc = DateTimeOffset.UtcNow, release.TagName, release.AssetName, release.RuntimeIdentifier, InstallerVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() };
-        File.WriteAllText(Path.Combine(target, "installation.json"), JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
+        var metadata = new
+        {
+            Product = ProductName,
+            InstalledUtc = DateTimeOffset.UtcNow,
+            application.TagName,
+            ApplicationAsset = application.AssetName,
+            SetupAsset = setup.AssetName,
+            application.RuntimeIdentifier,
+            InstallerVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString()
+        };
+        File.WriteAllText(Path.Combine(installRoot, "installation.json"),
+            JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
     }
 
-    private static void ValidateRepository(string repository)
+    private static string ApplicationDirectory(string root) => Path.Combine(root, ApplicationFolderName);
+    private static string SetupDirectory(string root) => Path.Combine(root, SetupFolderName);
+    private static string StartMenuFolder() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", StartMenuGroup);
+    private static string RuntimeEndpointFile() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "runtime", "server.json");
+    private static string NormalizeName(string value) => new(value.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
+    private static bool PathsEqual(string left, string right) => Path.GetFullPath(left).Equals(Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+    private static int RelativeDepth(string root, string path) => Path.GetRelativePath(root, path).Count(c => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar);
+    private static void OpenBrowser(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+
+    private static void RemoveStartMenu()
     {
-        if (string.IsNullOrWhiteSpace(repository) || repository.Count(character => character == '/') != 1)
-            throw new ArgumentException("Repository must use owner/name format.");
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        try { Directory.Delete(StartMenuFolder(), recursive: true); } catch { }
     }
 
-    private static void TryDeleteFile(string path) { try { File.SetAttributes(path, FileAttributes.Normal); File.Delete(path); } catch (Exception ex) { WriteLine($"Could not remove old file '{path}': {ex.Message}", ConsoleColor.Yellow); } }
-    private static string FormatBytes(long value) { string[] units = ["B", "KB", "MB", "GB"]; double size = value; var index = 0; while (size >= 1024 && index < units.Length - 1) { size /= 1024; index++; } return $"{size:0.##} {units[index]}"; }
-    private static HttpClient CreateClient() { var client = new HttpClient { Timeout = TimeSpan.FromMinutes(30) }; client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("BlazorPublisher-Setup", "1.0")); client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json")); return client; }
-    private static void WriteLine(string value, ConsoleColor color) { var previous = Console.ForegroundColor; Console.ForegroundColor = color; Console.WriteLine(value); Console.ForegroundColor = previous; }
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (!File.Exists(path)) return;
+            File.SetAttributes(path, FileAttributes.Normal);
+            File.Delete(path);
+        }
+        catch { }
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try { if (Directory.Exists(path)) Directory.Delete(path, recursive: true); } catch { }
+    }
+
+    private static HttpClient CreateHttpClient()
+    {
+        var client = new HttpClient { Timeout = TimeSpan.FromMinutes(30) };
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("BlazorPublisher-Setup", "1.0"));
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+        return client;
+    }
+
+    private static void WriteLine(string value, ConsoleColor color)
+    {
+        var previous = Console.ForegroundColor;
+        Console.ForegroundColor = color;
+        Console.WriteLine(value);
+        Console.ForegroundColor = previous;
+    }
 
     private sealed record ReleaseAsset(string TagName, string AssetName, string DownloadUrl, string RuntimeIdentifier);
     private sealed record LaunchInfo(string FileName, string WorkingDirectory, bool UseShellExecute, string[] PrefixArguments);
@@ -800,10 +758,12 @@ internal static class Program
     private sealed class Options
     {
         public SetupAction Action { get; private set; } = SetupAction.Install;
-        public string Repository { get; private set; } = DefaultRepository;
         public string? AssetUrl { get; private set; }
+        public string? SetupAssetUrl { get; private set; }
         public string? ReleaseAssetName { get; private set; }
-        public string InstallDirectory { get; private set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "BlazorPublisher");
+        public string? SetupAssetName { get; private set; }
+        public string InstallDirectory { get; private set; } = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "BlazorPublisher");
         public int? Port { get; private set; }
         public bool StartAfter { get; private set; } = true;
         public bool CreateShortcuts { get; private set; } = true;
@@ -816,10 +776,12 @@ internal static class Program
             var result = new Options();
             if (args.Length == 0) return result;
             var actionSpecified = false;
+
             for (var index = 0; index < args.Length; index++)
             {
                 var argument = args[index].Trim();
                 string Next() => ++index < args.Length ? args[index] : throw new ArgumentException($"Missing value after {argument}.");
+
                 switch (argument.ToLowerInvariant())
                 {
                     case "install" or "--install": result.Action = SetupAction.Install; result.StartAfter = true; actionSpecified = true; break;
@@ -830,9 +792,10 @@ internal static class Program
                         else { result.Action = SetupAction.Start; result.StartAfter = false; actionSpecified = true; }
                         break;
                     case "uninstall" or "--uninstall": result.Action = SetupAction.Uninstall; result.StartAfter = false; actionSpecified = true; break;
-                    case "--repo": result.Repository = Next(); break;
                     case "--asset-url": result.AssetUrl = Next(); break;
+                    case "--setup-url": result.SetupAssetUrl = Next(); break;
                     case "--release-asset": result.ReleaseAssetName = Next(); break;
+                    case "--setup-asset": result.SetupAssetName = Next(); break;
                     case "--install-dir": result.InstallDirectory = Path.GetFullPath(Next()); break;
                     case "--port": result.Port = int.Parse(Next()); break;
                     case "--no-start": result.StartAfter = false; break;
@@ -843,14 +806,14 @@ internal static class Program
                     default: throw new ArgumentException($"Unknown option: {argument}");
                 }
             }
+
+            if (result.Port.HasValue && (result.Port.Value <= 0 || result.Port.Value > 65535))
+                throw new ArgumentOutOfRangeException(nameof(result.Port), "Port must be between 1 and 65535.");
             return result;
         }
 
         public static void PrintHelp() => Console.WriteLine("""
 BlazorPublisher setup
-
-Double-click without arguments:
-  Downloads the latest Michi0403/BlazorPublisher release, installs it, creates Start Menu entries, starts the server, and opens the browser.
 
 Commands:
   PublisherStudio.Setup.exe --install [--start]
@@ -858,14 +821,8 @@ Commands:
   PublisherStudio.Setup.exe --start [--port 5198]
   PublisherStudio.Setup.exe --uninstall --force
 
-Options:
-  --repo owner/name          GitHub repository. Default: Michi0403/BlazorPublisher
-  --asset-url URL            Direct application ZIP URL instead of GitHub latest release
-  --release-asset NAME       Select an exact release asset name
-  --install-dir PATH         Installation folder
-  --no-start                 Install/update without starting
-  --no-shortcuts             Do not create Start Menu entries
-  --wait                     Wait for a key before closing
+The application is installed into Application\ and the installer into Setup\.
+The generated Install.cmd, Update.cmd, Start.cmd, and Uninstall.cmd always call Setup\PublisherStudio.Setup.exe.
 """);
     }
 }

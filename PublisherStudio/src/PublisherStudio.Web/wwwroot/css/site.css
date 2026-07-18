@@ -171,6 +171,8 @@ button { cursor: pointer; }
 .pub-element.selected { outline: 1.5px solid #1787d4; outline-offset: 1px; }
 .pub-element.locked.selected { outline-style: dashed; }
 .text-frame-content { width: 100%; height: 100%; overflow: hidden; user-select: none; }
+.publisher-story-document { width: 100%; min-height: 100%; box-sizing: border-box; }
+.publisher-story-document, .publisher-story-document * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .text-frame-content img { max-width: 100%; }
 .image-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: transparent; isolation: isolate; }
 .image-frame img { width: 100%; height: 100%; display: block; max-width: none; transform-origin: center; pointer-events: none; background: transparent; }
@@ -319,6 +321,7 @@ button { cursor: pointer; }
 
 @media print {
     html, body { overflow: visible; background: white; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .print-publication, .print-publication * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     .title-bar, .publication-ribbon, .page-navigator, .inspector-panel, .status-bar, .ruler-canvas, .corner-ruler { display: none !important; }
     .publisher-shell { display: block; height: auto; }
     .editor-workspace { display: none !important; }
@@ -1558,6 +1561,38 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 }
 .layer-row.selected:not(.selection-primary) { background: #edf6fc; box-shadow: inset 3px 0 #69a7d3; }
 
+
+
+/* Live quick-insert preview follows the pointer before an object is committed. */
+.publisher-insert-drag-ghost {
+    position:absolute;
+    z-index:972;
+    translate:-50% -50%;
+    pointer-events:none;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    width:190px;
+    height:108px;
+    padding:10px;
+    overflow:hidden;
+    border:2px solid #1787d4;
+    border-radius:5px;
+    background:#fffffff0;
+    color:#17365d;
+    box-shadow:0 7px 24px #0006;
+    opacity:.9;
+    font:600 12px/1.25 "Segoe UI",sans-serif;
+}
+.publisher-insert-drag-ghost.kind-text { width:220px; height:82px; align-items:flex-start; justify-content:flex-start; }
+.publisher-insert-drag-ghost.kind-text strong { font-size:18px; }
+.publisher-insert-drag-ghost.kind-video { background:#111827e8; color:white; aspect-ratio:16/9; }
+.publisher-insert-video-play { display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:#ffffff26; font-size:19px; }
+.publisher-insert-picture-mark { font-size:38px; line-height:1; color:#287ebd; }
+
 /* External desktop file drag/drop preview */
 .publication-page.external-file-drop-target { box-shadow: 0 0 0 3px #1787d4, 0 4px 22px #0007; }
 .publisher-external-drop-overlay { position:absolute; inset:0; z-index:970; pointer-events:none; background:color-mix(in srgb, #1787d4 8%, transparent); border:2px dashed #1787d4; }
@@ -1570,9 +1605,9 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .publisher-external-drop-ghost small { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700; }
 .publisher-external-drop-ghost p { margin:0; overflow:hidden; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; }
 
-/* Keep DevExpress visuals isolated while neighboring z-index values change. */
-.kind-datavisual { contain:layout; isolation:isolate; }
-.data-visual-view { contain:layout; }
+/* Keep DevExpress visuals stable without layout containment, which can blank canvas/SVG content after z-order updates. */
+.kind-datavisual { isolation:isolate; min-width:0; min-height:0; }
+.kind-datavisual > .data-visual-view { position:relative; width:100%; height:100%; min-width:0; min-height:0; }
 
 .publisher-recovery-banner { display:flex; align-items:center; gap:8px; padding:7px 12px; background:#fff7d6; border-bottom:1px solid #dfc55a; color:#493d0b; font:12px/1.25 "Segoe UI",sans-serif; }
 .publisher-recovery-banner span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

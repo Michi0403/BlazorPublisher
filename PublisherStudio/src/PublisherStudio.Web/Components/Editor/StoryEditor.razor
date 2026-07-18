@@ -184,7 +184,16 @@
             await _richEdit.SaveDocumentAsync();
             var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
             var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
-            await Saved.InvokeAsync((openXml, PublicationFileService.ExtractHtmlBody(html), StoryStorageFormat.OpenXml));
+            var preview = PublicationFileService.ExtractHtmlBody(html);
+            try
+            {
+                var exportedHtml = System.Text.Encoding.UTF8.GetString(html);
+                preview = await JS.InvokeAsync<string>("publisherStudio.prepareStoryPreviewHtml", exportedHtml);
+            }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+            catch (JSException) { }
+            await Saved.InvokeAsync((openXml, preview, StoryStorageFormat.OpenXml));
         }
         catch (Exception ex)
         {

@@ -9,7 +9,7 @@ public sealed class EditorStateService
     private readonly PublicationMediaAssetStore _mediaAssets;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
-    private PublicationElement? _clipboard;
+    private readonly List<PublicationElement> _clipboard = [];
     private readonly HashSet<Guid> _selectedElementIds = [];
     private string? _liveEditKey;
     private double? _lastInsertionX;
@@ -34,7 +34,7 @@ public sealed class EditorStateService
     public ConnectorToolKind ConnectorTool { get; private set; }
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
-    public bool CanPaste => _clipboard is not null;
+    public bool CanPaste => _clipboard.Count > 0;
     public PublicationPage CurrentPage => Document.Pages.First(p => p.Id == SelectedPageId);
     public PublicationElement? SelectedElement => CurrentPage.Elements.FirstOrDefault(e => e.Id == SelectedElementId);
     public IReadOnlyList<PublicationElement> SelectedElements => CurrentPage.Elements
@@ -628,54 +628,61 @@ public sealed class EditorStateService
 
     public void CopySelected()
     {
-        var element = SelectedElement;
-        if (element is null) return;
-        _clipboard = _files.CloneElement(element);
+        var sources = ClipboardSelection();
+        if (sources.Count == 0) return;
+        _clipboard.Clear();
+        _clipboard.AddRange(sources.Select(CloneElement));
         Notify(false);
+    }
+
+    public void CutSelected()
+    {
+        if (SelectedElements.Count == 0) return;
+        CopySelected();
+        DeleteSelected();
     }
 
     public void Paste()
     {
-        var source = _clipboard;
-        if (source is null) return;
-        if (source is ConnectorElement connectorSource &&
-            (!CurrentPage.Elements.Any(item => item.Id == connectorSource.Source.ElementId) ||
-             !CurrentPage.Elements.Any(item => item.Id == connectorSource.Target.ElementId))) return;
-        Capture();
-        var clone = CloneElement(source);
-        clone.Id = Guid.NewGuid();
-        clone.GroupId = null;
-        if (clone.Interaction.TargetElementId == source.Id) clone.Interaction.TargetElementId = clone.Id;
-        else if (clone.Interaction.TargetElementId is { } targetId && CurrentPage.Elements.All(item => item.Id != targetId)) clone.Interaction.TargetElementId = null;
-        if (clone.Interaction.TargetPageId is { } targetPageId && Document.Pages.All(page => page.Id != targetPageId)) clone.Interaction.TargetPageId = null;
-        RenewAnimationIds(clone, preserveOrder: false);
-        clone.Name = NextName(source.Name);
-        clone.X = Math.Clamp(source.X + 5, -clone.Width + 2, CurrentPage.WidthMm - 2);
-        clone.Y = Math.Clamp(source.Y + 5, -clone.Height + 2, CurrentPage.HeightMm - 2);
-        clone.ZIndex = NextZ();
-        CurrentPage.Elements.Add(clone);
-        ReindexAnimations();
-        SetSelectionCore([clone.Id], clone.Id);
-        Notify();
+        if (_clipboard.Count == 0) return;
+        CloneSelection(_clipboard, useInsertionPoint: true);
     }
 
     public void DuplicateSelected()
     {
-        var element = SelectedElement;
-        if (element is null) return;
+        var sources = ClipboardSelection();
+        if (sources.Count == 0) return;
+        CloneSelection(sources, useInsertionPoint: false);
+    }
+
+    public void SelectAll()
+    {
+        var ids = CurrentPage.Elements.Where(element => element.Visible).Select(element => element.Id).ToArray();
+        if (ids.Length == 0) return;
+        SetSelectionCore(ids, ids[0]);
+        CropMode = false;
+        ConnectorTool = ConnectorToolKind.None;
+        EndLiveEdit();
+        Notify(false);
+    }
+
+    public void NudgeSelection(double dx, double dy)
+    {
+        var elements = TransformSelectionBlock();
+        if (elements.Count == 0 || (NearlyEqual(dx, 0) && NearlyEqual(dy, 0))) return;
+        var left = elements.Min(element => element.X);
+        var top = elements.Min(element => element.Y);
+        var right = elements.Max(element => element.X + element.Width);
+        var bottom = elements.Max(element => element.Y + element.Height);
+        dx = Math.Clamp(dx, -left, CurrentPage.WidthMm - right);
+        dy = Math.Clamp(dy, -top, CurrentPage.HeightMm - bottom);
+        if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
         Capture();
-        var clone = CloneElement(element);
-        clone.Id = Guid.NewGuid();
-        clone.GroupId = null;
-        if (clone.Interaction.TargetElementId == element.Id) clone.Interaction.TargetElementId = clone.Id;
-        RenewAnimationIds(clone, preserveOrder: false);
-        clone.Name = NextName(element.Name);
-        clone.X += 5;
-        clone.Y += 5;
-        clone.ZIndex = NextZ();
-        CurrentPage.Elements.Add(clone);
-        ReindexAnimations();
-        SetSelectionCore([clone.Id], clone.Id);
+        foreach (var element in elements)
+        {
+            element.X += dx;
+            element.Y += dy;
+        }
         Notify();
     }
 
@@ -1321,6 +1328,108 @@ public sealed class EditorStateService
         Capture();
         remaining.InsertRange(targetIndex, block);
         ApplyNormalizedZOrder(remaining);
+        Notify();
+    }
+
+    private List<PublicationElement> ClipboardSelection()
+    {
+        if (SelectedElement is null) return [];
+        var selected = SelectedElements.ToList();
+        var selectedObjectIds = selected
+            .Where(element => element is not ConnectorElement)
+            .Select(element => element.Id)
+            .ToHashSet();
+        var connected = CurrentPage.Elements
+            .OfType<ConnectorElement>()
+            .Where(connector => selectedObjectIds.Contains(connector.Source.ElementId)
+                && selectedObjectIds.Contains(connector.Target.ElementId));
+        return selected
+            .Concat(connected)
+            .DistinctBy(element => element.Id)
+            .OrderBy(element => element.ZIndex)
+            .ToList();
+    }
+
+    private void CloneSelection(IReadOnlyList<PublicationElement> sources, bool useInsertionPoint)
+    {
+        if (sources.Count == 0) return;
+        var objectSources = sources.Where(source => source is not ConnectorElement).ToList();
+        if (objectSources.Count == 0 && sources.All(source => source is ConnectorElement)) return;
+
+        Capture();
+        var idMap = sources.ToDictionary(source => source.Id, _ => Guid.NewGuid());
+        var groupMap = sources
+            .Where(source => source.GroupId is not null)
+            .Select(source => source.GroupId!.Value)
+            .Distinct()
+            .ToDictionary(groupId => groupId, _ => Guid.NewGuid());
+
+        var left = objectSources.Count > 0 ? objectSources.Min(source => source.X) : 0;
+        var top = objectSources.Count > 0 ? objectSources.Min(source => source.Y) : 0;
+        var right = objectSources.Count > 0 ? objectSources.Max(source => source.X + source.Width) : left;
+        var bottom = objectSources.Count > 0 ? objectSources.Max(source => source.Y + source.Height) : top;
+        var offsetX = 5d;
+        var offsetY = 5d;
+        if (useInsertionPoint && _lastInsertionX is { } insertionX && _lastInsertionY is { } insertionY)
+        {
+            offsetX = insertionX - (left + right) / 2;
+            offsetY = insertionY - (top + bottom) / 2;
+        }
+
+        var nextZ = NextZ();
+        var nextAnimationOrder = NextAnimationOrder();
+        var clones = new List<PublicationElement>();
+        foreach (var source in sources.OrderBy(source => source.ZIndex))
+        {
+            var clone = CloneElement(source);
+            clone.Id = idMap[source.Id];
+            clone.GroupId = source.GroupId is { } groupId && groupMap.TryGetValue(groupId, out var newGroupId)
+                ? newGroupId
+                : null;
+            clone.Name = NextName(source.Name);
+            clone.ZIndex = nextZ++;
+
+            if (clone is ConnectorElement connector)
+            {
+                if (idMap.TryGetValue(connector.Source.ElementId, out var mappedSource))
+                    connector.Source.ElementId = mappedSource;
+                else if (CurrentPage.Elements.All(element => element.Id != connector.Source.ElementId))
+                    continue;
+                if (idMap.TryGetValue(connector.Target.ElementId, out var mappedTarget))
+                    connector.Target.ElementId = mappedTarget;
+                else if (CurrentPage.Elements.All(element => element.Id != connector.Target.ElementId))
+                    continue;
+            }
+            else
+            {
+                clone.X = Math.Clamp(source.X + offsetX, -clone.Width + 2, CurrentPage.WidthMm - 2);
+                clone.Y = Math.Clamp(source.Y + offsetY, -clone.Height + 2, CurrentPage.HeightMm - 2);
+            }
+
+            if (clone.Interaction.TargetElementId is { } targetId)
+            {
+                if (idMap.TryGetValue(targetId, out var mappedTarget)) clone.Interaction.TargetElementId = mappedTarget;
+                else if (CurrentPage.Elements.All(element => element.Id != targetId)) clone.Interaction.TargetElementId = null;
+            }
+            if (clone.Interaction.TargetPageId is { } targetPageId && Document.Pages.All(page => page.Id != targetPageId))
+                clone.Interaction.TargetPageId = null;
+
+            foreach (var animation in clone.Animations)
+            {
+                animation.Id = Guid.NewGuid();
+                animation.Order = nextAnimationOrder++;
+            }
+
+            CurrentPage.Elements.Add(clone);
+            if (source is PublicationMediaElement) _mediaAssets.Copy(source.Id, clone.Id);
+            clones.Add(clone);
+        }
+
+        ReindexAnimations();
+        ApplyNormalizedZOrder(OrderedElements());
+        SetSelectionCore(clones.Select(clone => clone.Id), clones.FirstOrDefault()?.Id);
+        CropMode = false;
+        ConnectorTool = ConnectorToolKind.None;
         Notify();
     }
 

@@ -302,9 +302,39 @@ function insertionDragStart(state, event) {
     state.insertDragSource = source;
 }
 
+function createInsertionDropPreview(state, kind) {
+    state.insertDropPreview?.remove?.();
+    const ghost = document.createElement('div');
+    ghost.className = `publisher-insert-drag-ghost kind-${kind}`;
+    ghost.setAttribute('aria-hidden', 'true');
+    if (kind === 'video') {
+        ghost.innerHTML = '<span class="publisher-insert-video-play">▶</span><small>Video</small>';
+    } else if (kind === 'picture') {
+        ghost.innerHTML = '<span class="publisher-insert-picture-mark">▧</span><small>Picture</small>';
+    } else {
+        ghost.innerHTML = '<strong>New text box</strong><small>Text</small>';
+    }
+    state.page?.appendChild(ghost);
+    state.insertDropPreview = ghost;
+    return ghost;
+}
+
+function positionInsertionDropPreview(state, event, kind) {
+    const rect = state.page.getBoundingClientRect();
+    const xPx = clamp(event.clientX - rect.left, 0, rect.width);
+    const yPx = clamp(event.clientY - rect.top, 0, rect.height);
+    const ghost = state.insertDropPreview?.classList?.contains(`kind-${kind}`)
+        ? state.insertDropPreview
+        : createInsertionDropPreview(state, kind);
+    ghost.style.left = `${xPx}px`;
+    ghost.style.top = `${yPx}px`;
+}
+
 function clearInsertionDrag(state) {
     state?.insertDragSource?.classList?.remove('dragging');
     state.insertDragSource = null;
+    state?.insertDropPreview?.remove?.();
+    state.insertDropPreview = null;
     state?.page?.classList?.remove('insert-drop-target');
 }
 
@@ -332,6 +362,7 @@ function insertionDragOver(state, event) {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
     state.page.classList.add('insert-drop-target');
+    positionInsertionDropPreview(state, event, kind);
 }
 
 async function insertionDrop(state, event) {
@@ -365,6 +396,14 @@ function externalDraggedFile(event) {
     if (transfer.files?.length) return transfer.files[0];
     const item = [...(transfer.items || [])].find(candidate => candidate.kind === 'file');
     return item?.getAsFile?.() || null;
+}
+
+function externalDraggedDescriptor(event) {
+    const file = externalDraggedFile(event);
+    if (file) return { file, name: file.name || '', type: file.type || '', size: file.size || 0, lastModified: file.lastModified || 0 };
+    const item = [...(event?.dataTransfer?.items || [])].find(candidate => candidate.kind === 'file');
+    if (!item) return null;
+    return { file: null, name: '', type: item.type || '', size: 0, lastModified: 0 };
 }
 
 function externalDropKind(file) {
@@ -406,10 +445,10 @@ function createExternalDropPreview(state, file, kind) {
     ghost.className = `publisher-external-drop-ghost kind-${kind || 'unsupported'}`;
     ghost.setAttribute('aria-hidden', 'true');
     let url = '';
-    const fileKey = `${file.name}|${file.size}|${file.lastModified}|${file.type}`;
+    const fileKey = `${file?.name || ''}|${file?.size || 0}|${file?.lastModified || 0}|${file?.type || ''}`;
     const preview = { file, fileKey, kind, overlay, ghost, url, widthPx: 190, heightPx: kind === 'video' ? 108 : 120, pixelWidth: 0, pixelHeight: 0, durationSeconds: 0 };
 
-    if (kind === 'picture') {
+    if (kind === 'picture' && file instanceof Blob) {
         url = URL.createObjectURL(file);
         preview.url = url;
         const image = document.createElement('img');
@@ -424,7 +463,7 @@ function createExternalDropPreview(state, file, kind) {
             }
         }, { once: true });
         ghost.appendChild(image);
-    } else if (kind === 'video') {
+    } else if (kind === 'video' && file instanceof Blob) {
         url = URL.createObjectURL(file);
         preview.url = url;
         const video = document.createElement('video');
@@ -449,9 +488,9 @@ function createExternalDropPreview(state, file, kind) {
         const icon = document.createElement('b');
         icon.textContent = kind === 'markdown' ? 'MD' : kind === 'text' ? 'TXT' : '?';
         const label = document.createElement('small');
-        label.textContent = file.name || 'Dropped file';
+        label.textContent = file?.name || (kind ? `Dropped ${kind}` : 'Dropped file');
         ghost.append(icon, label);
-        if (kind === 'text' || kind === 'markdown') {
+        if ((kind === 'text' || kind === 'markdown') && file instanceof Blob) {
             file.slice(0, 4096).text().then(text => {
                 if (state.externalDropPreview !== preview) return;
                 const excerpt = document.createElement('p');
@@ -482,15 +521,15 @@ function positionExternalDropPreview(state, event) {
 }
 
 function externalFileDragOver(state, event) {
-    const file = externalDraggedFile(event);
-    if (!file) return false;
+    const descriptor = externalDraggedDescriptor(event);
+    if (!descriptor) return false;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
-    const kind = externalDropKind(file);
+    const kind = externalDropKind(descriptor);
     const current = state.externalDropPreview;
-    const fileKey = `${file.name}|${file.size}|${file.lastModified}|${file.type}`;
+    const fileKey = `${descriptor.name}|${descriptor.size}|${descriptor.lastModified}|${descriptor.type}`;
     if (!current || current.fileKey !== fileKey || current.kind !== kind)
-        createExternalDropPreview(state, file, kind);
+        createExternalDropPreview(state, descriptor.file || descriptor, kind);
     positionExternalDropPreview(state, event);
     return true;
 }
@@ -551,7 +590,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         snapToObjects: Boolean(config?.snapToObjects),
         snapInObjects: Boolean(config?.snapInObjects),
         gridSpacingMm: Math.max(.1, number(config?.gridSpacingMm, 2.5)),
-        connectorTool: String(config?.connectorTool || 'None')
+        connectorTool: String(config?.connectorTool || 'None'),
+        revision: number(config?.revision, 0)
     };
 
     let state = canvasStates.get(stage);
@@ -570,6 +610,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             connectorGhost: null,
             lastCanvasClick: null,
             externalDropPreview: null,
+            insertDropPreview: null,
+            keyboardActive: false,
             handlers: {}
         };
 
@@ -583,6 +625,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         };
         handlers.windowPointerDown = event => {
             if (state.operation && !state.stage.contains(event.target)) resetPointerOperation(state, true);
+            if (state.stage.contains(event.target)) state.keyboardActive = true;
         };
         handlers.windowPointerUp = event => pointerUp(state, event);
         handlers.windowPointerCancel = event => pointerCancel(state, event);
@@ -597,12 +640,16 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         };
         handlers.stageWheel = event => cropWheel(state, event);
         handlers.stageKeyDown = event => canvasKeyDown(state, event);
+        handlers.documentKeyDown = event => canvasDocumentKeyDown(state, event);
+        handlers.stageDragEnter = event => insertionDragOver(state, event);
         handlers.stageDragOver = event => insertionDragOver(state, event);
         handlers.stageDrop = event => insertionDrop(state, event);
         handlers.stageDragLeave = event => {
-            if (!state.externalDropPreview) return;
             const next = event.relatedTarget;
-            if (!next || !state.stage.contains(next)) clearExternalDropPreview(state);
+            if (!next || !state.stage.contains(next)) {
+                clearExternalDropPreview(state);
+                clearInsertionDrag(state);
+            }
         };
         handlers.documentDragStart = event => insertionDragStart(state, event);
         handlers.documentDragEnd = () => insertionDragEnd(state);
@@ -622,6 +669,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         stage.addEventListener('pointerleave', handlers.stagePointerLeave);
         stage.addEventListener('wheel', handlers.stageWheel, { passive: false });
         stage.addEventListener('keydown', handlers.stageKeyDown);
+        document.addEventListener('keydown', handlers.documentKeyDown, true);
+        stage.addEventListener('dragenter', handlers.stageDragEnter);
         stage.addEventListener('dragover', handlers.stageDragOver);
         stage.addEventListener('drop', handlers.stageDrop);
         stage.addEventListener('dragleave', handlers.stageDragLeave);
@@ -638,7 +687,14 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         canvasStates.set(stage, state);
     }
 
-    if (state.page !== page && state.operation) resetPointerOperation(state, true);
+    const pageChanged = state.page !== page;
+    const revisionChanged = number(state.config?.revision, -1) !== normalizedConfig.revision;
+    if ((pageChanged || revisionChanged) && state.operation) resetPointerOperation(state, true);
+    if (pageChanged || revisionChanged) {
+        clearInsertionDrag(state);
+        clearExternalDropPreview(state);
+        clearPublicationPreview(state.page?.id || state.page);
+    }
     state.scroll = scroll;
     state.page = page;
     state.dotnet = dotnet;
@@ -675,6 +731,8 @@ export function disposeCanvas(stageId) {
     stage.removeEventListener('pointerleave', handlers.stagePointerLeave);
     stage.removeEventListener('wheel', handlers.stageWheel);
     stage.removeEventListener('keydown', handlers.stageKeyDown);
+    document.removeEventListener('keydown', handlers.documentKeyDown, true);
+    stage.removeEventListener('dragenter', handlers.stageDragEnter);
     stage.removeEventListener('dragover', handlers.stageDragOver);
     stage.removeEventListener('drop', handlers.stageDrop);
     stage.removeEventListener('dragleave', handlers.stageDragLeave);
@@ -756,11 +814,60 @@ function finishRulerGuide(state, orientation, event) {
 }
 
 
-function canvasKeyDown(state, event) {
-    if (event.key !== 'Escape') return;
+function isPublisherEditableTarget(target) {
+    if (!(target instanceof Element)) return false;
+    return Boolean(target.closest('input,textarea,select,button,a,[role="button"],[role="menuitem"],[contenteditable="true"],[contenteditable=""],[role="textbox"],[role="dialog"],.modal-backdrop,.editor-modal-backdrop'));
+}
+
+function resetCanvasTransientState(state, restoreDom = true) {
+    resetPointerOperation(state, restoreDom);
     clearConnectorOperation(state, true);
-    safeDotNet(state, 'CancelActiveTool');
+    clearInsertionDrag(state);
+    clearExternalDropPreview(state);
+    clearPublicationPreview(state.page?.id || state.page);
+}
+
+function invokeCanvasKeyboardCommand(state, event, method, ...args) {
+    resetCanvasTransientState(state, true);
+    safeDotNet(state, method, ...args);
+    try { state.stage.focus({ preventScroll: true }); } catch { }
     event.preventDefault();
+    event.stopPropagation();
+}
+
+function canvasDocumentKeyDown(state, event) {
+    if (!state?.keyboardActive || !state.stage?.isConnected || event.defaultPrevented || isPublisherEditableTarget(event.target)) return;
+    const key = String(event.key || '').toLowerCase();
+    const command = event.ctrlKey || event.metaKey;
+
+    if (key === 'escape') {
+        resetCanvasTransientState(state, true);
+        safeDotNet(state, 'CancelActiveTool');
+        event.preventDefault();
+        return;
+    }
+    if (command && key === 'c') return invokeCanvasKeyboardCommand(state, event, 'KeyboardCopy');
+    if (command && key === 'x') return invokeCanvasKeyboardCommand(state, event, 'KeyboardCut');
+    if (command && key === 'v') return invokeCanvasKeyboardCommand(state, event, 'KeyboardPaste');
+    if (command && key === 'd') return invokeCanvasKeyboardCommand(state, event, 'KeyboardDuplicate');
+    if (command && key === 'a') return invokeCanvasKeyboardCommand(state, event, 'KeyboardSelectAll');
+    if (command && key === 'g' && event.shiftKey) return invokeCanvasKeyboardCommand(state, event, 'KeyboardUngroup');
+    if (command && key === 'g') return invokeCanvasKeyboardCommand(state, event, 'KeyboardGroup');
+    if (command && key === 'z' && event.shiftKey) return invokeCanvasKeyboardCommand(state, event, 'KeyboardRedo');
+    if (command && key === 'z') return invokeCanvasKeyboardCommand(state, event, 'KeyboardUndo');
+    if (command && key === 'y') return invokeCanvasKeyboardCommand(state, event, 'KeyboardRedo');
+    if (key === 'delete' || key === 'backspace') return invokeCanvasKeyboardCommand(state, event, 'KeyboardDelete');
+
+    if (key.startsWith('arrow')) {
+        const step = event.altKey ? .1 : event.shiftKey ? 5 : 1;
+        const dx = key === 'arrowleft' ? -step : key === 'arrowright' ? step : 0;
+        const dy = key === 'arrowup' ? -step : key === 'arrowdown' ? step : 0;
+        return invokeCanvasKeyboardCommand(state, event, 'KeyboardNudge', dx, dy);
+    }
+}
+
+function canvasKeyDown(state, event) {
+    canvasDocumentKeyDown(state, event);
 }
 
 function connectorToolActive(state) {
@@ -1005,6 +1112,8 @@ function registerCanvasClick(state, operation, event) {
 
 function pointerDown(state, event) {
     if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
+    state.keyboardActive = true;
+    clearPublicationPreview(state.page?.id || state.page);
     if (state.operation) resetPointerOperation(state, true);
     if (mediaPointerTargetsControls(event)) return;
     state.stage.focus({ preventScroll: true });
@@ -2813,6 +2922,7 @@ function animationItems(root) {
 function clearPublicationPreview(key) {
     const state = publicationAnimationPreviews.get(key);
     if (!state) return;
+    if (state.cleanupTimer) clearTimeout(state.cleanupTimer);
     for (const animation of state.animations) {
         try { animation.cancel(); } catch { }
     }
@@ -2821,6 +2931,21 @@ function clearPublicationPreview(key) {
     if (state.clickTarget && state.clickHandler) state.clickTarget.removeEventListener('click', state.clickHandler, true);
     state.root?.classList.remove('pub-animation-previewing', 'pub-animation-click-hint');
     publicationAnimationPreviews.delete(key);
+    if (state.root?.querySelector?.('.data-visual-view')) refreshDataVisualLayout(state.root.id || 'publisher-page');
+}
+
+function armPublicationPreviewCleanup(state) {
+    if (!state || state.clickGroups?.length || state.root?.classList?.contains('pub-animation-click-hint')) return;
+    const key = state.root.id || state.root;
+    const animations = [...state.animations];
+    Promise.all(animations.map(animation => animation.finished?.catch?.(() => undefined) ?? Promise.resolve()))
+        .then(() => {
+            if (publicationAnimationPreviews.get(key) !== state || state.clickGroups?.length) return;
+            if (state.cleanupTimer) clearTimeout(state.cleanupTimer);
+            state.cleanupTimer = setTimeout(() => {
+                if (publicationAnimationPreviews.get(key) === state) clearPublicationPreview(key);
+            }, 120);
+        });
 }
 function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
     let previousStart = initialOffset;
@@ -2841,7 +2966,7 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
 }
 function previewPublicationItems(root, items, includeTransition, transitionTarget = root) {
     clearPublicationPreview(root.id || root);
-    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set() };
+    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set(), cleanupTimer: 0 };
     publicationAnimationPreviews.set(root.id || root, state);
     root.classList.add('pub-animation-previewing');
     if (includeTransition) state.animations.push(runPublicationPageTransition(root, true, transitionTarget));
@@ -2886,10 +3011,14 @@ function previewPublicationItems(root, items, includeTransition, transitionTarge
             event.preventDefault();
             event.stopImmediatePropagation();
             schedulePublicationPreviewGroup(state, state.clickGroups.shift(), 0);
-            if (!state.clickGroups.length && !hasClickMedia) root.classList.remove('pub-animation-click-hint');
+            if (!state.clickGroups.length && !hasClickMedia) {
+                root.classList.remove('pub-animation-click-hint');
+                armPublicationPreviewCleanup(state);
+            }
         };
         root.addEventListener('click', state.clickHandler, true);
     }
+    armPublicationPreviewCleanup(state);
     return state;
 }
 function previewPageAnimations(pageId) {
@@ -4172,7 +4301,10 @@ export function refreshDataVisualLayout(pageId = 'publisher-page') {
 export function cancelCanvasInteraction(stageId = 'publisher-stage') {
     const stage = document.getElementById(stageId);
     const state = stage ? canvasStates.get(stage) : null;
-    if (state) resetPointerOperation(state, true);
+    if (!state) return;
+    resetCanvasTransientState(state, true);
+    state.lastCanvasClick = null;
+    try { state.stage.focus({ preventScroll: true }); } catch { }
 }
 
 export function clickElementById(id) {
@@ -4196,6 +4328,85 @@ export function consumeCanvasInsertPlacement(id) {
     return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : null;
 }
 
+
+async function prepareStoryPreviewHtml(html) {
+    const source = String(html || '');
+    if (!source.trim()) return '<div class="publisher-story-document"><p></p></div>';
+
+    const parsed = new DOMParser().parseFromString(source, 'text/html');
+    parsed.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => node.remove());
+    parsed.querySelectorAll('*').forEach(node => {
+        for (const attribute of [...node.attributes]) {
+            if (/^on/i.test(attribute.name)) node.removeAttribute(attribute.name);
+            else if ((attribute.name === 'href' || attribute.name === 'src') && /^\s*javascript:/i.test(attribute.value))
+                node.setAttribute(attribute.name, '#');
+        }
+    });
+
+    const frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.tabIndex = -1;
+    frame.style.cssText = 'position:fixed;left:-100000px;top:0;width:1200px;height:1600px;visibility:hidden;pointer-events:none;border:0;';
+    document.body.appendChild(frame);
+
+    try {
+        const loaded = new Promise(resolve => {
+            const timeout = setTimeout(resolve, 2500);
+            frame.addEventListener('load', () => {
+                clearTimeout(timeout);
+                resolve();
+            }, { once: true });
+        });
+        frame.srcdoc = '<!doctype html>' + parsed.documentElement.outerHTML;
+        await loaded;
+        const doc = frame.contentDocument;
+        if (!doc?.body) throw new Error('The story HTML preview document could not be created.');
+        try { await doc.fonts?.ready; } catch { }
+
+        const originalNodes = [doc.body, ...doc.body.querySelectorAll('*')];
+        const cloneBody = doc.body.cloneNode(true);
+        const cloneNodes = [cloneBody, ...cloneBody.querySelectorAll('*')];
+        const properties = [
+            'display','position','float','clear','box-sizing',
+            'color','background-color','background-image','background-repeat','background-position','background-size',
+            'font-family','font-size','font-weight','font-style','font-variant','font-stretch','line-height',
+            'letter-spacing','word-spacing','text-align','text-indent','text-transform','text-shadow',
+            'text-decoration-line','text-decoration-style','text-decoration-color','text-decoration-thickness',
+            'white-space','overflow-wrap','word-break','hyphens','vertical-align','direction','unicode-bidi',
+            'list-style-type','list-style-position','list-style-image',
+            'margin-top','margin-right','margin-bottom','margin-left',
+            'padding-top','padding-right','padding-bottom','padding-left',
+            'border-top-width','border-right-width','border-bottom-width','border-left-width',
+            'border-top-style','border-right-style','border-bottom-style','border-left-style',
+            'border-top-color','border-right-color','border-bottom-color','border-left-color',
+            'border-radius','border-collapse','border-spacing','table-layout',
+            'break-before','break-after','break-inside','page-break-before','page-break-after','page-break-inside',
+            'opacity'
+        ];
+
+        for (let index = 0; index < Math.min(originalNodes.length, cloneNodes.length); index++) {
+            const original = originalNodes[index];
+            const clone = cloneNodes[index];
+            const computed = frame.contentWindow.getComputedStyle(original);
+            const inline = [];
+            for (const property of properties) {
+                const value = computed.getPropertyValue(property);
+                if (value) inline.push(`${property}:${value}`);
+            }
+            const existing = clone.getAttribute?.('style');
+            clone.setAttribute?.('style', `${existing ? existing + ';' : ''}${inline.join(';')}`);
+            clone.removeAttribute?.('class');
+            clone.removeAttribute?.('id');
+        }
+
+        cloneBody.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => node.remove());
+        const bodyStyle = cloneBody.getAttribute('style') || '';
+        return `<div class="publisher-story-document" style="${bodyStyle};width:100%;min-height:100%;height:auto">${cloneBody.innerHTML}</div>`;
+    } finally {
+        frame.remove();
+    }
+}
+
 window.publisherStudio = {
     setDocumentDirty(value) { publisherDocumentDirty = Boolean(value); },
     restorePublisherWorkspaceAfterExport(stageId = 'publisher-stage') {
@@ -4208,6 +4419,7 @@ window.publisherStudio = {
     },
     cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
     initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
+    prepareStoryPreviewHtml(html) { return prepareStoryPreviewHtml(html); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
 

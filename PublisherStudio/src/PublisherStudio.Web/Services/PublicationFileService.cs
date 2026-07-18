@@ -205,7 +205,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.20";
+        document.FormatVersion = "1.21";
         return document;
     }
 
@@ -230,7 +230,9 @@ public sealed partial class PublicationFileService
     {
         var html = System.Text.Encoding.UTF8.GetString(htmlBytes);
         var match = BodyRegex().Match(html);
-        return SanitizePreviewHtml(match.Success ? match.Groups[1].Value : html);
+        var styles = string.Concat(StyleRegex().Matches(html).Cast<Match>().Select(item => item.Value));
+        var body = match.Success ? match.Groups[1].Value : html;
+        return SanitizePreviewHtml($"{styles}<div class=\"publisher-story-document\">{body}</div>");
     }
 
     public static string SanitizePreviewHtml(string html)
@@ -244,6 +246,8 @@ public sealed partial class PublicationFileService
 
     [GeneratedRegex(@"<body[^>]*>([\s\S]*?)</body>", RegexOptions.IgnoreCase)]
     private static partial Regex BodyRegex();
+    [GeneratedRegex(@"<style[^>]*>[\s\S]*?</style>", RegexOptions.IgnoreCase)]
+    private static partial Regex StyleRegex();
     [GeneratedRegex(@"<(script|iframe|object|embed|form|input|button|meta|link)[^>]*>[\s\S]*?</\1\s*>|<(script|iframe|object|embed|form|input|button|meta|link)[^>]*/?>", RegexOptions.IgnoreCase)]
     private static partial Regex DangerousElementsRegex();
     [GeneratedRegex("\\s+on[a-z]+\\s*=\\s*(?:\\\"[^\\\"]*\\\"|'[^']*'|[^\\s>]+)", RegexOptions.IgnoreCase)]

@@ -497,7 +497,7 @@
             $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.CropMode}|{State.Document.View.RulerUnit}|" +
             $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
             $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
-            $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}";
+            $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{State.Revision}";
         var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}";
 
         _canvasInitializationInProgress = true;
@@ -522,7 +522,8 @@
                         snapToObjects = State.Document.View.SnapToObjects,
                         snapInObjects = State.Document.View.SnapInObjects,
                         gridSpacingMm = State.Document.View.GridSpacingMm,
-                        connectorTool = State.ConnectorTool.ToString()
+                        connectorTool = State.ConnectorTool.ToString(),
+                        revision = State.Revision
                     });
                 if (initialized) _canvasInitializationKey = initializationKey;
             }
@@ -607,6 +608,17 @@
             parsed, kind, name, mimeType, size, durationSeconds, pixelWidth, pixelHeight, x, y));
     }
     [JSInvokable] public Task ExternalFileDropFailed(string message) => RequestExternalDropError.InvokeAsync(message);
+    [JSInvokable] public void KeyboardCopy() => State.CopySelected();
+    [JSInvokable] public void KeyboardCut() => State.CutSelected();
+    [JSInvokable] public void KeyboardPaste() => State.Paste();
+    [JSInvokable] public void KeyboardDuplicate() => State.DuplicateSelected();
+    [JSInvokable] public void KeyboardDelete() => State.DeleteSelected();
+    [JSInvokable] public void KeyboardSelectAll() => State.SelectAll();
+    [JSInvokable] public void KeyboardGroup() => State.GroupSelected();
+    [JSInvokable] public void KeyboardUngroup() => State.UngroupSelected();
+    [JSInvokable] public void KeyboardUndo() => State.Undo();
+    [JSInvokable] public void KeyboardRedo() => State.Redo();
+    [JSInvokable] public void KeyboardNudge(double dx, double dy) => State.NudgeSelection(dx, dy);
     private void ResetPointerState() => State.CancelActiveTool();
 
     private Task DoubleClick(PublicationElement element)

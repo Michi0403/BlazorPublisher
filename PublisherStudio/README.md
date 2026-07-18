@@ -166,3 +166,7 @@ See `CHANGELOG-v1.0.19.md`. Browser recordings remain available as local downloa
 ## v1.0.20 object workflow and recovery stabilization
 
 See `CHANGELOG-v1.0.20.md`. Desktop file drag/drop now creates live-positioned picture, video, text, and Markdown objects; grouping is respected by alignment, z-order and animation; chart layering and minimum sizing are stabilized; WordArt gains a font selector; timeline dragging terminates reliably; and atomic local recovery protects work around navigation and presentation export.
+
+## v1.0.21 interaction, story and canvas-state stabilization
+
+See `CHANGELOG-v1.0.21.md`. Multi-object clipboard and keyboard editing now work as one coherent canvas workflow; quick inserts and desktop files display live drag previews; animation and pointer states return reliably to selection mode; RichEdit formatting is preserved in canvas, print and exported output; and chart content remains stable across z-order changes.

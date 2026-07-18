@@ -61,15 +61,13 @@
                             DocumentFormat="@_documentFormat"
                             @bind-DocumentContent="_content"
                             @bind-Selection="_selection"
+                            DocumentLoaded="HandleDocumentLoaded"
+                            MailMergeSettings="@_mailMergeSettingsContent"
                             BarMode="BarMode.Ribbon"
                             ViewType="ViewType.PrintLayout"
                             ReadOnly="false"
                             HorizontalRulerVisible="true"
-                            CssClass="story-rich-edit">
-                    <MailMergeSettings>
-                        <DxMailMergeSettings Data="@_fieldData" ViewMergedData="true" ActiveRecord="0" />
-                    </MailMergeSettings>
-                </DxRichEdit>
+                            CssClass="story-rich-edit" />
                 @if (_upgradingLegacyStory)
                 {
                     <div class="story-upgrade-notice">Upgrading this legacy HTML story to DOCX so page layout, fonts, fields, colors, headers, and footers work correctly…</div>
@@ -108,6 +106,8 @@
     private int _editorRevision;
     private bool _legacyConversionPending;
     private bool _upgradingLegacyStory;
+    private int _documentLoadGeneration;
+    private RenderFragment? _mailMergeSettingsContent;
     private string? _error;
     private IReadOnlyList<PublicationFieldRecord> _fieldData = [];
     private string? _storyPreviewTransferId;
@@ -124,9 +124,12 @@
         if (Visible && TextFrame is not null && _loadedId != TextFrame.Id)
         {
             _editorRevision++;
+            _documentLoadGeneration++;
+            _mailMergeSettingsContent = null;
             _content = TextFrame.DocumentContent.ToArray();
             _documentFormat = TextFrame.StoryFormat == StoryStorageFormat.Html ? DocumentFormat.Html : DocumentFormat.OpenXml;
             _legacyConversionPending = TextFrame.StoryFormat == StoryStorageFormat.Html;
+            _upgradingLegacyStory = false;
             _loadedId = TextFrame.Id;
             _error = null;
             _fieldData =
@@ -146,41 +149,126 @@
 
         if (!Visible)
         {
+            _documentLoadGeneration++;
+            _mailMergeSettingsContent = null;
             _loadedId = null;
             _legacyConversionPending = false;
             _upgradingLegacyStory = false;
             _error = null;
+            ResetStoryPreviewTransfer();
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Visible)
-        {
-            try { await JS.InvokeVoidAsync("publisherStudio.initializeStoryEditorLayout", "story-editor-shell", "story-editor-host"); }
-            catch (JSDisconnectedException) { }
-        }
-        if (!_legacyConversionPending || _richEdit is null || _upgradingLegacyStory) return;
-
-        _upgradingLegacyStory = true;
-        await InvokeAsync(StateHasChanged);
+        if (!Visible) return;
         try
         {
+            await JS.InvokeVoidAsync(
+                "publisherStudio.initializeStoryEditorLayout",
+                "story-editor-shell",
+                "story-editor-host");
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task HandleDocumentLoaded(Document _)
+    {
+        var generation = _documentLoadGeneration;
+        if (!IsCurrentStoryLoad(generation)) return;
+
+        if (_legacyConversionPending)
+        {
+            await UpgradeLegacyStoryAfterLoad(generation);
+            return;
+        }
+
+        await EnableMailMergeAfterLoad(generation);
+    }
+
+    private async Task UpgradeLegacyStoryAfterLoad(int generation)
+    {
+        if (_richEdit is null || _upgradingLegacyStory || !IsCurrentStoryLoad(generation)) return;
+
+        _upgradingLegacyStory = true;
+        await SafeStateHasChanged();
+        try
+        {
+            // HTML stories (including older dropped text/Markdown frames) must first be
+            // fully loaded by RichEdit. Exporting from OnAfterRender raced the component's
+            // JavaScript initialization and could also make mail-merge settings run against
+            // a document that did not yet exist.
             var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
+            if (!IsCurrentStoryLoad(generation)) return;
+
+            _content = openXml.ToArray();
             _documentFormat = DocumentFormat.OpenXml;
-            _content = openXml;
             _legacyConversionPending = false;
+            _mailMergeSettingsContent = null;
             _editorRevision++;
+            _documentLoadGeneration++;
+            _upgradingLegacyStory = false;
+            await SafeStateHasChanged();
+        }
+        catch (OperationCanceledException)
+        {
+            if (IsCurrentStoryLoad(generation))
+            {
+                _upgradingLegacyStory = false;
+                _error = "The story editor was closed before the legacy story finished loading.";
+                await SafeStateHasChanged();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            _upgradingLegacyStory = false;
+        }
+        catch (ObjectDisposedException)
+        {
+            _upgradingLegacyStory = false;
         }
         catch (Exception ex)
         {
-            _error = $"Legacy story conversion failed: {ex.Message}";
+            if (IsCurrentStoryLoad(generation))
+            {
+                _upgradingLegacyStory = false;
+                _error = $"Legacy story conversion failed: {ex.Message}";
+                await SafeStateHasChanged();
+            }
         }
-        finally
+    }
+
+    private async Task EnableMailMergeAfterLoad(int generation)
+    {
+        if (!IsCurrentStoryLoad(generation) || _mailMergeSettingsContent is not null) return;
+
+        // DxRichEdit's mail-merge settings perform JavaScript interop as soon as the
+        // settings parameter changes. Keep the RenderFragment stable and attach it only
+        // after DocumentLoaded confirms that the editor has created the document.
+        var fieldData = _fieldData;
+        _mailMergeSettingsContent = builder =>
         {
-            _upgradingLegacyStory = false;
-            await InvokeAsync(StateHasChanged);
-        }
+            builder.OpenComponent<DxMailMergeSettings>(0);
+            builder.AddAttribute(1, nameof(DxMailMergeSettings.Data), fieldData);
+            builder.AddAttribute(2, nameof(DxMailMergeSettings.ViewMergedData), true);
+            builder.AddAttribute(3, nameof(DxMailMergeSettings.ActiveRecord), 0);
+            builder.CloseComponent();
+        };
+        await SafeStateHasChanged();
+    }
+
+    private bool IsCurrentStoryLoad(int generation) =>
+        Visible
+        && TextFrame is not null
+        && _loadedId == TextFrame.Id
+        && generation == _documentLoadGeneration;
+
+    private async Task SafeStateHasChanged()
+    {
+        try { await InvokeAsync(StateHasChanged); }
+        catch (ObjectDisposedException) { }
+        catch (InvalidOperationException) when (!Visible) { }
     }
 
     private async Task Apply()

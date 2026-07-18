@@ -183,3 +183,7 @@ See `CHANGELOG-v1.0.23.md`. RichEdit formatting and document backgrounds now sur
 ## v1.0.24 story print and marquee selection
 
 See `CHANGELOG-v1.0.24.md`. Story documents containing embedded pictures can be applied through chunked interop, print output retains page and text highlight fills, and mouse rectangle selection again works across every visible z-level while respecting persistent groups.
+
+## v1.0.25 dropped-story stability
+
+See `CHANGELOG-v1.0.25.md`. Dropped text and Markdown now enter the publication as native OpenXML stories, legacy HTML stories upgrade only after RichEdit reports the document loaded, and mail-merge settings attach only after that same safe lifecycle point so opening a dropped story cannot terminate the Blazor circuit.

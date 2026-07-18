@@ -306,8 +306,10 @@
                 {
                     text.Name = string.IsNullOrWhiteSpace(request.Name) ? "Dropped text" : request.Name;
                     text.PreviewHtml = html;
-                    text.DocumentContent = Encoding.UTF8.GetBytes(html);
-                    text.StoryFormat = StoryStorageFormat.Html;
+                    text.DocumentContent = kind == "markdown"
+                        ? RichTextDocumentFactory.CreateOpenXmlFromMarkdown(content)
+                        : RichTextDocumentFactory.CreateOpenXmlFromPlainText(content);
+                    text.StoryFormat = StoryStorageFormat.OpenXml;
                     text.Width = Math.Min(120, Math.Max(70, State.CurrentPage.WidthMm * .45));
                     text.Height = Math.Min(90, Math.Max(35, State.CurrentPage.HeightMm * .28));
                     text.X = Math.Clamp(request.X - text.Width / 2, -text.Width + 2, State.CurrentPage.WidthMm - 2);

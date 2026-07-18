@@ -1,4 +1,5 @@
 using DevExpress.Blazor;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using System.Net;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -33,6 +34,10 @@ public static class Program
         builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, requestedPort));
 
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+        // Large offline-first media recordings are transferred in many small JS interop
+        // chunks. The operation may legitimately outlive the default interop timeout.
+        builder.Services.Configure<Microsoft.AspNetCore.Components.Server.CircuitOptions>(options =>
+            options.JSInteropDefaultCallTimeout = Timeout.InfiniteTimeSpan);
         builder.Services.AddControllers();
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();

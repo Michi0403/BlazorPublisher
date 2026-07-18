@@ -2548,9 +2548,9 @@ function publicationPageTransitionFrames(page, entering = true) {
     }
     return entering ? frames : [...frames].reverse();
 }
-function runPublicationPageTransition(page, entering = true) {
+function runPublicationPageTransition(page, entering = true, target = page) {
     const duration = (publicationReducedMotion() ? .001 : Math.max(.1, animationNumber(page.dataset.transitionDuration, .55))) * 1000;
-    return page.animate(publicationPageTransitionFrames(page, entering), {
+    return target.animate(publicationPageTransitionFrames(page, entering), {
         duration,
         easing: animationEasing(page.dataset.transitionEasing),
         fill: 'both'
@@ -2591,12 +2591,12 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
         previousEnd = start + publicationAnimationSpan(item.animation);
     }
 }
-function previewPublicationItems(root, items, includeTransition) {
+function previewPublicationItems(root, items, includeTransition, transitionTarget = root) {
     clearPublicationPreview(root.id || root);
     const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set() };
     publicationAnimationPreviews.set(root.id || root, state);
     root.classList.add('pub-animation-previewing');
-    if (includeTransition) state.animations.push(runPublicationPageTransition(root, true));
+    if (includeTransition) state.animations.push(runPublicationPageTransition(root, true, transitionTarget));
 
     const automatic = [];
     let currentClickGroup = null;
@@ -2749,6 +2749,12 @@ function websitePresentationRuntime() {
     if (!pages.length) return;
     const lower = value => String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
     const num = (value, fallback) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
+    const pageSizes = pages.map(page => ({
+        width: Math.max(1, num(page.dataset.exportWidthPx, page.offsetWidth || 1)),
+        height: Math.max(1, num(page.dataset.exportHeightPx, page.offsetHeight || 1))
+    }));
+    const frameWidth = Math.max(1, num(publication.dataset.frameWidthPx, Math.max(...pageSizes.map(size => size.width))));
+    const frameHeight = Math.max(1, num(publication.dataset.frameHeightPx, Math.max(...pageSizes.map(size => size.height))));
     const bool = value => String(value).toLowerCase() === 'true';
     const parse = (value, fallback) => { try { return JSON.parse(value || ''); } catch { return fallback; } };
     const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3002,14 +3008,11 @@ function websitePresentationRuntime() {
     };
     const fitPages = () => {
         const controlsHeight = controls && !controls.hidden ? 62 : 18;
-        for (const page of pages) {
-            const width = Math.max(1, num(page.dataset.exportWidthPx, page.offsetWidth || 1));
-            const height = Math.max(1, num(page.dataset.exportHeightPx, page.offsetHeight || 1));
-            page.style.width = `${width}px`;
-            page.style.height = `${height}px`;
-            const scale = Math.min((innerWidth - 32) / width, (innerHeight - controlsHeight - 24) / height, 1.75);
-            page.style.transform = `scale(${Math.max(.05, scale)})`;
-        }
+        const scale = Math.min(
+            (innerWidth - 32) / frameWidth,
+            (innerHeight - controlsHeight - 24) / frameHeight,
+            1.75);
+        stage.style.transform = `scale(${Math.max(.05, scale)})`;
     };
     const updateControls = () => {
         if (!counter) return;
@@ -3074,10 +3077,31 @@ function websitePresentationRuntime() {
     const goNext = () => showPage(current + 1, 1, true);
     const goPrevious = () => showPage(current - 1, -1, true);
 
-    const shells = pages.map(page => {
+    const stage = document.createElement('div');
+    stage.className = 'ps-stage';
+    stage.style.width = `${frameWidth}px`;
+    stage.style.height = `${frameHeight}px`;
+    publication.appendChild(stage);
+
+    const shells = pages.map((page, index) => {
         const shell = document.createElement('div');
         shell.className = 'ps-slide';
-        page.before(shell);
+        const size = pageSizes[index];
+        const pageScale = Math.min(frameWidth / size.width, frameHeight / size.height);
+        page.style.position = 'absolute';
+        page.style.left = '50%';
+        page.style.top = '50%';
+        page.style.width = `${size.width}px`;
+        page.style.height = `${size.height}px`;
+        page.style.minWidth = `${size.width}px`;
+        page.style.minHeight = `${size.height}px`;
+        page.style.maxWidth = 'none';
+        page.style.maxHeight = 'none';
+        page.style.margin = '0';
+        page.style.translate = 'none';
+        page.style.transformOrigin = 'center center';
+        page.style.transform = `translate(-50%, -50%) scale(${Math.max(.01, pageScale)})`;
+        stage.appendChild(shell);
         shell.appendChild(page);
         shell.hidden = true;
         return shell;
@@ -3169,7 +3193,20 @@ function websitePresentationRuntime() {
     shells[0].hidden = false;
     shells[0].classList.add('active');
     updateControls();
-    runCurrentPage(startAutomatically);
+    const startFirstPage = async () => {
+        if (startAutomatically && lower(pages[0].dataset.transitionKind) !== 'none') {
+            const duration = (reducedMotion ? .001 : Math.max(.1, num(pages[0].dataset.transitionDuration, .55))) * 1000;
+            const initial = shells[0].animate(transitionFrames(pages[0], true), {
+                duration,
+                easing: easing(pages[0].dataset.transitionEasing),
+                fill: 'both'
+            });
+            activeAnimations.push(initial);
+            try { await initial.finished; } catch { }
+        }
+        runCurrentPage(startAutomatically);
+    };
+    startFirstPage();
 }
 
 function barcodeColor(value, fallback) {
@@ -3366,7 +3403,8 @@ function chooseVideoRecordingMimeType() {
 }
 
 function exportedPageDuration(page) {
-    let duration = Math.max(2.5, animationNumber(page.dataset.timelineDuration, 0), animationNumber(page.dataset.autoAdvanceSeconds, 0));
+    const transitionDuration = Math.max(.1, animationNumber(page.dataset.transitionDuration, .55));
+    let duration = Math.max(2.5, transitionDuration + .3, animationNumber(page.dataset.timelineDuration, 0), animationNumber(page.dataset.autoAdvanceSeconds, 0));
     let cursor = 0;
     for (const item of animationItems(page)) {
         const animation = item.animation || {};
@@ -3384,7 +3422,7 @@ function exportedPageDuration(page) {
         const rate = Math.max(.1, animationNumber(node.dataset.mediaRate, 1));
         duration = Math.max(duration, start + (trimEnd - trimStart) / rate + .3);
     }
-    return Math.min(600, duration);
+    return duration;
 }
 
 function prepareVideoExportPage(page) {
@@ -3424,7 +3462,19 @@ function evenVideoDimension(value, fallback) {
     return rounded % 2 === 0 ? rounded : rounded + 1;
 }
 
-function pageIntrinsicSize(page) {
+function pagePresentationSize(page) {
+    const widthMm = number(page.dataset.pageWidthMm, 0);
+    const heightMm = number(page.dataset.pageHeightMm, 0);
+    const exportWidth = number(page.dataset.exportWidthPx, 0);
+    const exportHeight = number(page.dataset.exportHeightPx, 0);
+    if (exportWidth > 0 && exportHeight > 0)
+        return { width: exportWidth, height: exportHeight, area: exportWidth * exportHeight };
+    if (widthMm > 0 && heightMm > 0) {
+        const width = widthMm * PX_PER_MM_AT_96_DPI;
+        const height = heightMm * PX_PER_MM_AT_96_DPI;
+        return { width, height, area: width * height };
+    }
+
     const previousTransform = page.style.transform;
     const previousTranslate = page.style.translate;
     const wasHidden = page.hidden;
@@ -3441,17 +3491,33 @@ function pageIntrinsicSize(page) {
     return { width, height, area: width * height };
 }
 
-function largestVideoPageFrame(pages) {
-    const measured = pages.map(pageIntrinsicSize);
-    let largest = measured[0] || { width: 1280, height: 720, area: 1280 * 720 };
-    for (const size of measured) {
-        if (size.area > largest.area || (Math.abs(size.area - largest.area) < .5 && size.width > largest.width))
-            largest = size;
+function publicationFrameDefinition(pages, evenDimensions = false) {
+    const measured = pages.map(pagePresentationSize);
+    const fallback = { width: 1280, height: 720, area: 1280 * 720 };
+    if (!measured.length)
+        return { width: fallback.width, height: fallback.height, pageSizes: [] };
+
+    // A publication containing any landscape page exports to a landscape frame.
+    // Every page still participates in the maximum-size calculation: mixed portrait
+    // pages contribute their long side to frame width and their short side to frame
+    // height. Portrait-only publications keep their native portrait orientation.
+    const landscape = measured.some(size => size.width > size.height + .5);
+    let width = landscape
+        ? Math.max(...measured.map(size => Math.max(size.width, size.height)))
+        : Math.max(...measured.map(size => size.width));
+    let height = landscape
+        ? Math.max(...measured.map(size => Math.min(size.width, size.height)))
+        : Math.max(...measured.map(size => size.height));
+    if (!(width > 0) || !(height > 0)) {
+        width = fallback.width;
+        height = fallback.height;
     }
+
     return {
-        width: evenVideoDimension(largest.width, 1280),
-        height: evenVideoDimension(largest.height, 720),
-        pageSizes: measured
+        width: evenDimensions ? evenVideoDimension(width, fallback.width) : Math.max(1, Math.round(width)),
+        height: evenDimensions ? evenVideoDimension(height, fallback.height) : Math.max(1, Math.round(height)),
+        pageSizes: measured,
+        landscape
     };
 }
 
@@ -3598,6 +3664,14 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         page.id = `publisher-video-export-page-${index}-${Date.now()}`;
         page.querySelectorAll('video,audio').forEach(media => { media.controls = false; media.preload = 'auto'; });
     });
+    const pageShells = pages.map(page => {
+        const shell = document.createElement('div');
+        shell.className = 'publisher-video-page-shell';
+        page.before(shell);
+        shell.appendChild(page);
+        shell.hidden = true;
+        return shell;
+    });
     frame.appendChild(publication);
 
     const countdown = document.createElement('div');
@@ -3606,8 +3680,8 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     overlay.append(frame, countdown);
     document.body.appendChild(overlay);
 
-    const frameDefinition = largestVideoPageFrame(pages);
-    pages.forEach((page, index) => page.hidden = index !== 0);
+    const frameDefinition = publicationFrameDefinition(pages, true);
+    pageShells.forEach((shell, index) => shell.hidden = index !== 0);
     const frameWidth = frameDefinition.width;
     const frameHeight = frameDefinition.height;
     frame.style.width = `${frameWidth}px`;
@@ -3616,7 +3690,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     frame.style.setProperty('--publisher-video-frame-height', `${frameHeight}px`);
 
     const fitPage = (page, pageIndex = pages.indexOf(page)) => {
-        const measured = frameDefinition.pageSizes[pageIndex] || pageIntrinsicSize(page);
+        const measured = frameDefinition.pageSizes[pageIndex] || pagePresentationSize(page);
         const scale = Math.min(frameWidth / measured.width, frameHeight / measured.height);
         page.style.width = `${measured.width}px`;
         page.style.height = `${measured.height}px`;
@@ -3672,12 +3746,15 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         step = 'recording publication pages';
         for (let index = 0; index < pages.length; index++) {
             const page = pages[index];
-            pages.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
+            const shell = pageShells[index];
+            pageShells.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
             fitPage(page, index);
             await sleep(120);
             const duration = exportedPageDuration(page);
             totalDuration += duration;
-            previewPublicationItems(page, prepareVideoExportPage(page), true);
+            // Animate the fixed-size shell rather than the fitted page. Page transition
+            // transforms therefore no longer overwrite the page's centering/scale.
+            previewPublicationItems(page, prepareVideoExportPage(page), true, shell);
             await sleep(duration * 1000);
             clearPublicationPreview(page.id || page);
             page.querySelectorAll('video,audio').forEach(media => {
@@ -3958,6 +4035,10 @@ window.publisherStudio = {
         publication.removeAttribute('style');
         publication.className = 'website-publication';
         normalizePublicationPageSizes(publication);
+        const websitePages = [...publication.querySelectorAll(':scope > .print-page')];
+        const websiteFrame = publicationFrameDefinition(websitePages, false);
+        publication.dataset.frameWidthPx = String(websiteFrame.width);
+        publication.dataset.frameHeightPx = String(websiteFrame.height);
         await inlineLocalMediaSources(publication);
         publication.querySelectorAll('img').forEach(image => {
             image.draggable = true;
@@ -3975,10 +4056,11 @@ window.publisherStudio = {
 :root{color-scheme:dark}
 html,body{width:100%;height:100%;overflow:hidden!important;background:#20242b!important}
 body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
-.website-publication{position:fixed;inset:0;display:block!important;overflow:hidden;visibility:visible!important;pointer-events:auto!important}
-.ps-slide{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;transform-origin:center;will-change:transform,opacity,clip-path}
+.website-publication{position:fixed;inset:0;display:grid!important;place-items:center;overflow:hidden;visibility:visible!important;pointer-events:auto!important}
+.ps-stage{position:relative;overflow:hidden;background:#090d14;transform-origin:center center;box-shadow:0 10px 48px #000a}
+.ps-slide{position:absolute;inset:0;display:block;overflow:hidden;transform-origin:center;will-change:transform,opacity,clip-path}
 .ps-slide[hidden]{display:none!important}
-.website-publication .print-page{position:relative;overflow:hidden;margin:0;box-shadow:0 10px 48px #000a;background-color:#fff;transform-origin:center;will-change:transform}
+.website-publication .print-page{position:absolute;left:50%;top:50%;overflow:hidden;margin:0;box-shadow:none;background-color:#fff;transform-origin:center;will-change:transform}
 .website-publication .print-element{position:absolute;transform-origin:center}
 .website-publication .print-connector{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform-box:fill-box;transform-origin:center}
 .website-publication .print-connector.ps-interactive{pointer-events:none}
@@ -4001,9 +4083,10 @@ body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
 @media (prefers-reduced-motion:reduce){.ps-slide,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
 @media print{
 html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}
-.website-publication{position:static;overflow:visible}
+.website-publication{position:static;display:block!important;overflow:visible}
+.ps-stage{position:static;width:auto!important;height:auto!important;overflow:visible;transform:none!important;box-shadow:none}
 .ps-slide,.ps-slide[hidden]{position:relative;display:block!important;inset:auto;overflow:hidden;break-after:page}
-.website-publication .print-page{margin:0 auto;box-shadow:none;transform:none!important}
+.website-publication .print-page{position:relative;left:auto;top:auto;margin:0 auto;box-shadow:none;transform:none!important}
 .ps-controls{display:none!important}
 }
 </style>

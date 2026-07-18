@@ -1262,9 +1262,10 @@ button { cursor: pointer; }
 .pub-icon-barcode::before { content:"▦"; font-size:13px; }
 .publisher-video-export-overlay { position:fixed; z-index:2147483647; inset:0; display:grid; place-items:center; overflow:hidden; background:#090d14; }
 .publisher-video-export-frame { position:relative; grid-area:1/1; flex:none; overflow:hidden; background:#090d14; box-shadow:0 0 0 1px #ffffff20,0 18px 55px #000b; transform-origin:center center; }
-.publisher-video-export-publication { position:absolute; inset:0; display:grid!important; place-items:center; visibility:visible!important; pointer-events:none!important; overflow:hidden; }
-.publisher-video-export-publication > .print-page { position:absolute!important; left:50%!important; top:50%!important; margin:0!important; translate:none!important; box-shadow:none!important; transform-origin:center center; }
-.publisher-video-export-publication > .print-page[hidden] { display:none!important; }
+.publisher-video-export-publication { position:absolute; inset:0; display:block!important; visibility:visible!important; pointer-events:none!important; overflow:hidden; }
+.publisher-video-page-shell { position:absolute; inset:0; overflow:hidden; transform-origin:center center; will-change:transform,opacity,clip-path; }
+.publisher-video-page-shell[hidden] { display:none!important; }
+.publisher-video-page-shell > .print-page { position:absolute!important; left:50%!important; top:50%!important; margin:0!important; translate:none!important; box-shadow:none!important; transform-origin:center center; }
 .publisher-video-export-publication video,.publisher-video-export-publication audio { pointer-events:none!important; }
 .publisher-video-export-countdown { position:relative; z-index:2; padding:16px 24px; border:1px solid #ffffff40; border-radius:8px; color:#fff; background:#111827e8; font:600 20px Segoe UI,system-ui,sans-serif; box-shadow:0 10px 35px #000a; }
 .inspector-barcode-preview { height:150px; display:grid; place-items:center; padding:8px; overflow:hidden; border:1px solid #cbd5e1; background:#fff; }

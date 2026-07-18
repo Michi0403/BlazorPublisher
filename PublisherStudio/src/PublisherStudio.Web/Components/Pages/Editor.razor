@@ -498,7 +498,7 @@
             if (!mimeType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format: {Path.GetExtension(file.Name)}.");
 
-            await using var stream = file.OpenReadStream(160 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(long.MaxValue);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
             var bytes = buffer.ToArray();

@@ -158,3 +158,7 @@ See `CHANGELOG-v1.0.md`. Audio and video are first-class publication objects, Vi
 ## v1.0.5 beta stabilization
 
 See `CHANGELOG-v1.0.5.md`. Presentation video recording, publisher pointer state, deterministic layer ordering, CSV/XML data import, barcode value import, and Story Editor ribbon sizing were stabilized for beta.
+
+## v1.0.19 recording and presentation export stabilization
+
+See `CHANGELOG-v1.0.19.md`. Browser recordings remain available as local downloadable blobs until Media Studio closes, large recordings are embedded only on demand through small JS-interop chunks, and HTML/video presentation exports share one fixed publication frame with working page transitions. Versions v1.0.12 through v1.0.18 were iterative releases without separate changelog files.

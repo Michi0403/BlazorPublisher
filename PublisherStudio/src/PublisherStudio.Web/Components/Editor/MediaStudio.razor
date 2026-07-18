@@ -30,6 +30,7 @@
                             <DxRibbonItem Text="Generate tone" Enabled="@(!_recording)" Click="GenerateTone" />
                         }
                         <DxRibbonItem Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
+                        <DxRibbonItem Text="Download recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Playback">
                         <DxRibbonItem Text="Play range" Enabled="@HasSource" Click="PlaySelection" />
@@ -141,17 +142,25 @@
                     {
                         <section>
                             <h3>Video</h3>
-                            <p class="property-note">Camera and screen recording use the browser’s MediaRecorder. The resulting WebM clip remains self-contained in the publication and animated HTML export.</p>
+                            <p class="property-note">Camera and screen recording use the browser’s MediaRecorder. Completed recordings stay in the browser until this studio closes, remain downloadable at their original size, and are embedded only when you insert or apply them.</p>
+                            @if (HasRetainedRecording)
+                            {
+                                <p class="property-note"><b>Completed recording:</b> @FormatBytes(_retainedRecordingSizeBytes). Download remains available even if embedding fails because the browser or computer runs out of memory.</p>
+                            }
                         </section>
                     }
                 </aside>
             </div>
 
             <footer class="media-studio-footer">
-                <span>@(_error ?? _warning ?? (HasSource ? $"{MimeLabel} · {Time(_duration)}" : "Import or record a source to begin."))</span>
+                <span>@FooterStatus</span>
                 <div>
+                    @if (HasRetainedRecording)
+                    {
+                        <DxButton Text="Download recording" Click="DownloadRecording" />
+                    }
                     <DxButton Text="Cancel" Click="Cancel" />
-                    <DxButton Text="@(_saving ? "Applying…" : (EditingExisting ? "Apply media" : "Insert media"))" Enabled="@(HasSource && !_recording && !_saving)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
+                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
         </section>
@@ -172,6 +181,7 @@
             <DxContextMenuItem Text="Generate example tone" Enabled="@(!_recording)" Click="GenerateTone" />
         }
         <DxContextMenuItem Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
+        <DxContextMenuItem Text="Download completed recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
         <DxContextMenuItem Text="Play selected range" Enabled="@HasSource" BeginGroup="true" Click="PlaySelection" />
         <DxContextMenuItem Text="Pause" Enabled="@HasSource" Click="PausePreview" />
         <DxContextMenuItem Text="Jump to trim start" Enabled="@HasSource" Click="SeekStart" />
@@ -195,7 +205,6 @@
     [Parameter] public EventCallback<MediaEditorResult> Saved { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
-    private const int MaxMediaDataUrlLength = 160 * 1024 * 1024;
     private DotNetObjectReference<MediaStudio>? _self;
     private DxContextMenu _mediaContextMenu = default!;
     private IJSObjectReference? _module;
@@ -219,6 +228,12 @@
     private bool _autoPlay = true;
     private bool _recording;
     private bool _saving;
+    private bool _embedding;
+    private double _embeddingProgress;
+    private bool _hasRetainedRecording;
+    private long _retainedRecordingSizeBytes;
+    private string _retainedRecordingFileName = string.Empty;
+    private string _retainedRecordingObjectUrl = string.Empty;
     private PublicationMediaPlaybackTrigger _playbackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter;
     private List<double> _waveform = [];
     private string? _error;
@@ -228,13 +243,26 @@
     private string? _recordingId;
     private int _recordingExpectedChunks;
     private int _recordingNextChunk;
+    private long _recordingExpectedBytes;
 
     private bool IsVideo => Kind == PublicationElementKind.Video;
-    private bool HasSource => !string.IsNullOrWhiteSpace(_dataUrl) && _duration > 0;
+    private bool HasRetainedRecording => _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
+    private bool HasSource => (!string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording) && _duration > 0;
     private string ImportMenuText => $"Import {(IsVideo ? "video" : "audio")}…";
     private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
     private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? "Video" : "Audio") : _mimeType;
-    private string SourceStatus => _recording ? "Recording…" : HasSource ? $"Ready · {Time(_trimEnd - _trimStart)} selected" : "No source";
+    private string SourceStatus => _recording
+        ? "Recording…"
+        : _embedding
+            ? $"Embedding recording · {_embeddingProgress:0}%"
+            : HasRetainedRecording
+                ? $"Recording ready · {FormatBytes(_retainedRecordingSizeBytes)} · download protected"
+                : HasSource ? $"Ready · {Time(_trimEnd - _trimStart)} selected" : "No source";
+    private string ApplyButtonText => _embedding ? $"Embedding {_embeddingProgress:0}%" : _saving ? "Applying…" : EditingExisting ? "Apply media" : "Insert media";
+    private string FooterStatus => _error ?? _warning ??
+        (HasRetainedRecording
+            ? $"{MimeLabel} · {Time(_duration)} · {FormatBytes(_retainedRecordingSizeBytes)} · available to download"
+            : HasSource ? $"{MimeLabel} · {Time(_duration)}" : "Import or record a source to begin.");
     private IEnumerable<double> DisplayWaveform => _waveform.Count > 0 ? _waveform : Enumerable.Repeat(.22, 64);
     private double MaxFade => Math.Max(.05, Math.Min(10, (_trimEnd - _trimStart) / Math.Max(.25, _playbackRate) / 2));
     private double MajorTick => _duration switch { <= 10 => 1, <= 30 => 5, <= 120 => 10, <= 600 => 60, _ => 300 };
@@ -251,6 +279,13 @@
         _warning = null;
         _recording = false;
         _saving = false;
+        _embedding = false;
+        _embeddingProgress = 0;
+        _hasRetainedRecording = false;
+        _dataUrl = string.Empty;
+        _retainedRecordingSizeBytes = 0;
+        _retainedRecordingFileName = string.Empty;
+        _retainedRecordingObjectUrl = string.Empty;
         if (InitialMedia is { } media)
         {
             _name = media.Name;
@@ -312,7 +347,7 @@
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty && SessionId != _initializedSession)
         {
-            await _module.InvokeVoidAsync("initializeMediaStudio", "media-studio-preview", _self);
+            await _module.InvokeVoidAsync("initializeMediaStudio", "media-studio-preview", _self, SessionId.ToString("N"));
             _initializedSession = SessionId;
         }
         return _module;
@@ -368,7 +403,7 @@
             if (!_mimeType.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Select a supported {(IsVideo ? "video" : "audio")} file.");
 
-            await using var stream = file.OpenReadStream(160 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(long.MaxValue);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
             var bytes = buffer.ToArray();
@@ -407,6 +442,8 @@
             _fadeIn = _fadeOut = 0;
             _error = null;
             if (!usedMetadataFallback) _warning = null;
+            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview");
+            ClearRetainedRecordingState();
             RefreshPreviewSource();
         }
         catch (Exception ex)
@@ -472,7 +509,9 @@
     {
         try
         {
-            await EnsureMediaModuleAsync();
+            var module = await EnsureMediaModuleAsync();
+            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview");
+            ClearRetainedRecordingState();
             _dataUrl = CreateToneDataUrl(3, 440, .32);
             _mimeType = "audio/wav";
             _name = "Generated A4 tone.wav";
@@ -485,39 +524,113 @@
         }
     }
 
-    [JSInvokable]
-    public bool BeginMediaRecordingTransfer(string transferId, string mimeType, int totalLength, int chunkCount)
+    private void ClearRetainedRecordingState()
     {
-        if (totalLength <= 0 || totalLength > MaxMediaDataUrlLength || chunkCount <= 0 || chunkCount > 100_000) return false;
+        _hasRetainedRecording = false;
+        _retainedRecordingSizeBytes = 0;
+        _retainedRecordingFileName = string.Empty;
+        _retainedRecordingObjectUrl = string.Empty;
+        _embedding = false;
+        _embeddingProgress = 0;
+    }
+
+    [JSInvokable]
+    public Task MediaRecordingCleared()
+    {
+        ClearRetainedRecordingState();
+        _dataUrl = string.Empty;
+        _previewSource = string.Empty;
+        _duration = 0;
+        _trimStart = 0;
+        _trimEnd = 0;
+        _posterDataUrl = string.Empty;
+        _waveform = [];
+        _fadeIn = 0;
+        _fadeOut = 0;
+        MediaAssets.Remove(_previewAssetId);
+        return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task MediaRecordingReady(RetainedMediaRecordingInfo info)
+    {
+        _recording = false;
+        _recordingBuffer = null;
+        _recordingId = null;
+        _hasRetainedRecording = info.SizeBytes > 0 && !string.IsNullOrWhiteSpace(info.ObjectUrl);
+        _retainedRecordingSizeBytes = Math.Max(0, info.SizeBytes);
+        _retainedRecordingFileName = string.IsNullOrWhiteSpace(info.FileName)
+            ? RecordingName(info.MimeType, IsVideo)
+            : info.FileName;
+        _retainedRecordingObjectUrl = info.ObjectUrl ?? string.Empty;
+        _previewSource = _retainedRecordingObjectUrl;
+        _mimeType = NormalizeMimeType(info.MimeType, IsVideo ? "video/webm" : "audio/webm");
+        _name = _retainedRecordingFileName;
+        _duration = Math.Max(.01, info.DurationSeconds);
+        _trimStart = 0;
+        _trimEnd = _duration;
+        _posterDataUrl = info.PosterDataUrl ?? string.Empty;
+        _waveform = info.WaveformSamples ?? [];
+        _fadeIn = _fadeOut = 0;
+        _error = null;
+        _warning = string.IsNullOrWhiteSpace(info.MetadataWarning)
+            ? "Recording completed. It remains available for download until this studio closes."
+            : $"Recording completed and remains downloadable. Browser metadata warning: {info.MetadataWarning}";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public bool BeginMediaRecordingTransfer(string transferId, string mimeType, long totalBytes, int chunkCount)
+    {
+        if (string.IsNullOrWhiteSpace(transferId) || totalBytes <= 0 || chunkCount <= 0) return false;
         _recordingId = transferId;
         _mimeType = NormalizeMimeType(mimeType, IsVideo ? "video/webm" : "audio/webm");
-        _recordingBuffer = new StringBuilder(totalLength);
+        _recordingBuffer = new StringBuilder();
         _recordingExpectedChunks = chunkCount;
         _recordingNextChunk = 0;
+        _recordingExpectedBytes = totalBytes;
+        _embedding = true;
+        _embeddingProgress = 0;
+        _error = null;
+        _warning = "Embedding the completed recording into the publication…";
+        _ = InvokeAsync(StateHasChanged);
         return true;
     }
 
     [JSInvokable]
     public bool AppendMediaRecordingChunk(string transferId, int chunkIndex, string chunk)
     {
-        if (_recordingId != transferId || _recordingBuffer is null || chunkIndex != _recordingNextChunk) return false;
-        if (_recordingBuffer.Length + chunk.Length > MaxMediaDataUrlLength) return false;
+        if (_recordingId != transferId || _recordingBuffer is null || chunkIndex != _recordingNextChunk || string.IsNullOrEmpty(chunk))
+            return false;
         _recordingBuffer.Append(chunk);
         _recordingNextChunk++;
         return true;
     }
 
     [JSInvokable]
+    public Task MediaRecordingTransferProgress(long transferredBytes, long totalBytes)
+    {
+        var total = Math.Max(1, totalBytes > 0 ? totalBytes : _recordingExpectedBytes);
+        _embeddingProgress = Math.Clamp(transferredBytes * 100d / total, 0, 100);
+        return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
     public async Task CompleteMediaRecordingTransfer(string transferId)
     {
-        if (_recordingId != transferId || _recordingBuffer is null || _recordingNextChunk != _recordingExpectedChunks) return;
-        _dataUrl = NormalizeMediaDataUrl(_recordingBuffer.ToString(), IsVideo ? "video/webm" : "audio/webm");
+        if (_recordingId != transferId || _recordingBuffer is null || _recordingNextChunk != _recordingExpectedChunks)
+            throw new InvalidDataException("The recording transfer did not complete in the expected order.");
+
+        _dataUrl = $"data:{_mimeType};base64,{_recordingBuffer}";
         _recordingBuffer = null;
         _recordingId = null;
+        _recordingExpectedChunks = 0;
+        _recordingNextChunk = 0;
+        _recordingExpectedBytes = 0;
         _recording = false;
-        _name = RecordingName(_mimeType, IsVideo);
-        RefreshPreviewSource();
-        await InspectSource();
+        _embedding = false;
+        _embeddingProgress = 100;
+        _warning = "Recording embedded. The original browser recording is still available for download until this studio closes.";
         await InvokeAsync(StateHasChanged);
     }
 
@@ -525,8 +638,12 @@
     public Task MediaRecordingFailed(string message)
     {
         _recording = false;
+        _embedding = false;
         _recordingBuffer = null;
         _recordingId = null;
+        _recordingExpectedChunks = 0;
+        _recordingNextChunk = 0;
+        _recordingExpectedBytes = 0;
         _error = message;
         return InvokeAsync(StateHasChanged);
     }
@@ -581,21 +698,65 @@
     private void ChangePlaybackTrigger(ChangeEventArgs args) { if (Enum.TryParse<PublicationMediaPlaybackTrigger>(Text(args), out var value)) _playbackTrigger = value; }
     private void ClampFades() { _fadeIn = Math.Min(_fadeIn, MaxFade); _fadeOut = Math.Min(_fadeOut, MaxFade); }
 
+    private async Task DownloadRecording()
+    {
+        if (!HasRetainedRecording) return;
+        try
+        {
+            var module = await EnsureMediaModuleAsync();
+            await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName);
+            _warning = $"Downloaded {_retainedRecordingFileName} ({FormatBytes(_retainedRecordingSizeBytes)}).";
+        }
+        catch (Exception ex)
+        {
+            _error = $"The completed recording could not be downloaded: {ex.Message}";
+        }
+    }
+
     private async Task Save()
     {
-        if (_saving || !HasSource || _recording) return;
+        if (_saving || _embedding || !HasSource || _recording) return;
         _saving = true;
         _error = null;
         var applied = false;
         await InvokeAsync(StateHasChanged);
         try
         {
-            if (_module is not null)
+            var module = await EnsureMediaModuleAsync();
+            try { await module.InvokeVoidAsync("pauseMedia", "media-studio-preview"); }
+            catch (JSException) { }
+            catch (TaskCanceledException) { }
+
+            if (HasRetainedRecording && string.IsNullOrWhiteSpace(_dataUrl))
             {
-                try { await _module.InvokeVoidAsync("pauseMedia", "media-studio-preview"); }
-                catch (JSException) { }
-                catch (TaskCanceledException) { }
+                _embedding = true;
+                _embeddingProgress = 0;
+                _warning = $"Embedding {FormatBytes(_retainedRecordingSizeBytes)} in chunks. The original remains downloadable.";
+                await InvokeAsync(StateHasChanged);
+                try
+                {
+                    await module.InvokeAsync<bool>("embedRetainedRecording", "media-studio-preview");
+                }
+                catch (Exception embedError)
+                {
+                    _embedding = false;
+                    _recordingBuffer = null;
+                    _recordingId = null;
+                    try
+                    {
+                        await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName);
+                        _error = $"Embedding failed, so the completed recording was downloaded instead and remains available here. {embedError.Message}";
+                    }
+                    catch (Exception downloadError)
+                    {
+                        _error = $"Embedding failed, but the completed recording remains available through Download recording. {embedError.Message} Download error: {downloadError.Message}";
+                    }
+                    return;
+                }
             }
+
+            if (string.IsNullOrWhiteSpace(_dataUrl))
+                throw new InvalidDataException("The completed recording has not been embedded yet.");
 
             await Saved.InvokeAsync(new MediaEditorResult
             {
@@ -620,14 +781,21 @@
             });
             applied = true;
             MediaAssets.Remove(_previewAssetId);
+            try
+            {
+                await module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview");
+                _initializedSession = Guid.Empty;
+            }
+            catch (JSException) { }
+            catch (TaskCanceledException) { }
         }
         catch (JSDisconnectedException)
         {
-            _error = "The browser connection closed before the media could be inserted.";
+            _error = "The browser connection closed before the media could be inserted. A completed browser recording remains downloadable while this studio is open.";
         }
         catch (TaskCanceledException)
         {
-            _error = "The media insert operation was cancelled.";
+            _error = "The media insert operation was cancelled. A completed browser recording remains downloadable while this studio is open.";
         }
         catch (Exception ex)
         {
@@ -635,6 +803,7 @@
         }
         finally
         {
+            _embedding = false;
             _saving = false;
             if (!applied)
             {
@@ -650,14 +819,15 @@
     {
         _recording = false;
         _saving = false;
+        _embedding = false;
         _recordingBuffer = null;
         _recordingId = null;
         if (_module is not null)
         {
             try
             {
-                await _module.InvokeVoidAsync("cancelMediaRecording", "media-studio-preview");
-                await _module.InvokeVoidAsync("pauseMedia", "media-studio-preview");
+                await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview");
+                _initializedSession = Guid.Empty;
             }
             catch (JSDisconnectedException) { }
             catch (TaskCanceledException) { }
@@ -764,6 +934,31 @@
     private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
     private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
     private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        var value = Math.Max(0, bytes);
+        var unit = 0;
+        var display = (double)value;
+        while (display >= 1024 && unit < units.Length - 1)
+        {
+            display /= 1024;
+            unit++;
+        }
+        return $"{display:0.##} {units[unit]}";
+    }
+
+    public sealed class RetainedMediaRecordingInfo
+    {
+        public string ObjectUrl { get; set; } = string.Empty;
+        public string MimeType { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
+        public long SizeBytes { get; set; }
+        public double DurationSeconds { get; set; }
+        public List<double> WaveformSamples { get; set; } = [];
+        public string PosterDataUrl { get; set; } = string.Empty;
+        public string MetadataWarning { get; set; } = string.Empty;
+    }
 
     public async ValueTask DisposeAsync()
     {

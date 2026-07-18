@@ -1,5 +1,5 @@
 const studioStates = new Map();
-const CHUNK_SIZE = 24 * 1024;
+const RECORDING_TRANSFER_CHUNK_SIZE = 18 * 1024;
 
 function baseMimeType(value, fallback = 'application/octet-stream') {
     const mimeType = String(value || '').split(';', 1)[0].trim().toLowerCase();
@@ -18,10 +18,57 @@ function normalizeMediaDataUrl(dataUrl, fallbackMimeType = 'application/octet-st
 function stateFor(id) {
     let state = studioStates.get(id);
     if (!state) {
-        state = { id, dotnet: null, recorder: null, stream: null, chunks: [], rangeHandler: null, stopAt: null, discardRecording: false };
+        state = {
+            id,
+            sessionId: '',
+            dotnet: null,
+            recorder: null,
+            stream: null,
+            chunks: [],
+            rangeHandler: null,
+            stopAt: null,
+            discardRecording: false,
+            retainedRecordingBlob: null,
+            retainedRecordingUrl: '',
+            retainedRecordingKind: '',
+            retainedRecordingMimeType: '',
+            retainedRecordingFileName: ''
+        };
         studioStates.set(id, state);
     }
     return state;
+}
+
+function releaseRetainedRecording(state) {
+    if (state.retainedRecordingUrl) {
+        try { URL.revokeObjectURL(state.retainedRecordingUrl); } catch { }
+    }
+    state.retainedRecordingBlob = null;
+    state.retainedRecordingUrl = '';
+    state.retainedRecordingKind = '';
+    state.retainedRecordingMimeType = '';
+    state.retainedRecordingFileName = '';
+}
+
+function recordingExtension(mimeType) {
+    const normalized = baseMimeType(mimeType);
+    if (normalized.includes('mp4')) return 'mp4';
+    if (normalized.includes('ogg')) return 'ogg';
+    if (normalized.includes('wav')) return 'wav';
+    return 'webm';
+}
+
+function recordingFileName(kind, mimeType) {
+    return `Recorded ${kind === 'video' ? 'Video' : 'Audio'}.${recordingExtension(mimeType)}`;
+}
+
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    const characterChunk = 0x8000;
+    let binary = '';
+    for (let offset = 0; offset < bytes.length; offset += characterChunk)
+        binary += String.fromCharCode(...bytes.subarray(offset, Math.min(bytes.length, offset + characterChunk)));
+    return btoa(binary);
 }
 
 function mediaElement(id) {
@@ -36,8 +83,11 @@ export function clickElement(id) {
     element.click();
 }
 
-export function initializeMediaStudio(id, dotnet) {
+export function initializeMediaStudio(id, dotnet, sessionId) {
     const state = stateFor(id);
+    const nextSessionId = String(sessionId || '');
+    if (state.sessionId && state.sessionId !== nextSessionId) releaseRetainedRecording(state);
+    state.sessionId = nextSessionId;
     state.dotnet = dotnet;
     state.discardRecording = false;
 }
@@ -197,29 +247,89 @@ async function streamFor(kind, source) {
     return navigator.mediaDevices.getUserMedia({ audio: true });
 }
 
-async function transferRecording(state, blob, kind) {
-    // Codec lists such as "video/webm;codecs=vp8,opus" contain a comma. A comma is
-    // also the data-URL header separator, so FileReader would otherwise create a
-    // malformed URL that the video element cannot decode. Store the container MIME
-    // type only; the encoded WebM bytes still retain their actual codecs.
-    const mimeType = baseMimeType(blob.type, kind === 'video' ? 'video/webm' : 'audio/webm');
-    const transferableBlob = blob.type === mimeType ? blob : blob.slice(0, blob.size, mimeType);
-    const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(normalizeMediaDataUrl(String(reader.result || ''), mimeType));
-        reader.onerror = () => reject(reader.error || new Error('The recording could not be read.'));
-        reader.readAsDataURL(transferableBlob);
+async function retainRecording(state, blob, kind) {
+    const fallbackMimeType = kind === 'video' ? 'video/webm' : 'audio/webm';
+    const mimeType = baseMimeType(blob.type, fallbackMimeType);
+    const retainedBlob = blob.type === mimeType ? blob : blob.slice(0, blob.size, mimeType);
+    releaseRetainedRecording(state);
+    state.retainedRecordingBlob = retainedBlob;
+    state.retainedRecordingUrl = URL.createObjectURL(retainedBlob);
+    state.retainedRecordingKind = kind;
+    state.retainedRecordingMimeType = mimeType;
+    state.retainedRecordingFileName = recordingFileName(kind, mimeType);
+
+    const preview = mediaElement(state.id);
+    let info = { durationSeconds: 0, waveformSamples: [], posterDataUrl: '' };
+    let metadataWarning = '';
+    try {
+        if (!preview) throw new Error('Media preview is not available.');
+        preview.muted = false;
+        info = await inspectElement(preview, state.retainedRecordingUrl, kind);
+    } catch (error) {
+        metadataWarning = error?.message || String(error);
+        if (preview) {
+            preview.src = state.retainedRecordingUrl;
+            preview.load();
+        }
+    }
+
+    await state.dotnet?.invokeMethodAsync('MediaRecordingReady', {
+        objectUrl: state.retainedRecordingUrl,
+        mimeType,
+        fileName: state.retainedRecordingFileName,
+        sizeBytes: retainedBlob.size,
+        durationSeconds: info.durationSeconds || 0,
+        waveformSamples: info.waveformSamples || [],
+        posterDataUrl: info.posterDataUrl || '',
+        metadataWarning
     });
+}
+
+export async function embedRetainedRecording(id) {
+    const state = stateFor(id);
+    const blob = state.retainedRecordingBlob;
+    if (!(blob instanceof Blob) || !blob.size)
+        throw new Error('No completed recording is available to embed.');
+
+    const mimeType = state.retainedRecordingMimeType || baseMimeType(blob.type, state.retainedRecordingKind === 'audio' ? 'audio/webm' : 'video/webm');
     const transferId = crypto.randomUUID();
-    const chunkCount = Math.ceil(dataUrl.length / CHUNK_SIZE);
-    const accepted = await state.dotnet.invokeMethodAsync('BeginMediaRecordingTransfer', transferId, mimeType, dataUrl.length, chunkCount);
-    if (!accepted) throw new Error('The recording is too large for the embedded publication.');
+    const chunkCount = Math.max(1, Math.ceil(blob.size / RECORDING_TRANSFER_CHUNK_SIZE));
+    const accepted = await state.dotnet?.invokeMethodAsync('BeginMediaRecordingTransfer', transferId, mimeType, blob.size, chunkCount);
+    if (!accepted) throw new Error('The publication could not begin the recording transfer.');
+
+    let transferred = 0;
     for (let index = 0; index < chunkCount; index++) {
-        const chunk = dataUrl.slice(index * CHUNK_SIZE, (index + 1) * CHUNK_SIZE);
+        const start = index * RECORDING_TRANSFER_CHUNK_SIZE;
+        const end = Math.min(blob.size, start + RECORDING_TRANSFER_CHUNK_SIZE);
+        const buffer = await blob.slice(start, end).arrayBuffer();
+        const chunk = arrayBufferToBase64(buffer);
         const ok = await state.dotnet.invokeMethodAsync('AppendMediaRecordingChunk', transferId, index, chunk);
         if (!ok) throw new Error('The recording transfer was interrupted.');
+        transferred = end;
+        if (index === chunkCount - 1 || index % 32 === 0)
+            await state.dotnet.invokeMethodAsync('MediaRecordingTransferProgress', transferred, blob.size);
     }
     await state.dotnet.invokeMethodAsync('CompleteMediaRecordingTransfer', transferId);
+    return true;
+}
+
+export function downloadRetainedRecording(id, requestedFileName) {
+    const state = stateFor(id);
+    const blob = state.retainedRecordingBlob;
+    if (!(blob instanceof Blob) || !blob.size)
+        throw new Error('No completed recording is available to download.');
+    const anchor = document.createElement('a');
+    anchor.href = state.retainedRecordingUrl || URL.createObjectURL(blob);
+    anchor.download = String(requestedFileName || state.retainedRecordingFileName || recordingFileName(state.retainedRecordingKind, state.retainedRecordingMimeType));
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+}
+
+export function clearRetainedRecording(id) {
+    const state = stateFor(id);
+    releaseRetainedRecording(state);
 }
 
 export async function startMediaRecording(id, kind, source, dotnet) {
@@ -263,7 +373,8 @@ export async function startMediaRecording(id, kind, source, dotnet) {
             }
             if (state.discardRecording) return;
             const blob = new Blob(state.chunks, { type: state.recorder?.mimeType || mimeType || (kind === 'video' ? 'video/webm' : 'audio/webm') });
-            await transferRecording(state, blob, kind);
+            if (!blob.size) throw new Error('The browser completed the recording but produced an empty file.');
+            await retainRecording(state, blob, kind);
         } catch (error) {
             await state.dotnet?.invokeMethodAsync('MediaRecordingFailed', error?.message || String(error));
         } finally {
@@ -282,6 +393,8 @@ export async function startMediaRecording(id, kind, source, dotnet) {
         }, { once: true });
     }
     state.recorder.start(250);
+    releaseRetainedRecording(state);
+    await state.dotnet?.invokeMethodAsync('MediaRecordingCleared');
 }
 
 export function stopMediaRecording(id) {
@@ -353,5 +466,6 @@ export function disposeMediaStudio(id) {
     try { if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop(); } catch { }
     for (const track of state.stream?.getTracks() || []) track.stop();
     if (element && state.rangeHandler) element.removeEventListener('timeupdate', state.rangeHandler);
+    releaseRetainedRecording(state);
     studioStates.delete(id);
 }

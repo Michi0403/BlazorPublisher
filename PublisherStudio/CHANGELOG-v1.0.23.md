@@ -10,4 +10,5 @@
 - Added lightweight built-in icons to every DevExpress ribbon command in PublisherStudio, Story Editor, Picture Studio, Media Studio, Barcode Studio, data editors, and the timeline. Drawing, selection, render, animation, media, data, page, clipboard, and arrangement commands now remain visually distinguishable without adding an external icon package.
 - Retained the v1.0.22 mouse selection, grouped cross-layer movement, desktop clipboard, keyboard clipboard, drag/drop, recovery, chart stability, and HTML/video presentation-export behavior.
 - Kept `using Microsoft.AspNetCore.Components.Server;` in `Program.cs` for the existing `CircuitOptions` configuration.
+- Corrected the v1.0.23 source package build errors: dynamic DevExpress context-menu labels now come from strongly typed string helpers, and the standalone Story HTML template uses a two-dollar raw interpolated string so CSS braces remain literal.
 - Publication format marker updated to `1.23`; older publications remain loadable.

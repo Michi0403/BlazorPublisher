@@ -319,23 +319,23 @@
     {
         var safeTitle = System.Net.WebUtility.HtmlEncode(title);
         var background = PublicationFileService.NormalizeCssBackground(prepared.Background);
-        return $"""
+        return $$"""
             <!doctype html>
             <html lang="en">
             <head>
               <meta charset="utf-8">
               <meta name="viewport" content="width=device-width,initial-scale=1">
-              <title>{safeTitle}</title>
+              <title>{{safeTitle}}</title>
               <style>
-                * {{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }}
-                html,body {{ min-height:100%; margin:0; background:#e5e7eb; }}
-                body {{ display:grid; place-items:start center; padding:24px; font-family:Segoe UI,Arial,sans-serif; --publisher-story-page-background:{background}; }}
-                .publisher-story-document {{ position:relative; isolation:isolate; width:min(100%,1200px); min-height:calc(100vh - 48px); background:var(--publisher-story-page-background,white); box-shadow:0 3px 18px #0003; }}
-                .publisher-story-document::before {{ content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }}
-                @media print {{ @page {{ margin:0; }} html,body {{ background:white; }} body {{ display:block; padding:0; }} .publisher-story-document {{ width:100%; min-height:100vh; margin:0; box-shadow:none; }} }}
+                * { box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+                html,body { min-height:100%; margin:0; background:#e5e7eb; }
+                body { display:grid; place-items:start center; padding:24px; font-family:Segoe UI,Arial,sans-serif; --publisher-story-page-background:{{background}}; }
+                .publisher-story-document { position:relative; isolation:isolate; width:min(100%,1200px); min-height:calc(100vh - 48px); background:var(--publisher-story-page-background,white); box-shadow:0 3px 18px #0003; }
+                .publisher-story-document::before { content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }
+                @media print { @page { margin:0; } html,body { background:white; } body { display:block; padding:0; } .publisher-story-document { width:100%; min-height:100vh; margin:0; box-shadow:none; } }
               </style>
             </head>
-            <body>{prepared.Html}</body>
+            <body>{{prepared.Html}}</body>
             </html>
             """;
     }

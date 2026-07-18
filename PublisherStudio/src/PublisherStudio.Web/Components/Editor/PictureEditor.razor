@@ -705,7 +705,7 @@
                             }
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Font size · @Math.Round(pictureText.FontSizePx) px">
+                    <DxContextMenuItem Text="@PictureTextFontSizeMenuText(pictureText)">
                         <Items>
                             <DxContextMenuItem Text="24 px" Click="TextSize24" />
                             <DxContextMenuItem Text="48 px" Click="TextSize48" />
@@ -777,7 +777,7 @@
                             <DxContextMenuItem Text="Secondary: blue" Click="RenderSecondaryBlue" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Scale · @Math.Round(render.Scale) px">
+                    <DxContextMenuItem Text="@RenderScaleMenuText(render)">
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Scale - 24) < .01, "24 px"))" Click="RenderScale24" />
                             <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Scale - 64) < .01, "64 px"))" Click="RenderScale64" />
@@ -785,7 +785,7 @@
                             <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Scale - 256) < .01, "256 px"))" Click="RenderScale256" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Detail · @render.Detail">
+                    <DxContextMenuItem Text="@RenderDetailMenuText(render)">
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(render.Detail == 1, "1 · Fast"))" Click="RenderDetail1" />
                             <DxContextMenuItem Text="@(CheckedText(render.Detail == 2, "2"))" Click="RenderDetail2" />
@@ -794,7 +794,7 @@
                             <DxContextMenuItem Text="@(CheckedText(render.Detail == 8, "8 · Fine"))" Click="RenderDetail8" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Softness · @Math.Round(render.Softness * 100)%">
+                    <DxContextMenuItem Text="@RenderSoftnessMenuText(render)">
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Softness) < .01, "0%"))" Click="RenderSoftness0" />
                             <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Softness - .25) < .01, "25%"))" Click="RenderSoftness25" />
@@ -812,7 +812,7 @@
                             <DxContextMenuItem Text="3.0×" Click="RenderContrast30" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Angle · @Math.Round(render.AngleDegrees)°">
+                    <DxContextMenuItem Text="@RenderAngleMenuText(render)">
                         <Items>
                             <DxContextMenuItem Text="0°" Click="RenderAngle0" />
                             <DxContextMenuItem Text="45°" Click="RenderAngle45" />
@@ -821,7 +821,7 @@
                             <DxContextMenuItem Text="270°" Click="RenderAngle270" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Stripe width · @Math.Round(render.StripeWidthPx) px" Enabled="@(render.RenderKind == PictureRenderKind.Stripes)">
+                    <DxContextMenuItem Text="@RenderStripeWidthMenuText(render)" Enabled="@(render.RenderKind == PictureRenderKind.Stripes)">
                         <Items>
                             <DxContextMenuItem Text="8 px" Click="RenderStripe8" />
                             <DxContextMenuItem Text="16 px" Click="RenderStripe16" />

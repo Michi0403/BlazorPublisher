@@ -1021,8 +1021,26 @@ public partial class PictureEditor
         _ => "•"
     };
 
+    private static string PictureTextFontSizeMenuText(TextPictureLayer text) =>
+        $"Font size · {Math.Round(text.FontSizePx).ToString(CultureInfo.InvariantCulture)} px";
+
+    private static string RenderScaleMenuText(RenderPictureLayer render) =>
+        $"Scale · {Math.Round(render.Scale).ToString(CultureInfo.InvariantCulture)} px";
+
+    private static string RenderDetailMenuText(RenderPictureLayer render) =>
+        $"Detail · {render.Detail.ToString(CultureInfo.InvariantCulture)}";
+
+    private static string RenderSoftnessMenuText(RenderPictureLayer render) =>
+        $"Softness · {Math.Round(render.Softness * 100).ToString(CultureInfo.InvariantCulture)}%";
+
     private static string RenderContrastMenuText(RenderPictureLayer render) =>
         $"Contrast · {render.RenderContrast.ToString("0.0", CultureInfo.InvariantCulture)}×";
+
+    private static string RenderAngleMenuText(RenderPictureLayer render) =>
+        $"Angle · {Math.Round(render.AngleDegrees).ToString(CultureInfo.InvariantCulture)}°";
+
+    private static string RenderStripeWidthMenuText(RenderPictureLayer render) =>
+        $"Stripe width · {Math.Round(render.StripeWidthPx).ToString(CultureInfo.InvariantCulture)} px";
 
     private static string LayerDescription(PictureLayer layer) => layer switch
     {

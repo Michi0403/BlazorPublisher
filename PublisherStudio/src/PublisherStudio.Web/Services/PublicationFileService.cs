@@ -125,6 +125,15 @@ public sealed partial class PublicationFileService
                 var numeric = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name;
                 if (!string.IsNullOrWhiteSpace(numeric)) visual.ValueFields.Add(numeric);
             }
+            var minimum = visual.VisualKind switch
+            {
+                DataVisualKind.Sparkline => (Width: 55d, Height: 18d),
+                DataVisualKind.KpiProgress => (Width: 60d, Height: 24d),
+                DataVisualKind.DataTable => (Width: 80d, Height: 48d),
+                _ => (Width: 75d, Height: 55d)
+            };
+            visual.Width = Math.Max(minimum.Width, visual.Width);
+            visual.Height = Math.Max(minimum.Height, visual.Height);
         }
 
         foreach (var publicationPage in document.Pages)
@@ -196,7 +205,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.19";
+        document.FormatVersion = "1.20";
         return document;
     }
 

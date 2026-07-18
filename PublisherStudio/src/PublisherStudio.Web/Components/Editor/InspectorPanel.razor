@@ -255,7 +255,18 @@
                 <section class="property-section wordart-properties">
                     <h3>WordArt / LogoArt</h3>
                     <label>Text<textarea rows="3" value="@wordArt.Text" @onchange="ChangeWordArtText"></textarea></label>
-                    <label>Font family<input value="@wordArt.FontFamily" @onchange="ChangeWordArtFont" /></label>
+                    <label>Font family
+                        <select value="@wordArt.FontFamily" @onchange="ChangeWordArtFont">
+                            @if (!WordArtFonts.Contains(wordArt.FontFamily, StringComparer.OrdinalIgnoreCase))
+                            {
+                                <option value="@wordArt.FontFamily">@wordArt.FontFamily</option>
+                            }
+                            @foreach (var font in WordArtFonts)
+                            {
+                                <option value="@font">@font</option>
+                            }
+                        </select>
+                    </label>
                     @RangeField("Font size", wordArt.FontSizePt, 8, 180, 1, "wordFontSize")
                     @RangeField("Letter spacing", wordArt.LetterSpacing, -5, 30, .5, "wordLetterSpacing")
                     @ColorField("Fill", wordArt.FillColor, "wordFill")
@@ -472,6 +483,11 @@
 </aside>
 
 @code {
+    private static readonly string[] WordArtFonts =
+    [
+        "Segoe UI", "Arial", "Arial Black", "Calibri", "Cambria", "Georgia", "Impact",
+        "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"
+    ];
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public EventCallback OnEditStory { get; set; }
     [Parameter] public EventCallback OnReplacePicture { get; set; }

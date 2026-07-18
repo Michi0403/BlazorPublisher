@@ -25,6 +25,7 @@
                 {
                     <svg class="print-connector" style="z-index:@connector.ZIndex"
                          data-publication-element data-element-id="@connector.Id"
+                         data-group-id="@connector.GroupId"
                          data-animations="@PublicationAnimationData.Animations(connector)"
                          data-interaction="@PublicationAnimationData.Interaction(connector)"
                          data-interaction-action="@connector.Interaction.Action"
@@ -38,6 +39,7 @@
                 {
                     <div class="print-element" style="@ElementStyle(element)"
                          data-publication-element data-element-id="@element.Id"
+                         data-group-id="@element.GroupId"
                          data-animations="@PublicationAnimationData.Animations(element)"
                          data-interaction="@PublicationAnimationData.Interaction(element)"
                      data-interaction-action="@element.Interaction.Action"

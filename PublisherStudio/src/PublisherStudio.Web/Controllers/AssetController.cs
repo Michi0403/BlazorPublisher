@@ -40,4 +40,22 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
             DataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}"
         });
     }
+
+    [HttpPost("drop/{id:guid}")]
+    [DisableRequestSizeLimit]
+    public async Task<IActionResult> UploadDroppedAsset(Guid id, CancellationToken cancellationToken)
+    {
+        if (id == Guid.Empty) return BadRequest("A valid asset id is required.");
+        var mimeType = string.IsNullOrWhiteSpace(Request.ContentType)
+            ? "application/octet-stream"
+            : Request.ContentType.Split(';', 2)[0].Trim();
+
+        await using var buffer = new MemoryStream();
+        await Request.Body.CopyToAsync(buffer, cancellationToken);
+        var bytes = buffer.ToArray();
+        if (bytes.Length == 0) return BadRequest("The dropped file is empty.");
+
+        var url = mediaAssets.RegisterBytes(id, bytes, mimeType);
+        return Ok(new { Id = id, MimeType = mimeType, Size = bytes.LongLength, Url = url });
+    }
 }

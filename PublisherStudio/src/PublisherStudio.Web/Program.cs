@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using PublisherStudio.Components;
 using PublisherStudio.Services;
+using Microsoft.AspNetCore.Components.Server;
 
 namespace PublisherStudio;
 
@@ -36,7 +37,7 @@ public static class Program
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         // Large offline-first media recordings are transferred in many small JS interop
         // chunks. The operation may legitimately outlive the default interop timeout.
-        builder.Services.Configure<Microsoft.AspNetCore.Components.Server.CircuitOptions>(options =>
+        builder.Services.Configure<CircuitOptions>(options =>
             options.JSInteropDefaultCallTimeout = Timeout.InfiniteTimeSpan);
         builder.Services.AddControllers();
         builder.Services.AddHealthChecks();
@@ -46,6 +47,7 @@ public static class Program
         builder.Services.AddSingleton<PublicationDataService>();
         builder.Services.AddSingleton<PublicationFileService>();
         builder.Services.AddSingleton<PublicationMediaAssetStore>();
+        builder.Services.AddSingleton<PublicationRecoveryService>();
         builder.Services.AddScoped<EditorStateService>();
         builder.Services.AddScoped<PictureEditorStateService>();
 

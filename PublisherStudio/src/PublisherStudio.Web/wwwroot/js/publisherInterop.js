@@ -2,6 +2,14 @@ const canvasStates = new WeakMap();
 const boundRulers = new WeakSet();
 const wordArtPathStates = new WeakMap();
 const PX_PER_MM_AT_96_DPI = 96 / 25.4;
+let publisherDocumentDirty = false;
+let activeVideoExportCancel = null;
+
+window.addEventListener('beforeunload', event => {
+    if (!publisherDocumentDirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+});
 
 function number(value, fallback = 0) {
     const parsed = Number.parseFloat(value);
@@ -313,6 +321,7 @@ function suppressInsertionClick(state, event) {
 }
 
 function insertionDragOver(state, event) {
+    if (externalFileDragOver(state, event)) return;
     const kind = insertionKindFromEvent(state, event);
     if (!kind || !state.page?.isConnected) return;
     const rect = state.page.getBoundingClientRect();
@@ -325,7 +334,8 @@ function insertionDragOver(state, event) {
     state.page.classList.add('insert-drop-target');
 }
 
-function insertionDrop(state, event) {
+async function insertionDrop(state, event) {
+    if (await externalFileDrop(state, event)) return;
     const kind = insertionKindFromEvent(state, event);
     if (!kind || !state.page?.isConnected) return;
     const rect = state.page.getBoundingClientRect();
@@ -346,6 +356,182 @@ function insertionDrop(state, event) {
         }
     }
     safeDotNet(state, 'DropInsert', kind, x, y);
+}
+
+
+function externalDraggedFile(event) {
+    const transfer = event?.dataTransfer;
+    if (!transfer) return null;
+    if (transfer.files?.length) return transfer.files[0];
+    const item = [...(transfer.items || [])].find(candidate => candidate.kind === 'file');
+    return item?.getAsFile?.() || null;
+}
+
+function externalDropKind(file) {
+    const name = String(file?.name || '').toLowerCase();
+    const mime = String(file?.type || '').toLowerCase();
+    if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/.test(name)) return 'picture';
+    if (mime.startsWith('video/') || /\.(mp4|m4v|webm|ogv|ogg|mov)$/.test(name)) return 'video';
+    if (mime === 'text/markdown' || /\.(md|markdown)$/.test(name)) return 'markdown';
+    if (mime.startsWith('text/') || /\.(txt|text|log|csv|tsv)$/.test(name)) return 'text';
+    if (/\.docx$/.test(name)) return 'docx';
+    return '';
+}
+
+function clearExternalDropPreview(state) {
+    const preview = state?.externalDropPreview;
+    if (!preview) return;
+    if (preview.url) URL.revokeObjectURL(preview.url);
+    preview.ghost?.remove?.();
+    preview.overlay?.remove?.();
+    state.page?.classList?.remove('external-file-drop-target');
+    state.externalDropPreview = null;
+}
+
+function createExternalDropPreview(state, file, kind) {
+    clearExternalDropPreview(state);
+    const overlay = document.createElement('div');
+    overlay.className = 'publisher-external-drop-overlay';
+    const message = document.createElement('span');
+    message.className = 'publisher-external-drop-message';
+    message.textContent = kind === 'picture' ? 'Drop picture at this position'
+        : kind === 'video' ? 'Drop video at this position'
+        : kind === 'markdown' ? 'Drop Markdown as a text frame'
+        : kind === 'text' ? 'Drop text as a text frame'
+        : 'This file type is not supported yet';
+    overlay.appendChild(message);
+    state.page.appendChild(overlay);
+
+    const ghost = document.createElement('div');
+    ghost.className = `publisher-external-drop-ghost kind-${kind || 'unsupported'}`;
+    ghost.setAttribute('aria-hidden', 'true');
+    let url = '';
+    const fileKey = `${file.name}|${file.size}|${file.lastModified}|${file.type}`;
+    const preview = { file, fileKey, kind, overlay, ghost, url, widthPx: 190, heightPx: kind === 'video' ? 108 : 120, pixelWidth: 0, pixelHeight: 0, durationSeconds: 0 };
+
+    if (kind === 'picture') {
+        url = URL.createObjectURL(file);
+        preview.url = url;
+        const image = document.createElement('img');
+        image.src = url;
+        image.alt = '';
+        image.addEventListener('load', () => {
+            preview.pixelWidth = image.naturalWidth || 0;
+            preview.pixelHeight = image.naturalHeight || 0;
+            if (preview.pixelWidth > 0 && preview.pixelHeight > 0) {
+                preview.heightPx = clamp(preview.widthPx * preview.pixelHeight / preview.pixelWidth, 54, 220);
+                ghost.style.height = `${preview.heightPx}px`;
+            }
+        }, { once: true });
+        ghost.appendChild(image);
+    } else if (kind === 'video') {
+        url = URL.createObjectURL(file);
+        preview.url = url;
+        const video = document.createElement('video');
+        video.src = url;
+        video.muted = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.preload = 'metadata';
+        video.play().catch(() => { });
+        video.addEventListener('loadedmetadata', () => {
+            preview.pixelWidth = video.videoWidth || 0;
+            preview.pixelHeight = video.videoHeight || 0;
+            preview.durationSeconds = Number.isFinite(video.duration) ? Math.max(0, video.duration) : 0;
+            if (preview.pixelWidth > 0 && preview.pixelHeight > 0) {
+                preview.heightPx = clamp(preview.widthPx * preview.pixelHeight / preview.pixelWidth, 54, 220);
+                ghost.style.height = `${preview.heightPx}px`;
+            }
+        }, { once: true });
+        ghost.appendChild(video);
+    } else {
+        const icon = document.createElement('b');
+        icon.textContent = kind === 'markdown' ? 'MD' : kind === 'text' ? 'TXT' : '?';
+        const label = document.createElement('small');
+        label.textContent = file.name || 'Dropped file';
+        ghost.append(icon, label);
+        if (kind === 'text' || kind === 'markdown') {
+            file.slice(0, 4096).text().then(text => {
+                if (state.externalDropPreview !== preview) return;
+                const excerpt = document.createElement('p');
+                excerpt.textContent = text.replace(/\s+/g, ' ').trim().slice(0, 180) || '(empty text file)';
+                ghost.appendChild(excerpt);
+            }).catch(() => { });
+        }
+    }
+    ghost.style.width = `${preview.widthPx}px`;
+    ghost.style.height = `${preview.heightPx}px`;
+    state.page.appendChild(ghost);
+    state.page.classList.add('external-file-drop-target');
+    state.externalDropPreview = preview;
+    return preview;
+}
+
+function positionExternalDropPreview(state, event) {
+    const preview = state.externalDropPreview;
+    if (!preview) return null;
+    const rect = state.page.getBoundingClientRect();
+    const xPx = clamp(event.clientX - rect.left, 0, rect.width);
+    const yPx = clamp(event.clientY - rect.top, 0, rect.height);
+    preview.ghost.style.left = `${xPx}px`;
+    preview.ghost.style.top = `${yPx}px`;
+    const x = clamp(xPx / state.config.pxPerMm, 0, number(state.page.dataset.pageWidthMm));
+    const y = clamp(yPx / state.config.pxPerMm, 0, number(state.page.dataset.pageHeightMm));
+    return { x, y };
+}
+
+function externalFileDragOver(state, event) {
+    const file = externalDraggedFile(event);
+    if (!file) return false;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    const kind = externalDropKind(file);
+    const current = state.externalDropPreview;
+    const fileKey = `${file.name}|${file.size}|${file.lastModified}|${file.type}`;
+    if (!current || current.fileKey !== fileKey || current.kind !== kind)
+        createExternalDropPreview(state, file, kind);
+    positionExternalDropPreview(state, event);
+    return true;
+}
+
+async function externalFileDrop(state, event) {
+    const file = externalDraggedFile(event);
+    if (!file) return false;
+    event.preventDefault();
+    event.stopPropagation();
+    const preview = state.externalDropPreview || createExternalDropPreview(state, file, externalDropKind(file));
+    const placement = positionExternalDropPreview(state, event) || { x: 0, y: 0 };
+    const kind = preview?.kind || externalDropKind(file);
+    if (!kind || kind === 'docx') {
+        clearExternalDropPreview(state);
+        await safeDotNet(state, 'ExternalFileDropFailed', kind === 'docx'
+            ? 'DOCX drag and drop is not available yet. Drop a picture, video, text, or Markdown file.'
+            : `The file '${file.name || 'file'}' is not a supported picture, video, text, or Markdown file.`);
+        return true;
+    }
+
+    const assetId = crypto.randomUUID();
+    try {
+        preview?.overlay?.classList?.add('uploading');
+        const message = preview?.overlay?.querySelector?.('.publisher-external-drop-message');
+        if (message) message.textContent = `Importing ${file.name || kind}…`;
+        const response = await fetch(`/api/assets/drop/${encodeURIComponent(assetId)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': file.type || 'application/octet-stream', 'X-Publisher-File-Name': encodeURIComponent(file.name || '') },
+            body: file
+        });
+        if (!response.ok) throw new Error((await response.text()) || `Upload failed with status ${response.status}.`);
+        await safeDotNet(state, 'CompleteExternalFileDrop', assetId, kind, file.name || kind,
+            file.type || 'application/octet-stream', file.size || 0,
+            preview?.durationSeconds || 0, preview?.pixelWidth || 0, preview?.pixelHeight || 0,
+            placement.x, placement.y);
+    } catch (error) {
+        await safeDotNet(state, 'ExternalFileDropFailed', error?.message || String(error));
+    } finally {
+        clearExternalDropPreview(state);
+    }
+    return true;
 }
 
 export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) {
@@ -383,6 +569,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             cropTimers: new Map(),
             connectorGhost: null,
             lastCanvasClick: null,
+            externalDropPreview: null,
             handlers: {}
         };
 
@@ -412,6 +599,11 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         handlers.stageKeyDown = event => canvasKeyDown(state, event);
         handlers.stageDragOver = event => insertionDragOver(state, event);
         handlers.stageDrop = event => insertionDrop(state, event);
+        handlers.stageDragLeave = event => {
+            if (!state.externalDropPreview) return;
+            const next = event.relatedTarget;
+            if (!next || !state.stage.contains(next)) clearExternalDropPreview(state);
+        };
         handlers.documentDragStart = event => insertionDragStart(state, event);
         handlers.documentDragEnd = () => insertionDragEnd(state);
         handlers.documentClick = event => suppressInsertionClick(state, event);
@@ -432,6 +624,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         stage.addEventListener('keydown', handlers.stageKeyDown);
         stage.addEventListener('dragover', handlers.stageDragOver);
         stage.addEventListener('drop', handlers.stageDrop);
+        stage.addEventListener('dragleave', handlers.stageDragLeave);
         document.addEventListener('dragstart', handlers.documentDragStart, true);
         document.addEventListener('dragend', handlers.documentDragEnd, true);
         document.addEventListener('click', handlers.documentClick, true);
@@ -468,6 +661,7 @@ export function disposeCanvas(stageId) {
     resetPointerOperation(state, true);
     clearObjectAlignmentFeedback(state);
     clearInsertionDrag(state);
+    clearExternalDropPreview(state);
     state.resizeObserver?.disconnect?.();
     for (const timer of state.cropTimers?.values?.() || []) clearTimeout(timer);
     state.cropTimers?.clear?.();
@@ -483,6 +677,7 @@ export function disposeCanvas(stageId) {
     stage.removeEventListener('keydown', handlers.stageKeyDown);
     stage.removeEventListener('dragover', handlers.stageDragOver);
     stage.removeEventListener('drop', handlers.stageDrop);
+    stage.removeEventListener('dragleave', handlers.stageDragLeave);
     document.removeEventListener('dragstart', handlers.documentDragStart, true);
     document.removeEventListener('dragend', handlers.documentDragEnd, true);
     document.removeEventListener('click', handlers.documentClick, true);
@@ -813,6 +1008,14 @@ function pointerDown(state, event) {
     if (state.operation) resetPointerOperation(state, true);
     if (mediaPointerTargetsControls(event)) return;
     state.stage.focus({ preventScroll: true });
+
+    const insertionRect = state.page.getBoundingClientRect();
+    if (event.clientX >= insertionRect.left && event.clientX <= insertionRect.right &&
+        event.clientY >= insertionRect.top && event.clientY <= insertionRect.bottom) {
+        const insertionX = clamp((event.clientX - insertionRect.left) / state.config.pxPerMm, 0, number(state.page.dataset.pageWidthMm));
+        const insertionY = clamp((event.clientY - insertionRect.top) / state.config.pxPerMm, 0, number(state.page.dataset.pageHeightMm));
+        safeDotNet(state, 'SetInsertionPoint', insertionX, insertionY);
+    }
 
     const endpoint = event.target.closest('[data-connector-end]');
     if (endpoint && state.page.contains(endpoint)) {
@@ -1166,6 +1369,11 @@ function pointerUp(state, event) {
     } else {
         const value = operation.current ?? { x: operation.x, y: operation.y, width: operation.width, height: operation.height };
         safeDotNet(state, 'CommitBounds', operation.id, value.x, value.y, value.width, value.height);
+        const resized = state.page.querySelector(`[data-element-id="${CSS.escape(operation.id)}"]`);
+        if (resized?.classList.contains('kind-datavisual')) {
+            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
+        }
     }
 }
 
@@ -2509,20 +2717,60 @@ function runPublicationMediaAnimation(node, animation, delaySeconds = 0) {
     };
 }
 
+function publicationAnimationGroupNodes(node) {
+    const groupId = String(node?.dataset?.groupId || '').trim();
+    const root = node?.closest?.('.publication-page,.print-page') || node?.parentElement;
+    if (!groupId || !root) return [node];
+    const peers = [...root.querySelectorAll('[data-publication-element][data-group-id]')]
+        .filter(candidate => String(candidate.dataset.groupId || '') === groupId);
+    return peers.length ? peers : [node];
+}
+
+function publicationGroupTransformOrigins(nodes) {
+    const rectangles = nodes.map(node => ({ node, rect: node.getBoundingClientRect(), previous: node.style.transformOrigin }));
+    const left = Math.min(...rectangles.map(item => item.rect.left));
+    const top = Math.min(...rectangles.map(item => item.rect.top));
+    const right = Math.max(...rectangles.map(item => item.rect.right));
+    const bottom = Math.max(...rectangles.map(item => item.rect.bottom));
+    const centerX = (left + right) / 2;
+    const centerY = (top + bottom) / 2;
+    for (const item of rectangles)
+        item.node.style.transformOrigin = `${centerX - item.rect.left}px ${centerY - item.rect.top}px`;
+    return () => rectangles.forEach(item => item.node.style.transformOrigin = item.previous);
+}
+
+function publicationAnimationComposite(animations, restore) {
+    let restored = false;
+    const restoreOnce = () => {
+        if (restored) return;
+        restored = true;
+        restore?.();
+    };
+    return {
+        finished: Promise.all(animations.map(animation => animation.finished.catch(() => undefined))),
+        cancel() { animations.forEach(animation => { try { animation.cancel(); } catch { } }); restoreOnce(); },
+        pause() { animations.forEach(animation => { try { animation.pause(); } catch { } }); },
+        play() { animations.forEach(animation => { try { animation.play(); } catch { } }); }
+    };
+}
+
 function runPublicationAnimation(node, animation, delaySeconds = 0) {
     if (isMediaAnimationEffect(animation.effect)) return runPublicationMediaAnimation(node, animation, delaySeconds);
     const reducedMotion = publicationReducedMotion();
     const duration = (reducedMotion ? .001 : Math.max(.05, animationNumber(animation.durationSeconds, .6))) * 1000;
     const repeat = Math.max(1, Math.round(animationNumber(animation.repeatCount, 1)));
     const iterations = reducedMotion ? 1 : repeat * (animation.autoReverse ? 2 : 1);
-    return node.animate(publicationAnimationFrames(node, animation), {
-        duration,
-        delay: (reducedMotion ? 0 : Math.max(0, delaySeconds)) * 1000,
-        easing: animationEasing(animation.easing),
-        iterations,
-        direction: animation.autoReverse ? 'alternate' : 'normal',
-        fill: animationName(animation.phase) === 'entrance' ? 'both' : 'forwards'
-    });
+    const nodes = publicationAnimationGroupNodes(node);
+    const restore = nodes.length > 1 ? publicationGroupTransformOrigins(nodes) : null;
+    const animations = nodes.map(member => member.animate(publicationAnimationFrames(member, animation), {
+            duration,
+            delay: (reducedMotion ? 0 : Math.max(0, delaySeconds)) * 1000,
+            easing: animationEasing(animation.easing),
+            iterations,
+            direction: animation.autoReverse ? 'alternate' : 'normal',
+            fill: animationName(animation.phase) === 'entrance' ? 'both' : 'forwards'
+        }));
+    return animations.length === 1 ? animations[0] : publicationAnimationComposite(animations, restore);
 }
 function publicationPageTransitionFrames(page, entering = true) {
     const kind = animationName(page.dataset.transitionKind);
@@ -2820,6 +3068,32 @@ function websitePresentationRuntime() {
             default: return [{ opacity: 1 }, { opacity: 1 }];
         }
     };
+    const groupNodes = node => {
+        const groupId = String(node?.dataset?.groupId || '').trim();
+        const page = node?.closest?.('.print-page');
+        if (!groupId || !page) return [node];
+        const peers = [...page.querySelectorAll('[data-publication-element][data-group-id]')]
+            .filter(candidate => String(candidate.dataset.groupId || '') === groupId);
+        return peers.length ? peers : [node];
+    };
+    const setGroupOrigins = nodes => {
+        if (nodes.length < 2) return () => {};
+        const entries = nodes.map(node => ({ node, rect: node.getBoundingClientRect(), previous: node.style.transformOrigin }));
+        const left = Math.min(...entries.map(item => item.rect.left));
+        const top = Math.min(...entries.map(item => item.rect.top));
+        const right = Math.max(...entries.map(item => item.rect.right));
+        const bottom = Math.max(...entries.map(item => item.rect.bottom));
+        const centerX = (left + right) / 2;
+        const centerY = (top + bottom) / 2;
+        entries.forEach(item => item.node.style.transformOrigin = `${centerX - item.rect.left}px ${centerY - item.rect.top}px`);
+        return () => entries.forEach(item => item.node.style.transformOrigin = item.previous);
+    };
+    const compositeAnimation = (animations, restore) => ({
+        finished: Promise.all(animations.map(animation => animation.finished.catch(() => undefined))),
+        cancel() { animations.forEach(animation => { try { animation.cancel(); } catch { } }); restore(); },
+        pause() { animations.forEach(animation => { try { animation.pause(); } catch { } }); },
+        play() { animations.forEach(animation => { try { animation.play(); } catch { } }); }
+    });
     const playItem = (item, delay = 0) => {
         item.prestate?.cancel();
         item.prestate = null;
@@ -2842,16 +3116,19 @@ function websitePresentationRuntime() {
             activeAnimations.push(handle);
             return handle;
         }
-        if (lower(item.animation.phase) === 'entrance') item.node.classList.remove('ps-action-hidden');
+        const nodes = groupNodes(item.node);
+        if (lower(item.animation.phase) === 'entrance') nodes.forEach(node => node.classList.remove('ps-action-hidden'));
         const repeat = Math.max(1, Math.round(num(item.animation.repeatCount, 1)));
-        const animation = item.node.animate(frames(item.node, item.animation), {
+        const restore = setGroupOrigins(nodes);
+        const members = nodes.map(node => node.animate(frames(node, item.animation), {
             duration: (reducedMotion ? .001 : Math.max(.05, num(item.animation.durationSeconds, .6))) * 1000,
             delay: (reducedMotion ? 0 : Math.max(0, delay)) * 1000,
             easing: easing(item.animation.easing),
             iterations: reducedMotion ? 1 : repeat * (item.animation.autoReverse ? 2 : 1),
             direction: item.animation.autoReverse ? 'alternate' : 'normal',
             fill: lower(item.animation.phase) === 'entrance' ? 'both' : 'forwards'
-        });
+        }));
+        const animation = members.length === 1 ? members[0] : compositeAnimation(members, restore);
         activeAnimations.push(animation);
         return animation;
     };
@@ -2923,9 +3200,13 @@ function websitePresentationRuntime() {
     const primeClickEntrances = groups => {
         for (const item of groups.flat()) {
             if (lower(item.animation.phase) !== 'entrance') continue;
-            item.prestate = item.node.animate(frames(item.node, item.animation), { duration: 1, fill: 'both' });
-            item.prestate.pause();
-            item.prestate.currentTime = 0;
+            const members = groupNodes(item.node).map(node => {
+                const animation = node.animate(frames(node, item.animation), { duration: 1, fill: 'both' });
+                animation.pause();
+                animation.currentTime = 0;
+                return animation;
+            });
+            item.prestate = members.length === 1 ? members[0] : compositeAnimation(members, () => {});
             activeAnimations.push(item.prestate);
         }
     };
@@ -3677,7 +3958,30 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     const countdown = document.createElement('div');
     countdown.className = 'publisher-video-export-countdown';
     countdown.textContent = 'Select This Tab and enable tab audio when needed.';
-    overlay.append(frame, countdown);
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'publisher-video-export-cancel';
+    cancelButton.textContent = 'Cancel export and return';
+    let cancelled = false;
+    const cancelExport = () => {
+        cancelled = true;
+        if (recorder && recorder.state !== 'inactive') { try { recorder.stop(); } catch { } }
+        if (capture) capture.getTracks().forEach(track => { try { track.stop(); } catch { } });
+    };
+    const waitForExport = async milliseconds => {
+        const end = performance.now() + Math.max(0, milliseconds);
+        while (performance.now() < end) {
+            if (cancelled) throw new Error('Video export was cancelled.');
+            await sleep(Math.min(120, Math.max(1, end - performance.now())));
+        }
+        if (cancelled) throw new Error('Video export was cancelled.');
+    };
+    const cancelOnEscape = event => { if (event.key === 'Escape') cancelExport(); };
+    cancelButton.addEventListener('click', cancelExport);
+    window.addEventListener('keydown', cancelOnEscape, true);
+    activeVideoExportCancel?.();
+    activeVideoExportCancel = cancelExport;
+    overlay.append(frame, countdown, cancelButton);
     document.body.appendChild(overlay);
 
     const frameDefinition = publicationFrameDefinition(pages, true);
@@ -3716,8 +4020,10 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     let totalDuration = 0;
     try {
         step = 'requesting tab capture';
-        await sleep(120);
+        await waitForExport(120);
         capture = await requestPresentationCapture();
+        if (cancelled) throw new Error('Video export was cancelled.');
+        capture.getVideoTracks()[0]?.addEventListener('ended', cancelExport, { once: true });
         step = 'creating the page-sized compositor';
         compositor = await createPageFrameRecordingStream(capture, frame, frameWidth, frameHeight);
 
@@ -3735,27 +4041,30 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         });
 
         for (let count = 3; count > 0; count--) {
+            if (cancelled) throw new Error('Video export was cancelled.');
             const sourceLabel = compositor.displaySurface && compositor.displaySurface !== 'browser'
                 ? `Selected ${compositor.displaySurface}; This Tab is recommended`
                 : 'Page-sized tab recording';
             countdown.textContent = `${sourceLabel} starts in ${count}`;
-            await sleep(700);
+            await waitForExport(700);
         }
         countdown.remove();
         recorder.start(500);
         step = 'recording publication pages';
         for (let index = 0; index < pages.length; index++) {
+            if (cancelled) throw new Error('Video export was cancelled.');
             const page = pages[index];
             const shell = pageShells[index];
             pageShells.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
             fitPage(page, index);
-            await sleep(120);
+            await waitForExport(120);
             const duration = exportedPageDuration(page);
             totalDuration += duration;
             // Animate the fixed-size shell rather than the fitted page. Page transition
             // transforms therefore no longer overwrite the page's centering/scale.
             previewPublicationItems(page, prepareVideoExportPage(page), true, shell);
-            await sleep(duration * 1000);
+            await waitForExport(duration * 1000);
+            if (cancelled) throw new Error('Video export was cancelled.');
             clearPublicationPreview(page.id || page);
             page.querySelectorAll('video,audio').forEach(media => {
                 try { media.pause(); } catch { }
@@ -3766,7 +4075,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         step = 'finalizing WebM';
         if (recorder.state === 'recording') {
             try { recorder.requestData(); } catch { }
-            await sleep(120);
+            await waitForExport(120);
             recorder.stop();
         }
         await Promise.race([
@@ -3794,6 +4103,8 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         try { compositor?.stop(); } catch { }
         if (capture) capture.getTracks().forEach(track => { try { track.stop(); } catch { } });
         window.removeEventListener('resize', fitFrameToViewport);
+        window.removeEventListener('keydown', cancelOnEscape, true);
+        if (activeVideoExportCancel === cancelExport) activeVideoExportCancel = null;
         overlay.remove();
     }
 }
@@ -3843,6 +4154,21 @@ function initializeStoryEditorLayout(shellId, hostId) {
     schedule();
 }
 
+
+let dataVisualLayoutTimer = 0;
+export function refreshDataVisualLayout(pageId = 'publisher-page') {
+    const page = document.getElementById(pageId);
+    if (!page?.querySelector?.('.data-visual-view')) return;
+    if (dataVisualLayoutTimer) clearTimeout(dataVisualLayoutTimer);
+    requestAnimationFrame(() => {
+        window.dispatchEvent(new Event('resize'));
+        dataVisualLayoutTimer = window.setTimeout(() => {
+            dataVisualLayoutTimer = 0;
+            if (page.isConnected) window.dispatchEvent(new Event('resize'));
+        }, 120);
+    });
+}
+
 export function cancelCanvasInteraction(stageId = 'publisher-stage') {
     const stage = document.getElementById(stageId);
     const state = stage ? canvasStates.get(stage) : null;
@@ -3871,6 +4197,15 @@ export function consumeCanvasInsertPlacement(id) {
 }
 
 window.publisherStudio = {
+    setDocumentDirty(value) { publisherDocumentDirty = Boolean(value); },
+    restorePublisherWorkspaceAfterExport(stageId = 'publisher-stage') {
+        activeVideoExportCancel?.();
+        document.querySelectorAll('.publisher-video-export-overlay').forEach(element => element.remove());
+        const stage = document.getElementById(stageId);
+        if (stage) {
+            try { stage.focus({ preventScroll: true }); } catch { }
+        }
+    },
     cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
     initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },

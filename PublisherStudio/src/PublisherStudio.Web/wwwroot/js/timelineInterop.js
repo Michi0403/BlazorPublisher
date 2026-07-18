@@ -62,6 +62,27 @@ function frames(node, animation) {
         default: return [{ opacity: 1 }, { opacity: 1 }];
     }
 }
+function groupNodes(node) {
+    const groupId = String(node?.dataset?.groupId || '').trim();
+    const page = node?.closest?.('.publication-page,.print-page');
+    if (!groupId || !page) return [node];
+    const peers = [...page.querySelectorAll('[data-publication-element][data-group-id]')]
+        .filter(candidate => String(candidate.dataset.groupId || '') === groupId);
+    return peers.length ? peers : [node];
+}
+function composite(animations) {
+    return {
+        cancel() { animations.forEach(animation => { try { animation.cancel(); } catch { } }); },
+        pause() { animations.forEach(animation => { try { animation.pause(); } catch { } }); },
+        play() { animations.forEach(animation => { try { animation.play(); } catch { } }); },
+        get currentTime() { return animations[0]?.currentTime || 0; },
+        set currentTime(value) { animations.forEach(animation => animation.currentTime = value); }
+    };
+}
+function animateGroup(node, animation, options) {
+    const animations = groupNodes(node).map(member => member.animate(frames(member, animation), options));
+    return animations.length === 1 ? animations[0] : composite(animations);
+}
 function animationSpan(animation) {
     return Math.max(.05, number(animation.durationSeconds, .6)) * Math.max(1, number(animation.repeatCount, 1)) * (animation.autoReverse ? 2 : 1);
 }
@@ -150,15 +171,28 @@ function timelinePointerDown(state, event) {
     clip.setPointerCapture(event.pointerId);
     clip.classList.add('dragging');
     const move = moveEvent => timelinePointerMove(state, moveEvent);
+    let finished = false;
     const finish = upEvent => {
+        if (finished) return;
+        if (upEvent?.pointerId !== undefined && upEvent.pointerId !== event.pointerId) return;
+        finished = true;
         clip.removeEventListener('pointermove', move);
         clip.removeEventListener('pointerup', finish);
         clip.removeEventListener('pointercancel', finish);
-        timelinePointerUp(state, upEvent);
+        clip.removeEventListener('lostpointercapture', finish);
+        window.removeEventListener('pointerup', finish, true);
+        window.removeEventListener('pointercancel', finish, true);
+        window.removeEventListener('blur', finish, true);
+        try { if (clip.hasPointerCapture(event.pointerId)) clip.releasePointerCapture(event.pointerId); } catch { }
+        timelinePointerUp(state, upEvent || { pointerId: event.pointerId });
     };
     clip.addEventListener('pointermove', move);
     clip.addEventListener('pointerup', finish);
     clip.addEventListener('pointercancel', finish);
+    clip.addEventListener('lostpointercapture', finish);
+    window.addEventListener('pointerup', finish, true);
+    window.addEventListener('pointercancel', finish, true);
+    window.addEventListener('blur', finish, true);
     event.preventDefault();
     event.stopPropagation();
 }
@@ -221,7 +255,7 @@ export function scrubPublicationTimeline(pageId, seconds) {
     for (const item of animationItems(page)) {
         if (lower(item.animation.trigger) === 'onclick' && item.animation.timelineStartSeconds == null) continue;
         const repeat = Math.max(1, Math.round(number(item.animation.repeatCount, 1)));
-        const animation = item.node.animate(frames(item.node, item.animation), {
+        const animation = animateGroup(item.node, item.animation, {
             duration: Math.max(.05, number(item.animation.durationSeconds, .6)) * 1000,
             delay: item.start * 1000,
             easing: easing(item.animation.easing),
@@ -276,7 +310,7 @@ export function playPublicationTimeline(pageId, startSeconds, endSeconds, dotnet
     const animations = [];
     for (const item of items) {
         const repeat = Math.max(1, Math.round(number(item.animation.repeatCount, 1)));
-        const animation = item.node.animate(frames(item.node, item.animation), {
+        const animation = animateGroup(item.node, item.animation, {
             duration: Math.max(.05, number(item.animation.durationSeconds, .6)) * 1000,
             delay: item.start * 1000,
             easing: easing(item.animation.easing),

@@ -12,6 +12,8 @@ public sealed class EditorStateService
     private PublicationElement? _clipboard;
     private readonly HashSet<Guid> _selectedElementIds = [];
     private string? _liveEditKey;
+    private double? _lastInsertionX;
+    private double? _lastInsertionY;
 
     public EditorStateService(PublicationFileService files, PublicationDataService data, PublicationMediaAssetStore mediaAssets)
     {
@@ -26,6 +28,8 @@ public sealed class EditorStateService
     public PublicationDocument Document { get; private set; }
     public Guid SelectedPageId { get; private set; }
     public Guid? SelectedElementId { get; private set; }
+    public bool IsDirty { get; private set; }
+    public long Revision { get; private set; }
     public bool CropMode { get; private set; }
     public ConnectorToolKind ConnectorTool { get; private set; }
     public bool CanUndo => _undo.Count > 0;
@@ -54,6 +58,8 @@ public sealed class EditorStateService
         _undo.Clear();
         _redo.Clear();
         _liveEditKey = null;
+        _lastInsertionX = null;
+        _lastInsertionY = null;
         Notify();
     }
 
@@ -69,7 +75,41 @@ public sealed class EditorStateService
         _undo.Clear();
         _redo.Clear();
         _liveEditKey = null;
+        _lastInsertionX = null;
+        _lastInsertionY = null;
+        IsDirty = false;
+        Revision++;
+        Notify(false);
+    }
+
+    public void LoadRecovery(string json)
+    {
+        Load(json);
+        IsDirty = true;
+        Revision++;
+        Changed?.Invoke();
+    }
+
+    public void MarkSaved()
+    {
+        IsDirty = false;
+        Revision++;
+        Changed?.Invoke();
+    }
+
+    public void RenameDocument(string value)
+    {
+        value = string.IsNullOrWhiteSpace(value) ? "Untitled Publication" : value.Trim();
+        if (string.Equals(Document.Name, value, StringComparison.Ordinal)) return;
+        Capture();
+        Document.Name = value;
         Notify();
+    }
+
+    public void SetInsertionPoint(double x, double y)
+    {
+        _lastInsertionX = Math.Clamp(x, 0, CurrentPage.WidthMm);
+        _lastInsertionY = Math.Clamp(y, 0, CurrentPage.HeightMm);
     }
 
     public void SelectPage(Guid id)
@@ -80,6 +120,8 @@ public sealed class EditorStateService
         CropMode = false;
         ConnectorTool = ConnectorToolKind.None;
         EndLiveEdit();
+        _lastInsertionX = null;
+        _lastInsertionY = null;
         Notify(false);
     }
 
@@ -183,7 +225,7 @@ public sealed class EditorStateService
         return element;
     }
 
-    public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null, double? centerX = null, double? centerY = null)
+    public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null, double? centerX = null, double? centerY = null, int pixelWidth = 0, int pixelHeight = 0)
     {
         Capture();
         var element = new ImageFrameElement
@@ -198,7 +240,9 @@ public sealed class EditorStateService
             Width = 90,
             Height = pictureSource is { WidthPx: > 0, HeightPx: > 0 }
                 ? Math.Clamp(90d * pictureSource.HeightPx / pictureSource.WidthPx, 20, 140)
-                : 65,
+                : pixelWidth > 0 && pixelHeight > 0
+                    ? Math.Clamp(90d * pixelHeight / pixelWidth, 20, 140)
+                    : 65,
             ZIndex = NextZ()
         };
         PlaceAt(element, centerX, centerY);
@@ -236,7 +280,7 @@ public sealed class EditorStateService
         return element;
     }
 
-    public AudioElement AddAudio(string dataUrl, string mimeType, string name, double durationSeconds, IReadOnlyList<double>? waveformSamples = null)
+    public AudioElement AddAudio(string dataUrl, string mimeType, string name, double durationSeconds, IReadOnlyList<double>? waveformSamples = null, double? centerX = null, double? centerY = null)
     {
         Capture();
         mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "audio/webm");
@@ -255,6 +299,7 @@ public sealed class EditorStateService
             Height = 28,
             ZIndex = NextZ()
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
         SetSelectionCore([element.Id], element.Id);
         EnsureTimelineDuration();
@@ -292,7 +337,7 @@ public sealed class EditorStateService
 
 
 
-    public WordArtElement AddWordArt()
+    public WordArtElement AddWordArt(double? centerX = null, double? centerY = null)
     {
         Capture();
         var element = new WordArtElement
@@ -305,6 +350,7 @@ public sealed class EditorStateService
             Height = 35,
             ZIndex = NextZ()
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
         SetSelectionCore([element.Id], element.Id);
         Notify();
@@ -319,7 +365,7 @@ public sealed class EditorStateService
         return data;
     }
 
-    public BarcodeElement AddBarcode()
+    public BarcodeElement AddBarcode(double? centerX = null, double? centerY = null)
     {
         Capture();
         var element = new BarcodeElement
@@ -331,13 +377,14 @@ public sealed class EditorStateService
             Height = 70,
             ZIndex = NextZ()
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
         SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
     }
 
-    public DataVisualElement AddDataVisual(DataVisualKind kind)
+    public DataVisualElement AddDataVisual(DataVisualKind kind, double? centerX = null, double? centerY = null)
     {
         Capture();
         var data = EnsureDataObject();
@@ -356,16 +403,23 @@ public sealed class EditorStateService
             ValueFields = string.IsNullOrWhiteSpace(numeric) ? [] : [numeric],
             X = 28,
             Y = 30,
-            Width = kind is DataVisualKind.Sparkline or DataVisualKind.KpiProgress ? 110 : 130,
+            Width = kind switch
+            {
+                DataVisualKind.Sparkline => 120,
+                DataVisualKind.KpiProgress => 120,
+                DataVisualKind.DataTable => 150,
+                _ => 145
+            },
             Height = kind switch
             {
-                DataVisualKind.Sparkline => 28,
-                DataVisualKind.KpiProgress => 35,
-                DataVisualKind.DataTable => 75,
-                _ => 80
+                DataVisualKind.Sparkline => 34,
+                DataVisualKind.KpiProgress => 40,
+                DataVisualKind.DataTable => 90,
+                _ => 95
             },
             ZIndex = NextZ()
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
         SetSelectionCore([element.Id], element.Id);
         Notify();
@@ -459,7 +513,7 @@ public sealed class EditorStateService
         Notify(false);
     }
 
-    public ShapeElement AddShape(PublicationShape shape)
+    public ShapeElement AddShape(PublicationShape shape, double? centerX = null, double? centerY = null)
     {
         Capture();
         var element = new ShapeElement
@@ -472,6 +526,7 @@ public sealed class EditorStateService
             Height = shape == PublicationShape.Line ? 1 : 40,
             ZIndex = NextZ()
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
         SetSelectionCore([element.Id], element.Id);
         Notify();
@@ -925,8 +980,9 @@ public sealed class EditorStateService
     {
         var element = CurrentPage.Elements.FirstOrDefault(e => e.Id == id);
         if (element is null || element.Locked || element is ConnectorElement) return;
-        var nextWidth = Math.Max(2, Math.Min(width, CurrentPage.WidthMm * 2));
-        var nextHeight = Math.Max(2, Math.Min(height, CurrentPage.HeightMm * 2));
+        var (minimumWidth, minimumHeight) = MinimumElementSize(element);
+        var nextWidth = Math.Max(minimumWidth, Math.Min(width, CurrentPage.WidthMm * 2));
+        var nextHeight = Math.Max(minimumHeight, Math.Min(height, CurrentPage.HeightMm * 2));
         var nextX = Math.Clamp(x, -nextWidth + 2, CurrentPage.WidthMm - 2);
         var nextY = Math.Clamp(y, -nextHeight + 2, CurrentPage.HeightMm - 2);
         if (NearlyEqual(element.X, nextX) && NearlyEqual(element.Y, nextY) &&
@@ -1098,34 +1154,51 @@ public sealed class EditorStateService
 
     public void SetSelectedLayerPosition(int position)
     {
-        var selected = SelectedElement;
-        if (selected is null) return;
+        var block = LayerSelectionBlock();
+        if (block.Count == 0) return;
         var ordered = OrderedElements();
-        var currentIndex = ordered.IndexOf(selected);
+        var selectedIds = block.Select(item => item.Id).ToHashSet();
+        var currentIndex = ordered.FindIndex(item => selectedIds.Contains(item.Id));
         if (currentIndex < 0) return;
-        var targetIndex = Math.Clamp(position - 1, 0, ordered.Count - 1);
+        var remaining = ordered.Where(item => !selectedIds.Contains(item.Id)).ToList();
+        var targetIndex = Math.Clamp(position - 1, 0, remaining.Count);
         if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
         Capture();
-        ordered.RemoveAt(currentIndex);
-        ordered.Insert(targetIndex, selected);
-        ApplyNormalizedZOrder(ordered);
+        remaining.InsertRange(targetIndex, block);
+        ApplyNormalizedZOrder(remaining);
         Notify();
     }
 
     public void Align(string mode)
     {
-        UpdateSelected(element =>
+        var elements = TransformSelectionBlock();
+        if (elements.Count == 0) return;
+        var left = elements.Min(item => item.X);
+        var top = elements.Min(item => item.Y);
+        var right = elements.Max(item => item.X + item.Width);
+        var bottom = elements.Max(item => item.Y + item.Height);
+        var width = right - left;
+        var height = bottom - top;
+        var dx = 0d;
+        var dy = 0d;
+        switch (mode)
         {
-            switch (mode)
-            {
-                case "left": element.X = 0; break;
-                case "center": element.X = (CurrentPage.WidthMm - element.Width) / 2; break;
-                case "right": element.X = CurrentPage.WidthMm - element.Width; break;
-                case "top": element.Y = 0; break;
-                case "middle": element.Y = (CurrentPage.HeightMm - element.Height) / 2; break;
-                case "bottom": element.Y = CurrentPage.HeightMm - element.Height; break;
-            }
-        });
+            case "left": dx = -left; break;
+            case "center": dx = (CurrentPage.WidthMm - width) / 2 - left; break;
+            case "right": dx = CurrentPage.WidthMm - right; break;
+            case "top": dy = -top; break;
+            case "middle": dy = (CurrentPage.HeightMm - height) / 2 - top; break;
+            case "bottom": dy = CurrentPage.HeightMm - bottom; break;
+            default: return;
+        }
+        if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
+        Capture();
+        foreach (var element in elements)
+        {
+            element.X += dx;
+            element.Y += dy;
+        }
+        Notify();
     }
 
     public void Undo()
@@ -1229,26 +1302,58 @@ public sealed class EditorStateService
 
     private void ReorderSelected(int movement)
     {
-        var selected = SelectedElement;
-        if (selected is null) return;
+        var block = LayerSelectionBlock();
+        if (block.Count == 0) return;
         var ordered = OrderedElements();
-        var currentIndex = ordered.IndexOf(selected);
+        var selectedIds = block.Select(item => item.Id).ToHashSet();
+        var currentIndex = ordered.FindIndex(item => selectedIds.Contains(item.Id));
         if (currentIndex < 0) return;
+        var remaining = ordered.Where(item => !selectedIds.Contains(item.Id)).ToList();
         var targetIndex = movement switch
         {
-            int.MaxValue => ordered.Count - 1,
+            int.MaxValue => remaining.Count,
             int.MinValue => 0,
-            > 0 => Math.Min(ordered.Count - 1, currentIndex + 1),
+            > 0 => Math.Min(remaining.Count, currentIndex + 1),
             < 0 => Math.Max(0, currentIndex - 1),
             _ => currentIndex
         };
         if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
         Capture();
-        ordered.RemoveAt(currentIndex);
-        ordered.Insert(targetIndex, selected);
-        ApplyNormalizedZOrder(ordered);
+        remaining.InsertRange(targetIndex, block);
+        ApplyNormalizedZOrder(remaining);
         Notify();
     }
+
+    private List<PublicationElement> LayerSelectionBlock()
+    {
+        if (SelectedElement is null) return [];
+        IEnumerable<PublicationElement> source = _selectedElementIds.Count > 1 ? SelectedElements : SelectionUnit(SelectedElement);
+        var ids = source
+            .Select(item => item.Id)
+            .ToHashSet();
+        return OrderedElements().Where(item => ids.Contains(item.Id)).ToList();
+    }
+
+    private List<PublicationElement> TransformSelectionBlock()
+    {
+        if (SelectedElement is null) return [];
+        IEnumerable<PublicationElement> source = _selectedElementIds.Count > 1 ? SelectedElements : SelectionUnit(SelectedElement);
+        return source.Where(item => !item.Locked && item is not ConnectorElement).DistinctBy(item => item.Id).ToList();
+    }
+
+    private static (double Width, double Height) MinimumElementSize(PublicationElement element) => element switch
+    {
+        DataVisualElement { VisualKind: DataVisualKind.Sparkline } => (55, 18),
+        DataVisualElement { VisualKind: DataVisualKind.KpiProgress } => (60, 24),
+        DataVisualElement { VisualKind: DataVisualKind.DataTable } => (80, 48),
+        DataVisualElement => (75, 55),
+        VideoElement => (35, 22),
+        AudioElement => (45, 16),
+        TextFrameElement => (15, 10),
+        WordArtElement => (25, 12),
+        BarcodeElement => (22, 22),
+        _ => (5, 5)
+    };
 
     private List<PublicationElement> OrderedElements() => CurrentPage.Elements
         .Select((element, index) => new { Element = element, Index = index })
@@ -1306,9 +1411,11 @@ public sealed class EditorStateService
 
     private void PlaceAt(PublicationElement element, double? centerX, double? centerY)
     {
-        if (centerX is null || centerY is null) return;
-        element.X = Math.Clamp(centerX.Value - element.Width / 2, -element.Width + 2, CurrentPage.WidthMm - 2);
-        element.Y = Math.Clamp(centerY.Value - element.Height / 2, -element.Height + 2, CurrentPage.HeightMm - 2);
+        var x = centerX ?? _lastInsertionX;
+        var y = centerY ?? _lastInsertionY;
+        if (x is null || y is null) return;
+        element.X = Math.Clamp(x.Value - element.Width / 2, -element.Width + 2, CurrentPage.WidthMm - 2);
+        element.Y = Math.Clamp(y.Value - element.Height / 2, -element.Height + 2, CurrentPage.HeightMm - 2);
     }
 
     private void RemoveMediaAssets(PublicationDocument document)
@@ -1336,7 +1443,12 @@ public sealed class EditorStateService
 
     private void Notify(bool markModified = true)
     {
-        if (markModified) Document.ModifiedUtc = DateTimeOffset.UtcNow;
+        if (markModified)
+        {
+            Document.ModifiedUtc = DateTimeOffset.UtcNow;
+            IsDirty = true;
+            Revision++;
+        }
         Changed?.Invoke();
     }
 }

@@ -4,16 +4,26 @@
 @inject EditorStateService State
 @inject PublicationFileService Files
 @inject PublicationMediaAssetStore MediaAssets
+@inject PublicationRecoveryService Recovery
 @inject IJSRuntime JS
 
 <PageTitle>BlazorPublisher</PageTitle>
 
-<div class="publisher-shell">
+<div class="publisher-shell @(_recoveryCandidate is not null ? "has-recovery" : null)">
     <header class="title-bar">
         <div class="brand-mark">P</div>
         <input class="document-name" value="@State.Document.Name" @onchange="RenameDocument" aria-label="Publication name" />
         <span class="modified-label">Modified @State.Document.ModifiedUtc.LocalDateTime.ToString("g")</span>
     </header>
+
+    @if (_recoveryCandidate is not null)
+    {
+        <aside class="publisher-recovery-banner" role="status">
+            <span><b>Recovered work is available:</b> @_recoveryCandidate.DocumentName · @_recoveryCandidate.SavedUtc.LocalDateTime.ToString("g")</span>
+            <button type="button" @onclick="RestoreRecovery">Restore</button>
+            <button type="button" @onclick="DismissRecovery">Dismiss</button>
+        </aside>
+    }
 
     <PublicationRibbon State="State"
                        TimelineVisible="_timelineVisible"
@@ -61,15 +71,16 @@
     <div id="publisher-workspace" class="editor-workspace @(_timelineVisible ? "timeline-open" : null)">
         <PageNavigator State="State" TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
-        <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
+        <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestReplacePicture="OpenReplacePicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
                      RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
                      RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia"
                      RequestInsertBarcode="InsertBarcode" RequestEditBarcode="EditBarcode"
-                     TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" RequestCanvasInsert="HandleCanvasInsert" />
+                     TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" RequestCanvasInsert="HandleCanvasInsert"
+                     RequestExternalFileDrop="HandleExternalFileDrop" RequestExternalDropError="HandleExternalDropError" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
         <InspectorPanel State="State"
                         OnEditStory="OpenStoryEditor"
-                        OnReplacePicture="OpenPicturePicker"
+                        OnReplacePicture="OpenReplacePicturePicker"
                         OnInsertPicture="OpenPicturePicker"
                         OnCreatePicture="CreatePicture"
                         OnEditPicture="EditSelectedPicture"
@@ -181,7 +192,12 @@
     private string? _pictureEditorInitialRaster;
     private string _pictureEditorInitialName = "Picture";
     private CanvasInsertRequest? _pendingCanvasInsert;
+    private Guid? _replacePictureTargetId;
     private bool _workspaceInitialized;
+    private PublicationRecoverySnapshot? _recoveryCandidate;
+    private CancellationTokenSource? _recoverySaveCancellation;
+    private long _scheduledRecoveryRevision = -1;
+    private bool _disposed;
     private string? _error;
     private string? _notice;
     private string SelectionStatus => State.ConnectorTool != ConnectorToolKind.None
@@ -190,7 +206,11 @@
             ? $"{State.SelectedElements.Count} objects selected{(State.SelectedElements.Any(item => item.GroupId is not null) ? " · grouped" : string.Empty)}"
             : State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
 
-    protected override void OnInitialized() => State.Changed += StateChanged;
+    protected override void OnInitialized()
+    {
+        State.Changed += StateChanged;
+        _recoveryCandidate = Recovery.TryReadLatest();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -198,10 +218,23 @@
         {
             _workspaceInitialized = true;
             await JS.InvokeVoidAsync("publisherStudio.initializeWorkspace", "publisher-workspace");
+            await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty);
         }
     }
 
-    private void StateChanged() => InvokeAsync(StateHasChanged);
+    private void StateChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            try { await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty); }
+            catch (InvalidOperationException) { }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+            StateHasChanged();
+        });
+        if (State.IsDirty && State.Revision != _scheduledRecoveryRevision)
+            ScheduleRecoverySave();
+    }
     private void NewDocument() => State.NewDocument();
     private void AddTextQuick() => State.AddText();
 
@@ -228,6 +261,152 @@
         }
         _pendingCanvasInsert = null;
     }
+
+    private async Task HandleExternalFileDrop(ExternalFileDropRequest request)
+    {
+        if (!MediaAssets.TryGet(request.AssetId, out var bytes, out var storedMimeType, out _))
+        {
+            ShowError(new InvalidDataException("The dropped file was not available after upload."));
+            return;
+        }
+
+        try
+        {
+            State.SetInsertionPoint(request.X, request.Y);
+            var kind = request.Kind.Trim().ToLowerInvariant();
+            var mimeType = ResolveDroppedMimeType(request.Name, request.MimeType, storedMimeType, kind);
+            if (kind == "picture")
+            {
+                var dataUrl = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
+                State.AddImage(dataUrl, request.Name, centerX: request.X, centerY: request.Y,
+                    pixelWidth: request.PixelWidth, pixelHeight: request.PixelHeight);
+                ShowNotice($"Inserted {request.Name} at the drop position.");
+                return;
+            }
+
+            if (kind == "video")
+            {
+                mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "video/webm");
+                var dataUrl = PublicationMediaData.NormalizeDataUrl($"data:{mimeType};base64,{Convert.ToBase64String(bytes)}", mimeType);
+                var video = State.AddVideo(dataUrl, mimeType, request.Name,
+                    request.DurationSeconds > 0 ? request.DurationSeconds : 5,
+                    centerX: request.X, centerY: request.Y);
+                MediaAssets.Copy(request.AssetId, video.Id);
+                _timelineVisible = true;
+                ShowNotice($"Inserted {request.Name} at the drop position. The timeline is open for timing and trimming.");
+                return;
+            }
+
+            if (kind is "text" or "markdown")
+            {
+                var content = DecodeText(bytes);
+                var html = kind == "markdown" ? MarkdownToHtml(content) : PlainTextToHtml(content);
+                var text = State.AddText(request.X, request.Y);
+                State.UpdateSelected(_ =>
+                {
+                    text.Name = string.IsNullOrWhiteSpace(request.Name) ? "Dropped text" : request.Name;
+                    text.PreviewHtml = html;
+                    text.DocumentContent = Encoding.UTF8.GetBytes(html);
+                    text.StoryFormat = StoryStorageFormat.Html;
+                    text.Width = Math.Min(120, Math.Max(70, State.CurrentPage.WidthMm * .45));
+                    text.Height = Math.Min(90, Math.Max(35, State.CurrentPage.HeightMm * .28));
+                    text.X = Math.Clamp(request.X - text.Width / 2, -text.Width + 2, State.CurrentPage.WidthMm - 2);
+                    text.Y = Math.Clamp(request.Y - text.Height / 2, -text.Height + 2, State.CurrentPage.HeightMm - 2);
+                });
+                ShowNotice($"Inserted {request.Name} as an editable text frame.");
+                return;
+            }
+
+            throw new InvalidDataException("Drop a picture, video, text, or Markdown file.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+        finally
+        {
+            MediaAssets.Remove(request.AssetId);
+        }
+    }
+
+    private Task HandleExternalDropError(string message)
+    {
+        ShowError(new InvalidDataException(message));
+        return Task.CompletedTask;
+    }
+
+    private static string DecodeText(byte[] bytes)
+    {
+        if (bytes.Length >= 3 && bytes[0] == 0xef && bytes[1] == 0xbb && bytes[2] == 0xbf)
+            return Encoding.UTF8.GetString(bytes, 3, bytes.Length - 3);
+        if (bytes.Length >= 2 && bytes[0] == 0xff && bytes[1] == 0xfe)
+            return Encoding.Unicode.GetString(bytes, 2, bytes.Length - 2);
+        if (bytes.Length >= 2 && bytes[0] == 0xfe && bytes[1] == 0xff)
+            return Encoding.BigEndianUnicode.GetString(bytes, 2, bytes.Length - 2);
+        return Encoding.UTF8.GetString(bytes);
+    }
+
+    private static string ResolveDroppedMimeType(string name, string requested, string stored, string kind)
+    {
+        var declared = PublicationMediaData.NormalizeMimeType(requested, stored);
+        if ((kind == "picture" && declared.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) ||
+            (kind == "video" && declared.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) ||
+            kind is "text" or "markdown")
+            return declared;
+        return Path.GetExtension(name).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".svg" => "image/svg+xml",
+            ".mp4" => "video/mp4",
+            ".m4v" => "video/x-m4v",
+            ".webm" => "video/webm",
+            ".ogv" or ".ogg" => "video/ogg",
+            ".mov" => "video/quicktime",
+            ".md" or ".markdown" => "text/markdown",
+            _ => kind == "picture" ? "image/png" : kind == "video" ? "video/mp4" : "text/plain"
+        };
+    }
+
+    private static string PlainTextToHtml(string text) =>
+        $"<p style=\"margin:0;white-space:pre-wrap;font:12pt Segoe UI\">{System.Net.WebUtility.HtmlEncode(text)}</p>";
+
+    private static string MarkdownToHtml(string markdown)
+    {
+        var builder = new StringBuilder();
+        var inList = false;
+        foreach (var rawLine in markdown.Replace("\r\n", "\n").Split('\n'))
+        {
+            var line = rawLine.TrimEnd();
+            var trimmed = line.TrimStart();
+            if (trimmed.StartsWith("- ") || trimmed.StartsWith("* "))
+            {
+                if (!inList) { builder.Append("<ul>"); inList = true; }
+                builder.Append("<li>").Append(MarkdownInline(trimmed[2..])).Append("</li>");
+                continue;
+            }
+            if (inList) { builder.Append("</ul>"); inList = false; }
+            if (string.IsNullOrWhiteSpace(trimmed)) { builder.Append("<p><br></p>"); continue; }
+            var heading = trimmed.TakeWhile(character => character == '#').Count();
+            if (heading is >= 1 and <= 6 && trimmed.Length > heading && char.IsWhiteSpace(trimmed[heading]))
+                builder.Append($"<h{heading}>").Append(MarkdownInline(trimmed[(heading + 1)..])).Append($"</h{heading}>");
+            else
+                builder.Append("<p>").Append(MarkdownInline(trimmed)).Append("</p>");
+        }
+        if (inList) builder.Append("</ul>");
+        return builder.Length == 0 ? "<p><br></p>" : builder.ToString();
+    }
+
+    private static string MarkdownInline(string value)
+    {
+        var encoded = System.Net.WebUtility.HtmlEncode(value);
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", "<em>$1</em>");
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"`(.+?)`", "<code>$1</code>");
+        return encoded;
+    }
     private async Task OpenPublicationPicker()
     {
         await CancelPublisherPointerAsync();
@@ -236,6 +415,15 @@
     private async Task OpenPicturePicker()
     {
         _pendingCanvasInsert = null;
+        _replacePictureTargetId = null;
+        await CancelPublisherPointerAsync();
+        await OpenHiddenFileInput("picture-file-input");
+    }
+    private async Task OpenReplacePicturePicker()
+    {
+        if (State.SelectedElement is not ImageFrameElement image) return;
+        _pendingCanvasInsert = null;
+        _replacePictureTargetId = image.Id;
         await CancelPublisherPointerAsync();
         await OpenHiddenFileInput("picture-file-input");
     }
@@ -270,7 +458,53 @@
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
         using var streamReference = new DotNetStreamReference(stream);
         await JS.InvokeVoidAsync("publisherStudio.downloadStream", name, streamReference, "application/json");
+        State.MarkSaved();
+        await Recovery.DeleteAsync(State.Document.Id);
+        await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", false);
         ShowNotice($"Saved {name}");
+    }
+
+    private void ScheduleRecoverySave()
+    {
+        _scheduledRecoveryRevision = State.Revision;
+        _recoverySaveCancellation?.Cancel();
+        _recoverySaveCancellation?.Dispose();
+        var cancellation = _recoverySaveCancellation = new CancellationTokenSource();
+        _ = DebouncedRecoverySaveAsync(cancellation);
+    }
+
+    private async Task DebouncedRecoverySaveAsync(CancellationTokenSource cancellation)
+    {
+        try
+        {
+            await Task.Delay(1800, cancellation.Token);
+            await InvokeAsync(() => SaveRecoveryNow(cancellation.Token));
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { Console.Error.WriteLine($"Publication recovery save failed: {ex}"); }
+    }
+
+    private async Task SaveRecoveryNow(CancellationToken cancellationToken = default)
+    {
+        if (!State.IsDirty) return;
+        var json = Files.Serialize(State.Document);
+        await Recovery.SaveAsync(State.Document.Id, State.Document.Name, State.Document.ModifiedUtc, json, cancellationToken);
+    }
+
+    private Task RestoreRecovery()
+    {
+        if (_recoveryCandidate is null) return Task.CompletedTask;
+        State.LoadRecovery(_recoveryCandidate.Json);
+        _recoveryCandidate = null;
+        ShowNotice("Recovered the latest automatically saved publication state.");
+        return Task.CompletedTask;
+    }
+
+    private async Task DismissRecovery()
+    {
+        if (_recoveryCandidate is { } recovery)
+            await Recovery.DeleteAsync(recovery.DocumentId);
+        _recoveryCandidate = null;
     }
 
     private async Task ExportPng() => await ExportRasterPages("png");
@@ -352,6 +586,7 @@
     {
         try
         {
+            await SaveRecoveryNow();
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".html";
             ShowNotice("Preparing website export…");
             await InvokeAsync(StateHasChanged);
@@ -371,6 +606,7 @@
         _videoExporting = true;
         try
         {
+            await SaveRecoveryNow();
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".webm";
             ShowNotice("Choose this browser tab in the capture dialog and enable tab audio when media sound should be included.");
             var result = await JS.InvokeAsync<VideoExportResult>(
@@ -382,8 +618,18 @@
                 : " · full-tab fallback";
             ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds){frame}.");
         }
+        catch (Exception ex) when (ex.Message.Contains("cancel", StringComparison.OrdinalIgnoreCase))
+        {
+            ShowNotice("Video export cancelled. Your publication remains open and the latest recovery copy was kept.");
+        }
         catch (Exception ex) { ShowError(ex); }
-        finally { _videoExporting = false; }
+        finally
+        {
+            _videoExporting = false;
+            try { await JS.InvokeVoidAsync("publisherStudio.restorePublisherWorkspaceAfterExport", "publisher-stage"); }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+        }
     }
 
     private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");
@@ -456,8 +702,10 @@
                 State.AddImage(dataUrl, file.Name, centerX: placement.X, centerY: placement.Y);
                 _pendingCanvasInsert = null;
             }
-            else if (State.SelectedElement is ImageFrameElement image)
+            else if (_replacePictureTargetId is Guid replaceId &&
+                     State.CurrentPage.Elements.OfType<ImageFrameElement>().FirstOrDefault(item => item.Id == replaceId) is { } image)
             {
+                State.SelectElement(image.Id);
                 State.UpdateSelected(_ =>
                 {
                     image.DataUrl = dataUrl;
@@ -474,10 +722,12 @@
             {
                 State.AddImage(dataUrl, file.Name);
             }
+            _replacePictureTargetId = null;
         }
         catch (Exception ex)
         {
             _pendingCanvasInsert = null;
+            _replacePictureTargetId = null;
             ShowError(ex);
         }
     }
@@ -945,9 +1195,7 @@
 
     private void RenameDocument(ChangeEventArgs args)
     {
-        State.Document.Name = string.IsNullOrWhiteSpace(args.Value?.ToString()) ? "Untitled Publication" : args.Value!.ToString()!;
-        State.Document.ModifiedUtc = DateTimeOffset.UtcNow;
-        StateChanged();
+        State.RenameDocument(args.Value?.ToString() ?? string.Empty);
     }
 
     private void ChangeZoom(ChangeEventArgs args)
@@ -989,5 +1237,21 @@
         public string FileName { get; set; } = string.Empty;
     }
 
-    public void Dispose() => State.Changed -= StateChanged;
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        State.Changed -= StateChanged;
+        _recoverySaveCancellation?.Cancel();
+        _recoverySaveCancellation?.Dispose();
+        if (State.IsDirty)
+        {
+            try
+            {
+                var json = Files.Serialize(State.Document);
+                _ = Recovery.SaveAsync(State.Document.Id, State.Document.Name, State.Document.ModifiedUtc, json);
+            }
+            catch { }
+        }
+    }
 }

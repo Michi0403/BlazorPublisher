@@ -162,3 +162,7 @@ See `CHANGELOG-v1.0.5.md`. Presentation video recording, publisher pointer state
 ## v1.0.19 recording and presentation export stabilization
 
 See `CHANGELOG-v1.0.19.md`. Browser recordings remain available as local downloadable blobs until Media Studio closes, large recordings are embedded only on demand through small JS-interop chunks, and HTML/video presentation exports share one fixed publication frame with working page transitions. Versions v1.0.12 through v1.0.18 were iterative releases without separate changelog files.
+
+## v1.0.20 object workflow and recovery stabilization
+
+See `CHANGELOG-v1.0.20.md`. Desktop file drag/drop now creates live-positioned picture, video, text, and Markdown objects; grouping is respected by alignment, z-order and animation; chart layering and minimum sizing are stabilized; WordArt gains a font selector; timeline dragging terminates reliably; and atomic local recovery protects work around navigation and presentation export.

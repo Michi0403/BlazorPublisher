@@ -57,7 +57,7 @@
                 }
             }
 
-            @foreach (var connector in State.CurrentPage.Elements.OfType<ConnectorElement>().Where(e => e.Visible).OrderBy(e => e.ZIndex))
+            @foreach (var connector in State.CurrentPage.Elements.OfType<ConnectorElement>().Where(e => e.Visible))
             {
                 if (ConnectorGeometry.TryResolve(State.CurrentPage, connector, out var sourcePoint, out var targetPoint))
                 {
@@ -97,7 +97,7 @@
                 }
             }
 
-            @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible && e is not ConnectorElement).OrderBy(e => e.ZIndex))
+            @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible && e is not ConnectorElement))
             {
                 <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
                      data-animations="@PublicationAnimationData.Animations(element)"
@@ -176,7 +176,7 @@
                             <WordArtView Item="wordArt" IdPrefix="canvas" />
                             break;
                         case DataVisualElement dataVisual:
-                            <DataVisualView Document="State.Document" Item="dataVisual" CurrentPageId="State.SelectedPageId" />
+                            <DataVisualView @key="dataVisual.Id" Document="State.Document" Item="dataVisual" CurrentPageId="State.SelectedPageId" />
                             break;
                         case BarcodeElement barcode:
                             <BarcodeView Item="barcode" />
@@ -427,6 +427,7 @@
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public EventCallback<Guid> EditTextRequested { get; set; }
     [Parameter] public EventCallback RequestPicture { get; set; }
+    [Parameter] public EventCallback RequestReplacePicture { get; set; }
     [Parameter] public EventCallback RequestCreatePicture { get; set; }
     [Parameter] public EventCallback RequestEditPicture { get; set; }
     [Parameter] public EventCallback<DataVisualKind> RequestInsertDataVisual { get; set; }
@@ -442,6 +443,8 @@
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback RequestToggleTimeline { get; set; }
     [Parameter] public EventCallback<CanvasInsertRequest> RequestCanvasInsert { get; set; }
+    [Parameter] public EventCallback<ExternalFileDropRequest> RequestExternalFileDrop { get; set; }
+    [Parameter] public EventCallback<string> RequestExternalDropError { get; set; }
 
     private string TimelineCommandText => TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
 
@@ -451,6 +454,7 @@
     private bool _disposed;
     private bool _canvasInitializationInProgress;
     private string? _canvasInitializationKey;
+    private string? _dataVisualLayoutKey;
     private static readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
     private static readonly ConnectorAnchor[] ConnectorAnchors =
     [
@@ -494,31 +498,41 @@
             $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
             $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
             $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}";
-        if (initializationKey == _canvasInitializationKey) return;
+        var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}";
 
         _canvasInitializationInProgress = true;
         try
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
-            _self ??= DotNetObjectReference.Create(this);
-            var initialized = await _module.InvokeAsync<bool>("initializeCanvas",
-                "publisher-stage", "publisher-scroll-area", "publisher-page", "publisher-horizontal-ruler", "publisher-vertical-ruler", _self,
-                new
-                {
-                    pxPerMm = PixelsPerMm,
-                    cropMode = State.CropMode,
-                    unit = State.Document.View.RulerUnit.ToString(),
-                    rulersVisible = State.Document.View.RulersVisible,
-                    guidesVisible = State.Document.View.GuidesVisible,
-                    snapToGrid = State.Document.View.SnapToGrid,
-                    snapToGuides = State.Document.View.SnapToGuides,
-                    snapToPage = State.Document.View.SnapToPage,
-                    snapToObjects = State.Document.View.SnapToObjects,
-                    snapInObjects = State.Document.View.SnapInObjects,
-                    gridSpacingMm = State.Document.View.GridSpacingMm,
-                    connectorTool = State.ConnectorTool.ToString()
-                });
-            if (initialized) _canvasInitializationKey = initializationKey;
+            if (initializationKey != _canvasInitializationKey)
+            {
+                _self ??= DotNetObjectReference.Create(this);
+                var initialized = await _module.InvokeAsync<bool>("initializeCanvas",
+                    "publisher-stage", "publisher-scroll-area", "publisher-page", "publisher-horizontal-ruler", "publisher-vertical-ruler", _self,
+                    new
+                    {
+                        pxPerMm = PixelsPerMm,
+                        cropMode = State.CropMode,
+                        unit = State.Document.View.RulerUnit.ToString(),
+                        rulersVisible = State.Document.View.RulersVisible,
+                        guidesVisible = State.Document.View.GuidesVisible,
+                        snapToGrid = State.Document.View.SnapToGrid,
+                        snapToGuides = State.Document.View.SnapToGuides,
+                        snapToPage = State.Document.View.SnapToPage,
+                        snapToObjects = State.Document.View.SnapToObjects,
+                        snapInObjects = State.Document.View.SnapInObjects,
+                        gridSpacingMm = State.Document.View.GridSpacingMm,
+                        connectorTool = State.ConnectorTool.ToString()
+                    });
+                if (initialized) _canvasInitializationKey = initializationKey;
+            }
+
+            if (dataVisualLayoutKey != _dataVisualLayoutKey)
+            {
+                _dataVisualLayoutKey = dataVisualLayoutKey;
+                if (State.CurrentPage.Elements.Any(element => element is DataVisualElement))
+                    await _module.InvokeVoidAsync("refreshDataVisualLayout", "publisher-page");
+            }
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -582,6 +596,17 @@
     }
     [JSInvokable] public void CancelActiveTool() => State.CancelActiveTool();
     [JSInvokable] public Task DropInsert(string kind, double x, double y) => RequestCanvasInsert.InvokeAsync(new CanvasInsertRequest(kind, x, y));
+    [JSInvokable] public void SetInsertionPoint(double x, double y) => State.SetInsertionPoint(x, y);
+    [JSInvokable]
+    public Task CompleteExternalFileDrop(string assetId, string kind, string name, string mimeType, long size,
+        double durationSeconds, int pixelWidth, int pixelHeight, double x, double y)
+    {
+        if (!Guid.TryParse(assetId, out var parsed))
+            return RequestExternalDropError.InvokeAsync("The dropped file could not be registered.");
+        return RequestExternalFileDrop.InvokeAsync(new ExternalFileDropRequest(
+            parsed, kind, name, mimeType, size, durationSeconds, pixelWidth, pixelHeight, x, y));
+    }
+    [JSInvokable] public Task ExternalFileDropFailed(string message) => RequestExternalDropError.InvokeAsync(message);
     private void ResetPointerState() => State.CancelActiveTool();
 
     private Task DoubleClick(PublicationElement element)
@@ -609,7 +634,7 @@
     }
 
     private Task EditSelectedStory() => State.SelectedElement is TextFrameElement text ? EditTextRequested.InvokeAsync(text.Id) : Task.CompletedTask;
-    private Task ReplaceSelectedPicture() => RequestPicture.InvokeAsync();
+    private Task ReplaceSelectedPicture() => RequestReplacePicture.InvokeAsync();
     private Task InsertPicture() => RequestPicture.InvokeAsync();
     private Task CreatePicture() => RequestCreatePicture.InvokeAsync();
     private Task EditSelectedPicture() => RequestEditPicture.InvokeAsync();

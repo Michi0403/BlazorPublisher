@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.19";
+    public string FormatVersion { get; set; } = "1.20";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -116,6 +116,17 @@ public enum PublicationBarcodeErrorCorrection { L, M, Q, H }
 public enum PublicationBarcodeModuleShape { Square, Rounded, Dots }
 
 public sealed record CanvasInsertRequest(string Kind, double X, double Y);
+public sealed record ExternalFileDropRequest(
+    Guid AssetId,
+    string Kind,
+    string Name,
+    string MimeType,
+    long Size,
+    double DurationSeconds,
+    int PixelWidth,
+    int PixelHeight,
+    double X,
+    double Y);
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextFrameElement), "text")]

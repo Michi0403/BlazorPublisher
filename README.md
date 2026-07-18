@@ -1,4 +1,4 @@
-Installer for Windows 64 is here https://github.com/Michi0403/BlazorPublisher/releases/download/v119/PublisherStudio.Setup.exe
+Installer for Windows 64 is here https://github.com/Michi0403/BlazorPublisher/releases/download/v125/PublisherStudio.Setup.exe
 
 For anything else check the release section.
 Installers for different OS than windows do probably not work, but my focus is on windows now because I don't have test systems and time (and no visible tester and feedback like most developers face)

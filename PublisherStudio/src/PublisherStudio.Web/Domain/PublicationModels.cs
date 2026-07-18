@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.10";
+    public string FormatVersion { get; set; } = "1.11";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -60,6 +60,7 @@ public sealed class PublicationViewSettings
     public bool SnapToGuides { get; set; } = true;
     public bool SnapToPage { get; set; } = true;
     public bool SnapToObjects { get; set; } = true;
+    public bool SnapInObjects { get; set; } = true;
     public double GridSpacingMm { get; set; } = 2.5;
     public int ExportDpi { get; set; } = 150;
 }
@@ -114,6 +115,8 @@ public enum PublicationBarcodeFormat { QrCode, Code128, Code39, Ean13, UpcA, Itf
 public enum PublicationBarcodeErrorCorrection { L, M, Q, H }
 public enum PublicationBarcodeModuleShape { Square, Rounded, Dots }
 
+public sealed record CanvasInsertRequest(string Kind, double X, double Y);
+
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextFrameElement), "text")]
 [JsonDerivedType(typeof(ImageFrameElement), "image")]
@@ -138,6 +141,7 @@ public abstract class PublicationElement
     public bool Visible { get; set; } = true;
     public bool Locked { get; set; }
     public bool HiddenAtPresentationStart { get; set; }
+    public Guid? GroupId { get; set; }
     public List<PublicationAnimation> Animations { get; set; } = [];
     public PublicationInteraction Interaction { get; set; } = new();
 }

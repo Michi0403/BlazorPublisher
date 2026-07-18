@@ -10,6 +10,7 @@ public sealed class EditorStateService
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private PublicationElement? _clipboard;
+    private readonly HashSet<Guid> _selectedElementIds = [];
     private string? _liveEditKey;
 
     public EditorStateService(PublicationFileService files, PublicationDataService data, PublicationMediaAssetStore mediaAssets)
@@ -32,13 +33,22 @@ public sealed class EditorStateService
     public bool CanPaste => _clipboard is not null;
     public PublicationPage CurrentPage => Document.Pages.First(p => p.Id == SelectedPageId);
     public PublicationElement? SelectedElement => CurrentPage.Elements.FirstOrDefault(e => e.Id == SelectedElementId);
+    public IReadOnlyList<PublicationElement> SelectedElements => CurrentPage.Elements
+        .Where(element => _selectedElementIds.Contains(element.Id))
+        .OrderBy(element => element.ZIndex)
+        .ToList();
+    public IReadOnlyCollection<Guid> SelectedElementIds => _selectedElementIds;
+    public bool HasMultipleSelection => _selectedElementIds.Count > 1;
+    public bool CanGroupSelection => SelectedElements.Count(element => element is not ConnectorElement && !element.Locked) > 1;
+    public bool CanUngroupSelection => SelectedElements.Any(element => element.GroupId is not null);
+    public bool IsSelected(Guid id) => _selectedElementIds.Contains(id);
 
     public void NewDocument()
     {
         RemoveMediaAssets(Document);
         Document = PublicationDocument.CreateDefault();
         SelectedPageId = Document.Pages[0].Id;
-        SelectedElementId = null;
+        ClearSelectionCore();
         CropMode = false;
         ConnectorTool = ConnectorToolKind.None;
         _undo.Clear();
@@ -53,7 +63,7 @@ public sealed class EditorStateService
         Document = _files.Deserialize(json);
         _mediaAssets.RegisterDocument(Document);
         SelectedPageId = Document.Pages[0].Id;
-        SelectedElementId = null;
+        ClearSelectionCore();
         CropMode = false;
         ConnectorTool = ConnectorToolKind.None;
         _undo.Clear();
@@ -66,26 +76,92 @@ public sealed class EditorStateService
     {
         if (Document.Pages.All(p => p.Id != id)) return;
         SelectedPageId = id;
-        SelectedElementId = null;
+        ClearSelectionCore();
         CropMode = false;
         ConnectorTool = ConnectorToolKind.None;
         EndLiveEdit();
         Notify(false);
     }
 
-    public void SelectElement(Guid? id)
+    public void SelectElement(Guid? id, bool additive = false)
     {
-        var selectionChanged = SelectedElementId != id;
-        SelectedElementId = id;
-        var cropChanged = CropMode && SelectedElement is not ImageFrameElement;
+        if (id is null)
+        {
+            if (_selectedElementIds.Count == 0 && SelectedElementId is null) return;
+            ClearSelectionCore();
+            CropMode = false;
+            EndLiveEdit();
+            Notify(false);
+            return;
+        }
+
+        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == id.Value);
+        if (element is null) return;
+        var selection = SelectionUnit(element).Select(item => item.Id).ToHashSet();
+        var previousPrimary = SelectedElementId;
+        var previousSelection = _selectedElementIds.ToHashSet();
+
+        if (additive)
+        {
+            if (selection.All(_selectedElementIds.Contains))
+                _selectedElementIds.ExceptWith(selection);
+            else
+                _selectedElementIds.UnionWith(selection);
+        }
+        else
+        {
+            _selectedElementIds.Clear();
+            _selectedElementIds.UnionWith(selection);
+        }
+
+        if (_selectedElementIds.Contains(id.Value)) SelectedElementId = id.Value;
+        else if (previousPrimary is { } previous && _selectedElementIds.Contains(previous)) SelectedElementId = previous;
+        else SelectedElementId = _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
+
+        var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
         if (cropChanged) CropMode = false;
         EndLiveEdit();
-        // Connector mode is an explicit mouse mode. It is ended only by Done, Escape,
-        // or toggling the connector command, never as a side effect of selection.
-        if (selectionChanged || cropChanged) Notify(false);
+        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged) Notify(false);
     }
 
-    public TextFrameElement AddText()
+    public void SetPrimarySelection(Guid id)
+    {
+        if (!_selectedElementIds.Contains(id))
+        {
+            SelectElement(id);
+            return;
+        }
+        if (SelectedElementId == id) return;
+        SelectedElementId = id;
+        if (CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement)) CropMode = false;
+        EndLiveEdit();
+        Notify(false);
+    }
+
+    public void GroupSelected()
+    {
+        var elements = SelectedElements.Where(element => element is not ConnectorElement && !element.Locked).ToList();
+        if (elements.Count < 2) return;
+        Capture();
+        var groupId = Guid.NewGuid();
+        foreach (var element in elements) element.GroupId = groupId;
+        SetSelectionCore(elements.Select(element => element.Id), SelectedElementId);
+        Notify();
+    }
+
+    public void UngroupSelected()
+    {
+        var selectedIds = _selectedElementIds.ToArray();
+        var groupIds = SelectedElements.Where(element => element.GroupId is not null).Select(element => element.GroupId!.Value).ToHashSet();
+        if (groupIds.Count == 0) return;
+        Capture();
+        var affected = CurrentPage.Elements.Where(element => element.GroupId is { } groupId && groupIds.Contains(groupId)).ToList();
+        foreach (var element in affected) element.GroupId = null;
+        SetSelectionCore(selectedIds, SelectedElementId);
+        Notify();
+    }
+
+    public TextFrameElement AddText(double? centerX = null, double? centerY = null)
     {
         Capture();
         var element = new TextFrameElement
@@ -100,13 +176,14 @@ public sealed class EditorStateService
             DocumentContent = RichTextDocumentFactory.CreateOpenXml("New text box"),
             StoryFormat = StoryStorageFormat.OpenXml
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
     }
 
-    public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null)
+    public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null, double? centerX = null, double? centerY = null)
     {
         Capture();
         var element = new ImageFrameElement
@@ -124,13 +201,14 @@ public sealed class EditorStateService
                 : 65,
             ZIndex = NextZ()
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
     }
 
-    public VideoElement AddVideo(string dataUrl, string mimeType, string name, double durationSeconds, string posterDataUrl = "")
+    public VideoElement AddVideo(string dataUrl, string mimeType, string name, double durationSeconds, string posterDataUrl = "", double? centerX = null, double? centerY = null)
     {
         Capture();
         mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "video/webm");
@@ -150,8 +228,9 @@ public sealed class EditorStateService
             Height = 67.5,
             ZIndex = NextZ()
         };
+        PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         EnsureTimelineDuration();
         Notify();
         return element;
@@ -177,7 +256,7 @@ public sealed class EditorStateService
             ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         EnsureTimelineDuration();
         Notify();
         return element;
@@ -191,7 +270,7 @@ public sealed class EditorStateService
         update(media);
         NormalizeMedia(media);
         EnsureTimelineDuration();
-        SelectedElementId = media.Id;
+        SetSelectionCore([media.Id], media.Id);
         Notify();
     }
 
@@ -227,7 +306,7 @@ public sealed class EditorStateService
             ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
     }
@@ -253,7 +332,7 @@ public sealed class EditorStateService
             ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
     }
@@ -288,7 +367,7 @@ public sealed class EditorStateService
             ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
     }
@@ -346,7 +425,7 @@ public sealed class EditorStateService
             ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(connector);
-        SelectedElementId = connector.Id;
+        SetSelectionCore([connector.Id], connector.Id);
         Notify();
         return connector;
     }
@@ -362,7 +441,7 @@ public sealed class EditorStateService
         var endpoint = sourceEnd ? connector.Source : connector.Target;
         endpoint.ElementId = elementId;
         endpoint.Anchor = anchor;
-        SelectedElementId = connector.Id;
+        SetSelectionCore([connector.Id], connector.Id);
         Notify();
     }
 
@@ -394,7 +473,7 @@ public sealed class EditorStateService
             ZIndex = NextZ()
         };
         CurrentPage.Elements.Add(element);
-        SelectedElementId = element.Id;
+        SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
     }
@@ -414,7 +493,7 @@ public sealed class EditorStateService
         };
         Document.Pages.Add(publicationPage);
         SelectedPageId = publicationPage.Id;
-        SelectedElementId = null;
+        ClearSelectionCore();
         Notify();
     }
 
@@ -442,7 +521,7 @@ public sealed class EditorStateService
         foreach (var guide in clone.Guides) guide.Id = Guid.NewGuid();
         Document.Pages.Insert(Document.Pages.IndexOf(CurrentPage) + 1, clone);
         SelectedPageId = clone.Id;
-        SelectedElementId = null;
+        ClearSelectionCore();
         Notify();
     }
 
@@ -457,35 +536,37 @@ public sealed class EditorStateService
             if (item.Interaction.TargetPageId == deletedPageId)
                 item.Interaction.TargetPageId = null;
         SelectedPageId = Document.Pages[Math.Clamp(index - 1, 0, Document.Pages.Count - 1)].Id;
-        SelectedElementId = null;
+        ClearSelectionCore();
         Notify();
     }
 
     public void DeleteSelected()
     {
-        var element = SelectedElement;
-        if (element is null || element.Locked) return;
+        var elements = SelectedElements.Where(element => !element.Locked).ToList();
+        if (elements.Count == 0) return;
         Capture();
-        var removedIds = new HashSet<Guid> { element.Id };
-        CurrentPage.Elements.Remove(element);
-        if (element is PublicationMediaElement)
-            _mediaAssets.Remove(element.Id);
-        if (element is not ConnectorElement)
+        var removedIds = elements.Select(element => element.Id).ToHashSet();
+        foreach (var element in elements)
         {
-            foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>()
-                         .Where(connector => connector.Source.ElementId == element.Id || connector.Target.ElementId == element.Id)
-                         .ToList())
-            {
-                removedIds.Add(connector.Id);
-                CurrentPage.Elements.Remove(connector);
-            }
+            CurrentPage.Elements.Remove(element);
+            if (element is PublicationMediaElement) _mediaAssets.Remove(element.Id);
         }
+
+        var removedObjectIds = elements.Where(element => element is not ConnectorElement).Select(element => element.Id).ToHashSet();
+        foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>()
+                     .Where(connector => removedObjectIds.Contains(connector.Source.ElementId) || removedObjectIds.Contains(connector.Target.ElementId))
+                     .ToList())
+        {
+            removedIds.Add(connector.Id);
+            CurrentPage.Elements.Remove(connector);
+        }
+
         foreach (var item in CurrentPage.Elements)
             if (item.Interaction.TargetElementId is { } targetId && removedIds.Contains(targetId))
                 item.Interaction.TargetElementId = null;
         ApplyNormalizedZOrder(OrderedElements());
         ReindexAnimations();
-        SelectedElementId = null;
+        ClearSelectionCore();
         CropMode = false;
         Notify();
     }
@@ -508,6 +589,7 @@ public sealed class EditorStateService
         Capture();
         var clone = CloneElement(source);
         clone.Id = Guid.NewGuid();
+        clone.GroupId = null;
         if (clone.Interaction.TargetElementId == source.Id) clone.Interaction.TargetElementId = clone.Id;
         else if (clone.Interaction.TargetElementId is { } targetId && CurrentPage.Elements.All(item => item.Id != targetId)) clone.Interaction.TargetElementId = null;
         if (clone.Interaction.TargetPageId is { } targetPageId && Document.Pages.All(page => page.Id != targetPageId)) clone.Interaction.TargetPageId = null;
@@ -518,7 +600,7 @@ public sealed class EditorStateService
         clone.ZIndex = NextZ();
         CurrentPage.Elements.Add(clone);
         ReindexAnimations();
-        SelectedElementId = clone.Id;
+        SetSelectionCore([clone.Id], clone.Id);
         Notify();
     }
 
@@ -529,6 +611,7 @@ public sealed class EditorStateService
         Capture();
         var clone = CloneElement(element);
         clone.Id = Guid.NewGuid();
+        clone.GroupId = null;
         if (clone.Interaction.TargetElementId == element.Id) clone.Interaction.TargetElementId = clone.Id;
         RenewAnimationIds(clone, preserveOrder: false);
         clone.Name = NextName(element.Name);
@@ -537,7 +620,7 @@ public sealed class EditorStateService
         clone.ZIndex = NextZ();
         CurrentPage.Elements.Add(clone);
         ReindexAnimations();
-        SelectedElementId = clone.Id;
+        SetSelectionCore([clone.Id], clone.Id);
         Notify();
     }
 
@@ -627,7 +710,7 @@ public sealed class EditorStateService
         owner.Animations.Add(clone);
         ReindexAnimations();
         EnsureTimelineDuration();
-        SelectedElementId = owner.Id;
+        SetSelectionCore([owner.Id], owner.Id);
         Notify();
         return clone;
     }
@@ -761,7 +844,7 @@ public sealed class EditorStateService
         }
         NormalizeMedia(media);
         EnsureTimelineDuration();
-        SelectedElementId = media.Id;
+        SetSelectionCore([media.Id], media.Id);
         Notify();
     }
 
@@ -803,6 +886,39 @@ public sealed class EditorStateService
             .DefaultIfEmpty(0)
             .Max();
         return Math.Clamp(Math.Max(CurrentPage.TimelineDurationSeconds, Math.Max(animationEnd, mediaEnd) + .5), 1, 3600);
+    }
+
+    public void CommitMove(Guid id, double x, double y, IReadOnlyCollection<Guid>? movingIds = null)
+    {
+        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == id);
+        if (element is null || element.Locked || element is ConnectorElement) return;
+        var requestedIds = movingIds is { Count: > 0 } ? movingIds.ToHashSet() : null;
+        var moving = (requestedIds is null
+                ? MovableSelectionFor(element)
+                : CurrentPage.Elements.Where(item => requestedIds.Contains(item.Id)))
+            .Where(item => !item.Locked && item is not ConnectorElement)
+            .DistinctBy(item => item.Id)
+            .ToList();
+        if (moving.All(item => item.Id != element.Id)) moving.Insert(0, element);
+        if (moving.Count == 0) return;
+
+        var requestedDx = x - element.X;
+        var requestedDy = y - element.Y;
+        var minDx = moving.Max(item => -item.Width + 2 - item.X);
+        var maxDx = moving.Min(item => CurrentPage.WidthMm - 2 - item.X);
+        var minDy = moving.Max(item => -item.Height + 2 - item.Y);
+        var maxDy = moving.Min(item => CurrentPage.HeightMm - 2 - item.Y);
+        var dx = Math.Clamp(requestedDx, minDx, maxDx);
+        var dy = Math.Clamp(requestedDy, minDy, maxDy);
+        if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
+
+        Capture();
+        foreach (var item in moving)
+        {
+            item.X += dx;
+            item.Y += dy;
+        }
+        Notify();
     }
 
     public void CommitBounds(Guid id, double x, double y, double width, double height)
@@ -1031,7 +1147,7 @@ public sealed class EditorStateService
         var selectedPageIndex = Math.Max(0, Document.Pages.FindIndex(p => p.Id == SelectedPageId));
         Document = _files.Deserialize(json);
         SelectedPageId = Document.Pages[Math.Min(selectedPageIndex, Document.Pages.Count - 1)].Id;
-        SelectedElementId = null;
+        ClearSelectionCore();
         CropMode = false;
         ConnectorTool = ConnectorToolKind.None;
         _liveEditKey = null;
@@ -1157,6 +1273,43 @@ public sealed class EditorStateService
 
     private int NextZ() => CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
     private string NextName(string basis) => $"{basis} {CurrentPage.Elements.Count + 1}";
+
+    private IEnumerable<PublicationElement> SelectionUnit(PublicationElement element)
+    {
+        if (element.GroupId is not { } groupId) return [element];
+        return CurrentPage.Elements.Where(item => item.GroupId == groupId);
+    }
+
+    private IEnumerable<PublicationElement> MovableSelectionFor(PublicationElement element)
+    {
+        if (_selectedElementIds.Contains(element.Id) && _selectedElementIds.Count > 1)
+            return SelectedElements;
+        return SelectionUnit(element);
+    }
+
+    private void SetSelectionCore(IEnumerable<Guid> ids, Guid? primary)
+    {
+        _selectedElementIds.Clear();
+        foreach (var id in ids)
+            if (CurrentPage.Elements.Any(element => element.Id == id))
+                _selectedElementIds.Add(id);
+        SelectedElementId = primary is { } value && _selectedElementIds.Contains(value)
+            ? value
+            : _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
+    }
+
+    private void ClearSelectionCore()
+    {
+        _selectedElementIds.Clear();
+        SelectedElementId = null;
+    }
+
+    private void PlaceAt(PublicationElement element, double? centerX, double? centerY)
+    {
+        if (centerX is null || centerY is null) return;
+        element.X = Math.Clamp(centerX.Value - element.Width / 2, -element.Width + 2, CurrentPage.WidthMm - 2);
+        element.Y = Math.Clamp(centerY.Value - element.Height / 2, -element.Height + 2, CurrentPage.HeightMm - 2);
+    }
 
     private void RemoveMediaAssets(PublicationDocument document)
     {

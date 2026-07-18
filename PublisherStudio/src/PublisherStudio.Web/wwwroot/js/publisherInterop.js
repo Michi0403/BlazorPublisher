@@ -47,10 +47,16 @@ function clearObjectAlignmentFeedback(state) {
     state.page.querySelectorAll('.publisher-object-alignment-overlay').forEach(element => element.remove());
 }
 
-function publicationObjectBounds(state, excludedId) {
+function publicationObjectBounds(state, excludedIds) {
+    const excluded = excludedIds instanceof Set ? excludedIds : new Set([excludedIds].filter(Boolean));
     return [...state.page.querySelectorAll('[data-publication-element][data-element-id]')]
-        .filter(element => element.dataset.elementId !== excludedId && !element.matches('[data-connector-id]') && !element.classList.contains('locked-hidden'))
-        .map(element => ({ element, ...elementMm(element, state.config.pxPerMm) }));
+        .filter(element => !excluded.has(element.dataset.elementId) && !element.matches('[data-connector-id]') && !element.classList.contains('locked-hidden'))
+        .map(element => ({
+            element,
+            id: element.dataset.elementId,
+            zIndex: number(element.style.zIndex),
+            ...elementMm(element, state.config.pxPerMm)
+        }));
 }
 
 function rectanglesOverlap(a, b) {
@@ -58,48 +64,158 @@ function rectanglesOverlap(a, b) {
         && Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y) > .15;
 }
 
+function overlapArea(a, b) {
+    const width = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x));
+    const height = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+    return width * height;
+}
+
+function rectangleGap(a, b) {
+    const horizontal = Math.max(b.x - (a.x + a.width), a.x - (b.x + b.width), 0);
+    const vertical = Math.max(b.y - (a.y + a.height), a.y - (b.y + b.height), 0);
+    return Math.hypot(horizontal, vertical);
+}
+
+function internalSnapFractions(size, pxPerMm) {
+    const pixels = size * pxPerMm;
+    const step = pixels >= 520 ? .05 : pixels >= 260 ? .1 : .25;
+    const values = new Set([0, .25, .5, .75, 1]);
+    for (let value = 0; value <= 1.0001; value += step) values.add(Math.round(value * 1000) / 1000);
+    return [...values].sort((a, b) => a - b);
+}
+
+function chooseInternalTarget(targets, moving, nearTolerance) {
+    const overlapping = targets
+        .map(target => ({ target, area: overlapArea(moving, target) }))
+        .filter(item => item.area > .15)
+        .sort((a, b) => b.target.zIndex - a.target.zIndex || b.area - a.area);
+    if (overlapping.length) return overlapping[0].target;
+
+    return targets
+        .map(target => ({ target, distance: rectangleGap(moving, target) }))
+        .filter(item => item.distance <= nearTolerance)
+        .sort((a, b) => a.distance - b.distance || b.target.zIndex - a.target.zIndex)[0]?.target || null;
+}
+
+function sourceAnchors(size, grab, extraOffsets = []) {
+    const offsets = new Set([0, size / 2, size, ...extraOffsets].map(value => Math.round(value * 10000) / 10000));
+    return [...offsets]
+        .filter(offset => offset >= -.0001 && offset <= size + .0001)
+        .map(offset => {
+            const fraction = size > 0 ? offset / size : .5;
+            return { offset, fraction, penalty: Math.abs(grab - fraction) };
+        });
+}
+
+function movingAnchorOffsets(operation, axis) {
+    const bounds = operation.movingBounds;
+    if (!bounds || !operation.moving?.length) return [];
+    const origin = axis === 'x' ? bounds.x : bounds.y;
+    return operation.moving.flatMap(item => {
+        const start = (axis === 'x' ? item.x : item.y) - origin;
+        const size = axis === 'x' ? item.width : item.height;
+        return [start, start + size / 2, start + size];
+    });
+}
+
+function snapCandidate(mode, axis, target, destination, source, rawStart, tolerance, percent = null) {
+    const delta = destination - (rawStart + source.offset);
+    if (Math.abs(delta) > tolerance) return null;
+    return {
+        mode,
+        axis,
+        delta,
+        line: destination,
+        target,
+        percent,
+        sourcePercent: source.fraction,
+        score: Math.abs(delta) + source.penalty * tolerance * .7,
+        key: `${mode}:${axis}:${target.id}:${destination.toFixed(4)}:${source.fraction}`
+    };
+}
+
+function pickSnapCandidate(candidates, previous, tolerance, releaseTolerance) {
+    const valid = candidates.filter(Boolean);
+    if (previous?.key) {
+        const locked = valid.find(candidate => candidate.key === previous.key && Math.abs(candidate.delta) <= releaseTolerance);
+        if (locked) return locked;
+    }
+    return valid.filter(candidate => Math.abs(candidate.delta) <= tolerance).sort((a, b) => a.score - b.score)[0] || null;
+}
+
 function objectSnapResult(state, operation, x, y, width, height) {
-    const targets = publicationObjectBounds(state, operation.id);
+    const targets = publicationObjectBounds(state, operation.movingIds || operation.id);
     const tolerance = 7 / state.config.pxPerMm;
+    const releaseTolerance = 11 / state.config.pxPerMm;
     const nearTolerance = tolerance * 2.2;
-    let bestX = null;
-    let bestY = null;
-    for (const target of targets) {
-        const movingX = [x, x + width / 2, x + width];
-        const targetX = [target.x, target.x + target.width / 2, target.x + target.width];
-        for (const source of movingX) for (const destination of targetX) {
-            const delta = destination - source;
-            if (Math.abs(delta) <= tolerance && (!bestX || Math.abs(delta) < Math.abs(bestX.delta))) bestX = { delta, line: destination, target };
-        }
-        const movingY = [y, y + height / 2, y + height];
-        const targetY = [target.y, target.y + target.height / 2, target.y + target.height];
-        for (const source of movingY) for (const destination of targetY) {
-            const delta = destination - source;
-            if (Math.abs(delta) <= tolerance && (!bestY || Math.abs(delta) < Math.abs(bestY.delta))) bestY = { delta, line: destination, target };
+    const moving = { x, y, width, height };
+    const xSources = sourceAnchors(width, operation.grabGroupX ?? .5, movingAnchorOffsets(operation, 'x'));
+    const ySources = sourceAnchors(height, operation.grabGroupY ?? .5, movingAnchorOffsets(operation, 'y'));
+    const xCandidates = [];
+    const yCandidates = [];
+
+    if (state.config.snapToObjects) {
+        for (const target of targets) {
+            for (const source of xSources) {
+                for (const destination of [target.x, target.x + target.width / 2, target.x + target.width])
+                    xCandidates.push(snapCandidate('object', 'x', target, destination, source, x, releaseTolerance));
+            }
+            for (const source of ySources) {
+                for (const destination of [target.y, target.y + target.height / 2, target.y + target.height])
+                    yCandidates.push(snapCandidate('object', 'y', target, destination, source, y, releaseTolerance));
+            }
         }
     }
+
+    const internalTarget = state.config.snapInObjects ? chooseInternalTarget(targets, moving, nearTolerance) : null;
+    if (internalTarget) {
+        const xFractions = internalSnapFractions(internalTarget.width, state.config.pxPerMm);
+        const yFractions = internalSnapFractions(internalTarget.height, state.config.pxPerMm);
+        for (const source of xSources) {
+            for (const fraction of xFractions) {
+                const destination = internalTarget.x + internalTarget.width * fraction;
+                xCandidates.push(snapCandidate('inside', 'x', internalTarget, destination, source, x, releaseTolerance, fraction));
+            }
+        }
+        for (const source of ySources) {
+            for (const fraction of yFractions) {
+                const destination = internalTarget.y + internalTarget.height * fraction;
+                yCandidates.push(snapCandidate('inside', 'y', internalTarget, destination, source, y, releaseTolerance, fraction));
+            }
+        }
+    }
+
+    const bestX = pickSnapCandidate(xCandidates, operation.snapLockX, tolerance, releaseTolerance);
+    const bestY = pickSnapCandidate(yCandidates, operation.snapLockY, tolerance, releaseTolerance);
+    operation.snapLockX = bestX;
+    operation.snapLockY = bestY;
     if (bestX) x += bestX.delta;
     if (bestY) y += bestY.delta;
+
     const moved = { x, y, width, height };
-    const collisions = targets.filter(target => rectanglesOverlap(moved, target));
+    const intentionalTargetIds = new Set([
+        internalTarget?.id,
+        ...[bestX, bestY]
+            .filter(candidate => candidate?.mode === 'inside')
+            .map(candidate => candidate.target.id)
+    ].filter(Boolean));
+    const collisions = targets.filter(target => !intentionalTargetIds.has(target.id) && rectanglesOverlap(moved, target));
     const alignedTargets = new Set([bestX?.target, bestY?.target].filter(Boolean));
     let nearTarget = null;
     let nearestDistance = Infinity;
     for (const target of targets) {
-        const horizontalGap = Math.max(target.x - (x + width), x - (target.x + target.width), 0);
-        const verticalGap = Math.max(target.y - (y + height), y - (target.y + target.height), 0);
-        const distance = Math.hypot(horizontalGap, verticalGap);
+        const distance = rectangleGap(moved, target);
         if (distance < nearestDistance) { nearestDistance = distance; nearTarget = target; }
     }
     const status = collisions.length ? 'red' : (bestX || bestY) ? 'green' : nearestDistance <= nearTolerance ? 'orange' : null;
-    return { x, y, width, height, bestX, bestY, collisions, alignedTargets, nearTarget, status };
+    return { x, y, width, height, bestX, bestY, collisions, alignedTargets, nearTarget, internalTarget, status };
 }
 
 function showObjectAlignmentFeedback(state, operation, result) {
     clearObjectAlignmentFeedback(state);
     if (!result?.status) return;
-    const operationElement = refreshOperationElement(state, operation);
-    operationElement?.classList.add(`alignment-moving-${result.status}`);
+    for (const moving of operation.moving || []) moving.element?.classList.add(`alignment-moving-${result.status}`);
+    if (!operation.moving?.length) refreshOperationElement(state, operation)?.classList.add(`alignment-moving-${result.status}`);
     const highlighted = result.status === 'red' ? result.collisions : result.status === 'green' ? [...result.alignedTargets] : [result.nearTarget].filter(Boolean);
     highlighted.forEach(target => target?.element?.classList.add(`alignment-target-${result.status}`));
     const overlay = document.createElement('div');
@@ -107,13 +223,13 @@ function showObjectAlignmentFeedback(state, operation, result) {
     overlay.setAttribute('aria-hidden', 'true');
     if (result.bestX) {
         const line = document.createElement('i');
-        line.className = 'publisher-object-alignment-line vertical';
+        line.className = `publisher-object-alignment-line vertical ${result.bestX.mode === 'inside' ? 'inside' : ''}`;
         line.style.left = `${result.bestX.line * state.config.pxPerMm}px`;
         overlay.appendChild(line);
     }
     if (result.bestY) {
         const line = document.createElement('i');
-        line.className = 'publisher-object-alignment-line horizontal';
+        line.className = `publisher-object-alignment-line horizontal ${result.bestY.mode === 'inside' ? 'inside' : ''}`;
         line.style.top = `${result.bestY.line * state.config.pxPerMm}px`;
         overlay.appendChild(line);
     }
@@ -122,6 +238,16 @@ function showObjectAlignmentFeedback(state, operation, result) {
     crosshair.style.left = `${(result.x + result.width / 2) * state.config.pxPerMm}px`;
     crosshair.style.top = `${(result.y + result.height / 2) * state.config.pxPerMm}px`;
     overlay.appendChild(crosshair);
+
+    const internal = [result.bestX, result.bestY].filter(candidate => candidate?.mode === 'inside');
+    if (internal.length) {
+        const label = document.createElement('span');
+        label.className = 'publisher-object-alignment-label';
+        label.textContent = internal.map(candidate => `${candidate.axis.toUpperCase()} ${Math.round(candidate.percent * 100)}%`).join(' · ');
+        label.style.left = `${(result.x + result.width / 2) * state.config.pxPerMm}px`;
+        label.style.top = `${Math.max(0, result.y * state.config.pxPerMm - 26)}px`;
+        overlay.appendChild(label);
+    }
     state.page.appendChild(overlay);
 }
 
@@ -138,12 +264,88 @@ function resetPointerOperation(state, restoreDom = false) {
         return;
     }
     if (!restoreDom || !operation.id) return;
-    const element = state.page?.querySelector?.(`[data-element-id="${CSS.escape(operation.id)}"]`);
-    if (!element) return;
-    element.style.left = `${operation.x * state.config.pxPerMm}px`;
-    element.style.top = `${operation.y * state.config.pxPerMm}px`;
-    element.style.width = `${operation.width * state.config.pxPerMm}px`;
-    element.style.height = `${operation.height * state.config.pxPerMm}px`;
+    const moving = operation.moving?.length ? operation.moving : [{ id: operation.id, x: operation.x, y: operation.y, width: operation.width, height: operation.height }];
+    for (const item of moving) {
+        const element = state.page?.querySelector?.(`[data-element-id="${CSS.escape(item.id)}"]`);
+        if (!element) continue;
+        element.style.left = `${item.x * state.config.pxPerMm}px`;
+        element.style.top = `${item.y * state.config.pxPerMm}px`;
+        element.style.width = `${item.width * state.config.pxPerMm}px`;
+        element.style.height = `${item.height * state.config.pxPerMm}px`;
+        updateAttachedConnectors(state, item.id);
+    }
+}
+
+function insertionKindFromEvent(state, event) {
+    return event.dataTransfer?.getData('application/x-publisher-insert')
+        || event.dataTransfer?.getData('text/x-publisher-insert')
+        || String(state?.insertDragSource?.dataset?.publisherInsert || '');
+}
+
+function insertionDragStart(state, event) {
+    const source = event.target?.closest?.('[data-publisher-insert]');
+    if (!source || !event.dataTransfer) return;
+    const kind = String(source.dataset.publisherInsert || '').trim().toLowerCase();
+    if (!kind) return;
+    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.setData('application/x-publisher-insert', kind);
+    event.dataTransfer.setData('text/x-publisher-insert', kind);
+    source.classList.add('dragging');
+    state.insertDragSource = source;
+}
+
+function clearInsertionDrag(state) {
+    state?.insertDragSource?.classList?.remove('dragging');
+    state.insertDragSource = null;
+    state?.page?.classList?.remove('insert-drop-target');
+}
+
+function insertionDragEnd(state) {
+    state.suppressInsertClickUntil = performance.now() + 350;
+    clearInsertionDrag(state);
+}
+
+function suppressInsertionClick(state, event) {
+    if (performance.now() > number(state?.suppressInsertClickUntil)) return;
+    if (!event.target?.closest?.('[data-publisher-insert]')) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+}
+
+function insertionDragOver(state, event) {
+    const kind = insertionKindFromEvent(state, event);
+    if (!kind || !state.page?.isConnected) return;
+    const rect = state.page.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) {
+        state.page.classList.remove('insert-drop-target');
+        return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    state.page.classList.add('insert-drop-target');
+}
+
+function insertionDrop(state, event) {
+    const kind = insertionKindFromEvent(state, event);
+    if (!kind || !state.page?.isConnected) return;
+    const rect = state.page.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) return;
+    event.preventDefault();
+    const x = clamp((event.clientX - rect.left) / state.config.pxPerMm, 0, number(state.page.dataset.pageWidthMm));
+    const y = clamp((event.clientY - rect.top) / state.config.pxPerMm, 0, number(state.page.dataset.pageHeightMm));
+    state.suppressInsertClickUntil = performance.now() + 350;
+    clearInsertionDrag(state);
+    if (kind === 'picture') {
+        const input = document.getElementById('picture-file-input');
+        if (input instanceof HTMLInputElement && input.type === 'file') {
+            input.value = '';
+            input.dataset.publisherDropX = String(x);
+            input.dataset.publisherDropY = String(y);
+            input.click();
+            return;
+        }
+    }
+    safeDotNet(state, 'DropInsert', kind, x, y);
 }
 
 export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) {
@@ -161,6 +363,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         snapToGuides: Boolean(config?.snapToGuides),
         snapToPage: Boolean(config?.snapToPage),
         snapToObjects: Boolean(config?.snapToObjects),
+        snapInObjects: Boolean(config?.snapInObjects),
         gridSpacingMm: Math.max(.1, number(config?.gridSpacingMm, 2.5)),
         connectorTool: String(config?.connectorTool || 'None')
     };
@@ -207,6 +410,11 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         };
         handlers.stageWheel = event => cropWheel(state, event);
         handlers.stageKeyDown = event => canvasKeyDown(state, event);
+        handlers.stageDragOver = event => insertionDragOver(state, event);
+        handlers.stageDrop = event => insertionDrop(state, event);
+        handlers.documentDragStart = event => insertionDragStart(state, event);
+        handlers.documentDragEnd = () => insertionDragEnd(state);
+        handlers.documentClick = event => suppressInsertionClick(state, event);
         handlers.scroll = () => nextAnimationFrame(state);
 
         stage.addEventListener('pointerdown', handlers.stagePointerDown);
@@ -222,6 +430,11 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         stage.addEventListener('pointerleave', handlers.stagePointerLeave);
         stage.addEventListener('wheel', handlers.stageWheel, { passive: false });
         stage.addEventListener('keydown', handlers.stageKeyDown);
+        stage.addEventListener('dragover', handlers.stageDragOver);
+        stage.addEventListener('drop', handlers.stageDrop);
+        document.addEventListener('dragstart', handlers.documentDragStart, true);
+        document.addEventListener('dragend', handlers.documentDragEnd, true);
+        document.addEventListener('click', handlers.documentClick, true);
         scroll.addEventListener('scroll', handlers.scroll, { passive: true });
 
         if (typeof ResizeObserver === 'function') {
@@ -254,6 +467,7 @@ export function disposeCanvas(stageId) {
 
     resetPointerOperation(state, true);
     clearObjectAlignmentFeedback(state);
+    clearInsertionDrag(state);
     state.resizeObserver?.disconnect?.();
     for (const timer of state.cropTimers?.values?.() || []) clearTimeout(timer);
     state.cropTimers?.clear?.();
@@ -267,6 +481,11 @@ export function disposeCanvas(stageId) {
     stage.removeEventListener('pointerleave', handlers.stagePointerLeave);
     stage.removeEventListener('wheel', handlers.stageWheel);
     stage.removeEventListener('keydown', handlers.stageKeyDown);
+    stage.removeEventListener('dragover', handlers.stageDragOver);
+    stage.removeEventListener('drop', handlers.stageDrop);
+    document.removeEventListener('dragstart', handlers.documentDragStart, true);
+    document.removeEventListener('dragend', handlers.documentDragEnd, true);
+    document.removeEventListener('click', handlers.documentClick, true);
     state.scroll?.removeEventListener?.('scroll', handlers.scroll);
     window.removeEventListener('pointerdown', handlers.windowPointerDown, true);
     window.removeEventListener('pointerup', handlers.windowPointerUp, true);
@@ -534,6 +753,43 @@ function mediaPointerTargetsControls(event) {
     return relativeY >= rect.height - controlBand;
 }
 
+function selectionNodes(state) {
+    return [...state.page.querySelectorAll('[data-publication-element][data-element-id]:not([data-connector-id])')];
+}
+
+function selectionUnitNodes(state, element) {
+    const groupId = String(element.dataset.groupId || '').trim();
+    if (!groupId) return [element];
+    return selectionNodes(state).filter(item => item.dataset.groupId === groupId);
+}
+
+function movingNodesForPointer(state, element, additive, wasSelected) {
+    const selected = selectionNodes(state).filter(item => item.dataset.selected === 'true' || item.classList.contains('selected'));
+    const unit = selectionUnitNodes(state, element);
+    if (!additive) return wasSelected && selected.length ? selected : unit;
+    if (wasSelected) return selected.length ? selected : unit;
+    const result = [...selected];
+    for (const item of unit) if (!result.includes(item)) result.push(item);
+    return result;
+}
+
+function movingBounds(items) {
+    if (!items.length) return { x: 0, y: 0, width: 0, height: 0 };
+    const left = Math.min(...items.map(item => item.x));
+    const top = Math.min(...items.map(item => item.y));
+    const right = Math.max(...items.map(item => item.x + item.width));
+    const bottom = Math.max(...items.map(item => item.y + item.height));
+    return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
+function refreshMovingElements(state, operation) {
+    if (!operation?.moving) return;
+    for (const item of operation.moving) {
+        const current = state.page.querySelector(`[data-element-id="${CSS.escape(item.id)}"]`);
+        if (current) item.element = current;
+    }
+}
+
 function registerCanvasClick(state, operation, event) {
     if (!operation?.id || operation.kind === 'resize' || operation.kind?.startsWith('connector-')) return;
     const now = performance.now();
@@ -626,7 +882,8 @@ function pointerDown(state, event) {
     }
 
     const id = element.dataset.elementId;
-    const wasSelected = element.classList.contains('selected');
+    const wasSelected = element.dataset.selected === 'true' || element.classList.contains('selected');
+    const additive = Boolean(event.ctrlKey || event.metaKey || event.shiftKey);
     const activeConnectorTool = connectorToolActive(state);
     if (activeConnectorTool) {
         // Connector mode owns the canvas until the user completes it or presses Esc.
@@ -634,13 +891,22 @@ function pointerDown(state, event) {
         event.preventDefault();
         return;
     }
-    if (!wasSelected) safeDotNet(state, 'SelectElement', id);
+    const pendingToggle = additive && wasSelected;
+    if (!pendingToggle && (!wasSelected || additive)) safeDotNet(state, 'SelectElement', id, additive);
     if (element.classList.contains('locked')) return;
     if (element.matches('[data-connector-id]')) return;
 
     const handle = event.target.closest('[data-resize-handle]');
     const image = element.querySelector('img');
     const bounds = elementMm(element, state.config.pxPerMm);
+    const moving = movingNodesForPointer(state, element, additive, wasSelected)
+        .filter(item => !item.classList.contains('locked') && !item.matches('[data-connector-id]'))
+        .map(item => ({ id: item.dataset.elementId, element: item, ...elementMm(item, state.config.pxPerMm) }));
+    if (!moving.some(item => item.id === id)) moving.unshift({ id, element, ...bounds });
+    const groupBounds = movingBounds(moving);
+    const pageRect = state.page.getBoundingClientRect();
+    const pointerX = (event.clientX - pageRect.left) / state.config.pxPerMm;
+    const pointerY = (event.clientY - pageRect.top) / state.config.pxPerMm;
     const base = {
         id,
         element,
@@ -649,6 +915,13 @@ function pointerDown(state, event) {
         startY: event.clientY,
         moved: false,
         wasSelected,
+        additive,
+        pendingToggle,
+        moving,
+        movingIds: new Set(moving.map(item => item.id)),
+        movingBounds: groupBounds,
+        grabGroupX: groupBounds.width > 0 ? clamp((pointerX - groupBounds.x) / groupBounds.width, 0, 1) : .5,
+        grabGroupY: groupBounds.height > 0 ? clamp((pointerY - groupBounds.y) / groupBounds.height, 0, 1) : .5,
         ...bounds
     };
 
@@ -656,6 +929,8 @@ function pointerDown(state, event) {
         state.operation = {
             ...base,
             kind: 'crop',
+            moving: [{ id, element, ...bounds }],
+            movingIds: new Set([id]),
             image,
             cropX: number(image.dataset.cropX),
             cropY: number(image.dataset.cropY),
@@ -665,7 +940,7 @@ function pointerDown(state, event) {
             flipY: number(image.dataset.flipY, 1)
         };
     } else if (handle) {
-        state.operation = { ...base, kind: 'resize', handle: handle.dataset.resizeHandle };
+        state.operation = { ...base, kind: 'resize', moving: [{ id, element, ...bounds }], movingIds: new Set([id]), handle: handle.dataset.resizeHandle };
     } else {
         state.operation = { ...base, kind: 'move' };
     }
@@ -745,28 +1020,45 @@ function pointerMove(state, event) {
     let height = operation.height;
 
     if (operation.kind === 'move') {
-        x = snapAxis(operation.x + dx, operation.width, pageWidth, verticalGuides, state.config);
-        y = snapAxis(operation.y + dy, operation.height, pageHeight, horizontalGuides, state.config);
-        if (state.config.snapToObjects) {
-            const snapped = objectSnapResult(state, operation, x, y, width, height);
-            x = snapped.x;
-            y = snapped.y;
+        const initialBounds = operation.movingBounds ?? { x: operation.x, y: operation.y, width: operation.width, height: operation.height };
+        let groupX = snapAxis(initialBounds.x + dx, initialBounds.width, pageWidth, verticalGuides, state.config);
+        let groupY = snapAxis(initialBounds.y + dy, initialBounds.height, pageHeight, horizontalGuides, state.config);
+        if (state.config.snapToObjects || state.config.snapInObjects) {
+            const snapped = objectSnapResult(state, operation, groupX, groupY, initialBounds.width, initialBounds.height);
+            groupX = snapped.x;
+            groupY = snapped.y;
             showObjectAlignmentFeedback(state, operation, snapped);
         } else {
             clearObjectAlignmentFeedback(state);
         }
-    } else {
-        const handle = operation.handle;
-        if (handle.includes('e')) width = Math.max(2, snapSize(operation.width + dx, state.config));
-        if (handle.includes('s')) height = Math.max(2, snapSize(operation.height + dy, state.config));
-        if (handle.includes('w')) {
-            x = snapCoordinate(operation.x + dx, verticalGuides, state.config);
-            width = Math.max(2, operation.width - (x - operation.x));
+
+        const translateX = groupX - initialBounds.x;
+        const translateY = groupY - initialBounds.y;
+        x = operation.x + translateX;
+        y = operation.y + translateY;
+        operation.current = { x, y, width, height };
+        operation.currentDelta = { x: translateX, y: translateY };
+        refreshMovingElements(state, operation);
+        for (const item of operation.moving || []) {
+            if (!item.element) continue;
+            item.element.style.left = `${(item.x + translateX) * state.config.pxPerMm}px`;
+            item.element.style.top = `${(item.y + translateY) * state.config.pxPerMm}px`;
+            updateAttachedConnectors(state, item.id);
         }
-        if (handle.includes('n')) {
-            y = snapCoordinate(operation.y + dy, horizontalGuides, state.config);
-            height = Math.max(2, operation.height - (y - operation.y));
-        }
+        event.preventDefault();
+        return;
+    }
+
+    const handle = operation.handle;
+    if (handle.includes('e')) width = Math.max(2, snapSize(operation.width + dx, state.config));
+    if (handle.includes('s')) height = Math.max(2, snapSize(operation.height + dy, state.config));
+    if (handle.includes('w')) {
+        x = snapCoordinate(operation.x + dx, verticalGuides, state.config);
+        width = Math.max(2, operation.width - (x - operation.x));
+    }
+    if (handle.includes('n')) {
+        y = snapCoordinate(operation.y + dy, horizontalGuides, state.config);
+        height = Math.max(2, operation.height - (y - operation.y));
     }
 
     operation.current = { x, y, width, height };
@@ -849,6 +1141,13 @@ function pointerUp(state, event) {
     }
 
     if (!operation.moved) {
+        if (operation.additive) {
+            if (operation.pendingToggle) safeDotNet(state, 'SelectElement', operation.id, true);
+            state.lastCanvasClick = null;
+            return;
+        }
+        if (operation.wasSelected && (operation.moving?.length || 0) > 1)
+            safeDotNet(state, 'SelectElement', operation.id, false);
         registerCanvasClick(state, operation, event);
         return;
     }
@@ -861,6 +1160,9 @@ function pointerUp(state, event) {
             operation.currentCropX ?? operation.cropX,
             operation.currentCropY ?? operation.cropY,
             operation.cropScale);
+    } else if (operation.kind === 'move') {
+        const value = operation.current ?? { x: operation.x, y: operation.y };
+        safeDotNet(state, 'CommitMove', operation.id, value.x, value.y, [...(operation.movingIds || [])]);
     } else {
         const value = operation.current ?? { x: operation.x, y: operation.y, width: operation.width, height: operation.height };
         safeDotNet(state, 'CommitBounds', operation.id, value.x, value.y, value.width, value.height);
@@ -3473,8 +3775,22 @@ export function cancelCanvasInteraction(stageId = 'publisher-stage') {
 export function clickElementById(id) {
     const element = document.getElementById(id);
     if (!element) throw new Error(`Element '${id}' is not available.`);
-    if (element instanceof HTMLInputElement && element.type === 'file') element.value = '';
+    if (element instanceof HTMLInputElement && element.type === 'file') {
+        element.value = '';
+        delete element.dataset.publisherDropX;
+        delete element.dataset.publisherDropY;
+    }
     element.click();
+}
+
+export function consumeCanvasInsertPlacement(id) {
+    const element = document.getElementById(id);
+    if (!(element instanceof HTMLInputElement)) return null;
+    const x = Number.parseFloat(element.dataset.publisherDropX || '');
+    const y = Number.parseFloat(element.dataset.publisherDropY || '');
+    delete element.dataset.publisherDropX;
+    delete element.dataset.publisherDropY;
+    return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : null;
 }
 
 window.publisherStudio = {
@@ -3484,6 +3800,7 @@ window.publisherStudio = {
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
 
     clickElement(id) { clickElementById(id); },
+    consumeCanvasInsertPlacement(id) { return consumeCanvasInsertPlacement(id); },
 
     initializeWorkspace(id) {
         const workspace = document.getElementById(id);

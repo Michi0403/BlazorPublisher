@@ -46,6 +46,8 @@
                 <DxRibbonItem Text="Vertical middle" Enabled="CanAlign" Click="AlignMiddle" />
                 <DxRibbonItem Text="Bottom" Enabled="CanAlign" Click="AlignBottom" />
             </DxRibbonItem>
+            <DxRibbonItem Text="Group" Enabled="State.CanGroupSelection" Click="GroupSelected" />
+            <DxRibbonItem Text="Ungroup" Enabled="State.CanUngroupSelection" Click="UngroupSelected" />
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -200,6 +202,7 @@
                 <DxRibbonItem Text="@SnapGuidesText" Click="ToggleSnapGuides" />
                 <DxRibbonItem Text="@SnapPageText" Click="ToggleSnapPage" />
                 <DxRibbonItem Text="@SnapObjectsText" Click="ToggleSnapObjects" />
+                <DxRibbonItem Text="@SnapInObjectsText" Click="ToggleSnapInObjects" />
             </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Zoom" IconCssClass="pub-icon pub-icon-zoom">
@@ -426,6 +429,7 @@
     private string SnapGuidesText => CheckText(State.Document.View.SnapToGuides, "Snap to guides");
     private string SnapPageText => CheckText(State.Document.View.SnapToPage, "Snap to page");
     private string SnapObjectsText => CheckText(State.Document.View.SnapToObjects, "Snap to objects");
+    private string SnapInObjectsText => CheckText(State.Document.View.SnapInObjects, "Snap in objects");
     private string TimelinePaneText => CheckText(TimelineVisible, "Timeline pane");
     private static string CheckText(bool value, string text) => value ? $"✓ {text}" : text;
 
@@ -461,8 +465,8 @@
     private Task RequestPreviewObjectAnimations() => OnPreviewObjectAnimations.InvokeAsync();
     private Task RequestStopAnimations() => OnStopAnimations.InvokeAsync();
 
-    private bool HasSelection => State.SelectedElement is not null;
-    private bool CanExportSelection => State.SelectedElement is not null and not ConnectorElement;
+    private bool HasSelection => State.SelectedElements.Count > 0;
+    private bool CanExportSelection => State.SelectedElements.Count == 1 && State.SelectedElement is not null and not ConnectorElement;
     private bool CanAlign => State.SelectedElement is not null and not ConnectorElement;
     private bool IsImageSelected => State.SelectedElement is ImageFrameElement;
     private bool IsTextSelected => State.SelectedElement is TextFrameElement;
@@ -497,6 +501,8 @@
     private void Paste() => State.Paste();
     private void Duplicate() => State.DuplicateSelected();
     private void Delete() => State.DeleteSelected();
+    private void GroupSelected() => State.GroupSelected();
+    private void UngroupSelected() => State.UngroupSelected();
     private void BringToFront() => State.BringToFront();
     private void BringForward() => State.BringForward();
     private void SendBackward() => State.SendBackward();
@@ -578,6 +584,7 @@
     private void ToggleSnapGuides() => State.SetViewOption(view => view.SnapToGuides = !view.SnapToGuides);
     private void ToggleSnapPage() => State.SetViewOption(view => view.SnapToPage = !view.SnapToPage);
     private void ToggleSnapObjects() => State.SetViewOption(view => view.SnapToObjects = !view.SnapToObjects);
+    private void ToggleSnapInObjects() => State.SetViewOption(view => view.SnapInObjects = !view.SnapInObjects);
     private void UnitMillimeter() => State.SetRulerUnit(MeasurementUnit.Millimeter);
     private void UnitCentimeter() => State.SetRulerUnit(MeasurementUnit.Centimeter);
     private void UnitInch() => State.SetRulerUnit(MeasurementUnit.Inch);

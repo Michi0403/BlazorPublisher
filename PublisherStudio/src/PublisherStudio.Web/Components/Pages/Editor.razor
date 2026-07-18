@@ -50,6 +50,14 @@
                        OnPreviewObjectAnimations="PreviewObjectAnimations"
                        OnStopAnimations="StopAnimations" />
 
+    <div class="publisher-quick-insert" aria-label="Drag objects onto the publication page">
+        <span>Drag to canvas</span>
+        <button type="button" draggable="true" data-publisher-insert="text" title="Drag a text box to an exact position, or click to insert" @onclick="AddTextQuick"><i class="pub-icon pub-icon-text"></i>Text</button>
+        <button type="button" draggable="true" data-publisher-insert="picture" title="Drag to choose and place a picture, or click to insert" @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>Picture</button>
+        <button type="button" draggable="true" data-publisher-insert="video" title="Drag to create or import and place a video, or click to insert" @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>Video</button>
+        <small>Ctrl/Shift-click objects for multi-selection</small>
+    </div>
+
     <div id="publisher-workspace" class="editor-workspace @(_timelineVisible ? "timeline-open" : null)">
         <PageNavigator State="State" TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
@@ -57,7 +65,7 @@
                      RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
                      RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia"
                      RequestInsertBarcode="InsertBarcode" RequestEditBarcode="EditBarcode"
-                     TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
+                     TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" RequestCanvasInsert="HandleCanvasInsert" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
         <InspectorPanel State="State"
                         OnEditStory="OpenStoryEditor"
@@ -172,12 +180,15 @@
     private PictureDocument? _pictureEditorInitialDocument;
     private string? _pictureEditorInitialRaster;
     private string _pictureEditorInitialName = "Picture";
+    private CanvasInsertRequest? _pendingCanvasInsert;
     private bool _workspaceInitialized;
     private string? _error;
     private string? _notice;
     private string SelectionStatus => State.ConnectorTool != ConnectorToolKind.None
         ? $"{State.ConnectorTool} connector tool — drag from one object port to another; Esc cancels"
-        : State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
+        : State.SelectedElements.Count > 1
+            ? $"{State.SelectedElements.Count} objects selected{(State.SelectedElements.Any(item => item.GroupId is not null) ? " · grouped" : string.Empty)}"
+            : State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
 
     protected override void OnInitialized() => State.Changed += StateChanged;
 
@@ -192,6 +203,31 @@
 
     private void StateChanged() => InvokeAsync(StateHasChanged);
     private void NewDocument() => State.NewDocument();
+    private void AddTextQuick() => State.AddText();
+
+    private async Task HandleCanvasInsert(CanvasInsertRequest request)
+    {
+        var kind = request.Kind.Trim().ToLowerInvariant();
+        if (kind == "text")
+        {
+            State.AddText(request.X, request.Y);
+            return;
+        }
+
+        _pendingCanvasInsert = request with { Kind = kind };
+        if (kind == "picture")
+        {
+            await CancelPublisherPointerAsync();
+            await OpenHiddenFileInput("picture-file-input");
+            return;
+        }
+        if (kind == "video")
+        {
+            await OpenMediaStudio(PublicationElementKind.Video, null);
+            return;
+        }
+        _pendingCanvasInsert = null;
+    }
     private async Task OpenPublicationPicker()
     {
         await CancelPublisherPointerAsync();
@@ -199,10 +235,15 @@
     }
     private async Task OpenPicturePicker()
     {
+        _pendingCanvasInsert = null;
         await CancelPublisherPointerAsync();
         await OpenHiddenFileInput("picture-file-input");
     }
-    private Task OpenVideoPicker() => OpenMediaStudio(PublicationElementKind.Video, null);
+    private Task OpenVideoPicker()
+    {
+        _pendingCanvasInsert = null;
+        return OpenMediaStudio(PublicationElementKind.Video, null);
+    }
     private async Task OpenAudioPicker()
     {
         await CancelPublisherPointerAsync();
@@ -396,7 +437,26 @@
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
             var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
-            if (State.SelectedElement is ImageFrameElement image)
+            double[]? dropPlacement = null;
+            try
+            {
+                dropPlacement = await JS.InvokeAsync<double[]?>("publisherStudio.consumeCanvasInsertPlacement", "picture-file-input");
+            }
+            catch (JSException)
+            {
+                // A cached pre-v1.0.11 script must not block normal picture insertion.
+            }
+            if (dropPlacement is { Length: >= 2 })
+            {
+                State.AddImage(dataUrl, file.Name, centerX: dropPlacement[0], centerY: dropPlacement[1]);
+                _pendingCanvasInsert = null;
+            }
+            else if (_pendingCanvasInsert is { Kind: "picture" } placement)
+            {
+                State.AddImage(dataUrl, file.Name, centerX: placement.X, centerY: placement.Y);
+                _pendingCanvasInsert = null;
+            }
+            else if (State.SelectedElement is ImageFrameElement image)
             {
                 State.UpdateSelected(_ =>
                 {
@@ -417,6 +477,7 @@
         }
         catch (Exception ex)
         {
+            _pendingCanvasInsert = null;
             ShowError(ex);
         }
     }
@@ -573,7 +634,9 @@
             }
             else if (result.Kind == PublicationElementKind.Video)
             {
-                media = State.AddVideo(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.PosterDataUrl);
+                media = _pendingCanvasInsert is { Kind: "video" } placement
+                    ? State.AddVideo(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.PosterDataUrl, placement.X, placement.Y)
+                    : State.AddVideo(result.DataUrl, result.MimeType, result.Name, result.DurationSeconds, result.PosterDataUrl);
                 State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
             }
             else
@@ -588,6 +651,7 @@
             _mediaStudioVisible = false;
             _mediaStudioTargetId = null;
             _mediaStudioInitial = null;
+            _pendingCanvasInsert = null;
             _timelineVisible = true;
             ShowNotice($"{(result.Kind == PublicationElementKind.Video ? "Video" : "Audio")} applied to the publication timeline.");
         }
@@ -628,6 +692,7 @@
         _mediaStudioVisible = false;
         _mediaStudioTargetId = null;
         _mediaStudioInitial = null;
+        _pendingCanvasInsert = null;
         return Task.CompletedTask;
     }
 

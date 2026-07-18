@@ -62,12 +62,14 @@
                 if (ConnectorGeometry.TryResolve(State.CurrentPage, connector, out var sourcePoint, out var targetPoint))
                 {
                     var connectorPath = ConnectorGeometry.Path(connector, sourcePoint, targetPoint);
-                    <svg @key="connector.Id" id="element-@connector.Id" class="pub-connector @(connector.Id == State.SelectedElementId ? "selected" : null) @(connector.Locked ? "locked" : null)"
+                    <svg @key="connector.Id" id="element-@connector.Id" class="pub-connector @(State.IsSelected(connector.Id) ? "selected" : null) @(connector.Id == State.SelectedElementId ? "selection-primary" : null) @(connector.Locked ? "locked" : null)"
                          style="z-index:@connector.ZIndex"
                          viewBox="0 0 @Inv(State.CurrentPage.WidthMm) @Inv(State.CurrentPage.HeightMm)"
                          preserveAspectRatio="none"
                          data-publication-element
                          data-element-id="@connector.Id"
+                         data-selected="@State.IsSelected(connector.Id).ToString().ToLowerInvariant()"
+                         data-group-id="@connector.GroupId"
                          data-animations="@PublicationAnimationData.Animations(connector)"
                          data-interaction="@PublicationAnimationData.Interaction(connector)"
                          data-interaction-action="@connector.Interaction.Action"
@@ -101,6 +103,8 @@
                      data-animations="@PublicationAnimationData.Animations(element)"
                      data-interaction="@PublicationAnimationData.Interaction(element)"
                      data-interaction-action="@element.Interaction.Action"
+                     data-selected="@State.IsSelected(element.Id).ToString().ToLowerInvariant()"
+                     data-group-id="@element.GroupId"
                      data-playback-hidden="@element.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
                      data-media-kind="@(element is PublicationMediaElement ? element.Kind.ToString().ToLowerInvariant() : null)"
                      data-media-start="@(element is PublicationMediaElement mediaData ? Inv(mediaData.TimelineStartSeconds) : null)"
@@ -114,7 +118,7 @@
                      data-media-trigger="@(element is PublicationMediaElement mediaTrigger ? mediaTrigger.PlaybackTrigger.ToString() : null)"
                      data-media-fade-in="@(element is PublicationMediaElement mediaFadeIn ? Inv(mediaFadeIn.FadeInSeconds) : null)"
                      data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)"
-                     class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(element.Id == State.SelectedElementId ? "selected" : null) @(element.Locked ? "locked" : null)"
+                     class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(State.IsSelected(element.Id) ? "selected" : null) @(element.Id == State.SelectedElementId ? "selection-primary" : null) @(element.GroupId is not null ? "grouped" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
                      @oncontextmenu="args => ShowElementContextMenu(element, args)"
                      @oncontextmenu:preventDefault
@@ -185,7 +189,7 @@
                             <span class="connector-port connector-port-@AnchorCss(anchor)" data-connector-port data-owner-id="@element.Id" data-anchor="@anchor" title="Connect at @anchor"></span>
                         }
                     }
-                    @if (element.Id == State.SelectedElementId && !element.Locked && !(State.CropMode && element is ImageFrameElement))
+                    @if (element.Id == State.SelectedElementId && !State.HasMultipleSelection && !element.Locked && !(State.CropMode && element is ImageFrameElement))
                     {
                         foreach (var handle in Handles)
                         {
@@ -326,6 +330,14 @@
                     <DxContextMenuItem Text="@TimelineCommandText" BeginGroup="true" Click="ToggleTimeline" />
                 </Items>
             </DxContextMenuItem>
+            @if (State.CanGroupSelection)
+            {
+                <DxContextMenuItem Text="Group selected objects" BeginGroup="true" Click="GroupSelected" />
+            }
+            @if (State.CanUngroupSelection)
+            {
+                <DxContextMenuItem Text="Ungroup objects" BeginGroup="true" Click="UngroupSelected" />
+            }
             <DxContextMenuItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="Copy" />
             <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" Click="Paste" />
             <DxContextMenuItem Text="Duplicate" Click="Duplicate" />
@@ -429,6 +441,7 @@
     [Parameter] public EventCallback RequestEditBarcode { get; set; }
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback RequestToggleTimeline { get; set; }
+    [Parameter] public EventCallback<CanvasInsertRequest> RequestCanvasInsert { get; set; }
 
     private string TimelineCommandText => TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
 
@@ -456,7 +469,9 @@
 
     private string PointerStateText => State.ConnectorTool != ConnectorToolKind.None
         ? (State.ConnectorTool == ConnectorToolKind.Arrow ? "Draw arrow connector" : "Draw connector")
-        : State.CropMode ? "Crop picture" : "Select / move";
+        : State.CropMode ? "Crop picture"
+        : State.HasMultipleSelection ? $"Move {State.SelectedElements.Count} objects"
+        : "Select / move";
     private bool CanResetPointerState => State.ConnectorTool != ConnectorToolKind.None || State.CropMode;
 
     private string PageStyle
@@ -477,7 +492,7 @@
         var initializationKey = $"{State.CurrentPage.Id:N}|" +
             $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.CropMode}|{State.Document.View.RulerUnit}|" +
             $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
-            $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|" +
+            $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
             $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}";
         if (initializationKey == _canvasInitializationKey) return;
 
@@ -499,6 +514,7 @@
                     snapToGuides = State.Document.View.SnapToGuides,
                     snapToPage = State.Document.View.SnapToPage,
                     snapToObjects = State.Document.View.SnapToObjects,
+                    snapInObjects = State.Document.View.SnapInObjects,
                     gridSpacingMm = State.Document.View.GridSpacingMm,
                     connectorTool = State.ConnectorTool.ToString()
                 });
@@ -525,7 +541,7 @@
         State.SetZoom(zoom);
     }
 
-    [JSInvokable] public void SelectElement(string id) { if (Guid.TryParse(id, out var guid)) State.SelectElement(guid); }
+    [JSInvokable] public void SelectElement(string id, bool additive = false) { if (Guid.TryParse(id, out var guid)) State.SelectElement(guid, additive); }
     [JSInvokable] public void ClearSelectionFromCanvas() => State.SelectElement(null);
     [JSInvokable]
     public Task ActivateElement(string id)
@@ -535,6 +551,16 @@
         if (element is null) return Task.CompletedTask;
         State.SelectElement(guid);
         return DoubleClick(element);
+    }
+    [JSInvokable]
+    public void CommitMove(string id, double x, double y, string[]? movingIds = null)
+    {
+        if (!Guid.TryParse(id, out var guid)) return;
+        var parsedIds = movingIds?
+            .Select(value => Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty)
+            .Where(value => value != Guid.Empty)
+            .ToArray();
+        State.CommitMove(guid, x, y, parsedIds);
     }
     [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) { if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height); }
     [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) { if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale); }
@@ -555,6 +581,7 @@
         State.ReconnectConnector(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), elementGuid, parsedAnchor);
     }
     [JSInvokable] public void CancelActiveTool() => State.CancelActiveTool();
+    [JSInvokable] public Task DropInsert(string kind, double x, double y) => RequestCanvasInsert.InvokeAsync(new CanvasInsertRequest(kind, x, y));
     private void ResetPointerState() => State.CancelActiveTool();
 
     private Task DoubleClick(PublicationElement element)
@@ -569,7 +596,7 @@
 
     private async Task ShowElementContextMenu(PublicationElement element, MouseEventArgs args)
     {
-        State.SelectElement(element.Id);
+        State.SetPrimarySelection(element.Id);
         await InvokeAsync(StateHasChanged);
         await _contextMenu.ShowAsync(args);
     }
@@ -702,6 +729,8 @@
     private void Copy() => State.CopySelected();
     private void Paste() => State.Paste();
     private void Duplicate() => State.DuplicateSelected();
+    private void GroupSelected() => State.GroupSelected();
+    private void UngroupSelected() => State.UngroupSelected();
     private void Delete() => State.DeleteSelected();
     private void BringToFront() => State.BringToFront();
     private void BringForward() => State.BringForward();

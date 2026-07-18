@@ -39,9 +39,9 @@
             <div class="layers-list">
                 @foreach (var item in State.CurrentPage.Elements.OrderByDescending(element => element.ZIndex))
                 {
-                    <div class="layer-row @(item.Id == State.SelectedElementId ? "selected" : null)"
+                    <div class="layer-row @(State.IsSelected(item.Id) ? "selected" : null) @(item.Id == State.SelectedElementId ? "selection-primary" : null)"
                          @oncontextmenu="args => ShowLayerContextMenu(item, args)" @oncontextmenu:preventDefault>
-                        <button class="layer-select" title="Select @item.Name" @onclick="() => State.SelectElement(item.Id)">
+                        <button class="layer-select" title="Select @item.Name" @onclick="args => SelectLayer(item, args)">
                             <span class="layer-kind">@KindGlyph(item)</span>
                             <span class="layer-name">@item.Name</span>
                         </button>
@@ -451,6 +451,14 @@
                 <DxContextMenuItem Text="@(CheckedText(contextMedia.Muted, "Muted"))" Click="ToggleContextMediaMuted" />
                 <DxContextMenuItem Text="@(CheckedText(contextMedia.Loop, "Loop clip"))" Click="ToggleContextMediaLoop" />
             }
+            @if (State.CanGroupSelection)
+            {
+                <DxContextMenuItem Text="Group selected objects" BeginGroup="true" Click="State.GroupSelected" />
+            }
+            @if (State.CanUngroupSelection)
+            {
+                <DxContextMenuItem Text="Ungroup objects" BeginGroup="true" Click="State.UngroupSelected" />
+            }
             <DxContextMenuItem Text="Duplicate" BeginGroup="true" Click="DuplicateContextLayer" />
             <DxContextMenuItem Text="Delete" Enabled="@(ContextLayer is { Locked: false })" Click="DeleteContextLayer" />
             <DxContextMenuItem Text="Bring to front" BeginGroup="true" Click="ContextBringToFront" />
@@ -525,6 +533,8 @@
     private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
     private Task AddChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
     private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
+    private void SelectLayer(PublicationElement item, MouseEventArgs args) =>
+        State.SelectElement(item.Id, args.CtrlKey || args.MetaKey || args.ShiftKey);
 
     private void ToggleLayerVisibility(PublicationElement item)
     {
@@ -541,11 +551,11 @@
     private async Task ShowLayerContextMenu(PublicationElement item, MouseEventArgs args)
     {
         _contextLayerId = item.Id;
-        State.SelectElement(item.Id);
+        State.SetPrimarySelection(item.Id);
         await InvokeAsync(StateHasChanged);
         await _layerContextMenu.ShowAsync(args);
     }
-    private void SelectContextLayer() { if (_contextLayerId is Guid id) State.SelectElement(id); }
+    private void SelectContextLayer() { if (_contextLayerId is Guid id) State.SetPrimarySelection(id); }
     private Task EditContextMedia() { SelectContextLayer(); return OnEditMedia.InvokeAsync(); }
     private Task EditContextBarcode() { SelectContextLayer(); return OnEditBarcode.InvokeAsync(); }
     private void DuplicateContextLayer() { SelectContextLayer(); State.DuplicateSelected(); }

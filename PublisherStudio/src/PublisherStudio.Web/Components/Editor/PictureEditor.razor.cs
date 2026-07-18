@@ -669,6 +669,12 @@ public partial class PictureEditor
     private void RasterStretch() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Stretch);
     private void RasterFlipHorizontal() => WithRaster(layer => layer.FlipHorizontal = !layer.FlipHorizontal);
     private void RasterFlipVertical() => WithRaster(layer => layer.FlipVertical = !layer.FlipVertical);
+    private void RasterRotateLeft() => WithRaster(layer => layer.Rotation = (layer.Rotation - 90 + 360) % 360);
+    private void RasterRotateRight() => WithRaster(layer => layer.Rotation = (layer.Rotation + 90) % 360);
+    private void RasterResetRotation() => WithRaster(layer => layer.Rotation = 0);
+    private void RasterNoTint() => WithRaster(layer => layer.TintOpacity = 0);
+    private void RasterBlueTint() => WithRaster(layer => { layer.TintColor = "#2563eb"; layer.TintOpacity = .28; });
+    private void RasterWarmTint() => WithRaster(layer => { layer.TintColor = "#f97316"; layer.TintOpacity = .24; });
     private void SoftenLight() => State.UpdateSelected(layer => layer.Blur = 2);
     private void SoftenMedium() => State.UpdateSelected(layer => layer.Blur = 6);
     private void RemoveSoftening() => State.UpdateSelected(layer => layer.Blur = 0);
@@ -714,6 +720,55 @@ public partial class PictureEditor
     private void FillSolid() => WithFill(layer => layer.FillKind = PictureFillKind.Solid);
     private void FillLinearGradient() => WithFill(layer => layer.FillKind = PictureFillKind.LinearGradient);
     private void FillRadialGradient() => WithFill(layer => layer.FillKind = PictureFillKind.RadialGradient);
+    private void SetPictureTextFont(string font) => WithText(layer => layer.FontFamily = font);
+    private void SetPictureTextSize(double value) => WithText(layer => layer.FontSizePx = value);
+    private void TextSize24() => SetPictureTextSize(24);
+    private void TextSize48() => SetPictureTextSize(48);
+    private void TextSize72() => SetPictureTextSize(72);
+    private void TextSize120() => SetPictureTextSize(120);
+    private void TextSize180() => SetPictureTextSize(180);
+    private void TogglePictureTextBold() => WithText(layer => layer.Bold = !layer.Bold);
+    private void TogglePictureTextItalic() => WithText(layer => layer.Italic = !layer.Italic);
+    private void TogglePictureTextShadow() => WithText(layer => layer.ShadowEnabled = !layer.ShadowEnabled);
+    private void TextAlignLeft() => WithText(layer => layer.Alignment = PictureTextAlignment.Left);
+    private void TextAlignCenter() => WithText(layer => layer.Alignment = PictureTextAlignment.Center);
+    private void TextAlignRight() => WithText(layer => layer.Alignment = PictureTextAlignment.Right);
+    private void TextColorBlue() => WithText(layer => layer.FillColor = "#17365d");
+    private void TextColorBlack() => WithText(layer => layer.FillColor = "#000000");
+    private void TextColorWhite() => WithText(layer => layer.FillColor = "#ffffff");
+    private void TextColorRed() => WithText(layer => layer.FillColor = "#dc2626");
+    private void TextOutlineNone() => WithText(layer => { layer.OutlineColor = "transparent"; layer.OutlineWidthPx = 0; });
+    private void TextOutlineThin() => WithText(layer => { layer.OutlineColor = "#111827"; layer.OutlineWidthPx = 1; });
+    private void TextOutlineThick() => WithText(layer => { layer.OutlineColor = "#ffffff"; layer.OutlineWidthPx = 4; });
+    private void ShapeFillSolid() => WithShape(layer => layer.FillKind = PictureFillKind.Solid);
+    private void ShapeFillLinear() => WithShape(layer => layer.FillKind = PictureFillKind.LinearGradient);
+    private void ShapeFillRadial() => WithShape(layer => layer.FillKind = PictureFillKind.RadialGradient);
+    private void SetShapeColors(string first, string second, string stroke) => WithShape(layer => { layer.FillColor = first; layer.SecondaryFillColor = second; layer.StrokeColor = stroke; });
+    private void ShapeColorsBlue() => SetShapeColors("#60a5fa", "#dbeafe", "#1d4ed8");
+    private void ShapeColorsGreen() => SetShapeColors("#4ade80", "#dcfce7", "#15803d");
+    private void ShapeColorsOrange() => SetShapeColors("#fb923c", "#ffedd5", "#c2410c");
+    private void ShapeColorsMono() => SetShapeColors("#111827", "#ffffff", "#000000");
+    private void SetShapeStroke(double width) => WithShape(layer => layer.StrokeWidthPx = width);
+    private void ShapeStroke0() => SetShapeStroke(0);
+    private void ShapeStroke1() => SetShapeStroke(1);
+    private void ShapeStroke3() => SetShapeStroke(3);
+    private void ShapeStroke8() => SetShapeStroke(8);
+    private void SetFillColors(string first, string second) => WithFill(layer => { layer.PrimaryColor = first; layer.SecondaryColor = second; });
+    private void FillColorsBlue() => SetFillColors("#dbeafe", "#6366f1");
+    private void FillColorsGreen() => SetFillColors("#dcfce7", "#16a34a");
+    private void FillColorsSunset() => SetFillColors("#fde68a", "#f97316");
+    private void FillColorsMono() => SetFillColors("#ffffff", "#111827");
+    private void SetFillAngle(double value) => WithFill(layer => layer.AngleDegrees = value);
+    private void FillAngle0() => SetFillAngle(0);
+    private void FillAngle45() => SetFillAngle(45);
+    private void FillAngle90() => SetFillAngle(90);
+    private void FillAngle180() => SetFillAngle(180);
+    private void FillAngle270() => SetFillAngle(270);
+    private void SetLayerOpacity(double value) => State.UpdateSelected(layer => layer.Opacity = value);
+    private void LayerOpacity100() => SetLayerOpacity(1);
+    private void LayerOpacity75() => SetLayerOpacity(.75);
+    private void LayerOpacity50() => SetLayerOpacity(.5);
+    private void LayerOpacity25() => SetLayerOpacity(.25);
     private void ToggleSelectedLockMenu()
     {
         if (State.SelectedLayer is PictureLayer layer) State.ToggleLock(layer.Id);
@@ -831,6 +886,57 @@ public partial class PictureEditor
     private void ChangeRenderStripeWidth(ChangeEventArgs args) => WithRender(layer => layer.StripeWidthPx = Number(args, layer.StripeWidthPx));
     private void ChangeRenderAngle(ChangeEventArgs args) => WithRenderLive("render-angle", layer => layer.AngleDegrees = Number(args, layer.AngleDegrees));
     private void RandomizeRender() => WithRender(layer => layer.Seed = Random.Shared.Next(1, int.MaxValue));
+    private Task FocusRenderProperties() => JS.InvokeVoidAsync("publisherStudio.focusElement", "picture-render-properties").AsTask();
+    private void RenderPrimaryWhite() => WithRender(layer => layer.PrimaryColor = "#ffffff");
+    private void RenderPrimaryBlack() => WithRender(layer => layer.PrimaryColor = "#000000");
+    private void RenderPrimaryBlue() => WithRender(layer => layer.PrimaryColor = "#2563eb");
+    private void RenderSecondaryWhite() => WithRender(layer => layer.SecondaryColor = "#ffffff");
+    private void RenderSecondaryBlack() => WithRender(layer => layer.SecondaryColor = "#000000");
+    private void RenderSecondaryBlue() => WithRender(layer => layer.SecondaryColor = "#60a5fa");
+    private void SetRenderScale(double value) => WithRender(layer => layer.Scale = value);
+    private void RenderScale24() => SetRenderScale(24);
+    private void RenderScale64() => SetRenderScale(64);
+    private void RenderScale128() => SetRenderScale(128);
+    private void RenderScale256() => SetRenderScale(256);
+    private void SetRenderDetail(int value) => WithRender(layer => layer.Detail = value);
+    private void RenderDetail1() => SetRenderDetail(1);
+    private void RenderDetail2() => SetRenderDetail(2);
+    private void RenderDetail4() => SetRenderDetail(4);
+    private void RenderDetail6() => SetRenderDetail(6);
+    private void RenderDetail8() => SetRenderDetail(8);
+    private void SetRenderSoftness(double value) => WithRender(layer => layer.Softness = value);
+    private void RenderSoftness0() => SetRenderSoftness(0);
+    private void RenderSoftness25() => SetRenderSoftness(.25);
+    private void RenderSoftness50() => SetRenderSoftness(.5);
+    private void RenderSoftness75() => SetRenderSoftness(.75);
+    private void RenderSoftness100() => SetRenderSoftness(1);
+    private void SetRenderContrast(double value) => WithRender(layer => layer.RenderContrast = value);
+    private void RenderContrast05() => SetRenderContrast(.5);
+    private void RenderContrast10() => SetRenderContrast(1);
+    private void RenderContrast15() => SetRenderContrast(1.5);
+    private void RenderContrast20() => SetRenderContrast(2);
+    private void RenderContrast30() => SetRenderContrast(3);
+    private void SetRenderAngle(double value) => WithRender(layer => layer.AngleDegrees = value);
+    private void RenderAngle0() => SetRenderAngle(0);
+    private void RenderAngle45() => SetRenderAngle(45);
+    private void RenderAngle90() => SetRenderAngle(90);
+    private void RenderAngle180() => SetRenderAngle(180);
+    private void RenderAngle270() => SetRenderAngle(270);
+    private void SetRenderStripeWidth(double value) => WithRender(layer => layer.StripeWidthPx = value);
+    private void RenderStripe8() => SetRenderStripeWidth(8);
+    private void RenderStripe16() => SetRenderStripeWidth(16);
+    private void RenderStripe32() => SetRenderStripeWidth(32);
+    private void RenderStripe64() => SetRenderStripeWidth(64);
+    private void RenderStripe128() => SetRenderStripeWidth(128);
+    private void ResetRenderSettings() => WithRender(layer =>
+    {
+        layer.Scale = 90;
+        layer.Detail = 4;
+        layer.Softness = .6;
+        layer.RenderContrast = 1;
+        layer.AngleDegrees = 45;
+        layer.StripeWidthPx = 32;
+    });
 
     private void ChangeBrightness(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-brightness", layer => layer.Brightness = Number(args, layer.Brightness));
     private void ChangeContrast(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-contrast", layer => layer.Contrast = Number(args, layer.Contrast));
@@ -914,6 +1020,9 @@ public partial class PictureEditor
         PictureLayerKind.Paint => "✎",
         _ => "•"
     };
+
+    private static string RenderContrastMenuText(RenderPictureLayer render) =>
+        $"Contrast · {render.RenderContrast.ToString("0.0", CultureInfo.InvariantCulture)}×";
 
     private static string LayerDescription(PictureLayer layer) => layer switch
     {

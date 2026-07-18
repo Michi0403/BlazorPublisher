@@ -126,7 +126,7 @@
                     @switch (element)
                     {
                         case TextFrameElement text:
-                            <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@text.Background;border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                            <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;border:@Mm(text.BorderWidth) solid @text.BorderColor">
                                 @((MarkupString)text.PreviewHtml)
                             </div>
                             break;
@@ -206,6 +206,18 @@
     <Items>
         <DxContextMenuItem Text="Undo" IconCssClass="pub-icon pub-icon-undo" Enabled="@State.CanUndo" Click="State.Undo" />
         <DxContextMenuItem Text="Redo" IconCssClass="pub-icon pub-icon-redo" Enabled="@State.CanRedo" Click="State.Redo" />
+        <DxContextMenuItem Text="Page transition" IconCssClass="pub-icon pub-icon-transition" BeginGroup="true">
+            <Items>
+                <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.None, "None"))" Click="TransitionNone" />
+                <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Fade, "Fade"))" Click="TransitionFade" />
+                <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Push, "Push"))" Click="TransitionPush" />
+                <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Wipe, "Wipe"))" Click="TransitionWipe" />
+                <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Zoom, "Zoom"))" Click="TransitionZoom" />
+                <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Flip, "Flip"))" Click="TransitionFlip" />
+                <DxContextMenuItem Text="Preview page" BeginGroup="true" Click="PreviewPageAnimations" />
+                <DxContextMenuItem Text="@TimelineCommandText" Click="ToggleTimeline" />
+            </Items>
+        </DxContextMenuItem>
         @if (State.SelectedElement is TextFrameElement textFrame)
         {
             <DxContextMenuItem Text="Edit story" IconCssClass="pub-icon pub-icon-edit" BeginGroup="true" Click="EditSelectedStory" />
@@ -315,19 +327,47 @@
         {
             <DxContextMenuItem Text="Animations" IconCssClass="pub-icon pub-icon-animation" BeginGroup="true">
                 <Items>
-                    <DxContextMenuItem Text="Add fade in" Click="AddFadeInAnimation" />
-                    <DxContextMenuItem Text="Add fly in" Click="AddFlyInAnimation" />
-                    <DxContextMenuItem Text="Add pulse" Click="AddPulseAnimation" />
-                    <DxContextMenuItem Text="Add fade out" Click="AddFadeOutAnimation" />
+                    <DxContextMenuItem Text="Entrance">
+                        <Items>
+                            <DxContextMenuItem Text="Fade in" Click="AddFadeInAnimation" />
+                            <DxContextMenuItem Text="Fly in" Click="AddFlyInAnimation" />
+                            <DxContextMenuItem Text="Float in" Click="AddFloatInAnimation" />
+                            <DxContextMenuItem Text="Zoom in" Click="AddZoomInAnimation" />
+                            <DxContextMenuItem Text="Wipe in" Click="AddWipeInAnimation" />
+                            <DxContextMenuItem Text="Bounce in" Click="AddBounceInAnimation" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Emphasis / motion">
+                        <Items>
+                            <DxContextMenuItem Text="Pulse" Click="AddPulseAnimation" />
+                            <DxContextMenuItem Text="Spin" Click="AddSpinAnimation" />
+                            <DxContextMenuItem Text="Shake" Click="AddShakeAnimation" />
+                            <DxContextMenuItem Text="Grow / shrink" Click="AddGrowShrinkAnimation" />
+                            <DxContextMenuItem Text="Bounce" Click="AddBounceAnimation" />
+                            <DxContextMenuItem Text="Move" Click="AddMoveAnimation" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Exit">
+                        <Items>
+                            <DxContextMenuItem Text="Fade out" Click="AddFadeOutAnimation" />
+                            <DxContextMenuItem Text="Fly out" Click="AddFlyOutAnimation" />
+                            <DxContextMenuItem Text="Zoom out" Click="AddZoomOutAnimation" />
+                            <DxContextMenuItem Text="Wipe out" Click="AddWipeOutAnimation" />
+                        </Items>
+                    </DxContextMenuItem>
                     @if (State.SelectedElement is PublicationMediaElement)
                     {
-                        <DxContextMenuItem Text="Play media at this step" BeginGroup="true" Click="AddPlayMediaAnimation" />
-                        <DxContextMenuItem Text="Pause media at this step" Click="AddPauseMediaAnimation" />
-                        <DxContextMenuItem Text="Stop media at this step" Click="AddStopMediaAnimation" />
+                        <DxContextMenuItem Text="Media step" BeginGroup="true">
+                            <Items>
+                                <DxContextMenuItem Text="Play media" Click="AddPlayMediaAnimation" />
+                                <DxContextMenuItem Text="Pause media" Click="AddPauseMediaAnimation" />
+                                <DxContextMenuItem Text="Stop media" Click="AddStopMediaAnimation" />
+                            </Items>
+                        </DxContextMenuItem>
                     }
-                    <DxContextMenuItem Text="Preview object" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="PreviewSelectedAnimations" />
+                    <DxContextMenuItem Text="Preview object" BeginGroup="true" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="PreviewSelectedAnimations" />
+                    <DxContextMenuItem Text="Edit animation details / timeline" Click="ToggleTimeline" />
                     <DxContextMenuItem Text="Remove all object animations" Enabled="@(State.SelectedElement.Animations.Count > 0)" Click="ClearSelectedAnimations" />
-                    <DxContextMenuItem Text="@TimelineCommandText" BeginGroup="true" Click="ToggleTimeline" />
                 </Items>
             </DxContextMenuItem>
             @if (State.CanGroupSelection)
@@ -368,18 +408,6 @@
         }
         else
         {
-            <DxContextMenuItem Text="Preview page animations" IconCssClass="pub-icon pub-icon-animation" Click="PreviewPageAnimations" />
-            <DxContextMenuItem Text="@TimelineCommandText" IconCssClass="pub-icon pub-icon-timeline" Click="ToggleTimeline" />
-            <DxContextMenuItem Text="Page transition">
-                <Items>
-                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.None, "None"))" Click="TransitionNone" />
-                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Fade, "Fade"))" Click="TransitionFade" />
-                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Push, "Push"))" Click="TransitionPush" />
-                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Wipe, "Wipe"))" Click="TransitionWipe" />
-                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Zoom, "Zoom"))" Click="TransitionZoom" />
-                    <DxContextMenuItem Text="@(CheckedText(State.CurrentPage.Transition.Kind == PublicationPageTransitionKind.Flip, "Flip"))" Click="TransitionFlip" />
-                </Items>
-            </DxContextMenuItem>
             <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" BeginGroup="true" Click="Paste" />
             <DxContextMenuItem Text="Insert text box" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
@@ -493,11 +521,17 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (_disposed || _canvasInitializationInProgress) return;
+        var selectedElementIds = State.SelectedElementIds
+            .OrderBy(id => id)
+            .Select(id => id.ToString("D"))
+            .ToArray();
+        var selectionKey = string.Join(",", selectedElementIds);
+        var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
         var initializationKey = $"{State.CurrentPage.Id:N}|" +
             $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.CropMode}|{State.Document.View.RulerUnit}|" +
             $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
             $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
-            $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{State.Revision}";
+            $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
         var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}";
 
         _canvasInitializationInProgress = true;
@@ -523,7 +557,9 @@
                         snapInObjects = State.Document.View.SnapInObjects,
                         gridSpacingMm = State.Document.View.GridSpacingMm,
                         connectorTool = State.ConnectorTool.ToString(),
-                        revision = State.Revision
+                        selectedElementIds,
+                        internalClipboardAvailable = State.CanPaste,
+                        clipboardRevision = State.ClipboardRevision
                     });
                 if (initialized) _canvasInitializationKey = initializationKey;
             }
@@ -745,8 +781,20 @@
     private void FlipPictureVertical() => SetImage(image => image.FlipVertical = !image.FlipVertical);
     private void AddFadeInAnimation() => State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
     private void AddFlyInAnimation() => State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
+    private void AddFloatInAnimation() => State.AddAnimation(PublicationAnimationEffect.Float, PublicationAnimationPhase.Entrance);
+    private void AddZoomInAnimation() => State.AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
+    private void AddWipeInAnimation() => State.AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
+    private void AddBounceInAnimation() => State.AddAnimation(PublicationAnimationEffect.Bounce, PublicationAnimationPhase.Entrance);
     private void AddPulseAnimation() => State.AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
+    private void AddSpinAnimation() => State.AddAnimation(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
+    private void AddShakeAnimation() => State.AddAnimation(PublicationAnimationEffect.Shake, PublicationAnimationPhase.Emphasis);
+    private void AddGrowShrinkAnimation() => State.AddAnimation(PublicationAnimationEffect.GrowShrink, PublicationAnimationPhase.Emphasis);
+    private void AddBounceAnimation() => State.AddAnimation(PublicationAnimationEffect.Bounce, PublicationAnimationPhase.Emphasis);
+    private void AddMoveAnimation() => State.AddAnimation(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
     private void AddFadeOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+    private void AddFlyOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Exit);
+    private void AddZoomOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Exit);
+    private void AddWipeOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Exit);
     private void AddPlayMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.PlayMedia, PublicationAnimationPhase.Emphasis);
     private void AddPauseMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.PauseMedia, PublicationAnimationPhase.Emphasis);
     private void AddStopMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.StopMedia, PublicationAnimationPhase.Emphasis);
@@ -1056,4 +1104,11 @@
         catch (ObjectDisposedException) { }
         catch (InvalidOperationException) { }
     }
+
+    private static string StoryBackground(TextFrameElement text) =>
+        string.IsNullOrWhiteSpace(text.DocumentBackground) || string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase)
+            ? text.Background
+            : text.DocumentBackground;
+
+
 }

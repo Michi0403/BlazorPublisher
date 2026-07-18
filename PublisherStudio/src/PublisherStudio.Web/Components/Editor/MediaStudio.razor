@@ -22,25 +22,25 @@
                         @if (IsVideo)
                         {
                             <DxRibbonItem Text="Record camera" IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordCamera" />
-                            <DxRibbonItem Text="Record screen" Enabled="@(!_recording)" Click="RecordScreen" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-video" Text="Record screen" Enabled="@(!_recording)" Click="RecordScreen" />
                         }
                         else
                         {
                             <DxRibbonItem Text="Record microphone" IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="RecordMicrophone" />
-                            <DxRibbonItem Text="Generate tone" Enabled="@(!_recording)" Click="GenerateTone" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-audio" Text="Generate tone" Enabled="@(!_recording)" Click="GenerateTone" />
                         }
-                        <DxRibbonItem Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
-                        <DxRibbonItem Text="Download recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-stop" Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Playback">
-                        <DxRibbonItem Text="Play range" Enabled="@HasSource" Click="PlaySelection" />
-                        <DxRibbonItem Text="Pause" Enabled="@HasSource" Click="PausePreview" />
-                        <DxRibbonItem Text="To trim start" Enabled="@HasSource" Click="SeekStart" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="Play range" Enabled="@HasSource" Click="PlaySelection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-pause" Text="Pause" Enabled="@HasSource" Click="PausePreview" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="To trim start" Enabled="@HasSource" Click="SeekStart" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Trim">
-                        <DxRibbonItem Text="Start at playhead" Enabled="@HasSource" Click="SetTrimStartAtPlayhead" />
-                        <DxRibbonItem Text="End at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
-                        <DxRibbonItem Text="Reset trim" Enabled="@HasSource" Click="ResetTrim" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="Start at playhead" Enabled="@HasSource" Click="SetTrimStartAtPlayhead" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="End at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Reset trim" Enabled="@HasSource" Click="ResetTrim" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>

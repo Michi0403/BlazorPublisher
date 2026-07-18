@@ -1186,9 +1186,9 @@
         return Task.CompletedTask;
     }
 
-    private Task SaveStory((byte[] Content, string PreviewHtml, StoryStorageFormat Format) result)
+    private Task SaveStory((byte[] Content, string PreviewHtml, string DocumentBackground, StoryStorageFormat Format) result)
     {
-        State.UpdateTextDocument(result.Content, result.PreviewHtml, result.Format);
+        State.UpdateTextDocument(result.Content, result.PreviewHtml, result.DocumentBackground, result.Format);
         _storyEditorVisible = false;
         return Task.CompletedTask;
     }

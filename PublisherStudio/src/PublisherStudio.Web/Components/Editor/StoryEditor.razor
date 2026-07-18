@@ -13,29 +13,29 @@
             <DxRibbon CssClass="story-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Story">
                     <DxRibbonGroup Text="Dynamic fields">
-                        <DxRibbonItem Text="Insert field" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Date" Click="InsertDateField" />
-                            <DxRibbonItem Text="Time" Click="InsertTimeField" />
-                            <DxRibbonItem Text="Page number" Click="InsertPageField" />
-                            <DxRibbonItem Text="Page count" Click="InsertPageCountField" />
-                            <DxRibbonItem Text="Publication name" Click="InsertPublicationField" />
-                            <DxRibbonItem Text="Page name" Click="InsertPageNameField" />
-                            <DxRibbonItem Text="Story name" Click="InsertStoryNameField" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Insert field" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Date" Click="InsertDateField" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Time" Click="InsertTimeField" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-page" Text="Page number" Click="InsertPageField" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-page" Text="Page count" Click="InsertPageCountField" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Publication name" Click="InsertPublicationField" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-page" Text="Page name" Click="InsertPageNameField" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Story name" Click="InsertStoryNameField" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="Update fields" IsPrimary="true" Click="UpdateFields" />
-                        <DxRibbonItem Text="Field display" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Show results" Click="ShowFieldResults" />
-                            <DxRibbonItem Text="Show codes" Click="ShowFieldCodes" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Update fields" IsPrimary="true" Click="UpdateFields" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="Field display" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-visible" Text="Show results" Click="ShowFieldResults" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-visible" Text="Show codes" Click="ShowFieldCodes" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Export">
                     <DxRibbonGroup Text="Download">
-                        <DxRibbonItem Text="Download document" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="DOCX" Click="ExportDocx" />
-                            <DxRibbonItem Text="RTF" Click="ExportRtf" />
-                            <DxRibbonItem Text="Plain text" Click="ExportText" />
-                            <DxRibbonItem Text="HTML" Click="ExportHtml" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download document" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="DOCX" Click="ExportDocx" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="RTF" Click="ExportRtf" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Plain text" Click="ExportText" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="HTML" Click="ExportHtml" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Output"><DxRibbonItem Text="Print" IconCssClass="pub-icon pub-icon-print" Click="PrintStory" /></DxRibbonGroup>
@@ -97,7 +97,7 @@
     [Parameter] public string PageName { get; set; } = "Page";
     [Parameter] public int PageNumber { get; set; } = 1;
     [Parameter] public int PageCount { get; set; } = 1;
-    [Parameter] public EventCallback<(byte[] Content, string PreviewHtml, StoryStorageFormat Format)> Saved { get; set; }
+    [Parameter] public EventCallback<(byte[] Content, string PreviewHtml, string DocumentBackground, StoryStorageFormat Format)> Saved { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private DxRichEdit? _richEdit;
@@ -181,19 +181,18 @@
         _error = null;
         try
         {
-            await _richEdit.SaveDocumentAsync();
+            // Export the live RichEdit document directly. SaveDocumentAsync can rebind the
+            // DocumentContent parameter before the export completes and used to drop direct
+            // formatting in the persisted copy even though a manual DOCX download was correct.
             var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
             var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
-            var preview = PublicationFileService.ExtractHtmlBody(html);
-            try
-            {
-                var exportedHtml = System.Text.Encoding.UTF8.GetString(html);
-                preview = await JS.InvokeAsync<string>("publisherStudio.prepareStoryPreviewHtml", exportedHtml);
-            }
-            catch (JSDisconnectedException) { }
-            catch (TaskCanceledException) { }
-            catch (JSException) { }
-            await Saved.InvokeAsync((openXml, preview, StoryStorageFormat.OpenXml));
+            var openXmlBackground = PublicationFileService.ExtractOpenXmlDocumentBackground(openXml);
+            var prepared = await PrepareStoryPreview(html, openXmlBackground);
+            var preview = prepared.Html;
+            var documentBackground = prepared.Background;
+            _content = openXml.ToArray();
+            _documentFormat = DocumentFormat.OpenXml;
+            await Saved.InvokeAsync((openXml, preview, documentBackground, StoryStorageFormat.OpenXml));
         }
         catch (Exception ex)
         {
@@ -255,6 +254,14 @@
         try
         {
             var content = await _richEdit.ExportDocumentAsync(format);
+            if (format == DocumentFormat.Html)
+            {
+                var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
+                var prepared = await PrepareStoryPreview(
+                    content,
+                    PublicationFileService.ExtractOpenXmlDocumentBackground(openXml));
+                content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(prepared, $"{PublicationName} – {TextFrame.Name}"));
+            }
             var baseName = PublicationFileService.SafeFileName($"{PublicationName}-{TextFrame.Name}");
             await using var stream = new MemoryStream(content);
             using var reference = new DotNetStreamReference(stream);
@@ -268,10 +275,81 @@
 
     private async Task PrintStory()
     {
-        if (_richEdit is null) return;
-        try { await _richEdit.PrintDocumentAsync(); }
+        if (_richEdit is null || TextFrame is null) return;
+        try
+        {
+            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
+            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
+            var prepared = await PrepareStoryPreview(
+                html,
+                PublicationFileService.ExtractOpenXmlDocumentBackground(openXml));
+            await JS.InvokeVoidAsync("publisherStudio.printStoryHtml", StandaloneStoryHtml(prepared, $"{PublicationName} – {TextFrame.Name}"));
+        }
         catch (Exception ex) { _error = ex.Message; }
     }
 
+    private async Task<StoryPreviewResult> PrepareStoryPreview(byte[] html, string? preferredBackground = null)
+    {
+        var normalizedPreferredBackground = PublicationFileService.NormalizeCssBackground(preferredBackground);
+        var fallback = new StoryPreviewResult
+        {
+            Html = PublicationFileService.ExtractHtmlBody(html),
+            Background = IsVisibleBackground(normalizedPreferredBackground)
+                ? normalizedPreferredBackground
+                : TextFrame?.DocumentBackground ?? "transparent"
+        };
+        try
+        {
+            var exportedHtml = System.Text.Encoding.UTF8.GetString(html);
+            var prepared = await JS.InvokeAsync<StoryPreviewResult>(
+                "publisherStudio.prepareStoryPreviewHtml",
+                exportedHtml,
+                normalizedPreferredBackground);
+            if (IsVisibleBackground(normalizedPreferredBackground))
+                prepared.Background = normalizedPreferredBackground;
+            prepared.Background = PublicationFileService.NormalizeCssBackground(prepared.Background);
+            return prepared;
+        }
+        catch (JSDisconnectedException) { return fallback; }
+        catch (TaskCanceledException) { return fallback; }
+        catch (JSException) { return fallback; }
+    }
+
+    private static string StandaloneStoryHtml(StoryPreviewResult prepared, string title)
+    {
+        var safeTitle = System.Net.WebUtility.HtmlEncode(title);
+        var background = PublicationFileService.NormalizeCssBackground(prepared.Background);
+        return $"""
+            <!doctype html>
+            <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width,initial-scale=1">
+              <title>{safeTitle}</title>
+              <style>
+                * {{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }}
+                html,body {{ min-height:100%; margin:0; background:#e5e7eb; }}
+                body {{ display:grid; place-items:start center; padding:24px; font-family:Segoe UI,Arial,sans-serif; --publisher-story-page-background:{background}; }}
+                .publisher-story-document {{ position:relative; isolation:isolate; width:min(100%,1200px); min-height:calc(100vh - 48px); background:var(--publisher-story-page-background,white); box-shadow:0 3px 18px #0003; }}
+                .publisher-story-document::before {{ content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }}
+                @media print {{ @page {{ margin:0; }} html,body {{ background:white; }} body {{ display:block; padding:0; }} .publisher-story-document {{ width:100%; min-height:100vh; margin:0; box-shadow:none; }} }}
+              </style>
+            </head>
+            <body>{prepared.Html}</body>
+            </html>
+            """;
+    }
+
+    private static bool IsVisibleBackground(string? value) =>
+        !string.IsNullOrWhiteSpace(value)
+        && !string.Equals(value, "transparent", StringComparison.OrdinalIgnoreCase)
+        && !string.Equals(value, "none", StringComparison.OrdinalIgnoreCase);
+
     private Task Cancel() => Cancelled.InvokeAsync();
+
+    public sealed class StoryPreviewResult
+    {
+        public string Html { get; set; } = "<div class=\"publisher-story-document\"><p></p></div>";
+        public string Background { get; set; } = "transparent";
+    }
 }

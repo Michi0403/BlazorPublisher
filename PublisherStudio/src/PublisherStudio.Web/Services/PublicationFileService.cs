@@ -1,6 +1,8 @@
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services;
@@ -52,6 +54,7 @@ public sealed partial class PublicationFileService
         foreach (var text in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<TextFrameElement>())
         {
             text.PreviewHtml = SanitizePreviewHtml(text.PreviewHtml);
+            text.DocumentBackground = NormalizeCssBackground(text.DocumentBackground);
             text.PaddingMm = Math.Clamp(text.PaddingMm, 0, 50);
             text.BorderWidth = Math.Clamp(text.BorderWidth, 0, 5);
             if (text.DocumentContent is null || text.DocumentContent.Length == 0)
@@ -63,6 +66,12 @@ public sealed partial class PublicationFileService
             {
                 // Files created by v0.1/v0.2 stored stories as HTML. StoryEditor upgrades them to DOCX on first open.
                 text.StoryFormat = StoryStorageFormat.Html;
+            }
+            else if (string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase))
+            {
+                // v1.22 and older publications did not persist the RichEdit page color separately.
+                // Recover it directly from the stored DOCX package when possible.
+                text.DocumentBackground = ExtractOpenXmlDocumentBackground(text.DocumentContent);
             }
         }
 
@@ -205,7 +214,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.21";
+        document.FormatVersion = "1.23";
         return document;
     }
 
@@ -233,6 +242,62 @@ public sealed partial class PublicationFileService
         var styles = string.Concat(StyleRegex().Matches(html).Cast<Match>().Select(item => item.Value));
         var body = match.Success ? match.Groups[1].Value : html;
         return SanitizePreviewHtml($"{styles}<div class=\"publisher-story-document\">{body}</div>");
+    }
+
+    public static string ExtractOpenXmlDocumentBackground(byte[] openXml)
+    {
+        if (openXml is null || openXml.Length < 4 || openXml[0] != (byte)'P' || openXml[1] != (byte)'K')
+            return "transparent";
+
+        try
+        {
+            using var stream = new MemoryStream(openXml, writable: false);
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false);
+            var documentEntry = archive.GetEntry("word/document.xml");
+            if (documentEntry is null) return "transparent";
+
+            using var documentStream = documentEntry.Open();
+            var document = XDocument.Load(documentStream, LoadOptions.None);
+            XNamespace word = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+            var background = document.Root?.Element(word + "background");
+            var color = background?.Attribute(word + "color")?.Value;
+            if (string.IsNullOrWhiteSpace(color) || string.Equals(color, "auto", StringComparison.OrdinalIgnoreCase))
+                return "transparent";
+
+            var normalized = color.Trim();
+            if (Regex.IsMatch(normalized, "^[0-9a-fA-F]{6}$"))
+                normalized = "#" + normalized;
+            else if (Regex.IsMatch(normalized, "^[0-9a-fA-F]{3}$"))
+                normalized = "#" + normalized;
+
+            return NormalizeCssBackground(normalized);
+        }
+        catch (InvalidDataException)
+        {
+            return "transparent";
+        }
+        catch (IOException)
+        {
+            return "transparent";
+        }
+        catch (System.Xml.XmlException)
+        {
+            return "transparent";
+        }
+    }
+
+
+    public static string NormalizeCssBackground(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return "transparent";
+        var normalized = value.Trim();
+        if (normalized.Length > 512) return "transparent";
+        if (normalized.IndexOfAny(new[] { ';', '"', '\'', '<', '>', '{', '}' }) >= 0
+            || normalized.Contains("javascript:", StringComparison.OrdinalIgnoreCase)
+            || normalized.Contains("expression(", StringComparison.OrdinalIgnoreCase)
+            || normalized.Contains("url(", StringComparison.OrdinalIgnoreCase))
+            return "transparent";
+        return normalized;
     }
 
     public static string SanitizePreviewHtml(string html)

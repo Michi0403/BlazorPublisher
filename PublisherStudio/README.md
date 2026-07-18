@@ -170,3 +170,11 @@ See `CHANGELOG-v1.0.20.md`. Desktop file drag/drop now creates live-positioned p
 ## v1.0.21 interaction, story and canvas-state stabilization
 
 See `CHANGELOG-v1.0.21.md`. Multi-object clipboard and keyboard editing now work as one coherent canvas workflow; quick inserts and desktop files display live drag previews; animation and pointer states return reliably to selection mode; RichEdit formatting is preserved in canvas, print and exported output; and chart content remains stable across z-order changes.
+
+## v1.0.22 selection and desktop clipboard stabilization
+
+See `CHANGELOG-v1.0.22.md`. Mouse selection is restored without removing the v1.0.21 drag/drop and keyboard workflow; selected and grouped objects move together across z-levels; and files or text copied from the desktop can be pasted at the last canvas position.
+
+## v1.0.23 story fidelity and command-surface completion
+
+See `CHANGELOG-v1.0.23.md`. RichEdit formatting and document backgrounds now survive apply, reopen, canvas display, print and HTML/video export; Publisher and Picture Studio context menus expose the relevant animation and layer settings; selected renderer properties are clearly identified; and all ribbon commands have built-in icons.

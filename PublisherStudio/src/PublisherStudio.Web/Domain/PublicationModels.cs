@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.21";
+    public string FormatVersion { get; set; } = "1.23";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -163,6 +163,7 @@ public sealed class TextFrameElement : PublicationElement
     public string PreviewHtml { get; set; } = "<p>Text frame</p>";
     public byte[] DocumentContent { get; set; } = RichTextDocumentFactory.CreateOpenXml("Text frame");
     public StoryStorageFormat StoryFormat { get; set; } = StoryStorageFormat.OpenXml;
+    public string DocumentBackground { get; set; } = "transparent";
     public double PaddingMm { get; set; } = 2;
     public string Background { get; set; } = "transparent";
     public string BorderColor { get; set; } = "transparent";

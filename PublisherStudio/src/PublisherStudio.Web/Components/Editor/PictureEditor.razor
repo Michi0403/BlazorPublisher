@@ -17,92 +17,92 @@
             <DxRibbon CssClass="picture-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Home">
                     <DxRibbonGroup Text="History">
-                        <DxRibbonItem Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
-                        <DxRibbonItem Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-undo" Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-redo" Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Edit">
-                        <DxRibbonItem Text="Clipboard & layers" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Copy" Enabled="HasSelection" Click="State.CopySelected" />
-                            <DxRibbonItem Text="Paste" Enabled="State.CanPaste" Click="State.Paste" />
-                            <DxRibbonItem Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
-                            <DxRibbonItem Text="Move layer up" Enabled="HasSelection" Click="MoveUp" />
-                            <DxRibbonItem Text="Move layer down" Enabled="HasSelection" Click="MoveDown" />
-                            <DxRibbonItem Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Clipboard & layers" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy" Enabled="HasSelection" Click="State.CopySelected" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-paste" Text="Paste" Enabled="State.CanPaste" Click="State.Paste" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-duplicate" Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Move layer up" Enabled="HasSelection" Click="MoveUp" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Move layer down" Enabled="HasSelection" Click="MoveDown" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="View">
-                        <DxRibbonItem Text="Canvas view" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Fit canvas" Click="FitCanvas" />
-                            <DxRibbonItem Text="100%" Click="Zoom100" />
-                            <DxRibbonItem Text="@GridText" Click="ToggleGridRibbon" />
-                            <DxRibbonItem Text="@SnapText" Click="ToggleSnapRibbon" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Canvas view" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text="Fit canvas" Click="FitCanvas" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text="100%" Click="Zoom100" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-grid" Text="@GridText" Click="ToggleGridRibbon" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-snap" Text="@SnapText" Click="ToggleSnapRibbon" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Insert">
                     <DxRibbonGroup Text="Content">
-                        <DxRibbonItem Text="Add content" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Image" Click="RequestImage" />
-                            <DxRibbonItem Text="Text" Click="AddTextLayer" />
-                            <DxRibbonItem Text="Paint layer" Click="AddPaintLayer" />
-                            <DxRibbonItem Text="Solid fill" Click="AddSolidFill" />
-                            <DxRibbonItem Text="Gradient fill" Click="AddGradient" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Add content" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="Image" Click="RequestImage" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Text" Click="AddTextLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Paint layer" Click="AddPaintLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Solid fill" Click="AddSolidFill" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Gradient fill" Click="AddGradient" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Shapes">
-                        <DxRibbonItem Text="Basic shapes" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Rectangle" Click="AddRectangle" />
-                            <DxRibbonItem Text="Ellipse" Click="AddEllipse" />
-                            <DxRibbonItem Text="Arrow" Click="AddArrowShape" />
-                            <DxRibbonItem Text="Line" Click="AddLineShape" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-shape" Text="Basic shapes" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-rectangle" Text="Rectangle" Click="AddRectangle" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-ellipse" Text="Ellipse" Click="AddEllipse" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="Arrow" Click="AddArrowShape" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Line" Click="AddLineShape" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Renderers">
-                        <DxRibbonItem Text="Texture & light" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Clouds" Click="AddClouds" />
-                            <DxRibbonItem Text="Noise" Click="AddNoise" />
-                            <DxRibbonItem Text="Grain noise" Click="AddGrainNoise" />
-                            <DxRibbonItem Text="Stripes" Click="AddStripes" />
-                            <DxRibbonItem Text="Vignette" Click="AddVignette" />
-                            <DxRibbonItem Text="Bloom" Click="AddBloom" />
-                            <DxRibbonItem Text="Neon" Click="AddNeon" />
-                            <DxRibbonItem Text="Lens flare" Click="AddLensFlare" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Texture & light" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Clouds" Click="AddClouds" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Noise" Click="AddNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Grain noise" Click="AddGrainNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Stripes" Click="AddStripes" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Vignette" Click="AddVignette" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Bloom" Click="AddBloom" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Neon" Click="AddNeon" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Lens flare" Click="AddLensFlare" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="Motion & surfaces" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Motion blur" Click="AddMotionBlur" />
-                            <DxRibbonItem Text="Wind" Click="AddWind" />
-                            <DxRibbonItem Text="Ocean waves" Click="AddOceanWaves" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-animation" Text="Motion & surfaces" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Motion blur" Click="AddMotionBlur" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Wind" Click="AddWind" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Ocean waves" Click="AddOceanWaves" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Draw">
                     <DxRibbonGroup Text="Drawing">
-                        <DxRibbonItem Text="Drawing tools" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="@SelectToolText" Click="SelectTool" />
-                            <DxRibbonItem Text="@BrushToolText" Click="BrushTool" />
-                            <DxRibbonItem Text="@PencilToolText" Click="PencilTool" />
-                            <DxRibbonItem Text="@SprayToolText" Click="SprayTool" />
-                            <DxRibbonItem Text="@ToothbrushToolText" Click="ToothbrushTool" />
-                            <DxRibbonItem Text="@SquareToolText" Click="SquareTool" />
-                            <DxRibbonItem Text="@RectangleToolText" Click="RectangleTool" />
-                            <DxRibbonItem Text="@EllipseToolText" Click="EllipseTool" />
-                            <DxRibbonItem Text="@ArrowToolText" Click="ArrowTool" />
-                            <DxRibbonItem Text="@LineToolText" Click="LineTool" />
-                            <DxRibbonItem Text="@EraserToolText" Click="EraserTool" />
-                            <DxRibbonItem Text="@EyedropperToolText" Click="EyedropperTool" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Drawing tools" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@SelectToolText" Click="SelectTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@BrushToolText" Click="BrushTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-pencil" Text="@PencilToolText" Click="PencilTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-spray" Text="@SprayToolText" Click="SprayTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@ToothbrushToolText" Click="ToothbrushTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-rectangle" Text="@SquareToolText" Click="SquareTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-rectangle" Text="@RectangleToolText" Click="RectangleTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-ellipse" Text="@EllipseToolText" Click="EllipseTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="@ArrowToolText" Click="ArrowTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@LineToolText" Click="LineTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="@EraserToolText" Click="EraserTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-eyedropper" Text="@EyedropperToolText" Click="EyedropperTool" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Selection & fill">
-                        <DxRibbonItem Text="Selection tools" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="@RectangleSelectToolText" Click="RectangleSelectTool" />
-                            <DxRibbonItem Text="@EllipseSelectToolText" Click="EllipseSelectTool" />
-                            <DxRibbonItem Text="@FreeSelectToolText" Click="FreeSelectTool" />
-                            <DxRibbonItem Text="@MagneticSelectToolText" Click="MagneticSelectTool" />
-                            <DxRibbonItem Text="Clear selection" Click="ClearAreaSelection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="Selection tools" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@RectangleSelectToolText" Click="RectangleSelectTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@EllipseSelectToolText" Click="EllipseSelectTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@FreeSelectToolText" Click="FreeSelectTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MagneticSelectToolText" Click="MagneticSelectTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear selection" Click="ClearAreaSelection" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="Area fill" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="@FillSolidToolText" Click="FillSolidTool" />
-                            <DxRibbonItem Text="@FillGradientToolText" Click="FillGradientTool" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Area fill" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-gradient" Text="@FillSolidToolText" Click="FillSolidTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-gradient" Text="@FillGradientToolText" Click="FillGradientTool" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Color">
@@ -110,91 +110,91 @@
                         <DxRibbonColorPaletteItem Text="Secondary" Value="@_drawSecondaryColor" ValueChanged="ChangeDrawSecondaryColor"><Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups></DxRibbonColorPaletteItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Width">
-                        <DxRibbonItem Text="Brush width" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="@DrawWidthText(1)" Click="DrawWidth1" />
-                            <DxRibbonItem Text="@DrawWidthText(3)" Click="DrawWidth3" />
-                            <DxRibbonItem Text="@DrawWidthText(8)" Click="DrawWidth8" />
-                            <DxRibbonItem Text="@DrawWidthText(16)" Click="DrawWidth16" />
-                            <DxRibbonItem Text="@DrawWidthText(32)" Click="DrawWidth32" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Brush width" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(1)" Click="DrawWidth1" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(3)" Click="DrawWidth3" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(8)" Click="DrawWidth8" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(16)" Click="DrawWidth16" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(32)" Click="DrawWidth32" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Output">
                     <DxRibbonGroup Text="Export">
-                        <DxRibbonItem Text="Download" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Download PNG" Click="DownloadPng" />
-                            <DxRibbonItem Text="Download JPEG" Click="DownloadJpeg" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download PNG" Click="DownloadPng" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download JPEG" Click="DownloadJpeg" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Publication">
-                        <DxRibbonItem Text="@(EditingExisting ? "Apply to picture" : "Insert into publication")" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="Apply" />
-                        <DxRibbonItem Text="Cancel" Click="Cancel" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? "Apply to picture" : "Insert into publication")" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="Apply" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Cancel" Click="Cancel" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Effects">
                     <DxRibbonGroup Text="Adjust">
-                        <DxRibbonItem Text="Tone" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Brighten" Enabled="HasSelection" Click="Brighten" />
-                            <DxRibbonItem Text="Darken" Enabled="HasSelection" Click="Darken" />
-                            <DxRibbonItem Text="More contrast" Enabled="HasSelection" Click="MoreContrast" />
-                            <DxRibbonItem Text="More saturation" Enabled="HasSelection" Click="MoreSaturation" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-audio" Text="Tone" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Brighten" Enabled="HasSelection" Click="Brighten" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Darken" Enabled="HasSelection" Click="Darken" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="More contrast" Enabled="HasSelection" Click="MoreContrast" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="More saturation" Enabled="HasSelection" Click="MoreSaturation" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="Soften" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Light soften" Enabled="HasSelection" Click="SoftenLight" />
-                            <DxRibbonItem Text="Medium soften" Enabled="HasSelection" Click="SoftenMedium" />
-                            <DxRibbonItem Text="Remove soften" Enabled="HasSelection" Click="RemoveSoftening" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Soften" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Light soften" Enabled="HasSelection" Click="SoftenLight" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Medium soften" Enabled="HasSelection" Click="SoftenMedium" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove soften" Enabled="HasSelection" Click="RemoveSoftening" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="Color effects" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Grayscale" Enabled="HasSelection" Click="ToggleGrayscalePreset" />
-                            <DxRibbonItem Text="Sepia" Enabled="HasSelection" Click="ToggleSepiaPreset" />
-                            <DxRibbonItem Text="Invert" Enabled="HasSelection" Click="ToggleInvertPreset" />
-                            <DxRibbonItem Text="Reset all" Enabled="HasSelection" Click="ResetAdjustments" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Color effects" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Grayscale" Enabled="HasSelection" Click="ToggleGrayscalePreset" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Sepia" Enabled="HasSelection" Click="ToggleSepiaPreset" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Invert" Enabled="HasSelection" Click="ToggleInvertPreset" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Reset all" Enabled="HasSelection" Click="ResetAdjustments" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="Glow & flare" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Bloom glow" Enabled="HasSelection" Click="ApplyBloomEffect" />
-                            <DxRibbonItem Text="Neon glow" Enabled="HasSelection" Click="ApplyNeonEffect" />
-                            <DxRibbonItem Text="Lens flare" Enabled="HasSelection" Click="ApplyLensFlareEffect" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Glow & flare" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text="Bloom glow" Enabled="HasSelection" Click="ApplyBloomEffect" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text="Neon glow" Enabled="HasSelection" Click="ApplyNeonEffect" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text="Lens flare" Enabled="HasSelection" Click="ApplyLensFlareEffect" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Render Tools" Contextual="true" Visible="IsRenderSelected">
                     <DxRibbonGroup Text="Renderer">
-                        <DxRibbonItem Text="Change renderer" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Clouds" Click="MakeRenderClouds" />
-                            <DxRibbonItem Text="Noise" Click="MakeRenderNoise" />
-                            <DxRibbonItem Text="Stripes" Click="MakeRenderStripes" />
-                            <DxRibbonItem Text="Vignette" Click="MakeRenderVignette" />
-                            <DxRibbonItem Text="Bloom" Click="MakeRenderBloom" />
-                            <DxRibbonItem Text="Neon" Click="MakeRenderNeon" />
-                            <DxRibbonItem Text="Lens flare" Click="MakeRenderLensFlare" />
-                            <DxRibbonItem Text="Grain noise" Click="MakeRenderGrainNoise" />
-                            <DxRibbonItem Text="Motion blur" Click="MakeRenderMotionBlur" />
-                            <DxRibbonItem Text="Wind" Click="MakeRenderWind" />
-                            <DxRibbonItem Text="Ocean waves" Click="MakeRenderOceanWaves" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Change renderer" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Clouds" Click="MakeRenderClouds" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Noise" Click="MakeRenderNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Stripes" Click="MakeRenderStripes" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Vignette" Click="MakeRenderVignette" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Bloom" Click="MakeRenderBloom" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Neon" Click="MakeRenderNeon" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Lens flare" Click="MakeRenderLensFlare" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Grain noise" Click="MakeRenderGrainNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Motion blur" Click="MakeRenderMotionBlur" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Wind" Click="MakeRenderWind" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Ocean waves" Click="MakeRenderOceanWaves" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="New seed" IsPrimary="true" Click="RandomizeRender" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="New seed" IsPrimary="true" Click="RandomizeRender" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Paint Tools" Contextual="true" Visible="IsPaintSelected">
                     <DxRibbonGroup Text="Paint layer">
-                        <DxRibbonItem Text="Paint tool" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Brush" Click="BrushTool" />
-                            <DxRibbonItem Text="Spray can" Click="SprayTool" />
-                            <DxRibbonItem Text="Toothbrush" Click="ToothbrushTool" />
-                            <DxRibbonItem Text="Eraser" Click="EraserTool" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Paint tool" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Brush" Click="BrushTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-spray" Text="Spray can" Click="SprayTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Toothbrush" Click="ToothbrushTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="Eraser" Click="EraserTool" />
                         </DxRibbonItem>
-                        <DxRibbonItem Text="Clear strokes" Enabled="CanDelete" Click="State.ClearSelectedPaint" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear strokes" Enabled="CanDelete" Click="State.ClearSelectedPaint" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsRasterSelected">
                     <DxRibbonGroup Text="Raster">
-                        <DxRibbonItem Text="Replace" IsPrimary="true" Enabled="CanDelete" Click="RequestRasterReplacement" />
-                        <DxRibbonItem Text="Fit and flip" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem Text="Contain" Enabled="CanDelete" Click="RasterContain" />
-                            <DxRibbonItem Text="Cover" Enabled="CanDelete" Click="RasterCover" />
-                            <DxRibbonItem Text="Stretch" Enabled="CanDelete" Click="RasterStretch" />
-                            <DxRibbonItem Text="Flip horizontal" Enabled="CanDelete" Click="RasterFlipHorizontal" />
-                            <DxRibbonItem Text="Flip vertical" Enabled="CanDelete" Click="RasterFlipVertical" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Replace" IsPrimary="true" Enabled="CanDelete" Click="RequestRasterReplacement" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-rotate" Text="Fit and flip" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Contain" Enabled="CanDelete" Click="RasterContain" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Cover" Enabled="CanDelete" Click="RasterCover" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Stretch" Enabled="CanDelete" Click="RasterStretch" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Flip horizontal" Enabled="CanDelete" Click="RasterFlipHorizontal" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Flip vertical" Enabled="CanDelete" Click="RasterFlipVertical" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
@@ -261,9 +261,12 @@
                 </main>
 
                 <aside class="picture-studio-properties">
-                    <div class="picture-pane-heading">
-                        <strong>Properties</strong>
-                        <span>@(State.SelectedLayer?.Kind.ToString() ?? "Canvas")</span>
+                    <div class="picture-pane-heading picture-selection-heading @(State.SelectedLayer is null ? string.Empty : "has-selection")">
+                        <span class="picture-selection-glyph">@(State.SelectedLayer is { } selectedHeadingLayer ? LayerIcon(selectedHeadingLayer) : "▱")</span>
+                        <span class="picture-selection-copy">
+                            <strong>@(State.SelectedLayer is null ? "Canvas properties" : "Selected layer")</strong>
+                            <small>@(State.SelectedLayer is { } selectedHeading ? $"{selectedHeading.Name} · {LayerDescription(selectedHeading)}" : $"{State.Document.WidthPx} × {State.Document.HeightPx} px")</small>
+                        </span>
                     </div>
                     <div class="picture-property-scroll">
                         <section class="picture-property-section">
@@ -557,8 +560,8 @@
                                     </section>
                                     break;
                                 case RenderPictureLayer renderLayer:
-                                    <section class="picture-property-section">
-                                        <h3>Procedural render</h3>
+                                    <section id="picture-render-properties" class="picture-property-section picture-selected-property-section">
+                                        <h3><span class="pub-icon pub-icon-render"></span> Procedural render · @renderLayer.Name</h3>
                                         <label>Renderer
                                             <select value="@renderLayer.RenderKind" @onchange="ChangeRenderKind">
                                                 @foreach (var kind in Enum.GetValues<PictureRenderKind>())
@@ -677,6 +680,65 @@
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="Flip horizontal" Enabled="@(!raster.Locked)" Click="RasterFlipHorizontal" />
                     <DxContextMenuItem Text="Flip vertical" Enabled="@(!raster.Locked)" Click="RasterFlipVertical" />
+                    <DxContextMenuItem Text="Rotate image">
+                        <Items>
+                            <DxContextMenuItem Text="Rotate 90° left" Click="RasterRotateLeft" />
+                            <DxContextMenuItem Text="Rotate 90° right" Click="RasterRotateRight" />
+                            <DxContextMenuItem Text="Reset rotation" Click="RasterResetRotation" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Tint">
+                        <Items>
+                            <DxContextMenuItem Text="No tint" Click="RasterNoTint" />
+                            <DxContextMenuItem Text="Blue tint" Click="RasterBlueTint" />
+                            <DxContextMenuItem Text="Warm tint" Click="RasterWarmTint" />
+                        </Items>
+                    </DxContextMenuItem>
+                }
+                else if (selectedLayer is TextPictureLayer pictureText)
+                {
+                    <DxContextMenuItem Text="Font" IconCssClass="pub-icon pub-icon-text" BeginGroup="true">
+                        <Items>
+                            @foreach (var font in PictureFonts)
+                            {
+                                <DxContextMenuItem Text="@(CheckedText(string.Equals(pictureText.FontFamily, font, StringComparison.OrdinalIgnoreCase), font))" Click="() => SetPictureTextFont(font)" />
+                            }
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Font size · @Math.Round(pictureText.FontSizePx) px">
+                        <Items>
+                            <DxContextMenuItem Text="24 px" Click="TextSize24" />
+                            <DxContextMenuItem Text="48 px" Click="TextSize48" />
+                            <DxContextMenuItem Text="72 px" Click="TextSize72" />
+                            <DxContextMenuItem Text="120 px" Click="TextSize120" />
+                            <DxContextMenuItem Text="180 px" Click="TextSize180" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="@(CheckedText(pictureText.Bold, "Bold"))" Click="TogglePictureTextBold" />
+                    <DxContextMenuItem Text="@(CheckedText(pictureText.Italic, "Italic"))" Click="TogglePictureTextItalic" />
+                    <DxContextMenuItem Text="@(CheckedText(pictureText.ShadowEnabled, "Shadow"))" Click="TogglePictureTextShadow" />
+                    <DxContextMenuItem Text="Alignment">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(pictureText.Alignment == PictureTextAlignment.Left, "Left"))" Click="TextAlignLeft" />
+                            <DxContextMenuItem Text="@(CheckedText(pictureText.Alignment == PictureTextAlignment.Center, "Center"))" Click="TextAlignCenter" />
+                            <DxContextMenuItem Text="@(CheckedText(pictureText.Alignment == PictureTextAlignment.Right, "Right"))" Click="TextAlignRight" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Text color">
+                        <Items>
+                            <DxContextMenuItem Text="Dark blue" Click="TextColorBlue" />
+                            <DxContextMenuItem Text="Black" Click="TextColorBlack" />
+                            <DxContextMenuItem Text="White" Click="TextColorWhite" />
+                            <DxContextMenuItem Text="Red" Click="TextColorRed" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Outline">
+                        <Items>
+                            <DxContextMenuItem Text="No outline" Click="TextOutlineNone" />
+                            <DxContextMenuItem Text="Thin dark outline" Click="TextOutlineThin" />
+                            <DxContextMenuItem Text="Thick white outline" Click="TextOutlineThick" />
+                        </Items>
+                    </DxContextMenuItem>
                 }
                 else if (selectedLayer is PaintPictureLayer paint)
                 {
@@ -704,7 +766,72 @@
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.OceanWaves, "Ocean waves"))" Click="MakeRenderOceanWaves" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="New random seed" Click="RandomizeRender" />
+                    <DxContextMenuItem Text="Edit all renderer properties…" IconCssClass="pub-icon pub-icon-properties" Click="FocusRenderProperties" />
+                    <DxContextMenuItem Text="Colors">
+                        <Items>
+                            <DxContextMenuItem Text="Primary: white" Click="RenderPrimaryWhite" />
+                            <DxContextMenuItem Text="Primary: black" Click="RenderPrimaryBlack" />
+                            <DxContextMenuItem Text="Primary: blue" Click="RenderPrimaryBlue" />
+                            <DxContextMenuItem Text="Secondary: white" BeginGroup="true" Click="RenderSecondaryWhite" />
+                            <DxContextMenuItem Text="Secondary: black" Click="RenderSecondaryBlack" />
+                            <DxContextMenuItem Text="Secondary: blue" Click="RenderSecondaryBlue" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Scale · @Math.Round(render.Scale) px">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Scale - 24) < .01, "24 px"))" Click="RenderScale24" />
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Scale - 64) < .01, "64 px"))" Click="RenderScale64" />
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Scale - 128) < .01, "128 px"))" Click="RenderScale128" />
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Scale - 256) < .01, "256 px"))" Click="RenderScale256" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Detail · @render.Detail">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(render.Detail == 1, "1 · Fast"))" Click="RenderDetail1" />
+                            <DxContextMenuItem Text="@(CheckedText(render.Detail == 2, "2"))" Click="RenderDetail2" />
+                            <DxContextMenuItem Text="@(CheckedText(render.Detail == 4, "4 · Balanced"))" Click="RenderDetail4" />
+                            <DxContextMenuItem Text="@(CheckedText(render.Detail == 6, "6"))" Click="RenderDetail6" />
+                            <DxContextMenuItem Text="@(CheckedText(render.Detail == 8, "8 · Fine"))" Click="RenderDetail8" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Softness · @Math.Round(render.Softness * 100)%">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Softness) < .01, "0%"))" Click="RenderSoftness0" />
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Softness - .25) < .01, "25%"))" Click="RenderSoftness25" />
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Softness - .5) < .01, "50%"))" Click="RenderSoftness50" />
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Softness - .75) < .01, "75%"))" Click="RenderSoftness75" />
+                            <DxContextMenuItem Text="@(CheckedText(Math.Abs(render.Softness - 1) < .01, "100%"))" Click="RenderSoftness100" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="@RenderContrastMenuText(render)">
+                        <Items>
+                            <DxContextMenuItem Text="0.5×" Click="RenderContrast05" />
+                            <DxContextMenuItem Text="1.0×" Click="RenderContrast10" />
+                            <DxContextMenuItem Text="1.5×" Click="RenderContrast15" />
+                            <DxContextMenuItem Text="2.0×" Click="RenderContrast20" />
+                            <DxContextMenuItem Text="3.0×" Click="RenderContrast30" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Angle · @Math.Round(render.AngleDegrees)°">
+                        <Items>
+                            <DxContextMenuItem Text="0°" Click="RenderAngle0" />
+                            <DxContextMenuItem Text="45°" Click="RenderAngle45" />
+                            <DxContextMenuItem Text="90°" Click="RenderAngle90" />
+                            <DxContextMenuItem Text="180°" Click="RenderAngle180" />
+                            <DxContextMenuItem Text="270°" Click="RenderAngle270" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Stripe width · @Math.Round(render.StripeWidthPx) px" Enabled="@(render.RenderKind == PictureRenderKind.Stripes)">
+                        <Items>
+                            <DxContextMenuItem Text="8 px" Click="RenderStripe8" />
+                            <DxContextMenuItem Text="16 px" Click="RenderStripe16" />
+                            <DxContextMenuItem Text="32 px" Click="RenderStripe32" />
+                            <DxContextMenuItem Text="64 px" Click="RenderStripe64" />
+                            <DxContextMenuItem Text="128 px" Click="RenderStripe128" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="New random seed" IconCssClass="pub-icon pub-icon-random" Click="RandomizeRender" />
+                    <DxContextMenuItem Text="Reset renderer settings" Click="ResetRenderSettings" />
                 }
                 else if (selectedLayer is ShapePictureLayer shape)
                 {
@@ -717,6 +844,29 @@
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Line, "Line"))" Click="ShapeLine" />
                         </Items>
                     </DxContextMenuItem>
+                    <DxContextMenuItem Text="Fill type">
+                        <Items>
+                            <DxContextMenuItem Text="@(CheckedText(shape.FillKind == PictureFillKind.Solid, "Solid"))" Click="ShapeFillSolid" />
+                            <DxContextMenuItem Text="@(CheckedText(shape.FillKind == PictureFillKind.LinearGradient, "Linear gradient"))" Click="ShapeFillLinear" />
+                            <DxContextMenuItem Text="@(CheckedText(shape.FillKind == PictureFillKind.RadialGradient, "Radial gradient"))" Click="ShapeFillRadial" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Fill colors">
+                        <Items>
+                            <DxContextMenuItem Text="Blue" Click="ShapeColorsBlue" />
+                            <DxContextMenuItem Text="Green" Click="ShapeColorsGreen" />
+                            <DxContextMenuItem Text="Orange" Click="ShapeColorsOrange" />
+                            <DxContextMenuItem Text="Black / white" Click="ShapeColorsMono" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Stroke width">
+                        <Items>
+                            <DxContextMenuItem Text="None" Click="ShapeStroke0" />
+                            <DxContextMenuItem Text="1 px" Click="ShapeStroke1" />
+                            <DxContextMenuItem Text="3 px" Click="ShapeStroke3" />
+                            <DxContextMenuItem Text="8 px" Click="ShapeStroke8" />
+                        </Items>
+                    </DxContextMenuItem>
                 }
                 else if (selectedLayer is FillPictureLayer fill)
                 {
@@ -727,7 +877,52 @@
                             <DxContextMenuItem Text="@(CheckedText(fill.FillKind == PictureFillKind.RadialGradient, "Radial gradient"))" Click="FillRadialGradient" />
                         </Items>
                     </DxContextMenuItem>
+                    <DxContextMenuItem Text="Color preset">
+                        <Items>
+                            <DxContextMenuItem Text="Blue" Click="FillColorsBlue" />
+                            <DxContextMenuItem Text="Green" Click="FillColorsGreen" />
+                            <DxContextMenuItem Text="Sunset" Click="FillColorsSunset" />
+                            <DxContextMenuItem Text="Black / white" Click="FillColorsMono" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Angle">
+                        <Items>
+                            <DxContextMenuItem Text="0°" Click="FillAngle0" />
+                            <DxContextMenuItem Text="45°" Click="FillAngle45" />
+                            <DxContextMenuItem Text="90°" Click="FillAngle90" />
+                            <DxContextMenuItem Text="180°" Click="FillAngle180" />
+                            <DxContextMenuItem Text="270°" Click="FillAngle270" />
+                        </Items>
+                    </DxContextMenuItem>
                 }
+
+                <DxContextMenuItem Text="Adjustments" IconCssClass="pub-icon pub-icon-color" BeginGroup="true">
+                    <Items>
+                        <DxContextMenuItem Text="Brighten" Click="Brighten" />
+                        <DxContextMenuItem Text="Darken" Click="Darken" />
+                        <DxContextMenuItem Text="More contrast" Click="MoreContrast" />
+                        <DxContextMenuItem Text="More saturation" Click="MoreSaturation" />
+                        <DxContextMenuItem Text="@(CheckedText(selectedLayer.Grayscale > .5, "Grayscale"))" Click="ToggleGrayscalePreset" />
+                        <DxContextMenuItem Text="@(CheckedText(selectedLayer.Sepia > .5, "Sepia"))" Click="ToggleSepiaPreset" />
+                        <DxContextMenuItem Text="@(CheckedText(selectedLayer.Invert > .5, "Invert"))" Click="ToggleInvertPreset" />
+                        <DxContextMenuItem Text="Soften">
+                            <Items>
+                                <DxContextMenuItem Text="None" Click="RemoveSoftening" />
+                                <DxContextMenuItem Text="Light" Click="SoftenLight" />
+                                <DxContextMenuItem Text="Medium" Click="SoftenMedium" />
+                            </Items>
+                        </DxContextMenuItem>
+                        <DxContextMenuItem Text="Reset all adjustments" BeginGroup="true" Click="ResetAdjustments" />
+                    </Items>
+                </DxContextMenuItem>
+                <DxContextMenuItem Text="Opacity">
+                    <Items>
+                        <DxContextMenuItem Text="100%" Click="LayerOpacity100" />
+                        <DxContextMenuItem Text="75%" Click="LayerOpacity75" />
+                        <DxContextMenuItem Text="50%" Click="LayerOpacity50" />
+                        <DxContextMenuItem Text="25%" Click="LayerOpacity25" />
+                    </Items>
+                </DxContextMenuItem>
 
                 <DxContextMenuItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="State.CopySelected" />
                 <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="State.CanPaste" Click="State.Paste" />
@@ -747,7 +942,6 @@
                         <DxContextMenuItem Text="Fit to canvas" Click="State.FitSelectedToCanvas" />
                     </Items>
                 </DxContextMenuItem>
-                <DxContextMenuItem Text="Reset adjustments" Click="ResetAdjustments" />
                 <DxContextMenuItem Text="@(selectedLayer.Locked ? "Unlock layer" : "Lock layer")" BeginGroup="true" Click="ToggleSelectedLockMenu" />
                 <DxContextMenuItem Text="@(selectedLayer.Visible ? "Hide layer" : "Show layer")" Click="ToggleSelectedVisibilityMenu" />
             }

@@ -171,7 +171,8 @@ button { cursor: pointer; }
 .pub-element.selected { outline: 1.5px solid #1787d4; outline-offset: 1px; }
 .pub-element.locked.selected { outline-style: dashed; }
 .text-frame-content { width: 100%; height: 100%; overflow: hidden; user-select: none; }
-.publisher-story-document { width: 100%; min-height: 100%; box-sizing: border-box; }
+.publisher-story-document { position: relative; isolation: isolate; width: 100%; min-height: 100%; box-sizing: border-box; background: var(--publisher-story-page-background, transparent); }
+.publisher-story-document::before { content: ""; position: absolute; z-index: -1; inset: 0; background: var(--publisher-story-page-background, transparent); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .publisher-story-document, .publisher-story-document * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .text-frame-content img { max-width: 100%; }
 .image-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: transparent; isolation: isolate; }
@@ -347,6 +348,14 @@ button { cursor: pointer; }
 .pub-icon-crop::before { content: "⌗"; }.pub-icon-edit::before { content: "✎"; }.pub-icon-color::before { content: "◐"; }
 .pub-icon-layers::before { content: "▱"; }.pub-icon-insert::before { content: "+"; }
 .pub-icon-open::before { content: "▰"; }.pub-icon-save::before { content: "▣"; }.pub-icon-image::before { content: "▧"; }
+.pub-icon-command::before { content: "◆"; font-size: 9px; }.pub-icon-download::before { content: "⇩"; }.pub-icon-play::before { content: "▶"; font-size: 11px; }
+.pub-icon-pause::before { content: "Ⅱ"; }.pub-icon-stop::before { content: "■"; font-size: 10px; }.pub-icon-video::before { content: "▶"; font-size: 10px; }
+.pub-icon-audio::before { content: "♪"; }.pub-icon-barcode::before { content: "▥"; }.pub-icon-chart::before { content: "▥"; }.pub-icon-data::before { content: "▦"; }
+.pub-icon-connector::before { content: "⌁"; }.pub-icon-arrow::before { content: "➜"; }.pub-icon-rectangle::before { content: "□"; }.pub-icon-ellipse::before { content: "○"; }.pub-icon-line::before { content: "╱"; }
+.pub-icon-brush::before { content: "🖌"; font-size: 12px; }.pub-icon-pencil::before { content: "✎"; }.pub-icon-spray::before { content: "⁙"; }.pub-icon-toothbrush::before { content: "⋮"; }
+.pub-icon-eraser::before { content: "▰"; transform: rotate(-35deg); }.pub-icon-eyedropper::before { content: "◒"; }.pub-icon-select::before { content: "⌖"; }.pub-icon-gradient::before { content: "◩"; }
+.pub-icon-animation::before { content: "✦"; }.pub-icon-transition::before { content: "⇄"; }.pub-icon-timeline::before { content: "↦"; }.pub-icon-grid::before { content: "▦"; }.pub-icon-snap::before { content: "⌗"; }
+.pub-icon-guide::before { content: "┼"; }.pub-icon-lock::before { content: "▣"; font-size: 10px; }.pub-icon-visible::before { content: "◉"; }.pub-icon-random::before { content: "⤨"; }.pub-icon-render::before { content: "✺"; }
 .pub-icon-vector::before { content: "◇"; }.pub-icon-web::before { content: "⌘"; }.pub-icon-print::before { content: "▤"; }
 .publication-ribbon .pub-icon { border-radius: 3px; }
 /* Make commands read as actual controls while keeping the Office-style flat ribbon. */
@@ -1615,3 +1624,11 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .publisher-video-export-cancel { position:fixed; right:18px; top:18px; z-index:10003; border:1px solid #ffffff80; border-radius:5px; padding:8px 12px; background:#8f1d1de8; color:white; font:600 12px "Segoe UI",sans-serif; cursor:pointer; box-shadow:0 4px 18px #0007; }
 .publisher-shell.has-recovery { grid-template-rows:38px auto auto 34px minmax(0,1fr) 29px; }
 @media print { .publisher-recovery-banner { display:none !important; } }
+
+.picture-selection-heading { display: grid; grid-template-columns: 30px minmax(0,1fr); align-items: center; gap: 8px; min-height: 44px; }
+.picture-selection-heading.has-selection { color: #0f3f67; background: linear-gradient(90deg,#dbeeff,#f8fbff); box-shadow: inset 3px 0 #1787d4; }
+.picture-selection-glyph { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid #9fbad0; border-radius: 4px; background: #fff; font-weight: 800; }
+.picture-selection-copy { min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.picture-selection-copy small { overflow: hidden; color: #526476; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.picture-selected-property-section { border-color: #8ab8d8 !important; box-shadow: inset 3px 0 #1787d4; }
+.picture-selected-property-section > h3 { display: flex; align-items: center; gap: 6px; color: #0f4c75; }

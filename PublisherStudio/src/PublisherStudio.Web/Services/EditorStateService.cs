@@ -35,6 +35,7 @@ public sealed class EditorStateService
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
     public bool CanPaste => _clipboard.Count > 0;
+    public long ClipboardRevision { get; private set; }
     public PublicationPage CurrentPage => Document.Pages.First(p => p.Id == SelectedPageId);
     public PublicationElement? SelectedElement => CurrentPage.Elements.FirstOrDefault(e => e.Id == SelectedElementId);
     public IReadOnlyList<PublicationElement> SelectedElements => CurrentPage.Elements
@@ -632,6 +633,7 @@ public sealed class EditorStateService
         if (sources.Count == 0) return;
         _clipboard.Clear();
         _clipboard.AddRange(sources.Select(CloneElement));
+        ClipboardRevision++;
         Notify(false);
     }
 
@@ -954,10 +956,21 @@ public sealed class EditorStateService
     {
         var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == id);
         if (element is null || element.Locked || element is ConnectorElement) return;
-        var requestedIds = movingIds is { Count: > 0 } ? movingIds.ToHashSet() : null;
-        var moving = (requestedIds is null
-                ? MovableSelectionFor(element)
-                : CurrentPage.Elements.Where(item => requestedIds.Contains(item.Id)))
+        var requestedIds = movingIds is { Count: > 0 }
+            ? movingIds.ToHashSet()
+            : new HashSet<Guid>();
+
+        // Browser-side movement is optimistic; the server-side selection remains
+        // authoritative. Merge every selected object and the persistent group unit so
+        // lower z-level members cannot be omitted by stale DOM selection markers.
+        if (_selectedElementIds.Contains(element.Id))
+            requestedIds.UnionWith(_selectedElementIds);
+        foreach (var grouped in SelectionUnit(element))
+            requestedIds.Add(grouped.Id);
+        requestedIds.Add(element.Id);
+
+        var moving = CurrentPage.Elements
+            .Where(item => requestedIds.Contains(item.Id))
             .Where(item => !item.Locked && item is not ConnectorElement)
             .DistinctBy(item => item.Id)
             .ToList();
@@ -1056,12 +1069,13 @@ public sealed class EditorStateService
 
     public void SwapPageOrientation() => SetPageSize(CurrentPage.HeightMm, CurrentPage.WidthMm);
 
-    public void UpdateTextDocument(byte[] content, string previewHtml, StoryStorageFormat format = StoryStorageFormat.OpenXml)
+    public void UpdateTextDocument(byte[] content, string previewHtml, string documentBackground, StoryStorageFormat format = StoryStorageFormat.OpenXml)
     {
         if (SelectedElement is not TextFrameElement text || text.Locked) return;
         Capture();
         text.DocumentContent = content;
         text.PreviewHtml = PublicationFileService.SanitizePreviewHtml(previewHtml);
+        text.DocumentBackground = PublicationFileService.NormalizeCssBackground(documentBackground);
         text.StoryFormat = format;
         Notify();
     }

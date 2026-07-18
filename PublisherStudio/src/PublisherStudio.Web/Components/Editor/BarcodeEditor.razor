@@ -13,34 +13,34 @@
                 <DxRibbonTab Text="Barcode">
                     <DxRibbonGroup Text="Format" IconCssClass="pub-icon pub-icon-barcode">
                         <DxRibbonItem Text="QR Code" IconCssClass="pub-icon pub-icon-barcode" Click="SetQrCode" />
-                        <DxRibbonItem Text="Code 128" Click="SetCode128" />
-                        <DxRibbonItem Text="Code 39" Click="SetCode39" />
-                        <DxRibbonItem Text="EAN-13" Click="SetEan13" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-barcode" Text="Code 128" Click="SetCode128" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-barcode" Text="Code 39" Click="SetCode39" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-barcode" Text="EAN-13" Click="SetEan13" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="More formats">
-                        <DxRibbonItem Text="UPC-A" Click="SetUpcA" />
-                        <DxRibbonItem Text="ITF-14" Click="SetItf14" />
-                        <DxRibbonItem Text="Codabar" Click="SetCodabar" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-barcode" Text="UPC-A" Click="SetUpcA" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-barcode" Text="ITF-14" Click="SetItf14" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-barcode" Text="Codabar" Click="SetCodabar" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Generate">
-                        <DxRibbonItem Text="Regenerate" Click="RefreshNow" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-random" Text="Regenerate" Click="RefreshNow" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Design">
                     <DxRibbonGroup Text="Colors">
-                        <DxRibbonItem Text="Swap foreground / background" Click="SwapColors" />
-                        <DxRibbonItem Text="@TransparencyCommandText" Click="ToggleTransparency" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Swap foreground / background" Click="SwapColors" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="@TransparencyCommandText" Click="ToggleTransparency" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Module / bar design">
-                        <DxRibbonItem Text="Square" Click="SetSquare" />
-                        <DxRibbonItem Text="Rounded" Click="SetRounded" />
-                        <DxRibbonItem Text="Dots" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetDots" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Square" Click="SetSquare" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Rounded" Click="SetRounded" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Dots" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetDots" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="QR correction">
-                        <DxRibbonItem Text="Low (L)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetLowCorrection" />
-                        <DxRibbonItem Text="Medium (M)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetMediumCorrection" />
-                        <DxRibbonItem Text="Quartile (Q)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetQuartileCorrection" />
-                        <DxRibbonItem Text="High (H)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetHighCorrection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Low (L)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetLowCorrection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Medium (M)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetMediumCorrection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Quartile (Q)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetQuartileCorrection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="High (H)" Enabled="@(_draft.Format == PublicationBarcodeFormat.QrCode)" Click="SetHighCorrection" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>

@@ -507,17 +507,25 @@ function createExternalDropPreview(state, file, kind) {
     return preview;
 }
 
-function positionExternalDropPreview(state, event) {
+function positionExternalDropPreviewAt(state, placement) {
     const preview = state.externalDropPreview;
     if (!preview) return null;
-    const rect = state.page.getBoundingClientRect();
-    const xPx = clamp(event.clientX - rect.left, 0, rect.width);
-    const yPx = clamp(event.clientY - rect.top, 0, rect.height);
-    preview.ghost.style.left = `${xPx}px`;
-    preview.ghost.style.top = `${yPx}px`;
-    const x = clamp(xPx / state.config.pxPerMm, 0, number(state.page.dataset.pageWidthMm));
-    const y = clamp(yPx / state.config.pxPerMm, 0, number(state.page.dataset.pageHeightMm));
+    const pageWidth = number(state.page.dataset.pageWidthMm);
+    const pageHeight = number(state.page.dataset.pageHeightMm);
+    const x = clamp(number(placement?.x, pageWidth / 2), 0, pageWidth);
+    const y = clamp(number(placement?.y, pageHeight / 2), 0, pageHeight);
+    preview.ghost.style.left = `${x * state.config.pxPerMm}px`;
+    preview.ghost.style.top = `${y * state.config.pxPerMm}px`;
+    state.lastInsertionPoint = { x, y };
     return { x, y };
+}
+
+function positionExternalDropPreview(state, event) {
+    const rect = state.page.getBoundingClientRect();
+    return positionExternalDropPreviewAt(state, {
+        x: (event.clientX - rect.left) / state.config.pxPerMm,
+        y: (event.clientY - rect.top) / state.config.pxPerMm
+    });
 }
 
 function externalFileDragOver(state, event) {
@@ -534,6 +542,45 @@ function externalFileDragOver(state, event) {
     return true;
 }
 
+async function importExternalFileAt(state, file, placement, existingPreview = null) {
+    const kind = externalDropKind(file);
+    const preview = existingPreview || createExternalDropPreview(state, file, kind);
+    positionExternalDropPreviewAt(state, placement);
+    if (!kind || kind === 'docx') {
+        clearExternalDropPreview(state);
+        await safeDotNet(state, 'ExternalFileDropFailed', kind === 'docx'
+            ? 'DOCX import is not available yet. Use a picture, video, text, or Markdown file.'
+            : `The file '${file?.name || 'file'}' is not a supported picture, video, text, or Markdown file.`);
+        return false;
+    }
+
+    const assetId = crypto.randomUUID();
+    try {
+        preview?.overlay?.classList?.add('uploading');
+        const message = preview?.overlay?.querySelector?.('.publisher-external-drop-message');
+        if (message) message.textContent = `Importing ${file?.name || kind}…`;
+        const response = await fetch(`/api/assets/drop/${encodeURIComponent(assetId)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': file?.type || 'application/octet-stream',
+                'X-Publisher-File-Name': encodeURIComponent(file?.name || '')
+            },
+            body: file
+        });
+        if (!response.ok) throw new Error((await response.text()) || `Upload failed with status ${response.status}.`);
+        await safeDotNet(state, 'CompleteExternalFileDrop', assetId, kind, file?.name || kind,
+            file?.type || 'application/octet-stream', file?.size || 0,
+            preview?.durationSeconds || 0, preview?.pixelWidth || 0, preview?.pixelHeight || 0,
+            placement.x, placement.y);
+        return true;
+    } catch (error) {
+        await safeDotNet(state, 'ExternalFileDropFailed', error?.message || String(error));
+        return false;
+    } finally {
+        clearExternalDropPreview(state);
+    }
+}
+
 async function externalFileDrop(state, event) {
     const file = externalDraggedFile(event);
     if (!file) return false;
@@ -541,37 +588,88 @@ async function externalFileDrop(state, event) {
     event.stopPropagation();
     const preview = state.externalDropPreview || createExternalDropPreview(state, file, externalDropKind(file));
     const placement = positionExternalDropPreview(state, event) || { x: 0, y: 0 };
-    const kind = preview?.kind || externalDropKind(file);
-    if (!kind || kind === 'docx') {
-        clearExternalDropPreview(state);
-        await safeDotNet(state, 'ExternalFileDropFailed', kind === 'docx'
-            ? 'DOCX drag and drop is not available yet. Drop a picture, video, text, or Markdown file.'
-            : `The file '${file.name || 'file'}' is not a supported picture, video, text, or Markdown file.`);
-        return true;
-    }
-
-    const assetId = crypto.randomUUID();
-    try {
-        preview?.overlay?.classList?.add('uploading');
-        const message = preview?.overlay?.querySelector?.('.publisher-external-drop-message');
-        if (message) message.textContent = `Importing ${file.name || kind}…`;
-        const response = await fetch(`/api/assets/drop/${encodeURIComponent(assetId)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': file.type || 'application/octet-stream', 'X-Publisher-File-Name': encodeURIComponent(file.name || '') },
-            body: file
-        });
-        if (!response.ok) throw new Error((await response.text()) || `Upload failed with status ${response.status}.`);
-        await safeDotNet(state, 'CompleteExternalFileDrop', assetId, kind, file.name || kind,
-            file.type || 'application/octet-stream', file.size || 0,
-            preview?.durationSeconds || 0, preview?.pixelWidth || 0, preview?.pixelHeight || 0,
-            placement.x, placement.y);
-    } catch (error) {
-        await safeDotNet(state, 'ExternalFileDropFailed', error?.message || String(error));
-    } finally {
-        clearExternalDropPreview(state);
-    }
+    await importExternalFileAt(state, file, placement, preview);
     return true;
 }
+
+function canvasClipboardFiles(event) {
+    const transfer = event?.clipboardData;
+    if (!transfer) return [];
+    const files = [...(transfer.files || [])].filter(file => file instanceof Blob);
+    for (const item of [...(transfer.items || [])]) {
+        if (item.kind !== 'file') continue;
+        const file = item.getAsFile?.();
+        if (file && !files.includes(file)) files.push(file);
+    }
+    return files;
+}
+
+function canvasClipboardPlacement(state, index = 0) {
+    const pageWidth = number(state.page?.dataset?.pageWidthMm);
+    const pageHeight = number(state.page?.dataset?.pageHeightMm);
+    const base = state.lastInsertionPoint || { x: pageWidth / 2, y: pageHeight / 2 };
+    const offset = index * 4;
+    return {
+        x: clamp(number(base.x, pageWidth / 2) + offset, 0, pageWidth),
+        y: clamp(number(base.y, pageHeight / 2) + offset, 0, pageHeight)
+    };
+}
+
+function namedClipboardFile(file, index) {
+    if (file?.name) return file;
+    const mime = String(file?.type || '').toLowerCase();
+    const extension = mime.startsWith('image/') ? (mime.split('/')[1] || 'png').replace('jpeg', 'jpg')
+        : mime.startsWith('video/') ? (mime.split('/')[1] || 'webm').replace('quicktime', 'mov')
+        : mime === 'text/markdown' ? 'md'
+        : 'txt';
+    return new File([file], `Pasted ${mime.startsWith('image/') ? 'image' : mime.startsWith('video/') ? 'video' : 'file'} ${index + 1}.${extension}`,
+        { type: file?.type || 'application/octet-stream', lastModified: Date.now() });
+}
+
+async function canvasDocumentPaste(state, event) {
+    if (!state?.keyboardActive || !state.stage?.isConnected || event.defaultPrevented || isPublisherEditableTarget(event.target)) return;
+    if (state.pendingPasteTimer) clearTimeout(state.pendingPasteTimer);
+    state.pendingPasteTimer = 0;
+
+    const files = canvasClipboardFiles(event);
+    const types = [...(event.clipboardData?.types || [])].map(value => String(value).toLowerCase());
+    const plainText = String(event.clipboardData?.getData?.('text/plain') || '');
+    const markdownText = String(event.clipboardData?.getData?.('text/markdown') || '');
+    const externalText = markdownText || plainText;
+    const preferInternal = state.internalClipboardArmed && !state.externalClipboardLikely;
+    const useExternalText = Boolean(externalText.trim()) && !preferInternal;
+
+    if (preferInternal || (!files.length && !useExternalText)) {
+        event.preventDefault();
+        event.stopPropagation();
+        resetCanvasTransientState(state, true);
+        safeDotNet(state, 'KeyboardPaste');
+        state.externalClipboardLikely = false;
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    resetCanvasTransientState(state, true);
+    state.internalClipboardArmed = false;
+    state.externalClipboardLikely = true;
+
+    if (files.length) {
+        for (let index = 0; index < files.length; index++) {
+            const file = namedClipboardFile(files[index], index);
+            await importExternalFileAt(state, file, canvasClipboardPlacement(state, index));
+        }
+        return;
+    }
+
+    const markdown = Boolean(markdownText) || types.includes('text/markdown');
+    const file = new File([externalText], markdown ? 'Pasted Markdown.md' : 'Pasted Text.txt', {
+        type: markdown ? 'text/markdown' : 'text/plain',
+        lastModified: Date.now()
+    });
+    await importExternalFileAt(state, file, canvasClipboardPlacement(state, 0));
+}
+
 
 export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) {
     const stage = document.getElementById(stageId);
@@ -591,7 +689,11 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         snapInObjects: Boolean(config?.snapInObjects),
         gridSpacingMm: Math.max(.1, number(config?.gridSpacingMm, 2.5)),
         connectorTool: String(config?.connectorTool || 'None'),
-        revision: number(config?.revision, 0)
+        selectedElementIds: new Set((Array.isArray(config?.selectedElementIds) ? config.selectedElementIds : [])
+            .map(value => String(value || '').toLowerCase())
+            .filter(Boolean)),
+        internalClipboardAvailable: Boolean(config?.internalClipboardAvailable),
+        clipboardRevision: number(config?.clipboardRevision, 0)
     };
 
     let state = canvasStates.get(stage);
@@ -612,6 +714,10 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             externalDropPreview: null,
             insertDropPreview: null,
             keyboardActive: false,
+            internalClipboardArmed: normalizedConfig.internalClipboardAvailable,
+            externalClipboardLikely: false,
+            pendingPasteTimer: 0,
+            lastInsertionPoint: null,
             handlers: {}
         };
 
@@ -629,9 +735,15 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         };
         handlers.windowPointerUp = event => pointerUp(state, event);
         handlers.windowPointerCancel = event => pointerCancel(state, event);
-        handlers.windowBlur = () => resetPointerOperation(state, true);
+        handlers.windowBlur = () => {
+            state.externalClipboardLikely = true;
+            resetPointerOperation(state, true);
+        };
         handlers.visibilityChange = () => {
-            if (document.hidden) resetPointerOperation(state, true);
+            if (document.hidden) {
+                state.externalClipboardLikely = true;
+                resetPointerOperation(state, true);
+            }
         };
         handlers.stagePointerLeave = () => {
             state.cursorX = null;
@@ -641,6 +753,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         handlers.stageWheel = event => cropWheel(state, event);
         handlers.stageKeyDown = event => canvasKeyDown(state, event);
         handlers.documentKeyDown = event => canvasDocumentKeyDown(state, event);
+        handlers.documentPaste = event => canvasDocumentPaste(state, event);
         handlers.stageDragEnter = event => insertionDragOver(state, event);
         handlers.stageDragOver = event => insertionDragOver(state, event);
         handlers.stageDrop = event => insertionDrop(state, event);
@@ -656,7 +769,9 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         handlers.documentClick = event => suppressInsertionClick(state, event);
         handlers.scroll = () => nextAnimationFrame(state);
 
-        stage.addEventListener('pointerdown', handlers.stagePointerDown);
+        // Capture phase keeps selection alive even when nested media, SVG, chart,
+        // or animation content stops pointer events in its own component tree.
+        stage.addEventListener('pointerdown', handlers.stagePointerDown, true);
         stage.addEventListener('pointermove', handlers.stagePointerMove);
         stage.addEventListener('pointerup', handlers.stagePointerUp);
         stage.addEventListener('pointercancel', handlers.stagePointerCancel);
@@ -670,6 +785,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         stage.addEventListener('wheel', handlers.stageWheel, { passive: false });
         stage.addEventListener('keydown', handlers.stageKeyDown);
         document.addEventListener('keydown', handlers.documentKeyDown, true);
+        document.addEventListener('paste', handlers.documentPaste, true);
         stage.addEventListener('dragenter', handlers.stageDragEnter);
         stage.addEventListener('dragover', handlers.stageDragOver);
         stage.addEventListener('drop', handlers.stageDrop);
@@ -688,12 +804,16 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
     }
 
     const pageChanged = state.page !== page;
-    const revisionChanged = number(state.config?.revision, -1) !== normalizedConfig.revision;
-    if ((pageChanged || revisionChanged) && state.operation) resetPointerOperation(state, true);
-    if (pageChanged || revisionChanged) {
+    const clipboardChanged = number(state.config?.clipboardRevision, -1) !== normalizedConfig.clipboardRevision;
+    if (clipboardChanged && normalizedConfig.internalClipboardAvailable) {
+        state.internalClipboardArmed = true;
+        state.externalClipboardLikely = false;
+    }
+    if (pageChanged && state.operation) resetPointerOperation(state, true);
+    if (pageChanged) {
         clearInsertionDrag(state);
         clearExternalDropPreview(state);
-        clearPublicationPreview(state.page?.id || state.page);
+        try { clearPublicationPreview(state.page?.id || state.page); } catch { }
     }
     state.scroll = scroll;
     state.page = page;
@@ -715,6 +835,8 @@ export function disposeCanvas(stageId) {
     if (!state) return;
 
     resetPointerOperation(state, true);
+    if (state.pendingPasteTimer) clearTimeout(state.pendingPasteTimer);
+    state.pendingPasteTimer = 0;
     clearObjectAlignmentFeedback(state);
     clearInsertionDrag(state);
     clearExternalDropPreview(state);
@@ -723,7 +845,7 @@ export function disposeCanvas(stageId) {
     state.cropTimers?.clear?.();
 
     const handlers = state.handlers || {};
-    stage.removeEventListener('pointerdown', handlers.stagePointerDown);
+    stage.removeEventListener('pointerdown', handlers.stagePointerDown, true);
     stage.removeEventListener('pointermove', handlers.stagePointerMove);
     stage.removeEventListener('pointerup', handlers.stagePointerUp);
     stage.removeEventListener('pointercancel', handlers.stagePointerCancel);
@@ -732,6 +854,7 @@ export function disposeCanvas(stageId) {
     stage.removeEventListener('wheel', handlers.stageWheel);
     stage.removeEventListener('keydown', handlers.stageKeyDown);
     document.removeEventListener('keydown', handlers.documentKeyDown, true);
+    document.removeEventListener('paste', handlers.documentPaste, true);
     stage.removeEventListener('dragenter', handlers.stageDragEnter);
     stage.removeEventListener('dragover', handlers.stageDragOver);
     stage.removeEventListener('drop', handlers.stageDrop);
@@ -824,7 +947,8 @@ function resetCanvasTransientState(state, restoreDom = true) {
     clearConnectorOperation(state, true);
     clearInsertionDrag(state);
     clearExternalDropPreview(state);
-    clearPublicationPreview(state.page?.id || state.page);
+    try { clearPublicationPreview(state.page?.id || state.page); }
+    catch (error) { console.warn('Publisher transient preview cleanup failed.', error); }
 }
 
 function invokeCanvasKeyboardCommand(state, event, method, ...args) {
@@ -846,9 +970,27 @@ function canvasDocumentKeyDown(state, event) {
         event.preventDefault();
         return;
     }
-    if (command && key === 'c') return invokeCanvasKeyboardCommand(state, event, 'KeyboardCopy');
-    if (command && key === 'x') return invokeCanvasKeyboardCommand(state, event, 'KeyboardCut');
-    if (command && key === 'v') return invokeCanvasKeyboardCommand(state, event, 'KeyboardPaste');
+    if (command && key === 'c') {
+        state.internalClipboardArmed = true;
+        state.externalClipboardLikely = false;
+        return invokeCanvasKeyboardCommand(state, event, 'KeyboardCopy');
+    }
+    if (command && key === 'x') {
+        state.internalClipboardArmed = true;
+        state.externalClipboardLikely = false;
+        return invokeCanvasKeyboardCommand(state, event, 'KeyboardCut');
+    }
+    if (command && key === 'v') {
+        // Do not cancel the native paste event: it is the only standards-based way
+        // for the browser to expose files copied from Explorer/Finder or external text.
+        if (state.pendingPasteTimer) clearTimeout(state.pendingPasteTimer);
+        state.pendingPasteTimer = setTimeout(() => {
+            state.pendingPasteTimer = 0;
+            resetCanvasTransientState(state, true);
+            safeDotNet(state, 'KeyboardPaste');
+        }, 80);
+        return;
+    }
     if (command && key === 'd') return invokeCanvasKeyboardCommand(state, event, 'KeyboardDuplicate');
     if (command && key === 'a') return invokeCanvasKeyboardCommand(state, event, 'KeyboardSelectAll');
     if (command && key === 'g' && event.shiftKey) return invokeCanvasKeyboardCommand(state, event, 'KeyboardUngroup');
@@ -1055,8 +1197,35 @@ function mediaPointerTargetsControls(event) {
     return relativeY >= rect.height - controlBand;
 }
 
+function selectableNodes(state) {
+    return [...state.page.querySelectorAll('[data-publication-element][data-element-id]')];
+}
+
 function selectionNodes(state) {
-    return [...state.page.querySelectorAll('[data-publication-element][data-element-id]:not([data-connector-id])')];
+    return selectableNodes(state).filter(item => !item.matches('[data-connector-id]'));
+}
+
+function selectedElementIdSet(state) {
+    const ids = new Set(state.config?.selectedElementIds || []);
+    for (const item of selectableNodes(state)) {
+        if (item.dataset.selected === 'true' || item.classList.contains('selected'))
+            ids.add(String(item.dataset.elementId || '').toLowerCase());
+    }
+    ids.delete('');
+    return ids;
+}
+
+function synchronizeSelectionDom(state, ids, primaryId = null) {
+    const normalized = new Set([...ids].map(value => String(value || '').toLowerCase()).filter(Boolean));
+    const primary = String(primaryId || '').toLowerCase();
+    state.config.selectedElementIds = normalized;
+    for (const item of selectableNodes(state)) {
+        const id = String(item.dataset.elementId || '').toLowerCase();
+        const selected = normalized.has(id);
+        item.dataset.selected = selected ? 'true' : 'false';
+        item.classList.toggle('selected', selected);
+        item.classList.toggle('selection-primary', selected && id === primary);
+    }
 }
 
 function selectionUnitNodes(state, element) {
@@ -1065,8 +1234,24 @@ function selectionUnitNodes(state, element) {
     return selectionNodes(state).filter(item => item.dataset.groupId === groupId);
 }
 
+function optimisticSelectElement(state, element, additive) {
+    const unitIds = selectionUnitNodes(state, element)
+        .map(item => String(item.dataset.elementId || '').toLowerCase())
+        .filter(Boolean);
+    let ids = selectedElementIdSet(state);
+    if (additive) {
+        const remove = unitIds.length > 0 && unitIds.every(id => ids.has(id));
+        for (const id of unitIds) remove ? ids.delete(id) : ids.add(id);
+    } else {
+        ids = new Set(unitIds);
+    }
+    synchronizeSelectionDom(state, ids, element.dataset.elementId);
+    return ids;
+}
+
 function movingNodesForPointer(state, element, additive, wasSelected) {
-    const selected = selectionNodes(state).filter(item => item.dataset.selected === 'true' || item.classList.contains('selected'));
+    const selectedIds = selectedElementIdSet(state);
+    const selected = selectionNodes(state).filter(item => selectedIds.has(String(item.dataset.elementId || '').toLowerCase()));
     const unit = selectionUnitNodes(state, element);
     if (!additive) return wasSelected && selected.length ? selected : unit;
     if (wasSelected) return selected.length ? selected : unit;
@@ -1113,9 +1298,9 @@ function registerCanvasClick(state, operation, event) {
 function pointerDown(state, event) {
     if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
     state.keyboardActive = true;
-    clearPublicationPreview(state.page?.id || state.page);
+    try { clearPublicationPreview(state.page?.id || state.page); }
+    catch (error) { console.warn('Publisher animation preview cleanup failed.', error); }
     if (state.operation) resetPointerOperation(state, true);
-    if (mediaPointerTargetsControls(event)) return;
     state.stage.focus({ preventScroll: true });
 
     const insertionRect = state.page.getBoundingClientRect();
@@ -1123,7 +1308,20 @@ function pointerDown(state, event) {
         event.clientY >= insertionRect.top && event.clientY <= insertionRect.bottom) {
         const insertionX = clamp((event.clientX - insertionRect.left) / state.config.pxPerMm, 0, number(state.page.dataset.pageWidthMm));
         const insertionY = clamp((event.clientY - insertionRect.top) / state.config.pxPerMm, 0, number(state.page.dataset.pageHeightMm));
+        state.lastInsertionPoint = { x: insertionX, y: insertionY };
         safeDotNet(state, 'SetInsertionPoint', insertionX, insertionY);
+    }
+
+    if (mediaPointerTargetsControls(event)) {
+        const owner = event.target.closest('[data-publication-element][data-element-id]');
+        if (owner && state.page.contains(owner)) {
+            const id = String(owner.dataset.elementId || '');
+            if (id && !selectedElementIdSet(state).has(id.toLowerCase())) {
+                optimisticSelectElement(state, owner, false);
+                safeDotNet(state, 'SelectElement', id, false);
+            }
+        }
+        return;
     }
 
     const endpoint = event.target.closest('[data-connector-end]');
@@ -1187,14 +1385,17 @@ function pointerDown(state, event) {
     if (!element || !state.page.contains(element)) {
         if (state.page.contains(event.target) || state.scroll.contains(event.target)) {
             state.lastCanvasClick = null;
-            if (!connectorToolActive(state)) safeDotNet(state, 'ClearSelectionFromCanvas');
+            if (!connectorToolActive(state)) {
+                synchronizeSelectionDom(state, new Set(), null);
+                safeDotNet(state, 'ClearSelectionFromCanvas');
+            }
             event.preventDefault();
         }
         return;
     }
 
     const id = element.dataset.elementId;
-    const wasSelected = element.dataset.selected === 'true' || element.classList.contains('selected');
+    const wasSelected = selectedElementIdSet(state).has(String(id || '').toLowerCase());
     const additive = Boolean(event.ctrlKey || event.metaKey || event.shiftKey);
     const activeConnectorTool = connectorToolActive(state);
     if (activeConnectorTool) {
@@ -1204,7 +1405,10 @@ function pointerDown(state, event) {
         return;
     }
     const pendingToggle = additive && wasSelected;
-    if (!pendingToggle && (!wasSelected || additive)) safeDotNet(state, 'SelectElement', id, additive);
+    if (!pendingToggle && (!wasSelected || additive)) {
+        optimisticSelectElement(state, element, additive);
+        safeDotNet(state, 'SelectElement', id, additive);
+    }
     if (element.classList.contains('locked')) return;
     if (element.matches('[data-connector-id]')) return;
 
@@ -1454,12 +1658,17 @@ function pointerUp(state, event) {
 
     if (!operation.moved) {
         if (operation.additive) {
-            if (operation.pendingToggle) safeDotNet(state, 'SelectElement', operation.id, true);
+            if (operation.pendingToggle) {
+                optimisticSelectElement(state, operation.element, true);
+                safeDotNet(state, 'SelectElement', operation.id, true);
+            }
             state.lastCanvasClick = null;
             return;
         }
-        if (operation.wasSelected && (operation.moving?.length || 0) > 1)
+        if (operation.wasSelected && (operation.moving?.length || 0) > 1) {
+            optimisticSelectElement(state, operation.element, false);
             safeDotNet(state, 'SelectElement', operation.id, false);
+        }
         registerCanvasClick(state, operation, event);
         return;
     }
@@ -4329,9 +4538,79 @@ export function consumeCanvasInsertPlacement(id) {
 }
 
 
-async function prepareStoryPreviewHtml(html) {
+function storyBackgroundIsVisible(value) {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (!normalized || normalized === 'transparent' || normalized === 'none') return false;
+    if (normalized === 'rgba(0, 0, 0, 0)' || normalized === 'rgba(0,0,0,0)') return false;
+    if (/^rgba?\([^)]*,\s*0(?:\.0+)?\s*\)$/.test(normalized)) return false;
+    return true;
+}
+
+function storyStyleBackgroundColor(style) {
+    if (!style) return '';
+    const color = style.getPropertyValue?.('background-color') || style.backgroundColor || '';
+    return storyBackgroundIsVisible(color) ? color.trim() : '';
+}
+
+function storyPageRuleBackground(doc) {
+    const visit = rules => {
+        for (const rule of rules || []) {
+            try {
+                const text = String(rule.cssText || '').trim().toLowerCase();
+                if (text.startsWith('@page') && rule.style) {
+                    const color = storyStyleBackgroundColor(rule.style);
+                    if (color) return color;
+                }
+                if (rule.cssRules) {
+                    const nested = visit(rule.cssRules);
+                    if (nested) return nested;
+                }
+            } catch { }
+        }
+        return '';
+    };
+    for (const sheet of doc.styleSheets || []) {
+        try {
+            const color = visit(sheet.cssRules);
+            if (color) return color;
+        } catch { }
+    }
+    return '';
+}
+
+function storyDocumentBackground(doc, view) {
+    const pageRule = storyPageRuleBackground(doc);
+    if (pageRule) return pageRule;
+
+    const roots = [doc.documentElement, doc.body];
+    for (const root of roots) {
+        if (!root) continue;
+        const color = storyStyleBackgroundColor(view.getComputedStyle(root));
+        if (color) return color;
+    }
+
+    const bodyRect = doc.body.getBoundingClientRect();
+    const referenceArea = Math.max(1,
+        Math.max(bodyRect.width, doc.documentElement.scrollWidth, doc.body.scrollWidth)
+        * Math.max(bodyRect.height, doc.documentElement.scrollHeight, doc.body.scrollHeight));
+    let best = null;
+    for (const element of doc.body.querySelectorAll('*')) {
+        const rect = element.getBoundingClientRect();
+        const area = Math.max(0, rect.width) * Math.max(0, rect.height);
+        if (area < referenceArea * .45) continue;
+        const color = storyStyleBackgroundColor(view.getComputedStyle(element));
+        if (!color) continue;
+        if (!best || area > best.area) best = { color, area };
+    }
+    return best?.color || 'transparent';
+}
+
+async function prepareStoryPreviewHtml(html, preferredBackground = '') {
     const source = String(html || '');
-    if (!source.trim()) return '<div class="publisher-story-document"><p></p></div>';
+    if (!source.trim()) return {
+        html: '<div class="publisher-story-document"><p></p></div>',
+        background: 'transparent'
+    };
 
     const parsed = new DOMParser().parseFromString(source, 'text/html');
     parsed.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => node.remove());
@@ -4360,9 +4639,13 @@ async function prepareStoryPreviewHtml(html) {
         frame.srcdoc = '<!doctype html>' + parsed.documentElement.outerHTML;
         await loaded;
         const doc = frame.contentDocument;
-        if (!doc?.body) throw new Error('The story HTML preview document could not be created.');
+        const view = frame.contentWindow;
+        if (!doc?.body || !view) throw new Error('The story HTML preview document could not be created.');
         try { await doc.fonts?.ready; } catch { }
 
+        const documentBackground = storyBackgroundIsVisible(preferredBackground)
+            ? String(preferredBackground).trim()
+            : storyDocumentBackground(doc, view);
         const originalNodes = [doc.body, ...doc.body.querySelectorAll('*')];
         const cloneBody = doc.body.cloneNode(true);
         const cloneNodes = [cloneBody, ...cloneBody.querySelectorAll('*')];
@@ -4387,7 +4670,7 @@ async function prepareStoryPreviewHtml(html) {
         for (let index = 0; index < Math.min(originalNodes.length, cloneNodes.length); index++) {
             const original = originalNodes[index];
             const clone = cloneNodes[index];
-            const computed = frame.contentWindow.getComputedStyle(original);
+            const computed = view.getComputedStyle(original);
             const inline = [];
             for (const property of properties) {
                 const value = computed.getPropertyValue(property);
@@ -4401,7 +4684,15 @@ async function prepareStoryPreviewHtml(html) {
 
         cloneBody.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => node.remove());
         const bodyStyle = cloneBody.getAttribute('style') || '';
-        return `<div class="publisher-story-document" style="${bodyStyle};width:100%;min-height:100%;height:auto">${cloneBody.innerHTML}</div>`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'publisher-story-document';
+        wrapper.style.cssText = `${bodyStyle};width:100%;min-height:100%;height:auto`;
+        if (storyBackgroundIsVisible(documentBackground)) {
+            wrapper.style.setProperty('--publisher-story-page-background', documentBackground);
+            wrapper.style.backgroundColor = documentBackground;
+        }
+        wrapper.innerHTML = cloneBody.innerHTML;
+        return { html: wrapper.outerHTML, background: documentBackground };
     } finally {
         frame.remove();
     }
@@ -4419,11 +4710,37 @@ window.publisherStudio = {
     },
     cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
     initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
-    prepareStoryPreviewHtml(html) { return prepareStoryPreviewHtml(html); },
+    prepareStoryPreviewHtml(html, preferredBackground = '') { return prepareStoryPreviewHtml(html, preferredBackground); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
 
     clickElement(id) { clickElementById(id); },
+    focusElement(id) {
+        const element = document.getElementById(id);
+        if (!element) return;
+        element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+        const focusable = element.querySelector('input,select,textarea,button,[tabindex]:not([tabindex="-1"])');
+        setTimeout(() => { try { focusable?.focus({ preventScroll: true }); } catch { } }, 180);
+    },
+    printStoryHtml(html) {
+        const frame = document.createElement('iframe');
+        frame.setAttribute('aria-hidden', 'true');
+        frame.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none';
+        const remove = () => { try { frame.remove(); } catch { } };
+        frame.addEventListener('load', () => {
+            const view = frame.contentWindow;
+            if (!view) { remove(); return; }
+            const cleanup = () => setTimeout(remove, 250);
+            view.addEventListener('afterprint', cleanup, { once: true });
+            setTimeout(() => {
+                try { view.focus(); view.print(); }
+                catch { remove(); }
+                setTimeout(remove, 60000);
+            }, 120);
+        }, { once: true });
+        document.body.appendChild(frame);
+        frame.srcdoc = String(html || '');
+    },
     consumeCanvasInsertPlacement(id) { return consumeCanvasInsertPlacement(id); },
 
     initializeWorkspace(id) {

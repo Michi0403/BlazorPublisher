@@ -59,7 +59,7 @@
                         @switch (element)
                         {
                             case TextFrameElement text:
-                                <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@text.Background;border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                                <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;border:@Mm(text.BorderWidth) solid @text.BorderColor">
                                     @((MarkupString)text.PreviewHtml)
                                 </div>
                                 break;
@@ -307,4 +307,11 @@
     private static string Mm(double value) => $"{Inv(value)}mm";
     private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+
+    private static string StoryBackground(TextFrameElement text) =>
+        string.IsNullOrWhiteSpace(text.DocumentBackground) || string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase)
+            ? text.Background
+            : text.DocumentBackground;
+
+
 }

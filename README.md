@@ -1,15 +1,11 @@
 Installer for Windows 64 is here https://github.com/Michi0403/BlazorPublisher/releases/download/v119/PublisherStudio.Setup.exe
-
-For anything else check the release section.
-Installers for different OS than windows do probably not work, but my focus is on windows now because I don't have test systems and time (and no visible tester and feedback like most developers face)
-
 # PublisherStudio / BlazorPublisher foundation
 
 PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It keeps the existing ASP.NET Core host and optional InstallerConsole architecture, while the product UI is a Publisher-style document and picture editor built with DevExpress DXperience 25.2.
 
 ## Implemented in this source package
 
-- DevExpress Blazor `DxRibbon` with File, Home, Insert, Page Design, View, Picture Tools, Text Box Tools, WordArt Tools, Connector Tools, Shape Tools, and Data Tools tabs.
+- DevExpress Blazor `DxRibbon` with File, Home, Insert, Page Design, View, Animations, Picture Tools, Text Box Tools, WordArt Tools, Connector Tools, Shape Tools, and Data Tools tabs.
 - DevExpress `DxContextMenu` on the page, selected publication objects, Picture Studio canvas/layers, and data-visual preview.
 - Multi-page workspace with page thumbnails, layers, selection handles, drag, resize, rotation, ordering, alignment, duplication, copy/paste, undo, and redo.
 - Canvas-linked horizontal and vertical rulers that follow page position, scroll, zoom, and the selected unit.
@@ -19,17 +15,21 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 - Text frames edited with DevExpress Blazor RichEdit and its Office ribbon; stories use DOCX storage, support dynamic fields, and download as DOCX, RTF, TXT, or HTML.
 - Image frames with preserved PNG alpha, replacement, fit/fill, interactive crop panning, wheel-based crop zoom, picture rotation, flipping, opacity, brightness, contrast, saturation, hue, inversion, grayscale, sepia, blur, masks, borders, shadows, tint/full recolor, blend modes, color-key transparency, and frame-ratio presets.
 - A separate **Picture Studio** opened by **Insert > Create picture** or **Picture Tools > Edit in Picture Studio**, with transparent canvases, direct transforms, undo/redo, a layer clipboard, keyboard shortcuts, contextual right-click commands, and editable raster, text, shape, fill, paint, and procedural-render layers.
-- Publication-level reusable data objects sourced from JSON, pasted CSV/TSV/delimited text, or live publication-object metadata.
+- Publication-level reusable data objects sourced from imported or pasted CSV/TSV, JSON, XML, or live publication-object metadata.
 - Insertable live DevExpress data visuals: Cartesian charts, pie/doughnut charts, polar charts, sparklines, circular bar gauges, data tables, and KPI progress indicators.
 - A guided data-visual editor for choosing component type, chart subtype, category, series, numeric fields, labels, legends, ranges, and row limits with a live preview.
-- Picture Studio effects include tint/recolor, soften/blur, tonal and color adjustments, gradients, Clouds, Noise, Stripes, Vignette, opacity, and blend modes; its editable source is retained inside the publication while a rendered PNG is used by the page.
+- Picture Studio effects include tint/recolor, soften/blur, tonal and color adjustments, gradients, Clouds, Noise, Stripes, Vignette, Bloom, Neon, Lens Flare, Grain, Motion Blur, Wind, and Ocean Waves; drawing includes brush, pencil, spray, toothbrush, lines, arrows, base forms, area selections, and solid/gradient selection fills.
 - Rectangles, rounded rectangles, ellipses, lines, and WordArt/LogoArt with fixed transforms plus freely drawn text paths.
 - Attached straight, elbow, and curved connectors with eight ports per object, reconnectable endpoints, line styles, and arrow/triangle/diamond markers.
 - Native self-contained JSON publication format (`.pubstudio.json`).
-- Current-page PNG, JPEG, and browser-oriented SVG export.
-- Self-contained multi-page HTML website export.
+- Per-page PNG and JPEG export (ZIP for multi-page documents), browser-oriented SVG export, and browser-capture WebM presentation export.
+- Page-wide animation timelines, object entrance/emphasis/motion/exit effects, page transitions, click triggers, playback timing, and object interactions across every publication element type.
+- Embedded audio and video page objects with import, camera/screen/microphone recording, generated sample audio, non-destructive trims, fades, playback settings, media animation cues, and layer integration.
+- An on-demand page timeline docked to the bottom of the workspace with playhead transport, a DevExpress visible-range selector, draggable/resizable animation clips, and draggable/trim-enabled media clips.
+- Self-contained animated HTML presentation export with responsive scaling, keyboard/control navigation, fullscreen, replay, looping, automatic advance, and print fallback.
 - Browser print workflow suitable for printing or the browser's Save as PDF command.
-- Optional InstallerConsole that installs a published payload, starts the Blazor host, removes it, or downloads and publishes a source ZIP without requiring Git.
+- Insertable QR and linear barcodes with common symbologies, colors, readable text, module designs, and QR error correction.
+- Windows InstallerConsole bootstrapper that downloads the latest GitHub release, installs per-user into AppData, starts the host, updates or uninstalls it, and creates Start Menu command entries without requiring Git.
 
 ## Design reference boundary
 
@@ -74,8 +74,11 @@ Without a supplied port, Kestrel asks the operating system for a loopback port a
 8. Choose **Insert > Create picture** to start a transparent layered image, or select an image and choose **Picture Tools > Edit in Picture Studio**. Use **Insert into publication / Apply to picture** to retain the editable layer source.
 9. Choose **Insert > Manage data** to create a reusable data object from JSON, pasted CSV/TSV, or live page/object metadata.
 10. Choose **Insert > Chart**, **Pie**, **Polar**, **Sparkline**, **Bar Gauge**, **Data Table**, or **KPI**, then select fields and subtypes in the live visual editor.
-11. Right-click the page, a selected publication object, the Picture Studio canvas/layer list, or a data-visual preview for commands relevant to that location.
-12. Use **File** for JSON save/open and PNG, JPEG, SVG, website, or print/PDF output.
+11. Choose **Insert > Media** to embed audio/video, or open **Create audio / Create video** for microphone, camera, screen, generated-tone, trim, fade, volume, and playback controls.
+12. Select an object and open the **Animations** inspector tab or ribbon tab to add entrance, emphasis, motion, or exit steps. Open the docked timeline pane from the Animations, View, or Media Tools ribbon tabs and use it to drag animation timing and arrange or trim media clips against one page playhead.
+13. Right-click the page, page thumbnails, selected objects, timeline clips/background, Picture Studio canvas/layers, Media Studio preview/range, or a data-visual preview for commands relevant to that location.
+14. Use **Insert > Barcode / QR** for QR, Code 128, Code 39, EAN-13, UPC-A, ITF-14, or Codabar objects.
+15. Use **File** for JSON save/open and PNG, JPEG, SVG, animated website, WebM presentation capture, or print/PDF output.
 
 The file picker is reset before every picture/open command, so selecting the same file again also triggers replacement.
 
@@ -102,9 +105,9 @@ dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip
 
 ## Deliberate limits
 
-This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, full pen-tool Bézier handles, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. Picture Studio now includes editable brush, pencil, line, eraser, and eyedropper tools in addition to compositing and non-destructive layers; lasso selections, pixel masks, clone/heal tools, and pressure-sensitive input remain later milestones. Data visuals currently cover self-contained publication data; external databases, authenticated APIs, maps that require external tile/GIS providers, dashboards, reports, and spreadsheet-calculation engines remain deliberate later integrations. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives.
+This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, full pen-tool Bézier handles, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. Picture Studio now includes editable brush, pencil, line, eraser, and eyedropper tools in addition to compositing and non-destructive layers; lasso selections, pixel masks, clone/heal tools, and pressure-sensitive input remain later milestones. Data visuals currently cover self-contained publication data; external databases, authenticated APIs, maps that require external tile/GIS providers, dashboards, reports, and spreadsheet-calculation engines remain deliberate later integrations. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives. The animation/media document model is exporter-neutral and animated HTML is implemented; native PowerPoint timing-tree/media output and encoded video export remain later exporter modules. Media trimming is non-destructive and browser recording formats depend on `MediaRecorder` support in the active browser.
 
-See [`CHANGELOG-v0.3.md`](CHANGELOG-v0.3.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`VALIDATION.md`](VALIDATION.md).
+See [`CHANGELOG-v1.0.md`](CHANGELOG-v1.0.md), [`CHANGELOG-v0.9.md`](CHANGELOG-v0.9.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ANIMATION_EXPORT.md`](docs/ANIMATION_EXPORT.md), and [`VALIDATION.md`](VALIDATION.md).
 
 ## v0.3.1 WordArt visibility hotfix
 
@@ -132,7 +135,7 @@ See `CHANGELOG-v0.5.md`. A decoupled layered Picture Studio can create transpare
 
 ## v0.6 publication data and DevExpress visuals
 
-See `CHANGELOG-v0.6.md`. Publications can now store reusable data objects and insert live DevExpress Cartesian, pie/doughnut, polar, sparkline, bar-gauge, grid, and KPI visuals. Data can come from JSON, pasted delimited text, or the publication's own page/object metadata.
+See `CHANGELOG-v0.6.md`. Publications can now store reusable data objects and insert live DevExpress Cartesian, pie/doughnut, polar, sparkline, bar-gauge, grid, and KPI visuals. Data can come from CSV/TSV, JSON, XML, or the publication's own page/object metadata.
 
 ## v0.7 Picture Studio drawing and recovery
 
@@ -140,4 +143,48 @@ See `CHANGELOG-v0.7.md`. Picture Studio now uses a DevExpress Ribbon for insert,
 
 ## v0.8 desktop context menus
 
-See `PublisherStudio/CHANGELOG-v0.8.md`. Picture Studio now has hit-tested canvas and layer-list context menus, an internal layer clipboard, and focused-canvas keyboard shortcuts. The publication canvas and data-visual editor context menus now expose more relevant insert, type, display, page, and editing commands.
+See `CHANGELOG-v0.8.md`. Picture Studio now has hit-tested canvas and layer-list context menus, an internal layer clipboard, and focused-canvas keyboard shortcuts. The publication canvas and data-visual editor context menus now expose more relevant insert, type, display, page, and editing commands.
+
+
+## v0.9 animations and interactive presentation export
+
+See `CHANGELOG-v0.9.md`. Every publication element can participate in a page-wide animation timeline, pages have independent transitions and advance rules, and objects can navigate, open links, reveal/hide other objects, or replay animations. Website export is now an animated, self-contained presentation.
+
+
+## v1.0 media studios and visual page timeline
+
+See `CHANGELOG-v1.0.md`. Audio and video are first-class publication objects, Video Studio and Audio Studio provide simple browser-native creation and non-destructive editing, and the page timeline provides a second visual way to arrange animations and media.
+
+
+## v1.0.5 beta stabilization
+
+See `CHANGELOG-v1.0.5.md`. Presentation video recording, publisher pointer state, deterministic layer ordering, CSV/XML data import, barcode value import, and Story Editor ribbon sizing were stabilized for beta.
+
+## v1.0.19 recording and presentation export stabilization
+
+See `CHANGELOG-v1.0.19.md`. Browser recordings remain available as local downloadable blobs until Media Studio closes, large recordings are embedded only on demand through small JS-interop chunks, and HTML/video presentation exports share one fixed publication frame with working page transitions. Versions v1.0.12 through v1.0.18 were iterative releases without separate changelog files.
+
+## v1.0.20 object workflow and recovery stabilization
+
+See `CHANGELOG-v1.0.20.md`. Desktop file drag/drop now creates live-positioned picture, video, text, and Markdown objects; grouping is respected by alignment, z-order and animation; chart layering and minimum sizing are stabilized; WordArt gains a font selector; timeline dragging terminates reliably; and atomic local recovery protects work around navigation and presentation export.
+
+## v1.0.21 interaction, story and canvas-state stabilization
+
+See `CHANGELOG-v1.0.21.md`. Multi-object clipboard and keyboard editing now work as one coherent canvas workflow; quick inserts and desktop files display live drag previews; animation and pointer states return reliably to selection mode; RichEdit formatting is preserved in canvas, print and exported output; and chart content remains stable across z-order changes.
+
+## v1.0.22 selection and desktop clipboard stabilization
+
+See `CHANGELOG-v1.0.22.md`. Mouse selection is restored without removing the v1.0.21 drag/drop and keyboard workflow; selected and grouped objects move together across z-levels; and files or text copied from the desktop can be pasted at the last canvas position.
+
+## v1.0.23 story fidelity and command-surface completion
+
+See `CHANGELOG-v1.0.23.md`. RichEdit formatting and document backgrounds now survive apply, reopen, canvas display, print and HTML/video export; Publisher and Picture Studio context menus expose the relevant animation and layer settings; selected renderer properties are clearly identified; and all ribbon commands have built-in icons.
+
+
+## v1.0.24 story print and marquee selection
+
+See `CHANGELOG-v1.0.24.md`. Story documents containing embedded pictures can be applied through chunked interop, print output retains page and text highlight fills, and mouse rectangle selection again works across every visible z-level while respecting persistent groups.
+
+## v1.0.25 dropped-story stability
+
+See `CHANGELOG-v1.0.25.md`. Dropped text and Markdown now enter the publication as native OpenXML stories, legacy HTML stories upgrade only after RichEdit reports the document loaded, and mail-merge settings attach only after that same safe lifecycle point so opening a dropped story cannot terminate the Blazor circuit.

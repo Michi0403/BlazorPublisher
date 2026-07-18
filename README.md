@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-Installer for Windows 64 is here https://github.com/Michi0403/BlazorPublisher/releases/download/v119/PublisherStudio.Setup.exe
-=======
 Installer for Windows 64 is here https://github.com/Michi0403/BlazorPublisher/releases/download/v125/PublisherStudio.Setup.exe
 
 For anything else check the release section.

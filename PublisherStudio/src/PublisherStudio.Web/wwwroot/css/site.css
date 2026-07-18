@@ -175,6 +175,14 @@ button { cursor: pointer; }
 .publisher-story-document::before { content: ""; position: absolute; z-index: -1; inset: 0; background: var(--publisher-story-page-background, transparent); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .publisher-story-document, .publisher-story-document * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .text-frame-content img { max-width: 100%; }
+.publisher-selection-marquee {
+    position: absolute;
+    z-index: 985;
+    pointer-events: none;
+    border: 1px dashed #087ac1;
+    background: #168bd421;
+    box-shadow: 0 0 0 1px #ffffffa8 inset;
+}
 .image-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: transparent; isolation: isolate; }
 .image-frame img { width: 100%; height: 100%; display: block; max-width: none; transform-origin: center; pointer-events: none; background: transparent; }
 .picture-filter-defs { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
@@ -323,6 +331,14 @@ button { cursor: pointer; }
 @media print {
     html, body { overflow: visible; background: white; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     .print-publication, .print-publication * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .print-page[data-publisher-print-fill],
+    .text-frame-content[data-publisher-print-fill],
+    .publisher-story-document[data-publisher-print-fill],
+    .publisher-story-document [data-publisher-print-fill] {
+        background-color: var(--publisher-print-fill, transparent) !important;
+        -webkit-box-shadow: inset 0 0 0 100vmax var(--publisher-print-fill, transparent) !important;
+        box-shadow: inset 0 0 0 100vmax var(--publisher-print-fill, transparent) !important;
+    }
     .title-bar, .publication-ribbon, .page-navigator, .inspector-panel, .status-bar, .ruler-canvas, .corner-ruler { display: none !important; }
     .publisher-shell { display: block; height: auto; }
     .editor-workspace { display: none !important; }

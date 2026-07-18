@@ -110,6 +110,14 @@
     private bool _upgradingLegacyStory;
     private string? _error;
     private IReadOnlyList<PublicationFieldRecord> _fieldData = [];
+    private string? _storyPreviewTransferId;
+    private readonly System.Text.StringBuilder _storyPreviewBuffer = new();
+    private int _storyPreviewExpectedLength;
+    private int _storyPreviewExpectedChunks;
+    private int _storyPreviewNextChunk;
+    private string _storyPreviewBackground = "transparent";
+    private StoryPreviewResult? _storyPreviewResult;
+    private string? _storyPreviewTransferError;
 
     protected override void OnParametersSet()
     {
@@ -300,19 +308,90 @@
         };
         try
         {
-            var exportedHtml = System.Text.Encoding.UTF8.GetString(html);
-            var prepared = await JS.InvokeAsync<StoryPreviewResult>(
-                "publisherStudio.prepareStoryPreviewHtml",
-                exportedHtml,
-                normalizedPreferredBackground);
+            ResetStoryPreviewTransfer();
+            using var htmlStream = new MemoryStream(html, writable: false);
+            using var htmlReference = new DotNetStreamReference(htmlStream);
+            using var receiverReference = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync(
+                "publisherStudio.prepareStoryPreviewHtmlInChunks",
+                htmlReference,
+                normalizedPreferredBackground,
+                receiverReference);
+
+            var prepared = _storyPreviewResult
+                ?? throw new JSException(_storyPreviewTransferError ?? "The formatted story preview transfer did not complete.");
             if (IsVisibleBackground(normalizedPreferredBackground))
                 prepared.Background = normalizedPreferredBackground;
             prepared.Background = PublicationFileService.NormalizeCssBackground(prepared.Background);
+            ResetStoryPreviewTransfer();
             return prepared;
         }
-        catch (JSDisconnectedException) { return fallback; }
-        catch (TaskCanceledException) { return fallback; }
-        catch (JSException) { return fallback; }
+        catch (JSDisconnectedException) { ResetStoryPreviewTransfer(); return fallback; }
+        catch (TaskCanceledException) { ResetStoryPreviewTransfer(); return fallback; }
+        catch (JSException) { ResetStoryPreviewTransfer(); return fallback; }
+    }
+
+    [JSInvokable]
+    public bool BeginStoryPreviewTransfer(string transferId, int totalLength, int chunkCount, string background)
+    {
+        ResetStoryPreviewTransfer();
+        if (string.IsNullOrWhiteSpace(transferId) || totalLength < 0 || chunkCount <= 0)
+        {
+            _storyPreviewTransferError = "The story preview transfer metadata is invalid.";
+            return false;
+        }
+
+        _storyPreviewTransferId = transferId;
+        _storyPreviewExpectedLength = totalLength;
+        _storyPreviewExpectedChunks = chunkCount;
+        _storyPreviewBackground = PublicationFileService.NormalizeCssBackground(background);
+        return true;
+    }
+
+    [JSInvokable]
+    public bool AppendStoryPreviewChunk(string transferId, int chunkIndex, string chunk)
+    {
+        if (!string.Equals(_storyPreviewTransferId, transferId, StringComparison.Ordinal)
+            || chunkIndex != _storyPreviewNextChunk)
+        {
+            _storyPreviewTransferError = "The formatted story preview chunks arrived out of order.";
+            return false;
+        }
+
+        _storyPreviewBuffer.Append(chunk ?? string.Empty);
+        _storyPreviewNextChunk++;
+        return true;
+    }
+
+    [JSInvokable]
+    public bool CompleteStoryPreviewTransfer(string transferId)
+    {
+        if (!string.Equals(_storyPreviewTransferId, transferId, StringComparison.Ordinal)
+            || _storyPreviewNextChunk != _storyPreviewExpectedChunks
+            || _storyPreviewBuffer.Length != _storyPreviewExpectedLength)
+        {
+            _storyPreviewTransferError = "The formatted story preview transfer was incomplete.";
+            return false;
+        }
+
+        _storyPreviewResult = new StoryPreviewResult
+        {
+            Html = _storyPreviewBuffer.ToString(),
+            Background = _storyPreviewBackground
+        };
+        return true;
+    }
+
+    private void ResetStoryPreviewTransfer()
+    {
+        _storyPreviewTransferId = null;
+        _storyPreviewBuffer.Clear();
+        _storyPreviewExpectedLength = 0;
+        _storyPreviewExpectedChunks = 0;
+        _storyPreviewNextChunk = 0;
+        _storyPreviewBackground = "transparent";
+        _storyPreviewResult = null;
+        _storyPreviewTransferError = null;
     }
 
     private static string StandaloneStoryHtml(StoryPreviewResult prepared, string title)
@@ -332,7 +411,18 @@
                 body { display:grid; place-items:start center; padding:24px; font-family:Segoe UI,Arial,sans-serif; --publisher-story-page-background:{{background}}; }
                 .publisher-story-document { position:relative; isolation:isolate; width:min(100%,1200px); min-height:calc(100vh - 48px); background:var(--publisher-story-page-background,white); box-shadow:0 3px 18px #0003; }
                 .publisher-story-document::before { content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }
-                @media print { @page { margin:0; } html,body { background:white; } body { display:block; padding:0; } .publisher-story-document { width:100%; min-height:100vh; margin:0; box-shadow:none; } }
+                @media print {
+                  @page { margin:0; }
+                  html,body { background:white; }
+                  body { display:block; padding:0; }
+                  .publisher-story-document { width:100%; min-height:100vh; margin:0; box-shadow:none; }
+                  .publisher-story-document[data-publisher-print-fill],
+                  .publisher-story-document [data-publisher-print-fill] {
+                    background-color:var(--publisher-print-fill,transparent) !important;
+                    -webkit-box-shadow:inset 0 0 0 100vmax var(--publisher-print-fill,transparent) !important;
+                    box-shadow:inset 0 0 0 100vmax var(--publisher-print-fill,transparent) !important;
+                  }
+                }
               </style>
             </head>
             <body>{{prepared.Html}}</body>

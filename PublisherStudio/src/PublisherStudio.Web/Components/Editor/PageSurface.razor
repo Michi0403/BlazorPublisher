@@ -126,7 +126,7 @@
                     @switch (element)
                     {
                         case TextFrameElement text:
-                            <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                            <div class="text-frame-content" data-publisher-print-fill="true" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@Mm(text.BorderWidth) solid @text.BorderColor">
                                 @((MarkupString)text.PreviewHtml)
                             </div>
                             break;
@@ -594,6 +594,13 @@
 
     [JSInvokable] public void SelectElement(string id, bool additive = false) { if (Guid.TryParse(id, out var guid)) State.SelectElement(guid, additive); }
     [JSInvokable] public void ClearSelectionFromCanvas() => State.SelectElement(null);
+    [JSInvokable]
+    public void SetSelectionFromCanvas(string[]? ids)
+    {
+        State.SetSelection((ids ?? [])
+            .Select(value => Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty)
+            .Where(value => value != Guid.Empty));
+    }
     [JSInvokable]
     public Task ActivateElement(string id)
     {

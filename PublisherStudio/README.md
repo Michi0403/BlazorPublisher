@@ -178,3 +178,8 @@ See `CHANGELOG-v1.0.22.md`. Mouse selection is restored without removing the v1.
 ## v1.0.23 story fidelity and command-surface completion
 
 See `CHANGELOG-v1.0.23.md`. RichEdit formatting and document backgrounds now survive apply, reopen, canvas display, print and HTML/video export; Publisher and Picture Studio context menus expose the relevant animation and layer settings; selected renderer properties are clearly identified; and all ribbon commands have built-in icons.
+
+
+## v1.0.24 story print and marquee selection
+
+See `CHANGELOG-v1.0.24.md`. Story documents containing embedded pictures can be applied through chunked interop, print output retains page and text highlight fills, and mouse rectangle selection again works across every visible z-level while respecting persistent groups.

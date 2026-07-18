@@ -8,6 +8,7 @@
     @foreach (var publicationPage in Document.Pages)
     {
         <section class="print-page" style="@PageStyle(publicationPage)"
+                 data-publisher-print-fill="true"
                  data-page-id="@publicationPage.Id"
                  data-page-width-mm="@Inv(publicationPage.WidthMm)"
                  data-page-height-mm="@Inv(publicationPage.HeightMm)"
@@ -59,7 +60,7 @@
                         @switch (element)
                         {
                             case TextFrameElement text:
-                                <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                                <div class="text-frame-content" data-publisher-print-fill="true" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@Mm(text.BorderWidth) solid @text.BorderColor">
                                     @((MarkupString)text.PreviewHtml)
                                 </div>
                                 break;
@@ -273,7 +274,7 @@
     private static string WaveHeight(double sample) => $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
     private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
 
-    private static string PageStyle(PublicationPage p) => $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background}";
+    private static string PageStyle(PublicationPage p) => $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background};--publisher-print-fill:{p.Background}";
     private static string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({Inv(e.Rotation)}deg)";
     private static string ShapeStyle(ShapeElement s) => s.Shape == PublicationShape.Line
         ? $"background:{s.Stroke};height:{Mm(Math.Max(s.StrokeWidth, .3))};top:50%;position:absolute;width:100%"

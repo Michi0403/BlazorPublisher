@@ -167,6 +167,28 @@ public sealed class EditorStateService
         if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged) Notify(false);
     }
 
+    public void SetSelection(IEnumerable<Guid> ids)
+    {
+        var requested = ids
+            .Distinct()
+            .Select(id => CurrentPage.Elements.FirstOrDefault(element => element.Id == id))
+            .Where(element => element is not null)
+            .Cast<PublicationElement>()
+            .ToList();
+        var expanded = requested
+            .SelectMany(SelectionUnit)
+            .DistinctBy(element => element.Id)
+            .ToList();
+        var previousPrimary = SelectedElementId;
+        var previousSelection = _selectedElementIds.ToHashSet();
+        SetSelectionCore(expanded.Select(element => element.Id), requested.LastOrDefault()?.Id);
+        var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
+        if (cropChanged) CropMode = false;
+        EndLiveEdit();
+        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged)
+            Notify(false);
+    }
+
     public void SetPrimarySelection(Guid id)
     {
         if (!_selectedElementIds.Contains(id))

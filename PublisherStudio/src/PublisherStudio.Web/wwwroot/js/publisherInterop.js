@@ -271,6 +271,12 @@ function resetPointerOperation(state, restoreDom = false) {
         clearConnectorOperation(state, true);
         return;
     }
+    if (operation.kind === 'marquee') {
+        operation.overlay?.remove?.();
+        if (restoreDom)
+            synchronizeSelectionDom(state, operation.initialSelection || new Set(), operation.initialPrimaryId || null);
+        return;
+    }
     if (!restoreDom || !operation.id) return;
     const moving = operation.moving?.length ? operation.moving : [{ id: operation.id, x: operation.x, y: operation.y, width: operation.width, height: operation.height }];
     for (const item of moving) {
@@ -1228,6 +1234,66 @@ function synchronizeSelectionDom(state, ids, primaryId = null) {
     }
 }
 
+function createSelectionMarquee(state) {
+    const overlay = document.createElement('div');
+    overlay.className = 'publisher-selection-marquee';
+    overlay.setAttribute('aria-hidden', 'true');
+    state.page.appendChild(overlay);
+    return overlay;
+}
+
+function marqueeViewportRect(operation, event, pageRect) {
+    const startX = clamp(operation.startClientX, pageRect.left, pageRect.right);
+    const startY = clamp(operation.startClientY, pageRect.top, pageRect.bottom);
+    const endX = clamp(event.clientX, pageRect.left, pageRect.right);
+    const endY = clamp(event.clientY, pageRect.top, pageRect.bottom);
+    return {
+        left: Math.min(startX, endX),
+        top: Math.min(startY, endY),
+        right: Math.max(startX, endX),
+        bottom: Math.max(startY, endY)
+    };
+}
+
+function marqueeSelectionIds(state, viewportRect, initialSelection, additive) {
+    const hits = [];
+    for (const item of selectionNodes(state)) {
+        const rect = item.getBoundingClientRect();
+        const intersects = rect.right > viewportRect.left
+            && rect.left < viewportRect.right
+            && rect.bottom > viewportRect.top
+            && rect.top < viewportRect.bottom;
+        if (intersects) hits.push(item);
+    }
+
+    const expanded = new Set(additive ? initialSelection : []);
+    for (const item of hits) {
+        for (const member of selectionUnitNodes(state, item)) {
+            const id = String(member.dataset.elementId || '').toLowerCase();
+            if (id) expanded.add(id);
+        }
+    }
+    return expanded;
+}
+
+function updateSelectionMarquee(state, operation, event) {
+    const pageRect = state.page.getBoundingClientRect();
+    const viewportRect = marqueeViewportRect(operation, event, pageRect);
+    const left = viewportRect.left - pageRect.left;
+    const top = viewportRect.top - pageRect.top;
+    operation.overlay.style.left = `${left}px`;
+    operation.overlay.style.top = `${top}px`;
+    operation.overlay.style.width = `${viewportRect.right - viewportRect.left}px`;
+    operation.overlay.style.height = `${viewportRect.bottom - viewportRect.top}px`;
+    operation.currentSelection = marqueeSelectionIds(
+        state,
+        viewportRect,
+        operation.initialSelection,
+        operation.additive);
+    const primary = [...operation.currentSelection].at(-1) || null;
+    synchronizeSelectionDom(state, operation.currentSelection, primary);
+}
+
 function selectionUnitNodes(state, element) {
     const groupId = String(element.dataset.groupId || '').trim();
     if (!groupId) return [element];
@@ -1383,7 +1449,27 @@ function pointerDown(state, event) {
 
     const element = event.target.closest('[data-publication-element]');
     if (!element || !state.page.contains(element)) {
-        if (state.page.contains(event.target) || state.scroll.contains(event.target)) {
+        if (state.page.contains(event.target) && !connectorToolActive(state)) {
+            state.lastCanvasClick = null;
+            const additive = Boolean(event.ctrlKey || event.metaKey || event.shiftKey);
+            const initialSelection = selectedElementIdSet(state);
+            const initialPrimary = [...initialSelection].at(-1) || null;
+            if (!additive) synchronizeSelectionDom(state, new Set(), null);
+            state.operation = {
+                kind: 'marquee',
+                pointerId: event.pointerId,
+                startClientX: event.clientX,
+                startClientY: event.clientY,
+                moved: false,
+                additive,
+                initialSelection,
+                initialPrimaryId: initialPrimary,
+                currentSelection: additive ? new Set(initialSelection) : new Set(),
+                overlay: createSelectionMarquee(state)
+            };
+            try { state.stage.setPointerCapture(event.pointerId); } catch { }
+            event.preventDefault();
+        } else if (state.scroll.contains(event.target)) {
             state.lastCanvasClick = null;
             if (!connectorToolActive(state)) {
                 synchronizeSelectionDom(state, new Set(), null);
@@ -1485,6 +1571,15 @@ function pointerMove(state, event) {
     if (!operation || operation.pointerId !== event.pointerId) return;
     if (event.pointerType === 'mouse' && (event.buttons & 1) === 0) {
         pointerUp(state, event);
+        return;
+    }
+
+    if (operation.kind === 'marquee') {
+        const movementPixels = Math.hypot(event.clientX - operation.startClientX, event.clientY - operation.startClientY);
+        if (!operation.moved && movementPixels < 2) return;
+        operation.moved = true;
+        updateSelectionMarquee(state, operation, event);
+        event.preventDefault();
         return;
     }
 
@@ -1632,6 +1727,19 @@ function pointerUp(state, event) {
     state.operation = null;
     clearObjectAlignmentFeedback(state);
     try { state.stage.releasePointerCapture(event.pointerId); } catch { }
+
+    if (operation.kind === 'marquee') {
+        operation.overlay?.remove?.();
+        const selected = operation.moved
+            ? operation.currentSelection
+            : (operation.additive ? operation.initialSelection : new Set());
+        const primary = [...selected].at(-1) || null;
+        synchronizeSelectionDom(state, selected, primary);
+        safeDotNet(state, 'SetSelectionFromCanvas', [...selected]);
+        state.lastCanvasClick = null;
+        event.preventDefault();
+        return;
+    }
 
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
         state.lastCanvasClick = null;
@@ -4605,6 +4713,20 @@ function storyDocumentBackground(doc, view) {
     return best?.color || 'transparent';
 }
 
+async function waitForStoryImages(doc) {
+    const images = [...(doc?.images || [])];
+    if (!images.length) return;
+    await Promise.all(images.map(image => {
+        if (image.complete) return Promise.resolve();
+        return new Promise(resolve => {
+            const finish = () => resolve();
+            image.addEventListener('load', finish, { once: true });
+            image.addEventListener('error', finish, { once: true });
+            setTimeout(finish, 4000);
+        });
+    }));
+}
+
 async function prepareStoryPreviewHtml(html, preferredBackground = '') {
     const source = String(html || '');
     if (!source.trim()) return {
@@ -4642,6 +4764,7 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
         const view = frame.contentWindow;
         if (!doc?.body || !view) throw new Error('The story HTML preview document could not be created.');
         try { await doc.fonts?.ready; } catch { }
+        await waitForStoryImages(doc);
 
         const documentBackground = storyBackgroundIsVisible(preferredBackground)
             ? String(preferredBackground).trim()
@@ -4678,6 +4801,11 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
             }
             const existing = clone.getAttribute?.('style');
             clone.setAttribute?.('style', `${existing ? existing + ';' : ''}${inline.join(';')}`);
+            const printFill = storyStyleBackgroundColor(computed);
+            if (printFill && clone?.nodeType === 1) {
+                clone.setAttribute('data-publisher-print-fill', 'true');
+                clone.style.setProperty('--publisher-print-fill', printFill);
+            }
             clone.removeAttribute?.('class');
             clone.removeAttribute?.('id');
         }
@@ -4689,13 +4817,43 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
         wrapper.style.cssText = `${bodyStyle};width:100%;min-height:100%;height:auto`;
         if (storyBackgroundIsVisible(documentBackground)) {
             wrapper.style.setProperty('--publisher-story-page-background', documentBackground);
+            wrapper.style.setProperty('--publisher-print-fill', documentBackground);
             wrapper.style.backgroundColor = documentBackground;
+            wrapper.setAttribute('data-publisher-print-fill', 'true');
         }
         wrapper.innerHTML = cloneBody.innerHTML;
         return { html: wrapper.outerHTML, background: documentBackground };
     } finally {
         frame.remove();
     }
+}
+
+const STORY_PREVIEW_TRANSFER_CHUNK_SIZE = 6 * 1024;
+
+async function prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference) {
+    if (!htmlStream?.arrayBuffer || !dotNetReference)
+        throw new Error('The story preview stream could not be initialized.');
+    const buffer = await htmlStream.arrayBuffer();
+    const source = new TextDecoder('utf-8').decode(buffer);
+    const prepared = await prepareStoryPreviewHtml(source, preferredBackground);
+    const html = String(prepared?.html || '<div class="publisher-story-document"><p></p></div>');
+    const background = String(prepared?.background || 'transparent');
+    const transferId = globalThis.crypto?.randomUUID?.() || `story-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const chunkCount = Math.max(1, Math.ceil(html.length / STORY_PREVIEW_TRANSFER_CHUNK_SIZE));
+    const accepted = await dotNetReference.invokeMethodAsync(
+        'BeginStoryPreviewTransfer', transferId, html.length, chunkCount, background);
+    if (!accepted) throw new Error('The application rejected the formatted story preview transfer.');
+
+    for (let index = 0; index < chunkCount; index++) {
+        const start = index * STORY_PREVIEW_TRANSFER_CHUNK_SIZE;
+        const chunk = html.slice(start, start + STORY_PREVIEW_TRANSFER_CHUNK_SIZE);
+        const appended = await dotNetReference.invokeMethodAsync(
+            'AppendStoryPreviewChunk', transferId, index, chunk);
+        if (!appended) throw new Error(`The application rejected story preview chunk ${index + 1}.`);
+    }
+
+    const completed = await dotNetReference.invokeMethodAsync('CompleteStoryPreviewTransfer', transferId);
+    if (!completed) throw new Error('The formatted story preview transfer did not complete.');
 }
 
 window.publisherStudio = {
@@ -4711,6 +4869,7 @@ window.publisherStudio = {
     cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
     initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
     prepareStoryPreviewHtml(html, preferredBackground = '') { return prepareStoryPreviewHtml(html, preferredBackground); },
+    prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground = '', dotNetReference) { return prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
 

@@ -1,3 +1,7 @@
+Link to newest winx64 installer https://github.com/Michi0403/BlazorPublisher/releases/download/v131/PublisherStudio.Setup.exe
+
+Link to newest release https://github.com/Michi0403/BlazorPublisher/releases/tag/v131
+
 # PublisherStudio / BlazorPublisher foundation
 
 PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It keeps the existing ASP.NET Core host and optional InstallerConsole architecture, while the product UI is a Publisher-style document and picture editor built with DevExpress DXperience 25.2.

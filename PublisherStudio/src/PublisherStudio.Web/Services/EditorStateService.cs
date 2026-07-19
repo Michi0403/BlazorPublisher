@@ -2,12 +2,14 @@ using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services;
 
-public sealed class EditorStateService
+public sealed class EditorStateService : IDisposable
 {
     private readonly PublicationFileService _files;
     private readonly PublicationDataService _data;
     private readonly PublicationMediaAssetStore _mediaAssets;
     private readonly SpreadsheetDocumentService _spreadsheets;
+    private readonly PublicationLiveDataRegistry _liveData;
+    private readonly PublicationWebDataService _webData;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private readonly List<PublicationElement> _clipboard = [];
@@ -16,14 +18,23 @@ public sealed class EditorStateService
     private double? _lastInsertionX;
     private double? _lastInsertionY;
 
-    public EditorStateService(PublicationFileService files, PublicationDataService data, PublicationMediaAssetStore mediaAssets, SpreadsheetDocumentService spreadsheets)
+    public EditorStateService(
+        PublicationFileService files,
+        PublicationDataService data,
+        PublicationMediaAssetStore mediaAssets,
+        SpreadsheetDocumentService spreadsheets,
+        PublicationLiveDataRegistry liveData,
+        PublicationWebDataService webData)
     {
         _files = files;
         _data = data;
         _mediaAssets = mediaAssets;
         _spreadsheets = spreadsheets;
+        _liveData = liveData;
+        _webData = webData;
         Document = PublicationDocument.CreateDefault();
         SelectedPageId = Document.Pages[0].Id;
+        _liveData.Register(Document, _data, SelectedPageId);
     }
 
     public event Action? Changed;
@@ -53,6 +64,7 @@ public sealed class EditorStateService
     public void NewDocument()
     {
         RemoveMediaAssets(Document);
+        _liveData.Unregister(Document.Id);
         Document = PublicationDocument.CreateDefault();
         SelectedPageId = Document.Pages[0].Id;
         ClearSelectionCore();
@@ -69,6 +81,7 @@ public sealed class EditorStateService
     public void Load(string json)
     {
         RemoveMediaAssets(Document);
+        _liveData.Unregister(Document.Id);
         Document = _files.Deserialize(json);
         _mediaAssets.RegisterDocument(Document);
         SelectedPageId = Document.Pages[0].Id;
@@ -441,7 +454,8 @@ public sealed class EditorStateService
         var data = EnsureDataObject();
         var columns = _data.ResolveColumns(data);
         var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
-        var numeric = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name
+        var numericColumns = columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).Select(column => column.Name).ToArray();
+        var numeric = numericColumns.FirstOrDefault()
             ?? columns.Skip(1).FirstOrDefault()?.Name
             ?? argument;
         var element = new DataVisualElement
@@ -451,13 +465,20 @@ public sealed class EditorStateService
             VisualKind = kind,
             DataObjectId = data.Id,
             ArgumentField = argument,
+            TargetField = columns.Skip(1).FirstOrDefault()?.Name ?? argument,
             ValueFields = string.IsNullOrWhiteSpace(numeric) ? [] : [numeric],
+            OpenValueField = numericColumns.ElementAtOrDefault(0) ?? numeric,
+            HighValueField = numericColumns.ElementAtOrDefault(1) ?? numeric,
+            LowValueField = numericColumns.ElementAtOrDefault(2) ?? numeric,
+            CloseValueField = numericColumns.ElementAtOrDefault(3) ?? numeric,
+            SizeField = numericColumns.ElementAtOrDefault(1) ?? numeric,
             X = 28,
             Y = 30,
             Width = kind switch
             {
                 DataVisualKind.Sparkline => 120,
                 DataVisualKind.KpiProgress => 120,
+                DataVisualKind.LinearGauge => 145,
                 DataVisualKind.DataTable => 150,
                 _ => 145
             },
@@ -465,6 +486,7 @@ public sealed class EditorStateService
             {
                 DataVisualKind.Sparkline => 34,
                 DataVisualKind.KpiProgress => 40,
+                DataVisualKind.LinearGauge => 42,
                 DataVisualKind.DataTable => 90,
                 _ => 95
             },
@@ -501,13 +523,51 @@ public sealed class EditorStateService
 
     public void RefreshDataVisuals() => Notify(false);
 
+    public bool HasDueWebData => Document.DataObjects.Any(data => _webData.IsDue(data, DateTimeOffset.UtcNow));
+
+    public async Task RefreshWebDataAsync(Guid? dataId = null, bool force = true, CancellationToken cancellationToken = default)
+    {
+        var candidates = Document.DataObjects
+            .Where(data => data.SourceKind == PublicationDataSourceKind.Web
+                && data.Web.Enabled
+                && (dataId is null || data.Id == dataId.Value)
+                && (force || _webData.IsDue(data, DateTimeOffset.UtcNow)))
+            .ToArray();
+        await RefreshWebDataObjectsAsync(candidates, cancellationToken);
+    }
+
+    public Task RefreshWebDataOnOpenAsync(CancellationToken cancellationToken = default)
+        => RefreshWebDataObjectsAsync(Document.DataObjects
+            .Where(data => data.SourceKind == PublicationDataSourceKind.Web
+                && data.Web.Enabled
+                && data.Web.RefreshOnOpen)
+            .ToArray(), cancellationToken);
+
+    private async Task RefreshWebDataObjectsAsync(IReadOnlyList<PublicationDataObject> candidates, CancellationToken cancellationToken)
+    {
+        if (candidates.Count == 0) return;
+        foreach (var data in candidates)
+        {
+            try { await _webData.RefreshAsync(data, cancellationToken); }
+            catch when (data.Web.UseSnapshotOnFailure && data.Rows.Count > 0) { }
+        }
+        Notify(false);
+    }
+
     private static string DataVisualName(DataVisualKind kind) => kind switch
     {
         DataVisualKind.CartesianChart => "Chart",
         DataVisualKind.PieChart => "Pie Chart",
         DataVisualKind.PolarChart => "Polar Chart",
         DataVisualKind.Sparkline => "Sparkline",
-        DataVisualKind.BarGauge => "Gauge",
+        DataVisualKind.BarGauge => "Bar Gauge",
+        DataVisualKind.CircularGauge => "Circular Gauge",
+        DataVisualKind.LinearGauge => "Linear Gauge",
+        DataVisualKind.RangeSelector => "Range Selector",
+        DataVisualKind.Sankey => "Sankey Diagram",
+        DataVisualKind.Funnel => "Funnel",
+        DataVisualKind.Pyramid => "Pyramid",
+        DataVisualKind.TreeMap => "Tree Map",
         DataVisualKind.DataTable => "Data Table",
         DataVisualKind.KpiProgress => "KPI",
         _ => "Data Visual"
@@ -1531,6 +1591,7 @@ public sealed class EditorStateService
     {
         DataVisualElement { VisualKind: DataVisualKind.Sparkline } => (55, 18),
         DataVisualElement { VisualKind: DataVisualKind.KpiProgress } => (60, 24),
+        DataVisualElement { VisualKind: DataVisualKind.LinearGauge } => (70, 24),
         DataVisualElement { VisualKind: DataVisualKind.DataTable } => (80, 48),
         DataVisualElement => (75, 55),
         VideoElement => (35, 22),
@@ -1636,6 +1697,9 @@ public sealed class EditorStateService
             IsDirty = true;
             Revision++;
         }
+        _liveData.Register(Document, _data, SelectedPageId);
         Changed?.Invoke();
     }
+
+    public void Dispose() => _liveData.Unregister(Document.Id);
 }

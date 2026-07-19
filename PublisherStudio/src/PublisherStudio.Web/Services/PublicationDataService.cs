@@ -37,6 +37,22 @@ public sealed class PublicationDataService
             data.Delimiter = string.IsNullOrEmpty(data.Delimiter) ? "," : data.Delimiter[..1];
             data.Columns ??= [];
             data.Rows ??= [];
+            data.Web ??= new PublicationWebBinding();
+            data.Web.Headers ??= [];
+            if (data.Web.Id == Guid.Empty) data.Web.Id = Guid.NewGuid();
+            if (string.IsNullOrWhiteSpace(data.Web.WebhookToken)) data.Web.WebhookToken = Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(data.Web.ExportAccessToken)) data.Web.ExportAccessToken = Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant();
+            data.Web.Url ??= string.Empty;
+            data.Web.RequestBody ??= string.Empty;
+            data.Web.JsonPath ??= string.Empty;
+            data.Web.Delimiter = string.IsNullOrEmpty(data.Web.Delimiter) ? "," : data.Web.Delimiter[..1];
+            data.Web.RefreshIntervalSeconds = Math.Max(0, data.Web.RefreshIntervalSeconds);
+            data.Web.TimeoutSeconds = Math.Max(0, data.Web.TimeoutSeconds);
+            foreach (var header in data.Web.Headers)
+            {
+                header.Name ??= string.Empty;
+                header.Value ??= string.Empty;
+            }
             foreach (var row in data.Rows)
                 row.Values = new Dictionary<string, string>(row.Values ?? new Dictionary<string, string>(), StringComparer.OrdinalIgnoreCase);
             if (data.SourceKind != PublicationDataSourceKind.DocumentObjects && (data.Columns.Count == 0 || data.Rows.Count == 0) && !string.IsNullOrWhiteSpace(data.RawSource))
@@ -64,6 +80,9 @@ public sealed class PublicationDataService
                 data.Columns = DocumentObjectColumns();
                 data.Rows = [];
                 break;
+            case PublicationDataSourceKind.Web:
+                ParseWebSnapshot(data);
+                break;
             default:
                 throw new InvalidDataException("Unsupported data source type.");
         }
@@ -88,7 +107,7 @@ public sealed class PublicationDataService
         var valueFields = item.ValueFields.Where(field => !string.IsNullOrWhiteSpace(field)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
         if (valueFields.Length == 0) return [];
         var points = new List<DataChartPoint>();
-        foreach (var row in rows.Take(500))
+        foreach (var row in rows)
         {
             var argument = string.IsNullOrWhiteSpace(item.ArgumentField) ? (points.Count + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField);
             foreach (var valueField in valueFields)
@@ -111,7 +130,6 @@ public sealed class PublicationDataService
         if (string.IsNullOrWhiteSpace(field)) return [];
         var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
         return ResolveRows(document, data, currentPageId)
-            .Take(200)
             .Select((row, index) => new DataPiePoint(
                 string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField),
                 row.GetNumber(field)))
@@ -124,11 +142,129 @@ public sealed class PublicationDataService
         if (string.IsNullOrWhiteSpace(field)) return [];
         var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
         return ResolveRows(document, data, currentPageId)
-            .Take(500)
             .Select((row, index) => new DataSparkPoint(
                 string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField),
                 row.GetNumber(field)))
             .ToArray();
+    }
+
+
+    public IReadOnlyList<DataRangePoint> BuildRangePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    {
+        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
+        var lowField = !string.IsNullOrWhiteSpace(item.LowValueField) ? item.LowValueField : item.ValueFields.ElementAtOrDefault(0) ?? string.Empty;
+        var highField = !string.IsNullOrWhiteSpace(item.HighValueField) ? item.HighValueField : item.ValueFields.ElementAtOrDefault(1) ?? lowField;
+        if (string.IsNullOrWhiteSpace(lowField) || string.IsNullOrWhiteSpace(highField)) return [];
+        return ResolveRows(document, data, currentPageId).Select((row, index) =>
+        {
+            var argument = string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField);
+            var series = string.IsNullOrWhiteSpace(item.SeriesField) ? item.Title : row.Get(item.SeriesField);
+            return new DataRangePoint(string.IsNullOrWhiteSpace(argument) ? "(blank)" : argument, series, row.GetNumber(lowField), row.GetNumber(highField));
+        }).ToArray();
+    }
+
+    public IReadOnlyList<DataBubblePoint> BuildBubblePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    {
+        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
+        var valueField = item.ValueFields.FirstOrDefault() ?? string.Empty;
+        var sizeField = !string.IsNullOrWhiteSpace(item.SizeField) ? item.SizeField : item.ValueFields.ElementAtOrDefault(1) ?? valueField;
+        if (string.IsNullOrWhiteSpace(valueField)) return [];
+        return ResolveRows(document, data, currentPageId).Select((row, index) =>
+        {
+            var argument = string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField);
+            var series = string.IsNullOrWhiteSpace(item.SeriesField) ? item.Title : row.Get(item.SeriesField);
+            return new DataBubblePoint(string.IsNullOrWhiteSpace(argument) ? "(blank)" : argument, series, row.GetNumber(valueField), Math.Abs(row.GetNumber(sizeField)));
+        }).ToArray();
+    }
+
+    public IReadOnlyList<DataFinancialPoint> BuildFinancialPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    {
+        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
+        var open = !string.IsNullOrWhiteSpace(item.OpenValueField) ? item.OpenValueField : item.ValueFields.ElementAtOrDefault(0) ?? string.Empty;
+        var high = !string.IsNullOrWhiteSpace(item.HighValueField) ? item.HighValueField : item.ValueFields.ElementAtOrDefault(1) ?? open;
+        var low = !string.IsNullOrWhiteSpace(item.LowValueField) ? item.LowValueField : item.ValueFields.ElementAtOrDefault(2) ?? open;
+        var close = !string.IsNullOrWhiteSpace(item.CloseValueField) ? item.CloseValueField : item.ValueFields.ElementAtOrDefault(3) ?? open;
+        if (string.IsNullOrWhiteSpace(open)) return [];
+        return ResolveRows(document, data, currentPageId).Select((row, index) => new DataFinancialPoint(
+            string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField),
+            row.GetNumber(open), row.GetNumber(high), row.GetNumber(low), row.GetNumber(close))).ToArray();
+    }
+
+    public IReadOnlyList<DataSankeyPoint> BuildSankeyPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    {
+        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
+        var weightField = item.ValueFields.FirstOrDefault() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(item.ArgumentField) || string.IsNullOrWhiteSpace(item.TargetField) || string.IsNullOrWhiteSpace(weightField)) return [];
+        return ResolveRows(document, data, currentPageId)
+            .Select(row => new DataSankeyPoint(row.Get(item.ArgumentField), row.Get(item.TargetField), row.GetNumber(weightField)))
+            .Where(point => !string.IsNullOrWhiteSpace(point.Source) && !string.IsNullOrWhiteSpace(point.Target))
+            .ToArray();
+    }
+
+    public IReadOnlyList<DataTreeMapPoint> BuildTreeMapPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    {
+        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
+        var valueField = item.ValueFields.FirstOrDefault() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(item.ArgumentField) || string.IsNullOrWhiteSpace(valueField)) return [];
+        return ResolveRows(document, data, currentPageId)
+            .Select(row => new DataTreeMapPoint(row.Get(item.ArgumentField), string.IsNullOrWhiteSpace(item.ParentField) ? string.Empty : row.Get(item.ParentField), row.GetNumber(valueField)))
+            .ToArray();
+    }
+
+    public object BuildClientVisualConfiguration(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    {
+        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.DataObjectId);
+        var rows = ResolveRows(document, data, currentPageId)
+            .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase)).ToArray();
+        return new
+        {
+            id = item.Id,
+            kind = item.VisualKind.ToString(),
+            cartesianStyle = item.CartesianStyle.ToString(),
+            pieStyle = item.PieStyle.ToString(),
+            polarStyle = item.PolarStyle.ToString(),
+            sparklineStyle = item.SparklineStyle.ToString(),
+            item.Title,
+            item.ArgumentField,
+            item.SeriesField,
+            valueFields = item.ValueFields,
+            item.LowValueField,
+            item.HighValueField,
+            item.OpenValueField,
+            item.CloseValueField,
+            item.SizeField,
+            item.TargetField,
+            item.ParentField,
+            item.ShowLegend,
+            item.ShowLabels,
+            item.ShowTitle,
+            item.TableShowHeader,
+            item.TableShowFilterRow,
+            item.RowLimit,
+            item.MinimumValue,
+            item.MaximumValue,
+            item.Background,
+            rows,
+            live = data?.SourceKind == PublicationDataSourceKind.Web ? new
+            {
+                enabled = data.Web.Enabled,
+                transport = data.Web.Transport.ToString(),
+                method = data.Web.Method.ToString(),
+                url = data.Web.AllowExportedHtmlFetch ? data.Web.Url : string.Empty,
+                headers = data.Web.AllowExportedHtmlFetch ? data.Web.Headers : new List<PublicationWebHeader>(),
+                body = data.Web.AllowExportedHtmlFetch ? data.Web.RequestBody : string.Empty,
+                responseFormat = data.Web.ResponseFormat.ToString(),
+                jsonPath = data.Web.JsonPath,
+                delimiter = data.Web.Delimiter,
+                firstRowContainsHeaders = data.Web.FirstRowContainsHeaders,
+                refreshIntervalSeconds = data.Web.RefreshIntervalSeconds,
+                allowExportedHtmlFetch = data.Web.AllowExportedHtmlFetch,
+                useSnapshotOnFailure = data.Web.UseSnapshotOnFailure,
+                monolithRowsUrl = data.Web.AllowExportedHtmlFetch
+                    ? $"/api/publisher/exports/{document.Id}/data/{data.Id}/{data.Web.ExportAccessToken}/rows"
+                    : string.Empty
+            } : null
+        };
     }
 
     public IReadOnlyList<string> GridColumns(PublicationDataObject? data)
@@ -142,6 +278,69 @@ public sealed class PublicationDataService
             .Take(Math.Clamp(item.RowLimit, 1, 100))
             .Select(row => PublicationGridRow.From(row, columns))
             .ToArray();
+    }
+
+    private static void ParseWebSnapshot(PublicationDataObject data)
+    {
+        if (string.IsNullOrWhiteSpace(data.RawSource))
+        {
+            data.Columns = [];
+            data.Rows = [];
+            return;
+        }
+        var format = data.Web.ResponseFormat;
+        if (format == PublicationWebResponseFormat.Auto)
+        {
+            var trimmed = data.RawSource.TrimStart();
+            format = trimmed.StartsWith("{") || trimmed.StartsWith("[")
+                ? PublicationWebResponseFormat.Json
+                : trimmed.StartsWith("<")
+                    ? PublicationWebResponseFormat.Xml
+                    : PublicationWebResponseFormat.DelimitedText;
+        }
+        switch (format)
+        {
+            case PublicationWebResponseFormat.Json:
+                var originalJson = data.RawSource;
+                data.RawSource = SelectJsonPath(originalJson, data.Web.JsonPath);
+                try { ParseJson(data); }
+                finally { data.RawSource = originalJson; }
+                break;
+            case PublicationWebResponseFormat.Xml:
+                ParseXml(data);
+                break;
+            case PublicationWebResponseFormat.DelimitedText:
+                var originalDelimiter = data.Delimiter;
+                var originalHeaders = data.FirstRowContainsHeaders;
+                data.Delimiter = string.IsNullOrEmpty(data.Web.Delimiter) ? "," : data.Web.Delimiter[..1];
+                data.FirstRowContainsHeaders = data.Web.FirstRowContainsHeaders;
+                try { ParseDelimited(data); }
+                finally { data.Delimiter = originalDelimiter; data.FirstRowContainsHeaders = originalHeaders; }
+                break;
+            case PublicationWebResponseFormat.Text:
+                data.Columns = [new PublicationDataColumn { Name = "Value", ValueKind = PublicationDataValueKind.Text }];
+                data.Rows = [new PublicationDataRow
+                {
+                    Values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Value"] = data.RawSource }
+                }];
+                break;
+            default:
+                throw new InvalidDataException("Unsupported web response format.");
+        }
+    }
+
+    private static string SelectJsonPath(string source, string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return source;
+        using var document = JsonDocument.Parse(source, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+        var current = document.RootElement;
+        foreach (var segment in path.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (current.ValueKind == JsonValueKind.Object && current.TryGetProperty(segment, out var property)) current = property;
+            else if (current.ValueKind == JsonValueKind.Array && int.TryParse(segment, out var index) && index >= 0 && index < current.GetArrayLength()) current = current[index];
+            else throw new InvalidDataException($"JSON path segment '{segment}' was not found.");
+        }
+        return current.GetRawText();
     }
 
     private static void ParseJson(PublicationDataObject data)

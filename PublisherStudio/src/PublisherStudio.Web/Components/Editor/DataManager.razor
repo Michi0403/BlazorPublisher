@@ -1,5 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationDataService DataService
+@inject PublicationWebDataService WebDataService
+@inject PublicationWebhookStore Webhooks
 
 @if (Visible)
 {
@@ -8,7 +10,7 @@
             <header>
                 <div>
                     <strong>Publication data</strong>
-                    <span>Store reusable CSV, TSV, JSON, XML, or live document-object data inside the publication.</span>
+                    <span>Files, publication objects, local monolith APIs, REST polling, and webhook snapshots in one reusable data layer.</span>
                 </div>
                 <button type="button" class="window-close" @onclick="Close">×</button>
             </header>
@@ -20,7 +22,7 @@
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Sample sales data" Click="CreateSample" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Source">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-random" Text="Parse / refresh preview" Click="ParsePreview" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-random" Text="Parse / refresh preview" Click="ParseOrRefresh" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Save data object" IsPrimary="true" Click="Save" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete" Enabled="@ExistingDraft" Click="Delete" />
                     </DxRibbonGroup>
@@ -41,7 +43,7 @@
                     {
                         <button type="button" class="data-object-row @(data.Id == _draft.Id ? "selected" : null)" @onclick="() => Select(data)">
                             <strong>@data.Name</strong>
-                            <span>@data.SourceKind · @ResolvedRowCount(data) rows</span>
+                            <span>@SourceName(data) · @ResolvedRowCount(data) rows</span>
                         </button>
                     }
                 </aside>
@@ -55,6 +57,7 @@
                                 <option value="Json">JSON</option>
                                 <option value="Xml">XML</option>
                                 <option value="DocumentObjects">Publication objects</option>
+                                <option value="Web">Web / API / webhook</option>
                             </select>
                         </label>
                     </div>
@@ -62,13 +65,121 @@
                     @if (_draft.SourceKind == PublicationDataSourceKind.DocumentObjects)
                     {
                         <section class="data-source-help">
-                            <strong>Live document-object data</strong>
-                            <p>Rows are regenerated from publication objects. Use this for charts about object kinds, dimensions, positions, layers, visibility, or page membership.</p>
+                            <strong>Live publication-object data</strong>
+                            <p>Rows are regenerated from publication objects. The same local API boundary can later feed network viewers and streaming transports.</p>
                             <label>Scope
                                 <select value="@_draft.DocumentScope" @onchange="ChangeDocumentScope">
                                     <option value="AllPages">All pages</option>
                                     <option value="CurrentPage">Current page at render time</option>
                                 </select>
+                            </label>
+                        </section>
+                    }
+                    else if (_draft.SourceKind == PublicationDataSourceKind.Web)
+                    {
+                        <section class="web-data-editor">
+                            <div class="data-form-grid">
+                                <label>Transport
+                                    <select value="@_draft.Web.Transport" @onchange="ChangeWebTransport">
+                                        <option value="MonolithApi">PublisherStudio monolith API</option>
+                                        <option value="RestApi">External REST API</option>
+                                        <option value="Webhook">Webhook inbox</option>
+                                        <option value="Stream" disabled>Continuous stream (reserved)</option>
+                                    </select>
+                                </label>
+                                <label>Response
+                                    <select value="@_draft.Web.ResponseFormat" @onchange="ChangeResponseFormat">
+                                        @foreach (var format in Enum.GetValues<PublicationWebResponseFormat>())
+                                        {
+                                            <option value="@format">@Friendly(format.ToString())</option>
+                                        }
+                                    </select>
+                                </label>
+                            </div>
+
+                            @if (_draft.Web.Transport == PublicationWebTransportKind.Webhook)
+                            {
+                                <div class="data-source-help webhook-help">
+                                    <strong>Webhook address</strong>
+                                    <code>@WebhookRoute</code>
+                                    <p>POST or PUT JSON, XML, CSV, TSV, or text to this route. PublisherStudio keeps the latest payload in the current process and embeds the parsed snapshot when the publication is saved.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="data-form-grid">
+                                    <label>HTTP method
+                                        <select value="@_draft.Web.Method" @onchange="ChangeWebMethod">
+                                            @foreach (var method in Enum.GetValues<PublicationWebHttpMethod>())
+                                            {
+                                                <option value="@method">@method</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <label>URL
+                                        <input value="@_draft.Web.Url" @onchange="ChangeWebUrl" placeholder="/api/publisher/system/status" list="publisher-monolith-routes" />
+                                    </label>
+                                </div>
+                                @if (_draft.Web.Transport == PublicationWebTransportKind.MonolithApi)
+                                {
+                                    <datalist id="publisher-monolith-routes">
+                                        <option value="/api/publisher/system/status"></option>
+                                        <option value="/api/publisher/publications"></option>
+                                        <option value="@CurrentPublicationRoute"></option>
+                                        <option value="@CurrentPagesRoute"></option>
+                                        @foreach (var dataObject in State.Document.DataObjects)
+                                        {
+                                            <option value="@DataRowsRoute(dataObject.Id)"></option>
+                                        }
+                                    </datalist>
+                                    <p class="monolith-route-help">Relative routes stay inside this PublisherStudio process. Start with system status, publication pages, or the rows of another data object.</p>
+                                }
+                                <label>Request headers <small>one Name: Value pair per line</small>
+                                    <textarea class="web-header-editor" value="@_headerLines" @oninput="ChangeHeaderLines" spellcheck="false"></textarea>
+                                </label>
+                                @if (_draft.Web.Method is PublicationWebHttpMethod.Post or PublicationWebHttpMethod.Put or PublicationWebHttpMethod.Patch)
+                                {
+                                    <label>Request body
+                                        <textarea value="@_draft.Web.RequestBody" @oninput="ChangeRequestBody" spellcheck="false"></textarea>
+                                    </label>
+                                }
+                            }
+
+                            <div class="data-form-grid compact">
+                                <label>JSON path <input value="@_draft.Web.JsonPath" @onchange="ChangeJsonPath" placeholder="data.items" /></label>
+                                <label>Refresh every (seconds) <input type="number" min="0" step="1" value="@_draft.Web.RefreshIntervalSeconds" @onchange="ChangeRefreshSeconds" /></label>
+                                <label>Request timeout (seconds, 0 = none) <input type="number" min="0" step="1" value="@_draft.Web.TimeoutSeconds" @onchange="ChangeTimeoutSeconds" /></label>
+                            </div>
+                            @if (_draft.Web.ResponseFormat is PublicationWebResponseFormat.DelimitedText or PublicationWebResponseFormat.Text)
+                            {
+                                <div class="data-form-grid compact">
+                                    <label>Delimiter
+                                        <select value="@WebDelimiterKey" @onchange="ChangeWebDelimiter">
+                                            <option value=",">Comma</option><option value=";">Semicolon</option><option value="tab">Tab</option><option value="|">Pipe</option>
+                                        </select>
+                                    </label>
+                                    <label class="check-row"><input type="checkbox" checked="@_draft.Web.FirstRowContainsHeaders" @onchange="ToggleWebHeaders" /> First row contains headers</label>
+                                </div>
+                            }
+                            <div class="visual-option-grid web-data-options">
+                                <label class="check-row"><input type="checkbox" checked="@_draft.Web.Enabled" @onchange="ToggleWebEnabled" /> Enable data binding</label>
+                                <label class="check-row"><input type="checkbox" checked="@_draft.Web.RefreshOnOpen" @onchange="ToggleRefreshOnOpen" /> Refresh when opened</label>
+                                <label class="check-row"><input type="checkbox" checked="@_draft.Web.UseSnapshotOnFailure" @onchange="ToggleSnapshotFallback" /> Keep embedded snapshot on failure</label>
+                                <label class="check-row"><input type="checkbox" checked="@_draft.Web.AllowExportedHtmlFetch" @onchange="ToggleHtmlFetch" /> Allow standalone HTML to fetch this endpoint</label>
+                            </div>
+                            <div class="web-data-actions">
+                                <DxButton Text="Fetch / read webhook now" Click="RefreshWeb" RenderStyle="ButtonRenderStyle.Primary" Enabled="@_draft.Web.Enabled" />
+                                @if (_draft.Web.LastSuccessUtc is { } success)
+                                {
+                                    <span>Last success @success.LocalDateTime.ToString("g") · @_draft.Web.LastContentType</span>
+                                }
+                            </div>
+                            @if (_draft.Web.AllowExportedHtmlFetch)
+                            {
+                                <p class="data-export-warning">Standalone HTML uses its embedded snapshot first, then JavaScript fetch. External servers must permit browser requests. Relative monolith routes can be reconnected with the exported page's <code>publisherApi</code> query parameter. Any external URL, request body, or headers needed for direct browser fetch are embedded in that exported HTML, so do not enable this for secrets in a file you will share.</p>
+                            }
+                            <label class="data-source-input">Embedded response snapshot
+                                <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" spellcheck="false"></textarea>
                             </label>
                         </section>
                     }
@@ -79,10 +190,7 @@
                             <div class="data-form-grid compact">
                                 <label>Delimiter
                                     <select value="@DelimiterKey" @onchange="ChangeDelimiter">
-                                        <option value=",">Comma</option>
-                                        <option value=";">Semicolon</option>
-                                        <option value="tab">Tab</option>
-                                        <option value="|">Pipe</option>
+                                        <option value=",">Comma</option><option value=";">Semicolon</option><option value="tab">Tab</option><option value="|">Pipe</option>
                                     </select>
                                 </label>
                                 <label class="check-row"><input type="checkbox" checked="@_draft.FirstRowContainsHeaders" @onchange="ToggleHeaders" /> First row contains headers</label>
@@ -111,29 +219,17 @@
                         </div>
                         @if (PreviewColumns.Count == 0)
                         {
-                            <div class="empty-panel">Parse the source to see its columns and rows.</div>
+                            <div class="empty-panel">Parse or fetch the source to see its columns and rows.</div>
                         }
                         else
                         {
                             <div class="data-preview-scroll">
                                 <table>
-                                    <thead>
-                                        <tr>
-                                            @foreach (var column in PreviewColumns)
-                                            {
-                                                <th>@column.Name <small>@column.ValueKind</small></th>
-                                            }
-                                        </tr>
-                                    </thead>
+                                    <thead><tr>@foreach (var column in PreviewColumns) { <th>@column.Name <small>@column.ValueKind</small></th> }</tr></thead>
                                     <tbody>
                                         @foreach (var row in PreviewRows.Take(25))
                                         {
-                                            <tr>
-                                                @foreach (var column in PreviewColumns)
-                                                {
-                                                    <td>@row.Get(column.Name)</td>
-                                                }
-                                            </tr>
+                                            <tr>@foreach (var column in PreviewColumns) { <td>@row.Get(column.Name)</td> }</tr>
                                         }
                                     </tbody>
                                 </table>
@@ -144,7 +240,7 @@
             </div>
 
             <footer>
-                <span>Data objects are saved in the .pubstudio.json file and can be reused by several visuals.</span>
+                <span>Data snapshots and binding configuration are stored in the publication. Polling runs in the local ASP.NET Core monolith.</span>
                 <DxButton Text="Close" Click="Close" RenderStyle="ButtonRenderStyle.Primary" />
             </footer>
         </section>
@@ -160,8 +256,14 @@
     private PublicationDataObject _draft = new();
     private bool _wasVisible;
     private string? _error;
+    private string _headerLines = string.Empty;
     private bool ExistingDraft => State.Document.DataObjects.Any(data => data.Id == _draft.Id);
     private string DelimiterKey => _draft.Delimiter == "\t" ? "tab" : _draft.Delimiter;
+    private string WebDelimiterKey => _draft.Web.Delimiter == "\t" ? "tab" : _draft.Web.Delimiter;
+    private string WebhookRoute => $"/api/publisher/webhooks/{_draft.Web.Id}/{_draft.Web.WebhookToken}";
+    private string CurrentPublicationRoute => $"/api/publisher/publications/{State.Document.Id}";
+    private string CurrentPagesRoute => $"/api/publisher/publications/{State.Document.Id}/pages";
+    private string DataRowsRoute(Guid dataId) => $"/api/publisher/publications/{State.Document.Id}/data/{dataId}/rows";
     private string SourceInputLabel => _draft.SourceKind switch
     {
         PublicationDataSourceKind.Json => "JSON",
@@ -176,48 +278,52 @@
         if (Visible && !_wasVisible)
         {
             _error = null;
-            _draft = State.Document.DataObjects.Count > 0
-                ? DataService.Clone(State.Document.DataObjects[0])
-                : DataService.CreateSample();
+            SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
         }
         _wasVisible = Visible;
     }
 
-    private void Select(PublicationDataObject data)
+    private void SetDraft(PublicationDataObject value)
     {
-        _draft = DataService.Clone(data);
-        _error = null;
+        _draft = value;
+        _draft.Web ??= new PublicationWebBinding();
+        _draft.Web.Headers ??= [];
+        Webhooks.Register(_draft.Web.Id, _draft.Web.WebhookToken);
+        _headerLines = string.Join(Environment.NewLine, _draft.Web.Headers.Select(header => $"{header.Name}: {header.Value}"));
     }
 
+    private void Select(PublicationDataObject data) { SetDraft(DataService.Clone(data)); _error = null; }
     private void CreateNew()
     {
-        _draft = new PublicationDataObject
-        {
-            Name = "New Data",
-            SourceKind = PublicationDataSourceKind.DelimitedText,
-            RawSource = "Category,Value\nA,10\nB,20\nC,15"
-        };
+        SetDraft(new PublicationDataObject { Name = "New Data", SourceKind = PublicationDataSourceKind.DelimitedText, RawSource = "Category,Value\nA,10\nB,20\nC,15" });
         ParsePreview();
     }
-
     private void CreateSample()
     {
-        _draft = DataService.CreateSample($"Quarterly Sales {State.Document.DataObjects.Count + 1}");
-        _draft.Id = Guid.NewGuid();
-        _error = null;
+        var value = DataService.CreateSample($"Quarterly Sales {State.Document.DataObjects.Count + 1}");
+        value.Id = Guid.NewGuid(); SetDraft(value); _error = null;
+    }
+
+    private async Task ParseOrRefresh()
+    {
+        if (_draft.SourceKind == PublicationDataSourceKind.Web) await RefreshWeb(); else ParsePreview();
     }
 
     private void ParsePreview()
     {
+        try { DataService.ParseInto(_draft); _error = null; }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private async Task RefreshWeb()
+    {
         try
         {
-            DataService.ParseInto(_draft);
+            ApplyHeaderLines();
+            await WebDataService.RefreshAsync(_draft);
             _error = null;
         }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-        }
+        catch (Exception ex) { _error = ex.Message; }
     }
 
     private async Task ImportDataFile(InputFileChangeEventArgs args)
@@ -229,20 +335,12 @@
             using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
             _draft.RawSource = await reader.ReadToEndAsync();
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();
-            _draft.SourceKind = extension switch
-            {
-                ".json" => PublicationDataSourceKind.Json,
-                ".xml" => PublicationDataSourceKind.Xml,
-                _ => PublicationDataSourceKind.DelimitedText
-            };
+            _draft.SourceKind = extension switch { ".json" => PublicationDataSourceKind.Json, ".xml" => PublicationDataSourceKind.Xml, _ => PublicationDataSourceKind.DelimitedText };
             if (extension == ".tsv") _draft.Delimiter = "\t";
             else if (extension == ".csv") _draft.Delimiter = GuessCsvDelimiter(_draft.RawSource);
             ParsePreview();
         }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-        }
+        catch (Exception ex) { _error = ex.Message; }
     }
 
     private static string GuessCsvDelimiter(string source)
@@ -257,46 +355,78 @@
         try
         {
             if (string.IsNullOrWhiteSpace(_draft.Name)) throw new InvalidDataException("Enter a data object name.");
-            DataService.ParseInto(_draft);
+            ApplyHeaderLines();
+            if (_draft.SourceKind == PublicationDataSourceKind.Web)
+            {
+                // Saving the binding must not depend on the endpoint being online or a
+                // webhook payload already having arrived. Fetch is an explicit action;
+                // preserve and parse the latest embedded snapshot when one exists.
+                if (!string.IsNullOrWhiteSpace(_draft.RawSource)) DataService.ParseInto(_draft);
+                else { _draft.Columns = []; _draft.Rows = []; _draft.ModifiedUtc = DateTimeOffset.UtcNow; }
+            }
+            else DataService.ParseInto(_draft);
             State.UpsertDataObject(_draft);
-            _draft = DataService.Clone(State.Document.DataObjects.First(data => data.Id == _draft.Id));
+            SetDraft(DataService.Clone(State.Document.DataObjects.First(data => data.Id == _draft.Id)));
             _error = null;
             await DataChanged.InvokeAsync();
         }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-        }
+        catch (Exception ex) { _error = ex.Message; }
     }
 
     private async Task Delete()
     {
         if (!ExistingDraft) return;
-        if (!State.DeleteDataObject(_draft.Id))
-        {
-            _error = "This data object is still used by one or more chart, gauge, table, sparkline, or KPI objects.";
-            return;
-        }
-        _draft = State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample();
+        if (!State.DeleteDataObject(_draft.Id)) { _error = "This data object is still used by a data visual."; return; }
+        SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
         await DataChanged.InvokeAsync();
     }
 
+    private void ApplyHeaderLines()
+    {
+        _draft.Web.Headers = _headerLines.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(line => line.Split(new[] { ':' }, 2))
+            .Where(parts => parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
+            .Select(parts => new PublicationWebHeader { Name = parts[0].Trim(), Value = parts[1].Trim() })
+            .ToList();
+    }
+
+    private static string SourceName(PublicationDataObject data) => data.SourceKind == PublicationDataSourceKind.Web ? $"{data.Web.Transport}" : data.SourceKind.ToString();
     private int ResolvedRowCount(PublicationDataObject data) => DataService.ResolveRows(State.Document, data, State.SelectedPageId).Count;
     private Task Close() => Closed.InvokeAsync();
     private void ChangeName(ChangeEventArgs args) => _draft.Name = args.Value?.ToString() ?? string.Empty;
     private void ChangeRawSource(ChangeEventArgs args) => _draft.RawSource = args.Value?.ToString() ?? string.Empty;
-    private void ToggleHeaders(ChangeEventArgs args) => _draft.FirstRowContainsHeaders = args.Value is bool value && value;
+    private void ToggleHeaders(ChangeEventArgs args) => _draft.FirstRowContainsHeaders = Checked(args);
     private void ChangeDelimiter(ChangeEventArgs args) => _draft.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ",";
+    private void ChangeHeaderLines(ChangeEventArgs args) => _headerLines = args.Value?.ToString() ?? string.Empty;
+    private void ChangeRequestBody(ChangeEventArgs args) => _draft.Web.RequestBody = args.Value?.ToString() ?? string.Empty;
+    private void ChangeWebUrl(ChangeEventArgs args) => _draft.Web.Url = args.Value?.ToString() ?? string.Empty;
+    private void ChangeJsonPath(ChangeEventArgs args) => _draft.Web.JsonPath = args.Value?.ToString() ?? string.Empty;
+    private void ChangeRefreshSeconds(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.RefreshIntervalSeconds = Math.Max(0, value); }
+    private void ChangeTimeoutSeconds(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.TimeoutSeconds = Math.Max(0, value); }
+    private void ToggleWebEnabled(ChangeEventArgs args) => _draft.Web.Enabled = Checked(args);
+    private void ToggleRefreshOnOpen(ChangeEventArgs args) => _draft.Web.RefreshOnOpen = Checked(args);
+    private void ToggleSnapshotFallback(ChangeEventArgs args) => _draft.Web.UseSnapshotOnFailure = Checked(args);
+    private void ToggleHtmlFetch(ChangeEventArgs args) => _draft.Web.AllowExportedHtmlFetch = Checked(args);
+    private void ToggleWebHeaders(ChangeEventArgs args) => _draft.Web.FirstRowContainsHeaders = Checked(args);
+    private void ChangeWebDelimiter(ChangeEventArgs args) => _draft.Web.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ",";
+    private void ChangeWebMethod(ChangeEventArgs args) { if (Enum.TryParse<PublicationWebHttpMethod>(args.Value?.ToString(), out var value)) _draft.Web.Method = value; }
+    private void ChangeResponseFormat(ChangeEventArgs args) { if (Enum.TryParse<PublicationWebResponseFormat>(args.Value?.ToString(), out var value)) _draft.Web.ResponseFormat = value; }
+    private void ChangeWebTransport(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<PublicationWebTransportKind>(args.Value?.ToString(), out var value)) return;
+        _draft.Web.Transport = value;
+        if (value == PublicationWebTransportKind.MonolithApi && string.IsNullOrWhiteSpace(_draft.Web.Url)) _draft.Web.Url = "/api/publisher/system/status";
+    }
     private void ChangeSourceKind(ChangeEventArgs args)
     {
         if (!Enum.TryParse<PublicationDataSourceKind>(args.Value?.ToString(), out var value)) return;
         _draft.SourceKind = value;
         if (value == PublicationDataSourceKind.Json && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "[{\"Category\":\"A\",\"Value\":10}]";
-        if (value == PublicationDataSourceKind.Xml && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "<rows><row><Category>A</Category><Value>10</Value></row><row><Category>B</Category><Value>20</Value></row></rows>";
-        ParsePreview();
+        if (value == PublicationDataSourceKind.Xml && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "<rows><row><Category>A</Category><Value>10</Value></row></rows>";
+        if (value == PublicationDataSourceKind.Web && string.IsNullOrWhiteSpace(_draft.Web.Url)) _draft.Web.Url = "/api/publisher/system/status";
+        if (value != PublicationDataSourceKind.Web) ParsePreview();
     }
-    private void ChangeDocumentScope(ChangeEventArgs args)
-    {
-        if (Enum.TryParse<DocumentObjectDataScope>(args.Value?.ToString(), out var value)) _draft.DocumentScope = value;
-    }
+    private void ChangeDocumentScope(ChangeEventArgs args) { if (Enum.TryParse<DocumentObjectDataScope>(args.Value?.ToString(), out var value)) _draft.DocumentScope = value; }
+    private static bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
+    private static string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
 }

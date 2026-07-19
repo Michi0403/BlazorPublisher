@@ -320,16 +320,23 @@
                     <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.PolarChart, DataVisualMenuName(DataVisualKind.PolarChart)))" Click="SelectedVisualPolar" />
                     <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.Sparkline, DataVisualMenuName(DataVisualKind.Sparkline)))" Click="SelectedVisualSparkline" />
                     <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.BarGauge, DataVisualMenuName(DataVisualKind.BarGauge)))" Click="SelectedVisualBarGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.CircularGauge, DataVisualMenuName(DataVisualKind.CircularGauge)))" Click="SelectedVisualCircularGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.LinearGauge, DataVisualMenuName(DataVisualKind.LinearGauge)))" Click="SelectedVisualLinearGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.RangeSelector, DataVisualMenuName(DataVisualKind.RangeSelector)))" Click="SelectedVisualRangeSelector" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.Sankey, DataVisualMenuName(DataVisualKind.Sankey)))" Click="SelectedVisualSankey" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.Funnel, DataVisualMenuName(DataVisualKind.Funnel)))" Click="SelectedVisualFunnel" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.Pyramid, DataVisualMenuName(DataVisualKind.Pyramid)))" Click="SelectedVisualPyramid" />
+                    <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.TreeMap, DataVisualMenuName(DataVisualKind.TreeMap)))" Click="SelectedVisualTreeMap" />
                     <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.DataTable, DataVisualMenuName(DataVisualKind.DataTable)))" Click="SelectedVisualDataTable" />
                     <DxContextMenuItem Text="@(CheckedText(dataVisual.VisualKind == DataVisualKind.KpiProgress, DataVisualMenuName(DataVisualKind.KpiProgress)))" Click="SelectedVisualKpi" />
                 </Items>
             </DxContextMenuItem>
             <DxContextMenuItem Text="@(CheckedText(dataVisual.ShowTitle, "Show title"))" Click="ToggleDataVisualTitle" />
-            @if (dataVisual.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge)
+            @if (dataVisual.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.Sankey)
             {
                 <DxContextMenuItem Text="@(CheckedText(dataVisual.ShowLegend, "Show legend"))" Click="ToggleDataVisualLegend" />
             }
-            @if (dataVisual.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart)
+            @if (dataVisual.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sankey or DataVisualKind.Funnel or DataVisualKind.Pyramid)
             {
                 <DxContextMenuItem Text="@(CheckedText(dataVisual.ShowLabels, "Show point labels"))" Click="ToggleDataVisualLabels" />
             }
@@ -462,6 +469,13 @@
                     <DxContextMenuItem Text="Polar chart" Click="InsertPolar" />
                     <DxContextMenuItem Text="Sparkline" Click="InsertSparkline" />
                     <DxContextMenuItem Text="Bar gauge" Click="InsertBarGauge" />
+                    <DxContextMenuItem Text="Circular gauge" Click="InsertCircularGauge" />
+                    <DxContextMenuItem Text="Linear gauge" Click="InsertLinearGauge" />
+                    <DxContextMenuItem Text="Range selector" Click="InsertRangeSelector" />
+                    <DxContextMenuItem Text="Sankey diagram" Click="InsertSankey" />
+                    <DxContextMenuItem Text="Funnel" Click="InsertFunnel" />
+                    <DxContextMenuItem Text="Pyramid" Click="InsertPyramid" />
+                    <DxContextMenuItem Text="Tree map" Click="InsertTreeMap" />
                     <DxContextMenuItem Text="Data table" Click="InsertDataTable" />
                     <DxContextMenuItem Text="KPI progress" Click="InsertKpi" />
                 </Items>
@@ -799,16 +813,27 @@
     private Task InsertPolar() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
     private Task InsertSparkline() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
     private Task InsertBarGauge() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
+    private Task InsertCircularGauge() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.CircularGauge);
+    private Task InsertLinearGauge() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.LinearGauge);
+    private Task InsertRangeSelector() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.RangeSelector);
+    private Task InsertSankey() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Sankey);
+    private Task InsertFunnel() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Funnel);
+    private Task InsertPyramid() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Pyramid);
+    private Task InsertTreeMap() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.TreeMap);
     private Task InsertDataTable() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
     private Task InsertKpi() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
-    private void RefreshData() => State.RefreshDataVisuals();
+    private async Task RefreshData()
+    {
+        await State.RefreshWebDataAsync(State.SelectedElement is DataVisualElement visual ? visual.DataObjectId : null, true);
+        State.RefreshDataVisuals();
+    }
     private void ChangeSelectedDataVisualKind(DataVisualKind kind)
     {
         if (State.SelectedElement is not DataVisualElement dataVisual) return;
         State.UpdateSelected(_ =>
         {
             dataVisual.VisualKind = kind;
-            if (kind is not (DataVisualKind.CartesianChart or DataVisualKind.BarGauge) && dataVisual.ValueFields.Count > 1)
+            if (kind is not (DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge) && dataVisual.ValueFields.Count > 1)
                 dataVisual.ValueFields = [dataVisual.ValueFields[0]];
         });
     }
@@ -821,6 +846,13 @@
     private void SelectedVisualPolar() => ChangeSelectedDataVisualKind(DataVisualKind.PolarChart);
     private void SelectedVisualSparkline() => ChangeSelectedDataVisualKind(DataVisualKind.Sparkline);
     private void SelectedVisualBarGauge() => ChangeSelectedDataVisualKind(DataVisualKind.BarGauge);
+    private void SelectedVisualCircularGauge() => ChangeSelectedDataVisualKind(DataVisualKind.CircularGauge);
+    private void SelectedVisualLinearGauge() => ChangeSelectedDataVisualKind(DataVisualKind.LinearGauge);
+    private void SelectedVisualRangeSelector() => ChangeSelectedDataVisualKind(DataVisualKind.RangeSelector);
+    private void SelectedVisualSankey() => ChangeSelectedDataVisualKind(DataVisualKind.Sankey);
+    private void SelectedVisualFunnel() => ChangeSelectedDataVisualKind(DataVisualKind.Funnel);
+    private void SelectedVisualPyramid() => ChangeSelectedDataVisualKind(DataVisualKind.Pyramid);
+    private void SelectedVisualTreeMap() => ChangeSelectedDataVisualKind(DataVisualKind.TreeMap);
     private void SelectedVisualDataTable() => ChangeSelectedDataVisualKind(DataVisualKind.DataTable);
     private void SelectedVisualKpi() => ChangeSelectedDataVisualKind(DataVisualKind.KpiProgress);
     private void UpdateSelectedDataVisual(Action<DataVisualElement> update)
@@ -845,6 +877,13 @@
         DataVisualKind.PolarChart => "Polar chart",
         DataVisualKind.Sparkline => "Sparkline",
         DataVisualKind.BarGauge => "Bar gauge",
+        DataVisualKind.CircularGauge => "Circular gauge",
+        DataVisualKind.LinearGauge => "Linear gauge",
+        DataVisualKind.RangeSelector => "Range selector",
+        DataVisualKind.Sankey => "Sankey diagram",
+        DataVisualKind.Funnel => "Funnel",
+        DataVisualKind.Pyramid => "Pyramid",
+        DataVisualKind.TreeMap => "Tree map",
         DataVisualKind.DataTable => "Data table",
         _ => "KPI progress"
     };

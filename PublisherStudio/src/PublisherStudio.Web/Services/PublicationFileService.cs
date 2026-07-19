@@ -186,6 +186,13 @@ public sealed partial class PublicationFileService
         foreach (var visual in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<DataVisualElement>())
         {
             visual.ValueFields ??= [];
+            visual.LowValueField ??= string.Empty;
+            visual.HighValueField ??= string.Empty;
+            visual.OpenValueField ??= string.Empty;
+            visual.CloseValueField ??= string.Empty;
+            visual.SizeField ??= string.Empty;
+            visual.TargetField ??= string.Empty;
+            visual.ParentField ??= string.Empty;
             visual.RowLimit = Math.Clamp(visual.RowLimit <= 0 ? 12 : visual.RowLimit, 1, 100);
             visual.MaximumValue = visual.MaximumValue <= visual.MinimumValue ? visual.MinimumValue + 100 : visual.MaximumValue;
             visual.BorderWidthMm = Math.Clamp(visual.BorderWidthMm, 0, 8);
@@ -201,10 +208,19 @@ public sealed partial class PublicationFileService
                 var numeric = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name;
                 if (!string.IsNullOrWhiteSpace(numeric)) visual.ValueFields.Add(numeric);
             }
+            var numericFields = columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).Select(column => column.Name).ToArray();
+            var primary = visual.ValueFields.FirstOrDefault() ?? numericFields.FirstOrDefault() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(visual.OpenValueField)) visual.OpenValueField = numericFields.ElementAtOrDefault(0) ?? primary;
+            if (string.IsNullOrWhiteSpace(visual.HighValueField)) visual.HighValueField = numericFields.ElementAtOrDefault(1) ?? primary;
+            if (string.IsNullOrWhiteSpace(visual.LowValueField)) visual.LowValueField = numericFields.ElementAtOrDefault(2) ?? primary;
+            if (string.IsNullOrWhiteSpace(visual.CloseValueField)) visual.CloseValueField = numericFields.ElementAtOrDefault(3) ?? primary;
+            if (string.IsNullOrWhiteSpace(visual.SizeField)) visual.SizeField = numericFields.ElementAtOrDefault(1) ?? primary;
+            if (string.IsNullOrWhiteSpace(visual.TargetField)) visual.TargetField = columns.FirstOrDefault(column => !string.Equals(column.Name, visual.ArgumentField, StringComparison.OrdinalIgnoreCase))?.Name ?? string.Empty;
             var minimum = visual.VisualKind switch
             {
                 DataVisualKind.Sparkline => (Width: 55d, Height: 18d),
                 DataVisualKind.KpiProgress => (Width: 60d, Height: 24d),
+                DataVisualKind.LinearGauge => (Width: 70d, Height: 24d),
                 DataVisualKind.DataTable => (Width: 80d, Height: 48d),
                 _ => (Width: 75d, Height: 55d)
             };
@@ -281,7 +297,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.34";
+        document.FormatVersion = "1.35";
         return document;
     }
 

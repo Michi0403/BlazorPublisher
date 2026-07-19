@@ -1695,3 +1695,30 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 @media (max-width:760px) { .spreadsheet-editor-toolbar small,.spreadsheet-editor-dialog > footer > span { display:none; } }
 .print-publication .spreadsheet-preview-document,
 .publisher-video-export-publication .spreadsheet-preview-document { padding-bottom:3px; }
+
+/* v1.35 web data and complete DevExpress visual workbench */
+.data-visual-client-host,
+.data-visual-client-host > .dx-widget,
+.data-visual-client-host > .dx-visibility-change-handler {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+.data-visual-view[data-ps-visual-config] { position: relative; overflow: hidden; }
+.ps-live-fallback { width:100%; height:100%; padding:8px; overflow:auto; box-sizing:border-box; font:12px/1.4 Segoe UI,sans-serif; }
+.ps-live-fallback > strong, .ps-live-fallback > small { display:block; margin-bottom:6px; }
+.ps-live-fallback table { width:100%; border-collapse:collapse; }
+.ps-live-fallback th,.ps-live-fallback td { border:1px solid #cbd5e1; padding:3px 5px; text-align:left; }
+.ps-kpi { width:100%; height:100%; display:grid; grid-template-rows:auto 1fr auto; gap:6px; align-items:center; padding:10px; box-sizing:border-box; }
+.ps-kpi strong { font-size:clamp(20px,5cqw,52px); }
+.ps-kpi progress { width:100%; }
+.web-data-editor { display:grid; gap:10px; }
+.web-data-editor textarea { min-height:72px; resize:vertical; }
+.web-header-editor { min-height:64px!important; }
+.webhook-help code { display:block; padding:8px; border-radius:4px; background:#0f172a; color:#e2e8f0; overflow-wrap:anywhere; user-select:all; }
+.web-data-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.web-data-actions span { color:#475569; font-size:12px; }
+.data-export-warning { margin:0; padding:8px 10px; border-left:3px solid #f59e0b; background:#fffbeb; color:#78350f; font-size:12px; }
+.financial-field-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.monolith-route-help { margin:0; padding:7px 9px; border-left:3px solid #1787d4; background:#eef7fd; color:#28465d; font-size:12px; }

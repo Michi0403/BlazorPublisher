@@ -239,7 +239,7 @@ Recommended local media smoke tests:
 
 - Confirmed the Spreadsheet Home ribbon receives the custom `Open workbook` command through `SpreadsheetBuilder.Ribbon` and `SpreadsheetRibbonItemCollectionBuilder.AddButton`.
 - Confirmed `OnCustomCommandExecuted` invokes only the PublisherStudio workbook picker command and leaves normal Spreadsheet commands untouched.
-- Confirmed supported extension filtering, 64 MB browser/server limits, anti-forgery header forwarding, same-origin credentials, and session existence checks.
+- Confirmed supported extension filtering, anti-forgery header forwarding, same-origin credentials, and session existence checks. The temporary 64 MB limit present in v1.0.32 was removed in v1.0.33; current source uses no PublisherStudio-defined workbook upload ceiling.
 - Confirmed imported bytes pass the existing workbook validation path before replacing the session.
 - Confirmed session replacement regenerates the DevExpress document ID, updates filename/format/content/preview/active sheet under the session lock, and does not modify the publication frame until Apply is selected.
 - Confirmed the outer Blazor modal receives opening, ready, save, and failure messages from the same-origin iframe, disables conflicting commands during reload, and clears reload timeouts on success or failure.
@@ -255,3 +255,18 @@ Recommended local media smoke tests:
 - Verified the resize-cursor mapping against CSS screen-coordinate axes for 0°, 45°, 90°, and 135° rotations; horizontal, vertical, and both diagonal cursors now correspond to the actual handle movement vector.
 - JavaScript passes `node --check`; JSON/XML/package metadata and ZIP integrity are validated. A licensed end-to-end DevExpress build and interactive pointer test remain required on the user's development machine because the .NET SDK and licensed DevExpress feed are unavailable here.
 
+
+
+## v1.0.35 visualization and web-data validation
+
+- Confirmed the Cartesian enum and JavaScript mapper cover all 23 DevExtreme Chart series types in 25.2.8, including required dual-value range fields and OHLC financial fields.
+- Confirmed the visual catalogue includes pie/doughnut, all documented PolarChart types, all Sparkline types, bar/circular/linear gauges, range selector, Sankey, funnel/pyramid, tree map, data grid, and KPI; all kinds are reachable from the main ribbon, canvas insertion menu, visual editor, object context menu, and Data Tools quick-type menu.
+- Confirmed special range, bubble, financial, Sankey, and tree-map field mappings are persisted, normalized for older publications, cloned by the editor, and included in standalone client configuration.
+- Confirmed web bindings support monolith-relative and external absolute URLs, GET/POST/PUT/PATCH/DELETE, headers/body, JSON/XML/delimited parsing, JSON paths, refresh-on-open, manual/periodic refresh, webhook snapshots, and snapshot fallback.
+- Confirmed `0` request timeout maps to `Timeout.InfiniteTimeSpan`, Kestrel/form request limits remain unbounded by PublisherStudio, file imports use `OpenReadStream(long.MaxValue)`, and response bodies are read without an application byte ceiling.
+- Confirmed per-binding semaphores serialize concurrent refreshes. The live registry reuses unchanged immutable non-object data snapshots during unrelated canvas updates, resolves current-page object data against the selected page, and unregisters when a document is replaced or its scoped editor state is disposed.
+- Confirmed standalone export secrets are omitted unless the user enables live HTML fetch. Enabled bindings receive a random tokenized rows route; only that route has the permissive export CORS policy.
+- Confirmed website and video export force a server refresh before cloning/capture, the exported HTML embeds its snapshot and local visualization runtime, records the current loopback origin as a reconnect default with query-string override precedence, and each video page refreshes its visual DOM before recording.
+- Confirmed Spreadsheet Studio presents the custom far-left tab as **Home**, renames later built-in Home labels to **All controls**, and registers begin-synchronization only once.
+- Confirmed duplicate delimited-data headers are normalized once without the accidental second HashSet insertion loop.
+- `node --check` passes for both JavaScript files; package JSON and project XML parse; C# files and Razor `@code` blocks pass tree-sitter syntax parsing. A complete licensed `dotnet restore`/`dotnet build` and interactive DevExpress browser test remain required on the user's release machine because this environment lacks the .NET SDK and licensed DevExpress feed.

@@ -8,7 +8,7 @@
             <header>
                 <div>
                     <strong>Insert / edit data visual</strong>
-                    <span>DevExpress chart, pie, polar, sparkline, bar gauge, grid, and KPI components.</span>
+                    <span>The complete DevExtreme chart-series workbench plus pies, polar charts, sparklines, gauges, Sankey, funnel, pyramid, tree map, range selector, grid, and KPI.</span>
                 </div>
                 <button type="button" class="window-close" @onclick="Cancel">×</button>
             </header>
@@ -141,7 +141,36 @@
                             </label>
                         }
 
-                        @if (_draft.VisualKind is DataVisualKind.BarGauge or DataVisualKind.KpiProgress)
+                        @if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.RangeArea or CartesianChartStyle.RangeBar))
+                        {
+                            <div class="data-form-grid">
+                                @FieldSelect("Low value", _draft.LowValueField, ChangeLowValueField, ValueColumns)
+                                @FieldSelect("High value", _draft.HighValueField, ChangeHighValueField, ValueColumns)
+                            </div>
+                        }
+                        @if (_draft.VisualKind == DataVisualKind.CartesianChart && _draft.CartesianStyle == CartesianChartStyle.Bubble)
+                        {
+                            @FieldSelect("Bubble size", _draft.SizeField, ChangeSizeField, ValueColumns)
+                        }
+                        @if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.Candlestick or CartesianChartStyle.Stock))
+                        {
+                            <div class="data-form-grid financial-field-grid">
+                                @FieldSelect("Open", _draft.OpenValueField, ChangeOpenValueField, ValueColumns)
+                                @FieldSelect("High", _draft.HighValueField, ChangeHighValueField, ValueColumns)
+                                @FieldSelect("Low", _draft.LowValueField, ChangeLowValueField, ValueColumns)
+                                @FieldSelect("Close", _draft.CloseValueField, ChangeCloseValueField, ValueColumns)
+                            </div>
+                        }
+                        @if (_draft.VisualKind == DataVisualKind.Sankey)
+                        {
+                            @FieldSelect("Target node", _draft.TargetField, ChangeTargetField, Columns)
+                        }
+                        @if (_draft.VisualKind == DataVisualKind.TreeMap)
+                        {
+                            @FieldSelect("Parent field (optional)", _draft.ParentField, ChangeParentField, Columns, true)
+                        }
+
+                        @if (_draft.VisualKind is DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge or DataVisualKind.KpiProgress)
                         {
                             <div class="data-form-grid">
                                 <label>Minimum<input type="number" step="any" value="@Inv(_draft.MinimumValue)" @onchange="ChangeMinimum" /></label>
@@ -158,11 +187,11 @@
 
                         <div class="visual-option-grid">
                             <label class="check-row"><input type="checkbox" checked="@_draft.ShowTitle" @onchange="ToggleTitle" /> Show title</label>
-                            @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge)
+                            @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.Sankey)
                             {
                                 <label class="check-row"><input type="checkbox" checked="@_draft.ShowLegend" @onchange="ToggleLegend" /> Show legend</label>
                             }
-                            @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart)
+                            @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sankey or DataVisualKind.Funnel or DataVisualKind.Pyramid)
                             {
                                 <label class="check-row"><input type="checkbox" checked="@_draft.ShowLabels" @onchange="ToggleLabels" /> Show point labels</label>
                             }
@@ -180,7 +209,7 @@
                          @oncontextmenu:stopPropagation>
                         <DataVisualView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" />
                     </div>
-                    <p>Charts remain live DevExpress components on the publication canvas. Stored document-object sources update when publication objects change.</p>
+                    <p>Visuals remain live DevExpress components on the publication canvas. Web bindings are refreshed by the local monolith and standalone HTML can optionally continue polling with embedded JavaScript.</p>
                 </section>
             </div>
 
@@ -203,16 +232,23 @@
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.PolarChart, KindName(DataVisualKind.PolarChart)))" Click="SetPolarChart" />
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.Sparkline, KindName(DataVisualKind.Sparkline)))" Click="SetSparkline" />
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.BarGauge, KindName(DataVisualKind.BarGauge)))" Click="SetBarGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.CircularGauge, KindName(DataVisualKind.CircularGauge)))" Click="SetCircularGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.LinearGauge, KindName(DataVisualKind.LinearGauge)))" Click="SetLinearGauge" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.RangeSelector, KindName(DataVisualKind.RangeSelector)))" Click="SetRangeSelector" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.Sankey, KindName(DataVisualKind.Sankey)))" Click="SetSankey" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.Funnel, KindName(DataVisualKind.Funnel)))" Click="SetFunnel" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.Pyramid, KindName(DataVisualKind.Pyramid)))" Click="SetPyramid" />
+                    <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.TreeMap, KindName(DataVisualKind.TreeMap)))" Click="SetTreeMap" />
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.DataTable, KindName(DataVisualKind.DataTable)))" Click="SetDataTable" />
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.KpiProgress, KindName(DataVisualKind.KpiProgress)))" Click="SetKpiProgress" />
                 </Items>
             </DxContextMenuItem>
             <DxContextMenuItem Text="@(CheckedText(_draft.ShowTitle, "Show title"))" Click="ToggleTitleMenu" />
-            @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge)
+            @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.Sankey)
             {
                 <DxContextMenuItem Text="@(CheckedText(_draft.ShowLegend, "Show legend"))" Click="ToggleLegendMenu" />
             }
-            @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart)
+            @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sankey or DataVisualKind.Funnel or DataVisualKind.Pyramid)
             {
                 <DxContextMenuItem Text="@(CheckedText(_draft.ShowLabels, "Show point labels"))" Click="ToggleLabelsMenu" />
             }
@@ -239,13 +275,15 @@
     private PublicationDataObject? CurrentData => _draft is null ? null : State.Document.DataObjects.FirstOrDefault(data => data.Id == _draft.DataObjectId);
     private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(CurrentData);
     private IReadOnlyList<PublicationDataColumn> ValueColumns => Columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).ToArray();
-    private bool AllowsMultipleValueFields => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.BarGauge;
-    private bool CanSave => _draft is not null && CurrentData is not null && (_draft.VisualKind == DataVisualKind.DataTable || _draft.ValueFields.Count > 0);
+    private bool AllowsMultipleValueFields => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge;
+    private bool CanSave => _draft is not null && CurrentData is not null && ValidateFields(_draft);
     private string ValidationText => CurrentData is null
         ? "Choose or create a data object."
-        : _draft is not null && _draft.VisualKind != DataVisualKind.DataTable && _draft.ValueFields.Count == 0
-            ? "Select at least one value field."
-            : "The visual uses publication data stored in the document.";
+        : _draft is not null && !ValidateFields(_draft)
+            ? "Choose the required argument, value, range, financial, target, or hierarchy fields for this visual."
+            : CurrentData.SourceKind == PublicationDataSourceKind.Web
+                ? "This visual uses an embedded snapshot and the configured web binding."
+                : "The visual uses publication data stored in the document.";
 
     protected override void OnParametersSet()
     {
@@ -255,6 +293,7 @@
             {
                 _targetId = selected.Id;
                 _draft = Clone(selected);
+                EnsureSpecialFields();
             }
             else
             {
@@ -280,13 +319,19 @@
     private Task ShowVisualContextMenu(MouseEventArgs args) => _visualContextMenu.ShowAsync(args);
     private Task Cancel() => Cancelled.InvokeAsync();
     private Task RequestManage() => ManageDataRequested.InvokeAsync();
-    private void Refresh() => State.RefreshDataVisuals();
+    private async Task Refresh()
+    {
+        if (_draft is null) return;
+        await State.RefreshWebDataAsync(_draft.DataObjectId, true);
+        State.RefreshDataVisuals();
+    }
     private void SetKind(DataVisualKind kind)
     {
         if (_draft is null) return;
         _draft.VisualKind = kind;
         if (!AllowsMultipleValueFields && _draft.ValueFields.Count > 1)
             _draft.ValueFields = [ _draft.ValueFields[0] ];
+        EnsureSpecialFields();
     }
 
     private void SetCartesianChart() => SetKind(DataVisualKind.CartesianChart);
@@ -294,6 +339,13 @@
     private void SetPolarChart() => SetKind(DataVisualKind.PolarChart);
     private void SetSparkline() => SetKind(DataVisualKind.Sparkline);
     private void SetBarGauge() => SetKind(DataVisualKind.BarGauge);
+    private void SetCircularGauge() => SetKind(DataVisualKind.CircularGauge);
+    private void SetLinearGauge() => SetKind(DataVisualKind.LinearGauge);
+    private void SetRangeSelector() => SetKind(DataVisualKind.RangeSelector);
+    private void SetSankey() => SetKind(DataVisualKind.Sankey);
+    private void SetFunnel() => SetKind(DataVisualKind.Funnel);
+    private void SetPyramid() => SetKind(DataVisualKind.Pyramid);
+    private void SetTreeMap() => SetKind(DataVisualKind.TreeMap);
     private void SetDataTable() => SetKind(DataVisualKind.DataTable);
     private void SetKpiProgress() => SetKind(DataVisualKind.KpiProgress);
 
@@ -306,6 +358,7 @@
         _draft.SeriesField = string.Empty;
         _draft.ValueFields = columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).Take(2).Select(column => column.Name).ToList();
         if (_draft.ValueFields.Count == 0 && columns.Count > 1) _draft.ValueFields.Add(columns[1].Name);
+        EnsureSpecialFields();
     }
 
     private void ToggleValueField(string field, ChangeEventArgs args)
@@ -321,7 +374,14 @@
     private void ChangeTitle(ChangeEventArgs args) { if (_draft is not null) _draft.Title = args.Value?.ToString() ?? string.Empty; }
     private void ChangeArgumentField(ChangeEventArgs args) { if (_draft is not null) _draft.ArgumentField = args.Value?.ToString() ?? string.Empty; }
     private void ChangeSeriesField(ChangeEventArgs args) { if (_draft is not null) _draft.SeriesField = args.Value?.ToString() ?? string.Empty; }
-    private void ChangeCartesianStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<CartesianChartStyle>(args.Value?.ToString(), out var value)) _draft.CartesianStyle = value; }
+    private void ChangeLowValueField(ChangeEventArgs args) { if (_draft is not null) _draft.LowValueField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeHighValueField(ChangeEventArgs args) { if (_draft is not null) _draft.HighValueField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeOpenValueField(ChangeEventArgs args) { if (_draft is not null) _draft.OpenValueField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeCloseValueField(ChangeEventArgs args) { if (_draft is not null) _draft.CloseValueField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeSizeField(ChangeEventArgs args) { if (_draft is not null) _draft.SizeField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeTargetField(ChangeEventArgs args) { if (_draft is not null) _draft.TargetField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeParentField(ChangeEventArgs args) { if (_draft is not null) _draft.ParentField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeCartesianStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<CartesianChartStyle>(args.Value?.ToString(), out var value)) { _draft.CartesianStyle = value; EnsureSpecialFields(); } }
     private void ChangePieStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PieChartStyle>(args.Value?.ToString(), out var value)) _draft.PieStyle = value; }
     private void ChangePolarStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PolarChartStyle>(args.Value?.ToString(), out var value)) _draft.PolarStyle = value; }
     private void ChangeSparklineStyle(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<SparklineChartStyle>(args.Value?.ToString(), out var value)) _draft.SparklineStyle = value; }
@@ -367,6 +427,8 @@
         target.DataObjectId = source.DataObjectId; target.VisualKind = source.VisualKind;
         target.CartesianStyle = source.CartesianStyle; target.PieStyle = source.PieStyle; target.PolarStyle = source.PolarStyle; target.SparklineStyle = source.SparklineStyle;
         target.Title = source.Title; target.ArgumentField = source.ArgumentField; target.SeriesField = source.SeriesField; target.ValueFields = [.. source.ValueFields];
+        target.LowValueField = source.LowValueField; target.HighValueField = source.HighValueField; target.OpenValueField = source.OpenValueField; target.CloseValueField = source.CloseValueField;
+        target.SizeField = source.SizeField; target.TargetField = source.TargetField; target.ParentField = source.ParentField;
         target.ShowLegend = source.ShowLegend; target.ShowLabels = source.ShowLabels; target.ShowTitle = source.ShowTitle;
         target.TableShowHeader = source.TableShowHeader; target.TableShowFilterRow = source.TableShowFilterRow; target.RowLimit = source.RowLimit;
         target.MinimumValue = source.MinimumValue; target.MaximumValue = source.MaximumValue;
@@ -376,19 +438,78 @@
     private static string KindIcon(DataVisualKind kind) => kind switch
     {
         DataVisualKind.CartesianChart => "▥", DataVisualKind.PieChart => "◕", DataVisualKind.PolarChart => "✥",
-        DataVisualKind.Sparkline => "⌁", DataVisualKind.BarGauge => "◔", DataVisualKind.DataTable => "▦", _ => "%"
+        DataVisualKind.Sparkline => "⌁", DataVisualKind.BarGauge => "◔", DataVisualKind.CircularGauge => "◴",
+        DataVisualKind.LinearGauge => "▰", DataVisualKind.RangeSelector => "↔", DataVisualKind.Sankey => "⇉",
+        DataVisualKind.Funnel => "▽", DataVisualKind.Pyramid => "△", DataVisualKind.TreeMap => "▦",
+        DataVisualKind.DataTable => "▤", _ => "%"
     };
     private static string KindName(DataVisualKind kind) => Friendly(kind.ToString());
     private static string KindDescription(DataVisualKind kind) => kind switch
     {
-        DataVisualKind.CartesianChart => "Bar, line, spline, area, and stacked series",
+        DataVisualKind.CartesianChart => "All 23 DevExtreme XY, range, bubble, stock, and candlestick series",
         DataVisualKind.PieChart => "Pie or doughnut composition",
-        DataVisualKind.PolarChart => "Polar line, area, bar, or scatter",
+        DataVisualKind.PolarChart => "All PolarChart series: line, area, bar, stacked bar, and scatter",
         DataVisualKind.Sparkline => "Compact trend graphic",
-        DataVisualKind.BarGauge => "Circular multi-value gauge",
+        DataVisualKind.BarGauge => "Multi-value circular bar gauge",
+        DataVisualKind.CircularGauge => "Needle gauge with optional subvalues",
+        DataVisualKind.LinearGauge => "Horizontal or vertical value gauge",
+        DataVisualKind.RangeSelector => "Interactive data-range navigator",
+        DataVisualKind.Sankey => "Weighted source-to-target flows",
+        DataVisualKind.Funnel => "Stage reduction and conversion",
+        DataVisualKind.Pyramid => "Hierarchical proportional pyramid",
+        DataVisualKind.TreeMap => "Hierarchical area map",
         DataVisualKind.DataTable => "DevExpress data grid",
         _ => "Single value with progress indicator"
     };
+
+    private RenderFragment FieldSelect(string label, string value, Action<ChangeEventArgs> changed, IReadOnlyList<PublicationDataColumn> columns, bool allowNone = false) => builder =>
+    {
+        var sequence = 0;
+        builder.OpenElement(sequence++, "label");
+        builder.AddContent(sequence++, label);
+        builder.OpenElement(sequence++, "select");
+        builder.AddAttribute(sequence++, "value", value);
+        builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.Create(this, changed));
+        if (allowNone)
+        {
+            builder.OpenElement(sequence++, "option"); builder.AddAttribute(sequence++, "value", ""); builder.AddContent(sequence++, "None"); builder.CloseElement();
+        }
+        foreach (var column in columns)
+        {
+            builder.OpenElement(sequence++, "option"); builder.AddAttribute(sequence++, "value", column.Name); builder.AddContent(sequence++, column.Name); builder.CloseElement();
+        }
+        builder.CloseElement(); builder.CloseElement();
+    };
+
+    private void EnsureSpecialFields()
+    {
+        if (_draft is null) return;
+        var numeric = ValueColumns.Select(column => column.Name).ToArray();
+        var all = Columns.Select(column => column.Name).ToArray();
+        string Pick(int index, string current) => !string.IsNullOrWhiteSpace(current) ? current : numeric.ElementAtOrDefault(index) ?? numeric.FirstOrDefault() ?? string.Empty;
+        _draft.OpenValueField = Pick(0, _draft.OpenValueField);
+        _draft.HighValueField = Pick(1, _draft.HighValueField);
+        _draft.LowValueField = Pick(2, _draft.LowValueField);
+        _draft.CloseValueField = Pick(3, _draft.CloseValueField);
+        _draft.SizeField = Pick(1, _draft.SizeField);
+        if (string.IsNullOrWhiteSpace(_draft.TargetField)) _draft.TargetField = all.FirstOrDefault(field => !string.Equals(field, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
+    }
+
+    private static bool ValidateFields(DataVisualElement item)
+    {
+        if (item.VisualKind == DataVisualKind.DataTable) return true;
+        if (item.ValueFields.Count == 0) return false;
+        if (item.VisualKind == DataVisualKind.Sankey) return !string.IsNullOrWhiteSpace(item.ArgumentField) && !string.IsNullOrWhiteSpace(item.TargetField);
+        if (item.VisualKind == DataVisualKind.TreeMap) return !string.IsNullOrWhiteSpace(item.ArgumentField);
+        if (item.VisualKind == DataVisualKind.CartesianChart && (item.CartesianStyle is CartesianChartStyle.RangeArea or CartesianChartStyle.RangeBar))
+            return !string.IsNullOrWhiteSpace(item.LowValueField) && !string.IsNullOrWhiteSpace(item.HighValueField);
+        if (item.VisualKind == DataVisualKind.CartesianChart && item.CartesianStyle == CartesianChartStyle.Bubble)
+            return !string.IsNullOrWhiteSpace(item.SizeField);
+        if (item.VisualKind == DataVisualKind.CartesianChart && (item.CartesianStyle is CartesianChartStyle.Candlestick or CartesianChartStyle.Stock))
+            return !string.IsNullOrWhiteSpace(item.OpenValueField) && !string.IsNullOrWhiteSpace(item.HighValueField)
+                && !string.IsNullOrWhiteSpace(item.LowValueField) && !string.IsNullOrWhiteSpace(item.CloseValueField);
+        return true;
+    }
     private static string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
     private static bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
     private static bool TryDouble(object? value, out double result) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out result) || double.TryParse(value?.ToString(), out result);

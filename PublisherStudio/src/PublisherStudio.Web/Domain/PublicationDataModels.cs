@@ -7,7 +7,8 @@ public enum PublicationDataSourceKind
     Json,
     DelimitedText,
     Xml,
-    DocumentObjects
+    DocumentObjects,
+    Web
 }
 
 public enum PublicationDataValueKind
@@ -33,6 +34,7 @@ public sealed class PublicationDataObject
     public string Delimiter { get; set; } = ",";
     public bool FirstRowContainsHeaders { get; set; } = true;
     public DocumentObjectDataScope DocumentScope { get; set; } = DocumentObjectDataScope.AllPages;
+    public PublicationWebBinding Web { get; set; } = new();
     public List<PublicationDataColumn> Columns { get; set; } = [];
     public List<PublicationDataRow> Rows { get; set; } = [];
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
@@ -68,6 +70,13 @@ public enum DataVisualKind
     PolarChart,
     Sparkline,
     BarGauge,
+    CircularGauge,
+    LinearGauge,
+    RangeSelector,
+    Sankey,
+    Funnel,
+    Pyramid,
+    TreeMap,
     DataTable,
     KpiProgress
 }
@@ -91,7 +100,12 @@ public enum CartesianChartStyle
     StackedSpline,
     FullStackedSpline,
     StackedSplineArea,
-    FullStackedSplineArea
+    FullStackedSplineArea,
+    RangeArea,
+    RangeBar,
+    Bubble,
+    Candlestick,
+    Stock
 }
 
 public enum PieChartStyle
@@ -105,6 +119,7 @@ public enum PolarChartStyle
     Line,
     Area,
     Bar,
+    StackedBar,
     Scatter
 }
 
@@ -133,6 +148,13 @@ public sealed class DataVisualElement : PublicationElement
     public string ArgumentField { get; set; } = string.Empty;
     public string SeriesField { get; set; } = string.Empty;
     public List<string> ValueFields { get; set; } = [];
+    public string LowValueField { get; set; } = string.Empty;
+    public string HighValueField { get; set; } = string.Empty;
+    public string OpenValueField { get; set; } = string.Empty;
+    public string CloseValueField { get; set; } = string.Empty;
+    public string SizeField { get; set; } = string.Empty;
+    public string TargetField { get; set; } = string.Empty;
+    public string ParentField { get; set; } = string.Empty;
     public bool ShowLegend { get; set; } = true;
     public bool ShowLabels { get; set; }
     public bool ShowTitle { get; set; } = true;
@@ -149,6 +171,11 @@ public sealed class DataVisualElement : PublicationElement
 public sealed record DataChartPoint(string Argument, string Series, double Value);
 public sealed record DataPiePoint(string Argument, double Value);
 public sealed record DataSparkPoint(string Argument, double Value);
+public sealed record DataRangePoint(string Argument, string Series, double Low, double High);
+public sealed record DataBubblePoint(string Argument, string Series, double Value, double Size);
+public sealed record DataFinancialPoint(string Argument, double Open, double High, double Low, double Close);
+public sealed record DataSankeyPoint(string Source, string Target, double Weight);
+public sealed record DataTreeMapPoint(string Label, string Parent, double Value);
 
 public sealed class PublicationGridRow
 {

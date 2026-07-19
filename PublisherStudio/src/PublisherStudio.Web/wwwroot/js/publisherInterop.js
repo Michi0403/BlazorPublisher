@@ -4388,6 +4388,9 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     if (!source) throw new Error('The publication export surface is not available.');
     const sourcePages = [...source.querySelectorAll(':scope > .print-page')];
     if (!sourcePages.length) throw new Error('The publication does not contain any pages.');
+    if (window.PublisherStudioLiveDataRuntime) {
+        await window.PublisherStudioLiveDataRuntime.refreshAll(source, { polling: false });
+    }
     refreshContentFit(source);
     await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -4518,6 +4521,10 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
             const shell = pageShells[index];
             pageShells.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
             fitPage(page, index);
+            if (window.PublisherStudioLiveDataRuntime) {
+                await window.PublisherStudioLiveDataRuntime.refreshAll(page, { polling: false });
+                fitPage(page, index);
+            }
             await waitForExport(120);
             const duration = exportedPageDuration(page);
             totalDuration += duration;
@@ -4566,6 +4573,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         window.removeEventListener('resize', fitFrameToViewport);
         window.removeEventListener('keydown', cancelOnEscape, true);
         if (activeVideoExportCancel === cancelExport) activeVideoExportCancel = null;
+        try { window.PublisherStudioLiveDataRuntime?.dispose(overlay); } catch { }
         overlay.remove();
     }
 }
@@ -5215,6 +5223,21 @@ window.publisherStudio = {
     async exportWebsite(fileName, title) {
         const source = document.querySelector('.print-publication');
         if (!source) throw new Error('The publication export surface is not available.');
+        if (window.PublisherStudioLiveDataRuntime) {
+            await window.PublisherStudioLiveDataRuntime.refreshAll(source, { polling: false });
+        }
+        const fetchExportAsset = async url => {
+            const response = await fetch(url, { cache: 'force-cache' });
+            if (!response.ok) throw new Error(`The offline export asset ${url} is missing (${response.status}). Run Prepare-SpreadsheetAssets.cmd on the build machine.`);
+            return await response.text();
+        };
+        const [devExtremeCss, jquerySource, devExtremeSource, liveDataSource] = await Promise.all([
+            fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
+            fetchExportAsset('vendor/jquery/jquery.min.js'),
+            fetchExportAsset('vendor/devextreme-dist/js/dx.all.js'),
+            fetchExportAsset('js/liveDataInterop.js')
+        ]);
+        const safeScript = value => String(value).replace(/<\/script/gi, '<\\/script');
         await document.fonts?.ready;
         await waitForImages(source);
         refreshContentFit(source);
@@ -5235,14 +5258,16 @@ window.publisherStudio = {
             image.removeAttribute('aria-hidden');
         });
         const css = collectExportCss();
-        const runtime = `(${websitePresentationRuntime.toString()})();`;
+        const defaultPublisherApi = /^https?:$/.test(location.protocol) ? location.origin : "";
+        const runtime = `window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${websitePresentationRuntime.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});`;
         const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(title)}</title>
-<style>${css}
+<style>${devExtremeCss}
+${css}
 :root{color-scheme:dark}
 html,body{width:100%;height:100%;overflow:hidden!important;background:#20242b!important}
 body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
@@ -5281,7 +5306,7 @@ html,body{width:auto;height:auto;overflow:visible!important;background:#fff!impo
 }
 </style>
 </head>
-<body>${publication.outerHTML}<script>${runtime}</script></body>
+<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(runtime)}</script></body>
 </html>`;
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
     },

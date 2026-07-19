@@ -1,7 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationDataService DataService
 
-<div class="data-visual-view" style="@ContainerStyle">
+<div class="data-visual-view" style="@ContainerStyle" data-ps-visual-config="@ClientConfigBase64">
     @if (DataObject is null)
     {
         <div class="data-visual-empty">
@@ -13,8 +13,12 @@
     {
         <div class="data-visual-empty">
             <strong>No columns</strong>
-            <span>Edit the data object and parse CSV, TSV, JSON, or XML.</span>
+            <span>Edit the data object and parse a file, monolith API, REST endpoint, or webhook payload.</span>
         </div>
+    }
+    else if (UsesClientVisualization)
+    {
+        <DataVisualClientHost Document="Document" Item="Item" CurrentPageId="CurrentPageId" />
     }
     else
     {
@@ -131,38 +135,14 @@
                             PageSize="@Math.Clamp(Item.RowLimit, 1, 100)"
                             PagerVisible="false">
                         <Columns>
-                            @if (GridColumns.Count > 0)
-                            {
-                                <DxGridDataColumn FieldName="C1" Caption="@GridColumns[0]" />
-                            }
-                            @if (GridColumns.Count > 1)
-                            {
-                                <DxGridDataColumn FieldName="C2" Caption="@GridColumns[1]" />
-                            }
-                            @if (GridColumns.Count > 2)
-                            {
-                                <DxGridDataColumn FieldName="C3" Caption="@GridColumns[2]" />
-                            }
-                            @if (GridColumns.Count > 3)
-                            {
-                                <DxGridDataColumn FieldName="C4" Caption="@GridColumns[3]" />
-                            }
-                            @if (GridColumns.Count > 4)
-                            {
-                                <DxGridDataColumn FieldName="C5" Caption="@GridColumns[4]" />
-                            }
-                            @if (GridColumns.Count > 5)
-                            {
-                                <DxGridDataColumn FieldName="C6" Caption="@GridColumns[5]" />
-                            }
-                            @if (GridColumns.Count > 6)
-                            {
-                                <DxGridDataColumn FieldName="C7" Caption="@GridColumns[6]" />
-                            }
-                            @if (GridColumns.Count > 7)
-                            {
-                                <DxGridDataColumn FieldName="C8" Caption="@GridColumns[7]" />
-                            }
+                            @if (GridColumns.Count > 0) { <DxGridDataColumn FieldName="C1" Caption="@GridColumns[0]" /> }
+                            @if (GridColumns.Count > 1) { <DxGridDataColumn FieldName="C2" Caption="@GridColumns[1]" /> }
+                            @if (GridColumns.Count > 2) { <DxGridDataColumn FieldName="C3" Caption="@GridColumns[2]" /> }
+                            @if (GridColumns.Count > 3) { <DxGridDataColumn FieldName="C4" Caption="@GridColumns[3]" /> }
+                            @if (GridColumns.Count > 4) { <DxGridDataColumn FieldName="C5" Caption="@GridColumns[4]" /> }
+                            @if (GridColumns.Count > 5) { <DxGridDataColumn FieldName="C6" Caption="@GridColumns[5]" /> }
+                            @if (GridColumns.Count > 6) { <DxGridDataColumn FieldName="C7" Caption="@GridColumns[6]" /> }
+                            @if (GridColumns.Count > 7) { <DxGridDataColumn FieldName="C8" Caption="@GridColumns[7]" /> }
                         </Columns>
                     </DxGrid>
                 </div>
@@ -198,10 +178,35 @@
     private IReadOnlyList<string> GridColumns => DataService.GridColumns(DataObject);
     private IReadOnlyList<PublicationGridRow> GridRows => DataService.BuildGridRows(Document, Item, CurrentPageId);
     private string PrimaryValueField => Item.ValueFields.FirstOrDefault() ?? string.Empty;
-    private double[] GaugeValues => ChartPoints.Select(point => point.Value).Take(8).ToArray();
+    private double[] GaugeValues => ChartPoints.Select(point => point.Value).ToArray();
     private double KpiValue => ChartPoints.FirstOrDefault()?.Value ?? 0;
     private string KpiLabel => $"{KpiValue:0.##} / {Item.MaximumValue:0.##}";
     private double PieInnerDiameter => Item.PieStyle == PieChartStyle.Doughnut ? .55 : 0;
+    private bool UsesClientVisualization => Item.VisualKind is DataVisualKind.PolarChart
+        or DataVisualKind.CircularGauge
+        or DataVisualKind.LinearGauge
+        or DataVisualKind.RangeSelector
+        or DataVisualKind.Sankey
+        or DataVisualKind.Funnel
+        or DataVisualKind.Pyramid
+        or DataVisualKind.TreeMap
+        or DataVisualKind.DataTable
+        || (Item.VisualKind == DataVisualKind.CartesianChart
+            && Item.CartesianStyle is CartesianChartStyle.RangeArea
+                or CartesianChartStyle.RangeBar
+                or CartesianChartStyle.Bubble
+                or CartesianChartStyle.Candlestick
+                or CartesianChartStyle.Stock);
+    private string ClientConfigBase64
+    {
+        get
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(
+                DataService.BuildClientVisualConfiguration(Document, Item, CurrentPageId),
+                new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        }
+    }
     private ChartSeriesType ResolvedChartSeriesType => Item.CartesianStyle switch
     {
         CartesianChartStyle.Line => ChartSeriesType.Line,

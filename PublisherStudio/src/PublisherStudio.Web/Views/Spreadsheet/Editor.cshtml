@@ -105,6 +105,7 @@
                 this.notifyReady();
                 window.setTimeout(() => {
                     try { this.control?.focus(); } catch (_) { }
+                    publisherSpreadsheetRenameRibbonTabs();
                 }, 100);
             },
 
@@ -189,6 +190,31 @@
             window.publisherSpreadsheetBridge.onInit(spreadsheet);
         }
 
+        function publisherSpreadsheetRenameRibbonTabs() {
+            const root = document.getElementById("publisher-spreadsheet-island");
+            if (!root) return;
+            const candidates = Array.from(root.querySelectorAll('[role="tab"], .dx-tab, .dxbs-tabs-item, .dxr-tab'))
+                .filter(element => element.textContent?.trim() === "Home");
+            if (candidates.length > 1) {
+                // The first Home is PublisherStudio's complete, always-visible tab.
+                // The later Home is the built-in DevExpress tab with the full native command set.
+                for (const element of candidates.slice(1)) {
+                    const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() === "Home");
+                    if (textNode) textNode.textContent = "All controls";
+                    else {
+                        const label = Array.from(element.querySelectorAll("span,div,a")).find(node => node.children.length === 0 && node.textContent?.trim() === "Home");
+                        if (label) label.textContent = "All controls";
+                    }
+                }
+            }
+        }
+
+        const publisherSpreadsheetRibbonObserver = new MutationObserver(() => publisherSpreadsheetRenameRibbonTabs());
+        window.addEventListener("DOMContentLoaded", () => {
+            const island = document.getElementById("publisher-spreadsheet-island");
+            if (island) publisherSpreadsheetRibbonObserver.observe(island, { childList: true, subtree: true });
+        });
+
         function publisherSpreadsheetOnDocumentChanged() {
             window.publisherSpreadsheetBridge.awaitingSynchronization = true;
             window.publisherSpreadsheetBridge.dirty = true;
@@ -233,10 +259,10 @@
             .Ribbon(ribbon => ribbon.Tabs(tabs =>
             {
                 // The standard Spreadsheet ribbon hides lower-priority commands as the
-                // editor narrows. The far-left All controls tab keeps the publication workflow
+                // editor narrows. The far-left Home tab keeps the publication workflow
                 // directly reachable; Format and Cells & Data split dense command sets so
                 // they do not disappear into the adaptive overflow menu.
-                tabs.Insert(0).Title("All controls").Name("PublisherAllControls").Items(items =>
+                tabs.Insert(0).Title("Home").Name("PublisherHome").Items(items =>
                 {
                     items.AddButton("Open workbook", "publisherOpenWorkbook", false, "/icons/open-workbook.svg", true);
                     items.AddButton("Blank workbook", "publisherNewWorkbook", false, "new", true);

@@ -1,0 +1,33 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject PublicationDataService DataService
+@inject IJSRuntime JS
+
+<div id="@ElementId" class="data-visual-client-host"></div>
+
+@code {
+    [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    [Parameter, EditorRequired] public DataVisualElement Item { get; set; } = default!;
+    [Parameter] public Guid CurrentPageId { get; set; }
+
+    private readonly string _instanceId = Guid.NewGuid().ToString("N");
+    private string ElementId => $"ps-data-visual-{Item.Id:N}-{_instanceId}";
+    private object ClientConfig => DataService.BuildClientVisualConfiguration(Document, Item, CurrentPageId);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, ClientConfig); }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException) { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.disposeById", ElementId);
+        }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException) { }
+    }
+}

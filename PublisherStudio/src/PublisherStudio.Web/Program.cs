@@ -57,6 +57,9 @@ public static class Program
         });
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
+        builder.Services.AddHttpClient();
+        builder.Services.AddCors(options => options.AddPolicy("PublisherExport", policy =>
+            policy.AllowAnyOrigin().WithMethods("GET").AllowAnyHeader()));
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = DevExpress.Blazor.SizeMode.Small);
 
         var spreadsheetHibernationPath = Path.Combine(
@@ -82,6 +85,9 @@ public static class Program
         builder.Services.AddSingleton<SpreadsheetDocumentService>();
         builder.Services.AddSingleton<SpreadsheetSessionStore>();
         builder.Services.AddSingleton<PublicationDataService>();
+        builder.Services.AddSingleton<PublicationWebhookStore>();
+        builder.Services.AddSingleton<PublicationLiveDataRegistry>();
+        builder.Services.AddSingleton<PublicationWebDataService>();
         builder.Services.AddSingleton<PublicationFileService>();
         builder.Services.AddSingleton<PublicationMediaAssetStore>();
         builder.Services.AddSingleton<PublicationRecoveryService>();
@@ -96,6 +102,7 @@ public static class Program
         }
         app.UseDevExpressControls();
         app.UseStaticFiles();
+        app.UseCors();
         app.UseAntiforgery();
         app.MapStaticAssets();
         app.MapControllers();
@@ -122,6 +129,7 @@ internal static class RuntimeEndpointWriter
     {
         var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()?.Addresses;
         var baseUrl = addresses?.FirstOrDefault() ?? "http://127.0.0.1";
+        RuntimeEndpointStore.BaseUrl = baseUrl;
         var uri = new Uri(baseUrl);
         var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "runtime");
         Directory.CreateDirectory(directory);

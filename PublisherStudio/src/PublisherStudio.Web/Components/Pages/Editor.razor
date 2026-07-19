@@ -12,6 +12,7 @@
 <PageTitle>BlazorPublisher</PageTitle>
 
 <div class="publisher-shell @(_recoveryCandidate is not null ? "has-recovery" : null)">
+    <WebDataRefreshHost State="State" />
     <header class="title-bar">
         <div class="brand-mark">P</div>
         <input class="document-name" value="@State.Document.Name" @onchange="RenameDocument" aria-label="Publication name" />
@@ -655,6 +656,8 @@
     {
         try
         {
+            await State.RefreshWebDataAsync(force: true);
+            await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".html";
             ShowNotice("Preparing website export…");
@@ -675,6 +678,8 @@
         _videoExporting = true;
         try
         {
+            await State.RefreshWebDataAsync(force: true);
+            await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".webm";
             ShowNotice("Choose this browser tab in the capture dialog and enable tab audio when media sound should be included.");

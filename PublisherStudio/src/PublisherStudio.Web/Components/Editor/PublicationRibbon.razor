@@ -75,6 +75,13 @@
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Polar chart" Click="AddPolarChart" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Sparkline" Click="AddSparkline" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Bar gauge" Click="AddBarGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Circular gauge" Click="AddCircularGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Linear gauge" Click="AddLinearGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Range selector" Click="AddRangeSelector" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Sankey diagram" Click="AddSankey" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Funnel" Click="AddFunnel" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Pyramid" Click="AddPyramid" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Tree map" Click="AddTreeMap" />
                 <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-chart" Click="AddDataTable" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="KPI progress" Click="AddKpi" />
                 <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-chart" Click="RequestManageData" />
@@ -369,8 +376,16 @@
             <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Quick type" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Bar / line chart" Click="MakeCartesian" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Pie" Click="MakePie" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Polar chart" Click="MakePolar" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Sparkline" Click="MakeSparkline" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Gauge" Click="MakeGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Bar gauge" Click="MakeGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Circular gauge" Click="MakeCircularGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Linear gauge" Click="MakeLinearGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Range selector" Click="MakeRangeSelector" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Sankey" Click="MakeSankey" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Funnel" Click="MakeFunnel" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Pyramid" Click="MakePyramid" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Tree map" Click="MakeTreeMap" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Table" Click="MakeTable" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="KPI" Click="MakeKpi" />
             </DxRibbonItem>
@@ -596,13 +611,28 @@
     private Task AddPolarChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
     private Task AddSparkline() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
     private Task AddBarGauge() => OnInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
+    private Task AddCircularGauge() => OnInsertDataVisual.InvokeAsync(DataVisualKind.CircularGauge);
+    private Task AddLinearGauge() => OnInsertDataVisual.InvokeAsync(DataVisualKind.LinearGauge);
+    private Task AddRangeSelector() => OnInsertDataVisual.InvokeAsync(DataVisualKind.RangeSelector);
+    private Task AddSankey() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Sankey);
+    private Task AddFunnel() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Funnel);
+    private Task AddPyramid() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Pyramid);
+    private Task AddTreeMap() => OnInsertDataVisual.InvokeAsync(DataVisualKind.TreeMap);
     private Task AddDataTable() => OnInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
     private Task AddKpi() => OnInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
     private void RefreshData() => State.RefreshDataVisuals();
     private void MakeCartesian() => SetDataVisualKind(DataVisualKind.CartesianChart);
     private void MakePie() => SetDataVisualKind(DataVisualKind.PieChart);
+    private void MakePolar() => SetDataVisualKind(DataVisualKind.PolarChart);
     private void MakeSparkline() => SetDataVisualKind(DataVisualKind.Sparkline);
     private void MakeGauge() => SetDataVisualKind(DataVisualKind.BarGauge);
+    private void MakeCircularGauge() => SetDataVisualKind(DataVisualKind.CircularGauge);
+    private void MakeLinearGauge() => SetDataVisualKind(DataVisualKind.LinearGauge);
+    private void MakeRangeSelector() => SetDataVisualKind(DataVisualKind.RangeSelector);
+    private void MakeSankey() => SetDataVisualKind(DataVisualKind.Sankey);
+    private void MakeFunnel() => SetDataVisualKind(DataVisualKind.Funnel);
+    private void MakePyramid() => SetDataVisualKind(DataVisualKind.Pyramid);
+    private void MakeTreeMap() => SetDataVisualKind(DataVisualKind.TreeMap);
     private void MakeTable() => SetDataVisualKind(DataVisualKind.DataTable);
     private void MakeKpi() => SetDataVisualKind(DataVisualKind.KpiProgress);
     private void SetDataVisualKind(DataVisualKind kind) => State.UpdateSelected(element => { if (element is DataVisualElement visual) visual.VisualKind = kind; });

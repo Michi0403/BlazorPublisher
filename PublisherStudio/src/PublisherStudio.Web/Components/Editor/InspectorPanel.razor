@@ -776,7 +776,11 @@
     private void ToggleDataTitle(ChangeEventArgs args) => SetDataVisual(item => item.ShowTitle = ReadBool(args));
     private void ToggleDataLegend(ChangeEventArgs args) => SetDataVisual(item => item.ShowLegend = ReadBool(args));
     private void ToggleDataLabels(ChangeEventArgs args) => SetDataVisual(item => item.ShowLabels = ReadBool(args));
-    private void RefreshData() => State.RefreshDataVisuals();
+    private async Task RefreshData()
+    {
+        await State.RefreshWebDataAsync(State.SelectedElement is DataVisualElement visual ? visual.DataObjectId : null, true);
+        State.RefreshDataVisuals();
+    }
     private void ToggleSpreadsheetGridLines(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); }
     private void ToggleSpreadsheetSheetName(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName); }
     private string DataObjectName(Guid id) => State.Document.DataObjects.FirstOrDefault(data => data.Id == id)?.Name ?? "Missing source";
@@ -787,6 +791,13 @@
         DataVisualKind.PolarChart => "DevExpress polar chart",
         DataVisualKind.Sparkline => "DevExpress sparkline",
         DataVisualKind.BarGauge => "DevExpress bar gauge",
+        DataVisualKind.CircularGauge => "DevExtreme circular gauge",
+        DataVisualKind.LinearGauge => "DevExtreme linear gauge",
+        DataVisualKind.RangeSelector => "DevExtreme range selector",
+        DataVisualKind.Sankey => "DevExpress Sankey diagram",
+        DataVisualKind.Funnel => "DevExtreme funnel",
+        DataVisualKind.Pyramid => "DevExtreme pyramid",
+        DataVisualKind.TreeMap => "DevExtreme tree map",
         DataVisualKind.DataTable => "DevExpress data grid",
         _ => "DevExpress KPI progress"
     };

@@ -90,7 +90,7 @@ The web project now references `DevExpress.AspNetCore.Spreadsheet` and copies it
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.34`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.35`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
 
 ## Reference and license boundary
 
@@ -99,3 +99,14 @@ GIMP and Inkscape are behavioural references for familiar image/ruler workflows.
 ## Security boundary
 
 Imported preview HTML is stripped of active elements, event-handler attributes, and `javascript:` URLs before rendering. Image MIME types and stream sizes are bounded. RichEdit document bytes are treated as the editable story source rather than injected HTML. Spreadsheet requests and custom saves require anti-forgery tokens; the custom save verifies that the submitted DevExpress document ID matches the editing session. Workbook signatures are validated before opening, and spreadsheet preview HTML is regenerated from embedded workbook bytes rather than trusted from the publication file.
+
+
+## Web resource and live-data boundary (v1.0.35)
+
+`PublicationWebBinding` is a transport contract rather than a chart model. It describes a monolith-relative or absolute HTTP request, headers/body, response parsing, JSON path, polling, webhook identity, export permission, and snapshot fallback. Today `PublicationDataObject` consumes it; later web-content frames and streaming adapters can reuse it without depending on Blazor components or chart classes.
+
+`PublicationWebDataService` performs server-side monolith/REST polling and reads the latest `PublicationWebhookStore` payload. It serializes refreshes per binding and imposes no PublisherStudio response-size ceiling. A zero request timeout means no application timeout. `WebDataRefreshHost` handles refresh-on-open and periodic polling, while `EditorStateService` forces a final refresh before website or presentation-video export.
+
+`PublicationLiveDataRegistry` publishes immutable DTO snapshots of open documents. The loopback API exposes system status, publication summaries, pages, data metadata, and rows. Standalone HTML that is explicitly allowed to reconnect receives a per-binding tokenized rows URL with CORS enabled; the unrestricted diagnostic API remains same-origin. This same DTO/transport boundary is intended to become the source for future LAN presentation, VLC-compatible output, and provider adapters. The `Stream` transport enum is reserved but intentionally rejected in v1.0.35 so a later streaming implementation can define lifecycle, buffering, codecs, and authentication deliberately.
+
+Website export embeds DevExtreme CSS/JavaScript, the visualization runtime, and the last successful data rows in one HTML file. It therefore renders offline. Optional live refresh first tries the tokenized monolith snapshot route when a `publisherApi` base is supplied, then falls back to direct external fetch where browser CORS policy permits it. Video export refreshes server-side bindings before capture and refreshes each visual when its page becomes active.

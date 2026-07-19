@@ -192,3 +192,8 @@ See `CHANGELOG-v1.0.24.md`. Story documents containing embedded pictures can be 
 ## v1.0.25 dropped-story stability
 
 See `CHANGELOG-v1.0.25.md`. Dropped text and Markdown now enter the publication as native OpenXML stories, legacy HTML stories upgrade only after RichEdit reports the document loaded, and mail-merge settings attach only after that same safe lifecycle point so opening a dropped story cannot terminate the Blazor circuit.
+
+## v1.0.27 DOCX-aligned Story printing
+
+See `CHANGELOG-v1.0.27.md`. Story Editor print preview, browser printing, PDF output, and standalone HTML now use the page size, orientation, margins, and gutter stored in the live DOCX, while preserving full-page background colors and text fills.
+

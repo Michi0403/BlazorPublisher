@@ -1,4 +1,5 @@
 @namespace PublisherStudio.Components.Editor
+@implements IDisposable
 @inject IJSRuntime JS
 
 @if (Visible && TextFrame is not null)
@@ -99,6 +100,7 @@
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private DxRichEdit? _richEdit;
+    private DotNetObjectReference<StoryEditor>? _selfReference;
     private Selection _selection = default!;
     private byte[] _content = [];
     private Guid? _loadedId;
@@ -164,10 +166,12 @@
         if (!Visible) return;
         try
         {
+            _selfReference ??= DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync(
                 "publisherStudio.initializeStoryEditorLayout",
                 "story-editor-shell",
-                "story-editor-host");
+                "story-editor-host",
+                _selfReference);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -356,7 +360,11 @@
                 var prepared = await PrepareStoryPreview(
                     content,
                     PublicationFileService.ExtractOpenXmlDocumentBackground(openXml));
-                content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(prepared, $"{PublicationName} – {TextFrame.Name}"));
+                var pageLayout = PublicationFileService.ExtractOpenXmlPageLayout(openXml);
+                content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(
+                    prepared,
+                    $"{PublicationName} – {TextFrame.Name}",
+                    pageLayout));
             }
             var baseName = PublicationFileService.SafeFileName($"{PublicationName}-{TextFrame.Name}");
             await using var stream = new MemoryStream(content);
@@ -369,19 +377,45 @@
         }
     }
 
+    [JSInvokable]
+    public Task PrintStoryFromClient() => PrintStory();
+
     private async Task PrintStory()
     {
         if (_richEdit is null || TextFrame is null) return;
+        _error = null;
+        var title = $"{PublicationName} – {TextFrame.Name}";
+        string? previewId = null;
         try
         {
+            // Open the preview window before the first asynchronous document export so the
+            // browser still treats it as a direct user action instead of blocking the popup.
+            previewId = await JS.InvokeAsync<string?>("publisherStudio.claimStoryPrintPreview", title);
+            if (string.IsNullOrWhiteSpace(previewId))
+                throw new InvalidOperationException("The browser blocked the story print-preview window. Allow popups for this local PublisherStudio address and try again.");
+
             var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
             var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
             var prepared = await PrepareStoryPreview(
                 html,
                 PublicationFileService.ExtractOpenXmlDocumentBackground(openXml));
-            await JS.InvokeVoidAsync("publisherStudio.printStoryHtml", StandaloneStoryHtml(prepared, $"{PublicationName} – {TextFrame.Name}"));
+            var pageLayout = PublicationFileService.ExtractOpenXmlPageLayout(openXml);
+            await JS.InvokeVoidAsync(
+                "publisherStudio.completeStoryPrintPreview",
+                previewId,
+                StandaloneStoryHtml(prepared, title, pageLayout, printPreview: true));
         }
-        catch (Exception ex) { _error = ex.Message; }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            if (!string.IsNullOrWhiteSpace(previewId))
+            {
+                try { await JS.InvokeVoidAsync("publisherStudio.failStoryPrintPreview", previewId, ex.Message); }
+                catch (JSDisconnectedException) { }
+                catch (TaskCanceledException) { }
+                catch (JSException) { }
+            }
+        }
     }
 
     private async Task<StoryPreviewResult> PrepareStoryPreview(byte[] html, string? preferredBackground = null)
@@ -482,10 +516,65 @@
         _storyPreviewTransferError = null;
     }
 
-    private static string StandaloneStoryHtml(StoryPreviewResult prepared, string title)
+    private static string StandaloneStoryHtml(
+        StoryPreviewResult prepared,
+        string title,
+        StoryPageLayout pageLayout,
+        bool printPreview = false)
     {
         var safeTitle = System.Net.WebUtility.HtmlEncode(title);
         var background = PublicationFileService.NormalizeCssBackground(prepared.Background);
+        var pageBackground = IsVisibleBackground(background) ? background : "#ffffff";
+        var pageWidth = CssMillimeters(pageLayout.PageWidthMm);
+        var pageHeight = CssMillimeters(pageLayout.PageHeightMm);
+        var marginTop = CssMillimeters(pageLayout.MarginTopMm);
+        var marginRight = CssMillimeters(pageLayout.MarginRightMm);
+        var marginBottom = CssMillimeters(pageLayout.MarginBottomMm);
+        var marginLeft = CssMillimeters(pageLayout.MarginLeftMm);
+        var contentHeight = CssMillimeters(pageLayout.ContentHeightMm);
+        var pageDescription = System.Net.WebUtility.HtmlEncode(
+            $"{FormatMeasurement(pageLayout.PageWidthMm)} × {FormatMeasurement(pageLayout.PageHeightMm)} mm, "
+            + (pageLayout.IsLandscape ? "landscape" : "portrait"));
+        var toolbar = printPreview
+            ? $$"""<nav class="publisher-print-toolbar" aria-label="Story print preview controls"><strong>Story print preview</strong><span>Document page: {{pageDescription}}. This window is independent from the editor.</span><button type="button" onclick="window.print()">Print</button><button type="button" onclick="window.close()">Close</button></nav>"""
+            : string.Empty;
+        var printScript = printPreview
+            ? """
+              <script>
+                (() => {
+                  const visibleFill = value => value && value !== 'transparent' && value !== 'rgba(0, 0, 0, 0)';
+                  const materializePrintFills = () => {
+                    document.querySelectorAll('[data-publisher-print-fill]').forEach(node => {
+                      const computed = getComputedStyle(node);
+                      const fill = computed.getPropertyValue('--publisher-print-fill').trim() || computed.backgroundColor;
+                      if (!visibleFill(fill)) return;
+                      node.style.setProperty('--publisher-print-fill', fill);
+                      node.style.setProperty('background-color', fill, 'important');
+                      node.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                      node.style.setProperty('print-color-adjust', 'exact', 'important');
+                      node.style.setProperty('box-shadow', `inset 0 0 0 100vmax ${fill}`, 'important');
+                    });
+                  };
+                  const waitForImages = () => Promise.all([...document.images].map(image => image.complete
+                    ? Promise.resolve()
+                    : new Promise(resolve => {
+                        image.addEventListener('load', resolve, { once: true });
+                        image.addEventListener('error', resolve, { once: true });
+                        setTimeout(resolve, 5000);
+                      })));
+                  const startPrint = async () => {
+                    try { await document.fonts?.ready; } catch { }
+                    await waitForImages();
+                    materializePrintFills();
+                    document.body.offsetHeight;
+                    requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
+                  };
+                  addEventListener('beforeprint', materializePrintFills);
+                  addEventListener('load', () => setTimeout(startPrint, 300), { once: true });
+                })();
+              </script>
+              """
+            : string.Empty;
         return $$"""
             <!doctype html>
             <html lang="en">
@@ -494,16 +583,27 @@
               <meta name="viewport" content="width=device-width,initial-scale=1">
               <title>{{safeTitle}}</title>
               <style>
-                * { box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+                * { box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+                @page { size:{{pageWidth}} {{pageHeight}}; margin:{{marginTop}} {{marginRight}} {{marginBottom}} {{marginLeft}}; background:{{pageBackground}}; }
                 html,body { min-height:100%; margin:0; background:#e5e7eb; }
-                body { display:grid; place-items:start center; padding:24px; font-family:Segoe UI,Arial,sans-serif; --publisher-story-page-background:{{background}}; }
-                .publisher-story-document { position:relative; isolation:isolate; width:min(100%,1200px); min-height:calc(100vh - 48px); background:var(--publisher-story-page-background,white); box-shadow:0 3px 18px #0003; }
+                body { display:grid; place-items:start center; gap:12px; padding:24px; font-family:Segoe UI,Arial,sans-serif; --publisher-story-page-background:{{pageBackground}}; }
+                .publisher-print-toolbar { position:sticky; z-index:20; top:0; display:flex; align-items:center; gap:12px; width:min(100%,1200px); padding:10px 12px; border:1px solid #cbd5e1; border-radius:5px; background:white; box-shadow:0 3px 14px #0002; }
+                .publisher-print-toolbar span { flex:1; color:#526071; font-size:12px; }
+                .publisher-print-toolbar button { padding:7px 13px; border:1px solid #9ba5b1; border-radius:4px; background:white; cursor:pointer; }
+                .publisher-print-toolbar button:first-of-type { color:white; border-color:#d96700; background:#ed7203; }
+                .publisher-story-sheet { position:relative; isolation:isolate; width:{{pageWidth}}; min-height:{{pageHeight}}; padding:{{marginTop}} {{marginRight}} {{marginBottom}} {{marginLeft}}; background:var(--publisher-story-page-background,white); box-shadow:0 3px 18px #0003; }
+                .publisher-story-sheet::before { content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }
+                .publisher-story-document { position:relative; isolation:isolate; width:100% !important; min-height:{{contentHeight}} !important; height:auto !important; margin:0 !important; padding:0 !important; background:var(--publisher-story-page-background,white); }
                 .publisher-story-document::before { content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }
+                [data-publisher-print-fill] { background-color:var(--publisher-print-fill,transparent) !important; }
                 @media print {
-                  @page { margin:0; }
-                  html,body { background:white; }
-                  body { display:block; padding:0; }
-                  .publisher-story-document { width:100%; min-height:100vh; margin:0; box-shadow:none; }
+                  html,body { min-height:0; background:{{pageBackground}} !important; }
+                  body { position:relative; display:block; padding:0; isolation:isolate; }
+                  body::before { content:""; position:fixed; z-index:0; top:calc(-1 * {{marginTop}}); right:calc(-1 * {{marginRight}}); bottom:calc(-1 * {{marginBottom}}); left:calc(-1 * {{marginLeft}}); background:{{pageBackground}}; -webkit-box-shadow:inset 0 0 0 100vmax {{pageBackground}}; box-shadow:inset 0 0 0 100vmax {{pageBackground}}; }
+                  .publisher-print-toolbar { display:none !important; }
+                  .publisher-story-sheet { position:relative; z-index:1; display:block; width:auto; min-height:0; margin:0; padding:0; background:transparent; box-shadow:none; }
+                  .publisher-story-sheet::before { display:none; }
+                  .publisher-story-document { width:100% !important; min-height:{{contentHeight}} !important; margin:0 !important; padding:0 !important; box-shadow:none; }
                   .publisher-story-document[data-publisher-print-fill],
                   .publisher-story-document [data-publisher-print-fill] {
                     background-color:var(--publisher-print-fill,transparent) !important;
@@ -513,17 +613,36 @@
                 }
               </style>
             </head>
-            <body>{{prepared.Html}}</body>
+            <body>{{toolbar}}<main class="publisher-story-sheet">{{prepared.Html}}</main>{{printScript}}</body>
             </html>
             """;
     }
 
-    private static bool IsVisibleBackground(string? value) =>
-        !string.IsNullOrWhiteSpace(value)
-        && !string.Equals(value, "transparent", StringComparison.OrdinalIgnoreCase)
-        && !string.Equals(value, "none", StringComparison.OrdinalIgnoreCase);
+    private static string CssMillimeters(double value) => FormatMeasurement(value) + "mm";
+
+    private static string FormatMeasurement(double value) =>
+        value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static bool IsVisibleBackground(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        var normalized = value.Trim();
+        return !string.Equals(normalized, "transparent", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(normalized, "none", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(normalized, "rgba(0, 0, 0, 0)", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(normalized, "rgba(0,0,0,0)", StringComparison.OrdinalIgnoreCase);
+    }
 
     private Task Cancel() => Cancelled.InvokeAsync();
+
+    public void Dispose()
+    {
+        _documentLoadGeneration++;
+        _mailMergeSettingsContent = null;
+        ResetStoryPreviewTransfer();
+        _selfReference?.Dispose();
+        _selfReference = null;
+    }
 
     public sealed class StoryPreviewResult
     {

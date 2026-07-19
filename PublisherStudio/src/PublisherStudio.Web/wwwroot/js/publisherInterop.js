@@ -419,7 +419,7 @@ function externalDropKind(file) {
     if (mime.startsWith('video/') || /\.(mp4|m4v|webm|ogv|ogg|mov)$/.test(name)) return 'video';
     if (mime === 'text/markdown' || /\.(md|markdown)$/.test(name)) return 'markdown';
     if (mime.startsWith('text/') || /\.(txt|text|log|csv|tsv)$/.test(name)) return 'text';
-    if (/\.docx$/.test(name)) return 'docx';
+    if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || /\.docx$/.test(name)) return 'docx';
     return '';
 }
 
@@ -443,6 +443,7 @@ function createExternalDropPreview(state, file, kind) {
         : kind === 'video' ? 'Drop video at this position'
         : kind === 'markdown' ? 'Drop Markdown as a text frame'
         : kind === 'text' ? 'Drop text as a text frame'
+        : kind === 'docx' ? 'Drop Word document as an editable text frame'
         : 'This file type is not supported yet';
     overlay.appendChild(message);
     state.page.appendChild(overlay);
@@ -492,7 +493,7 @@ function createExternalDropPreview(state, file, kind) {
         ghost.appendChild(video);
     } else {
         const icon = document.createElement('b');
-        icon.textContent = kind === 'markdown' ? 'MD' : kind === 'text' ? 'TXT' : '?';
+        icon.textContent = kind === 'markdown' ? 'MD' : kind === 'text' ? 'TXT' : kind === 'docx' ? 'DOCX' : '?';
         const label = document.createElement('small');
         label.textContent = file?.name || (kind ? `Dropped ${kind}` : 'Dropped file');
         ghost.append(icon, label);
@@ -552,11 +553,10 @@ async function importExternalFileAt(state, file, placement, existingPreview = nu
     const kind = externalDropKind(file);
     const preview = existingPreview || createExternalDropPreview(state, file, kind);
     positionExternalDropPreviewAt(state, placement);
-    if (!kind || kind === 'docx') {
+    if (!kind) {
         clearExternalDropPreview(state);
-        await safeDotNet(state, 'ExternalFileDropFailed', kind === 'docx'
-            ? 'DOCX import is not available yet. Use a picture, video, text, or Markdown file.'
-            : `The file '${file?.name || 'file'}' is not a supported picture, video, text, or Markdown file.`);
+        await safeDotNet(state, 'ExternalFileDropFailed',
+            `The file '${file?.name || 'file'}' is not a supported picture, video, DOCX, text, or Markdown file.`);
         return false;
     }
 
@@ -4557,13 +4557,14 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
 
 const storyEditorLayouts = new WeakMap();
 
-function initializeStoryEditorLayout(shellId, hostId) {
+function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) {
     const shell = document.getElementById(shellId);
     const host = document.getElementById(hostId);
     if (!shell || !host) return;
     let state = storyEditorLayouts.get(shell);
     if (state) {
         state.host = host;
+        if (dotNetReference) state.dotNet = dotNetReference;
         state.schedule();
         return;
     }
@@ -4586,16 +4587,38 @@ function initializeStoryEditorLayout(shellId, hostId) {
         timer = window.setTimeout(refresh, 40);
     };
     const click = event => {
+        const printCommand = reserveStoryPrintPreviewFromEvent(event, host);
+        if (printCommand === 'rich-edit') {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            state?.dotNet?.invokeMethodAsync('PrintStoryFromClient').catch(error =>
+                console.error('Story print preview could not be started.', error));
+            return;
+        }
         if (!event.target.closest('button,[role="tab"],[role="button"]')) return;
         schedule();
         window.setTimeout(schedule, 120);
         window.setTimeout(schedule, 320);
     };
+    const keydown = event => {
+        if (!(event.ctrlKey || event.metaKey) || event.altKey || String(event.key || '').toLowerCase() !== 'p') return;
+        if (!host.contains(event.target)) return;
+        const current = storyPrintPreviews.get(reservedStoryPrintPreviewId);
+        if (!current?.previewWindow || current.previewWindow.closed)
+            reservedStoryPrintPreviewId = openStoryPrintPreview('Story print preview');
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        state?.dotNet?.invokeMethodAsync('PrintStoryFromClient').catch(error =>
+            console.error('Story print preview could not be started.', error));
+    };
     shell.addEventListener('click', click, true);
+    shell.addEventListener('keydown', keydown, true);
     const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
     resizeObserver?.observe(shell);
     resizeObserver?.observe(host);
-    state = { host, schedule, resizeObserver, click };
+    state = { host, schedule, resizeObserver, click, keydown, dotNet: dotNetReference };
     storyEditorLayouts.set(shell, state);
     schedule();
 }
@@ -4856,6 +4879,119 @@ async function prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, 
     if (!completed) throw new Error('The formatted story preview transfer did not complete.');
 }
 
+
+const storyPrintPreviews = new Map();
+let reservedStoryPrintPreviewId = '';
+
+function storyPrintPreviewLoadingHtml(title) {
+    const safeTitle = String(title || 'Story print preview')
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    return `<!doctype html><html><head><meta charset="utf-8"><title>${safeTitle}</title>
+        <style>body{margin:0;display:grid;place-items:center;min-height:100vh;font:14px Segoe UI,Arial,sans-serif;background:#f3f4f6;color:#172033}.card{padding:22px 28px;border:1px solid #d5d9de;border-radius:6px;background:white;box-shadow:0 8px 28px #0002}</style>
+        </head><body><div class="card"><strong>Preparing print preview…</strong><div>${safeTitle}</div></div></body></html>`;
+}
+
+function openStoryPrintPreview(title) {
+    const id = globalThis.crypto?.randomUUID?.() || `story-print-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const previewWindow = window.open('', `_publisher_story_print_${id}`);
+    if (!previewWindow) return '';
+    try {
+        previewWindow.document.open();
+        previewWindow.document.write(storyPrintPreviewLoadingHtml(title));
+        previewWindow.document.close();
+        previewWindow.focus();
+    } catch {
+        try { previewWindow.close(); } catch { }
+        return '';
+    }
+    storyPrintPreviews.set(id, { previewWindow, objectUrl: '' });
+    return id;
+}
+
+
+function storyPrintCommandFromEvent(event, richEditHost = null) {
+    const target = event?.target;
+    const command = target?.closest?.('button,[role="button"],[role="menuitem"],.dxbl-btn,.dxbl-ribbon-item,.dxbl-ribbon-item-content');
+    if (!command) return '';
+    const pathHasPrintIcon = [...(event?.composedPath?.() || [])]
+        .some(node => node?.classList?.contains?.('pub-icon-print'));
+    const commandLabel = [command.textContent, command.getAttribute?.('aria-label'), command.getAttribute?.('title')]
+        .filter(Boolean).join(' ').trim().toLowerCase();
+    const publisherPrint = pathHasPrintIcon
+        || Boolean(target?.closest?.('.pub-icon-print'))
+        || Boolean(command?.querySelector?.('.pub-icon-print'))
+        || (command?.closest?.('.story-editor-ribbon') && commandLabel === 'print');
+    if (publisherPrint) return 'publisher';
+    if (richEditHost?.contains?.(command) && /(^|\s)print(\s|$)/.test(commandLabel)) return 'rich-edit';
+    return '';
+}
+
+function reserveStoryPrintPreviewFromEvent(event, richEditHost = null) {
+    const commandKind = storyPrintCommandFromEvent(event, richEditHost);
+    if (!commandKind) return '';
+    const current = storyPrintPreviews.get(reservedStoryPrintPreviewId);
+    if (!current?.previewWindow || current.previewWindow.closed)
+        reservedStoryPrintPreviewId = openStoryPrintPreview('Story print preview');
+    return commandKind;
+}
+
+function claimStoryPrintPreview(title) {
+    const reservedId = reservedStoryPrintPreviewId;
+    reservedStoryPrintPreviewId = '';
+    const entry = storyPrintPreviews.get(reservedId);
+    if (entry?.previewWindow && !entry.previewWindow.closed) {
+        try {
+            entry.previewWindow.document.title = String(title || 'Story print preview');
+            entry.previewWindow.focus();
+        } catch { }
+        return reservedId;
+    }
+    return openStoryPrintPreview(title);
+}
+
+function completeStoryPrintPreview(id, html) {
+    const entry = storyPrintPreviews.get(String(id || ''));
+    if (!entry?.previewWindow || entry.previewWindow.closed)
+        throw new Error('The story print-preview window is no longer available.');
+
+    if (entry.objectUrl) {
+        try { URL.revokeObjectURL(entry.objectUrl); } catch { }
+    }
+    const objectUrl = URL.createObjectURL(new Blob([String(html || '')], { type: 'text/html;charset=utf-8' }));
+    entry.objectUrl = objectUrl;
+    entry.previewWindow.location.replace(objectUrl);
+    try { entry.previewWindow.focus(); } catch { }
+
+    // The loaded blob is independent from the Blazor circuit. Revoking the URL later
+    // does not close the already-loaded preview, but avoids keeping the export forever.
+    setTimeout(() => {
+        const current = storyPrintPreviews.get(String(id || ''));
+        if (current?.objectUrl !== objectUrl) return;
+        try { URL.revokeObjectURL(objectUrl); } catch { }
+        current.objectUrl = '';
+        if (current.previewWindow?.closed) storyPrintPreviews.delete(String(id || ''));
+    }, 10 * 60 * 1000);
+    return true;
+}
+
+function failStoryPrintPreview(id, message) {
+    const key = String(id || '');
+    const entry = storyPrintPreviews.get(key);
+    if (!entry?.previewWindow || entry.previewWindow.closed) {
+        storyPrintPreviews.delete(key);
+        return;
+    }
+    const safeMessage = String(message || 'The story print preview could not be prepared.')
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    try {
+        entry.previewWindow.document.open();
+        entry.previewWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Print preview error</title></head><body style="font:14px Segoe UI,Arial,sans-serif;padding:32px"><h1>Print preview could not be prepared</h1><p>${safeMessage}</p><button onclick="window.close()">Close</button></body></html>`);
+        entry.previewWindow.document.close();
+        entry.previewWindow.focus();
+    } catch { }
+}
+
 window.publisherStudio = {
     setDocumentDirty(value) { publisherDocumentDirty = Boolean(value); },
     restorePublisherWorkspaceAfterExport(stageId = 'publisher-stage') {
@@ -4867,7 +5003,7 @@ window.publisherStudio = {
         }
     },
     cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
-    initializeStoryEditorLayout(shellId, hostId) { initializeStoryEditorLayout(shellId, hostId); },
+    initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { initializeStoryEditorLayout(shellId, hostId, dotNetReference); },
     prepareStoryPreviewHtml(html, preferredBackground = '') { return prepareStoryPreviewHtml(html, preferredBackground); },
     prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground = '', dotNetReference) { return prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
@@ -4881,24 +5017,15 @@ window.publisherStudio = {
         const focusable = element.querySelector('input,select,textarea,button,[tabindex]:not([tabindex="-1"])');
         setTimeout(() => { try { focusable?.focus({ preventScroll: true }); } catch { } }, 180);
     },
+    reserveStoryPrintPreviewFromEvent(event) { reserveStoryPrintPreviewFromEvent(event); },
+    claimStoryPrintPreview(title) { return claimStoryPrintPreview(title); },
+    openStoryPrintPreview(title) { return openStoryPrintPreview(title); },
+    completeStoryPrintPreview(id, html) { return completeStoryPrintPreview(id, html); },
+    failStoryPrintPreview(id, message) { failStoryPrintPreview(id, message); },
     printStoryHtml(html) {
-        const frame = document.createElement('iframe');
-        frame.setAttribute('aria-hidden', 'true');
-        frame.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none';
-        const remove = () => { try { frame.remove(); } catch { } };
-        frame.addEventListener('load', () => {
-            const view = frame.contentWindow;
-            if (!view) { remove(); return; }
-            const cleanup = () => setTimeout(remove, 250);
-            view.addEventListener('afterprint', cleanup, { once: true });
-            setTimeout(() => {
-                try { view.focus(); view.print(); }
-                catch { remove(); }
-                setTimeout(remove, 60000);
-            }, 120);
-        }, { once: true });
-        document.body.appendChild(frame);
-        frame.srcdoc = String(html || '');
+        const id = openStoryPrintPreview('Story print preview');
+        if (!id) throw new Error('The browser blocked the story print-preview window.');
+        return completeStoryPrintPreview(id, html);
     },
     consumeCanvasInsertPlacement(id) { return consumeCanvasInsertPlacement(id); },
 

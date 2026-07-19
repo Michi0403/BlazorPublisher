@@ -181,3 +181,13 @@ Recommended local media smoke tests:
 - Media Studio, Picture Studio output, Story Editor, Barcode Studio, Publication Data, Data Visual Editor, and Timeline command surfaces use DevExpress ribbons; property forms and standard dialog confirmation buttons remain conventional controls.
 - JavaScript passes `node --check`; all C# files and Razor `@code` blocks parse with the C# tree-sitter grammar; JSON/XML files parse successfully.
 - A full `dotnet restore`/`build` and real browser pointer/media permission test remain unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+
+## v1.0.27 targeted validation
+
+- Story print layout is read from `word/document.xml` section properties (`w:pgSz` and `w:pgMar`) and converted from twips to millimetres. Explicit portrait/landscape orientation is reconciled with stored width and height.
+- Gutter placement supports normal left gutters, right-to-left gutters, and `w:gutterAtTop`; malformed optional settings do not discard otherwise valid page geometry.
+- Story print HTML emits an explicit physical `@page` size and document margins, uses a same-sized preview sheet, and removes the preview-only padding before print to avoid applying margins twice.
+- Transparent document backgrounds resolve to a white physical sheet; explicit document colors retain the fixed full-page print fill and paragraph/text fill materialization.
+- Page dimensions and margin pairs are bounded so corrupt DOCX values cannot create negative content boxes or unbounded browser print CSS.
+- JavaScript passes `node --check`; project JSON/XML and archive integrity are checked. A full `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+

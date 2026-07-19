@@ -297,29 +297,45 @@
                 return;
             }
 
-            if (kind is "text" or "markdown")
+            if (kind is "text" or "markdown" or "docx")
             {
-                var content = DecodeText(bytes);
-                var html = kind == "markdown" ? MarkdownToHtml(content) : PlainTextToHtml(content);
+                if (kind == "docx" && !PublicationFileService.IsOpenXmlDocument(bytes))
+                    throw new InvalidDataException($"'{request.Name}' is not a valid Office Open XML DOCX document.");
+
                 var text = State.AddText(request.X, request.Y);
                 State.UpdateSelected(_ =>
                 {
-                    text.Name = string.IsNullOrWhiteSpace(request.Name) ? "Dropped text" : request.Name;
-                    text.PreviewHtml = html;
-                    text.DocumentContent = kind == "markdown"
-                        ? RichTextDocumentFactory.CreateOpenXmlFromMarkdown(content)
-                        : RichTextDocumentFactory.CreateOpenXmlFromPlainText(content);
+                    text.Name = string.IsNullOrWhiteSpace(request.Name)
+                        ? kind == "docx" ? "Imported Word document" : "Dropped text"
+                        : request.Name;
+                    if (kind == "docx")
+                    {
+                        text.DocumentContent = bytes.ToArray();
+                        text.PreviewHtml = PublicationFileService.CreateOpenXmlPreviewHtml(bytes, text.Name);
+                        text.DocumentBackground = PublicationFileService.ExtractOpenXmlDocumentBackground(bytes);
+                    }
+                    else
+                    {
+                        var content = DecodeText(bytes);
+                        text.PreviewHtml = kind == "markdown" ? MarkdownToHtml(content) : PlainTextToHtml(content);
+                        text.DocumentContent = kind == "markdown"
+                            ? RichTextDocumentFactory.CreateOpenXmlFromMarkdown(content)
+                            : RichTextDocumentFactory.CreateOpenXmlFromPlainText(content);
+                        text.DocumentBackground = "transparent";
+                    }
                     text.StoryFormat = StoryStorageFormat.OpenXml;
-                    text.Width = Math.Min(120, Math.Max(70, State.CurrentPage.WidthMm * .45));
-                    text.Height = Math.Min(90, Math.Max(35, State.CurrentPage.HeightMm * .28));
+                    text.Width = Math.Min(125, Math.Max(75, State.CurrentPage.WidthMm * .48));
+                    text.Height = Math.Min(95, Math.Max(40, State.CurrentPage.HeightMm * .30));
                     text.X = Math.Clamp(request.X - text.Width / 2, -text.Width + 2, State.CurrentPage.WidthMm - 2);
                     text.Y = Math.Clamp(request.Y - text.Height / 2, -text.Height + 2, State.CurrentPage.HeightMm - 2);
                 });
-                ShowNotice($"Inserted {request.Name} as an editable text frame.");
+                ShowNotice(kind == "docx"
+                    ? $"Inserted {request.Name} as an editable DOCX story. Double-click the frame for full Word-document fidelity."
+                    : $"Inserted {request.Name} as an editable text frame.");
                 return;
             }
 
-            throw new InvalidDataException("Drop a picture, video, text, or Markdown file.");
+            throw new InvalidDataException("Drop a picture, video, DOCX, text, or Markdown file.");
         }
         catch (Exception ex)
         {
@@ -353,7 +369,7 @@
         var declared = PublicationMediaData.NormalizeMimeType(requested, stored);
         if ((kind == "picture" && declared.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) ||
             (kind == "video" && declared.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) ||
-            kind is "text" or "markdown")
+            kind is "text" or "markdown" or "docx")
             return declared;
         return Path.GetExtension(name).ToLowerInvariant() switch
         {
@@ -368,7 +384,8 @@
             ".ogv" or ".ogg" => "video/ogg",
             ".mov" => "video/quicktime",
             ".md" or ".markdown" => "text/markdown",
-            _ => kind == "picture" ? "image/png" : kind == "video" ? "video/mp4" : "text/plain"
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            _ => kind == "picture" ? "image/png" : kind == "video" ? "video/mp4" : kind == "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "text/plain"
         };
     }
 

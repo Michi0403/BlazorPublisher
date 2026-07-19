@@ -53,15 +53,23 @@
                 input.click();
             },
 
+            async newWorkbook() {
+                if (this.openingWorkbook || this.inFlight) return;
+                if (this.dirty && !window.confirm("Create a blank workbook and discard the current unsaved spreadsheet changes?")) return;
+                this.openingWorkbook = true;
+                this.post("publisher-spreadsheet-opening", { fileName: "Spreadsheet.xlsx" });
+                try {
+                    const response = await fetch("@Url.Action("New", "Spreadsheet", new { sessionId = Model.SessionId })", { method: "POST", headers: { RequestVerificationToken: publisherSpreadsheetRequestToken }, credentials: "same-origin" });
+                    let result = null; try { result = await response.json(); } catch (_) { }
+                    if (!response.ok || !result?.success) throw new Error(result?.message || `A blank workbook could not be created (${response.status}).`);
+                    this.dirty = false; window.location.replace(result.reloadUrl || `${window.location.pathname}?revision=${Date.now()}`);
+                } catch (error) { this.openingWorkbook = false; this.post("publisher-spreadsheet-error", { message: error?.message || "A blank workbook could not be created." }); }
+            },
+
             async openWorkbook(file) {
                 if (!file || this.openingWorkbook || this.inFlight) return;
-                const maximumBytes = 64 * 1024 * 1024;
                 if (file.size <= 0) {
                     this.post("publisher-spreadsheet-error", { message: "The selected spreadsheet is empty." });
-                    return;
-                }
-                if (file.size > maximumBytes) {
-                    this.post("publisher-spreadsheet-error", { message: "The selected spreadsheet is larger than the 64 MB limit." });
                     return;
                 }
 
@@ -187,8 +195,13 @@
         }
 
         function publisherSpreadsheetOnCustomCommandExecuted(_spreadsheet, eventArgs) {
-            if (eventArgs.commandName === "publisherOpenWorkbook")
-                window.publisherSpreadsheetBridge.chooseWorkbook();
+            const bridge = window.publisherSpreadsheetBridge;
+            switch (eventArgs.commandName) {
+                case "publisherOpenWorkbook": bridge.chooseWorkbook(); break;
+                case "publisherNewWorkbook": bridge.newWorkbook(); break;
+                case "publisherApplyWorkbook": bridge.queueSave("apply"); break;
+                case "publisherDownloadWorkbook": bridge.queueSave("download"); break;
+            }
         }
 
         function publisherSpreadsheetOnBeginSynchronization() {
@@ -206,6 +219,10 @@
     </script>
 </head>
 <body>
+    <div class="publisher-spreadsheet-commandbar" role="toolbar" aria-label="Workbook commands">
+        <button type="button" id="publisher-open-workbook"><img src="/icons/open-workbook.svg" alt="" />Open workbook</button><button type="button" id="publisher-new-workbook">＋ Blank workbook</button>
+        <span class="publisher-spreadsheet-commandbar-spacer"></span><button type="button" id="publisher-apply-workbook">Apply to frame</button><button type="button" id="publisher-download-workbook">Download</button>
+    </div>
     <main id="publisher-spreadsheet-island">
         @(Html.DevExpress()
             .Spreadsheet("publisherSpreadsheet")
@@ -215,8 +232,58 @@
             .ConfirmOnLosingChanges(options => options.Enabled(false))
             .Ribbon(ribbon => ribbon.Tabs(tabs =>
             {
-                tabs.GetByName("Home").Items(items =>
-                    items.AddButton("Open workbook", "publisherOpenWorkbook", true, "open", true));
+                // The standard Spreadsheet ribbon hides lower-priority commands as the
+                // editor narrows. These compact PublisherStudio tabs keep the commands that
+                // matter for publication work directly reachable instead of burying them in
+                // an overflow menu.
+                tabs.Insert(0).Title("Publisher").Name("Publisher").Items(items =>
+                {
+                    items.AddButton("Open workbook", "publisherOpenWorkbook", false, "/icons/open-workbook.svg", true);
+                    items.AddButton("Blank workbook", "publisherNewWorkbook", false, "new", true);
+                    items.AddButton("Apply to frame", "publisherApplyWorkbook", true, "save", true);
+                    items.AddButton("Download", "publisherDownloadWorkbook", false, "download", true);
+                    items.AddUndoItem();
+                    items.AddRedoItem();
+                    items.AddCutItem();
+                    items.AddCopyItem();
+                    items.AddPasteItem();
+                    items.AddFindItem();
+                    items.AddPrintItem();
+                });
+                tabs.Insert(1).Title("Format").Name("PublisherFormat").Items(items =>
+                {
+                    items.AddFontNameItem();
+                    items.AddFontSizeItem();
+                    items.AddFontBoldItem();
+                    items.AddFontItalicItem();
+                    items.AddFontUnderlineItem();
+                    items.AddForeColorItem();
+                    items.AddBackgroundColorItem();
+                    items.AddBordersItem();
+                    items.AddAlignParagraphLeftItem();
+                    items.AddAlignParagraphCenterItem();
+                    items.AddAlignParagraphRightItem();
+                    items.AddAlignTopItem();
+                    items.AddAlignMiddleItem();
+                    items.AddAlignBottomItem();
+                    items.AddWrapTextItem();
+                    items.AddMergeCellsItem();
+                });
+                tabs.Insert(2).Title("Cells & Data").Name("PublisherCellsData").Items(items =>
+                {
+                    items.AddInsertCellsItem();
+                    items.AddDeleteCellsItem();
+                    items.AddFormatItem();
+                    items.AddAutoSumItem();
+                    items.AddSortAndFilterItem();
+                    items.AddFormatAsTableItem();
+                    items.AddInsertTableItem();
+                    items.AddInsertHyperlinkItem();
+                    items.AddFreezePanesItem();
+                    items.AddGridlinesItem();
+                    items.AddHeadingsItem();
+                });
+                tabs.GetByName("Home").Items(items => items.AddButton("Open workbook", "publisherOpenWorkbook", true, "/icons/open-workbook.svg", true));
             }))
             .Open(Model.DocumentId, Model.DocumentFormat, Model.ContentAccessor)
             .ClientSideEvents(events =>
@@ -236,6 +303,10 @@
         (() => {
             const bridge = window.publisherSpreadsheetBridge;
             const openInput = document.getElementById("publisher-spreadsheet-open-input");
+            document.getElementById("publisher-open-workbook")?.addEventListener("click", () => bridge.chooseWorkbook());
+            document.getElementById("publisher-new-workbook")?.addEventListener("click", () => bridge.newWorkbook());
+            document.getElementById("publisher-apply-workbook")?.addEventListener("click", () => bridge.queueSave("apply"));
+            document.getElementById("publisher-download-workbook")?.addEventListener("click", () => bridge.queueSave("download"));
             openInput?.addEventListener("change", async () => {
                 const file = openInput.files?.[0];
                 openInput.value = "";

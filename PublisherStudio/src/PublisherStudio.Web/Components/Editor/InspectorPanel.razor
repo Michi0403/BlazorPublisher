@@ -249,6 +249,14 @@
                     @ColorField("Background", text.Background, "textBackground")
                     @ColorField("Border", text.BorderColor, "textBorder")
                     @RangeField("Frame border width (mm)", text.BorderWidth, 0, 5, .05, "textBorderWidth")
+                    <label>Content sizing
+                        <select value="@text.ContentFit" @onchange="ChangeTextContentFit">
+                            <option value="Clip">Natural / clip fragments</option>
+                            <option value="Fit">Fit whole text</option>
+                            <option value="Fill">Fill and crop</option>
+                            <option value="Stretch">Stretch to frame</option>
+                        </select>
+                    </label>
                     <DxButton Text="Edit story" Click="RequestEditStory" CssClass="wide-button" />
                 </section>
             }
@@ -370,6 +378,14 @@
                     </div>
                     <DxButton Text="Create blank spreadsheet" Click="RequestCreateSpreadsheet" CssClass="wide-button" />
                     <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowGridLines" @onchange="ToggleSpreadsheetGridLines" /> Show grid lines on canvas</label>
+                    <label>Content sizing
+                        <select value="@spreadsheet.ContentFit" @onchange="ChangeSpreadsheetContentFit">
+                            <option value="Clip">Natural / crop fragments</option>
+                            <option value="Fit">Fit whole worksheet</option>
+                            <option value="Fill">Fill and crop</option>
+                            <option value="Stretch">Stretch to frame</option>
+                        </select>
+                    </label>
                     @ColorField("Background", spreadsheet.Background, "spreadsheetBackground")
                     @ColorField("Border", spreadsheet.BorderColor, "spreadsheetBorder")
                     @RangeField("Border width", spreadsheet.BorderWidthMm, 0, 5, .05, "spreadsheetBorderWidth")
@@ -652,6 +668,8 @@
     private void ToggleMediaLoop(ChangeEventArgs _) => UpdateMedia(media => media.Loop = !media.Loop);
     private void ToggleMediaAutoPlay(ChangeEventArgs _) => UpdateMedia(media => media.AutoPlay = !media.AutoPlay);
     private void ChangeVideoFit(ChangeEventArgs args) { if (Enum.TryParse<PublicationVideoFitMode>(args.Value?.ToString(), out var value) && State.SelectedElement is VideoElement video) State.UpdateMedia(video.Id, _ => video.FitMode = value); }
+    private void ChangeTextContentFit(ChangeEventArgs args) { if (Enum.TryParse<PublicationContentFitMode>(args.Value?.ToString(), out var value) && State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => text.ContentFit = value); }
+    private void ChangeSpreadsheetContentFit(ChangeEventArgs args) { if (Enum.TryParse<PublicationContentFitMode>(args.Value?.ToString(), out var value) && State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ContentFit = value); }
     private void ToggleVideoControls(ChangeEventArgs _) { if (State.SelectedElement is VideoElement video) State.UpdateMedia(video.Id, _ => video.ShowControls = !video.ShowControls); }
     private void ChangeAudioDisplay(ChangeEventArgs args) { if (Enum.TryParse<PublicationAudioDisplayKind>(args.Value?.ToString(), out var value) && State.SelectedElement is AudioElement audio) State.UpdateMedia(audio.Id, _ => audio.DisplayKind = value); }
     private void ToggleAudioControls(ChangeEventArgs _) { if (State.SelectedElement is AudioElement audio) State.UpdateMedia(audio.Id, _ => audio.ShowControls = !audio.ShowControls); }

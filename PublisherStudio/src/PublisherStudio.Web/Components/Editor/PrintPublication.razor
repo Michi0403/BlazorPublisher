@@ -60,8 +60,10 @@
                         @switch (element)
                         {
                             case TextFrameElement text:
-                                <div class="text-frame-content" data-publisher-print-fill="true" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@Mm(text.BorderWidth) solid @text.BorderColor">
-                                    @((MarkupString)text.PreviewHtml)
+                                <div class="text-frame-content publication-content-frame fit-@text.ContentFit.ToString().ToLowerInvariant()" data-content-fit="@text.ContentFit.ToString().ToLowerInvariant()" data-content-kind="text" data-publisher-print-fill="true" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                                    <div class="publication-content-source" data-content-fit-source>
+                                        @((MarkupString)text.PreviewHtml)
+                                    </div>
                                 </div>
                                 break;
                             case ImageFrameElement image:
@@ -105,9 +107,12 @@
                                 <DataVisualView Document="Document" Item="dataVisual" CurrentPageId="publicationPage.Id" />
                                 break;
                             case SpreadsheetElement spreadsheet:
-                                <div class="spreadsheet-frame @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
+                                <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
+                                <div class="publication-content-source" data-content-fit-source>
                                     @((MarkupString)spreadsheet.PreviewHtml)
                                 </div>
+
+                            </div>
                                 break;
                             case BarcodeElement barcode:
                                 <BarcodeView Item="barcode" />

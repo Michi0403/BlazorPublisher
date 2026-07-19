@@ -225,7 +225,7 @@
         try
         {
             var file = args.File;
-            await using var stream = file.OpenReadStream(16 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(long.MaxValue);
             using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
             _draft.RawSource = await reader.ReadToEndAsync();
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();

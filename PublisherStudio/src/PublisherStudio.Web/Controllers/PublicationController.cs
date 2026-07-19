@@ -17,7 +17,7 @@ public sealed class PublicationController(PublicationFileService files) : Contro
     }
 
     [HttpPost("validate")]
-    [RequestSizeLimit(64 * 1024 * 1024)]
+    [DisableRequestSizeLimit]
     public async Task<ActionResult<PublicationDocument>> Validate(IFormFile file, CancellationToken cancellationToken)
     {
         if (file.Length == 0) return BadRequest("The uploaded publication is empty.");

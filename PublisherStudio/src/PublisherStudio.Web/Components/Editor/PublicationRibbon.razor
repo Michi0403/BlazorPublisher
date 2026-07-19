@@ -280,6 +280,12 @@
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-rotate" Text="Rotate left" Click="RotateLeft" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-rotate" Text="Rotate right" Click="RotateRight" />
             </DxRibbonItem>
+            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Content sizing" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Natural / clip fragments" Click="TextFitClip" />
+                <DxRibbonItem Text="Fit whole text" Click="TextFitWhole" />
+                <DxRibbonItem Text="Fill and crop" Click="TextFitFill" />
+                <DxRibbonItem Text="Stretch to frame" Click="TextFitStretch" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -338,6 +344,12 @@
             <DxRibbonItem Text="Insert another" IconCssClass="pub-icon pub-icon-insert" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem Text="Open spreadsheet…" IconCssClass="pub-icon pub-icon-open" Click="RequestSpreadsheet" />
                 <DxRibbonItem Text="Blank spreadsheet" IconCssClass="pub-icon pub-icon-newpage" Click="RequestCreateSpreadsheet" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Content sizing" IconCssClass="pub-icon pub-icon-properties" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Natural / crop fragments" Click="SpreadsheetFitClip" />
+                <DxRibbonItem Text="Fit whole worksheet" Click="SpreadsheetFitWhole" />
+                <DxRibbonItem Text="Fill and crop" Click="SpreadsheetFitFill" />
+                <DxRibbonItem Text="Stretch to frame" Click="SpreadsheetFitStretch" />
             </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
@@ -466,6 +478,17 @@
     private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
     private Task RequestSpreadsheet() => OnInsertSpreadsheet.InvokeAsync();
     private Task RequestCreateSpreadsheet() => OnCreateSpreadsheet.InvokeAsync();
+    private void SetTextFit(PublicationContentFitMode mode) { if (State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => text.ContentFit = mode); }
+    private void TextFitClip() => SetTextFit(PublicationContentFitMode.Clip);
+    private void TextFitWhole() => SetTextFit(PublicationContentFitMode.Fit);
+    private void TextFitFill() => SetTextFit(PublicationContentFitMode.Fill);
+    private void TextFitStretch() => SetTextFit(PublicationContentFitMode.Stretch);
+    private void SetSpreadsheetFit(PublicationContentFitMode mode) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ContentFit = mode); }
+    private void SpreadsheetFitClip() => SetSpreadsheetFit(PublicationContentFitMode.Clip);
+    private void SpreadsheetFitWhole() => SetSpreadsheetFit(PublicationContentFitMode.Fit);
+    private void SpreadsheetFitFill() => SetSpreadsheetFit(PublicationContentFitMode.Fill);
+    private void SpreadsheetFitStretch() => SetSpreadsheetFit(PublicationContentFitMode.Stretch);
+
     private Task RequestEditSpreadsheet() => OnEditSpreadsheet.InvokeAsync();
     private Task RequestDownloadSpreadsheet() => OnDownloadSpreadsheet.InvokeAsync();
     private Task RequestVideo() => OnInsertVideo.InvokeAsync();

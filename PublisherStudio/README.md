@@ -1,6 +1,19 @@
-# PublisherStudio / BlazorPublisher foundation
+# PublisherStudio
 
-PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It keeps the existing ASP.NET Core host and optional InstallerConsole architecture, while the product UI is a Publisher-style document and picture editor built with DevExpress DXperience 25.2.
+**The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**
+
+PublisherStudio is a local-first desktop publishing environment powered by an ASP.NET Core loopback server. Build print publications, reports, interactive presentations, websites, and recorded media without sending project data to a cloud service.
+
+- **Page layout and presentations:** layered, grouped, animated, rotatable objects with rulers, guides, snapping, transitions, print, PDF, HTML, and recorded-presentation export.
+- **Word-class stories:** embedded DevExpress RichEdit documents with DOCX storage, fields, page settings, and backgrounds.
+- **Excel-class workbooks:** embedded DevExpress Spreadsheet editing, import/download, and scalable worksheet frames.
+- **Picture Studio:** a built-in mini image workshop for crop, filters, masks, tinting, transparency, drawing, gradients, and layered picture documents.
+- **Audio and video studio:** import, record, trim, arrange, preview, and export media directly inside publications.
+- **Data publishing:** charts, tables, KPI visuals, gauges, barcodes, QR codes, WordArt, connectors, and data-bound fields.
+
+Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
+
+> **Developer setup:** Node.js 20 or newer is required only to prepare the offline DevExpress Spreadsheet browser assets from npm. Run `Prepare-SpreadsheetAssets.cmd` after a clean checkout. Published/installed releases include those static files and do **not** require Node.js or npm at runtime.
 
 ## Implemented in this source package
 
@@ -222,3 +235,8 @@ See `CHANGELOG-v1.0.31.md`. PublisherStudio now creates `%LOCALAPPDATA%\Publishe
 ## v1.0.32 Spreadsheet toolbar workbook loading
 
 See `CHANGELOG-v1.0.32.md`. Spreadsheet Studio now contains an **Open workbook** command directly on the DevExpress Home ribbon. It loads XLSX, XLSM, XLS, CSV, TXT, or TSV into the current creation/editing session, updates the workbook name, and reloads the control with a fresh document identifier while retaining the existing drag-and-drop workflow. The import remains local and CSRF-protected. Node.js is still a development/release-build requirement only and is not required on end-user systems.
+
+## v1.0.33 workbook scale modes and rotation-aware transforms
+
+See `CHANGELOG-v1.0.33.md`. PublisherStudio no longer imposes application-level file upload ceilings. Spreadsheet Studio gains an original Open Workbook icon, permanent workbook commands, and dedicated Publisher, Format, and Cells & Data ribbon tabs so essential commands remain directly reachable at compact editor sizes. Spreadsheet and RichEdit text objects now support Natural/Clip, Fit, Fill, and Stretch display modes. Rotated objects resize along their own axes, resize cursors follow the visual handles, connectors update during the gesture, and WordArt plus its freehand path editor follow the actual object proportions.
+

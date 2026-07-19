@@ -680,6 +680,12 @@ async function canvasDocumentPaste(state, event) {
 }
 
 
+function measureNaturalContent(source,kind){const ot=source.style.transform,ow=source.style.width,oh=source.style.height;source.style.transform='none';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';const v={width:Math.max(1,source.scrollWidth,source.getBoundingClientRect().width),height:Math.max(1,source.scrollHeight,source.getBoundingClientRect().height)};source.style.transform=ot;source.style.width=ow;source.style.height=oh;return v;}
+export function refreshContentFit(root=document){const frames=root?.matches?.('[data-content-fit]')?[root]:[...(root?.querySelectorAll?.('[data-content-fit]')||[])];for(const frame of frames){const source=frame.querySelector(':scope > [data-content-fit-source]');if(!source)continue;const mode=String(frame.dataset.contentFit||'clip').toLowerCase(),kind=String(frame.dataset.contentKind||'text').toLowerCase();source.style.transform='none';source.style.transformOrigin='0 0';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';if(mode==='clip')continue;const n=measureNaturalContent(source,kind);let sx=Math.max(1,frame.clientWidth)/n.width,sy=Math.max(1,frame.clientHeight)/n.height;if(mode==='fit')sx=sy=Math.min(sx,sy);else if(mode==='fill')sx=sy=Math.max(sx,sy);source.style.transform=`scale(${Math.max(.0001,sx)}, ${Math.max(.0001,sy)})`;}}
+function resizeCursorFor(handle,rotation){const base={e:0,w:0,n:90,s:90,ne:45,sw:45,nw:135,se:135}[handle]??0,sector=Math.round(((((base+rotation)%180)+180)%180)/45)%4;return ['ew-resize','nesw-resize','ns-resize','nwse-resize'][sector];}
+function updateResizeHandleCursors(root=document){for(const element of root.querySelectorAll?.('.pub-element')||[]){const rotation=parseRotation(element);for(const handle of element.querySelectorAll('[data-resize-handle]'))handle.style.cursor=resizeCursorFor(handle.dataset.resizeHandle,rotation);}}
+
+
 export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) {
     const stage = document.getElementById(stageId);
     const scroll = document.getElementById(scrollId);
@@ -805,7 +811,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         scroll.addEventListener('scroll', handlers.scroll, { passive: true });
 
         if (typeof ResizeObserver === 'function') {
-            state.resizeObserver = new ResizeObserver(() => nextAnimationFrame(state));
+            state.resizeObserver = new ResizeObserver(() => { nextAnimationFrame(state); refreshContentFit(state.page); updateResizeHandleCursors(state.page); });
             state.resizeObserver.observe(stage);
             state.resizeObserver.observe(scroll);
         }
@@ -833,6 +839,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
 
     bindRuler(state.horizontalRuler, 'Horizontal', state);
     bindRuler(state.verticalRuler, 'Vertical', state);
+    refreshContentFit(state.page);
+    updateResizeHandleCursors(state.page);
     nextAnimationFrame(state);
     return true;
 }
@@ -1545,7 +1553,7 @@ function pointerDown(state, event) {
             flipY: number(image.dataset.flipY, 1)
         };
     } else if (handle) {
-        state.operation = { ...base, kind: 'resize', moving: [{ id, element, ...bounds }], movingIds: new Set([id]), handle: handle.dataset.resizeHandle };
+        state.operation = { ...base, kind: 'resize', moving: [{ id, element, ...bounds }], movingIds: new Set([id]), handle: handle.dataset.resizeHandle, rotation: parseRotation(element), centerX: bounds.x + bounds.width / 2, centerY: bounds.y + bounds.height / 2 };
     } else {
         state.operation = { ...base, kind: 'move' };
     }
@@ -1664,17 +1672,9 @@ function pointerMove(state, event) {
     }
 
     const handle = operation.handle;
-    if (handle.includes('e')) width = Math.max(2, snapSize(operation.width + dx, state.config));
-    if (handle.includes('s')) height = Math.max(2, snapSize(operation.height + dy, state.config));
-    if (handle.includes('w')) {
-        x = snapCoordinate(operation.x + dx, verticalGuides, state.config);
-        width = Math.max(2, operation.width - (x - operation.x));
-    }
-    if (handle.includes('n')) {
-        y = snapCoordinate(operation.y + dy, horizontalGuides, state.config);
-        height = Math.max(2, operation.height - (y - operation.y));
-    }
-
+    const radians=number(operation.rotation)*Math.PI/180,cos=Math.cos(radians),sin=Math.sin(radians),localDx=dx*cos+dy*sin,localDy=-dx*sin+dy*cos;
+    if(handle.includes('e'))width=Math.max(2,snapSize(operation.width+localDx,state.config));if(handle.includes('w'))width=Math.max(2,snapSize(operation.width-localDx,state.config));if(handle.includes('s'))height=Math.max(2,snapSize(operation.height+localDy,state.config));if(handle.includes('n'))height=Math.max(2,snapSize(operation.height-localDy,state.config));
+    const wd=width-operation.width,hd=height-operation.height;let sx=0,sy=0;if(handle.includes('e'))sx+=wd/2;if(handle.includes('w'))sx-=wd/2;if(handle.includes('s'))sy+=hd/2;if(handle.includes('n'))sy-=hd/2;x=operation.centerX+(sx*cos-sy*sin)-width/2;y=operation.centerY+(sx*sin+sy*cos)-height/2;
     operation.current = { x, y, width, height };
     const operationElement = refreshOperationElement(state, operation);
     if (!operationElement) return;
@@ -1682,6 +1682,8 @@ function pointerMove(state, event) {
     operationElement.style.top = `${y * state.config.pxPerMm}px`;
     operationElement.style.width = `${width * state.config.pxPerMm}px`;
     operationElement.style.height = `${height * state.config.pxPerMm}px`;
+    refreshContentFit(operationElement);
+    updateResizeHandleCursors(operationElement.parentElement || state.page);
     updateAttachedConnectors(state, operation.id);
     event.preventDefault();
 }
@@ -4379,6 +4381,8 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     if (!source) throw new Error('The publication export surface is not available.');
     const sourcePages = [...source.querySelectorAll(':scope > .print-page')];
     if (!sourcePages.length) throw new Error('The publication does not contain any pages.');
+    refreshContentFit(source);
+    await new Promise(resolve => requestAnimationFrame(resolve));
 
     const overlay = document.createElement('div');
     overlay.className = 'publisher-video-export-overlay';
@@ -4458,6 +4462,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         frame.style.transform = `scale(${Math.max(.05, scale)})`;
     };
     pages.forEach(fitPage);
+    refreshContentFit(publication);
     fitFrameToViewport();
     window.addEventListener('resize', fitFrameToViewport);
 
@@ -5093,6 +5098,8 @@ window.publisherStudio = {
         const exportSource = pageKey
             ? document.querySelector(`.print-publication > .print-page[data-page-id="${CSS.escape(pageKey)}"]`) || page
             : page;
+        refreshContentFit(exportSource);
+        await new Promise(resolve => requestAnimationFrame(resolve));
         const normalized = String(format).toLowerCase();
         const scale = clamp(number(dpi, 150) / 96, .5, 12);
         const canvas = await rasterizePageElement(exportSource, scale);
@@ -5118,6 +5125,8 @@ window.publisherStudio = {
         if (element.classList.contains('print-connector')) throw new Error('Connector-only export is not supported yet.');
         const page = element.closest('.print-page');
         if (!page) throw new Error('The selected object is not attached to a publication page.');
+        refreshContentFit(page);
+        await new Promise(resolve => requestAnimationFrame(resolve));
         const scale = clamp(number(dpi, 150) / 96, .5, 12);
         const pageCanvas = await rasterizeIsolatedPublicationElement(page, element, scale);
         const objectCanvas = cropCanvasToElement(pageCanvas, page, element, Math.max(2, Math.ceil(scale * 1.5)));
@@ -5136,6 +5145,8 @@ window.publisherStudio = {
         if (!container) throw new Error('The publication export surface is not available.');
         const pages = [...container.querySelectorAll(':scope > .print-page')];
         if (!pages.length) throw new Error('The publication does not contain any pages.');
+        refreshContentFit(container);
+        await new Promise(resolve => requestAnimationFrame(resolve));
         const normalized = String(format).toLowerCase();
         const jpeg = normalized === 'jpeg' || normalized === 'jpg';
         if (!jpeg && normalized !== 'png') throw new Error('Only PNG and JPEG page export are supported here.');
@@ -5199,6 +5210,8 @@ window.publisherStudio = {
         if (!source) throw new Error('The publication export surface is not available.');
         await document.fonts?.ready;
         await waitForImages(source);
+        refreshContentFit(source);
+        await new Promise(resolve => requestAnimationFrame(resolve));
         const publication = source.cloneNode(true);
         copyComputedStyles(source, publication);
         publication.removeAttribute('aria-hidden');
@@ -5271,6 +5284,8 @@ html,body{width:auto;height:auto;overflow:visible!important;background:#fff!impo
         try { active?.blur?.(); } catch { }
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
         document.body.classList.add('publisher-printing');
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        refreshContentFit(document.querySelector('.print-publication') || document);
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         const cleanup = () => document.body.classList.remove('publisher-printing');
         window.addEventListener('afterprint', cleanup, { once: true });

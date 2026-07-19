@@ -13,9 +13,6 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class SpreadsheetDocumentService
 {
-    private const int PreviewRowLimit = 80;
-    private const int PreviewColumnLimit = 40;
-    private const long PreviewXmlPartLimit = 32L * 1024 * 1024;
     private static readonly XNamespace Main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
     private static readonly XNamespace Relationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
     private static readonly XNamespace PackageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships";
@@ -249,12 +246,11 @@ public sealed class SpreadsheetDocumentService
         foreach (var row in rows)
         {
             var rowNumber = ParseInt(row.Attribute("r")?.Value, 1);
-            if (rowNumber > PreviewRowLimit) continue;
             foreach (var cell in row.Elements(Main + "c"))
             {
                 var reference = cell.Attribute("r")?.Value;
                 var (cellRow, cellColumn) = ParseCellReference(reference, rowNumber);
-                if (cellRow is < 1 or > PreviewRowLimit || cellColumn is < 1 or > PreviewColumnLimit) continue;
+                if (cellRow < 1 || cellColumn < 1) continue;
                 var styleIndex = ParseInt(cell.Attribute("s")?.Value, 0);
                 var value = ReadCellValue(cell, sharedStrings, styles.ElementAtOrDefault(styleIndex));
                 cells[(cellRow, cellColumn)] = new CellPreview(value, styleIndex);
@@ -265,11 +261,11 @@ public sealed class SpreadsheetDocumentService
 
         foreach (var merge in merged)
         {
-            maxRow = Math.Max(maxRow, Math.Min(PreviewRowLimit, merge.EndRow));
-            maxColumn = Math.Max(maxColumn, Math.Min(PreviewColumnLimit, merge.EndColumn));
+            maxRow = Math.Max(maxRow, merge.EndRow);
+            maxColumn = Math.Max(maxColumn, merge.EndColumn);
         }
-        maxRow = Math.Clamp(maxRow, 1, PreviewRowLimit);
-        maxColumn = Math.Clamp(maxColumn, 1, PreviewColumnLimit);
+        maxRow = Math.Max(maxRow, 1);
+        maxColumn = Math.Max(maxColumn, 1);
 
         var html = new StringBuilder(32_768);
         html.Append("<div class=\"spreadsheet-preview-document\" data-sheet=\"")
@@ -321,8 +317,8 @@ public sealed class SpreadsheetDocumentService
     {
         activeSheetName = sheetName;
         var text = DecodeText(content);
-        var rows = ParseDelimited(text, delimiter).Take(PreviewRowLimit).ToList();
-        var columns = Math.Clamp(rows.Count == 0 ? 1 : rows.Max(row => row.Count), 1, PreviewColumnLimit);
+        var rows = ParseDelimited(text, delimiter).ToList();
+        var columns = Math.Max(rows.Count == 0 ? 1 : rows.Max(row => row.Count), 1);
         var html = new StringBuilder("<div class=\"spreadsheet-preview-document\"><table><tbody>");
         foreach (var row in rows)
         {
@@ -384,7 +380,6 @@ public sealed class SpreadsheetDocumentService
             {
                 if (current == '\r' && index + 1 < text.Length && text[index + 1] == '\n') index++;
                 row.Add(value.ToString()); value.Clear(); rows.Add(row); row = [];
-                if (rows.Count >= PreviewRowLimit) break;
                 continue;
             }
             value.Append(current);
@@ -416,7 +411,6 @@ public sealed class SpreadsheetDocumentService
     {
         var entry = archive.GetEntry("xl/sharedStrings.xml");
         if (entry is null) return [];
-        if (entry.Length > PreviewXmlPartLimit) throw new InvalidDataException("Workbook shared strings are too large for a canvas preview.");
         using var input = entry.Open();
         var document = XDocument.Load(input, LoadOptions.None);
         return document.Root?.Elements(Main + "si")
@@ -428,7 +422,6 @@ public sealed class SpreadsheetDocumentService
     {
         var entry = archive.GetEntry("xl/styles.xml");
         if (entry is null) return [CellStyle.Default];
-        if (entry.Length > PreviewXmlPartLimit) throw new InvalidDataException("Workbook styles are too large for a canvas preview.");
         using var input = entry.Open();
         var document = XDocument.Load(input, LoadOptions.None);
         var fonts = document.Root?.Element(Main + "fonts")?.Elements(Main + "font").Select(ReadFont).ToList() ?? [FontStyle.Default];
@@ -526,7 +519,7 @@ public sealed class SpreadsheetDocumentService
             var start = ParseInt(column.Attribute("min")?.Value, 1);
             var end = ParseInt(column.Attribute("max")?.Value, start);
             var width = Math.Clamp(ParseDouble(column.Attribute("width")?.Value, 8.43) * 7 + 5, 24, 360);
-            for (var index = start; index <= Math.Min(end, PreviewColumnLimit); index++) result[index] = width;
+            for (var index = start; index <= end; index++) result[index] = width;
         }
         return result;
     }
@@ -557,7 +550,6 @@ public sealed class SpreadsheetDocumentService
     private static XDocument LoadEntry(ZipArchive archive, string path)
     {
         var entry = archive.GetEntry(path) ?? throw new InvalidDataException($"Workbook part '{path}' is missing.");
-        if (entry.Length > PreviewXmlPartLimit) throw new InvalidDataException($"Workbook part '{path}' is too large for a canvas preview.");
         using var input = entry.Open();
         return XDocument.Load(input, LoadOptions.None);
     }

@@ -149,7 +149,7 @@
         try
         {
             var file = args.File;
-            await using var stream = file.OpenReadStream(4 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(long.MaxValue);
             using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
             var source = await reader.ReadToEndAsync();
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();

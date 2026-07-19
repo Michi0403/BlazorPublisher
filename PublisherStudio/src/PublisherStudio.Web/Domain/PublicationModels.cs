@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.29";
+    public string FormatVersion { get; set; } = "1.33";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -99,6 +99,7 @@ public enum ConnectorToolKind { None, Line, Arrow }
 public enum ImageMaskShape { Rectangle, RoundedRectangle, Ellipse }
 public enum StoryStorageFormat { Html, OpenXml }
 public enum SpreadsheetStorageFormat { Xlsx, Xlsm, Xls, Csv, Text }
+public enum PublicationContentFitMode { Clip, Fit, Fill, Stretch }
 public enum ImageTintMode { Overlay, Recolor }
 public enum ImageBlendMode { Normal, Multiply, Screen, Darken, Lighten }
 public enum WordArtWarp { None, ArchUp, ArchDown, Wave, Custom }
@@ -170,6 +171,7 @@ public sealed class TextFrameElement : PublicationElement
     public string Background { get; set; } = "transparent";
     public string BorderColor { get; set; } = "transparent";
     public double BorderWidth { get; set; }
+    public PublicationContentFitMode ContentFit { get; set; } = PublicationContentFitMode.Clip;
 }
 
 public sealed class SpreadsheetElement : PublicationElement
@@ -184,6 +186,7 @@ public sealed class SpreadsheetElement : PublicationElement
     public string Background { get; set; } = "#ffffff";
     public string BorderColor { get; set; } = "#94a3b8";
     public double BorderWidthMm { get; set; } = 0.25;
+    public PublicationContentFitMode ContentFit { get; set; } = PublicationContentFitMode.Clip;
 }
 
 public sealed class ImageFrameElement : PublicationElement

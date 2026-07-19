@@ -11,7 +11,6 @@ namespace PublisherStudio.Controllers;
 [AutoValidateAntiforgeryToken]
 public sealed class SpreadsheetController : Controller
 {
-    private const long MaxWorkbookUploadBytes = 64L * 1024 * 1024;
     private readonly SpreadsheetSessionStore _sessions;
     private readonly SpreadsheetDocumentService _documents;
 
@@ -41,7 +40,7 @@ public sealed class SpreadsheetController : Controller
     public IActionResult RequestHandler() => SpreadsheetRequestProcessor.GetResponse(HttpContext);
 
     [HttpPost("open/{sessionId:guid}")]
-    [RequestSizeLimit(MaxWorkbookUploadBytes + 1024 * 1024)]
+    [DisableRequestSizeLimit]
     public async Task<IActionResult> Open(Guid sessionId, IFormFile? workbook, CancellationToken cancellationToken)
     {
         if (!_sessions.TryGet(sessionId, out _))
@@ -50,8 +49,6 @@ public sealed class SpreadsheetController : Controller
             return BadRequest(new { success = false, message = "Select a spreadsheet file to open." });
         if (workbook.Length <= 0)
             return BadRequest(new { success = false, message = "The selected spreadsheet is empty." });
-        if (workbook.Length > MaxWorkbookUploadBytes)
-            return BadRequest(new { success = false, message = "The selected spreadsheet is larger than the 64 MB limit." });
 
         try
         {
@@ -75,6 +72,37 @@ public sealed class SpreadsheetController : Controller
             });
         }
         catch (Exception ex) when (ex is InvalidDataException or IOException or OperationCanceledException)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("new/{sessionId:guid}")]
+    public IActionResult New(Guid sessionId)
+    {
+        if (!_sessions.TryGet(sessionId, out _))
+            return NotFound(new { success = false, message = "Spreadsheet editing session expired." });
+
+        try
+        {
+            var replaced = _sessions.Replace(
+                sessionId,
+                "Spreadsheet.xlsx",
+                SpreadsheetStorageFormat.Xlsx,
+                _documents.CreateBlankXlsx());
+            return Ok(new
+            {
+                success = true,
+                fileName = replaced.FileName,
+                activeSheetName = replaced.ActiveSheetName,
+                reloadUrl = Url.Action(nameof(Editor), new
+                {
+                    sessionId,
+                    revision = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                })
+            });
+        }
+        catch (Exception ex) when (ex is InvalidDataException or IOException)
         {
             return BadRequest(new { success = false, message = ex.Message });
         }

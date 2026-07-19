@@ -366,7 +366,7 @@ public partial class PictureEditor
             if (!allowed.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
                 throw new InvalidDataException("Unsupported picture format.");
 
-            await using var stream = file.OpenReadStream(64 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(long.MaxValue);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);
             var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";

@@ -21,6 +21,7 @@
 
     <svg id="@EditorId"
          class="wordart-path-canvas @(_drawingArmed ? "drawing-armed" : null)"
+         style="aspect-ratio:@EditorAspectRatio"
          viewBox="0 0 1000 300"
          preserveAspectRatio="none"
          role="application"
@@ -56,6 +57,7 @@
     private string GridId => $"wordart-path-grid-{Item.Id:N}";
     private string GridFill => $"url(#{GridId})";
     private string PathData => WordArtPathGeometry.Build(Item.CustomPathPoints);
+    private string EditorAspectRatio => Math.Clamp(Item.Width / Math.Max(Item.Height, 1), .35, 6).ToString("0.###", CultureInfo.InvariantCulture);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

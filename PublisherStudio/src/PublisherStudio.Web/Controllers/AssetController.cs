@@ -25,7 +25,7 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
     }
 
     [HttpPost("image")]
-    [RequestSizeLimit(64 * 1024 * 1024)]
+    [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
     {
         if (file.Length == 0 || !AllowedTypes.Contains(file.ContentType))

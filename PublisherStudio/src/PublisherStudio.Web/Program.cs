@@ -6,6 +6,7 @@ using System.Net;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.AspNetCore.Http.Features;
 using PublisherStudio.Components;
 using PublisherStudio.Services;
 
@@ -33,7 +34,14 @@ public static class Program
         StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
         var requestedPort = ResolvePort(args ?? []);
-        builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, requestedPort));
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            options.Listen(IPAddress.Loopback, requestedPort);
+            // PublisherStudio is a loopback-only desktop application. Do not impose an
+            // application-defined workbook upload ceiling; the user's available memory,
+            // disk space, and the spreadsheet engine are the natural limits.
+            options.Limits.MaxRequestBodySize = null;
+        });
 
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         // Large offline-first media recordings are transferred in many small JS interop
@@ -41,6 +49,12 @@ public static class Program
         builder.Services.Configure<CircuitOptions>(options =>
             options.JSInteropDefaultCallTimeout = Timeout.InfiniteTimeSpan);
         builder.Services.AddControllersWithViews();
+        builder.Services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = long.MaxValue;
+            options.ValueLengthLimit = int.MaxValue;
+            options.MultipartHeadersLengthLimit = int.MaxValue;
+        });
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = DevExpress.Blazor.SizeMode.Small);

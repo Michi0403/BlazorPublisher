@@ -233,10 +233,10 @@
             .Ribbon(ribbon => ribbon.Tabs(tabs =>
             {
                 // The standard Spreadsheet ribbon hides lower-priority commands as the
-                // editor narrows. These compact PublisherStudio tabs keep the commands that
-                // matter for publication work directly reachable instead of burying them in
-                // an overflow menu.
-                tabs.Insert(0).Title("Publisher").Name("Publisher").Items(items =>
+                // editor narrows. The far-left All controls tab keeps the publication workflow
+                // directly reachable; Format and Cells & Data split dense command sets so
+                // they do not disappear into the adaptive overflow menu.
+                tabs.Insert(0).Title("All controls").Name("PublisherAllControls").Items(items =>
                 {
                     items.AddButton("Open workbook", "publisherOpenWorkbook", false, "/icons/open-workbook.svg", true);
                     items.AddButton("Blank workbook", "publisherNewWorkbook", false, "new", true);
@@ -283,7 +283,6 @@
                     items.AddGridlinesItem();
                     items.AddHeadingsItem();
                 });
-                tabs.GetByName("Home").Items(items => items.AddButton("Open workbook", "publisherOpenWorkbook", true, "/icons/open-workbook.svg", true));
             }))
             .Open(Model.DocumentId, Model.DocumentFormat, Model.ContentAccessor)
             .ClientSideEvents(events =>

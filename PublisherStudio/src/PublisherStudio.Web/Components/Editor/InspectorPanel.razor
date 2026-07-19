@@ -378,6 +378,7 @@
                     </div>
                     <DxButton Text="Create blank spreadsheet" Click="RequestCreateSpreadsheet" CssClass="wide-button" />
                     <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowGridLines" @onchange="ToggleSpreadsheetGridLines" /> Show grid lines on canvas</label>
+                    <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowSheetName" @onchange="ToggleSpreadsheetSheetName" /> Show worksheet name on canvas</label>
                     <label>Content sizing
                         <select value="@spreadsheet.ContentFit" @onchange="ChangeSpreadsheetContentFit">
                             <option value="Clip">Natural / crop fragments</option>
@@ -777,6 +778,7 @@
     private void ToggleDataLabels(ChangeEventArgs args) => SetDataVisual(item => item.ShowLabels = ReadBool(args));
     private void RefreshData() => State.RefreshDataVisuals();
     private void ToggleSpreadsheetGridLines(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); }
+    private void ToggleSpreadsheetSheetName(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName); }
     private string DataObjectName(Guid id) => State.Document.DataObjects.FirstOrDefault(data => data.Id == id)?.Name ?? "Missing source";
     private static string DataVisualDescription(DataVisualElement item) => item.VisualKind switch
     {

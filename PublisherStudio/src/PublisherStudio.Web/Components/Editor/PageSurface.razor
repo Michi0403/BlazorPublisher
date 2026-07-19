@@ -185,7 +185,10 @@
                                 <div class="publication-content-source" data-content-fit-source>
                                     @((MarkupString)spreadsheet.PreviewHtml)
                                 </div>
-                                <span class="spreadsheet-sheet-badge"><i class="pub-icon pub-icon-spreadsheet"></i>@spreadsheet.ActiveSheetName</span>
+                                @if (spreadsheet.ShowSheetName)
+                                {
+                                    <span class="spreadsheet-sheet-badge"><i class="pub-icon pub-icon-spreadsheet"></i>@spreadsheet.ActiveSheetName</span>
+                                }
                             </div>
                             break;
                         case BarcodeElement barcode:
@@ -235,6 +238,14 @@
                 <Items>
                     <DxContextMenuItem Text="@(CheckedText(string.Equals(textFrame.Background, "transparent", StringComparison.OrdinalIgnoreCase), "No fill"))" Click="TextFrameNoFill" />
                     <DxContextMenuItem Text="@(CheckedText(string.Equals(textFrame.Background, "#ffffff", StringComparison.OrdinalIgnoreCase), "White fill"))" Click="TextFrameWhiteFill" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="Content sizing">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(textFrame.ContentFit == PublicationContentFitMode.Clip, "Natural / crop fragments"))" Click="TextFitClip" />
+                    <DxContextMenuItem Text="@(CheckedText(textFrame.ContentFit == PublicationContentFitMode.Fit, "Fit whole text"))" Click="TextFitWhole" />
+                    <DxContextMenuItem Text="@(CheckedText(textFrame.ContentFit == PublicationContentFitMode.Fill, "Fill and crop"))" Click="TextFitFill" />
+                    <DxContextMenuItem Text="@(CheckedText(textFrame.ContentFit == PublicationContentFitMode.Stretch, "Stretch to frame"))" Click="TextFitStretch" />
                 </Items>
             </DxContextMenuItem>
         }
@@ -289,6 +300,7 @@
             <DxContextMenuItem Text="Edit spreadsheet" IconCssClass="pub-icon pub-icon-spreadsheet" BeginGroup="true" Click="EditSelectedSpreadsheet" />
             <DxContextMenuItem Text="Download workbook" IconCssClass="pub-icon pub-icon-save" Click="DownloadSelectedSpreadsheet" />
             <DxContextMenuItem Text="@(CheckedText(spreadsheet.ShowGridLines, "Show grid lines"))" Click="ToggleSpreadsheetGridLines" />
+            <DxContextMenuItem Text="@(CheckedText(spreadsheet.ShowSheetName, "Show worksheet name"))" Click="ToggleSpreadsheetSheetName" />
             <DxContextMenuItem Text="Content sizing">
                 <Items>
                     <DxContextMenuItem Text="@(CheckedText(spreadsheet.ContentFit == PublicationContentFitMode.Clip, "Natural / crop fragments"))" Click="SpreadsheetFitClip" />
@@ -733,6 +745,20 @@
         if (State.SelectedElement is SpreadsheetElement spreadsheet)
             State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines);
     }
+    private void ToggleSpreadsheetSheetName()
+    {
+        if (State.SelectedElement is SpreadsheetElement spreadsheet)
+            State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName);
+    }
+    private void SetTextFit(PublicationContentFitMode mode)
+    {
+        if (State.SelectedElement is TextFrameElement text)
+            State.UpdateSelected(_ => text.ContentFit = mode);
+    }
+    private void TextFitClip() => SetTextFit(PublicationContentFitMode.Clip);
+    private void TextFitWhole() => SetTextFit(PublicationContentFitMode.Fit);
+    private void TextFitFill() => SetTextFit(PublicationContentFitMode.Fill);
+    private void TextFitStretch() => SetTextFit(PublicationContentFitMode.Stretch);
     private void SetSpreadsheetFit(PublicationContentFitMode mode)
     {
         if (State.SelectedElement is SpreadsheetElement spreadsheet)

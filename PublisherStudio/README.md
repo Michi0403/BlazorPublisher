@@ -240,3 +240,7 @@ See `CHANGELOG-v1.0.32.md`. Spreadsheet Studio now contains an **Open workbook**
 
 See `CHANGELOG-v1.0.33.md`. PublisherStudio no longer imposes application-level file upload ceilings. Spreadsheet Studio gains an original Open Workbook icon, permanent workbook commands, and dedicated Publisher, Format, and Cells & Data ribbon tabs so essential commands remain directly reachable at compact editor sizes. Spreadsheet and RichEdit text objects now support Natural/Clip, Fit, Fill, and Stretch display modes. Rotated objects resize along their own axes, resize cursors follow the visual handles, connectors update during the gesture, and WordArt plus its freehand path editor follow the actual object proportions.
 
+## v1.0.34 text-frame display parity and canvas polish
+
+See `CHANGELOG-v1.0.34.md`. Text frames now expose Natural/Clip, Fit, Fill, and Stretch directly from their canvas context menu as well as Text Box Tools and Properties. Spreadsheet frames gain an optional worksheet-name badge, the Spreadsheet island places **All controls** at the far left without injecting another Open command into Home, and rotated resize cursors now match the real visual drag axis.
+

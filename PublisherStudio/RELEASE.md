@@ -1,6 +1,6 @@
-# PublisherStudio v1.0.33 release
+# PublisherStudio v1.0.34 release
 
-See `CHANGELOG-v1.0.33.md`.
+See `CHANGELOG-v1.0.34.md`.
 
 # GitHub beta release
 

@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.33";
+    public string FormatVersion { get; set; } = "1.34";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -182,6 +182,7 @@ public sealed class SpreadsheetElement : PublicationElement
     public SpreadsheetStorageFormat StorageFormat { get; set; } = SpreadsheetStorageFormat.Xlsx;
     public string PreviewHtml { get; set; } = string.Empty;
     public string ActiveSheetName { get; set; } = "Sheet1";
+    public bool ShowSheetName { get; set; } = true;
     public bool ShowGridLines { get; set; } = true;
     public string Background { get; set; } = "#ffffff";
     public string BorderColor { get; set; } = "#94a3b8";

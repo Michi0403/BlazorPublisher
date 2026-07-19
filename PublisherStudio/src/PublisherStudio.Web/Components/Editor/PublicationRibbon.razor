@@ -345,6 +345,10 @@
                 <DxRibbonItem Text="Open spreadsheet…" IconCssClass="pub-icon pub-icon-open" Click="RequestSpreadsheet" />
                 <DxRibbonItem Text="Blank spreadsheet" IconCssClass="pub-icon pub-icon-newpage" Click="RequestCreateSpreadsheet" />
             </DxRibbonItem>
+            <DxRibbonItem Text="Canvas display" IconCssClass="pub-icon pub-icon-visible" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="@SpreadsheetGridLinesText" Click="ToggleSpreadsheetGridLines" />
+                <DxRibbonItem Text="@SpreadsheetSheetNameText" Click="ToggleSpreadsheetSheetName" />
+            </DxRibbonItem>
             <DxRibbonItem Text="Content sizing" IconCssClass="pub-icon pub-icon-properties" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem Text="Natural / crop fragments" Click="SpreadsheetFitClip" />
                 <DxRibbonItem Text="Fit whole worksheet" Click="SpreadsheetFitWhole" />
@@ -488,6 +492,8 @@
     private void SpreadsheetFitWhole() => SetSpreadsheetFit(PublicationContentFitMode.Fit);
     private void SpreadsheetFitFill() => SetSpreadsheetFit(PublicationContentFitMode.Fill);
     private void SpreadsheetFitStretch() => SetSpreadsheetFit(PublicationContentFitMode.Stretch);
+    private void ToggleSpreadsheetGridLines() { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); }
+    private void ToggleSpreadsheetSheetName() { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName); }
 
     private Task RequestEditSpreadsheet() => OnEditSpreadsheet.InvokeAsync();
     private Task RequestDownloadSpreadsheet() => OnDownloadSpreadsheet.InvokeAsync();
@@ -519,6 +525,8 @@
     private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
     private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
     private bool IsSpreadsheetSelected => State.SelectedElement is SpreadsheetElement;
+    private string SpreadsheetGridLinesText => State.SelectedElement is SpreadsheetElement { ShowGridLines: true } ? "Hide grid lines" : "Show grid lines";
+    private string SpreadsheetSheetNameText => State.SelectedElement is SpreadsheetElement { ShowSheetName: true } ? "Hide worksheet name" : "Show worksheet name";
     private bool IsMediaSelected => State.SelectedElement is PublicationMediaElement;
     private string MediaMutedText => CheckText((State.SelectedElement as PublicationMediaElement)?.Muted == true, "Muted");
     private string MediaLoopText => CheckText((State.SelectedElement as PublicationMediaElement)?.Loop == true, "Loop clip");

@@ -90,7 +90,7 @@ The web project now references `DevExpress.AspNetCore.Spreadsheet` and copies it
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.33`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.34`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
 
 ## Reference and license boundary
 

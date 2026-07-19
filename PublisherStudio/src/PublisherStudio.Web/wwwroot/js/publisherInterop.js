@@ -682,7 +682,14 @@ async function canvasDocumentPaste(state, event) {
 
 function measureNaturalContent(source,kind){const ot=source.style.transform,ow=source.style.width,oh=source.style.height;source.style.transform='none';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';const v={width:Math.max(1,source.scrollWidth,source.getBoundingClientRect().width),height:Math.max(1,source.scrollHeight,source.getBoundingClientRect().height)};source.style.transform=ot;source.style.width=ow;source.style.height=oh;return v;}
 export function refreshContentFit(root=document){const frames=root?.matches?.('[data-content-fit]')?[root]:[...(root?.querySelectorAll?.('[data-content-fit]')||[])];for(const frame of frames){const source=frame.querySelector(':scope > [data-content-fit-source]');if(!source)continue;const mode=String(frame.dataset.contentFit||'clip').toLowerCase(),kind=String(frame.dataset.contentKind||'text').toLowerCase();source.style.transform='none';source.style.transformOrigin='0 0';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';if(mode==='clip')continue;const n=measureNaturalContent(source,kind);let sx=Math.max(1,frame.clientWidth)/n.width,sy=Math.max(1,frame.clientHeight)/n.height;if(mode==='fit')sx=sy=Math.min(sx,sy);else if(mode==='fill')sx=sy=Math.max(sx,sy);source.style.transform=`scale(${Math.max(.0001,sx)}, ${Math.max(.0001,sy)})`;}}
-function resizeCursorFor(handle,rotation){const base={e:0,w:0,n:90,s:90,ne:45,sw:45,nw:135,se:135}[handle]??0,sector=Math.round(((((base+rotation)%180)+180)%180)/45)%4;return ['ew-resize','nesw-resize','ns-resize','nwse-resize'][sector];}
+function resizeCursorFor(handle, rotation) {
+    // CSS screen coordinates increase downward. 45 degrees therefore follows the
+    // NW-SE axis and 135 degrees follows NE-SW; treating them as mathematical
+    // Y-up angles swaps the diagonal cursor after an object is rotated.
+    const base = { e: 0, w: 0, n: 90, s: 90, nw: 45, se: 45, ne: 135, sw: 135 }[handle] ?? 0;
+    const sector = Math.round(((((base + rotation) % 180) + 180) % 180) / 45) % 4;
+    return ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'][sector];
+}
 function updateResizeHandleCursors(root=document){for(const element of root.querySelectorAll?.('.pub-element')||[]){const rotation=parseRotation(element);for(const handle of element.querySelectorAll('[data-resize-handle]'))handle.style.cursor=resizeCursorFor(handle.dataset.resizeHandle,rotation);}}
 
 
@@ -2103,7 +2110,7 @@ function cleanPageClone(page) {
     clone.style.margin = '0';
     clone.style.boxShadow = 'none';
     clone.style.backgroundImage = 'none';
-    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help,.connector-port,.connector-endpoint,.connector-hit,.connector-ghost').forEach(item => item.remove());
+    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help,.connector-port,.connector-endpoint,.connector-hit,.connector-ghost,.spreadsheet-sheet-badge').forEach(item => item.remove());
     clone.querySelectorAll('.selected').forEach(item => {
         item.classList.remove('selected');
         item.style.outline = 'none';

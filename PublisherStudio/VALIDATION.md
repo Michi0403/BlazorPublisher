@@ -245,3 +245,13 @@ Recommended local media smoke tests:
 - Confirmed the outer Blazor modal receives opening, ready, save, and failure messages from the same-origin iframe, disables conflicting commands during reload, and clears reload timeouts on success or failure.
 - Confirmed the existing Spreadsheet drag-and-drop behavior was not removed or overridden.
 - Confirmed JavaScript syntax, C# syntax trees, Razor code blocks, JSON, project XML, package version `1.0.32`, and ZIP integrity. A licensed end-to-end DevExpress build and browser test remain required on the user's development machine.
+
+## v1.0.34 text/spreadsheet display and cursor validation
+
+- Confirmed text-frame content sizing is reachable from the canvas context menu, Text Box Tools ribbon, and Properties panel, all updating the same `PublicationContentFitMode` field.
+- Confirmed the optional spreadsheet worksheet-name badge is enabled by default, persisted per object, and controlled from Spreadsheet Tools, the context menu, and Properties.
+- Confirmed the badge is not emitted when disabled and remains editor-only for print and presentation export.
+- Confirmed the custom Spreadsheet **All controls** tab is inserted at index zero and the previous custom Open command is no longer injected into the standard Home tab.
+- Verified the resize-cursor mapping against CSS screen-coordinate axes for 0°, 45°, 90°, and 135° rotations; horizontal, vertical, and both diagonal cursors now correspond to the actual handle movement vector.
+- JavaScript passes `node --check`; JSON/XML/package metadata and ZIP integrity are validated. A licensed end-to-end DevExpress build and interactive pointer test remain required on the user's development machine because the .NET SDK and licensed DevExpress feed are unavailable here.
+

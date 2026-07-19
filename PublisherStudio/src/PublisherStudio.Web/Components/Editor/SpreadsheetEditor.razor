@@ -1,0 +1,186 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject SpreadsheetSessionStore Sessions
+
+@if (Visible && SessionId != Guid.Empty)
+{
+    <div class="modal-backdrop spreadsheet-modal-backdrop" role="presentation">
+        <section class="spreadsheet-editor-dialog" role="dialog" aria-modal="true" aria-label="Edit spreadsheet">
+            <header>
+                <div><strong>Edit spreadsheet</strong><span>@FileName</span></div>
+                <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
+            </header>
+            <div class="spreadsheet-editor-toolbar">
+                <span><i class="pub-icon pub-icon-spreadsheet"></i>DevExpress Spreadsheet Studio</span>
+                <small>XLSX, XLSM, XLS, CSV, and TXT · edited legacy/text files save as XLSX · XLSM macros are preserved but cannot run or be edited</small>
+            </div>
+            <div class="spreadsheet-editor-host">
+                <iframe id="@FrameId" title="Spreadsheet Studio" src="@EditorUrl"></iframe>
+                @if (!_ready)
+                {
+                    <div class="spreadsheet-editor-loading"><i></i><strong>Opening workbook…</strong><span>The spreadsheet runs locally inside PublisherStudio.</span></div>
+                }
+            </div>
+            <footer>
+                <span>Workbook data is embedded in the publication. The canvas uses a safe static worksheet preview.</span>
+                @if (!string.IsNullOrWhiteSpace(_error))
+                {
+                    <strong class="story-error">@_error</strong>
+                }
+                <div>
+                    <DxButton Text="Cancel" Enabled="@(!_saving)" Click="Cancel" />
+                    <DxButton Text="Download workbook" Enabled="@(_ready && !_saving)" Click="Download" />
+                    <DxButton Text="@(_saving ? "Saving…" : "Apply to frame")" Enabled="@(_ready && !_saving)" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
+                </div>
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public Guid SessionId { get; set; }
+    [Parameter] public string FileName { get; set; } = "Spreadsheet.xlsx";
+    [Parameter] public EventCallback<SpreadsheetEditorResult> Saved { get; set; }
+    [Parameter] public EventCallback Cancelled { get; set; }
+
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<SpreadsheetEditor>? _self;
+    private Guid _initializedSession;
+    private Guid _registeredSession;
+    private bool _ready;
+    private bool _saving;
+    private string? _error;
+    private string FrameId => $"spreadsheet-frame-{SessionId:N}";
+    private string EditorUrl => $"/spreadsheet/editor/{SessionId:D}";
+
+    protected override void OnParametersSet()
+    {
+        if (!Visible)
+        {
+            _ready = false;
+            _saving = false;
+            _error = null;
+        }
+        else if (_initializedSession != SessionId)
+        {
+            _initializedSession = SessionId;
+            _ready = false;
+            _saving = false;
+            _error = null;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (!Visible)
+            {
+                if (_module is not null && _registeredSession != Guid.Empty)
+                {
+                    await _module.InvokeVoidAsync("dispose", $"spreadsheet-frame-{_registeredSession:N}");
+                    _registeredSession = Guid.Empty;
+                }
+                return;
+            }
+            if (SessionId == Guid.Empty || _initializedSession != SessionId || _registeredSession == SessionId) return;
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/spreadsheetEditorInterop.js");
+            _self ??= DotNetObjectReference.Create(this);
+            if (_registeredSession != Guid.Empty)
+                await _module.InvokeVoidAsync("dispose", $"spreadsheet-frame-{_registeredSession:N}");
+            await _module.InvokeVoidAsync("initialize", FrameId, SessionId.ToString("D"), _self);
+            _registeredSession = SessionId;
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (JSException ex)
+        {
+            _registeredSession = SessionId;
+            _ready = false;
+            _error = $"Spreadsheet Studio could not start: {ex.Message}";
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private Task Apply() => RequestSave("apply");
+
+    private Task Download() => RequestSave("download");
+
+    private async Task RequestSave(string intent)
+    {
+        if (_module is null || !_ready || _saving) return;
+        _saving = true;
+        _error = null;
+        try
+        {
+            await _module.InvokeVoidAsync("requestSave", FrameId, SessionId.ToString("D"), intent);
+        }
+        catch (JSDisconnectedException)
+        {
+            _saving = false;
+            _error = "The browser connection closed before the workbook could be saved.";
+        }
+        catch (JSException ex)
+        {
+            _saving = false;
+            _error = $"The workbook save command failed: {ex.Message}";
+        }
+    }
+
+    private async Task Cancel()
+    {
+        if (_saving) return;
+        await Cancelled.InvokeAsync();
+    }
+
+    [JSInvokable]
+    public Task SpreadsheetReady()
+    {
+        _ready = true;
+        _error = null;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public async Task SpreadsheetSaved(string intent)
+    {
+        _saving = false;
+        if (!Sessions.TryGet(SessionId, out var session))
+        {
+            _error = "The spreadsheet session expired before its workbook could be applied.";
+            StateHasChanged();
+            return;
+        }
+        FileName = session.FileName;
+        if (string.Equals(intent, "apply", StringComparison.OrdinalIgnoreCase))
+            await Saved.InvokeAsync(new SpreadsheetEditorResult(session.Content, session.FileName, session.SourceFormat, session.PreviewHtml, session.ActiveSheetName));
+        else
+            StateHasChanged();
+    }
+
+    [JSInvokable]
+    public Task SpreadsheetFailed(string message)
+    {
+        _saving = false;
+        _error = message;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            try { await _module.InvokeVoidAsync("dispose", FrameId); }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+            await _module.DisposeAsync();
+        }
+        _self?.Dispose();
+    }
+}
+
+public sealed record SpreadsheetEditorResult(byte[] Content, string FileName, SpreadsheetStorageFormat StorageFormat, string PreviewHtml, string ActiveSheetName);

@@ -6,26 +6,18 @@ Run:
 .\Build-Release.ps1 -Runtime win-x64
 ```
 
-Upload these two generated files from `artifacts/release` to the same GitHub release:
+The release script requires the .NET 10 SDK, Node.js/npm, access to the licensed DevExpress NuGet and npm packages, and a valid DevExpress license. It restores the Spreadsheet browser packages, copies the required Spreadsheet/DevExtreme/jQuery files into the local `wwwroot/vendor` tree, verifies them, and then publishes the self-contained application and setup launcher.
 
-- `BlazorPublisher-win-x64.zip`
-- `PublisherStudio.Setup-win-x64.exe`
+Upload the generated runtime and setup assets from `artifacts/release` to the same GitHub release. For Windows x64 these are:
 
-Keep the runtime name in every application ZIP. As in the LocalGPT installer, both
-the platform token and processor token must match. Names such as
-`BlazorPublisher-win-x64.zip` and `winx64.zip` are accepted; `linarm64.zip`,
-`winarm64.zip`, and generic unrelated ZIP files are not used on Windows x64. The
-installer also verifies the runtime recorded inside `PublisherStudio.Web.deps.json`
-before replacing an existing installation. Do not rename a runtime-specific archive
-to a generic name.
+- `winx64.zip`
+- `setupwinx64.zip`
+- `PublisherStudio.Setup.exe`
 
-Users download and double-click the setup EXE. The setup executable scans the newest published GitHub releases (including pre-releases), selects the matching application ZIP, installs it into `%LOCALAPPDATA%\Programs\BlazorPublisher`, creates Start Menu commands for Start, Install/Repair, Update, Uninstall, and opens the application.
+Keep the runtime token in every application ZIP. As in the LocalGPT installer, both the platform token and processor token must match. `winx64.zip`, `winarm64.zip`, `linx64.zip`, `linarm64.zip`, `macosx64.zip`, and `macosarm64.zip` identify the supported runtime packages. Do not rename a runtime-specific archive to an unrelated generic name.
 
-`Build-Release.ps1` now validates the publish output before creating the ZIP. A
-self-contained Windows package must contain `PublisherStudio.Web.exe`,
-`hostfxr.dll`, and `hostpolicy.dll`; a broken package is stopped before upload. The
-PublisherStudio icon is embedded into the app and setup executable and copied into
-the payload so every Start Menu entry uses the product icon instead of an arbitrary
-third-party `.ico` file.
+Users download and run the setup executable. It scans the newest published GitHub releases, including pre-releases, selects the matching application ZIP, installs it into `%LOCALAPPDATA%\Programs\BlazorPublisher`, creates Start Menu commands for Start, Install/Repair, Update, and Uninstall, and opens the application.
 
-The DevExpress package source and license must already be available on the build machine when the release assets are created.
+`Build-Release.ps1` validates the publish output before creating ZIP files. A self-contained Windows package must contain `PublisherStudio.Web.exe`, `hostfxr.dll`, and `hostpolicy.dll`; incomplete output is stopped before upload. The PublisherStudio icon is embedded into the application and setup executable and copied into the payload.
+
+The source archive intentionally excludes `node_modules` and generated proprietary DevExpress browser assets. Release builds restore them from the licensed feeds. The resulting published application serves all Spreadsheet resources from its own loopback ASP.NET Core server and does not need a CDN or internet connection at runtime.

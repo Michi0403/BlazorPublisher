@@ -21,6 +21,8 @@
                 <button title="Add WordArt" @onclick="AddWordArt">A★</button>
                 <button title="Add picture" @onclick="RequestInsertPicture">▧</button>
                 <button title="Create picture in Picture Studio" @onclick="RequestCreatePicture">▣</button>
+                <button title="Open spreadsheet" @onclick="RequestInsertSpreadsheet">▦</button>
+                <button title="Create spreadsheet" @onclick="RequestCreateSpreadsheet">▦+</button>
                 <button title="Insert video" @onclick="RequestInsertVideo">▶</button>
                 <button title="Insert audio" @onclick="RequestInsertAudio">♪</button>
                 <button title="Create video" @onclick="RequestCreateVideo">●▶</button>
@@ -352,6 +354,28 @@
                     <p class="property-note">The source remains embedded. Trimming, fades, playback rate, and timeline placement are non-destructive.</p>
                 </section>
             }
+            else if (element is SpreadsheetElement spreadsheet)
+            {
+                <section class="property-section spreadsheet-properties">
+                    <h3>Spreadsheet</h3>
+                    <div class="data-source-summary">
+                        <span><b>Workbook:</b> @spreadsheet.WorkbookFileName</span>
+                        <span><b>Active sheet:</b> @spreadsheet.ActiveSheetName</span>
+                        <span><b>Stored format:</b> @spreadsheet.StorageFormat</span>
+                    </div>
+                    <DxButton Text="Edit spreadsheet" Click="RequestEditSpreadsheet" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <div class="property-button-row">
+                        <DxButton Text="Download workbook" Click="RequestDownloadSpreadsheet" />
+                        <DxButton Text="Insert another…" Click="RequestInsertSpreadsheet" />
+                    </div>
+                    <DxButton Text="Create blank spreadsheet" Click="RequestCreateSpreadsheet" CssClass="wide-button" />
+                    <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowGridLines" @onchange="ToggleSpreadsheetGridLines" /> Show grid lines on canvas</label>
+                    @ColorField("Background", spreadsheet.Background, "spreadsheetBackground")
+                    @ColorField("Border", spreadsheet.BorderColor, "spreadsheetBorder")
+                    @RangeField("Border width", spreadsheet.BorderWidthMm, 0, 5, .05, "spreadsheetBorderWidth")
+                    <p class="property-note">Double-click the frame to open the full DevExpress Spreadsheet component. Workbook content stays embedded in the publication.</p>
+                </section>
+            }
             else if (element is BarcodeElement barcode)
             {
                 <section class="property-section barcode-properties">
@@ -456,6 +480,11 @@
             {
                 <DxContextMenuItem Text="Edit barcode" BeginGroup="true" Click="EditContextBarcode" />
             }
+            @if (ContextLayer is SpreadsheetElement)
+            {
+                <DxContextMenuItem Text="Edit spreadsheet" BeginGroup="true" Click="EditContextSpreadsheet" />
+                <DxContextMenuItem Text="Download workbook" Click="DownloadContextSpreadsheet" />
+            }
             @if (ContextLayer is PublicationMediaElement contextMedia)
             {
                 <DxContextMenuItem Text="Edit in Media Studio" BeginGroup="true" Click="EditContextMedia" />
@@ -494,6 +523,10 @@
     [Parameter] public EventCallback OnInsertPicture { get; set; }
     [Parameter] public EventCallback OnCreatePicture { get; set; }
     [Parameter] public EventCallback OnEditPicture { get; set; }
+    [Parameter] public EventCallback OnInsertSpreadsheet { get; set; }
+    [Parameter] public EventCallback OnCreateSpreadsheet { get; set; }
+    [Parameter] public EventCallback OnEditSpreadsheet { get; set; }
+    [Parameter] public EventCallback OnDownloadSpreadsheet { get; set; }
     [Parameter] public EventCallback OnApplyTransparentColor { get; set; }
     [Parameter] public EventCallback OnRestoreOriginalPicture { get; set; }
     [Parameter] public EventCallback<DataVisualKind> OnInsertDataVisual { get; set; }
@@ -529,6 +562,10 @@
     private Task RequestInsertPicture() => OnInsertPicture.InvokeAsync();
     private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
     private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
+    private Task RequestInsertSpreadsheet() => OnInsertSpreadsheet.InvokeAsync();
+    private Task RequestCreateSpreadsheet() => OnCreateSpreadsheet.InvokeAsync();
+    private Task RequestEditSpreadsheet() => OnEditSpreadsheet.InvokeAsync();
+    private Task RequestDownloadSpreadsheet() => OnDownloadSpreadsheet.InvokeAsync();
     private Task RequestApplyTransparentColor() => OnApplyTransparentColor.InvokeAsync();
     private Task RequestRestoreOriginalPicture() => OnRestoreOriginalPicture.InvokeAsync();
     private Task RequestEditDataVisual() => OnEditDataVisual.InvokeAsync();
@@ -573,6 +610,8 @@
     }
     private void SelectContextLayer() { if (_contextLayerId is Guid id) State.SetPrimarySelection(id); }
     private Task EditContextMedia() { SelectContextLayer(); return OnEditMedia.InvokeAsync(); }
+    private Task EditContextSpreadsheet() { SelectContextLayer(); return OnEditSpreadsheet.InvokeAsync(); }
+    private Task DownloadContextSpreadsheet() { SelectContextLayer(); return OnDownloadSpreadsheet.InvokeAsync(); }
     private Task EditContextBarcode() { SelectContextLayer(); return OnEditBarcode.InvokeAsync(); }
     private void DuplicateContextLayer() { SelectContextLayer(); State.DuplicateSelected(); }
     private void DeleteContextLayer() { SelectContextLayer(); State.DeleteSelected(); }
@@ -595,6 +634,7 @@
         PublicationElementKind.WordArt => "A★",
         PublicationElementKind.Connector => "↝",
         PublicationElementKind.DataVisual => "▥",
+        PublicationElementKind.Spreadsheet => "▦",
         PublicationElementKind.Barcode => "▦",
         _ => "◇"
     };
@@ -718,6 +758,7 @@
     private void ToggleDataLegend(ChangeEventArgs args) => SetDataVisual(item => item.ShowLegend = ReadBool(args));
     private void ToggleDataLabels(ChangeEventArgs args) => SetDataVisual(item => item.ShowLabels = ReadBool(args));
     private void RefreshData() => State.RefreshDataVisuals();
+    private void ToggleSpreadsheetGridLines(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); }
     private string DataObjectName(Guid id) => State.Document.DataObjects.FirstOrDefault(data => data.Id == id)?.Name ?? "Missing source";
     private static string DataVisualDescription(DataVisualElement item) => item.VisualKind switch
     {
@@ -790,6 +831,8 @@
             if (element is ConnectorElement connector && field == "connectorStroke") connector.Stroke = value;
             if (element is DataVisualElement dataVisual && field == "dataBackground") dataVisual.Background = value;
             if (element is DataVisualElement dataBorder && field == "dataBorder") dataBorder.BorderColor = value;
+            if (element is SpreadsheetElement spreadsheet && field == "spreadsheetBackground") spreadsheet.Background = value;
+            if (element is SpreadsheetElement spreadsheetBorder && field == "spreadsheetBorder") spreadsheetBorder.BorderColor = value;
             if (element is AudioElement audio && field == "audioAccent") audio.AccentColor = value;
         });
     }
@@ -884,6 +927,10 @@
         if (element is DataVisualElement dataVisual)
         {
             if (field == "dataBorderWidth") dataVisual.BorderWidthMm = value;
+        }
+        if (element is SpreadsheetElement spreadsheet)
+        {
+            if (field == "spreadsheetBorderWidth") spreadsheet.BorderWidthMm = Math.Clamp(value, 0, 5);
         }
         if (element is WordArtElement word)
         {

@@ -7,6 +7,7 @@ public sealed class EditorStateService
     private readonly PublicationFileService _files;
     private readonly PublicationDataService _data;
     private readonly PublicationMediaAssetStore _mediaAssets;
+    private readonly SpreadsheetDocumentService _spreadsheets;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private readonly List<PublicationElement> _clipboard = [];
@@ -15,11 +16,12 @@ public sealed class EditorStateService
     private double? _lastInsertionX;
     private double? _lastInsertionY;
 
-    public EditorStateService(PublicationFileService files, PublicationDataService data, PublicationMediaAssetStore mediaAssets)
+    public EditorStateService(PublicationFileService files, PublicationDataService data, PublicationMediaAssetStore mediaAssets, SpreadsheetDocumentService spreadsheets)
     {
         _files = files;
         _data = data;
         _mediaAssets = mediaAssets;
+        _spreadsheets = spreadsheets;
         Document = PublicationDocument.CreateDefault();
         SelectedPageId = Document.Pages[0].Id;
     }
@@ -240,6 +242,32 @@ public sealed class EditorStateService
             PreviewHtml = "<p style=\"margin:0;font:12pt Segoe UI\">New text box</p>",
             DocumentContent = RichTextDocumentFactory.CreateOpenXml("New text box"),
             StoryFormat = StoryStorageFormat.OpenXml
+        };
+        PlaceAt(element, centerX, centerY);
+        CurrentPage.Elements.Add(element);
+        SetSelectionCore([element.Id], element.Id);
+        Notify();
+        return element;
+    }
+
+    public SpreadsheetElement AddSpreadsheet(byte[] content, string fileName, SpreadsheetStorageFormat format, double? centerX = null, double? centerY = null)
+    {
+        _spreadsheets.ValidateWorkbookContent(content, format);
+        Capture();
+        var preview = _spreadsheets.RenderPreviewHtml(content, format, out var activeSheetName);
+        var element = new SpreadsheetElement
+        {
+            Name = NextName(string.IsNullOrWhiteSpace(fileName) ? "Spreadsheet" : Path.GetFileNameWithoutExtension(fileName)),
+            WorkbookContent = content.ToArray(),
+            WorkbookFileName = _spreadsheets.NormalizeWorkbookFileName(fileName, format),
+            StorageFormat = format,
+            PreviewHtml = preview,
+            ActiveSheetName = activeSheetName,
+            X = 28,
+            Y = 35,
+            Width = 125,
+            Height = 78,
+            ZIndex = NextZ()
         };
         PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
@@ -1091,6 +1119,19 @@ public sealed class EditorStateService
 
     public void SwapPageOrientation() => SetPageSize(CurrentPage.HeightMm, CurrentPage.WidthMm);
 
+    public void UpdateSpreadsheetDocument(byte[] content, string fileName, SpreadsheetStorageFormat format, string previewHtml, string activeSheetName)
+    {
+        if (SelectedElement is not SpreadsheetElement spreadsheet || spreadsheet.Locked) return;
+        _spreadsheets.ValidateWorkbookContent(content, format);
+        Capture();
+        spreadsheet.WorkbookContent = content.ToArray();
+        spreadsheet.WorkbookFileName = _spreadsheets.NormalizeWorkbookFileName(fileName, format);
+        spreadsheet.StorageFormat = format;
+        spreadsheet.PreviewHtml = previewHtml;
+        spreadsheet.ActiveSheetName = string.IsNullOrWhiteSpace(activeSheetName) ? "Sheet1" : activeSheetName;
+        Notify();
+    }
+
     public void UpdateTextDocument(byte[] content, string previewHtml, string documentBackground, StoryStorageFormat format = StoryStorageFormat.OpenXml)
     {
         if (SelectedElement is not TextFrameElement text || text.Locked) return;
@@ -1497,6 +1538,7 @@ public sealed class EditorStateService
         TextFrameElement => (15, 10),
         WordArtElement => (25, 12),
         BarcodeElement => (22, 22),
+        SpreadsheetElement => (35, 24),
         _ => (5, 5)
     };
 

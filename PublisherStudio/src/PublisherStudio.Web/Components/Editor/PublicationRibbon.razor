@@ -58,6 +58,8 @@
                 <DxRibbonItem Text="WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
                 <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
                 <DxRibbonItem Text="Create picture" IconCssClass="pub-icon pub-icon-picture" Click="RequestCreatePicture" />
+                <DxRibbonItem Text="Spreadsheet" IconCssClass="pub-icon pub-icon-spreadsheet" Click="RequestSpreadsheet" />
+                <DxRibbonItem Text="Create spreadsheet" IconCssClass="pub-icon pub-icon-spreadsheet" Click="RequestCreateSpreadsheet" />
             </DxRibbonItem>
             <DxRibbonItem Text="Media" IconCssClass="pub-icon pub-icon-command" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem Text="Insert video" IconCssClass="pub-icon pub-icon-video" Click="RequestVideo" />
@@ -329,6 +331,17 @@
         </DxRibbonGroup>
     </DxRibbonTab>
 
+    <DxRibbonTab Text="Spreadsheet Tools" Contextual="true" Visible="IsSpreadsheetSelected">
+        <DxRibbonGroup Text="Workbook" IconCssClass="pub-icon pub-icon-spreadsheet">
+            <DxRibbonItem Text="Edit spreadsheet" IconCssClass="pub-icon pub-icon-spreadsheet" IsPrimary="true" Click="RequestEditSpreadsheet" />
+            <DxRibbonItem Text="Download workbook" IconCssClass="pub-icon pub-icon-save" Click="RequestDownloadSpreadsheet" />
+            <DxRibbonItem Text="Insert another" IconCssClass="pub-icon pub-icon-insert" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Open spreadsheet…" IconCssClass="pub-icon pub-icon-open" Click="RequestSpreadsheet" />
+                <DxRibbonItem Text="Blank spreadsheet" IconCssClass="pub-icon pub-icon-newpage" Click="RequestCreateSpreadsheet" />
+            </DxRibbonItem>
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
     <DxRibbonTab Text="Data Tools" Contextual="true" Visible="IsDataVisualSelected">
         <DxRibbonGroup Text="Data visual" IconCssClass="pub-icon pub-icon-chart">
             <DxRibbonItem Text="Edit visual" IconCssClass="pub-icon pub-icon-chart" IsPrimary="true" Click="RequestEditDataVisual" />
@@ -402,6 +415,10 @@
     [Parameter] public EventCallback OnInsertPicture { get; set; }
     [Parameter] public EventCallback OnCreatePicture { get; set; }
     [Parameter] public EventCallback OnEditPicture { get; set; }
+    [Parameter] public EventCallback OnInsertSpreadsheet { get; set; }
+    [Parameter] public EventCallback OnCreateSpreadsheet { get; set; }
+    [Parameter] public EventCallback OnEditSpreadsheet { get; set; }
+    [Parameter] public EventCallback OnDownloadSpreadsheet { get; set; }
     [Parameter] public EventCallback OnInsertVideo { get; set; }
     [Parameter] public EventCallback OnInsertAudio { get; set; }
     [Parameter] public EventCallback OnCreateVideo { get; set; }
@@ -447,6 +464,10 @@
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
     private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
     private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
+    private Task RequestSpreadsheet() => OnInsertSpreadsheet.InvokeAsync();
+    private Task RequestCreateSpreadsheet() => OnCreateSpreadsheet.InvokeAsync();
+    private Task RequestEditSpreadsheet() => OnEditSpreadsheet.InvokeAsync();
+    private Task RequestDownloadSpreadsheet() => OnDownloadSpreadsheet.InvokeAsync();
     private Task RequestVideo() => OnInsertVideo.InvokeAsync();
     private Task RequestAudio() => OnInsertAudio.InvokeAsync();
     private Task RequestCreateVideo() => OnCreateVideo.InvokeAsync();
@@ -474,6 +495,7 @@
     private bool IsWordArtSelected => State.SelectedElement is WordArtElement;
     private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
     private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
+    private bool IsSpreadsheetSelected => State.SelectedElement is SpreadsheetElement;
     private bool IsMediaSelected => State.SelectedElement is PublicationMediaElement;
     private string MediaMutedText => CheckText((State.SelectedElement as PublicationMediaElement)?.Muted == true, "Muted");
     private string MediaLoopText => CheckText((State.SelectedElement as PublicationMediaElement)?.Loop == true, "Loop clip");

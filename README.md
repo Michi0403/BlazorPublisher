@@ -17,6 +17,7 @@ PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It ke
 - Guides created by dragging from either ruler, movable guides, guide deletion by dragging outside the page, grid display, and snap options.
 - A larger preset catalogue: A3, A4, A5, Letter, Legal, Tabloid, business card, landscape variants, and square, plus custom dimensions.
 - Text frames edited with DevExpress Blazor RichEdit and its Office ribbon; stories use DOCX storage, support dynamic fields, and download as DOCX, RTF, TXT, or HTML.
+- First-class spreadsheet frames edited with the DevExpress ASP.NET Core Spreadsheet control in an application-styled modal; workbooks support XLSX, XLSM, XLS, CSV, and text import, formula editing, worksheet tabs, download, embedded publication storage, static canvas/print previews, layering, transforms, and double-click editing.
 - Image frames with preserved PNG alpha, replacement, fit/fill, interactive crop panning, wheel-based crop zoom, picture rotation, flipping, opacity, brightness, contrast, saturation, hue, inversion, grayscale, sepia, blur, masks, borders, shadows, tint/full recolor, blend modes, color-key transparency, and frame-ratio presets.
 - A separate **Picture Studio** opened by **Insert > Create picture** or **Picture Tools > Edit in Picture Studio**, with transparent canvases, direct transforms, undo/redo, a layer clipboard, keyboard shortcuts, contextual right-click commands, and editable raster, text, shape, fill, paint, and procedural-render layers.
 - Publication-level reusable data objects sourced from imported or pasted CSV/TSV, JSON, XML, or live publication-object metadata.
@@ -44,15 +45,22 @@ GIMP and Inkscape were used only as behavioural references for rulers, guides, c
 - Visual Studio with the .NET 10 SDK. The included `global.json` accepts .NET 10 feature bands starting at 10.0.100.
 - DevExpress DXperience 25.2 packages and a configured DevExpress NuGet feed.
 - A valid DevExpress license.
+- Node.js 20 or newer with npm is required when building from source so the licensed Spreadsheet/DevExtreme browser assets can be restored and copied locally.
 - A current Chromium-based browser is recommended for the raster/SVG export pipeline.
 
 ## Build and run
 
 ```powershell
+cd src/PublisherStudio.Web
+npm install --no-audit --no-fund
+npm run prepare:spreadsheet
+cd ../..
 dotnet restore PublisherStudio.sln
 dotnet build PublisherStudio.sln -c Debug
 dotnet run --project src/PublisherStudio.Web
 ```
+
+The published application serves the Spreadsheet JavaScript and CSS from its own ASP.NET Core host. No CDN or internet connection is required at runtime; source builds still need access to the licensed DevExpress NuGet/npm feeds during restore.
 
 Optional fixed port:
 
@@ -76,13 +84,14 @@ Without a supplied port, Kestrel asks the operating system for a loopback port a
 6. Choose **Insert > Connector** or **Arrow connector**, then drag from one round object port to another. Drag a selected endpoint to reconnect it; Esc stops the tool.
 7. Select WordArt and choose **WordArt Tools > Draw path**. Pick a preset or click **Draw freehand**, then drag the control points to refine the baseline.
 8. Choose **Insert > Create picture** to start a transparent layered image, or select an image and choose **Picture Tools > Edit in Picture Studio**. Use **Insert into publication / Apply to picture** to retain the editable layer source.
-9. Choose **Insert > Manage data** to create a reusable data object from JSON, pasted CSV/TSV, or live page/object metadata.
-10. Choose **Insert > Chart**, **Pie**, **Polar**, **Sparkline**, **Bar Gauge**, **Data Table**, or **KPI**, then select fields and subtypes in the live visual editor.
-11. Choose **Insert > Media** to embed audio/video, or open **Create audio / Create video** for microphone, camera, screen, generated-tone, trim, fade, volume, and playback controls.
-12. Select an object and open the **Animations** inspector tab or ribbon tab to add entrance, emphasis, motion, or exit steps. Open the docked timeline pane from the Animations, View, or Media Tools ribbon tabs and use it to drag animation timing and arrange or trim media clips against one page playhead.
-13. Right-click the page, page thumbnails, selected objects, timeline clips/background, Picture Studio canvas/layers, Media Studio preview/range, or a data-visual preview for commands relevant to that location.
-14. Use **Insert > Barcode / QR** for QR, Code 128, Code 39, EAN-13, UPC-A, ITF-14, or Codabar objects.
-15. Use **File** for JSON save/open and PNG, JPEG, SVG, animated website, WebM presentation capture, or print/PDF output.
+9. Choose **Insert > Spreadsheet** to import XLSX, XLSM, XLS, CSV, or text, or choose **Create spreadsheet** for a blank workbook. Edit it in Spreadsheet Studio and use **Apply to frame** to keep the workbook embedded in the publication. Double-click the frame to reopen it.
+10. Choose **Insert > Manage data** to create a reusable data object from JSON, pasted CSV/TSV, or live page/object metadata.
+11. Choose **Insert > Chart**, **Pie**, **Polar**, **Sparkline**, **Bar Gauge**, **Data Table**, or **KPI**, then select fields and subtypes in the live visual editor.
+12. Choose **Insert > Media** to embed audio/video, or open **Create audio / Create video** for microphone, camera, screen, generated-tone, trim, fade, volume, and playback controls.
+13. Select an object and open the **Animations** inspector tab or ribbon tab to add entrance, emphasis, motion, or exit steps. Open the docked timeline pane from the Animations, View, or Media Tools ribbon tabs and use it to drag animation timing and arrange or trim media clips against one page playhead.
+14. Right-click the page, page thumbnails, selected objects, timeline clips/background, Picture Studio canvas/layers, Media Studio preview/range, or a data-visual preview for commands relevant to that location.
+15. Use **Insert > Barcode / QR** for QR, Code 128, Code 39, EAN-13, UPC-A, ITF-14, or Codabar objects.
+16. Use **File** for JSON save/open and PNG, JPEG, SVG, animated website, WebM presentation capture, or print/PDF output.
 
 The file picker is reset before every picture/open command, so selecting the same file again also triggers replacement.
 
@@ -109,7 +118,7 @@ dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip
 
 ## Deliberate limits
 
-This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, full pen-tool Bézier handles, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. Picture Studio now includes editable brush, pencil, line, eraser, and eyedropper tools in addition to compositing and non-destructive layers; lasso selections, pixel masks, clone/heal tools, and pressure-sensitive input remain later milestones. Data visuals currently cover self-contained publication data; external databases, authenticated APIs, maps that require external tile/GIS providers, dashboards, reports, and spreadsheet-calculation engines remain deliberate later integrations. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives. The animation/media document model is exporter-neutral and animated HTML is implemented; native PowerPoint timing-tree/media output and encoded video export remain later exporter modules. Media trimming is non-destructive and browser recording formats depend on `MediaRecorder` support in the active browser.
+This is the next editor foundation, not a claim of complete Publisher/InDesign parity. Text-frame linking, master pages, full pen-tool Bézier handles, obstacle-aware connector routing, color management, CMYK/PDF-X prepress, imposition, and full packaging of external assets remain later milestones. Picture Studio now includes editable brush, pencil, line, eraser, and eyedropper tools in addition to compositing and non-destructive layers; lasso selections, pixel masks, clone/heal tools, and pressure-sensitive input remain later milestones. Data visuals currently cover self-contained publication data; external databases, authenticated APIs, maps that require external tile/GIS providers, dashboards, and reports remain deliberate later integrations. Spreadsheet Studio is now a separate first-class workbook object rather than a chart/data-visual substitute. SVG export currently uses an SVG `foreignObject` representation so it preserves the HTML text-frame rendering in Chromium; a future pure-vector exporter should translate each publication element directly to SVG primitives. The animation/media document model is exporter-neutral and animated HTML is implemented; native PowerPoint timing-tree/media output and encoded video export remain later exporter modules. Media trimming is non-destructive and browser recording formats depend on `MediaRecorder` support in the active browser.
 
 See [`CHANGELOG-v1.0.md`](CHANGELOG-v1.0.md), [`CHANGELOG-v0.9.md`](CHANGELOG-v0.9.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ANIMATION_EXPORT.md`](docs/ANIMATION_EXPORT.md), and [`VALIDATION.md`](VALIDATION.md).
 
@@ -204,4 +213,7 @@ See `CHANGELOG-v1.0.27.md`. Story Editor print preview, browser printing, PDF ou
 ## v1.0.28 exact Story PDF preview and print
 
 See `CHANGELOG-v1.0.28.md`. Story printing now paginates into explicit physical sheets using the live DOCX paper size and margins, removes RichEdit HTML preview-width centering, and opens an application-generated PDF instead of printing the preview HTML. This keeps the Word/LibreOffice placement and prevents browser-added date/title, URL, and page-number decorations.
+## v1.0.29 Spreadsheet Studio
+
+See `CHANGELOG-v1.0.29.md`. Spreadsheet workbooks are now first-class publication layers. The supported DevExpress ASP.NET Core Spreadsheet control runs as a same-origin MVC/Razor island inside the Blazor editor shell, with local assets, CSRF-protected document requests, session-bound saves, XLSX/XLSM/XLS/CSV/TXT import, workbook download, double-click editing, and safe static previews for canvas, print, and export.
 

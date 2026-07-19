@@ -178,6 +178,12 @@
                         case DataVisualElement dataVisual:
                             <DataVisualView @key="dataVisual.Id" Document="State.Document" Item="dataVisual" CurrentPageId="State.SelectedPageId" />
                             break;
+                        case SpreadsheetElement spreadsheet:
+                            <div class="spreadsheet-frame @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
+                                @((MarkupString)spreadsheet.PreviewHtml)
+                                <span class="spreadsheet-sheet-badge"><i class="pub-icon pub-icon-spreadsheet"></i>@spreadsheet.ActiveSheetName</span>
+                            </div>
+                            break;
                         case BarcodeElement barcode:
                             <BarcodeView Item="barcode" />
                             break;
@@ -273,6 +279,12 @@
         @if (State.SelectedElement is BarcodeElement)
         {
             <DxContextMenuItem Text="Edit barcode / QR" IconCssClass="pub-icon pub-icon-barcode" BeginGroup="true" Click="EditSelectedBarcode" />
+        }
+        @if (State.SelectedElement is SpreadsheetElement spreadsheet)
+        {
+            <DxContextMenuItem Text="Edit spreadsheet" IconCssClass="pub-icon pub-icon-spreadsheet" BeginGroup="true" Click="EditSelectedSpreadsheet" />
+            <DxContextMenuItem Text="Download workbook" IconCssClass="pub-icon pub-icon-save" Click="DownloadSelectedSpreadsheet" />
+            <DxContextMenuItem Text="@(CheckedText(spreadsheet.ShowGridLines, "Show grid lines"))" Click="ToggleSpreadsheetGridLines" />
         }
         @if (State.SelectedElement is DataVisualElement dataVisual)
         {
@@ -413,6 +425,8 @@
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
             <DxContextMenuItem Text="Insert picture…" IconCssClass="pub-icon pub-icon-picture" Click="InsertPicture" />
             <DxContextMenuItem Text="Create picture…" IconCssClass="pub-icon pub-icon-create-picture" Click="CreatePicture" />
+            <DxContextMenuItem Text="Insert spreadsheet…" IconCssClass="pub-icon pub-icon-spreadsheet" Click="InsertSpreadsheet" />
+            <DxContextMenuItem Text="Create spreadsheet…" IconCssClass="pub-icon pub-icon-spreadsheet" Click="CreateSpreadsheet" />
             <DxContextMenuItem Text="Insert video…" IconCssClass="pub-icon pub-icon-video" Click="InsertVideo" />
             <DxContextMenuItem Text="Create video…" Click="CreateVideo" />
             <DxContextMenuItem Text="Insert audio…" IconCssClass="pub-icon pub-icon-audio" Click="InsertAudio" />
@@ -458,6 +472,10 @@
     [Parameter] public EventCallback RequestReplacePicture { get; set; }
     [Parameter] public EventCallback RequestCreatePicture { get; set; }
     [Parameter] public EventCallback RequestEditPicture { get; set; }
+    [Parameter] public EventCallback RequestInsertSpreadsheet { get; set; }
+    [Parameter] public EventCallback RequestCreateSpreadsheet { get; set; }
+    [Parameter] public EventCallback RequestEditSpreadsheet { get; set; }
+    [Parameter] public EventCallback RequestDownloadSpreadsheet { get; set; }
     [Parameter] public EventCallback<DataVisualKind> RequestInsertDataVisual { get; set; }
     [Parameter] public EventCallback RequestEditDataVisual { get; set; }
     [Parameter] public EventCallback RequestManageData { get; set; }
@@ -669,6 +687,7 @@
         if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
         if (element is ImageFrameElement) State.ToggleCropMode();
         if (element is DataVisualElement) return RequestEditDataVisual.InvokeAsync();
+        if (element is SpreadsheetElement) return RequestEditSpreadsheet.InvokeAsync();
         if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
         if (element is BarcodeElement) return RequestEditBarcode.InvokeAsync();
         return Task.CompletedTask;
@@ -693,6 +712,15 @@
     private Task InsertPicture() => RequestPicture.InvokeAsync();
     private Task CreatePicture() => RequestCreatePicture.InvokeAsync();
     private Task EditSelectedPicture() => RequestEditPicture.InvokeAsync();
+    private Task InsertSpreadsheet() => RequestInsertSpreadsheet.InvokeAsync();
+    private Task CreateSpreadsheet() => RequestCreateSpreadsheet.InvokeAsync();
+    private Task EditSelectedSpreadsheet() => RequestEditSpreadsheet.InvokeAsync();
+    private Task DownloadSelectedSpreadsheet() => RequestDownloadSpreadsheet.InvokeAsync();
+    private void ToggleSpreadsheetGridLines()
+    {
+        if (State.SelectedElement is SpreadsheetElement spreadsheet)
+            State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines);
+    }
     private Task EditSelectedDataVisual() => RequestEditDataVisual.InvokeAsync();
     private Task ManageData() => RequestManageData.InvokeAsync();
     private Task InsertVideo() => RequestInsertVideo.InvokeAsync();

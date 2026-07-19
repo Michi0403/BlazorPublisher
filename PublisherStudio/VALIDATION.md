@@ -200,3 +200,16 @@ Recommended local media smoke tests:
 - The generated multi-page image PDF opened in Chromium's native PDF viewer and rendered all five pages. The PDF is intentionally visual/raster output so the native viewer can print exactly what is previewed without HTML print decorations.
 - JavaScript passes `node --check`; generated preview scripts, project JSON/XML, source archive integrity, and C# syntax trees are checked. A full `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
 
+
+## v1.0.29 Spreadsheet Studio validation
+
+- Confirmed publication format marker `1.29` and polymorphic Spreadsheet element registration.
+- Confirmed insert, blank-create, drag/drop, double-click edit, apply, cancel-new-frame, download, ribbon, context-menu, inspector, layer, thumbnail, print, and export wiring by source inspection.
+- Confirmed each editor session receives a unique DevExpress document ID and that custom saves reject a client state whose document ID does not match the session.
+- Confirmed internal Spreadsheet requests and custom saves send the ASP.NET Core anti-forgery request header and the Spreadsheet controller validates it.
+- Confirmed XLSX/XLSM ZIP package validation, XLS compound-file signature validation, blank XLSX generation, active-sheet preview parsing, CSV/TSV preview parsing, HTML encoding, and whitelist-generated cell styles.
+- Confirmed active-cell commit and begin/end synchronization handlers gate the custom client-state save path.
+- Confirmed startup timeout/error handling prevents a missing licensed browser asset from leaving the Blazor modal indefinitely in its loading state.
+- Confirmed local client asset paths, npm preparation script, MSBuild preparation target, release-script preflight, and source-package exclusions are mutually consistent.
+- JavaScript files and the asset preparation module pass `node --check`; JSON and project XML parse; C# files pass tree-sitter syntax parsing.
+- A full `dotnet restore`/`dotnet build`, DevExpress control initialization, formula calculation, and real browser save cycle remain unavailable in this environment because the .NET SDK and licensed DevExpress NuGet/npm feeds are not installed. Those tests must be run on the licensed build machine before publishing binaries.

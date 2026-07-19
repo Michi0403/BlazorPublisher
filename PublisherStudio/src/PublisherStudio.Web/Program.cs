@@ -1,4 +1,5 @@
 using DevExpress.Blazor;
+using DevExpress.AspNetCore;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using System.Net;
@@ -39,11 +40,26 @@ public static class Program
         // chunks. The operation may legitimately outlive the default interop timeout.
         builder.Services.Configure<CircuitOptions>(options =>
             options.JSInteropDefaultCallTimeout = Timeout.InfiniteTimeSpan);
-        builder.Services.AddControllers();
+        builder.Services.AddControllersWithViews();
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = DevExpress.Blazor.SizeMode.Small);
+        builder.Services.AddDevExpressControls(options =>
+        {
+            options.AddSpreadsheet(spreadsheetOptions =>
+                spreadsheetOptions.AddHibernation(hibernation =>
+                {
+                    hibernation.StoragePath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "PublisherStudio", "SpreadsheetHibernation");
+                    hibernation.Timeout = TimeSpan.FromMinutes(20);
+                    hibernation.DocumentsDisposeTimeout = TimeSpan.FromHours(4);
+                    hibernation.AllDocumentsOnApplicationEnd = true;
+                }));
+        });
         builder.Services.AddSingleton<PictureDocumentService>();
+        builder.Services.AddSingleton<SpreadsheetDocumentService>();
+        builder.Services.AddSingleton<SpreadsheetSessionStore>();
         builder.Services.AddSingleton<PublicationDataService>();
         builder.Services.AddSingleton<PublicationFileService>();
         builder.Services.AddSingleton<PublicationMediaAssetStore>();
@@ -57,6 +73,7 @@ public static class Program
             app.UseExceptionHandler("/error", createScopeForErrors: true);
             app.UseHsts();
         }
+        app.UseDevExpressControls();
         app.UseStaticFiles();
         app.UseAntiforgery();
         app.MapStaticAssets();

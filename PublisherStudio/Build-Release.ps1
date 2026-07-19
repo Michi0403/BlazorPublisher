@@ -26,7 +26,35 @@ Remove-Item $appFolder,$setupFolder,$appZip,$setupZip -Recurse -Force -ErrorActi
 New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
 
 $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
+$webDirectory = Split-Path -Parent $webProject
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
+
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is required to prepare the DevExpress Spreadsheet client assets." }
+if (-not (Get-Command npm -ErrorAction SilentlyContinue)) { throw "npm is required to prepare the DevExpress Spreadsheet client assets." }
+
+Write-Host "Preparing local Spreadsheet client assets..." -ForegroundColor Cyan
+Push-Location $webDirectory
+try {
+    npm install --no-audit --no-fund
+    if ($LASTEXITCODE -ne 0) { throw "npm install failed." }
+    npm run prepare:spreadsheet
+    if ($LASTEXITCODE -ne 0) { throw "Spreadsheet client asset preparation failed." }
+}
+finally {
+    Pop-Location
+}
+
+$requiredSpreadsheetAssets = @(
+    "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js",
+    "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.css",
+    "wwwroot\vendor\devextreme-dist\js\dx.all.js",
+    "wwwroot\vendor\devextreme-dist\css\dx.light.css",
+    "wwwroot\vendor\jquery\jquery.min.js"
+)
+$missingSpreadsheetAssets = @($requiredSpreadsheetAssets | Where-Object { -not (Test-Path (Join-Path $webDirectory $_)) })
+if ($missingSpreadsheetAssets.Count -gt 0) {
+    throw "Spreadsheet client assets are incomplete. Missing: $($missingSpreadsheetAssets -join ', ')"
+}
 
 Write-Host "Publishing BlazorPublisher application for $Runtime..." -ForegroundColor Cyan
 dotnet publish $webProject `

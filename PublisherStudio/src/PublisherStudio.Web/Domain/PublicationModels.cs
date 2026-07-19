@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.28";
+    public string FormatVersion { get; set; } = "1.29";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -89,7 +89,7 @@ public sealed class GuideLine
 
 public enum GuideOrientation { Horizontal, Vertical }
 public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
-public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual, Barcode }
+public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual, Barcode, Spreadsheet }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ConnectorPathKind { Straight, Elbow, Curved }
 public enum ConnectorMarker { None, Arrow, Triangle, Diamond }
@@ -98,6 +98,7 @@ public enum ConnectorAnchor { TopLeft, Top, TopRight, Right, BottomRight, Bottom
 public enum ConnectorToolKind { None, Line, Arrow }
 public enum ImageMaskShape { Rectangle, RoundedRectangle, Ellipse }
 public enum StoryStorageFormat { Html, OpenXml }
+public enum SpreadsheetStorageFormat { Xlsx, Xlsm, Xls, Csv, Text }
 public enum ImageTintMode { Overlay, Recolor }
 public enum ImageBlendMode { Normal, Multiply, Screen, Darken, Lighten }
 public enum WordArtWarp { None, ArchUp, ArchDown, Wave, Custom }
@@ -138,6 +139,7 @@ public sealed record ExternalFileDropRequest(
 [JsonDerivedType(typeof(ConnectorElement), "connector")]
 [JsonDerivedType(typeof(DataVisualElement), "dataVisual")]
 [JsonDerivedType(typeof(BarcodeElement), "barcode")]
+[JsonDerivedType(typeof(SpreadsheetElement), "spreadsheet")]
 public abstract class PublicationElement
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -168,6 +170,20 @@ public sealed class TextFrameElement : PublicationElement
     public string Background { get; set; } = "transparent";
     public string BorderColor { get; set; } = "transparent";
     public double BorderWidth { get; set; }
+}
+
+public sealed class SpreadsheetElement : PublicationElement
+{
+    public override PublicationElementKind Kind => PublicationElementKind.Spreadsheet;
+    public byte[] WorkbookContent { get; set; } = [];
+    public string WorkbookFileName { get; set; } = "Spreadsheet.xlsx";
+    public SpreadsheetStorageFormat StorageFormat { get; set; } = SpreadsheetStorageFormat.Xlsx;
+    public string PreviewHtml { get; set; } = string.Empty;
+    public string ActiveSheetName { get; set; } = "Sheet1";
+    public bool ShowGridLines { get; set; } = true;
+    public string Background { get; set; } = "#ffffff";
+    public string BorderColor { get; set; } = "#94a3b8";
+    public double BorderWidthMm { get; set; } = 0.25;
 }
 
 public sealed class ImageFrameElement : PublicationElement

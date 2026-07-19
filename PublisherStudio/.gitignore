@@ -9,3 +9,8 @@ artifacts/
 *.snk
 *.licx
 PublisherStudio/runtime/
+src/PublisherStudio.Web/node_modules/
+src/PublisherStudio.Web/wwwroot/vendor/devextreme-dist/
+src/PublisherStudio.Web/wwwroot/vendor/devexpress-aspnetcore-spreadsheet/
+src/PublisherStudio.Web/wwwroot/vendor/jquery/
+**/SpreadsheetHibernation/

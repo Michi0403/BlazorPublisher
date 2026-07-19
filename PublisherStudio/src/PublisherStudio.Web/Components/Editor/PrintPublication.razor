@@ -104,6 +104,11 @@
                             case DataVisualElement dataVisual:
                                 <DataVisualView Document="Document" Item="dataVisual" CurrentPageId="publicationPage.Id" />
                                 break;
+                            case SpreadsheetElement spreadsheet:
+                                <div class="spreadsheet-frame @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
+                                    @((MarkupString)spreadsheet.PreviewHtml)
+                                </div>
+                                break;
                             case BarcodeElement barcode:
                                 <BarcodeView Item="barcode" />
                                 break;

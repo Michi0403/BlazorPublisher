@@ -417,6 +417,8 @@ function externalDropKind(file) {
     const mime = String(file?.type || '').toLowerCase();
     if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/.test(name)) return 'picture';
     if (mime.startsWith('video/') || /\.(mp4|m4v|webm|ogv|ogg|mov)$/.test(name)) return 'video';
+    if (mime === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        mime === 'application/vnd.ms-excel' || /\.(xlsx|xlsm|xls|csv|tsv)$/.test(name)) return 'spreadsheet';
     if (mime === 'text/markdown' || /\.(md|markdown)$/.test(name)) return 'markdown';
     if (mime.startsWith('text/') || /\.(txt|text|log|csv|tsv)$/.test(name)) return 'text';
     if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || /\.docx$/.test(name)) return 'docx';
@@ -441,6 +443,7 @@ function createExternalDropPreview(state, file, kind) {
     message.className = 'publisher-external-drop-message';
     message.textContent = kind === 'picture' ? 'Drop picture at this position'
         : kind === 'video' ? 'Drop video at this position'
+        : kind === 'spreadsheet' ? 'Drop workbook as an editable spreadsheet frame'
         : kind === 'markdown' ? 'Drop Markdown as a text frame'
         : kind === 'text' ? 'Drop text as a text frame'
         : kind === 'docx' ? 'Drop Word document as an editable text frame'
@@ -493,7 +496,7 @@ function createExternalDropPreview(state, file, kind) {
         ghost.appendChild(video);
     } else {
         const icon = document.createElement('b');
-        icon.textContent = kind === 'markdown' ? 'MD' : kind === 'text' ? 'TXT' : kind === 'docx' ? 'DOCX' : '?';
+        icon.textContent = kind === 'spreadsheet' ? 'XLSX' : kind === 'markdown' ? 'MD' : kind === 'text' ? 'TXT' : kind === 'docx' ? 'DOCX' : '?';
         const label = document.createElement('small');
         label.textContent = file?.name || (kind ? `Dropped ${kind}` : 'Dropped file');
         ghost.append(icon, label);
@@ -556,7 +559,7 @@ async function importExternalFileAt(state, file, placement, existingPreview = nu
     if (!kind) {
         clearExternalDropPreview(state);
         await safeDotNet(state, 'ExternalFileDropFailed',
-            `The file '${file?.name || 'file'}' is not a supported picture, video, DOCX, text, or Markdown file.`);
+            `The file '${file?.name || 'file'}' is not a supported picture, spreadsheet, video, DOCX, text, or Markdown file.`);
         return false;
     }
 

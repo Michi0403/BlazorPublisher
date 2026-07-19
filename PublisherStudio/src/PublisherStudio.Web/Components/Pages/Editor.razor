@@ -4,6 +4,8 @@
 @inject EditorStateService State
 @inject PublicationFileService Files
 @inject PublicationMediaAssetStore MediaAssets
+@inject SpreadsheetDocumentService Spreadsheets
+@inject SpreadsheetSessionStore SpreadsheetSessions
 @inject PublicationRecoveryService Recovery
 @inject IJSRuntime JS
 
@@ -41,6 +43,10 @@
                        OnInsertPicture="OpenPicturePicker"
                        OnCreatePicture="CreatePicture"
                        OnEditPicture="EditSelectedPicture"
+                       OnInsertSpreadsheet="OpenSpreadsheetPicker"
+                       OnCreateSpreadsheet="CreateSpreadsheet"
+                       OnEditSpreadsheet="OpenSpreadsheetEditor"
+                       OnDownloadSpreadsheet="DownloadSelectedSpreadsheet"
                        OnInsertVideo="OpenVideoPicker"
                        OnInsertAudio="OpenAudioPicker"
                        OnCreateVideo="CreateVideo"
@@ -64,6 +70,7 @@
         <span>Drag to canvas</span>
         <button type="button" draggable="true" data-publisher-insert="text" title="Drag a text box to an exact position, or click to insert" @onclick="AddTextQuick"><i class="pub-icon pub-icon-text"></i>Text</button>
         <button type="button" draggable="true" data-publisher-insert="picture" title="Drag to choose and place a picture, or click to insert" @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>Picture</button>
+        <button type="button" draggable="true" data-publisher-insert="spreadsheet" title="Drag to create and place a spreadsheet, or click to open a workbook" @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>Sheet</button>
         <button type="button" draggable="true" data-publisher-insert="video" title="Drag to create or import and place a video, or click to insert" @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>Video</button>
         <small>Ctrl/Shift-click objects for multi-selection</small>
     </div>
@@ -72,6 +79,7 @@
         <PageNavigator State="State" TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
         <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestReplacePicture="OpenReplacePicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
+                     RequestInsertSpreadsheet="OpenSpreadsheetPicker" RequestCreateSpreadsheet="CreateSpreadsheet" RequestEditSpreadsheet="OpenSpreadsheetEditor" RequestDownloadSpreadsheet="DownloadSelectedSpreadsheet"
                      RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
                      RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia"
                      RequestInsertBarcode="InsertBarcode" RequestEditBarcode="EditBarcode"
@@ -84,6 +92,10 @@
                         OnInsertPicture="OpenPicturePicker"
                         OnCreatePicture="CreatePicture"
                         OnEditPicture="EditSelectedPicture"
+                        OnInsertSpreadsheet="OpenSpreadsheetPicker"
+                        OnCreateSpreadsheet="CreateSpreadsheet"
+                        OnEditSpreadsheet="OpenSpreadsheetEditor"
+                        OnDownloadSpreadsheet="DownloadSelectedSpreadsheet"
                         OnApplyTransparentColor="ApplyTransparentColor"
                         OnRestoreOriginalPicture="RestoreOriginalPicture"
                         OnInsertDataVisual="InsertDataVisual"
@@ -124,6 +136,7 @@
 
 <InputFile id="publication-file-input" class="hidden-file-input" accept=".json,.pubstudio.json,application/json" OnChange="OpenPublication" />
 <InputFile id="picture-file-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="InsertPicture" />
+<InputFile id="spreadsheet-file-input" class="hidden-file-input" accept=".xlsx,.xlsm,.xls,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/plain" OnChange="InsertSpreadsheet" />
 <InputFile id="video-file-input" class="hidden-file-input" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,video/mp4,video/x-m4v,video/webm,video/ogg,video/quicktime" OnChange="InsertVideo" />
 <InputFile id="audio-file-input" class="hidden-file-input" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac" OnChange="InsertAudio" />
 
@@ -137,6 +150,12 @@
              PageCount="@State.Document.Pages.Count"
              Saved="SaveStory"
              Cancelled="CloseStoryEditor" />
+
+<SpreadsheetEditor Visible="@_spreadsheetEditorVisible"
+                   SessionId="@_spreadsheetEditorSessionId"
+                   FileName="@_spreadsheetEditorFileName"
+                   Saved="SaveSpreadsheet"
+                   Cancelled="CloseSpreadsheetEditor" />
 
 <PictureEditor Visible="@_pictureEditorVisible"
                SessionId="@_pictureEditorSessionId"
@@ -172,6 +191,11 @@
 @code {
     private PageSurface? _pageSurface;
     private bool _storyEditorVisible;
+    private bool _spreadsheetEditorVisible;
+    private Guid _spreadsheetEditorSessionId;
+    private Guid? _spreadsheetEditorTargetId;
+    private Guid? _pendingNewSpreadsheetId;
+    private string _spreadsheetEditorFileName = "Spreadsheet.xlsx";
     private bool _pictureEditorVisible;
     private bool _dataVisualEditorVisible;
     private bool _dataManagerVisible;
@@ -254,6 +278,11 @@
             await OpenHiddenFileInput("picture-file-input");
             return;
         }
+        if (kind == "spreadsheet")
+        {
+            await CreateSpreadsheet();
+            return;
+        }
         if (kind == "video")
         {
             await OpenMediaStudio(PublicationElementKind.Video, null);
@@ -297,6 +326,16 @@
                 return;
             }
 
+            if (kind == "spreadsheet")
+            {
+                var format = Spreadsheets.DetectFormat(request.Name, mimeType);
+                var spreadsheet = State.AddSpreadsheet(bytes, request.Name, format, request.X, request.Y);
+                _pendingNewSpreadsheetId = spreadsheet.Id;
+                await OpenSpreadsheetEditorById(spreadsheet.Id, pendingNew: true);
+                ShowNotice($"Opened {request.Name} in Spreadsheet Studio. Apply it to keep the new frame.");
+                return;
+            }
+
             if (kind is "text" or "markdown" or "docx")
             {
                 if (kind == "docx" && !PublicationFileService.IsOpenXmlDocument(bytes))
@@ -335,7 +374,7 @@
                 return;
             }
 
-            throw new InvalidDataException("Drop a picture, video, DOCX, text, or Markdown file.");
+            throw new InvalidDataException("Drop a picture, spreadsheet, video, DOCX, text, or Markdown file.");
         }
         catch (Exception ex)
         {
@@ -369,7 +408,7 @@
         var declared = PublicationMediaData.NormalizeMimeType(requested, stored);
         if ((kind == "picture" && declared.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) ||
             (kind == "video" && declared.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) ||
-            kind is "text" or "markdown" or "docx")
+            kind is "spreadsheet" or "text" or "markdown" or "docx")
             return declared;
         return Path.GetExtension(name).ToLowerInvariant() switch
         {
@@ -385,6 +424,10 @@
             ".mov" => "video/quicktime",
             ".md" or ".markdown" => "text/markdown",
             ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ".xlsm" or ".xls" => "application/vnd.ms-excel",
+            ".csv" => "text/csv",
+            ".tsv" or ".txt" => "text/plain",
             _ => kind == "picture" ? "image/png" : kind == "video" ? "video/mp4" : kind == "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "text/plain"
         };
     }
@@ -438,6 +481,13 @@
         await CancelPublisherPointerAsync();
         await OpenHiddenFileInput("picture-file-input");
     }
+    private async Task OpenSpreadsheetPicker()
+    {
+        _pendingCanvasInsert = null;
+        await CancelPublisherPointerAsync();
+        await OpenHiddenFileInput("spreadsheet-file-input");
+    }
+
     private async Task OpenReplacePicturePicker()
     {
         if (State.SelectedElement is not ImageFrameElement image) return;
@@ -750,6 +800,121 @@
             ShowError(ex);
         }
     }
+
+    private async Task InsertSpreadsheet(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            var file = args.File;
+            var format = Spreadsheets.DetectFormat(file.Name, file.ContentType);
+            await using var stream = file.OpenReadStream(64 * 1024 * 1024);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            var bytes = buffer.ToArray();
+            if (bytes.Length == 0) throw new InvalidDataException("The selected spreadsheet is empty.");
+
+            SpreadsheetElement item;
+            if (_pendingCanvasInsert is { Kind: "spreadsheet" } placement)
+                item = State.AddSpreadsheet(bytes, file.Name, format, placement.X, placement.Y);
+            else
+                item = State.AddSpreadsheet(bytes, file.Name, format);
+            _pendingCanvasInsert = null;
+            _pendingNewSpreadsheetId = item.Id;
+            await OpenSpreadsheetEditorById(item.Id, pendingNew: true);
+        }
+        catch (Exception ex)
+        {
+            _pendingCanvasInsert = null;
+            ShowError(ex);
+        }
+    }
+
+    private async Task CreateSpreadsheet()
+    {
+        await CancelPublisherPointerAsync();
+        var bytes = Spreadsheets.CreateBlankXlsx();
+        SpreadsheetElement item;
+        if (_pendingCanvasInsert is { Kind: "spreadsheet" } placement)
+            item = State.AddSpreadsheet(bytes, "Spreadsheet.xlsx", SpreadsheetStorageFormat.Xlsx, placement.X, placement.Y);
+        else
+            item = State.AddSpreadsheet(bytes, "Spreadsheet.xlsx", SpreadsheetStorageFormat.Xlsx);
+        _pendingCanvasInsert = null;
+        _pendingNewSpreadsheetId = item.Id;
+        await OpenSpreadsheetEditorById(item.Id, pendingNew: true);
+    }
+
+    private Task OpenSpreadsheetEditor()
+    {
+        return State.SelectedElement is SpreadsheetElement spreadsheet
+            ? OpenSpreadsheetEditorById(spreadsheet.Id, pendingNew: false)
+            : Task.CompletedTask;
+    }
+
+    private async Task OpenSpreadsheetEditorById(Guid elementId, bool pendingNew = false)
+    {
+        var spreadsheet = State.CurrentPage.Elements.OfType<SpreadsheetElement>().FirstOrDefault(item => item.Id == elementId);
+        if (spreadsheet is null) return;
+        await CancelPublisherPointerAsync();
+        if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
+        State.SelectElement(spreadsheet.Id);
+        var session = SpreadsheetSessions.Create(spreadsheet.Id, spreadsheet.WorkbookFileName, spreadsheet.StorageFormat, spreadsheet.WorkbookContent);
+        _spreadsheetEditorSessionId = session.Id;
+        _spreadsheetEditorTargetId = spreadsheet.Id;
+        _spreadsheetEditorFileName = session.FileName;
+        if (!pendingNew) _pendingNewSpreadsheetId = null;
+        _spreadsheetEditorVisible = true;
+    }
+
+    private Task SaveSpreadsheet(SpreadsheetEditorResult result)
+    {
+        if (_spreadsheetEditorTargetId is Guid targetId)
+        {
+            State.SelectElement(targetId);
+            State.UpdateSpreadsheetDocument(result.Content, result.FileName, result.StorageFormat, result.PreviewHtml, result.ActiveSheetName);
+        }
+        if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
+        _spreadsheetEditorVisible = false;
+        _spreadsheetEditorSessionId = Guid.Empty;
+        _spreadsheetEditorTargetId = null;
+        _pendingNewSpreadsheetId = null;
+        _spreadsheetEditorFileName = "Spreadsheet.xlsx";
+        ShowNotice("Spreadsheet applied to the publication frame.");
+        return Task.CompletedTask;
+    }
+
+    private Task CloseSpreadsheetEditor()
+    {
+        if (_pendingNewSpreadsheetId is Guid id)
+        {
+            State.SelectElement(id);
+            State.DeleteSelected();
+        }
+        if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
+        _spreadsheetEditorVisible = false;
+        _spreadsheetEditorSessionId = Guid.Empty;
+        _spreadsheetEditorTargetId = null;
+        _pendingNewSpreadsheetId = null;
+        _spreadsheetEditorFileName = "Spreadsheet.xlsx";
+        return Task.CompletedTask;
+    }
+
+    private async Task DownloadSelectedSpreadsheet()
+    {
+        if (State.SelectedElement is not SpreadsheetElement spreadsheet) return;
+        await using var stream = new MemoryStream(spreadsheet.WorkbookContent, writable: false);
+        using var streamReference = new DotNetStreamReference(stream);
+        await JS.InvokeVoidAsync("publisherStudio.downloadStream", spreadsheet.WorkbookFileName, streamReference, SpreadsheetMimeType(spreadsheet.StorageFormat));
+        ShowNotice($"Downloaded {spreadsheet.WorkbookFileName}");
+    }
+
+    private static string SpreadsheetMimeType(SpreadsheetStorageFormat format) => format switch
+    {
+        SpreadsheetStorageFormat.Xlsm => "application/vnd.ms-excel.sheet.macroEnabled.12",
+        SpreadsheetStorageFormat.Xls => "application/vnd.ms-excel",
+        SpreadsheetStorageFormat.Csv => "text/csv",
+        SpreadsheetStorageFormat.Text => "text/plain",
+        _ => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    };
 
     private async Task InsertVideo(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Video);
     private async Task InsertAudio(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Audio);
@@ -1263,6 +1428,7 @@
         State.Changed -= StateChanged;
         _recoverySaveCancellation?.Cancel();
         _recoverySaveCancellation?.Dispose();
+        if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
         if (State.IsDirty)
         {
             try

@@ -1,0 +1,186 @@
+@model SpreadsheetEditorViewModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    Layout = null;
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken ?? string.Empty;
+    var encodedFileName = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.FileName);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@Model.FileName</title>
+    <link href="~/vendor/devextreme-dist/css/dx.light.css" rel="stylesheet" />
+    <link href="~/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.css" rel="stylesheet" />
+    <link href="~/css/spreadsheet-island.css" rel="stylesheet" />
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+    <script src="~/vendor/devextreme-dist/js/dx.all.js"></script>
+    <script src="~/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.js"></script>
+    <script>
+        "use strict";
+        const publisherSpreadsheetRequestToken = "@requestToken";
+        const publisherSpreadsheetSessionId = "@Model.SessionId";
+        const publisherSpreadsheetParentOrigin = window.location.origin;
+
+        window.publisherSpreadsheetBridge = {
+            control: null,
+            synchronizing: false,
+            awaitingSynchronization: false,
+            inFlight: false,
+            pendingIntent: null,
+            saveTimer: 0,
+            saveStartedAt: 0,
+
+            post(type, payload) {
+                window.parent.postMessage(
+                    Object.assign({ type, sessionId: publisherSpreadsheetSessionId }, payload || {}),
+                    publisherSpreadsheetParentOrigin);
+            },
+
+            notifyReady() {
+                if (this.control) this.post("publisher-spreadsheet-ready", { fileName: "@encodedFileName" });
+            },
+
+            onInit(spreadsheet) {
+                this.control = spreadsheet || window.publisherSpreadsheet;
+                this.notifyReady();
+                window.setTimeout(() => {
+                    try { this.control?.focus(); } catch (_) { }
+                }, 100);
+            },
+
+            queueSave(intent) {
+                if (this.inFlight) return;
+                this.pendingIntent = intent || "apply";
+                this.saveStartedAt = Date.now();
+                try { this.control?.applyCellEdit(); } catch (_) { }
+                this.scheduleSave(120);
+            },
+
+            scheduleSave(delay) {
+                window.clearTimeout(this.saveTimer);
+                this.saveTimer = window.setTimeout(() => this.flushSave(), delay || 0);
+            },
+
+            flushSave() {
+                if (!this.pendingIntent || this.inFlight || !this.control) return;
+                if (this.synchronizing || this.awaitingSynchronization) {
+                    if (Date.now() - this.saveStartedAt > 15000) {
+                        const intent = this.pendingIntent;
+                        this.pendingIntent = null;
+                        this.post("publisher-spreadsheet-error", {
+                            intent,
+                            message: "The last spreadsheet change did not finish synchronizing with the local server."
+                        });
+                        return;
+                    }
+                    this.scheduleSave(100);
+                    return;
+                }
+                const intent = this.pendingIntent;
+                this.pendingIntent = null;
+                this.inFlight = true;
+
+                let spreadsheetState;
+                try {
+                    spreadsheetState = this.control.getSpreadsheetState();
+                } catch (error) {
+                    this.inFlight = false;
+                    this.post("publisher-spreadsheet-error", {
+                        intent,
+                        message: error?.message || "The spreadsheet state could not be read."
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Save", "Spreadsheet", new { sessionId = Model.SessionId })",
+                    data: { spreadsheetState },
+                    headers: { RequestVerificationToken: publisherSpreadsheetRequestToken },
+                    success: result => {
+                        this.post("publisher-spreadsheet-saved", Object.assign({ intent }, result));
+                        if (intent === "download" && result.downloadUrl) {
+                            const link = document.createElement("a");
+                            link.href = result.downloadUrl;
+                            link.download = result.fileName || "Spreadsheet.xlsx";
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                        }
+                    },
+                    error: request => {
+                        let message = "The spreadsheet could not be saved.";
+                        try { message = request.responseJSON?.message || request.responseText || message; } catch (_) { }
+                        this.post("publisher-spreadsheet-error", { intent, message });
+                    },
+                    complete: () => {
+                        this.inFlight = false;
+                        if (this.pendingIntent) this.scheduleSave(0);
+                    }
+                });
+            }
+        };
+
+        function publisherSpreadsheetBeforeSend(_spreadsheet, eventArgs) {
+            eventArgs.request.setRequestHeader("RequestVerificationToken", publisherSpreadsheetRequestToken);
+        }
+
+        function publisherSpreadsheetOnInit(spreadsheet) {
+            window.publisherSpreadsheetBridge.onInit(spreadsheet);
+        }
+
+        function publisherSpreadsheetOnDocumentChanged() {
+            window.publisherSpreadsheetBridge.awaitingSynchronization = true;
+        }
+
+        function publisherSpreadsheetOnBeginSynchronization() {
+            const bridge = window.publisherSpreadsheetBridge;
+            bridge.awaitingSynchronization = true;
+            bridge.synchronizing = true;
+        }
+
+        function publisherSpreadsheetOnEndSynchronization() {
+            const bridge = window.publisherSpreadsheetBridge;
+            bridge.synchronizing = false;
+            bridge.awaitingSynchronization = false;
+            if (bridge.pendingIntent) bridge.scheduleSave(60);
+        }
+    </script>
+</head>
+<body>
+    <main id="publisher-spreadsheet-island">
+        @(Html.DevExpress()
+            .Spreadsheet("publisherSpreadsheet")
+            .Width("100%")
+            .Height("100%")
+            .DocumentRequestHandlerUrl(Url.Action("RequestHandler", "Spreadsheet"))
+            .ConfirmOnLosingChanges(options => options.Enabled(false))
+            .Open(Model.DocumentId, Model.DocumentFormat, Model.ContentAccessor)
+            .ClientSideEvents(events =>
+            {
+                events.OnBeforeSend("publisherSpreadsheetBeforeSend");
+                events.OnInit("publisherSpreadsheetOnInit");
+                events.OnDocumentChanged("publisherSpreadsheetOnDocumentChanged");
+                events.OnBeginSynchronization("publisherSpreadsheetOnBeginSynchronization");
+                events.OnEndSynchronization("publisherSpreadsheetOnEndSynchronization");
+            }))
+    </main>
+
+    <script>
+        (() => {
+            const bridge = window.publisherSpreadsheetBridge;
+
+            window.addEventListener("message", event => {
+                if (event.origin !== publisherSpreadsheetParentOrigin || event.data?.sessionId !== publisherSpreadsheetSessionId) return;
+                if (event.data.type === "publisher-spreadsheet-probe") bridge.notifyReady();
+                if (event.data.type === "publisher-spreadsheet-save") bridge.queueSave(event.data.intent || "apply");
+                if (event.data.type === "publisher-spreadsheet-focus") {
+                    try { bridge.control?.focus(); } catch (_) { }
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

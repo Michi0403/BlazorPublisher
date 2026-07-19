@@ -45,6 +45,23 @@ public sealed class SpreadsheetSessionStore
         return false;
     }
 
+    public SpreadsheetEditorSession Replace(Guid id, string fileName, SpreadsheetStorageFormat format, byte[] workbookContent)
+    {
+        if (!_sessions.TryGetValue(id, out var session)) throw new KeyNotFoundException("Spreadsheet editing session expired.");
+        _documents.ValidateWorkbookContent(workbookContent, format);
+        lock (session.SyncRoot)
+        {
+            session.DocumentId = $"publisher-spreadsheet-{Guid.NewGuid():N}";
+            session.FileName = _documents.NormalizeWorkbookFileName(fileName, format);
+            session.SourceFormat = format;
+            session.Content = workbookContent.ToArray();
+            session.PreviewHtml = _documents.RenderPreviewHtml(session.Content, format, out var activeSheetName);
+            session.ActiveSheetName = activeSheetName;
+            session.UpdatedUtc = DateTimeOffset.UtcNow;
+            return session.Clone();
+        }
+    }
+
     public SpreadsheetEditorSession Update(Guid id, byte[] workbookContent, SpreadsheetStorageFormat format, string? activeSheetName = null)
     {
         if (!_sessions.TryGetValue(id, out var session)) throw new KeyNotFoundException("Spreadsheet editing session expired.");
@@ -76,7 +93,7 @@ public sealed class SpreadsheetEditorSession
     internal object SyncRoot { get; } = new();
     public Guid Id { get; init; }
     public Guid ElementId { get; init; }
-    public string DocumentId { get; init; } = string.Empty;
+    public string DocumentId { get; set; } = string.Empty;
     public string FileName { get; set; } = "Spreadsheet.xlsx";
     public SpreadsheetStorageFormat SourceFormat { get; set; } = SpreadsheetStorageFormat.Xlsx;
     public byte[] Content { get; set; } = [];

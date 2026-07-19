@@ -31,6 +31,8 @@
             pendingIntent: null,
             saveTimer: 0,
             saveStartedAt: 0,
+            openingWorkbook: false,
+            dirty: false,
 
             post(type, payload) {
                 window.parent.postMessage(
@@ -40,6 +42,54 @@
 
             notifyReady() {
                 if (this.control) this.post("publisher-spreadsheet-ready", { fileName: "@encodedFileName" });
+            },
+
+            chooseWorkbook() {
+                if (this.openingWorkbook || this.inFlight) return;
+                if (this.dirty && !window.confirm("Open another workbook and discard the current unsaved spreadsheet changes?")) return;
+                const input = document.getElementById("publisher-spreadsheet-open-input");
+                if (!input) return;
+                input.value = "";
+                input.click();
+            },
+
+            async openWorkbook(file) {
+                if (!file || this.openingWorkbook || this.inFlight) return;
+                const maximumBytes = 64 * 1024 * 1024;
+                if (file.size <= 0) {
+                    this.post("publisher-spreadsheet-error", { message: "The selected spreadsheet is empty." });
+                    return;
+                }
+                if (file.size > maximumBytes) {
+                    this.post("publisher-spreadsheet-error", { message: "The selected spreadsheet is larger than the 64 MB limit." });
+                    return;
+                }
+
+                this.openingWorkbook = true;
+                this.post("publisher-spreadsheet-opening", { fileName: file.name });
+                try { this.control?.applyCellEdit(); } catch (_) { }
+
+                const formData = new FormData();
+                formData.append("workbook", file, file.name);
+                try {
+                    const response = await fetch("@Url.Action("Open", "Spreadsheet", new { sessionId = Model.SessionId })", {
+                        method: "POST",
+                        headers: { RequestVerificationToken: publisherSpreadsheetRequestToken },
+                        body: formData,
+                        credentials: "same-origin"
+                    });
+                    let result = null;
+                    try { result = await response.json(); } catch (_) { }
+                    if (!response.ok || !result?.success)
+                        throw new Error(result?.message || `The workbook could not be opened (${response.status}).`);
+                    this.dirty = false;
+                    window.location.replace(result.reloadUrl || `${window.location.pathname}?revision=${Date.now()}`);
+                } catch (error) {
+                    this.openingWorkbook = false;
+                    this.post("publisher-spreadsheet-error", {
+                        message: error?.message || "The workbook could not be opened."
+                    });
+                }
             },
 
             onInit(spreadsheet) {
@@ -133,6 +183,12 @@
 
         function publisherSpreadsheetOnDocumentChanged() {
             window.publisherSpreadsheetBridge.awaitingSynchronization = true;
+            window.publisherSpreadsheetBridge.dirty = true;
+        }
+
+        function publisherSpreadsheetOnCustomCommandExecuted(_spreadsheet, eventArgs) {
+            if (eventArgs.commandName === "publisherOpenWorkbook")
+                window.publisherSpreadsheetBridge.chooseWorkbook();
         }
 
         function publisherSpreadsheetOnBeginSynchronization() {
@@ -157,20 +213,34 @@
             .Height("100%")
             .DocumentRequestHandlerUrl(Url.Action("RequestHandler", "Spreadsheet"))
             .ConfirmOnLosingChanges(options => options.Enabled(false))
+            .Ribbon(ribbon => ribbon.Tabs(tabs =>
+            {
+                tabs.GetByName("Home").Items(items =>
+                    items.AddButton("Open workbook", "publisherOpenWorkbook", true, "open", true));
+            }))
             .Open(Model.DocumentId, Model.DocumentFormat, Model.ContentAccessor)
             .ClientSideEvents(events =>
             {
                 events.OnBeforeSend("publisherSpreadsheetBeforeSend");
                 events.OnInit("publisherSpreadsheetOnInit");
                 events.OnDocumentChanged("publisherSpreadsheetOnDocumentChanged");
+                events.OnCustomCommandExecuted("publisherSpreadsheetOnCustomCommandExecuted");
                 events.OnBeginSynchronization("publisherSpreadsheetOnBeginSynchronization");
                 events.OnEndSynchronization("publisherSpreadsheetOnEndSynchronization");
             }))
     </main>
+    <input id="publisher-spreadsheet-open-input" type="file" hidden
+           accept=".xlsx,.xlsm,.xls,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/plain" />
 
     <script>
         (() => {
             const bridge = window.publisherSpreadsheetBridge;
+            const openInput = document.getElementById("publisher-spreadsheet-open-input");
+            openInput?.addEventListener("change", async () => {
+                const file = openInput.files?.[0];
+                openInput.value = "";
+                if (file) await bridge.openWorkbook(file);
+            });
 
             window.addEventListener("message", event => {
                 if (event.origin !== publisherSpreadsheetParentOrigin || event.data?.sessionId !== publisherSpreadsheetSessionId) return;

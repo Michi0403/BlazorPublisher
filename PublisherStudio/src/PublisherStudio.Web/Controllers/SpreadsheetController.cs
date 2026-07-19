@@ -11,9 +11,15 @@ namespace PublisherStudio.Controllers;
 [AutoValidateAntiforgeryToken]
 public sealed class SpreadsheetController : Controller
 {
+    private const long MaxWorkbookUploadBytes = 64L * 1024 * 1024;
     private readonly SpreadsheetSessionStore _sessions;
+    private readonly SpreadsheetDocumentService _documents;
 
-    public SpreadsheetController(SpreadsheetSessionStore sessions) => _sessions = sessions;
+    public SpreadsheetController(SpreadsheetSessionStore sessions, SpreadsheetDocumentService documents)
+    {
+        _sessions = sessions;
+        _documents = documents;
+    }
 
     [HttpGet("editor/{sessionId:guid}")]
     [IgnoreAntiforgeryToken]
@@ -33,6 +39,46 @@ public sealed class SpreadsheetController : Controller
     [AcceptVerbs("GET", "POST")]
     [Route("request")]
     public IActionResult RequestHandler() => SpreadsheetRequestProcessor.GetResponse(HttpContext);
+
+    [HttpPost("open/{sessionId:guid}")]
+    [RequestSizeLimit(MaxWorkbookUploadBytes + 1024 * 1024)]
+    public async Task<IActionResult> Open(Guid sessionId, IFormFile? workbook, CancellationToken cancellationToken)
+    {
+        if (!_sessions.TryGet(sessionId, out _))
+            return NotFound(new { success = false, message = "Spreadsheet editing session expired." });
+        if (workbook is null)
+            return BadRequest(new { success = false, message = "Select a spreadsheet file to open." });
+        if (workbook.Length <= 0)
+            return BadRequest(new { success = false, message = "The selected spreadsheet is empty." });
+        if (workbook.Length > MaxWorkbookUploadBytes)
+            return BadRequest(new { success = false, message = "The selected spreadsheet is larger than the 64 MB limit." });
+
+        try
+        {
+            var format = _documents.DetectFormat(workbook.FileName, workbook.ContentType);
+            await using var input = workbook.OpenReadStream();
+            using var output = workbook.Length <= int.MaxValue
+                ? new MemoryStream((int)workbook.Length)
+                : new MemoryStream();
+            await input.CopyToAsync(output, cancellationToken);
+            var replaced = _sessions.Replace(sessionId, workbook.FileName, format, output.ToArray());
+            return Ok(new
+            {
+                success = true,
+                fileName = replaced.FileName,
+                activeSheetName = replaced.ActiveSheetName,
+                reloadUrl = Url.Action(nameof(Editor), new
+                {
+                    sessionId,
+                    revision = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                })
+            });
+        }
+        catch (Exception ex) when (ex is InvalidDataException or IOException or OperationCanceledException)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
 
     [HttpPost("save/{sessionId:guid}")]
     public IActionResult Save(Guid sessionId, SpreadsheetClientState spreadsheetState)

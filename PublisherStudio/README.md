@@ -218,3 +218,7 @@ See `CHANGELOG-v1.0.30.md`. Normal Visual Studio builds no longer execute `npm i
 ## v1.0.31 Spreadsheet hibernation startup fix
 
 See `CHANGELOG-v1.0.31.md`. PublisherStudio now creates `%LOCALAPPDATA%\PublisherStudio\SpreadsheetHibernation` before DevExpress Spreadsheet hibernation is configured, preventing first-run `DirectoryNotFoundException` failures. The folder is reused when already present. Node.js remains required only for developers and release-build machines preparing the offline Spreadsheet browser assets; end-user runtime installations do not require Node.js or npm.
+
+## v1.0.32 Spreadsheet toolbar workbook loading
+
+See `CHANGELOG-v1.0.32.md`. Spreadsheet Studio now contains an **Open workbook** command directly on the DevExpress Home ribbon. It loads XLSX, XLSM, XLS, CSV, TXT, or TSV into the current creation/editing session, updates the workbook name, and reloads the control with a fresh document identifier while retaining the existing drag-and-drop workflow. The import remains local and CSRF-protected. Node.js is still a development/release-build requirement only and is not required on end-user systems.

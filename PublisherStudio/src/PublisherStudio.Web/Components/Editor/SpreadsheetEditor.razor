@@ -17,9 +17,9 @@
             </div>
             <div class="spreadsheet-editor-host">
                 <iframe id="@FrameId" title="Spreadsheet Studio" src="@EditorUrl"></iframe>
-                @if (!_ready)
+                @if (!_ready || _opening)
                 {
-                    <div class="spreadsheet-editor-loading"><i></i><strong>Opening workbook…</strong><span>The spreadsheet runs locally inside PublisherStudio.</span></div>
+                    <div class="spreadsheet-editor-loading"><i></i><strong>@(_opening ? "Loading workbook…" : "Opening workbook…")</strong><span>The spreadsheet runs locally inside PublisherStudio.</span></div>
                 }
             </div>
             <footer>
@@ -29,9 +29,9 @@
                     <strong class="story-error">@_error</strong>
                 }
                 <div>
-                    <DxButton Text="Cancel" Enabled="@(!_saving)" Click="Cancel" />
-                    <DxButton Text="Download workbook" Enabled="@(_ready && !_saving)" Click="Download" />
-                    <DxButton Text="@(_saving ? "Saving…" : "Apply to frame")" Enabled="@(_ready && !_saving)" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
+                    <DxButton Text="Cancel" Enabled="@(!_saving && !_opening)" Click="Cancel" />
+                    <DxButton Text="Download workbook" Enabled="@(_ready && !_saving && !_opening)" Click="Download" />
+                    <DxButton Text="@(_saving ? "Saving…" : "Apply to frame")" Enabled="@(_ready && !_saving && !_opening)" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
                 </div>
             </footer>
         </section>
@@ -51,6 +51,7 @@
     private Guid _registeredSession;
     private bool _ready;
     private bool _saving;
+    private bool _opening;
     private string? _error;
     private string FrameId => $"spreadsheet-frame-{SessionId:N}";
     private string EditorUrl => $"/spreadsheet/editor/{SessionId:D}";
@@ -61,6 +62,7 @@
         {
             _ready = false;
             _saving = false;
+            _opening = false;
             _error = null;
         }
         else if (_initializedSession != SessionId)
@@ -68,6 +70,7 @@
             _initializedSession = SessionId;
             _ready = false;
             _saving = false;
+            _opening = false;
             _error = null;
         }
     }
@@ -110,7 +113,7 @@
 
     private async Task RequestSave(string intent)
     {
-        if (_module is null || !_ready || _saving) return;
+        if (_module is null || !_ready || _saving || _opening) return;
         _saving = true;
         _error = null;
         try
@@ -131,14 +134,25 @@
 
     private async Task Cancel()
     {
-        if (_saving) return;
+        if (_saving || _opening) return;
         await Cancelled.InvokeAsync();
     }
 
     [JSInvokable]
-    public Task SpreadsheetReady()
+    public Task SpreadsheetOpening()
+    {
+        _opening = true;
+        _error = null;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public Task SpreadsheetReady(string? fileName)
     {
         _ready = true;
+        _opening = false;
+        if (!string.IsNullOrWhiteSpace(fileName)) FileName = fileName;
         _error = null;
         StateHasChanged();
         return Task.CompletedTask;
@@ -165,6 +179,7 @@
     public Task SpreadsheetFailed(string message)
     {
         _saving = false;
+        _opening = false;
         _error = message;
         StateHasChanged();
         return Task.CompletedTask;

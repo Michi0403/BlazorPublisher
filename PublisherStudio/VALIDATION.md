@@ -234,3 +234,14 @@ Recommended local media smoke tests:
 - Confirmed existing hibernation data is left intact.
 - Confirmed package metadata and source archive versioning use `1.0.31`.
 - A licensed end-to-end DevExpress runtime test still needs to be executed on the user's build machine.
+
+## v1.0.32 Spreadsheet toolbar import validation
+
+- Confirmed the Spreadsheet Home ribbon receives the custom `Open workbook` command through `SpreadsheetBuilder.Ribbon` and `SpreadsheetRibbonItemCollectionBuilder.AddButton`.
+- Confirmed `OnCustomCommandExecuted` invokes only the PublisherStudio workbook picker command and leaves normal Spreadsheet commands untouched.
+- Confirmed supported extension filtering, 64 MB browser/server limits, anti-forgery header forwarding, same-origin credentials, and session existence checks.
+- Confirmed imported bytes pass the existing workbook validation path before replacing the session.
+- Confirmed session replacement regenerates the DevExpress document ID, updates filename/format/content/preview/active sheet under the session lock, and does not modify the publication frame until Apply is selected.
+- Confirmed the outer Blazor modal receives opening, ready, save, and failure messages from the same-origin iframe, disables conflicting commands during reload, and clears reload timeouts on success or failure.
+- Confirmed the existing Spreadsheet drag-and-drop behavior was not removed or overridden.
+- Confirmed JavaScript syntax, C# syntax trees, Razor code blocks, JSON, project XML, package version `1.0.32`, and ZIP integrity. A licensed end-to-end DevExpress build and browser test remain required on the user's development machine.

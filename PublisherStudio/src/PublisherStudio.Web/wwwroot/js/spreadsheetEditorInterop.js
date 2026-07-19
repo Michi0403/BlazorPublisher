@@ -4,6 +4,13 @@ export function initialize(iframeId, sessionId, dotnetReference) {
     dispose(iframeId);
 
     const registration = { handler: null, timer: 0 };
+    const startTimeout = message => {
+        window.clearTimeout(registration.timer);
+        registration.timer = window.setTimeout(() => {
+            registration.timer = 0;
+            dotnetReference.invokeMethodAsync("SpreadsheetFailed", message).catch(() => {});
+        }, 25000);
+    };
     registration.handler = event => {
         if (event.origin !== window.location.origin || event.data?.sessionId !== sessionId) return;
         const source = document.getElementById(iframeId)?.contentWindow;
@@ -12,22 +19,21 @@ export function initialize(iframeId, sessionId, dotnetReference) {
         if (event.data.type === "publisher-spreadsheet-ready") {
             window.clearTimeout(registration.timer);
             registration.timer = 0;
-            dotnetReference.invokeMethodAsync("SpreadsheetReady").catch(() => {});
+            dotnetReference.invokeMethodAsync("SpreadsheetReady", event.data.fileName || null).catch(() => {});
+        } else if (event.data.type === "publisher-spreadsheet-opening") {
+            startTimeout("The selected workbook did not finish loading in Spreadsheet Studio.");
+            dotnetReference.invokeMethodAsync("SpreadsheetOpening").catch(() => {});
         } else if (event.data.type === "publisher-spreadsheet-saved") {
             dotnetReference.invokeMethodAsync("SpreadsheetSaved", event.data.intent || "apply").catch(() => {});
         } else if (event.data.type === "publisher-spreadsheet-error") {
+            window.clearTimeout(registration.timer);
+            registration.timer = 0;
             dotnetReference.invokeMethodAsync("SpreadsheetFailed", event.data.message || "The spreadsheet could not be saved.").catch(() => {});
         }
     };
 
     window.addEventListener("message", registration.handler);
-    registration.timer = window.setTimeout(() => {
-        registration.timer = 0;
-        dotnetReference.invokeMethodAsync(
-            "SpreadsheetFailed",
-            "Spreadsheet Studio did not finish loading. Verify the DevExpress Spreadsheet client assets and server package license."
-        ).catch(() => {});
-    }, 25000);
+    startTimeout("Spreadsheet Studio did not finish loading. Verify the DevExpress Spreadsheet client assets and server package license.");
     registrations.set(iframeId, registration);
     const frame = document.getElementById(iframeId);
     frame?.contentWindow?.postMessage({ type: "publisher-spreadsheet-probe", sessionId }, window.location.origin);

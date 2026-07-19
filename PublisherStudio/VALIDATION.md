@@ -226,3 +226,11 @@ Recommended local media smoke tests:
 - Confirmed the shared PowerShell preparation script searches PATH, NVM for Windows, Program Files, the 32-bit Program Files folder, and the per-user Node.js folder; enforces Node.js 20+; runs npm restoration; invokes the existing Node copy module; and verifies all required JS/CSS outputs.
 - Confirmed `Build-Release.ps1` delegates to the same preparation path and no longer invokes bare `node` or `npm` commands.
 - Confirmed project XML, package JSON, command scripts, and archive paths parse structurally. A licensed end-to-end DevExpress build still needs to be executed on the user's build machine.
+
+## v1.0.31 Spreadsheet hibernation startup validation
+
+- Confirmed `Directory.Exists` and `Directory.CreateDirectory` execute before `AddDevExpressControls`.
+- Confirmed DevExpress receives the same prepared absolute path through `hibernation.StoragePath`.
+- Confirmed existing hibernation data is left intact.
+- Confirmed package metadata and source archive versioning use `1.0.31`.
+- A licensed end-to-end DevExpress runtime test still needs to be executed on the user's build machine.

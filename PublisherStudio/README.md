@@ -215,3 +215,6 @@ See `CHANGELOG-v1.0.29.md`. Spreadsheet workbooks are now first-class publicatio
 
 See `CHANGELOG-v1.0.30.md`. Normal Visual Studio builds no longer execute `npm install`, so a missing or stale Node.js `PATH` cannot surface as the opaque MSBuild exit code 9009. The shared Spreadsheet result model is now compiled from a normal C# source file, fixing the `SpreadsheetEditorResult` CS0246 errors. The preparation command also avoids restoring unused peer packages that caused the `lodash.isequal` deprecation warning. Run `Prepare-SpreadsheetAssets.cmd` once from the solution root; publishing still refuses to create an incomplete package when the local Spreadsheet browser files are absent.
 
+## v1.0.31 Spreadsheet hibernation startup fix
+
+See `CHANGELOG-v1.0.31.md`. PublisherStudio now creates `%LOCALAPPDATA%\PublisherStudio\SpreadsheetHibernation` before DevExpress Spreadsheet hibernation is configured, preventing first-run `DirectoryNotFoundException` failures. The folder is reused when already present. Node.js remains required only for developers and release-build machines preparing the offline Spreadsheet browser assets; end-user runtime installations do not require Node.js or npm.

@@ -44,14 +44,21 @@ public static class Program
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = DevExpress.Blazor.SizeMode.Small);
+
+        var spreadsheetHibernationPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "PublisherStudio", "SpreadsheetHibernation");
+        if (!Directory.Exists(spreadsheetHibernationPath))
+        {
+            Directory.CreateDirectory(spreadsheetHibernationPath);
+        }
+
         builder.Services.AddDevExpressControls(options =>
         {
             options.AddSpreadsheet(spreadsheetOptions =>
                 spreadsheetOptions.AddHibernation(hibernation =>
                 {
-                    hibernation.StoragePath = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "PublisherStudio", "SpreadsheetHibernation");
+                    hibernation.StoragePath = spreadsheetHibernationPath;
                     hibernation.Timeout = TimeSpan.FromMinutes(20);
                     hibernation.DocumentsDisposeTimeout = TimeSpan.FromHours(4);
                     hibernation.AllDocumentsOnApplicationEnd = true;

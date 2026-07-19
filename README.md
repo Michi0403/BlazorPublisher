@@ -1,3 +1,8 @@
+Win64 Installer here https://github.com/Michi0403/BlazorPublisher/releases/download/v128/PublisherStudio.Setup.exe
+
+for other OS (Lin, MacOs) consider to download the specific os version and open the browser the the hosted address yourself or create links.
+In future with helper and tester who commonly use linux we can make that more comfortable but, well I try to invest my time in the features and mainframe from the application, especially because I know "Works on Win10, linux, Win11".
+
 # PublisherStudio / BlazorPublisher foundation
 
 PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It keeps the existing ASP.NET Core host and optional InstallerConsole architecture, while the product UI is a Publisher-style document and picture editor built with DevExpress DXperience 25.2.

@@ -25,6 +25,12 @@ export function initialize(iframeId, sessionId, dotnetReference) {
             dotnetReference.invokeMethodAsync("SpreadsheetOpening").catch(() => {});
         } else if (event.data.type === "publisher-spreadsheet-saved") {
             dotnetReference.invokeMethodAsync("SpreadsheetSaved", event.data.intent || "apply").catch(() => {});
+        } else if (event.data.type === "publisher-spreadsheet-data-selection") {
+            dotnetReference.invokeMethodAsync("SpreadsheetDataSelectionReceived", {
+                sheetName: event.data.sheetName || "Sheet1",
+                rangeAddress: event.data.rangeAddress || "",
+                rows: Array.isArray(event.data.rows) ? event.data.rows : []
+            }).catch(() => {});
         } else if (event.data.type === "publisher-spreadsheet-error") {
             window.clearTimeout(registration.timer);
             registration.timer = 0;
@@ -42,6 +48,11 @@ export function initialize(iframeId, sessionId, dotnetReference) {
 export function requestSave(iframeId, sessionId, intent) {
     const frame = document.getElementById(iframeId);
     frame?.contentWindow?.postMessage({ type: "publisher-spreadsheet-save", sessionId, intent }, window.location.origin);
+}
+
+export function requestDataSelection(iframeId, sessionId) {
+    const frame = document.getElementById(iframeId);
+    frame?.contentWindow?.postMessage({ type: "publisher-spreadsheet-create-data-object", sessionId }, window.location.origin);
 }
 
 export function focus(iframeId, sessionId) {

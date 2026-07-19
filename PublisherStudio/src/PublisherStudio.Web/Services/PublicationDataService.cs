@@ -34,6 +34,7 @@ public sealed class PublicationDataService
         {
             data.Name = string.IsNullOrWhiteSpace(data.Name) ? "Data" : data.Name.Trim();
             data.RawSource ??= string.Empty;
+            data.SourceReference ??= string.Empty;
             data.Delimiter = string.IsNullOrEmpty(data.Delimiter) ? "," : data.Delimiter[..1];
             data.Columns ??= [];
             data.Rows ??= [];
@@ -245,6 +246,7 @@ public sealed class PublicationDataService
             item.MaximumValue,
             item.Background,
             rows,
+            columnKinds = ResolveColumns(data).ToDictionary(column => column.Name, column => column.ValueKind.ToString(), StringComparer.OrdinalIgnoreCase),
             live = data?.SourceKind == PublicationDataSourceKind.Web ? new
             {
                 enabled = data.Web.Enabled,
@@ -290,14 +292,7 @@ public sealed class PublicationDataService
         }
         var format = data.Web.ResponseFormat;
         if (format == PublicationWebResponseFormat.Auto)
-        {
-            var trimmed = data.RawSource.TrimStart();
-            format = trimmed.StartsWith("{") || trimmed.StartsWith("[")
-                ? PublicationWebResponseFormat.Json
-                : trimmed.StartsWith("<")
-                    ? PublicationWebResponseFormat.Xml
-                    : PublicationWebResponseFormat.DelimitedText;
-        }
+            format = DetectWebResponseFormat(data);
         switch (format)
         {
             case PublicationWebResponseFormat.Json:
@@ -329,54 +324,168 @@ public sealed class PublicationDataService
         }
     }
 
+    private static PublicationWebResponseFormat DetectWebResponseFormat(PublicationDataObject data)
+    {
+        var mediaType = data.Web.LastContentType?.Trim() ?? string.Empty;
+        if (mediaType.Contains("json", StringComparison.OrdinalIgnoreCase)) return PublicationWebResponseFormat.Json;
+        if (mediaType.Contains("xml", StringComparison.OrdinalIgnoreCase)) return PublicationWebResponseFormat.Xml;
+        if (mediaType.Contains("csv", StringComparison.OrdinalIgnoreCase) || mediaType.Contains("tab-separated", StringComparison.OrdinalIgnoreCase))
+            return PublicationWebResponseFormat.DelimitedText;
+
+        var trimmed = data.RawSource.TrimStart();
+        if (trimmed.StartsWith("{") || trimmed.StartsWith("[")) return PublicationWebResponseFormat.Json;
+        if (trimmed.StartsWith("<")) return PublicationWebResponseFormat.Xml;
+
+        // A few webhook gateways encode the complete JSON payload as a JSON string.
+        // Recognize that shape while Auto is selected so ParseJson can unwrap it.
+        if (trimmed.StartsWith('"'))
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(trimmed, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+                var encoded = document.RootElement.ValueKind == JsonValueKind.String ? document.RootElement.GetString()?.TrimStart() : null;
+                if (!string.IsNullOrWhiteSpace(encoded) && (encoded.StartsWith('{') || encoded.StartsWith('[')))
+                    return PublicationWebResponseFormat.Json;
+            }
+            catch (JsonException) { }
+        }
+        return PublicationWebResponseFormat.DelimitedText;
+    }
+
     private static string SelectJsonPath(string source, string path)
     {
         if (string.IsNullOrWhiteSpace(path)) return source;
         using var document = JsonDocument.Parse(source, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+        JsonDocument? encodedDocument = null;
         var current = document.RootElement;
-        foreach (var segment in path.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        if (current.ValueKind == JsonValueKind.String)
         {
-            if (current.ValueKind == JsonValueKind.Object && current.TryGetProperty(segment, out var property)) current = property;
-            else if (current.ValueKind == JsonValueKind.Array && int.TryParse(segment, out var index) && index >= 0 && index < current.GetArrayLength()) current = current[index];
-            else throw new InvalidDataException($"JSON path segment '{segment}' was not found.");
+            var encoded = current.GetString()?.Trim();
+            if (!string.IsNullOrWhiteSpace(encoded) && (encoded.StartsWith('{') || encoded.StartsWith('[')))
+            {
+                encodedDocument = JsonDocument.Parse(encoded, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+                current = encodedDocument.RootElement;
+            }
         }
-        return current.GetRawText();
+        try
+        {
+            foreach (var segment in path.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (current.ValueKind == JsonValueKind.Object && current.TryGetProperty(segment, out var property)) current = property;
+                else if (current.ValueKind == JsonValueKind.Array && int.TryParse(segment, out var index) && index >= 0 && index < current.GetArrayLength()) current = current[index];
+                else throw new InvalidDataException($"JSON path segment '{segment}' was not found.");
+            }
+            return current.GetRawText();
+        }
+        finally
+        {
+            encodedDocument?.Dispose();
+        }
     }
 
     private static void ParseJson(PublicationDataObject data)
     {
         using var document = JsonDocument.Parse(data.RawSource, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+        JsonDocument? encodedDocument = null;
         var root = document.RootElement;
-        var sourceRows = root.ValueKind switch
+
+        // Some webhook relays return JSON as an encoded JSON string. Unwrap one level
+        // so an array of objects is not treated as one opaque value column.
+        if (root.ValueKind == JsonValueKind.String)
         {
-            JsonValueKind.Array => root.EnumerateArray().ToArray(),
-            JsonValueKind.Object when root.TryGetProperty("data", out var nested) && nested.ValueKind == JsonValueKind.Array => nested.EnumerateArray().ToArray(),
-            JsonValueKind.Object => [root],
-            _ => throw new InvalidDataException("JSON must contain an object, an array of objects, or a data array.")
-        };
-        if (sourceRows.Length == 0)
-        {
-            data.Columns = [];
-            data.Rows = [];
-            return;
+            var encoded = root.GetString()?.Trim();
+            if (!string.IsNullOrWhiteSpace(encoded) && (encoded.StartsWith('{') || encoded.StartsWith('[')))
+            {
+                encodedDocument = JsonDocument.Parse(encoded, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+                root = encodedDocument.RootElement;
+            }
         }
-        if (sourceRows.Any(row => row.ValueKind != JsonValueKind.Object))
-            throw new InvalidDataException("Every JSON row must be an object with named properties.");
 
-        var names = new List<string>();
-        foreach (var row in sourceRows)
-            foreach (var property in row.EnumerateObject())
-                if (!names.Contains(property.Name, StringComparer.OrdinalIgnoreCase)) names.Add(property.Name);
+        try
+        {
+            var sourceRows = SelectJsonRows(root);
+            if (sourceRows.Length == 0)
+            {
+                data.Columns = [];
+                data.Rows = [];
+                return;
+            }
+            if (sourceRows.Any(row => row.ValueKind != JsonValueKind.Object))
+                throw new InvalidDataException("Every JSON row must be an object with named properties.");
 
-        data.Rows = sourceRows.Select(row => new PublicationDataRow
+            var names = new List<string>();
+            var rows = new List<PublicationDataRow>(sourceRows.Length);
+            foreach (var sourceRow in sourceRows)
+            {
+                var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                FlattenJsonObject(sourceRow, string.Empty, values, names);
+                rows.Add(new PublicationDataRow { Values = values });
+            }
+
+            data.Rows = rows;
+            data.Columns = names.Select(name => new PublicationDataColumn
+            {
+                Name = name,
+                ValueKind = InferKind(data.Rows.Select(row => row.Get(name)))
+            }).ToList();
+        }
+        finally
         {
-            Values = row.EnumerateObject().ToDictionary(property => property.Name, property => JsonText(property.Value), StringComparer.OrdinalIgnoreCase)
-        }).ToList();
-        data.Columns = names.Select(name => new PublicationDataColumn
+            encodedDocument?.Dispose();
+        }
+    }
+
+    private static JsonElement[] SelectJsonRows(JsonElement root)
+    {
+        if (root.ValueKind == JsonValueKind.Array) return root.EnumerateArray().ToArray();
+        if (root.ValueKind != JsonValueKind.Object)
+            throw new InvalidDataException("JSON must contain an object, an array of objects, or a wrapped object array.");
+        return TryFindJsonRowArray(root, 0, out var rows) ? rows : [root];
+    }
+
+    private static bool TryFindJsonRowArray(JsonElement root, int depth, out JsonElement[] rows)
+    {
+        rows = [];
+        if (depth > 4 || root.ValueKind != JsonValueKind.Object) return false;
+
+        var properties = root.EnumerateObject().ToArray();
+        var commonWrapperNames = new HashSet<string>(new[] { "data", "items", "results", "records", "rows" }, StringComparer.OrdinalIgnoreCase);
+        foreach (var property in properties.Where(property => commonWrapperNames.Contains(property.Name)))
         {
-            Name = name,
-            ValueKind = InferKind(data.Rows.Select(row => row.Get(name)))
-        }).ToList();
+            if (property.Value.ValueKind == JsonValueKind.Array)
+            {
+                rows = property.Value.EnumerateArray().ToArray();
+                return true;
+            }
+            if (property.Value.ValueKind == JsonValueKind.Object && TryFindJsonRowArray(property.Value, depth + 1, out rows))
+                return true;
+        }
+
+        var arrays = properties.Where(property => property.Value.ValueKind == JsonValueKind.Array).Select(property => property.Value).ToArray();
+        if (arrays.Length == 1)
+        {
+            rows = arrays[0].EnumerateArray().ToArray();
+            return true;
+        }
+
+        var objects = properties.Where(property => property.Value.ValueKind == JsonValueKind.Object).Select(property => property.Value).ToArray();
+        return objects.Length == 1 && TryFindJsonRowArray(objects[0], depth + 1, out rows);
+    }
+
+    private static void FlattenJsonObject(JsonElement source, string prefix, Dictionary<string, string> values, List<string> names)
+    {
+        foreach (var property in source.EnumerateObject())
+        {
+            var name = string.IsNullOrWhiteSpace(prefix) ? property.Name : $"{prefix}.{property.Name}";
+            if (property.Value.ValueKind == JsonValueKind.Object)
+            {
+                FlattenJsonObject(property.Value, name, values, names);
+                continue;
+            }
+
+            values[name] = JsonText(property.Value);
+            if (!names.Contains(name, StringComparer.OrdinalIgnoreCase)) names.Add(name);
+        }
     }
 
     private static string JsonText(JsonElement value) => value.ValueKind switch

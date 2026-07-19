@@ -1,6 +1,6 @@
 {
   "name": "publisherstudio-web-assets",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "private": true,
   "scripts": {
     "prepare:spreadsheet": "node tools/prepare-spreadsheet-assets.mjs",

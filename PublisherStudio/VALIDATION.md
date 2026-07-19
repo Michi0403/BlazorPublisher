@@ -270,3 +270,23 @@ Recommended local media smoke tests:
 - Confirmed Spreadsheet Studio presents the custom far-left tab as **Home**, renames later built-in Home labels to **All controls**, and registers begin-synchronization only once.
 - Confirmed duplicate delimited-data headers are normalized once without the accidental second HashSet insertion loop.
 - `node --check` passes for both JavaScript files; package JSON and project XML parse; C# files and Razor `@code` blocks pass tree-sitter syntax parsing. A complete licensed `dotnet restore`/`dotnet build` and interactive DevExpress browser test remain required on the user's release machine because this environment lacks the .NET SDK and licensed DevExpress feed.
+
+## v1.0.36 automatic parsing and spreadsheet-data validation
+
+1. Create a Web data object using `https://jsonplaceholder.typicode.com/todos`, response `Auto`, and no JSON path. Fetch it and verify the preview contains `userId`, `id`, `title`, and `completed` without first pressing Parse / refresh preview.
+2. Save and reopen the data object. Verify all four fields and all 200 rows remain parsed.
+3. Change the response format or JSON path while a snapshot exists and verify the preview reparses automatically.
+4. Test an encoded JSON string, an object containing `items: [...]`, and an object with one arbitrary array property. Verify each becomes rows rather than a single blob column.
+5. Open the data-visual editor and verify text, Boolean, date, and number fields all appear in the Data fields picker. Select `completed` and verify true/false plot as 1/0; select `title` and verify non-empty rows plot as 1.
+6. Open Spreadsheet Studio, select a range containing headers and data, and choose Create data object from the command bar, Start ribbon, and outer footer. Verify all three entry points open the review dialog.
+7. Disable the header checkbox and verify `Column 1`, `Column 2`, and so on appear as placeholders while the editable names remain required. Verify blank or duplicate names prevent creation.
+8. Create the object, close Spreadsheet Studio, and insert a chart or data table. Verify the new object is listed and its workbook/sheet/range source reference appears in the data manager.
+9. Verify the spreadsheet ribbon shows Start and does not contain two tabs named Home. When the native label can be reached, verify it reads All.
+
+Static checks completed for the v1.0.36 source package:
+
+- `node --check` passes for `spreadsheetEditorInterop.js`, `liveDataInterop.js`, and the JavaScript extracted from the Spreadsheet Razor view.
+- A mocked DevExpress selection test confirms a selected `A1:D5` range is trimmed to `A1:D3`, preserves all four fields, and serializes Boolean values as text for the publication data snapshot.
+- Browser-runtime parser tests confirm normal arrays, encoded JSON strings, nested/common wrappers, dotted-field flattening, and case-insensitive JSON paths produce row objects. Number, Boolean, Text, and DateTime field conversions match the server-side data-visual rules.
+- Modified C# files and Razor `@code` blocks pass tree-sitter C# syntax parsing; package JSON and project XML parse successfully.
+- A complete `dotnet restore`/`dotnet build` and interactive licensed DevExpress browser run remain required on the release machine because this environment does not contain the .NET SDK or the licensed DevExpress NuGet feed.

@@ -31,6 +31,7 @@ public sealed class PublicationDataObject
     public string Name { get; set; } = "Data";
     public PublicationDataSourceKind SourceKind { get; set; } = PublicationDataSourceKind.DelimitedText;
     public string RawSource { get; set; } = "Category,Value\nA,42\nB,67\nC,53";
+    public string SourceReference { get; set; } = string.Empty;
     public string Delimiter { get; set; } = ",";
     public bool FirstRowContainsHeaders { get; set; } = true;
     public DocumentObjectDataScope DocumentScope { get; set; } = DocumentObjectDataScope.AllPages;
@@ -55,11 +56,14 @@ public sealed class PublicationDataRow
     public double GetNumber(string field)
     {
         var value = Get(field);
-        return double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var invariant)
-            ? invariant
-            : double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out var current)
-                ? current
-                : 0;
+        if (double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var invariant)) return invariant;
+        if (double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out var current)) return current;
+        if (bool.TryParse(value, out var boolean)) return boolean ? 1 : 0;
+
+        // Text and date fields are valid measures too: a non-empty value counts as one.
+        // This keeps every parsed field available to charts without pretending that text
+        // has an arbitrary numeric magnitude.
+        return string.IsNullOrWhiteSpace(value) ? 0 : 1;
     }
 }
 

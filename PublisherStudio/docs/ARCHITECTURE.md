@@ -90,7 +90,7 @@ The web project now references `DevExpress.AspNetCore.Spreadsheet` and copies it
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.35`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.36`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
 
 ## Reference and license boundary
 
@@ -110,3 +110,7 @@ Imported preview HTML is stripped of active elements, event-handler attributes, 
 `PublicationLiveDataRegistry` publishes immutable DTO snapshots of open documents. The loopback API exposes system status, publication summaries, pages, data metadata, and rows. Standalone HTML that is explicitly allowed to reconnect receives a per-binding tokenized rows URL with CORS enabled; the unrestricted diagnostic API remains same-origin. This same DTO/transport boundary is intended to become the source for future LAN presentation, VLC-compatible output, and provider adapters. The `Stream` transport enum is reserved but intentionally rejected in v1.0.35 so a later streaming implementation can define lifecycle, buffering, codecs, and authentication deliberately.
 
 Website export embeds DevExtreme CSS/JavaScript, the visualization runtime, and the last successful data rows in one HTML file. It therefore renders offline. Optional live refresh first tries the tokenized monolith snapshot route when a `publisherApi` base is supplied, then falls back to direct external fetch where browser CORS policy permits it. Video export refreshes server-side bindings before capture and refreshes each visual when its page becomes active.
+
+## Spreadsheet selection data boundary (v1.0.36)
+
+The spreadsheet iframe reads the current bounded DevExpress client selection through the public selection and cell-value APIs, trims blank trailing rows/columns, and sends a string snapshot to the parent Blazor component through same-origin `postMessage`. PublisherStudio then requires an object name and unique column names, optionally consumes the first selected row as headers, serializes the result as embedded JSON, and stores the workbook/sheet/range as source-reference metadata. The data object is deliberately a publication snapshot rather than a live mutable pointer into the workbook, so charts remain deterministic after the spreadsheet editor closes or the source workbook is replaced.

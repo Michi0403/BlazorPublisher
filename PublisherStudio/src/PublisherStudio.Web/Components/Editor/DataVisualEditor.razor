@@ -79,8 +79,8 @@
                         @if (_draft.VisualKind != DataVisualKind.DataTable)
                         {
                             <fieldset class="value-field-picker">
-                                <legend>@(AllowsMultipleValueFields ? "Value fields" : "Value field")</legend>
-                                @foreach (var column in ValueColumns)
+                                <legend>@(AllowsMultipleValueFields ? "Data fields" : "Data field")</legend>
+                                @foreach (var column in MeasureColumns)
                                 {
                                     <label class="check-row">
                                         <input type="checkbox"
@@ -89,9 +89,13 @@
                                         @column.Name <small>@column.ValueKind</small>
                                     </label>
                                 }
-                                @if (ValueColumns.Count == 0)
+                                @if (MeasureColumns.Count == 0)
                                 {
-                                    <small>No numeric field was detected in this data object.</small>
+                                    <small>No field was detected in this data object.</small>
+                                }
+                                else
+                                {
+                                    <small class="field-measure-help">Numbers are plotted directly, Boolean values use 1/0, and non-empty text or date values count as 1.</small>
                                 }
                             </fieldset>
                         }
@@ -144,21 +148,21 @@
                         @if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.RangeArea or CartesianChartStyle.RangeBar))
                         {
                             <div class="data-form-grid">
-                                @FieldSelect("Low value", _draft.LowValueField, ChangeLowValueField, ValueColumns)
-                                @FieldSelect("High value", _draft.HighValueField, ChangeHighValueField, ValueColumns)
+                                @FieldSelect("Low value", _draft.LowValueField, ChangeLowValueField, NumericColumns)
+                                @FieldSelect("High value", _draft.HighValueField, ChangeHighValueField, NumericColumns)
                             </div>
                         }
                         @if (_draft.VisualKind == DataVisualKind.CartesianChart && _draft.CartesianStyle == CartesianChartStyle.Bubble)
                         {
-                            @FieldSelect("Bubble size", _draft.SizeField, ChangeSizeField, ValueColumns)
+                            @FieldSelect("Bubble size", _draft.SizeField, ChangeSizeField, NumericColumns)
                         }
                         @if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.Candlestick or CartesianChartStyle.Stock))
                         {
                             <div class="data-form-grid financial-field-grid">
-                                @FieldSelect("Open", _draft.OpenValueField, ChangeOpenValueField, ValueColumns)
-                                @FieldSelect("High", _draft.HighValueField, ChangeHighValueField, ValueColumns)
-                                @FieldSelect("Low", _draft.LowValueField, ChangeLowValueField, ValueColumns)
-                                @FieldSelect("Close", _draft.CloseValueField, ChangeCloseValueField, ValueColumns)
+                                @FieldSelect("Open", _draft.OpenValueField, ChangeOpenValueField, NumericColumns)
+                                @FieldSelect("High", _draft.HighValueField, ChangeHighValueField, NumericColumns)
+                                @FieldSelect("Low", _draft.LowValueField, ChangeLowValueField, NumericColumns)
+                                @FieldSelect("Close", _draft.CloseValueField, ChangeCloseValueField, NumericColumns)
                             </div>
                         }
                         @if (_draft.VisualKind == DataVisualKind.Sankey)
@@ -274,7 +278,10 @@
     private DataVisualElement? _draft;
     private PublicationDataObject? CurrentData => _draft is null ? null : State.Document.DataObjects.FirstOrDefault(data => data.Id == _draft.DataObjectId);
     private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(CurrentData);
-    private IReadOnlyList<PublicationDataColumn> ValueColumns => Columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).ToArray();
+    private IReadOnlyList<PublicationDataColumn> MeasureColumns => Columns;
+    private IReadOnlyList<PublicationDataColumn> NumericColumns => Columns
+        .Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean)
+        .ToArray();
     private bool AllowsMultipleValueFields => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge;
     private bool CanSave => _draft is not null && CurrentData is not null && ValidateFields(_draft);
     private string ValidationText => CurrentData is null
@@ -356,7 +363,11 @@
         var columns = DataService.ResolveColumns(CurrentData);
         _draft.ArgumentField = columns.FirstOrDefault()?.Name ?? string.Empty;
         _draft.SeriesField = string.Empty;
-        _draft.ValueFields = columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).Take(2).Select(column => column.Name).ToList();
+        _draft.ValueFields = columns
+            .Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean)
+            .Take(2)
+            .Select(column => column.Name)
+            .ToList();
         if (_draft.ValueFields.Count == 0 && columns.Count > 1) _draft.ValueFields.Add(columns[1].Name);
         EnsureSpecialFields();
     }
@@ -484,7 +495,7 @@
     private void EnsureSpecialFields()
     {
         if (_draft is null) return;
-        var numeric = ValueColumns.Select(column => column.Name).ToArray();
+        var numeric = NumericColumns.Select(column => column.Name).ToArray();
         var all = Columns.Select(column => column.Name).ToArray();
         string Pick(int index, string current) => !string.IsNullOrWhiteSpace(current) ? current : numeric.ElementAtOrDefault(index) ?? numeric.FirstOrDefault() ?? string.Empty;
         _draft.OpenValueField = Pick(0, _draft.OpenValueField);

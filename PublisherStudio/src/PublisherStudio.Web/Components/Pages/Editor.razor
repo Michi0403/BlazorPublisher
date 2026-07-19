@@ -156,6 +156,7 @@
                    SessionId="@_spreadsheetEditorSessionId"
                    FileName="@_spreadsheetEditorFileName"
                    Saved="SaveSpreadsheet"
+                   DataObjectCreated="CreateSpreadsheetDataObject"
                    Cancelled="CloseSpreadsheetEditor" />
 
 <PictureEditor Visible="@_pictureEditorVisible"
@@ -868,6 +869,34 @@
         _spreadsheetEditorFileName = session.FileName;
         if (!pendingNew) _pendingNewSpreadsheetId = null;
         _spreadsheetEditorVisible = true;
+    }
+
+    private Task CreateSpreadsheetDataObject(SpreadsheetDataObjectResult result)
+    {
+        try
+        {
+            var rows = result.Rows.Select(row =>
+            {
+                var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                for (var index = 0; index < result.ColumnNames.Count; index++)
+                    values[result.ColumnNames[index]] = index < row.Count ? row[index] : string.Empty;
+                return values;
+            }).ToList();
+            var data = new PublicationDataObject
+            {
+                Name = result.Name,
+                SourceKind = PublicationDataSourceKind.Json,
+                SourceReference = $"{result.WorkbookFileName} · {result.SheetName}!{result.RangeAddress}",
+                RawSource = System.Text.Json.JsonSerializer.Serialize(rows)
+            };
+            State.UpsertDataObject(data);
+            ShowNotice($"Created data object '{data.Name}' from {result.SheetName}!{result.RangeAddress}. It is ready for charts.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+        return Task.CompletedTask;
     }
 
     private Task SaveSpreadsheet(SpreadsheetEditorResult result)

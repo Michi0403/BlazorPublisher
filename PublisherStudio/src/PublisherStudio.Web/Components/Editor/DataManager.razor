@@ -62,6 +62,15 @@
                         </label>
                     </div>
 
+                    @if (!string.IsNullOrWhiteSpace(_draft.SourceReference))
+                    {
+                        <section class="data-source-help spreadsheet-data-reference">
+                            <strong>Spreadsheet selection snapshot</strong>
+                            <p>@_draft.SourceReference</p>
+                            <small>The selected cells were copied into this publication data object. Create the selection again from Spreadsheet Studio to replace it with newer workbook values.</small>
+                        </section>
+                    }
+
                     @if (_draft.SourceKind == PublicationDataSourceKind.DocumentObjects)
                     {
                         <section class="data-source-help">
@@ -179,7 +188,7 @@
                                 <p class="data-export-warning">Standalone HTML uses its embedded snapshot first, then JavaScript fetch. External servers must permit browser requests. Relative monolith routes can be reconnected with the exported page's <code>publisherApi</code> query parameter. Any external URL, request body, or headers needed for direct browser fetch are embedded in that exported HTML, so do not enable this for secrets in a file you will share.</p>
                             }
                             <label class="data-source-input">Embedded response snapshot
-                                <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" spellcheck="false"></textarea>
+                                <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" @onblur="ParsePreview" spellcheck="false"></textarea>
                             </label>
                         </section>
                     }
@@ -203,7 +212,7 @@
                             <span>Imported text remains embedded in the publication.</span>
                         </div>
                         <label class="data-source-input">@SourceInputLabel
-                            <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" spellcheck="false"></textarea>
+                            <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" @onblur="ParsePreview" spellcheck="false"></textarea>
                         </label>
                     }
 
@@ -288,8 +297,10 @@
         _draft = value;
         _draft.Web ??= new PublicationWebBinding();
         _draft.Web.Headers ??= [];
+        _draft.SourceReference ??= string.Empty;
         Webhooks.Register(_draft.Web.Id, _draft.Web.WebhookToken);
         _headerLines = string.Join(Environment.NewLine, _draft.Web.Headers.Select(header => $"{header.Name}: {header.Value}"));
+        ParseSnapshotIfAvailable();
     }
 
     private void Select(PublicationDataObject data) { SetDraft(DataService.Clone(data)); _error = null; }
@@ -313,6 +324,12 @@
     {
         try { DataService.ParseInto(_draft); _error = null; }
         catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private void ParseSnapshotIfAvailable()
+    {
+        if (_draft.SourceKind == PublicationDataSourceKind.DocumentObjects || string.IsNullOrWhiteSpace(_draft.RawSource)) return;
+        ParsePreview();
     }
 
     private async Task RefreshWeb()
@@ -390,27 +407,27 @@
             .ToList();
     }
 
-    private static string SourceName(PublicationDataObject data) => data.SourceKind == PublicationDataSourceKind.Web ? $"{data.Web.Transport}" : data.SourceKind.ToString();
+    private static string SourceName(PublicationDataObject data) => !string.IsNullOrWhiteSpace(data.SourceReference) ? "Spreadsheet selection" : data.SourceKind == PublicationDataSourceKind.Web ? $"{data.Web.Transport}" : data.SourceKind.ToString();
     private int ResolvedRowCount(PublicationDataObject data) => DataService.ResolveRows(State.Document, data, State.SelectedPageId).Count;
     private Task Close() => Closed.InvokeAsync();
     private void ChangeName(ChangeEventArgs args) => _draft.Name = args.Value?.ToString() ?? string.Empty;
     private void ChangeRawSource(ChangeEventArgs args) => _draft.RawSource = args.Value?.ToString() ?? string.Empty;
-    private void ToggleHeaders(ChangeEventArgs args) => _draft.FirstRowContainsHeaders = Checked(args);
-    private void ChangeDelimiter(ChangeEventArgs args) => _draft.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ",";
+    private void ToggleHeaders(ChangeEventArgs args) { _draft.FirstRowContainsHeaders = Checked(args); ParseSnapshotIfAvailable(); }
+    private void ChangeDelimiter(ChangeEventArgs args) { _draft.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ","; ParseSnapshotIfAvailable(); }
     private void ChangeHeaderLines(ChangeEventArgs args) => _headerLines = args.Value?.ToString() ?? string.Empty;
     private void ChangeRequestBody(ChangeEventArgs args) => _draft.Web.RequestBody = args.Value?.ToString() ?? string.Empty;
     private void ChangeWebUrl(ChangeEventArgs args) => _draft.Web.Url = args.Value?.ToString() ?? string.Empty;
-    private void ChangeJsonPath(ChangeEventArgs args) => _draft.Web.JsonPath = args.Value?.ToString() ?? string.Empty;
+    private void ChangeJsonPath(ChangeEventArgs args) { _draft.Web.JsonPath = args.Value?.ToString() ?? string.Empty; ParseSnapshotIfAvailable(); }
     private void ChangeRefreshSeconds(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.RefreshIntervalSeconds = Math.Max(0, value); }
     private void ChangeTimeoutSeconds(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.TimeoutSeconds = Math.Max(0, value); }
     private void ToggleWebEnabled(ChangeEventArgs args) => _draft.Web.Enabled = Checked(args);
     private void ToggleRefreshOnOpen(ChangeEventArgs args) => _draft.Web.RefreshOnOpen = Checked(args);
     private void ToggleSnapshotFallback(ChangeEventArgs args) => _draft.Web.UseSnapshotOnFailure = Checked(args);
     private void ToggleHtmlFetch(ChangeEventArgs args) => _draft.Web.AllowExportedHtmlFetch = Checked(args);
-    private void ToggleWebHeaders(ChangeEventArgs args) => _draft.Web.FirstRowContainsHeaders = Checked(args);
-    private void ChangeWebDelimiter(ChangeEventArgs args) => _draft.Web.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ",";
+    private void ToggleWebHeaders(ChangeEventArgs args) { _draft.Web.FirstRowContainsHeaders = Checked(args); ParseSnapshotIfAvailable(); }
+    private void ChangeWebDelimiter(ChangeEventArgs args) { _draft.Web.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ","; ParseSnapshotIfAvailable(); }
     private void ChangeWebMethod(ChangeEventArgs args) { if (Enum.TryParse<PublicationWebHttpMethod>(args.Value?.ToString(), out var value)) _draft.Web.Method = value; }
-    private void ChangeResponseFormat(ChangeEventArgs args) { if (Enum.TryParse<PublicationWebResponseFormat>(args.Value?.ToString(), out var value)) _draft.Web.ResponseFormat = value; }
+    private void ChangeResponseFormat(ChangeEventArgs args) { if (Enum.TryParse<PublicationWebResponseFormat>(args.Value?.ToString(), out var value)) { _draft.Web.ResponseFormat = value; ParseSnapshotIfAvailable(); } }
     private void ChangeWebTransport(ChangeEventArgs args)
     {
         if (!Enum.TryParse<PublicationWebTransportKind>(args.Value?.ToString(), out var value)) return;

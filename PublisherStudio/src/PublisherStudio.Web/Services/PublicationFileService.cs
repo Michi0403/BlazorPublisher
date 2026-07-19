@@ -297,7 +297,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.35";
+        document.FormatVersion = "1.36";
         return document;
     }
 

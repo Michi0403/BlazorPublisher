@@ -454,7 +454,7 @@ public sealed class EditorStateService : IDisposable
         var data = EnsureDataObject();
         var columns = _data.ResolveColumns(data);
         var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
-        var numericColumns = columns.Where(column => column.ValueKind == PublicationDataValueKind.Number).Select(column => column.Name).ToArray();
+        var numericColumns = columns.Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean).Select(column => column.Name).ToArray();
         var numeric = numericColumns.FirstOrDefault()
             ?? columns.Skip(1).FirstOrDefault()?.Name
             ?? argument;

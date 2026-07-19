@@ -30,11 +30,76 @@
                 }
                 <div>
                     <DxButton Text="Cancel" Enabled="@(!_saving && !_opening)" Click="Cancel" />
+                    <DxButton Text="Create data object from selection" Enabled="@(_ready && !_saving && !_opening)" Click="RequestDataObject" />
                     <DxButton Text="Download workbook" Enabled="@(_ready && !_saving && !_opening)" Click="Download" />
                     <DxButton Text="@(_saving ? "Saving…" : "Apply to frame")" Enabled="@(_ready && !_saving && !_opening)" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
                 </div>
             </footer>
         </section>
+
+        @if (_dataSelection is not null)
+        {
+            <div class="spreadsheet-data-object-backdrop" role="presentation">
+                <section class="spreadsheet-data-object-dialog" role="dialog" aria-modal="true" aria-label="Create publication data object from spreadsheet selection">
+                    <header>
+                        <div>
+                            <strong>Create publication data object</strong>
+                            <span>@($"{_dataSelection.SheetName}!{_dataSelection.RangeAddress} · {_dataSelection.Rows.Count} rows × {SelectionColumnCount} columns")</span>
+                        </div>
+                        <button type="button" class="window-close" @onclick="CancelDataObject">×</button>
+                    </header>
+                    <main>
+                        <label>Data object name
+                            <input value="@_dataObjectName" @oninput="ChangeDataObjectName" />
+                        </label>
+                        <label class="check-row spreadsheet-header-toggle">
+                            <input type="checkbox" checked="@_selectionFirstRowHeaders" @onchange="ToggleSelectionHeaders" />
+                            First selected row contains column headers
+                        </label>
+                        <p class="spreadsheet-data-object-help">Review the column names before creating the object. When the selection has no header row, define the names here; blank or duplicate names are not accepted.</p>
+
+                        <section class="spreadsheet-column-name-editor">
+                            <strong>Column names</strong>
+                            <div>
+                                @for (var index = 0; index < _selectionColumnNames.Count; index++)
+                                {
+                                    var columnIndex = index;
+                                    <label><span>@(index + 1)</span><input value="@_selectionColumnNames[index]" placeholder="@($"Column {index + 1}")" @oninput="(ChangeEventArgs args) => ChangeSelectionColumnName(columnIndex, args)" /></label>
+                                }
+                            </div>
+                        </section>
+
+                        <section class="spreadsheet-selection-preview">
+                            <div><strong>Preview</strong><span>@SelectionDataRowCount data rows</span></div>
+                            <div class="spreadsheet-selection-preview-scroll">
+                                <table>
+                                    <thead><tr>@for (var index = 0; index < _selectionColumnNames.Count; index++) { <th>@DisplaySelectionColumnName(index)</th> }</tr></thead>
+                                    <tbody>
+                                        @foreach (var row in SelectionPreviewRows)
+                                        {
+                                            <tr>
+                                                @for (var column = 0; column < _selectionColumnNames.Count; column++)
+                                                {
+                                                    <td>@(column < row.Count ? row[column] : string.Empty)</td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                        @if (!string.IsNullOrWhiteSpace(_selectionError))
+                        {
+                            <div class="inline-error">@_selectionError</div>
+                        }
+                    </main>
+                    <footer>
+                        <span>The selected cells are embedded as a snapshot and immediately become available to charts and data tables.</span>
+                        <div><DxButton Text="Cancel" Click="CancelDataObject" /><DxButton Text="Create data object" Click="CreateDataObject" RenderStyle="ButtonRenderStyle.Primary" /></div>
+                    </footer>
+                </section>
+            </div>
+        }
     </div>
 }
 
@@ -43,6 +108,7 @@
     [Parameter] public Guid SessionId { get; set; }
     [Parameter] public string FileName { get; set; } = "Spreadsheet.xlsx";
     [Parameter] public EventCallback<SpreadsheetEditorResult> Saved { get; set; }
+    [Parameter] public EventCallback<SpreadsheetDataObjectResult> DataObjectCreated { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private IJSObjectReference? _module;
@@ -53,8 +119,18 @@
     private bool _saving;
     private bool _opening;
     private string? _error;
+    private SpreadsheetDataSelection? _dataSelection;
+    private string _dataObjectName = "Spreadsheet Data";
+    private bool _selectionFirstRowHeaders = true;
+    private List<string> _selectionColumnNames = [];
+    private string? _selectionError;
     private string FrameId => $"spreadsheet-frame-{SessionId:N}";
     private string EditorUrl => $"/spreadsheet/editor/{SessionId:D}";
+    private int SelectionColumnCount => _dataSelection?.Rows.Count > 0 ? _dataSelection.Rows.Max(row => row.Count) : 0;
+    private int SelectionDataRowCount => Math.Max(0, (_dataSelection?.Rows.Count ?? 0) - (_selectionFirstRowHeaders ? 1 : 0));
+    private IEnumerable<List<string>> SelectionPreviewRows => (_dataSelection?.Rows ?? new List<List<string>>())
+        .Skip(_selectionFirstRowHeaders ? 1 : 0)
+        .Take(8);
 
     protected override void OnParametersSet()
     {
@@ -64,6 +140,7 @@
             _saving = false;
             _opening = false;
             _error = null;
+            ResetDataSelection();
         }
         else if (_initializedSession != SessionId)
         {
@@ -72,6 +149,7 @@
             _saving = false;
             _opening = false;
             _error = null;
+            ResetDataSelection();
         }
     }
 
@@ -110,6 +188,14 @@
     private Task Apply() => RequestSave("apply");
 
     private Task Download() => RequestSave("download");
+
+    private async Task RequestDataObject()
+    {
+        if (_module is null || !_ready || _saving || _opening) return;
+        _selectionError = null;
+        try { await _module.InvokeVoidAsync("requestDataSelection", FrameId, SessionId.ToString("D")); }
+        catch (JSException ex) { _error = $"The spreadsheet selection could not be read: {ex.Message}"; }
+    }
 
     private async Task RequestSave(string intent)
     {
@@ -173,6 +259,107 @@
             await Saved.InvokeAsync(new SpreadsheetEditorResult(session.Content, session.FileName, session.SourceFormat, session.PreviewHtml, session.ActiveSheetName));
         else
             StateHasChanged();
+    }
+
+    [JSInvokable]
+    public Task SpreadsheetDataSelectionReceived(SpreadsheetDataSelection selection)
+    {
+        if (selection.Rows.Count == 0 || selection.Rows.All(row => row.All(string.IsNullOrWhiteSpace)))
+        {
+            _error = "The selected spreadsheet range is empty.";
+            StateHasChanged();
+            return Task.CompletedTask;
+        }
+
+        _dataSelection = selection;
+        _selectionFirstRowHeaders = LooksLikeHeaders(selection.Rows);
+        var workbook = Path.GetFileNameWithoutExtension(FileName);
+        _dataObjectName = $"{workbook} - {selection.SheetName} {selection.RangeAddress}";
+        _selectionError = null;
+        RebuildSelectionColumnNames();
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void ToggleSelectionHeaders(ChangeEventArgs args)
+    {
+        _selectionFirstRowHeaders = args.Value is bool value && value;
+        _selectionError = null;
+        RebuildSelectionColumnNames();
+    }
+
+    private void ChangeDataObjectName(ChangeEventArgs args) => _dataObjectName = args.Value?.ToString() ?? string.Empty;
+
+    private void ChangeSelectionColumnName(int index, ChangeEventArgs args)
+    {
+        if (index < 0 || index >= _selectionColumnNames.Count) return;
+        _selectionColumnNames[index] = args.Value?.ToString() ?? string.Empty;
+        _selectionError = null;
+    }
+
+    private async Task CreateDataObject()
+    {
+        if (_dataSelection is null) return;
+        var name = _dataObjectName.Trim();
+        if (string.IsNullOrWhiteSpace(name)) { _selectionError = "Enter a data object name."; return; }
+        var columns = _selectionColumnNames.Select(value => value.Trim()).ToList();
+        if (columns.Count == 0 || columns.Any(string.IsNullOrWhiteSpace)) { _selectionError = "Every selected column needs a name."; return; }
+        if (columns.Distinct(StringComparer.OrdinalIgnoreCase).Count() != columns.Count) { _selectionError = "Column names must be unique."; return; }
+
+        var sourceRows = _dataSelection.Rows.Skip(_selectionFirstRowHeaders ? 1 : 0).ToList();
+        if (sourceRows.Count == 0) { _selectionError = "The selection contains headers but no data rows."; return; }
+        var normalizedRows = sourceRows.Select(row => Enumerable.Range(0, columns.Count)
+            .Select(index => index < row.Count ? row[index] : string.Empty)
+            .ToList()).ToList();
+
+        await DataObjectCreated.InvokeAsync(new SpreadsheetDataObjectResult
+        {
+            Name = name,
+            WorkbookFileName = FileName,
+            SheetName = _dataSelection.SheetName,
+            RangeAddress = _dataSelection.RangeAddress,
+            FirstRowContainsHeaders = _selectionFirstRowHeaders,
+            ColumnNames = columns,
+            Rows = normalizedRows
+        });
+        ResetDataSelection();
+    }
+
+    private void CancelDataObject() => ResetDataSelection();
+
+    private void ResetDataSelection()
+    {
+        _dataSelection = null;
+        _dataObjectName = "Spreadsheet Data";
+        _selectionFirstRowHeaders = true;
+        _selectionColumnNames = [];
+        _selectionError = null;
+    }
+
+    private void RebuildSelectionColumnNames()
+    {
+        var width = SelectionColumnCount;
+        IReadOnlyList<string> source = _selectionFirstRowHeaders && _dataSelection?.Rows.Count > 0 ? _dataSelection.Rows[0] : Array.Empty<string>();
+        _selectionColumnNames = Enumerable.Range(0, width)
+            .Select(index => index < source.Count ? source[index].Trim() : string.Empty)
+            .ToList();
+    }
+
+
+    private string DisplaySelectionColumnName(int index)
+        => index >= 0 && index < _selectionColumnNames.Count && !string.IsNullOrWhiteSpace(_selectionColumnNames[index])
+            ? _selectionColumnNames[index]
+            : $"Column {index + 1}";
+
+    private static bool LooksLikeHeaders(IReadOnlyList<List<string>> rows)
+    {
+        if (rows.Count < 2 || rows[0].Count == 0) return false;
+        var first = rows[0].Select(value => value?.Trim() ?? string.Empty).ToArray();
+        var nonEmpty = first.Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
+        if (nonEmpty.Length == 0 || nonEmpty.Distinct(StringComparer.OrdinalIgnoreCase).Count() != nonEmpty.Length) return false;
+        return nonEmpty.Any(value => !double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out _)
+            && !bool.TryParse(value, out _)
+            && !DateTimeOffset.TryParse(value, out _));
     }
 
     [JSInvokable]

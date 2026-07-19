@@ -253,3 +253,9 @@ Standalone HTML remains useful with no server: it renders the embedded snapshot 
 
 Spreadsheet Studio now labels PublisherStudio's far-left workflow tab **Home** and renames the built-in, command-dense DevExpress Home tab to **All controls**, removing the ambiguous duplicate Home labels.
 
+
+## v1.0.36 automatic parsing and spreadsheet selection data
+
+See `CHANGELOG-v1.0.36.md`. Web/API and webhook snapshots now parse automatically on fetch, save, editor blur, and parsing-option changes. JSON arrays, encoded JSON strings, common wrapper arrays, and nested objects are expanded into reusable columns. All parsed fields are visible in the data-field picker; Boolean values use 1/0 and non-empty text/date values can be counted.
+
+Spreadsheet Studio now includes **Create data object**. Select a bounded range, review whether the first row contains headers, correct or define the column names, and create an embedded publication data snapshot that is immediately available to charts and data tables.

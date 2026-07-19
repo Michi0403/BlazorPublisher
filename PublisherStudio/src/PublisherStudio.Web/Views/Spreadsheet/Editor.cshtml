@@ -117,6 +117,78 @@
                 this.scheduleSave(120);
             },
 
+            createDataObject() {
+                if (!this.control || this.openingWorkbook || this.inFlight) return;
+                try { this.control.applyCellEdit(); } catch (_) { }
+
+                let selection;
+                try { selection = this.control.getSelection(); }
+                catch (error) {
+                    this.post("publisher-spreadsheet-error", { message: error?.message || "The selected spreadsheet cells could not be read." });
+                    return;
+                }
+
+                const left = Number(selection?.leftColumnIndex);
+                const top = Number(selection?.topRowIndex);
+                const right = Number(selection?.rightColumnIndex);
+                const bottom = Number(selection?.bottomRowIndex);
+                if (![left, top, right, bottom].every(Number.isInteger) || left < 0 || top < 0 || right < left || bottom < top) {
+                    this.post("publisher-spreadsheet-error", { message: "Select a rectangular spreadsheet range first." });
+                    return;
+                }
+                if (right >= 16383 || bottom >= 1048575) {
+                    this.post("publisher-spreadsheet-error", { message: "Select a bounded cell range instead of an entire row, column, or worksheet." });
+                    return;
+                }
+
+                const cellText = value => {
+                    if (value === null || value === undefined) return "";
+                    if (value instanceof Date) return value.toISOString();
+                    if (typeof value === "string") return value;
+                    if (typeof value === "number" || typeof value === "boolean") return String(value);
+                    try { return String(value); } catch (_) { return ""; }
+                };
+                const rows = [];
+                let lastNonEmptyRow = -1;
+                let lastNonEmptyColumn = -1;
+                for (let rowIndex = top; rowIndex <= bottom; rowIndex++) {
+                    const row = [];
+                    for (let columnIndex = left; columnIndex <= right; columnIndex++) {
+                        let value = "";
+                        try { value = cellText(this.control.getCellValue(columnIndex, rowIndex)); } catch (_) { }
+                        row.push(value);
+                        if (value.trim().length > 0)
+                            lastNonEmptyColumn = Math.max(lastNonEmptyColumn, columnIndex - left);
+                    }
+                    rows.push(row);
+                    if (row.some(value => value.trim().length > 0)) lastNonEmptyRow = rows.length - 1;
+                }
+
+                if (lastNonEmptyRow < 0 || lastNonEmptyColumn < 0) {
+                    this.post("publisher-spreadsheet-error", { message: "The selected spreadsheet range is empty." });
+                    return;
+                }
+                const trimmedRows = rows.slice(0, lastNonEmptyRow + 1).map(row => row.slice(0, lastNonEmptyColumn + 1));
+                const columnName = index => {
+                    let value = index + 1;
+                    let result = "";
+                    while (value > 0) {
+                        const remainder = (value - 1) % 26;
+                        result = String.fromCharCode(65 + remainder) + result;
+                        value = Math.floor((value - 1) / 26);
+                    }
+                    return result;
+                };
+                const trimmedRight = left + lastNonEmptyColumn;
+                const trimmedBottom = top + lastNonEmptyRow;
+                const rangeAddress = `${columnName(left)}${top + 1}:${columnName(trimmedRight)}${trimmedBottom + 1}`;
+                this.post("publisher-spreadsheet-data-selection", {
+                    sheetName: this.control.getActiveSheetName?.() || "Sheet1",
+                    rangeAddress,
+                    rows: trimmedRows
+                });
+            },
+
             scheduleSave(delay) {
                 window.clearTimeout(this.saveTimer);
                 this.saveTimer = window.setTimeout(() => this.flushSave(), delay || 0);
@@ -195,16 +267,12 @@
             if (!root) return;
             const candidates = Array.from(root.querySelectorAll('[role="tab"], .dx-tab, .dxbs-tabs-item, .dxr-tab'))
                 .filter(element => element.textContent?.trim() === "Home");
-            if (candidates.length > 1) {
-                // The first Home is PublisherStudio's complete, always-visible tab.
-                // The later Home is the built-in DevExpress tab with the full native command set.
-                for (const element of candidates.slice(1)) {
-                    const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() === "Home");
-                    if (textNode) textNode.textContent = "All controls";
-                    else {
-                        const label = Array.from(element.querySelectorAll("span,div,a")).find(node => node.children.length === 0 && node.textContent?.trim() === "Home");
-                        if (label) label.textContent = "All controls";
-                    }
+            for (const element of candidates) {
+                const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() === "Home");
+                if (textNode) textNode.textContent = "All";
+                else {
+                    const label = Array.from(element.querySelectorAll("span,div,a")).find(node => node.children.length === 0 && node.textContent?.trim() === "Home");
+                    if (label) label.textContent = "All";
                 }
             }
         }
@@ -225,6 +293,7 @@
             switch (eventArgs.commandName) {
                 case "publisherOpenWorkbook": bridge.chooseWorkbook(); break;
                 case "publisherNewWorkbook": bridge.newWorkbook(); break;
+                case "publisherCreateDataObject": bridge.createDataObject(); break;
                 case "publisherApplyWorkbook": bridge.queueSave("apply"); break;
                 case "publisherDownloadWorkbook": bridge.queueSave("download"); break;
             }
@@ -247,6 +316,7 @@
 <body>
     <div class="publisher-spreadsheet-commandbar" role="toolbar" aria-label="Workbook commands">
         <button type="button" id="publisher-open-workbook"><img src="/icons/open-workbook.svg" alt="" />Open workbook</button><button type="button" id="publisher-new-workbook">＋ Blank workbook</button>
+        <button type="button" id="publisher-create-data-object">▤ Create data object</button>
         <span class="publisher-spreadsheet-commandbar-spacer"></span><button type="button" id="publisher-apply-workbook">Apply to frame</button><button type="button" id="publisher-download-workbook">Download</button>
     </div>
     <main id="publisher-spreadsheet-island">
@@ -259,13 +329,14 @@
             .Ribbon(ribbon => ribbon.Tabs(tabs =>
             {
                 // The standard Spreadsheet ribbon hides lower-priority commands as the
-                // editor narrows. The far-left Home tab keeps the publication workflow
+                // editor narrows. The far-left Start tab keeps the publication workflow
                 // directly reachable; Format and Cells & Data split dense command sets so
                 // they do not disappear into the adaptive overflow menu.
-                tabs.Insert(0).Title("Home").Name("PublisherHome").Items(items =>
+                tabs.Insert(0).Title("Start").Name("PublisherStart").Items(items =>
                 {
                     items.AddButton("Open workbook", "publisherOpenWorkbook", false, "/icons/open-workbook.svg", true);
                     items.AddButton("Blank workbook", "publisherNewWorkbook", false, "new", true);
+                    items.AddButton("Create data object", "publisherCreateDataObject", true, "table", true);
                     items.AddButton("Apply to frame", "publisherApplyWorkbook", true, "save", true);
                     items.AddButton("Download", "publisherDownloadWorkbook", false, "download", true);
                     items.AddUndoItem();
@@ -330,6 +401,7 @@
             const openInput = document.getElementById("publisher-spreadsheet-open-input");
             document.getElementById("publisher-open-workbook")?.addEventListener("click", () => bridge.chooseWorkbook());
             document.getElementById("publisher-new-workbook")?.addEventListener("click", () => bridge.newWorkbook());
+            document.getElementById("publisher-create-data-object")?.addEventListener("click", () => bridge.createDataObject());
             document.getElementById("publisher-apply-workbook")?.addEventListener("click", () => bridge.queueSave("apply"));
             document.getElementById("publisher-download-workbook")?.addEventListener("click", () => bridge.queueSave("download"));
             openInput?.addEventListener("change", async () => {
@@ -342,6 +414,7 @@
                 if (event.origin !== publisherSpreadsheetParentOrigin || event.data?.sessionId !== publisherSpreadsheetSessionId) return;
                 if (event.data.type === "publisher-spreadsheet-probe") bridge.notifyReady();
                 if (event.data.type === "publisher-spreadsheet-save") bridge.queueSave(event.data.intent || "apply");
+                if (event.data.type === "publisher-spreadsheet-create-data-object") bridge.createDataObject();
                 if (event.data.type === "publisher-spreadsheet-focus") {
                     try { bridge.control?.focus(); } catch (_) { }
                 }

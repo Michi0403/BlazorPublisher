@@ -16,9 +16,18 @@
         }
     }
 
-    function number(value) {
+    function number(value, declaredKind) {
         if (typeof value === "number") return Number.isFinite(value) ? value : 0;
-        let normalized = String(value ?? "").trim().replace(/[\s'’]/g, "");
+        if (typeof value === "boolean") return value ? 1 : 0;
+
+        const raw = String(value ?? "").trim();
+        const kind = String(declaredKind || "").toLowerCase();
+        if (kind === "boolean") return /^true$/i.test(raw) ? 1 : 0;
+        if (kind === "text" || kind === "datetime") return raw ? 1 : 0;
+        if (/^true$/i.test(raw)) return 1;
+        if (/^false$/i.test(raw) || !raw) return 0;
+
+        let normalized = raw.replace(/[\s'’]/g, "");
         const negativeParentheses = /^\(.*\)$/.test(normalized);
         normalized = normalized.replace(/[()]/g, "").replace(/[^0-9+\-.,eE]/g, "");
         const comma = normalized.lastIndexOf(",");
@@ -40,7 +49,7 @@
                 : `${parts.slice(0, -1).join("")}.${parts.at(-1)}`;
         }
         const parsed = Number(normalized);
-        if (!Number.isFinite(parsed)) return 0;
+        if (!Number.isFinite(parsed)) return raw ? 1 : 0;
         return negativeParentheses ? -Math.abs(parsed) : parsed;
     }
 
@@ -83,8 +92,52 @@
         return path.split(".").filter(Boolean).reduce((current, segment) => {
             if (current == null) return undefined;
             if (Array.isArray(current) && /^\d+$/.test(segment)) return current[Number(segment)];
-            return current[segment];
+            if (typeof current !== "object") return undefined;
+            if (Object.prototype.hasOwnProperty.call(current, segment)) return current[segment];
+            const key = Object.keys(current).find(candidate => candidate.toLowerCase() === segment.toLowerCase());
+            return key ? current[key] : undefined;
         }, value);
+    }
+
+    function unwrapJsonString(value) {
+        if (typeof value !== "string") return value;
+        const trimmed = value.trim();
+        if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return value;
+        try { return JSON.parse(trimmed); } catch { return value; }
+    }
+
+    function findJsonRows(value, depth) {
+        if (Array.isArray(value)) return value;
+        if (!value || typeof value !== "object" || depth > 4) return null;
+
+        const entries = Object.entries(value);
+        const wrappers = new Set(["data", "items", "results", "records", "rows"]);
+        for (const [name, nested] of entries.filter(([name]) => wrappers.has(name.toLowerCase()))) {
+            if (Array.isArray(nested)) return nested;
+            const rows = findJsonRows(nested, depth + 1);
+            if (rows) return rows;
+        }
+
+        const arrays = entries.map(([, nested]) => nested).filter(Array.isArray);
+        if (arrays.length === 1) return arrays[0];
+        const objects = entries.map(([, nested]) => nested).filter(nested => nested && typeof nested === "object" && !Array.isArray(nested));
+        return objects.length === 1 ? findJsonRows(objects[0], depth + 1) : null;
+    }
+
+    function flattenJsonRow(source, prefix, target) {
+        for (const [property, value] of Object.entries(source || {})) {
+            const name = prefix ? `${prefix}.${property}` : property;
+            if (value && typeof value === "object" && !Array.isArray(value)) {
+                flattenJsonRow(value, name, target);
+            } else if (value === null || value === undefined) {
+                target[name] = "";
+            } else if (Array.isArray(value)) {
+                target[name] = JSON.stringify(value);
+            } else {
+                target[name] = value;
+            }
+        }
+        return target;
     }
 
     function parseDelimited(text, delimiter, hasHeaders) {
@@ -158,18 +211,27 @@
     }
 
     function parseResponse(text, contentType, live) {
+        contentType = String(contentType || "").toLowerCase();
         let format = String(live.responseFormat || "Auto").toLowerCase();
         if (format === "auto") {
             const trimmed = text.trimStart();
-            format = contentType.includes("json") || trimmed.startsWith("{") || trimmed.startsWith("[") ? "json"
+            let encodedJson = false;
+            if (trimmed.startsWith('"')) {
+                try {
+                    const decoded = JSON.parse(trimmed);
+                    encodedJson = typeof decoded === "string" && /^[\s]*[\[{]/.test(decoded);
+                } catch { }
+            }
+            format = contentType.includes("json") || trimmed.startsWith("{") || trimmed.startsWith("[") || encodedJson ? "json"
                 : contentType.includes("xml") || trimmed.startsWith("<") ? "xml" : "delimitedtext";
         }
         if (format === "json") {
-            let value = selectJsonPath(JSON.parse(text), live.jsonPath);
-            if (value && !Array.isArray(value) && Array.isArray(value.data)) value = value.data;
-            else if (value && !Array.isArray(value) && Array.isArray(value.rows)) value = value.rows;
-            if (!Array.isArray(value)) value = [value];
-            return value.filter(item => item && typeof item === "object");
+            let value = unwrapJsonString(JSON.parse(text));
+            value = unwrapJsonString(selectJsonPath(value, live.jsonPath));
+            const rows = findJsonRows(value, 0) || (value && typeof value === "object" && !Array.isArray(value) ? [value] : []);
+            if (rows.some(item => !item || typeof item !== "object" || Array.isArray(item)))
+                throw new Error("Every JSON row must be an object with named properties.");
+            return rows.map(row => flattenJsonRow(row, "", {}));
         }
         if (format === "xml") return parseXml(text);
         if (format === "text") return [{ Value: text }];
@@ -256,6 +318,11 @@
         element.append(wrapper);
     }
 
+    function measure(config, row, field) {
+        const kind = config?.columnKinds?.[field] || config?.columnKinds?.[String(field || "").toLowerCase()] || "";
+        return number(get(row, field), kind);
+    }
+
     function common(config) {
         return {
             title: config.showTitle ? { text: config.title || "" } : undefined,
@@ -308,12 +375,12 @@
             normalized.push({
                 argument: get(row, argument),
                 series: definition.name,
-                value: number(get(row, definition.field)),
-                low: number(get(row, config.lowValueField || definition.field)),
-                high: number(get(row, config.highValueField || definition.field)),
-                open: number(get(row, config.openValueField || definition.field)),
-                close: number(get(row, config.closeValueField || definition.field)),
-                size: Math.max(0, number(get(row, config.sizeField || definition.field)))
+                value: measure(config, row, definition.field),
+                low: measure(config, row, config.lowValueField || definition.field),
+                high: measure(config, row, config.highValueField || definition.field),
+                open: measure(config, row, config.openValueField || definition.field),
+                close: measure(config, row, config.closeValueField || definition.field),
+                size: Math.max(0, measure(config, row, config.sizeField || definition.field))
             });
         }));
         const commonSeriesSettings = { type, argumentField: "argument", label: { visible: !!config.showLabels } };
@@ -339,7 +406,7 @@
             normalized.push({
                 argument: get(row, argument),
                 series: definition.name,
-                value: number(get(row, definition.field))
+                value: measure(config, row, definition.field)
             });
         }));
         return Object.assign(common(config), {
@@ -360,7 +427,7 @@
         const $element = window.jQuery(element);
         const kind = String(config.kind || "CartesianChart");
         const valueField = config.valueFields?.[0] || config.highValueField || config.closeValueField || "Value";
-        const points = rows.map(row => ({ argument: get(row, config.argumentField), value: number(get(row, valueField)) }));
+        const points = rows.map(row => ({ argument: get(row, config.argumentField), value: measure(config, row, valueField) }));
         let plugin, options;
         switch (kind) {
             case "CartesianChart": plugin = "dxChart"; options = chartOptions(config, rows); break;
@@ -384,12 +451,12 @@
             case "RangeSelector":
                 plugin = "dxRangeSelector"; options = { dataSource: points, chart: { series: { argumentField: "argument", valueField: "value", type: mapCartesianType(config.cartesianStyle) } }, scale: {}, size: elementSize(config), title: config.showTitle ? config.title : undefined }; break;
             case "Sankey":
-                plugin = "dxSankey"; options = Object.assign(common(config), { dataSource: rows.map(row => ({ source: String(get(row, config.argumentField)), target: String(get(row, config.targetField)), weight: number(get(row, valueField)) })), sourceField: "source", targetField: "target", weightField: "weight", label: { visible: !!config.showLabels } }); break;
+                plugin = "dxSankey"; options = Object.assign(common(config), { dataSource: rows.map(row => ({ source: String(get(row, config.argumentField)), target: String(get(row, config.targetField)), weight: measure(config, row, valueField) })), sourceField: "source", targetField: "target", weightField: "weight", label: { visible: !!config.showLabels } }); break;
             case "Funnel":
             case "Pyramid":
                 plugin = "dxFunnel"; options = Object.assign(common(config), { dataSource: points, argumentField: "argument", valueField: "value", inverted: kind === "Pyramid", label: { visible: !!config.showLabels } }); break;
             case "TreeMap":
-                plugin = "dxTreeMap"; options = Object.assign(common(config), { dataSource: rows.map((row, index) => ({ id: String(get(row, config.argumentField) || index), parent: String(get(row, config.parentField)), label: String(get(row, config.argumentField)), value: number(get(row, valueField)) })), idField: "id", parentField: "parent", labelField: "label", valueField: "value", tooltip: { enabled: true } }); break;
+                plugin = "dxTreeMap"; options = Object.assign(common(config), { dataSource: rows.map((row, index) => ({ id: String(get(row, config.argumentField) || index), parent: String(get(row, config.parentField)), label: String(get(row, config.argumentField)), value: measure(config, row, valueField) })), idField: "id", parentField: "parent", labelField: "label", valueField: "value", tooltip: { enabled: true } }); break;
             case "DataTable":
                 plugin = "dxDataGrid"; options = { dataSource: rows, showBorders: true, columnAutoWidth: true, filterRow: { visible: !!config.tableShowFilterRow }, paging: { pageSize: Math.max(1, config.rowLimit || 12) }, pager: { visible: false }, height: "100%", width: "100%" }; break;
             case "KpiProgress": {

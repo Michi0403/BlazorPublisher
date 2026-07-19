@@ -196,3 +196,7 @@ See `CHANGELOG-v1.0.26.md`. Story Editor printing now runs from an independent b
 
 See `CHANGELOG-v1.0.27.md`. Story Editor print preview, browser printing, PDF output, and standalone HTML now use the page size, orientation, margins, and gutter stored in the live DOCX, while preserving full-page background colors and text fills.
 
+## v1.0.28 exact Story PDF preview and print
+
+See `CHANGELOG-v1.0.28.md`. Story printing now paginates into explicit physical sheets using the live DOCX paper size and margins, removes RichEdit HTML preview-width centering, and opens an application-generated PDF instead of printing the preview HTML. This keeps the Word/LibreOffice placement and prevents browser-added date/title, URL, and page-number decorations.
+

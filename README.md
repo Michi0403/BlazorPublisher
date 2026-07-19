@@ -1,8 +1,3 @@
-Installer for Windows 64 is here https://github.com/Michi0403/BlazorPublisher/releases/download/v125/PublisherStudio.Setup.exe
-
-For anything else check the release section.
-Installers for different OS than windows do probably not work, but my focus is on windows now because I don't have test systems and time (and no visible tester and feedback like most developers face)
-
 # PublisherStudio / BlazorPublisher foundation
 
 PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It keeps the existing ASP.NET Core host and optional InstallerConsole architecture, while the product UI is a Publisher-style document and picture editor built with DevExpress DXperience 25.2.
@@ -193,7 +188,15 @@ See `CHANGELOG-v1.0.24.md`. Story documents containing embedded pictures can be 
 
 See `CHANGELOG-v1.0.25.md`. Dropped text and Markdown now enter the publication as native OpenXML stories, legacy HTML stories upgrade only after RichEdit reports the document loaded, and mail-merge settings attach only after that same safe lifecycle point so opening a dropped story cannot terminate the Blazor circuit.
 
+## v1.0.26 Story print-preview isolation and DOCX drop import
+
+See `CHANGELOG-v1.0.26.md`. Story Editor printing now runs from an independent blob-backed preview window with materialized print fills, so page colors and highlights print without keeping an iframe attached to the Blazor circuit. DOCX files can be dropped directly onto the publication as editable OpenXML stories.
+
 ## v1.0.27 DOCX-aligned Story printing
 
 See `CHANGELOG-v1.0.27.md`. Story Editor print preview, browser printing, PDF output, and standalone HTML now use the page size, orientation, margins, and gutter stored in the live DOCX, while preserving full-page background colors and text fills.
+
+## v1.0.28 exact Story PDF preview and print
+
+See `CHANGELOG-v1.0.28.md`. Story printing now paginates into explicit physical sheets using the live DOCX paper size and margins, removes RichEdit HTML preview-width centering, and opens an application-generated PDF instead of printing the preview HTML. This keeps the Word/LibreOffice placement and prevents browser-added date/title, URL, and page-number decorations.
 

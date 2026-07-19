@@ -190,4 +190,13 @@ Recommended local media smoke tests:
 - Transparent document backgrounds resolve to a white physical sheet; explicit document colors retain the fixed full-page print fill and paragraph/text fill materialization.
 - Page dimensions and margin pairs are bounded so corrupt DOCX values cannot create negative content boxes or unbounded browser print CSS.
 - JavaScript passes `node --check`; project JSON/XML and archive integrity are checked. A full `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+## v1.0.28 targeted validation
+
+- Compared the supplied expected PDF with the browser-generated Story PDF and confirmed that the defect consisted of two independent problems: RichEdit HTML retained a centered preview width, and Chromium inserted its own date/title plus URL/page-number header and footer.
+- Story HTML normalization now discards BODY-level fixed width, maximum width, automatic centering, and page-preview spacing while retaining inherited typography and all formatting on actual document nodes.
+- Pagination was exercised in Chromium with explicit fixed-size page wrappers and CSS columns. A five-page A4 test repeated the 12.7 mm top and left document margins on every page without cumulative horizontal drift.
+- Exact Story PDF generation was exercised in Chromium for A4 portrait, A4 landscape, and a custom 148 x 210 mm page. `pdfinfo` reported the expected physical MediaBox for every generated PDF.
+- Rendered PDF pages were visually inspected after generation: page background colors reach every paper edge, document content begins at the DOCX margin, paragraph/text fills retain the full content width, and no browser date, title, URL, or page number is present.
+- The generated multi-page image PDF opened in Chromium's native PDF viewer and rendered all five pages. The PDF is intentionally visual/raster output so the native viewer can print exactly what is previewed without HTML print decorations.
+- JavaScript passes `node --check`; generated preview scripts, project JSON/XML, source archive integrity, and C# syntax trees are checked. A full `dotnet restore`/`build` remains unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
 

@@ -4813,16 +4813,29 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
             'opacity'
         ];
 
+        const bodyProperties = new Set([
+            'color','font-family','font-size','font-weight','font-style','font-variant','font-stretch','line-height',
+            'letter-spacing','word-spacing','text-align','text-indent','text-transform','text-shadow',
+            'text-decoration-line','text-decoration-style','text-decoration-color','text-decoration-thickness',
+            'white-space','overflow-wrap','word-break','hyphens','vertical-align','direction','unicode-bidi'
+        ]);
+
         for (let index = 0; index < Math.min(originalNodes.length, cloneNodes.length); index++) {
             const original = originalNodes[index];
             const clone = cloneNodes[index];
             const computed = view.getComputedStyle(original);
             const inline = [];
             for (const property of properties) {
+                // RichEdit's exported BODY can contain browser/page-preview layout such as a
+                // fixed/max width and auto margins. Those values are not document formatting:
+                // the DOCX section page size and margins are applied by the Story preview shell.
+                // Retain only inherited text properties on BODY and keep complete computed
+                // formatting on the actual document nodes below it.
+                if (index === 0 && !bodyProperties.has(property)) continue;
                 const value = computed.getPropertyValue(property);
                 if (value) inline.push(`${property}:${value}`);
             }
-            const existing = clone.getAttribute?.('style');
+            const existing = index === 0 ? '' : clone.getAttribute?.('style');
             clone.setAttribute?.('style', `${existing ? existing + ';' : ''}${inline.join(';')}`);
             const printFill = storyStyleBackgroundColor(computed);
             if (printFill && clone?.nodeType === 1) {
@@ -4837,7 +4850,8 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
         const bodyStyle = cloneBody.getAttribute('style') || '';
         const wrapper = document.createElement('div');
         wrapper.className = 'publisher-story-document';
-        wrapper.style.cssText = `${bodyStyle};width:100%;min-height:100%;height:auto`;
+        wrapper.style.cssText = `${bodyStyle};display:block;position:static;float:none;clear:both;box-sizing:border-box;`+
+            'width:100%;max-width:none;min-width:0;min-height:0;height:auto;margin:0;padding:0;overflow:visible';
         if (storyBackgroundIsVisible(documentBackground)) {
             wrapper.style.setProperty('--publisher-story-page-background', documentBackground);
             wrapper.style.setProperty('--publisher-print-fill', documentBackground);
@@ -4958,7 +4972,10 @@ function completeStoryPrintPreview(id, html) {
     if (entry.objectUrl) {
         try { URL.revokeObjectURL(entry.objectUrl); } catch { }
     }
-    const objectUrl = URL.createObjectURL(new Blob([String(html || '')], { type: 'text/html;charset=utf-8' }));
+    const rendererUrl = new URL('js/vendor/html2canvas.min.js', document.baseURI).href
+        .replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    const hydratedHtml = String(html || '').replaceAll('__PUBLISHER_HTML2CANVAS_URL__', rendererUrl);
+    const objectUrl = URL.createObjectURL(new Blob([hydratedHtml], { type: 'text/html;charset=utf-8' }));
     entry.objectUrl = objectUrl;
     entry.previewWindow.location.replace(objectUrl);
     try { entry.previewWindow.focus(); } catch { }

@@ -531,50 +531,19 @@
         var marginRight = CssMillimeters(pageLayout.MarginRightMm);
         var marginBottom = CssMillimeters(pageLayout.MarginBottomMm);
         var marginLeft = CssMillimeters(pageLayout.MarginLeftMm);
+        var contentWidth = CssMillimeters(pageLayout.ContentWidthMm);
         var contentHeight = CssMillimeters(pageLayout.ContentHeightMm);
         var pageDescription = System.Net.WebUtility.HtmlEncode(
             $"{FormatMeasurement(pageLayout.PageWidthMm)} × {FormatMeasurement(pageLayout.PageHeightMm)} mm, "
             + (pageLayout.IsLandscape ? "landscape" : "portrait"));
+        var previewMode = printPreview ? "true" : "false";
         var toolbar = printPreview
-            ? $$"""<nav class="publisher-print-toolbar" aria-label="Story print preview controls"><strong>Story print preview</strong><span>Document page: {{pageDescription}}. This window is independent from the editor.</span><button type="button" onclick="window.print()">Print</button><button type="button" onclick="window.close()">Close</button></nav>"""
+            ? $$"""<nav class="publisher-print-toolbar" aria-label="Story PDF preview status"><strong>Preparing exact story PDF…</strong><span id="publisher-print-status">Document page: {{pageDescription}}. The generated PDF is the print preview.</span><button type="button" onclick="window.close()">Close</button></nav>"""
             : string.Empty;
-        var printScript = printPreview
-            ? """
-              <script>
-                (() => {
-                  const visibleFill = value => value && value !== 'transparent' && value !== 'rgba(0, 0, 0, 0)';
-                  const materializePrintFills = () => {
-                    document.querySelectorAll('[data-publisher-print-fill]').forEach(node => {
-                      const computed = getComputedStyle(node);
-                      const fill = computed.getPropertyValue('--publisher-print-fill').trim() || computed.backgroundColor;
-                      if (!visibleFill(fill)) return;
-                      node.style.setProperty('--publisher-print-fill', fill);
-                      node.style.setProperty('background-color', fill, 'important');
-                      node.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                      node.style.setProperty('print-color-adjust', 'exact', 'important');
-                      node.style.setProperty('box-shadow', `inset 0 0 0 100vmax ${fill}`, 'important');
-                    });
-                  };
-                  const waitForImages = () => Promise.all([...document.images].map(image => image.complete
-                    ? Promise.resolve()
-                    : new Promise(resolve => {
-                        image.addEventListener('load', resolve, { once: true });
-                        image.addEventListener('error', resolve, { once: true });
-                        setTimeout(resolve, 5000);
-                      })));
-                  const startPrint = async () => {
-                    try { await document.fonts?.ready; } catch { }
-                    await waitForImages();
-                    materializePrintFills();
-                    document.body.offsetHeight;
-                    requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
-                  };
-                  addEventListener('beforeprint', materializePrintFills);
-                  addEventListener('load', () => setTimeout(startPrint, 300), { once: true });
-                })();
-              </script>
-              """
+        var rendererScript = printPreview
+            ? """<script src="__PUBLISHER_HTML2CANVAS_URL__"></script>"""
             : string.Empty;
+
         return $$"""
             <!doctype html>
             <html lang="en">
@@ -584,36 +553,257 @@
               <title>{{safeTitle}}</title>
               <style>
                 * { box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-                @page { size:{{pageWidth}} {{pageHeight}}; margin:{{marginTop}} {{marginRight}} {{marginBottom}} {{marginLeft}}; background:{{pageBackground}}; }
+                @page { size:{{pageWidth}} {{pageHeight}}; margin:0; }
+                :root {
+                  --publisher-page-width:{{pageWidth}};
+                  --publisher-page-height:{{pageHeight}};
+                  --publisher-margin-top:{{marginTop}};
+                  --publisher-margin-right:{{marginRight}};
+                  --publisher-margin-bottom:{{marginBottom}};
+                  --publisher-margin-left:{{marginLeft}};
+                  --publisher-content-width:{{contentWidth}};
+                  --publisher-content-height:{{contentHeight}};
+                  --publisher-story-page-background:{{pageBackground}};
+                }
                 html,body { min-height:100%; margin:0; background:#e5e7eb; }
-                body { display:grid; place-items:start center; gap:12px; padding:24px; font-family:Segoe UI,Arial,sans-serif; --publisher-story-page-background:{{pageBackground}}; }
-                .publisher-print-toolbar { position:sticky; z-index:20; top:0; display:flex; align-items:center; gap:12px; width:min(100%,1200px); padding:10px 12px; border:1px solid #cbd5e1; border-radius:5px; background:white; box-shadow:0 3px 14px #0002; }
+                body { padding:24px; font-family:Segoe UI,Arial,sans-serif; }
+                .publisher-print-toolbar { position:sticky; z-index:20; top:0; display:flex; align-items:center; gap:12px; width:min(100%,1200px); margin:0 auto 14px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:5px; background:white; box-shadow:0 3px 14px #0002; }
                 .publisher-print-toolbar span { flex:1; color:#526071; font-size:12px; }
                 .publisher-print-toolbar button { padding:7px 13px; border:1px solid #9ba5b1; border-radius:4px; background:white; cursor:pointer; }
-                .publisher-print-toolbar button:first-of-type { color:white; border-color:#d96700; background:#ed7203; }
-                .publisher-story-sheet { position:relative; isolation:isolate; width:{{pageWidth}}; min-height:{{pageHeight}}; padding:{{marginTop}} {{marginRight}} {{marginBottom}} {{marginLeft}}; background:var(--publisher-story-page-background,white); box-shadow:0 3px 18px #0003; }
-                .publisher-story-sheet::before { content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }
-                .publisher-story-document { position:relative; isolation:isolate; width:100% !important; min-height:{{contentHeight}} !important; height:auto !important; margin:0 !important; padding:0 !important; background:var(--publisher-story-page-background,white); }
-                .publisher-story-document::before { content:""; position:absolute; z-index:-1; inset:0; background:var(--publisher-story-page-background,white); }
-                [data-publisher-print-fill] { background-color:var(--publisher-print-fill,transparent) !important; }
+                .publisher-print-toolbar.error { border-color:#ef9a9a; }
+                .publisher-print-toolbar.error strong { color:#a61b1b; }
+                .publisher-story-source { display:none !important; }
+                .publisher-story-pages { display:grid; justify-content:center; gap:18px; }
+                .publisher-story-sheet { position:relative; isolation:isolate; width:var(--publisher-page-width); height:var(--publisher-page-height); padding:var(--publisher-margin-top) var(--publisher-margin-right) var(--publisher-margin-bottom) var(--publisher-margin-left); overflow:hidden; background:var(--publisher-story-page-background); box-shadow:0 3px 18px #0003; break-after:page; page-break-after:always; }
+                .publisher-story-sheet:last-child { break-after:auto; page-break-after:auto; }
+                .publisher-story-viewport { position:relative; width:var(--publisher-content-width); height:var(--publisher-content-height); overflow:hidden; }
+                .publisher-story-flow, .publisher-story-measure { position:absolute; top:0; left:0; width:var(--publisher-content-width); height:var(--publisher-content-height); max-width:none; min-width:0; margin:0; padding:0; overflow:visible; column-width:var(--publisher-content-width); column-gap:0; column-fill:auto; }
+                .publisher-story-measure { position:fixed; z-index:-1000; top:0; left:-100000px; opacity:0; pointer-events:none; }
+                .publisher-story-flow > *, .publisher-story-measure > * { max-width:100%; }
+                .publisher-story-flow [data-publisher-print-fill], .publisher-story-measure [data-publisher-print-fill] { background-color:var(--publisher-print-fill,transparent) !important; }
                 @media print {
-                  html,body { min-height:0; background:{{pageBackground}} !important; }
-                  body { position:relative; display:block; padding:0; isolation:isolate; }
-                  body::before { content:""; position:fixed; z-index:0; top:calc(-1 * {{marginTop}}); right:calc(-1 * {{marginRight}}); bottom:calc(-1 * {{marginBottom}}); left:calc(-1 * {{marginLeft}}); background:{{pageBackground}}; -webkit-box-shadow:inset 0 0 0 100vmax {{pageBackground}}; box-shadow:inset 0 0 0 100vmax {{pageBackground}}; }
-                  .publisher-print-toolbar { display:none !important; }
-                  .publisher-story-sheet { position:relative; z-index:1; display:block; width:auto; min-height:0; margin:0; padding:0; background:transparent; box-shadow:none; }
-                  .publisher-story-sheet::before { display:none; }
-                  .publisher-story-document { width:100% !important; min-height:{{contentHeight}} !important; margin:0 !important; padding:0 !important; box-shadow:none; }
-                  .publisher-story-document[data-publisher-print-fill],
-                  .publisher-story-document [data-publisher-print-fill] {
-                    background-color:var(--publisher-print-fill,transparent) !important;
-                    -webkit-box-shadow:inset 0 0 0 100vmax var(--publisher-print-fill,transparent) !important;
-                    box-shadow:inset 0 0 0 100vmax var(--publisher-print-fill,transparent) !important;
-                  }
+                  html,body { min-height:0; background:var(--publisher-story-page-background) !important; }
+                  body { padding:0; }
+                  .publisher-print-toolbar, .publisher-story-source, .publisher-story-measure { display:none !important; }
+                  .publisher-story-pages { display:block; }
+                  .publisher-story-sheet { margin:0; box-shadow:none; }
                 }
               </style>
             </head>
-            <body>{{toolbar}}<main class="publisher-story-sheet">{{prepared.Html}}</main>{{printScript}}</body>
+            <body data-page-width-mm="{{FormatMeasurement(pageLayout.PageWidthMm)}}" data-page-height-mm="{{FormatMeasurement(pageLayout.PageHeightMm)}}">
+              {{toolbar}}
+              <div id="publisher-story-source" class="publisher-story-source" aria-hidden="true">{{prepared.Html}}</div>
+              <div id="publisher-story-measure" class="publisher-story-measure" aria-hidden="true"></div>
+              <main id="publisher-story-pages" class="publisher-story-pages" aria-label="Story pages"></main>
+              {{rendererScript}}
+              <script>
+                (() => {
+                  'use strict';
+                  const previewMode = {{previewMode}};
+                  const sourceHost = document.getElementById('publisher-story-source');
+                  const sourceDocument = sourceHost?.querySelector('.publisher-story-document');
+                  const measure = document.getElementById('publisher-story-measure');
+                  const pageHost = document.getElementById('publisher-story-pages');
+                  const status = document.getElementById('publisher-print-status');
+                  const toolbar = document.querySelector('.publisher-print-toolbar');
+                  const pageBackground = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--publisher-story-page-background').trim() || '#ffffff';
+                  const inheritedRootProperties = [
+                    'color','font-family','font-size','font-weight','font-style','font-variant','font-stretch','line-height',
+                    'letter-spacing','word-spacing','text-align','text-indent','text-transform','text-shadow',
+                    'text-decoration-line','text-decoration-style','text-decoration-color','text-decoration-thickness',
+                    'white-space','overflow-wrap','word-break','hyphens','vertical-align','direction','unicode-bidi'
+                  ];
+
+                  const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
+                  const visibleFill = value => {
+                    const normalized = String(value || '').replaceAll(' ', '').toLowerCase();
+                    return normalized && normalized !== 'transparent' && normalized !== 'rgba(0,0,0,0)';
+                  };
+                  const waitForImages = root => Promise.all([...root.querySelectorAll('img')].map(image => image.complete
+                    ? Promise.resolve()
+                    : new Promise(resolve => {
+                        const finish = () => resolve();
+                        image.addEventListener('load', finish, { once:true });
+                        image.addEventListener('error', finish, { once:true });
+                        setTimeout(finish, 5000);
+                      })));
+                  const materializePrintFills = root => {
+                    root.querySelectorAll('[data-publisher-print-fill]').forEach(node => {
+                      const computed = getComputedStyle(node);
+                      const fill = computed.getPropertyValue('--publisher-print-fill').trim() || computed.backgroundColor;
+                      if (!visibleFill(fill)) return;
+                      node.style.setProperty('--publisher-print-fill', fill);
+                      node.style.setProperty('background-color', fill, 'important');
+                      node.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                      node.style.setProperty('print-color-adjust', 'exact', 'important');
+                    });
+                  };
+                  const normalizeColumnBreaks = root => {
+                    root.querySelectorAll('*').forEach(node => {
+                      const before = `${node.style.getPropertyValue('break-before')} ${node.style.getPropertyValue('page-break-before')}`.toLowerCase();
+                      const after = `${node.style.getPropertyValue('break-after')} ${node.style.getPropertyValue('page-break-after')}`.toLowerCase();
+                      if (before.includes('page') || before.includes('always')) node.style.setProperty('break-before', 'column');
+                      if (after.includes('page') || after.includes('always')) node.style.setProperty('break-after', 'column');
+                    });
+                  };
+                  const createFlow = className => {
+                    const flow = document.createElement('div');
+                    flow.className = className;
+                    const sourceStyle = sourceDocument?.style;
+                    if (sourceStyle) {
+                      for (const property of inheritedRootProperties) {
+                        const value = sourceStyle.getPropertyValue(property);
+                        if (value) flow.style.setProperty(property, value, sourceStyle.getPropertyPriority(property));
+                      }
+                    }
+                    flow.innerHTML = sourceDocument?.innerHTML || '<p></p>';
+                    normalizeColumnBreaks(flow);
+                    materializePrintFills(flow);
+                    return flow;
+                  };
+
+                  const paginate = async () => {
+                    if (!sourceHost || !measure || !pageHost)
+                      throw new Error('The Story preview page could not be initialized.');
+                    measure.replaceChildren(createFlow('publisher-story-measure-content'));
+                    try { await document.fonts?.ready; } catch { }
+                    await waitForImages(measure);
+                    await nextFrame();
+                    await nextFrame();
+                    const columnWidth = measure.getBoundingClientRect().width;
+                    if (!(columnWidth > 0)) throw new Error('The DOCX content width is invalid.');
+                    const pageCount = Math.max(1, Math.ceil(measure.scrollWidth / columnWidth - .001));
+                    const fragment = document.createDocumentFragment();
+                    for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+                      const page = document.createElement('section');
+                      page.className = 'publisher-story-sheet';
+                      page.setAttribute('aria-label', `Story page ${pageIndex + 1} of ${pageCount}`);
+                      const viewport = document.createElement('div');
+                      viewport.className = 'publisher-story-viewport';
+                      const flow = createFlow('publisher-story-flow');
+                      flow.style.transform = `translate3d(${-pageIndex * columnWidth}px,0,0)`;
+                      viewport.append(flow);
+                      page.append(viewport);
+                      fragment.append(page);
+                    }
+                    pageHost.replaceChildren(fragment);
+                    measure.remove();
+                    sourceHost.remove();
+                    document.body.dataset.publisherReady = 'true';
+                    await waitForImages(pageHost);
+                    await nextFrame();
+                    await nextFrame();
+                    return [...pageHost.querySelectorAll('.publisher-story-sheet')];
+                  };
+
+                  const ascii = value => new TextEncoder().encode(value);
+                  const pdfNumber = value => Number(value).toFixed(3).replace(/\.000$/, '').replace(/(\.\d*?)0+$/, '$1');
+                  const canvasJpeg = canvas => new Promise((resolve, reject) => canvas.toBlob(async blob => {
+                    if (!blob) { reject(new Error('The browser could not encode a Story page image.')); return; }
+                    resolve(new Uint8Array(await blob.arrayBuffer()));
+                  }, 'image/jpeg', .985));
+                  const createImagePdf = (images, pageWidthMm, pageHeightMm) => {
+                    const pageWidthPoints = pageWidthMm * 72 / 25.4;
+                    const pageHeightPoints = pageHeightMm * 72 / 25.4;
+                    const objectCount = 2 + images.length * 3;
+                    const objects = new Array(objectCount + 1);
+                    const pageIds = images.map((_, index) => 3 + index * 3);
+                    objects[1] = [ascii('<< /Type /Catalog /Pages 2 0 R >>')];
+                    objects[2] = [ascii(`<< /Type /Pages /Count ${images.length} /Kids [${pageIds.map(id => `${id} 0 R`).join(' ')}] >>`)];
+                    images.forEach((image, index) => {
+                      const pageId = 3 + index * 3;
+                      const imageId = pageId + 1;
+                      const contentId = pageId + 2;
+                      const draw = ascii(`q\n${pdfNumber(pageWidthPoints)} 0 0 ${pdfNumber(pageHeightPoints)} 0 0 cm\n/Im0 Do\nQ\n`);
+                      objects[pageId] = [ascii(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pdfNumber(pageWidthPoints)} ${pdfNumber(pageHeightPoints)}] /Resources << /XObject << /Im0 ${imageId} 0 R >> >> /Contents ${contentId} 0 R >>`)];
+                      objects[imageId] = [
+                        ascii(`<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.bytes.length} >>\nstream\n`),
+                        image.bytes,
+                        ascii('\nendstream')
+                      ];
+                      objects[contentId] = [ascii(`<< /Length ${draw.length} >>\nstream\n`), draw, ascii('endstream')];
+                    });
+
+                    const header = new Uint8Array([37,80,68,70,45,49,46,52,10,37,226,227,207,211,10]);
+                    const chunks = [header];
+                    const offsets = new Array(objectCount + 1).fill(0);
+                    let length = header.length;
+                    const push = chunk => { chunks.push(chunk); length += chunk.length; };
+                    for (let objectId = 1; objectId <= objectCount; objectId++) {
+                      offsets[objectId] = length;
+                      push(ascii(`${objectId} 0 obj\n`));
+                      for (const chunk of objects[objectId]) push(chunk);
+                      push(ascii('\nendobj\n'));
+                    }
+                    const xrefOffset = length;
+                    push(ascii(`xref\n0 ${objectCount + 1}\n`));
+                    push(ascii('0000000000 65535 f \n'));
+                    for (let objectId = 1; objectId <= objectCount; objectId++)
+                      push(ascii(`${String(offsets[objectId]).padStart(10, '0')} 00000 n \n`));
+                    push(ascii(`trailer\n<< /Size ${objectCount + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`));
+                    return new Blob(chunks, { type:'application/pdf' });
+                  };
+
+                  const openExactPdfPreview = async pages => {
+                    if (typeof window.html2canvas !== 'function')
+                      throw new Error('The local Story PDF renderer did not load.');
+                    const pageWidthMm = Number(document.body.dataset.pageWidthMm);
+                    const pageHeightMm = Number(document.body.dataset.pageHeightMm);
+                    if (!(pageWidthMm > 0 && pageHeightMm > 0))
+                      throw new Error('The DOCX paper size is invalid.');
+                    const images = [];
+                    for (let index = 0; index < pages.length; index++) {
+                      if (status) status.textContent = `Rendering exact PDF page ${index + 1} of ${pages.length}…`;
+                      const page = pages[index];
+                      const bounds = page.getBoundingClientRect();
+                      const scale = Math.max(1, Math.min(2, 4096 / Math.max(bounds.width, 1), 4096 / Math.max(bounds.height, 1)));
+                      const canvas = await window.html2canvas(page, {
+                        backgroundColor:pageBackground,
+                        scale,
+                        useCORS:true,
+                        allowTaint:false,
+                        logging:false,
+                        removeContainer:true,
+                        width:bounds.width,
+                        height:bounds.height,
+                        windowWidth:Math.ceil(bounds.width),
+                        windowHeight:Math.ceil(bounds.height),
+                        scrollX:0,
+                        scrollY:0
+                      });
+                      const bytes = await canvasJpeg(canvas);
+                      images.push({ bytes, width:canvas.width, height:canvas.height });
+                      canvas.width = 1;
+                      canvas.height = 1;
+                    }
+                    if (status) status.textContent = 'Opening the exact PDF print preview…';
+                    const pdf = createImagePdf(images, pageWidthMm, pageHeightMm);
+                    const pdfUrl = URL.createObjectURL(pdf);
+                    globalThis.__publisherStoryPdfUrl = pdfUrl;
+                    location.replace(pdfUrl);
+                  };
+
+                  const fail = error => {
+                    console.error('Story PDF preview failed.', error);
+                    toolbar?.classList.add('error');
+                    const strong = toolbar?.querySelector('strong');
+                    if (strong) strong.textContent = 'Story PDF preview failed';
+                    if (status) status.textContent = error?.message || String(error);
+                  };
+
+                  addEventListener('beforeprint', () => materializePrintFills(document));
+                  addEventListener('load', async () => {
+                    try {
+                      const pages = await paginate();
+                      if (previewMode) await openExactPdfPreview(pages);
+                    } catch (error) {
+                      fail(error);
+                    }
+                  }, { once:true });
+                })();
+              </script>
+            </body>
             </html>
             """;
     }

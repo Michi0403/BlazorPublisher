@@ -11,6 +11,8 @@
     <SelfContained>false</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
     <PublishSingleFile>false</PublishSingleFile>
+    <PrepareSpreadsheetAssetsOnBuild Condition="'$(PrepareSpreadsheetAssetsOnBuild)' == ''">false</PrepareSpreadsheetAssetsOnBuild>
+    <SpreadsheetClientAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js</SpreadsheetClientAsset>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="25.2.8" />
@@ -20,9 +22,32 @@
   <ItemGroup>
     <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
-  <Target Name="PrepareSpreadsheetClientAssets" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
-    <Exec Command="npm install --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="!Exists('$(MSBuildProjectDirectory)/node_modules/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.js')" />
-    <Exec Command="node tools/prepare-spreadsheet-assets.mjs" WorkingDirectory="$(MSBuildProjectDirectory)" />
-    <Error Condition="!Exists('$(MSBuildProjectDirectory)/wwwroot/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.js')" Text="Spreadsheet client assets are missing. Run npm install and npm run prepare:spreadsheet in src/PublisherStudio.Web." />
+
+  <!--
+    npm is deliberately not invoked during an ordinary Visual Studio build. MSB3073/9009
+    otherwise hides the useful error when Node.js is not installed or Visual Studio still has
+    an old PATH. Run Prepare-SpreadsheetAssets.cmd once after cloning the source package.
+
+    Automated build agents may opt in with:
+      dotnet build -p:PrepareSpreadsheetAssetsOnBuild=true
+  -->
+  <Target Name="PrepareSpreadsheetClientAssets"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and !Exists('$(SpreadsheetClientAsset)')">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\Prepare-SpreadsheetAssets.ps1&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <Target Name="SpreadsheetClientAssetBuildNotice"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and !Exists('$(SpreadsheetClientAsset)')">
+    <Warning Text="Spreadsheet Studio browser assets are not prepared. The .NET solution can build, but Spreadsheet Studio will not load until Prepare-SpreadsheetAssets.cmd is run once from the solution root. Node.js 20+ is required only for that preparation step." />
+  </Target>
+
+  <Target Name="ValidateSpreadsheetClientAssetsForPublish"
+          BeforeTargets="ComputeFilesToPublish"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Condition="!Exists('$(SpreadsheetClientAsset)')"
+           Text="Spreadsheet Studio browser assets are missing. Run Prepare-SpreadsheetAssets.cmd from the solution root before publishing." />
   </Target>
 </Project>

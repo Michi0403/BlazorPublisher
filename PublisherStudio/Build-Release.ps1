@@ -29,20 +29,9 @@ $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.cspro
 $webDirectory = Split-Path -Parent $webProject
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is required to prepare the DevExpress Spreadsheet client assets." }
-if (-not (Get-Command npm -ErrorAction SilentlyContinue)) { throw "npm is required to prepare the DevExpress Spreadsheet client assets." }
-
 Write-Host "Preparing local Spreadsheet client assets..." -ForegroundColor Cyan
-Push-Location $webDirectory
-try {
-    npm install --no-audit --no-fund
-    if ($LASTEXITCODE -ne 0) { throw "npm install failed." }
-    npm run prepare:spreadsheet
-    if ($LASTEXITCODE -ne 0) { throw "Spreadsheet client asset preparation failed." }
-}
-finally {
-    Pop-Location
-}
+& (Join-Path $root "Prepare-SpreadsheetAssets.ps1")
+if ($LASTEXITCODE -ne 0) { throw "Spreadsheet client asset preparation failed." }
 
 $requiredSpreadsheetAssets = @(
     "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js",

@@ -213,3 +213,16 @@ Recommended local media smoke tests:
 - Confirmed local client asset paths, npm preparation script, MSBuild preparation target, release-script preflight, and source-package exclusions are mutually consistent.
 - JavaScript files and the asset preparation module pass `node --check`; JSON and project XML parse; C# files pass tree-sitter syntax parsing.
 - A full `dotnet restore`/`dotnet build`, DevExpress control initialization, formula calculation, and real browser save cycle remain unavailable in this environment because the .NET SDK and licensed DevExpress NuGet/npm feeds are not installed. Those tests must be run on the licensed build machine before publishing binaries.
+
+
+## v1.0.30 Spreadsheet asset-build validation
+
+- Confirmed ordinary project builds no longer contain an unconditional `npm install` execution path.
+- Confirmed `SpreadsheetEditorResult` is emitted from a namespace-level `.cs` file and referenced consistently by both Razor components, eliminating the reported CS0246 failures.
+- Confirmed the committed npm lockfile contains only the prebuilt `devextreme-dist`, Spreadsheet, and jQuery packages, and the supported restore path uses `npm ci --legacy-peer-deps`; the unused DevExtreme peer dependency tree that introduced `lodash.isequal` is not installed.
+- Confirmed the opt-in MSBuild preparation target is disabled by default, skipped during design-time builds, and runs only while the generated Spreadsheet script is missing.
+- Confirmed normal builds produce an actionable warning rather than MSB3073/9009 when the browser assets have not yet been prepared.
+- Confirmed publish remains blocked when the generated offline Spreadsheet script is absent.
+- Confirmed the shared PowerShell preparation script searches PATH, NVM for Windows, Program Files, the 32-bit Program Files folder, and the per-user Node.js folder; enforces Node.js 20+; runs npm restoration; invokes the existing Node copy module; and verifies all required JS/CSS outputs.
+- Confirmed `Build-Release.ps1` delegates to the same preparation path and no longer invokes bare `node` or `npm` commands.
+- Confirmed project XML, package JSON, command scripts, and archive paths parse structurally. A licensed end-to-end DevExpress build still needs to be executed on the user's build machine.

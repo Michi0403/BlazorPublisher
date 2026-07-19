@@ -1,8 +1,3 @@
-Win64 Installer here https://github.com/Michi0403/BlazorPublisher/releases/download/v128/PublisherStudio.Setup.exe
-
-for other OS (Lin, MacOs) consider to download the specific os version and open the browser the the hosted address yourself or create links.
-In future with helper and tester who commonly use linux we can make that more comfortable but, well I try to invest my time in the features and mainframe from the application, especially because I know "Works on Win10, linux, Win11".
-
 # PublisherStudio / BlazorPublisher foundation
 
 PublisherStudio is a .NET 10 Interactive Blazor Server publication editor. It keeps the existing ASP.NET Core host and optional InstallerConsole architecture, while the product UI is a Publisher-style document and picture editor built with DevExpress DXperience 25.2.
@@ -45,22 +40,21 @@ GIMP and Inkscape were used only as behavioural references for rulers, guides, c
 - Visual Studio with the .NET 10 SDK. The included `global.json` accepts .NET 10 feature bands starting at 10.0.100.
 - DevExpress DXperience 25.2 packages and a configured DevExpress NuGet feed.
 - A valid DevExpress license.
-- Node.js 20 or newer with npm is required when building from source so the licensed Spreadsheet/DevExtreme browser assets can be restored and copied locally.
+- Node.js 20 or newer with npm is a **source-development/build-machine requirement only** for the one-time Spreadsheet client-asset preparation step. Normal Visual Studio builds and installed PublisherStudio releases do not invoke Node.js or npm.
 - A current Chromium-based browser is recommended for the raster/SVG export pipeline.
 
 ## Build and run
 
 ```powershell
-cd src/PublisherStudio.Web
-npm install --no-audit --no-fund
-npm run prepare:spreadsheet
-cd ../..
+.\Prepare-SpreadsheetAssets.cmd
 dotnet restore PublisherStudio.sln
 dotnet build PublisherStudio.sln -c Debug
 dotnet run --project src/PublisherStudio.Web
 ```
 
-The published application serves the Spreadsheet JavaScript and CSS from its own ASP.NET Core host. No CDN or internet connection is required at runtime; source builds still need access to the licensed DevExpress NuGet/npm feeds during restore.
+`Prepare-SpreadsheetAssets.cmd` is required once after extracting a clean source archive, and again only when the pinned Spreadsheet client-package versions change. It finds standard Node.js/NVM installations even when Visual Studio was opened with an older `PATH`. Close and reopen Visual Studio after installing Node.js. The preparation uses the committed lockfile, the prebuilt `devextreme-dist` package, and disabled npm peer auto-installation, so unused DevExtreme source dependencies and their deprecation warnings are not restored.
+
+The published application serves the Spreadsheet JavaScript and CSS from its own ASP.NET Core host. No CDN or internet connection is required at runtime. A clean source checkout needs access to the DevExpress NuGet/npm packages only during restore and the one-time asset preparation step.
 
 Optional fixed port:
 
@@ -216,4 +210,8 @@ See `CHANGELOG-v1.0.28.md`. Story printing now paginates into explicit physical 
 ## v1.0.29 Spreadsheet Studio
 
 See `CHANGELOG-v1.0.29.md`. Spreadsheet workbooks are now first-class publication layers. The supported DevExpress ASP.NET Core Spreadsheet control runs as a same-origin MVC/Razor island inside the Blazor editor shell, with local assets, CSRF-protected document requests, session-bound saves, XLSX/XLSM/XLS/CSV/TXT import, workbook download, double-click editing, and safe static previews for canvas, print, and export.
+
+## v1.0.30 Spreadsheet build and compiler fixes
+
+See `CHANGELOG-v1.0.30.md`. Normal Visual Studio builds no longer execute `npm install`, so a missing or stale Node.js `PATH` cannot surface as the opaque MSBuild exit code 9009. The shared Spreadsheet result model is now compiled from a normal C# source file, fixing the `SpreadsheetEditorResult` CS0246 errors. The preparation command also avoids restoring unused peer packages that caused the `lodash.isequal` deprecation warning. Run `Prepare-SpreadsheetAssets.cmd` once from the solution root; publishing still refuses to create an incomplete package when the local Spreadsheet browser files are absent.
 

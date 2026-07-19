@@ -6,7 +6,7 @@ Run:
 .\Build-Release.ps1 -Runtime win-x64
 ```
 
-The release script requires the .NET 10 SDK, Node.js/npm, access to the licensed DevExpress NuGet and npm packages, and a valid DevExpress license. It restores the Spreadsheet browser packages, copies the required Spreadsheet/DevExtreme/jQuery files into the local `wwwroot/vendor` tree, verifies them, and then publishes the self-contained application and setup launcher.
+The release script requires the .NET 10 SDK, Node.js 20+/npm on the build machine, access to the DevExpress NuGet and npm packages, and a valid DevExpress license. Node.js is not a runtime prerequisite for installed releases. It calls `Prepare-SpreadsheetAssets.ps1`, which finds standard Node.js and NVM installations, restores the Spreadsheet browser packages, copies the required Spreadsheet/DevExtreme/jQuery files into the local `wwwroot/vendor` tree, verifies them, and then publishes the self-contained application and setup launcher.
 
 Upload the generated runtime and setup assets from `artifacts/release` to the same GitHub release. For Windows x64 these are:
 

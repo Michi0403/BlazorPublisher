@@ -6,48 +6,67 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
+    <Version>1.0.37</Version>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
+    <DevExpressVersion>25.2.8</DevExpressVersion>
     <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <SelfContained>false</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
     <PublishSingleFile>false</PublishSingleFile>
     <PrepareSpreadsheetAssetsOnBuild Condition="'$(PrepareSpreadsheetAssetsOnBuild)' == ''">false</PrepareSpreadsheetAssetsOnBuild>
     <SpreadsheetClientAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js</SpreadsheetClientAsset>
+    <DevExtremeRuntimeLicenseAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.js</DevExtremeRuntimeLicenseAsset>
+    <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
+    <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="25.2.8" />
-    <PackageReference Include="DevExpress.Blazor.RichEdit" Version="25.2.8" />
-    <PackageReference Include="DevExpress.AspNetCore.Spreadsheet" Version="25.2.8" />
+    <PackageReference Include="DevExpress.Blazor" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Blazor.RichEdit" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.AspNetCore.Spreadsheet" Version="$(DevExpressVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--
-    npm is deliberately not invoked during an ordinary Visual Studio build. MSB3073/9009
-    otherwise hides the useful error when Node.js is not installed or Visual Studio still has
-    an old PATH. Run Prepare-SpreadsheetAssets.cmd once after cloning the source package.
+    npm/npx are deliberately not invoked during an ordinary Visual Studio build. MSB3073/9009
+    otherwise hides the useful error when Node.js is not installed, Visual Studio has an old
+    PATH, or the licensed build identity is not registered. Run Prepare-DevExpressAssets.cmd
+    once after cloning the source package. The historical Prepare-SpreadsheetAssets.cmd name
+    remains as a compatibility alias.
 
-    Automated build agents may opt in with:
+    Automated licensed build agents may opt in with:
       dotnet build -p:PrepareSpreadsheetAssetsOnBuild=true
   -->
   <Target Name="PrepareSpreadsheetClientAssets"
           BeforeTargets="PrepareForBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and !Exists('$(SpreadsheetClientAsset)')">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\Prepare-SpreadsheetAssets.ps1&quot;"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)'))">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\Prepare-DevExpressAssets.ps1&quot;"
           WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
   <Target Name="SpreadsheetClientAssetBuildNotice"
           BeforeTargets="PrepareForBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and !Exists('$(SpreadsheetClientAsset)')">
-    <Warning Text="Spreadsheet Studio browser assets are not prepared. The .NET solution can build, but Spreadsheet Studio will not load until Prepare-SpreadsheetAssets.cmd is run once from the solution root. Node.js 20+ is required only for that preparation step." />
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)'))">
+    <Warning Text="DevExpress browser assets or the generated public DevExtreme runtime license are not prepared. Run Prepare-DevExpressAssets.cmd once from the solution root on a licensed developer/build machine. The .NET solution may compile without them, but Spreadsheet Studio and standalone HTML export will not be release-ready." />
   </Target>
 
   <Target Name="ValidateSpreadsheetClientAssetsForPublish"
           BeforeTargets="ComputeFilesToPublish"
           Condition="'$(DesignTimeBuild)' != 'true'">
     <Error Condition="!Exists('$(SpreadsheetClientAsset)')"
-           Text="Spreadsheet Studio browser assets are missing. Run Prepare-SpreadsheetAssets.cmd from the solution root before publishing." />
+           Text="Spreadsheet Studio browser assets are missing. Run Prepare-DevExpressAssets.cmd from the solution root before publishing." />
+    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseAsset)')"
+           Text="The generated public DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine before publishing." />
+    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseMetadata)')"
+           Text="The DevExtreme runtime-license metadata is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
+    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseVersionFile)')"
+           Text="The DevExtreme runtime-license version marker is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
+    <ReadLinesFromFile File="$(DevExtremeRuntimeLicenseVersionFile)"
+                       Condition="Exists('$(DevExtremeRuntimeLicenseVersionFile)')">
+      <Output TaskParameter="Lines" ItemName="DevExtremeRuntimeLicenseVersionLines" />
+    </ReadLinesFromFile>
+    <Error Condition="Exists('$(DevExtremeRuntimeLicenseVersionFile)') and '@(DevExtremeRuntimeLicenseVersionLines)' != '$(DevExpressVersion)'"
+           Text="The generated DevExtreme runtime license targets version '@(DevExtremeRuntimeLicenseVersionLines)', but this project uses $(DevExpressVersion). Run Prepare-DevExpressAssets.cmd again." />
   </Target>
 </Project>

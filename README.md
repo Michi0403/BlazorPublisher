@@ -13,7 +13,7 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
-> **Developer setup:** Node.js 20 or newer is required only to prepare the offline DevExpress Spreadsheet browser assets from npm. Run `Prepare-SpreadsheetAssets.cmd` after a clean checkout. Published/installed releases include those static files and do **not** require Node.js or npm at runtime.
+> **Developer setup:** Node.js 20 or newer is required only on a licensed developer/build machine. Run `Prepare-DevExpressAssets.cmd` after a clean checkout. It restores the local browser packages and uses the matching `devextreme-license` CLI to generate the public runtime key required by PublisherStudio and standalone HTML exports. Published/installed releases do **not** require Node.js, npm, npx, or a private DevExpress license at runtime.
 
 ## Implemented in this source package
 
@@ -53,21 +53,25 @@ GIMP and Inkscape were used only as behavioural references for rulers, guides, c
 - Visual Studio with the .NET 10 SDK. The included `global.json` accepts .NET 10 feature bands starting at 10.0.100.
 - DevExpress DXperience 25.2 packages and a configured DevExpress NuGet feed.
 - A valid DevExpress license.
-- Node.js 20 or newer with npm is a **source-development/build-machine requirement only** for the one-time Spreadsheet client-asset preparation step. Normal Visual Studio builds and installed PublisherStudio releases do not invoke Node.js or npm.
+- Node.js 20 or newer with npm and npx is a **source-development/build-machine requirement only** for DevExpress client-asset preparation and public DevExtreme runtime-key generation. Normal application use and installed PublisherStudio releases do not invoke Node.js, npm, or npx.
 - A current Chromium-based browser is recommended for the raster/SVG export pipeline.
 
 ## Build and run
 
 ```powershell
-.\Prepare-SpreadsheetAssets.cmd
+.\Prepare-DevExpressAssets.cmd
 dotnet restore PublisherStudio.sln
 dotnet build PublisherStudio.sln -c Debug
 dotnet run --project src/PublisherStudio.Web
 ```
 
-`Prepare-SpreadsheetAssets.cmd` is required once after extracting a clean source archive, and again only when the pinned Spreadsheet client-package versions change. It finds standard Node.js/NVM installations even when Visual Studio was opened with an older `PATH`. Close and reopen Visual Studio after installing Node.js. The preparation uses the committed lockfile, the prebuilt `devextreme-dist` package, and disabled npm peer auto-installation, so unused DevExtreme source dependencies and their deprecation warnings are not restored.
+`Prepare-DevExpressAssets.cmd` is required once after extracting a clean source archive and again whenever the pinned DevExtreme version changes or the licensed build identity changes. It finds standard Node.js/NVM installations even when Visual Studio was opened with an older `PATH`, restores the committed npm packages, temporarily pulls the matching `devextreme` CLI package with npx, and creates `wwwroot/vendor/devextreme-license.js` in non-modular form. The old `Prepare-SpreadsheetAssets.cmd` command remains as a compatibility alias.
 
-The published application serves the Spreadsheet JavaScript and CSS from its own ASP.NET Core host. No CDN or internet connection is required at runtime. A clean source checkout needs access to the DevExpress NuGet/npm packages only during restore and the one-time asset preparation step.
+The private DevExpress license is read only by the official generator from the licensed machine or the `DevExpress_License` environment variable. PublisherStudio stores and distributes only the generated public/runtime key. The source archive intentionally excludes that generated file, while published binaries include it beside the local DevExtreme assets.
+
+The published application serves Spreadsheet, DevExtreme, jQuery, and the runtime-license script from its own ASP.NET Core host. Standalone HTML export inlines the same files in the required order: jQuery, `dx.all.js`, generated runtime license, then PublisherStudio's visualization/data runtime. No CDN or internet connection is required at end-user runtime.
+
+Detailed setup, CI, ordering, and troubleshooting notes are in `docs/DEVEXTREME_RUNTIME_LICENSE.md`.
 
 Optional fixed port:
 
@@ -259,3 +263,8 @@ Spreadsheet Studio now labels PublisherStudio's far-left workflow tab **Home** a
 See `CHANGELOG-v1.0.36.md`. Web/API and webhook snapshots now parse automatically on fetch, save, editor blur, and parsing-option changes. JSON arrays, encoded JSON strings, common wrapper arrays, and nested objects are expanded into reusable columns. All parsed fields are visible in the data-field picker; Boolean values use 1/0 and non-empty text/date values can be counted.
 
 Spreadsheet Studio now includes **Create data object**. Select a bounded range, review whether the first row contains headers, correct or define the column names, and create an embedded publication data snapshot that is immediately available to charts and data tables.
+
+
+## v1.0.37 DevExtreme runtime-license export repair
+
+See `CHANGELOG-v1.0.37.md`. The DevExpress browser-asset preparation now generates the official public DevExtreme runtime key from the licensed build identity, validates its version, blocks publish when it is absent, and registers it in the main app, Spreadsheet Studio, and self-contained HTML exports before any DevExtreme component is created. The exported file remains self-contained and end users do not need Node.js or a private DevExpress license.

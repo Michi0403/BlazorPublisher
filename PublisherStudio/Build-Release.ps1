@@ -29,20 +29,23 @@ $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.cspro
 $webDirectory = Split-Path -Parent $webProject
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 
-Write-Host "Preparing local Spreadsheet client assets..." -ForegroundColor Cyan
-& (Join-Path $root "Prepare-SpreadsheetAssets.ps1")
-if ($LASTEXITCODE -ne 0) { throw "Spreadsheet client asset preparation failed." }
+Write-Host "Preparing local DevExpress client assets and runtime license..." -ForegroundColor Cyan
+& (Join-Path $root "Prepare-DevExpressAssets.ps1")
+if ($LASTEXITCODE -ne 0) { throw "DevExpress client-asset preparation failed." }
 
 $requiredSpreadsheetAssets = @(
     "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js",
     "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.css",
     "wwwroot\vendor\devextreme-dist\js\dx.all.js",
     "wwwroot\vendor\devextreme-dist\css\dx.light.css",
-    "wwwroot\vendor\jquery\jquery.min.js"
+    "wwwroot\vendor\jquery\jquery.min.js",
+    "wwwroot\vendor\devextreme-license.js",
+    "wwwroot\vendor\devextreme-license.meta.json",
+    "wwwroot\vendor\devextreme-license.version"
 )
 $missingSpreadsheetAssets = @($requiredSpreadsheetAssets | Where-Object { -not (Test-Path (Join-Path $webDirectory $_)) })
 if ($missingSpreadsheetAssets.Count -gt 0) {
-    throw "Spreadsheet client assets are incomplete. Missing: $($missingSpreadsheetAssets -join ', ')"
+    throw "DevExpress client assets are incomplete. Missing: $($missingSpreadsheetAssets -join ', ')"
 }
 
 Write-Host "Publishing BlazorPublisher application for $Runtime..." -ForegroundColor Cyan

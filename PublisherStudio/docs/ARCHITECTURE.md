@@ -114,3 +114,10 @@ Website export embeds DevExtreme CSS/JavaScript, the visualization runtime, and 
 ## Spreadsheet selection data boundary (v1.0.36)
 
 The spreadsheet iframe reads the current bounded DevExpress client selection through the public selection and cell-value APIs, trims blank trailing rows/columns, and sends a string snapshot to the parent Blazor component through same-origin `postMessage`. PublisherStudio then requires an object name and unique column names, optionally consumes the first selected row as headers, serializes the result as embedded JSON, and stores the workbook/sheet/range as source-reference metadata. The data object is deliberately a publication snapshot rather than a live mutable pointer into the workbook, so charts remain deterministic after the spreadsheet editor closes or the source workbook is replaced.
+
+
+## DevExtreme client-license boundary (v1.0.37)
+
+PublisherStudio uses non-modular DevExtreme browser bundles in three independent browser documents: the main Blazor host, the Spreadsheet Studio iframe, and each exported standalone HTML presentation. Each document must execute the generated public DevExtreme runtime-license script immediately after `dx.all.js` and before it creates a DevExtreme component.
+
+`Prepare-DevExpressAssets.ps1` restores the pinned browser packages and calls the official `devextreme-license` CLI from the same DevExtreme version. The CLI reads the private license only from the licensed developer/build environment and writes a public runtime script plus version metadata under `wwwroot/vendor`. Source archives omit those generated files. Publish is blocked when they are missing, while published applications and standalone HTML exports include only the public/runtime key.

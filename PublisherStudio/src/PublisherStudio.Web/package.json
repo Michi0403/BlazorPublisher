@@ -1,10 +1,12 @@
 {
   "name": "publisherstudio-web-assets",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "private": true,
   "scripts": {
-    "prepare:spreadsheet": "node tools/prepare-spreadsheet-assets.mjs",
-    "restore:spreadsheet": "npm ci --legacy-peer-deps --no-audit --no-fund"
+    "prepare:devexpress": "node tools/prepare-devexpress-assets.mjs",
+    "prepare:spreadsheet": "npm run prepare:devexpress",
+    "restore:devexpress": "npm ci --legacy-peer-deps --no-audit --no-fund",
+    "restore:spreadsheet": "npm run restore:devexpress"
   },
   "dependencies": {
     "devextreme-dist": "25.2.8",

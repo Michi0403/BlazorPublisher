@@ -15,13 +15,15 @@
 </head>
 <body>
     <Routes />
-    <script src="js/vendor/JsBarcode.all.min.js"></script>
-    <script src="js/vendor/qrcode-generator.js"></script>
-    <script src="_framework/blazor.web.js"></script>
-    <script src="js/vendor/html2canvas.min.js"></script>
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/devextreme-dist/js/dx.all.js"></script>
+    <script src="vendor/devextreme-license.js"
+            onerror="console.error('PublisherStudio: the generated DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine.')"></script>
+    <script src="js/vendor/JsBarcode.all.min.js"></script>
+    <script src="js/vendor/qrcode-generator.js"></script>
+    <script src="js/vendor/html2canvas.min.js"></script>
     <script src="js/liveDataInterop.js"></script>
     <script type="module" src="js/publisherInterop.js"></script>
+    <script src="_framework/blazor.web.js"></script>
 </body>
 </html>

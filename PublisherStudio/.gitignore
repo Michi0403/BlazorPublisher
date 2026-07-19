@@ -13,4 +13,8 @@ src/PublisherStudio.Web/node_modules/
 src/PublisherStudio.Web/wwwroot/vendor/devextreme-dist/
 src/PublisherStudio.Web/wwwroot/vendor/devexpress-aspnetcore-spreadsheet/
 src/PublisherStudio.Web/wwwroot/vendor/jquery/
+src/PublisherStudio.Web/wwwroot/vendor/devextreme-license.js
+src/PublisherStudio.Web/wwwroot/vendor/devextreme-license.generated.js
+src/PublisherStudio.Web/wwwroot/vendor/devextreme-license.meta.json
+src/PublisherStudio.Web/wwwroot/vendor/devextreme-license.version
 **/SpreadsheetHibernation/

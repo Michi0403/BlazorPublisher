@@ -5226,17 +5226,29 @@ window.publisherStudio = {
         if (window.PublisherStudioLiveDataRuntime) {
             await window.PublisherStudioLiveDataRuntime.refreshAll(source, { polling: false });
         }
-        const fetchExportAsset = async url => {
+        const fetchExportAsset = async (url, description = 'offline export asset') => {
             const response = await fetch(url, { cache: 'force-cache' });
-            if (!response.ok) throw new Error(`The offline export asset ${url} is missing (${response.status}). Run Prepare-SpreadsheetAssets.cmd on the build machine.`);
+            if (!response.ok) {
+                throw new Error(`The ${description} ${url} is missing (${response.status}). Run Prepare-DevExpressAssets.cmd on the licensed build machine before building or publishing PublisherStudio.`);
+            }
             return await response.text();
         };
-        const [devExtremeCss, jquerySource, devExtremeSource, liveDataSource] = await Promise.all([
+        const [devExtremeCss, jquerySource, devExtremeSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource] = await Promise.all([
             fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
             fetchExportAsset('vendor/jquery/jquery.min.js'),
             fetchExportAsset('vendor/devextreme-dist/js/dx.all.js'),
+            fetchExportAsset('vendor/devextreme-license.js', 'generated DevExtreme runtime license'),
+            fetchExportAsset('vendor/devextreme-license.version', 'DevExtreme runtime-license version marker'),
             fetchExportAsset('js/liveDataInterop.js')
         ]);
+        if (!/DevExpress\s*\.\s*config\s*\(/.test(devExtremeLicenseSource) || !/licenseKey\s*:/.test(devExtremeLicenseSource)) {
+            throw new Error('The generated DevExtreme runtime license file is invalid. Run Prepare-DevExpressAssets.cmd again on the licensed build machine.');
+        }
+        const bundledDevExtremeVersion = /Version:\s*([0-9]+(?:\.[0-9]+){2})/.exec(devExtremeSource)?.[1] || '';
+        const licensedDevExtremeVersion = String(devExtremeLicenseVersion || '').trim();
+        if (!bundledDevExtremeVersion || licensedDevExtremeVersion !== bundledDevExtremeVersion) {
+            throw new Error(`The DevExtreme runtime license targets ${licensedDevExtremeVersion || 'an unknown version'}, but the bundled browser runtime is ${bundledDevExtremeVersion || 'unknown'}. Run Prepare-DevExpressAssets.cmd again.`);
+        }
         const safeScript = value => String(value).replace(/<\/script/gi, '<\\/script');
         await document.fonts?.ready;
         await waitForImages(source);
@@ -5306,7 +5318,7 @@ html,body{width:auto;height:auto;overflow:visible!important;background:#fff!impo
 }
 </style>
 </head>
-<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(runtime)}</script></body>
+<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(runtime)}</script></body>
 </html>`;
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
     },

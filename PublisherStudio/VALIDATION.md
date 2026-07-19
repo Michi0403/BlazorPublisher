@@ -290,3 +290,17 @@ Static checks completed for the v1.0.36 source package:
 - Browser-runtime parser tests confirm normal arrays, encoded JSON strings, nested/common wrappers, dotted-field flattening, and case-insensitive JSON paths produce row objects. Number, Boolean, Text, and DateTime field conversions match the server-side data-visual rules.
 - Modified C# files and Razor `@code` blocks pass tree-sitter C# syntax parsing; package JSON and project XML parse successfully.
 - A complete `dotnet restore`/`dotnet build` and interactive licensed DevExpress browser run remain required on the release machine because this environment does not contain the .NET SDK or the licensed DevExpress NuGet feed.
+
+
+## v1.0.37 DevExtreme runtime-license and HTML export validation
+
+Static checks completed for the v1.0.37 source package:
+
+- Confirmed every non-modular DevExtreme document registers `vendor/devextreme-license.js` immediately after `dx.all.js`: the main application, Spreadsheet Studio, and standalone HTML export.
+- Confirmed the website exporter fetches the generated runtime-license source and version marker, rejects a missing, malformed, or version-mismatched file, escapes embedded closing script tags, and inlines the license before live-data or presentation initialization.
+- Confirmed `Prepare-DevExpressAssets.ps1` resolves Node.js/npm/npx, enforces Node.js 20+, reads the pinned `devextreme-dist` version, restores local packages, and invokes `devextreme-license --non-modular` from the matching `devextreme` package.
+- Confirmed the preparation script never reads, prints, stores, or embeds a private key itself; key discovery is delegated to the official CLI through the registered build identity or `DevExpress_License`.
+- Confirmed the Node preparation module rejects a missing, empty, or malformed generated runtime-license file and writes JSON metadata plus a plain version marker only after successful validation.
+- Confirmed project publish and release packaging fail when the runtime-license script, metadata, or exact-version marker is absent; MSBuild also rejects a marker that differs from the pinned DevExpress version.
+- Confirmed package metadata is `1.0.37`, DevExtreme remains pinned to `25.2.8`, and the publication document format intentionally remains `1.36`.
+- JavaScript syntax, JSON, XML, Node preparation behavior with a synthetic public runtime file, script-order assertions, and ZIP integrity are checked in this environment. The PowerShell flow was reviewed structurally but could not be executed here because PowerShell is unavailable. Generation of a real runtime key and a licensed end-to-end browser run must be completed on the user's licensed build machine because this environment does not have the user's DevExpress license or the .NET SDK/feed.

@@ -285,3 +285,7 @@ See `CHANGELOG-v1.0.40.md` and `docs/COMPONENT_RUNTIME.md`. The main editing stu
 ## v1.0.41 SVG paths and offline Signal Arrows
 
 See `CHANGELOG-v1.0.41.md` and `docs/ANIMATION_EXPORT.md`. Picture Studio can now download self-contained SVG files and edit path nodes precisely. Signal Arrows and Signal Connectors can join objects or exact page positions, emit click/hover gestures, animate an object's inner viewport, highlight spreadsheet cells or chart/HTML parts, control visibility/media/CSS classes, and continue through a chained signal sequence. The runtime is embedded into standalone presentation and website HTML exports, so these interactions work offline without a PublisherStudio server.
+
+## v1.0.42 reversible previews and signal resizing
+
+See `CHANGELOG-v1.0.42.md` and `docs/ANIMATION_EXPORT.md`. **Stop preview** now restores object transforms, dimensions, opacity, visibility, CSS classes, and media state after both ordinary animation previews and Signal Arrow/Connector playback. Signals add independent width/height resizing, page-entry playback starts from a clean baseline, and delegated click/hover monitoring survives rerendered DevExtreme, spreadsheet, chart, and custom HTML targets. These behaviors are included in offline single-file HTML exports.

@@ -358,3 +358,16 @@ Static checks completed for the v1.0.37 source package:
 - Package JSON, package lock, web project, and installer project are aligned to `1.0.41`.
 - Publication format is `1.39`; Picture Studio format is `1.2`.
 - Full .NET compilation requires the .NET SDK and licensed DevExpress build environment and is not available in the packaging environment used for this revision.
+
+## v1.0.42 preview reset, signal resize, and trigger-monitoring validation
+
+- `node --check` passes for `publisherInterop.js`.
+- Existing timeline and DevExtreme component-runtime tests pass.
+- `tests/signalRuntime.test.mjs` verifies the new width/height resize fields and editor controls, Stop-preview reset hook, dynamic trigger monitoring, self-contained offline runtime, and existing SVG/path/spreadsheet contracts.
+- A headless Chromium runtime test applies signal translation, scale, rotation, opacity, width resize, height resize, and a CSS-class completion action; it then verifies that `reset()` restores the exact original style, class, dimensions, and opacity.
+- The same browser test inserts the trigger source after runtime initialization and confirms delegated click monitoring still starts the signal.
+- A second headless Chromium test verifies both automatic cleanup and an early **Stop preview** restore the exact initial opacity, inline style, and class after a filled entrance animation.
+- Animation preview now snapshots and restores the affected page/object/media state, including opacity and transform values after filled Web Animations are cancelled.
+- Package JSON, package lock, web project, and installer project are aligned to `1.0.42`.
+- Publication format is `1.40`; Picture Studio format remains `1.2`.
+- Full .NET compilation requires the .NET SDK and licensed DevExpress build environment and is not available in the packaging environment used for this revision.

@@ -22,7 +22,7 @@ const css = read('src', 'PublisherStudio.Web', 'wwwroot', 'css', 'site.css');
 for (const contract of [
   'SignalConnector', 'SignalArrow', 'SignalConnectorSettings', 'SignalConnectorTrigger',
   'SignalConnectorVisual', 'SignalGesture', 'SignalCompletionAction', 'MotionTargetSelector',
-  'CompletionTargetSelector', 'NextConnectorId'
+  'CompletionTargetSelector', 'NextConnectorId', 'ResizeWidthPercent', 'ResizeHeightPercent'
 ]) assert.ok(model.includes(contract), `${contract} is missing from the signal model.`);
 
 assert.match(page, /CommitSignalConnector/);
@@ -39,6 +39,8 @@ assert.match(inspector, /Travel morph \/ transform/);
 assert.match(inspector, /Cell, chart point, button/);
 assert.match(inspector, /No server or network request is needed/);
 assert.match(inspector, /Preview signal now/);
+assert.match(inspector, /Resize width \(%\)/);
+assert.match(inspector, /Resize height \(%\)/);
 
 assert.match(runtime, /function signalConnectorRuntime\(/);
 assert.match(runtime, /signalConnectorRuntime\.toString\(\)/, 'single-file HTML must embed the runtime source');
@@ -47,7 +49,12 @@ assert.match(runtime, /waitForTarget/, 'signal targets rendered after page load 
 assert.match(runtime, /circular signal chain/, 'signal chaining must guard against cycles');
 assert.match(runtime, /window\.PublisherStudioSignals = api/);
 assert.match(runtime, /publisherSignalSynthetic/);
-assert.match(runtime, /event\?\.isTrusted === false/);
+assert.match(runtime, /MutationObserver/);
+assert.match(runtime, /const api = \{ run, stop, reset, startPage, dispose/);
+assert.match(runtime, /page\.__publisherSignalRuntime\?\.reset/);
+assert.match(runtime, /resizeWidthPercent/);
+assert.match(runtime, /resizeHeightPercent/);
+assert.doesNotMatch(runtime.slice(runtime.indexOf('function signalConnectorRuntime'), runtime.indexOf('function websitePresentationRuntime')), /publicationReducedMotion/, 'embedded signal runtime must be self-contained');
 assert.match(runtime, /options\.finiteLoops !== true/);
 assert.match(runtime, /videoSignals\?\.startPage\(page\)/);
 assert.match(runtime, /videoSignals\?\.stop\(\)/);
@@ -80,4 +87,4 @@ assert.match(pictureRuntime, /downloadPictureStudioSvg/);
 assert.match(css, /publisher-signal-runner/);
 assert.match(css, /picture-path-point-row/);
 
-console.log('offline signal connector, spreadsheet targeting, SVG output, and path-tool contract tests passed');
+console.log('offline signal connector reset/resize, spreadsheet targeting, SVG output, and path-tool contract tests passed');

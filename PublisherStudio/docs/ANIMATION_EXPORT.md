@@ -77,3 +77,16 @@ The browser runtime is shared by editor preview, presentation/site HTML, and vid
 Single-file HTML exports embed the runtime function and the serialized settings directly. No call back to PublisherStudio is made. The exported document therefore remains interactive when opened from local storage with no network. A publication that separately uses REST/OData or other remote live data still needs access to those configured endpoints.
 
 Video export runs the same runtime against the recording DOM. Chained signal durations are included in the page recording duration. Infinite signal loops are recorded as their configured finite repeat count so export termination remains deterministic.
+
+## Reversible preview state and signal resizing (v1.0.42)
+
+Editor preview is treated as a temporary playback session. Before an ordinary animation or signal mutates an object, the browser records the relevant DOM state. **Stop preview** cancels active Web Animations and signal chains, removes transient runners, and restores transforms, width/height, opacity, inline style, classes, hidden state, and media playback position. Ordinary animation preview also restores automatically after its preview sequence completes.
+
+Signal motion now has two distinct size mechanisms:
+
+- `Scale` applies a transform scale without changing layout dimensions.
+- `ResizeWidthPercent` and `ResizeHeightPercent` animate the target's measured box width and height. A value of `100` leaves that dimension unchanged.
+
+Click and hover triggers are delegated from the publication root and resolve their current endpoint target for every event. This avoids stale listeners when a DevExtreme component, spreadsheet preview, chart, or custom HTML subtree replaces its internal DOM. A mutation observer separately maintains connector-line hit testing.
+
+Page-entry playback calls signal reset before evaluating its triggers. Replaying or re-entering a page therefore uses the current publication objects as a stable initial baseline instead of compounding a previous preview run. The runtime implementation is embedded directly in offline HTML exports, including its reset and resize behavior.

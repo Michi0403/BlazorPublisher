@@ -326,6 +326,8 @@ public sealed partial class PublicationFileService
                 connector.Signal.DurationSeconds = Math.Clamp(connector.Signal.DurationSeconds <= 0 ? 1.5 : connector.Signal.DurationSeconds, .05, 3600);
                 connector.Signal.RepeatCount = Math.Clamp(connector.Signal.RepeatCount <= 0 ? 1 : connector.Signal.RepeatCount, 1, 1000);
                 connector.Signal.Scale = Math.Clamp(connector.Signal.Scale <= 0 ? 1 : connector.Signal.Scale, .01, 100);
+                connector.Signal.ResizeWidthPercent = Math.Clamp(connector.Signal.ResizeWidthPercent <= 0 ? 100 : connector.Signal.ResizeWidthPercent, .01, 10000);
+                connector.Signal.ResizeHeightPercent = Math.Clamp(connector.Signal.ResizeHeightPercent <= 0 ? 100 : connector.Signal.ResizeHeightPercent, .01, 10000);
                 connector.Signal.Opacity = Math.Clamp(connector.Signal.Opacity, 0, 1);
                 connector.Signal.CompletionDurationSeconds = Math.Clamp(connector.Signal.CompletionDurationSeconds <= 0 ? .8 : connector.Signal.CompletionDurationSeconds, .01, 3600);
                 if (connector.Signal.MotionTargetElementId is { } motionTarget && !elementIds.Contains(motionTarget))
@@ -338,7 +340,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.39";
+        document.FormatVersion = "1.40";
         return document;
     }
 

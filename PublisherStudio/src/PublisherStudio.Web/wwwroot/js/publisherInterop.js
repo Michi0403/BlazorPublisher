@@ -3170,6 +3170,60 @@ export function disposeWordArtPathEditor(editorId) {
 
 const publicationAnimationPreviews = new Map();
 
+function publicationPreviewAttribute(node, name) {
+    return node?.hasAttribute?.(name) ? node.getAttribute(name) : null;
+}
+function publicationPreviewSnapshot(node) {
+    if (!node) return null;
+    const media = node.matches?.('video,audio') ? node : null;
+    return {
+        node,
+        style: publicationPreviewAttribute(node, 'style'),
+        className: publicationPreviewAttribute(node, 'class'),
+        hidden: publicationPreviewAttribute(node, 'hidden'),
+        signalOpacity: publicationPreviewAttribute(node, 'data-publisher-signal-opacity'),
+        media: media ? {
+            currentTime: Number.isFinite(media.currentTime) ? media.currentTime : 0,
+            paused: media.paused,
+            volume: media.volume,
+            playbackRate: media.playbackRate,
+            muted: media.muted,
+            loop: media.loop,
+            timeHandler: media.__publisherTimeHandler || null
+        } : null
+    };
+}
+function restorePublicationPreviewAttribute(node, name, value) {
+    if (!node) return;
+    if (value === null) node.removeAttribute(name); else node.setAttribute(name, value);
+}
+function restorePublicationPreviewSnapshot(snapshot) {
+    const node = snapshot?.node;
+    if (!node?.isConnected) return;
+    restorePublicationPreviewAttribute(node, 'style', snapshot.style);
+    restorePublicationPreviewAttribute(node, 'class', snapshot.className);
+    restorePublicationPreviewAttribute(node, 'hidden', snapshot.hidden);
+    restorePublicationPreviewAttribute(node, 'data-publisher-signal-opacity', snapshot.signalOpacity);
+    if (!snapshot.media || !node.matches?.('video,audio')) return;
+    const currentHandler = node.__publisherTimeHandler;
+    if (currentHandler) node.removeEventListener('timeupdate', currentHandler);
+    node.__publisherTimeHandler = snapshot.media.timeHandler;
+    if (snapshot.media.timeHandler) node.addEventListener('timeupdate', snapshot.media.timeHandler);
+    node.pause();
+    node.volume = snapshot.media.volume;
+    node.playbackRate = snapshot.media.playbackRate;
+    node.muted = snapshot.media.muted;
+    node.loop = snapshot.media.loop;
+    try { node.currentTime = snapshot.media.currentTime; } catch { }
+    if (!snapshot.media.paused) node.play().catch(() => {});
+}
+function capturePublicationPreviewNode(state, node) {
+    if (!state?.snapshots || !node || state.snapshots.has(node)) return;
+    state.snapshots.set(node, publicationPreviewSnapshot(node));
+    if (!node.matches?.('video,audio'))
+        node.querySelectorAll?.('video,audio').forEach(media => capturePublicationPreviewNode(state, media));
+}
+
 function parsePublicationData(value, fallback) {
     if (!value) return fallback;
     try { return JSON.parse(value); } catch { return fallback; }
@@ -3395,6 +3449,8 @@ function clearPublicationPreview(key) {
     for (const node of state.mediaNodes || []) pausePublicationMediaNode(node, true);
     if (state.clickTarget && state.clickHandler) state.clickTarget.removeEventListener('click', state.clickHandler, true);
     state.root?.classList.remove('pub-animation-previewing', 'pub-animation-click-hint');
+    [...(state.snapshots?.values?.() || [])].reverse().forEach(restorePublicationPreviewSnapshot);
+    state.snapshots?.clear?.();
     publicationAnimationPreviews.delete(key);
     if (state.root?.querySelector?.('.data-visual-view')) refreshDataVisualLayout(state.root.id || 'publisher-page');
 }
@@ -3423,6 +3479,7 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
         if (Number.isFinite(explicitStart)) start = Math.max(0, explicitStart);
         else if (trigger === 'withprevious') start = previousStart + ownDelay;
         else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
+        publicationAnimationGroupNodes(item.node).forEach(node => capturePublicationPreviewNode(state, node));
         if (isMediaAnimationEffect(item.animation.effect)) state.mediaNodes.add(item.node);
         state.animations.push(runPublicationAnimation(item.node, item.animation, start));
         previousStart = start;
@@ -3431,8 +3488,10 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
 }
 function previewPublicationItems(root, items, includeTransition, transitionTarget = root) {
     clearPublicationPreview(root.id || root);
-    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set(), cleanupTimer: 0 };
+    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set(), cleanupTimer: 0, snapshots: new Map() };
     publicationAnimationPreviews.set(root.id || root, state);
+    capturePublicationPreviewNode(state, root);
+    capturePublicationPreviewNode(state, transitionTarget);
     root.classList.add('pub-animation-previewing');
     if (includeTransition) state.animations.push(runPublicationPageTransition(root, true, transitionTarget));
 
@@ -3466,6 +3525,7 @@ function previewPublicationItems(root, items, includeTransition, transitionTarge
                 if (animationName(mediaNode.dataset.mediaTrigger) === 'onclick') {
                     event.preventDefault();
                     event.stopImmediatePropagation();
+                    capturePublicationPreviewNode(state, mediaNode);
                     state.mediaNodes.add(mediaNode);
                     togglePublicationMediaNode(mediaNode);
                     return;
@@ -3489,7 +3549,11 @@ function previewPublicationItems(root, items, includeTransition, transitionTarge
 function previewPageAnimations(pageId) {
     const page = document.getElementById(pageId);
     if (!page) return;
+    if (!page.__publisherSignalRuntime)
+        page.__publisherSignalRuntime = signalConnectorRuntime(page, { autoStart: false, editor: true });
+    page.__publisherSignalRuntime?.reset?.();
     previewPublicationItems(page, animationItems(page), true);
+    page.__publisherSignalRuntime?.startPage?.(page);
 }
 function previewElementAnimations(elementId) {
     const node = document.getElementById(elementId);
@@ -3507,7 +3571,10 @@ function previewAnimationStep(pageId, animationId) {
 function stopAnimationPreview(pageId) {
     const page = document.getElementById(pageId);
     clearPublicationPreview(pageId);
-    if (page) clearPublicationPreview(page);
+    if (page) {
+        clearPublicationPreview(page);
+        page.__publisherSignalRuntime?.reset?.();
+    }
 }
 
 
@@ -3572,6 +3639,7 @@ function schedulePublicationPreviewMedia(state, root, initialOffset = 0) {
         const trigger = animationName(node.dataset.mediaTrigger);
         if (node.dataset.mediaAutoplay === 'false' || trigger === 'onclick') continue;
         const delay = Math.max(0, initialOffset + animationNumber(node.dataset.mediaStart, 0));
+        capturePublicationPreviewNode(state, node);
         state.mediaNodes.add(node);
         if (publicationReducedMotion() || delay <= 0) playPublicationMediaNode(node);
         else state.mediaTimers.push(setTimeout(() => playPublicationMediaNode(node), delay * 1000));
@@ -3592,9 +3660,15 @@ function signalConnectorRuntime(root = document, options = {}) {
     const wait = milliseconds => new Promise(resolve => setTimeout(resolve, Math.max(0, milliseconds)));
     const parse = value => { try { return JSON.parse(value || '{}'); } catch { return {}; } };
     const bool = value => value === true || String(value).toLowerCase() === 'true';
+    const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const cssEscape = value => globalThis.CSS?.escape ? CSS.escape(String(value)) : String(value).replace(/["\\]/g, '\\$&');
     const controllers = new Map();
     const bindings = [];
+    const snapshots = new Map();
+    const effects = new Map();
+    const timers = new Set();
+    const pointerStates = new Map();
+    let observer = null;
     let disposed = false;
 
     const pageFor = connector => connector?.closest?.('[data-page-id],.print-page,.publication-page') || host;
@@ -3648,8 +3722,61 @@ function signalConnectorRuntime(root = document, options = {}) {
         }
         return target;
     };
+    const attribute = (node, name) => node?.hasAttribute?.(name) ? node.getAttribute(name) : null;
+    const capture = node => {
+        if (!node || snapshots.has(node)) return;
+        const media = node.matches?.('video,audio') ? node : null;
+        snapshots.set(node, {
+            node,
+            style: attribute(node, 'style'),
+            className: attribute(node, 'class'),
+            hidden: attribute(node, 'hidden'),
+            signalOpacity: attribute(node, 'data-publisher-signal-opacity'),
+            media: media ? {
+                currentTime: Number.isFinite(media.currentTime) ? media.currentTime : 0,
+                paused: media.paused,
+                volume: media.volume,
+                playbackRate: media.playbackRate,
+                muted: media.muted,
+                loop: media.loop
+            } : null
+        });
+    };
+    const restoreAttribute = (node, name, value) => {
+        if (value === null) node.removeAttribute(name); else node.setAttribute(name, value);
+    };
+    const restoreSnapshot = snapshot => {
+        const node = snapshot?.node;
+        if (!node?.isConnected) return;
+        restoreAttribute(node, 'style', snapshot.style);
+        restoreAttribute(node, 'class', snapshot.className);
+        restoreAttribute(node, 'hidden', snapshot.hidden);
+        restoreAttribute(node, 'data-publisher-signal-opacity', snapshot.signalOpacity);
+        if (!snapshot.media || !node.matches?.('video,audio')) return;
+        node.pause();
+        node.volume = snapshot.media.volume;
+        node.playbackRate = snapshot.media.playbackRate;
+        node.muted = snapshot.media.muted;
+        node.loop = snapshot.media.loop;
+        try { node.currentTime = snapshot.media.currentTime; } catch { }
+        if (!snapshot.media.paused) node.play().catch(() => {});
+    };
+    const trackEffect = (animation, target, persistent = false) => {
+        if (!animation) return animation;
+        effects.set(animation, target || null);
+        animation.finished?.catch?.(() => undefined).finally?.(() => {
+            if (!persistent) effects.delete(animation);
+        });
+        return animation;
+    };
+    const schedule = (callback, milliseconds) => {
+        const timer = setTimeout(() => { timers.delete(timer); callback(); }, Math.max(0, milliseconds));
+        timers.add(timer);
+        return timer;
+    };
     const dispatchGesture = (target, gesture) => {
         if (!target) return;
+        capture(target);
         const kind = lower(gesture);
         const init = { bubbles: true, cancelable: true, composed: true, view: window };
         const dispatch = type => {
@@ -3664,7 +3791,7 @@ function signalConnectorRuntime(root = document, options = {}) {
         } else if (kind === 'hover') {
             for (const type of ['pointerover', 'mouseover', 'pointerenter', 'mouseenter']) dispatch(type);
             target.classList.add('ps-signal-hover');
-            setTimeout(() => {
+            schedule(() => {
                 for (const type of ['pointerout', 'mouseout', 'pointerleave', 'mouseleave']) dispatch(type);
                 target.classList.remove('ps-signal-hover');
             }, 800);
@@ -3672,23 +3799,28 @@ function signalConnectorRuntime(root = document, options = {}) {
     };
     const replayAnimations = target => {
         if (!target) return;
+        capture(target);
         try {
             target.getAnimations?.({ subtree: true }).forEach(animation => { animation.cancel(); animation.play(); });
             target.dispatchEvent(new CustomEvent('publisher:replay-animation', { bubbles: true, detail: { target } }));
         } catch { }
     };
     const animateOpacity = async (target, from, to, duration, signal) => {
-        if (!target?.animate || publicationReducedMotion()) { target.style.opacity = String(to); return; }
-        const animation = target.animate([{ opacity: from }, { opacity: to }], {
+        if (!target) return;
+        capture(target);
+        if (!target.animate || reducedMotion()) { target.style.opacity = String(to); return; }
+        const animation = trackEffect(target.animate([{ opacity: from }, { opacity: to }], {
             duration: Math.max(10, duration * 1000), easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards'
-        });
+        }), target, false);
         signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
         try { await animation.finished; } catch { }
         if (!signal?.aborted) target.style.opacity = String(to);
         animation.cancel();
+        effects.delete(animation);
     };
     const setVisibility = async (target, visible, duration, signal) => {
         if (!target) return;
+        capture(target);
         if (visible) {
             target.classList.remove('ps-action-hidden');
             target.hidden = false;
@@ -3713,6 +3845,7 @@ function signalConnectorRuntime(root = document, options = {}) {
         }
         const target = await waitForTarget(() => configuredTarget(connector, settings, 'completion'), signal);
         if (!target) return;
+        capture(target);
         const duration = Math.max(.01, num(settings.completionDurationSeconds, .8));
         const value = String(settings.completionValue || '').trim();
         if (action === 'click' || action === 'hover') dispatchGesture(target, action);
@@ -3725,18 +3858,24 @@ function signalConnectorRuntime(root = document, options = {}) {
             await animateOpacity(target, start, destination, duration, signal);
         }
         else if (action === 'replayanimation') replayAnimations(target);
-        else if (action === 'playmedia') target.querySelector?.('video,audio')?.play?.().catch?.(() => {});
-        else if (action === 'pausemedia') target.querySelector?.('video,audio')?.pause?.();
+        else if (action === 'playmedia') {
+            const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
+            if (media) { capture(media); media.play?.().catch?.(() => {}); }
+        }
+        else if (action === 'pausemedia') {
+            const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
+            if (media) { capture(media); media.pause?.(); }
+        }
         else if (action === 'togglemediaplayback') {
             const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
-            if (media) media.paused ? media.play().catch(() => {}) : media.pause();
+            if (media) { capture(media); media.paused ? media.play().catch(() => {}) : media.pause(); }
         } else if (action === 'highlight') {
             const color = value || '#facc15';
-            const animation = target.animate?.([
+            const animation = trackEffect(target.animate?.([
                 { outline: `0 solid ${color}`, boxShadow: `0 0 0 0 ${color}00` },
                 { outline: `4px solid ${color}`, boxShadow: `0 0 0 8px ${color}55`, offset: .35 },
                 { outline: `0 solid ${color}`, boxShadow: `0 0 0 0 ${color}00` }
-            ], { duration: duration * 1000, easing: 'ease-in-out' });
+            ], { duration: duration * 1000, easing: 'ease-in-out' }), target, false);
             try { await animation?.finished; } catch { }
         } else if (action === 'addcssclass' && value) target.classList.add(...value.split(/\s+/).filter(Boolean));
         else if (action === 'removecssclass' && value) target.classList.remove(...value.split(/\s+/).filter(Boolean));
@@ -3745,28 +3884,42 @@ function signalConnectorRuntime(root = document, options = {}) {
     const animateMotion = (connector, settings, signal, resolvedTarget = null) => {
         const target = resolvedTarget || configuredTarget(connector, settings, 'motion');
         if (!target?.animate) return null;
+        capture(target);
         const x = num(settings.translateXPercent);
         const y = num(settings.translateYPercent);
         const scale = Math.max(.01, num(settings.scale, 1));
+        const resizeWidth = Math.max(.01, num(settings.resizeWidthPercent, 100));
+        const resizeHeight = Math.max(.01, num(settings.resizeHeightPercent, 100));
         const rotation = num(settings.rotationDegrees);
         const opacity = Math.max(0, Math.min(1, num(settings.opacity, 1)));
-        if (Math.abs(x) < .001 && Math.abs(y) < .001 && Math.abs(scale - 1) < .001 && Math.abs(rotation) < .001 && Math.abs(opacity - 1) < .001) return null;
+        const resizeRequested = Math.abs(resizeWidth - 100) >= .001 || Math.abs(resizeHeight - 100) >= .001;
+        if (Math.abs(x) < .001 && Math.abs(y) < .001 && Math.abs(scale - 1) < .001 && !resizeRequested && Math.abs(rotation) < .001 && Math.abs(opacity - 1) < .001) return null;
         const computed = getComputedStyle(target);
         const base = computed.transform === 'none' ? '' : computed.transform;
         const destination = `${base} translate(${x}%,${y}%) scale(${scale}) rotate(${rotation}deg)`.trim();
+        const startFrame = { transform: base || 'none', opacity: computed.opacity };
+        const endFrame = { transform: destination, opacity };
+        if (resizeRequested) {
+            const rect = target.getBoundingClientRect();
+            const width = Math.max(.01, rect.width);
+            const height = Math.max(.01, rect.height);
+            startFrame.width = `${width}px`;
+            startFrame.height = `${height}px`;
+            endFrame.width = `${width * resizeWidth / 100}px`;
+            endFrame.height = `${height * resizeHeight / 100}px`;
+        }
         const duration = Math.max(.05, num(settings.durationSeconds, 1.5)) * 1000;
         const loop = bool(settings.loop) && options.finiteLoops !== true;
-        const iterations = loop ? Infinity : Math.max(1, Math.round(num(settings.repeatCount, 1)));
-        const animation = target.animate([
-            { transform: base || 'none', opacity: computed.opacity },
-            { transform: destination, opacity }
-        ], {
+        const repeatCount = Math.max(1, Math.round(num(settings.repeatCount, 1)));
+        const iterations = loop ? Infinity : repeatCount * (bool(settings.autoReverse) ? 2 : 1);
+        const restoreAfterRun = bool(settings.restoreMotionAfterRun);
+        const animation = trackEffect(target.animate([startFrame, endFrame], {
             duration,
             iterations,
             direction: bool(settings.autoReverse) ? 'alternate' : 'normal',
             easing: 'cubic-bezier(.4,0,.2,1)',
-            fill: bool(settings.restoreMotionAfterRun) ? 'none' : 'forwards'
-        });
+            fill: restoreAfterRun ? 'none' : 'forwards'
+        }), target, !restoreAfterRun);
         signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
         return animation;
     };
@@ -3775,28 +3928,31 @@ function signalConnectorRuntime(root = document, options = {}) {
         const visual = lower(settings.visual || 'flyingarrow');
         const path = connector.querySelector('.connector-line');
         const duration = Math.max(.05, num(settings.durationSeconds, 1.5)) * 1000;
-        const iterations = bool(settings.loop) && options.finiteLoops !== true ? Infinity : Math.max(1, Math.round(num(settings.repeatCount, 1)));
+        const repeatCount = Math.max(1, Math.round(num(settings.repeatCount, 1)));
+        const iterations = bool(settings.loop) && options.finiteLoops !== true ? Infinity : repeatCount * (bool(settings.autoReverse) ? 2 : 1);
         const direction = bool(settings.autoReverse) ? 'alternate' : 'normal';
         if (!visible || visual === 'none' || !path) { await wait(duration * (Number.isFinite(iterations) ? iterations : 1)); return; }
         if (visual === 'drawpath' && path.animate) {
+            capture(path);
             const length = path.getTotalLength?.() || 100;
             const previousDash = path.style.strokeDasharray;
             const previousOffset = path.style.strokeDashoffset;
-            const animation = path.animate([
+            const animation = trackEffect(path.animate([
                 { strokeDasharray: `${length} ${length}`, strokeDashoffset: length },
                 { strokeDasharray: `${length} ${length}`, strokeDashoffset: 0 }
-            ], { duration, iterations, direction, easing: 'linear' });
+            ], { duration, iterations, direction, easing: 'linear' }), path, false);
             signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
             try { await animation.finished; } catch { }
             path.style.strokeDasharray = previousDash; path.style.strokeDashoffset = previousOffset;
             return;
         }
         if (visual === 'pulse' && path.animate) {
-            const animation = path.animate([
+            capture(path);
+            const animation = trackEffect(path.animate([
                 { opacity: .3, filter: 'drop-shadow(0 0 0 currentColor)' },
                 { opacity: 1, filter: 'drop-shadow(0 0 5px currentColor)' },
                 { opacity: .3, filter: 'drop-shadow(0 0 0 currentColor)' }
-            ], { duration, iterations, direction, easing: 'ease-in-out' });
+            ], { duration, iterations, direction, easing: 'ease-in-out' }), path, false);
             signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
             try { await animation.finished; } catch { }
             return;
@@ -3848,6 +4004,7 @@ function signalConnectorRuntime(root = document, options = {}) {
         runOptions.signal?.addEventListener?.('abort', () => controller.abort(), { once: true });
         controllers.set(id, controller);
         const signal = controller.signal;
+        capture(connector);
         connector.classList.add('ps-signal-running');
         try {
             await wait(Math.max(0, num(settings.delaySeconds)) * 1000);
@@ -3877,54 +4034,96 @@ function signalConnectorRuntime(root = document, options = {}) {
             if (controllers.get(id) === controller) controllers.delete(id);
         }
     }
-    const stop = id => {
+    const abort = id => {
         if (id) { controllers.get(String(id).replace(/^element-/, ''))?.abort(); return; }
-        controllers.forEach(controller => controller.abort()); controllers.clear();
+        controllers.forEach(controller => controller.abort());
+        controllers.clear();
     };
+    const reset = () => {
+        abort();
+        effects.forEach((_, animation) => { try { animation.cancel(); } catch { } });
+        effects.clear();
+        timers.forEach(timer => clearTimeout(timer));
+        timers.clear();
+        host.querySelectorAll('.publisher-signal-runner').forEach(node => node.remove());
+        [...snapshots.values()].reverse().forEach(restoreSnapshot);
+        snapshots.clear();
+        host.querySelectorAll('.ps-signal-running,.ps-signal-hover').forEach(node => node.classList.remove('ps-signal-running', 'ps-signal-hover'));
+    };
+    const stop = id => { if (id) abort(id); else reset(); };
     const signalsIn = page => [...(page || host).querySelectorAll('[data-signal-enabled="true"][data-connector-id]')];
     const startPage = page => {
         const current = typeof page === 'string' ? host.querySelector(`[data-page-id="${cssEscape(page)}"]`) : page;
-        if (current) {
-            controllers.forEach((controller, id) => {
-                const connector = host.querySelector(`[data-connector-id="${cssEscape(id)}"]`);
-                if (connector && !current.contains(connector)) controller.abort();
-            });
-        }
+        reset();
         signalsIn(current || host).forEach(connector => {
             const settings = parse(connector.dataset.signal);
             if (lower(settings.trigger) === 'onpageenter') void run(connector);
         });
     };
-    const bind = () => {
+    const sourceContainsEvent = (connector, event) => {
+        const settings = parse(connector.dataset.signal);
+        const source = pointTarget(connector, 'source') || connector;
+        const path = event.composedPath?.() || [];
+        const onSource = source === event.target || source.contains?.(event.target) || path.includes(source);
+        const onVisibleLine = settings.lineVisible !== false && connector.dataset.signalLineVisible !== 'false'
+            && (connector === event.target || connector.contains?.(event.target) || path.includes(connector));
+        return onSource || onVisibleLine ? source : null;
+    };
+    const handleTrigger = (event, trigger) => {
+        if (event?.publisherSignalSynthetic) return;
         signalsIn(host).forEach(connector => {
             const settings = parse(connector.dataset.signal);
-            const trigger = lower(settings.trigger);
-            if (trigger !== 'onclick' && trigger !== 'onhover') return;
-            const source = pointTarget(connector, 'source') || connector;
-            const eventName = trigger === 'onclick' ? 'click' : 'pointerenter';
-            const handler = event => {
-                if (event?.publisherSignalSynthetic || event?.isTrusted === false) return;
-                void run(connector);
-            };
-            source.addEventListener(eventName, handler);
-            bindings.push([source, eventName, handler]);
-            if (connector !== source && settings.lineVisible !== false) {
+            if (lower(settings.trigger) !== trigger) return;
+            const source = sourceContainsEvent(connector, event);
+            if (!source) return;
+            if (trigger === 'onhover' && event.relatedTarget && source.contains?.(event.relatedTarget)) return;
+            void run(connector);
+        });
+    };
+    const refreshConnectorHitTesting = () => {
+        const current = new Set(signalsIn(host));
+        current.forEach(connector => {
+            const settings = parse(connector.dataset.signal);
+            const needsPointerEvents = ['onclick', 'onhover'].includes(lower(settings.trigger))
+                && settings.lineVisible !== false && connector.dataset.signalLineVisible !== 'false';
+            if (needsPointerEvents && !pointerStates.has(connector)) {
+                pointerStates.set(connector, connector.style.pointerEvents);
                 connector.style.pointerEvents = 'auto';
-                connector.addEventListener(eventName, handler);
-                bindings.push([connector, eventName, handler]);
+            } else if (!needsPointerEvents && pointerStates.has(connector)) {
+                connector.style.pointerEvents = pointerStates.get(connector);
+                pointerStates.delete(connector);
             }
         });
+        [...pointerStates.keys()].filter(connector => !current.has(connector) || !connector.isConnected).forEach(connector => {
+            if (connector.isConnected) connector.style.pointerEvents = pointerStates.get(connector);
+            pointerStates.delete(connector);
+        });
+    };
+    const bind = () => {
+        const click = event => handleTrigger(event, 'onclick');
+        const hover = event => handleTrigger(event, 'onhover');
         const pageEnter = event => startPage(event.target?.closest?.('[data-page-id]') || event.target);
+        host.addEventListener('click', click, true);
+        host.addEventListener('pointerover', hover, true);
         host.addEventListener('publisher:page-enter', pageEnter);
-        bindings.push([host, 'publisher:page-enter', pageEnter]);
+        bindings.push([host, 'click', click, true], [host, 'pointerover', hover, true], [host, 'publisher:page-enter', pageEnter, false]);
+        refreshConnectorHitTesting();
+        if (typeof MutationObserver === 'function') {
+            observer = new MutationObserver(refreshConnectorHitTesting);
+            observer.observe(host, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-signal', 'data-signal-enabled', 'data-signal-line-visible'] });
+        }
     };
     const dispose = () => {
-        disposed = true; stop();
-        bindings.splice(0).forEach(([node, eventName, handler]) => node.removeEventListener(eventName, handler));
-        host.querySelectorAll('.publisher-signal-runner').forEach(node => node.remove());
+        disposed = true;
+        reset();
+        observer?.disconnect();
+        observer = null;
+        bindings.splice(0).forEach(([node, eventName, handler, capturePhase]) => node.removeEventListener(eventName, handler, capturePhase));
+        pointerStates.forEach((value, connector) => { if (connector.isConnected) connector.style.pointerEvents = value; });
+        pointerStates.clear();
     };
     bind();
-    const api = { run, stop, startPage, dispose, root: host };
+    const api = { run, stop, reset, startPage, dispose, root: host };
     if (options.expose !== false) window.PublisherStudioSignals = api;
     if (options.autoStart !== false) {
         queueMicrotask(() => {
@@ -3934,7 +4133,6 @@ function signalConnectorRuntime(root = document, options = {}) {
     }
     return api;
 }
-
 
 function websitePresentationRuntime() {
     const publication = document.querySelector('.website-publication');
@@ -4837,7 +5035,7 @@ function exportedPageDuration(page) {
         return [String(node.dataset.connectorId || ''), settings];
     }));
     const signalOwnDuration = settings => {
-        const repeats = Math.max(1, animationNumber(settings?.repeatCount, 1));
+        const repeats = Math.max(1, animationNumber(settings?.repeatCount, 1)) * (settings?.autoReverse ? 2 : 1);
         return Math.max(0, animationNumber(settings?.delaySeconds, 0))
             + Math.max(.05, animationNumber(settings?.durationSeconds, 1.5)) * repeats
             + Math.max(0, animationNumber(settings?.completionDurationSeconds, 0));
@@ -5902,7 +6100,7 @@ window.publisherStudio = {
     },
     stopSignalConnectors(rootId) {
         const root = typeof rootId === 'string' ? document.getElementById(rootId) : rootId;
-        root?.__publisherSignalRuntime?.stop?.();
+        root?.__publisherSignalRuntime?.reset?.();
     },
 
     clickElement(id) { clickElementById(id); },

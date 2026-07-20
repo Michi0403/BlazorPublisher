@@ -579,6 +579,8 @@
                         <label>Move X (%)<input type="number" step=".1" value="@Inv(connector.Signal.TranslateXPercent)" @onchange="ChangeSignalMoveX" /></label>
                         <label>Move Y (%)<input type="number" step=".1" value="@Inv(connector.Signal.TranslateYPercent)" @onchange="ChangeSignalMoveY" /></label>
                         <label>Scale<input type="number" min=".01" max="100" step=".01" value="@Inv(connector.Signal.Scale)" @onchange="ChangeSignalScale" /></label>
+                        <label>Resize width (%)<input type="number" min=".01" max="10000" step=".1" value="@Inv(connector.Signal.ResizeWidthPercent)" @onchange="ChangeSignalResizeWidth" /></label>
+                        <label>Resize height (%)<input type="number" min=".01" max="10000" step=".1" value="@Inv(connector.Signal.ResizeHeightPercent)" @onchange="ChangeSignalResizeHeight" /></label>
                         <label>Rotation (°)<input type="number" step=".1" value="@Inv(connector.Signal.RotationDegrees)" @onchange="ChangeSignalRotation" /></label>
                         <label>Opacity<input type="number" min="0" max="1" step=".01" value="@Inv(connector.Signal.Opacity)" @onchange="ChangeSignalOpacity" /></label>
                         <label class="check-row"><input type="checkbox" checked="@connector.Signal.RestoreMotionAfterRun" @onchange="ToggleSignalRestoreMotion" /> Restore afterwards</label>
@@ -875,6 +877,8 @@
     private void ChangeSignalMoveX(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.TranslateXPercent = Math.Clamp(value, -10000, 10000)); }
     private void ChangeSignalMoveY(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.TranslateYPercent = Math.Clamp(value, -10000, 10000)); }
     private void ChangeSignalScale(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.Scale = Math.Clamp(value, .01, 100)); }
+    private void ChangeSignalResizeWidth(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.ResizeWidthPercent = Math.Clamp(value, .01, 10000)); }
+    private void ChangeSignalResizeHeight(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.ResizeHeightPercent = Math.Clamp(value, .01, 10000)); }
     private void ChangeSignalRotation(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.RotationDegrees = Math.Clamp(value, -36000, 36000)); }
     private void ChangeSignalOpacity(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.Opacity = Math.Clamp(value, 0, 1)); }
     private void ChangeSignalCompletionDuration(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.CompletionDurationSeconds = Math.Clamp(value, .01, 3600)); }

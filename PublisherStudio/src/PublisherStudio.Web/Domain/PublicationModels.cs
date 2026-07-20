@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.39";
+    public string FormatVersion { get; set; } = "1.40";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -346,6 +346,8 @@ public sealed class SignalConnectorSettings
     public double TranslateXPercent { get; set; }
     public double TranslateYPercent { get; set; }
     public double Scale { get; set; } = 1;
+    public double ResizeWidthPercent { get; set; } = 100;
+    public double ResizeHeightPercent { get; set; } = 100;
     public double RotationDegrees { get; set; }
     public double Opacity { get; set; } = 1;
     public bool RestoreMotionAfterRun { get; set; }

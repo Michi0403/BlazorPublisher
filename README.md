@@ -1,4 +1,4 @@
-Link to winx64 Installer https://github.com/Michi0403/BlazorPublisher/releases/download/v137/PublisherStudio.Setup.exe
+Link to winx64 Installer https://github.com/Michi0403/BlazorPublisher/releases/download/v138/PublisherStudio.Setup.exe
 
 # PublisherStudio
 

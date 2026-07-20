@@ -8,8 +8,13 @@ public static class ConnectorGeometry
 {
     public static bool TryResolve(PublicationPage page, ConnectorElement connector, out PublicationPoint source, out PublicationPoint target)
     {
-        return TryResolveEndpoint(page, connector.Source, out source)
-            && TryResolveEndpoint(page, connector.Target, out target);
+        if (!TryResolveEndpoint(page, connector.Source, out source))
+        {
+            target = default;
+            return false;
+        }
+
+        return TryResolveEndpoint(page, connector.Target, out target);
     }
 
     public static bool TryResolveEndpoint(PublicationPage page, ConnectorEndpoint endpoint, out PublicationPoint point)

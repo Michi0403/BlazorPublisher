@@ -39,7 +39,8 @@
                        OnExportSvg="ExportSvg"
                        OnExportSelectedPng="ExportSelectedPng"
                        OnExportSelectedSvg="ExportSelectedSvg"
-                       OnExportWebsite="ExportWebsite"
+                       OnExportWebsite="ExportPresentationHtml"
+                       OnExportSite="ExportSite"
                        OnExportVideo="ExportVideo"
                        OnInsertPicture="OpenPicturePicker"
                        OnCreatePicture="CreatePicture"
@@ -63,6 +64,8 @@
                        OnInsertDataVisual="InsertDataVisual"
                        OnEditDataVisual="OpenDataVisualEditor"
                        OnManageData="OpenDataManager"
+                       OnInsertComponent="InsertComponent"
+                       OnEditComponent="OpenComponentEditor"
                        OnPreviewPageAnimations="PreviewPageAnimations"
                        OnPreviewObjectAnimations="PreviewObjectAnimations"
                        OnStopAnimations="StopAnimations" />
@@ -82,6 +85,7 @@
         <PageSurface @ref="_pageSurface" State="State" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestReplacePicture="OpenReplacePicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
                      RequestInsertSpreadsheet="OpenSpreadsheetPicker" RequestCreateSpreadsheet="CreateSpreadsheet" RequestEditSpreadsheet="OpenSpreadsheetEditor" RequestDownloadSpreadsheet="DownloadSelectedSpreadsheet"
                      RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
+                     RequestInsertComponent="InsertComponent" RequestEditComponent="OpenComponentEditor"
                      RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia"
                      RequestInsertBarcode="InsertBarcode" RequestEditBarcode="EditBarcode"
                      TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" RequestCanvasInsert="HandleCanvasInsert"
@@ -102,6 +106,8 @@
                         OnInsertDataVisual="InsertDataVisual"
                         OnEditDataVisual="OpenDataVisualEditor"
                         OnManageData="OpenDataManager"
+                        OnInsertComponent="InsertComponent"
+                        OnEditComponent="OpenComponentEditor"
                         OnInsertVideo="OpenVideoPicker"
                         OnInsertAudio="OpenAudioPicker"
                         OnCreateVideo="CreateVideo"
@@ -177,6 +183,7 @@
              Cancelled="CloseMediaStudio" />
 
 <DataVisualEditor Visible="_dataVisualEditorVisible" State="State" Saved="SaveDataVisualEditor" Cancelled="CancelDataVisualEditor" ManageDataRequested="OpenDataManagerFromVisual" />
+<DevExtremeComponentEditor Visible="_componentEditorVisible" State="State" Saved="SaveComponentEditor" Cancelled="CancelComponentEditor" ManageDataRequested="OpenDataManagerFromComponent" />
 <DataManager Visible="_dataManagerVisible" State="State" Closed="CloseDataManager" DataChanged="DataManagerChanged" />
 <BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
 
@@ -200,6 +207,7 @@
     private string _spreadsheetEditorFileName = "Spreadsheet.xlsx";
     private bool _pictureEditorVisible;
     private bool _dataVisualEditorVisible;
+    private bool _componentEditorVisible;
     private bool _dataManagerVisible;
     private bool _mediaStudioVisible;
     private bool _timelineVisible;
@@ -211,7 +219,9 @@
     private PublicationElementKind _mediaStudioKind = PublicationElementKind.Audio;
     private PublicationMediaElement? _mediaStudioInitial;
     private Guid? _pendingNewDataVisualId;
+    private Guid? _pendingNewComponentId;
     private bool _resumeDataVisualAfterManager;
+    private bool _resumeComponentAfterManager;
     private Guid _pictureEditorSessionId;
     private Guid? _pictureEditorTargetId;
     private PictureDocument? _pictureEditorInitialDocument;
@@ -653,7 +663,7 @@
         }
     }
 
-    private async Task ExportWebsite()
+    private async Task ExportPresentationHtml()
     {
         try
         {
@@ -661,7 +671,7 @@
             await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
             var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".html";
-            ShowNotice("Preparing website export…");
+            ShowNotice("Preparing interactive presentation HTML…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
             await JS.InvokeVoidAsync("publisherStudio.exportWebsite", fileName, State.Document.Name);
@@ -671,6 +681,23 @@
         {
             ShowError(ex);
         }
+    }
+
+    private async Task ExportSite()
+    {
+        try
+        {
+            await State.RefreshWebDataAsync(force: true);
+            await InvokeAsync(StateHasChanged);
+            await SaveRecoveryNow();
+            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + "-site.html";
+            ShowNotice("Preparing single-file website export…");
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+            await JS.InvokeVoidAsync("publisherStudio.exportSite", fileName, State.Document.Name);
+            ShowNotice($"Exported {fileName}");
+        }
+        catch (Exception ex) { ShowError(ex); }
     }
 
     private async Task ExportVideo()
@@ -1355,6 +1382,51 @@
         return Task.CompletedTask;
     }
 
+    private async Task InsertComponent(PublicationComponentKind kind)
+    {
+        await CancelPublisherPointerAsync();
+        var component = State.AddDevExtremeComponent(kind);
+        _pendingNewComponentId = component.Id;
+        _componentEditorVisible = true;
+    }
+
+    private async Task OpenComponentEditor()
+    {
+        if (State.SelectedElement is not DevExtremeComponentElement) return;
+        await CancelPublisherPointerAsync();
+        _pendingNewComponentId = null;
+        _componentEditorVisible = true;
+    }
+
+    private Task SaveComponentEditor(DevExtremeComponentElement draft)
+    {
+        State.ApplySelectedComponent(draft);
+        _componentEditorVisible = false;
+        _pendingNewComponentId = null;
+        ShowNotice("Interactive component applied to the publication.");
+        return Task.CompletedTask;
+    }
+
+    private Task CancelComponentEditor()
+    {
+        _componentEditorVisible = false;
+        if (_pendingNewComponentId is Guid id)
+        {
+            State.SelectElement(id);
+            if (State.SelectedElement is DevExtremeComponentElement) State.DeleteSelected();
+        }
+        _pendingNewComponentId = null;
+        return Task.CompletedTask;
+    }
+
+    private Task OpenDataManagerFromComponent()
+    {
+        _resumeComponentAfterManager = true;
+        _componentEditorVisible = false;
+        _dataManagerVisible = true;
+        return Task.CompletedTask;
+    }
+
     private async Task OpenDataManager()
     {
         await CancelPublisherPointerAsync();
@@ -1374,7 +1446,10 @@
         _dataManagerVisible = false;
         if (_resumeDataVisualAfterManager && State.SelectedElement is DataVisualElement)
             _dataVisualEditorVisible = true;
+        if (_resumeComponentAfterManager && State.SelectedElement is DevExtremeComponentElement)
+            _componentEditorVisible = true;
         _resumeDataVisualAfterManager = false;
+        _resumeComponentAfterManager = false;
         return Task.CompletedTask;
     }
 

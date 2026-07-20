@@ -180,6 +180,9 @@
                         case DataVisualElement dataVisual:
                             <DataVisualView @key="dataVisual.Id" Document="State.Document" Item="dataVisual" CurrentPageId="State.SelectedPageId" />
                             break;
+                        case DevExtremeComponentElement component:
+                            <DevExtremeComponentView @key="component.Id" Document="State.Document" Item="component" CurrentPageId="State.SelectedPageId" />
+                            break;
                         case SpreadsheetElement spreadsheet:
                             <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
                                 <div class="publication-content-source" data-content-fit-source>
@@ -347,6 +350,18 @@
             <DxContextMenuItem Text="Manage publication data" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
             <DxContextMenuItem Text="Refresh data" Click="RefreshData" />
         }
+        @if (State.SelectedElement is DevExtremeComponentElement component)
+        {
+            <DxContextMenuItem Text="Open Component Studio" IconCssClass="pub-icon pub-icon-data" BeginGroup="true" Click="EditSelectedComponent" />
+            <DxContextMenuItem Text="Refresh component data" Click="RefreshData" />
+            <DxContextMenuItem Text="Manage publication data…" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
+            <DxContextMenuItem Text="Scope">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(component.Scope == PublicationComponentScope.Page, "This page"))" Click="ComponentPageScope" />
+                    <DxContextMenuItem Text="@(CheckedText(component.Scope == PublicationComponentScope.Document, "All pages"))" Click="ComponentDocumentScope" />
+                </Items>
+            </DxContextMenuItem>
+        }
         @if (State.SelectedElement is ShapeElement shape)
         {
             <DxContextMenuItem Text="Shape type" BeginGroup="true">
@@ -480,6 +495,17 @@
                     <DxContextMenuItem Text="KPI progress" Click="InsertKpi" />
                 </Items>
             </DxContextMenuItem>
+            <DxContextMenuItem Text="Insert interactive component" IconCssClass="pub-icon pub-icon-data">
+                <Items>
+                    <DxContextMenuItem Text="Data Grid" Click="InsertComponentGrid" />
+                    <DxContextMenuItem Text="Tree List" Click="InsertComponentTreeList" />
+                    <DxContextMenuItem Text="Scheduler" Click="InsertComponentScheduler" />
+                    <DxContextMenuItem Text="Edit Form" Click="InsertComponentForm" />
+                    <DxContextMenuItem Text="Menu" Click="InsertComponentMenu" />
+                    <DxContextMenuItem Text="Pivot Grid" Click="InsertComponentPivotGrid" />
+                    <DxContextMenuItem Text="Button" Click="InsertComponentButton" />
+                </Items>
+            </DxContextMenuItem>
             <DxContextMenuItem Text="Manage publication data…" IconCssClass="pub-icon pub-icon-data" Click="ManageData" />
             <DxContextMenuItem Text="Insert barcode / QR…" IconCssClass="pub-icon pub-icon-barcode" Click="InsertBarcode" />
             <DxContextMenuItem Text="Insert shape">
@@ -517,6 +543,8 @@
     [Parameter] public EventCallback<DataVisualKind> RequestInsertDataVisual { get; set; }
     [Parameter] public EventCallback RequestEditDataVisual { get; set; }
     [Parameter] public EventCallback RequestManageData { get; set; }
+    [Parameter] public EventCallback<PublicationComponentKind> RequestInsertComponent { get; set; }
+    [Parameter] public EventCallback RequestEditComponent { get; set; }
     [Parameter] public EventCallback RequestInsertVideo { get; set; }
     [Parameter] public EventCallback RequestInsertAudio { get; set; }
     [Parameter] public EventCallback RequestCreateVideo { get; set; }
@@ -725,6 +753,7 @@
         if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
         if (element is ImageFrameElement) State.ToggleCropMode();
         if (element is DataVisualElement) return RequestEditDataVisual.InvokeAsync();
+        if (element is DevExtremeComponentElement) return RequestEditComponent.InvokeAsync();
         if (element is SpreadsheetElement) return RequestEditSpreadsheet.InvokeAsync();
         if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
         if (element is BarcodeElement) return RequestEditBarcode.InvokeAsync();
@@ -783,6 +812,17 @@
     private void SpreadsheetFitFill() => SetSpreadsheetFit(PublicationContentFitMode.Fill);
     private void SpreadsheetFitStretch() => SetSpreadsheetFit(PublicationContentFitMode.Stretch);
     private Task EditSelectedDataVisual() => RequestEditDataVisual.InvokeAsync();
+    private Task EditSelectedComponent() => RequestEditComponent.InvokeAsync();
+    private void ComponentPageScope() => SetSelectedComponentScope(PublicationComponentScope.Page);
+    private void ComponentDocumentScope() => SetSelectedComponentScope(PublicationComponentScope.Document);
+    private void SetSelectedComponentScope(PublicationComponentScope scope) => State.SetSelectedComponentScope(scope);
+    private Task InsertComponentGrid() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.DataGrid);
+    private Task InsertComponentTreeList() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.TreeList);
+    private Task InsertComponentScheduler() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Scheduler);
+    private Task InsertComponentForm() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Form);
+    private Task InsertComponentMenu() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Menu);
+    private Task InsertComponentPivotGrid() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.PivotGrid);
+    private Task InsertComponentButton() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Button);
     private Task ManageData() => RequestManageData.InvokeAsync();
     private Task InsertVideo() => RequestInsertVideo.InvokeAsync();
     private Task InsertAudio() => RequestInsertAudio.InvokeAsync();
@@ -824,8 +864,15 @@
     private Task InsertKpi() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
     private async Task RefreshData()
     {
-        await State.RefreshWebDataAsync(State.SelectedElement is DataVisualElement visual ? visual.DataObjectId : null, true);
+        var dataObjectId = State.SelectedElement switch
+        {
+            DataVisualElement visual => visual.DataObjectId,
+            DevExtremeComponentElement component when component.Connection.Mode == PublicationComponentDataMode.PublicationDataObject => component.Connection.DataObjectId,
+            _ => null
+        };
+        await State.RefreshWebDataAsync(dataObjectId, true);
         State.RefreshDataVisuals();
+        await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.refreshAll", "publisher-page", new { polling = false, fetchNow = true });
     }
     private void ChangeSelectedDataVisualKind(DataVisualKind kind)
     {

@@ -1,13 +1,16 @@
-# PublisherStudio v1.0.38 release
+# PublisherStudio v1.0.39 release
 
-See `CHANGELOG-v1.0.38.md`.
+See `CHANGELOG-v1.0.39.md` and `docs/COMPONENT_RUNTIME.md`.
 
 Source release notes:
 
-- The publication/video-cut timeline no longer accumulates stale playback loops or delayed playhead callbacks after repeated Play, Pause, Stop, scrub, or timeline reopen operations.
-- Every playback run has an identity shared by JavaScript and Blazor. Old callbacks cannot update or terminate a newer run.
-- JS-to-.NET playhead reporting is coalesced to one in-flight callback, preventing render backlogs from making the playhead appear to accelerate.
-- Clip dragging and trim handles are bounded to the visible timeline track and reject non-finite values without changing valid cut, move, playback-rate, fade, loop, or source-duration behavior.
-- Run `npm run test:timeline` from `src/PublisherStudio.Web` to execute the timeline lifecycle regression test.
-- Run `Prepare-DevExpressAssets.cmd` on the licensed build machine before publishing, as in v1.0.37.
-- Publication document format remains `1.36`; existing projects remain compatible.
+- Added browser-native Data Grid, Tree List, Scheduler, Pivot Grid, Form/editor, collection, navigation, button, and layout-container publication objects.
+- Added direct REST/JSON `CustomStore` and OData `ODataStore` connections with field discovery, client/remote processing, CRUD, headers, credentials, and reusable publication datasets.
+- Added smart component actions for page navigation, REST/form submission, mail preparation, refresh, visibility, component values, and filters.
+- Added page-local and document-wide synchronized components with page-specific placement.
+- Added Menu/Context Menu page navigation and a second single-file website export with hash routing and browser history.
+- Preserved existing standalone charts and the current interactive-presentation HTML export.
+- Both exports remain one HTML file and embed the existing DevExtreme runtime only once.
+- Publication format is now `1.37`; application/package version is `1.0.39`.
+- Run `Prepare-DevExpressAssets.cmd` on the licensed build machine before building or publishing.
+- Run `npm run test:timeline` and `npm run test:components` from `src/PublisherStudio.Web` for the Node regression suites.

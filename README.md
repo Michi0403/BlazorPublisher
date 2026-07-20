@@ -1,4 +1,3 @@
-Link to winx64 Installer https://github.com/Michi0403/BlazorPublisher/releases/download/v138/PublisherStudio.Setup.exe
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**
@@ -273,3 +272,7 @@ See `CHANGELOG-v1.0.37.md`. The DevExpress browser-asset preparation now generat
 ## v1.0.38 stable video and animation timeline
 
 See `CHANGELOG-v1.0.38.md`. Repeated playback can no longer leave stale animation-frame loops or queued Blazor playhead callbacks behind. Timeline runs are identity-checked end to end, progress updates are coalesced, and extreme pointer movement is bounded before media or animation clips are committed. Existing non-destructive video/audio trimming, clip movement, fades, playback rate, looping, and page-duration behavior are preserved.
+
+## v1.0.39 browser-native components and single-file sites
+
+See `CHANGELOG-v1.0.39.md` and `docs/COMPONENT_RUNTIME.md`. PublisherStudio now inserts a curated set of browser-native DevExtreme grids, Scheduler, Pivot Grid, forms/editors, menus, galleries, buttons, and layout containers as publication objects. Components bind to publication datasets, direct REST/JSON, or OData; support CRUD and smart cross-component actions; can synchronize across pages; and work in both the preserved interactive-presentation HTML export and a new hash-routed single-file website export. Existing standalone charts remain unchanged.

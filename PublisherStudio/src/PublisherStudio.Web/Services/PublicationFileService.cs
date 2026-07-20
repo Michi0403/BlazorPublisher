@@ -59,6 +59,7 @@ public sealed partial class PublicationFileService
     private readonly PictureDocumentService _pictures;
     private readonly PublicationDataService _data;
     private readonly SpreadsheetDocumentService _spreadsheets;
+    private readonly PublicationComponentService _components;
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -67,11 +68,12 @@ public sealed partial class PublicationFileService
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public PublicationFileService(PictureDocumentService pictures, PublicationDataService data, SpreadsheetDocumentService spreadsheets)
+    public PublicationFileService(PictureDocumentService pictures, PublicationDataService data, SpreadsheetDocumentService spreadsheets, PublicationComponentService components)
     {
         _pictures = pictures;
         _data = data;
         _spreadsheets = spreadsheets;
+        _components = components;
     }
 
     public string Serialize(PublicationDocument document)
@@ -182,6 +184,9 @@ public sealed partial class PublicationFileService
             wordArt.PathBaselineOffset = Math.Clamp(wordArt.PathBaselineOffset, -80, 80);
         }
 
+
+        foreach (var component in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<DevExtremeComponentElement>())
+            _components.Normalize(document, component);
 
         foreach (var visual in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<DataVisualElement>())
         {
@@ -297,7 +302,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.36";
+        document.FormatVersion = "1.37";
         return document;
     }
 

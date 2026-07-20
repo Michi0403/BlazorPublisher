@@ -10,6 +10,7 @@
         <section class="print-page" style="@PageStyle(publicationPage)"
                  data-publisher-print-fill="true"
                  data-page-id="@publicationPage.Id"
+                 data-page-name="@publicationPage.Name"
                  data-page-width-mm="@Inv(publicationPage.WidthMm)"
                  data-page-height-mm="@Inv(publicationPage.HeightMm)"
                  data-transition-kind="@publicationPage.Transition.Kind"
@@ -105,6 +106,9 @@
                                 break;
                             case DataVisualElement dataVisual:
                                 <DataVisualView Document="Document" Item="dataVisual" CurrentPageId="publicationPage.Id" />
+                                break;
+                            case DevExtremeComponentElement component:
+                                <DevExtremeComponentView Document="Document" Item="component" CurrentPageId="publicationPage.Id" IdPrefix="print" />
                                 break;
                             case SpreadsheetElement spreadsheet:
                                 <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">

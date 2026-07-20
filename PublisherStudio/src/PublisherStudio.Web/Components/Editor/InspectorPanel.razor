@@ -29,6 +29,7 @@
                 <button title="Create audio" @onclick="RequestCreateAudio">●♪</button>
                 <button title="Add rectangle" @onclick="AddRectangle">◇</button>
                 <button title="Insert chart" @onclick="AddChart">▥</button>
+                <button title="Insert professional Data Grid" @onclick="AddComponentDataGrid">▦</button>
                 <button title="Draw connector: click, then drag between object ports" @onclick="StartConnector">↝</button>
                 <button title="Delete selected layer" disabled="@(State.SelectedElement is null || State.SelectedElement.Locked)" @onclick="State.DeleteSelected">⌫</button>
             </div>
@@ -426,6 +427,27 @@
                     @RangeField("Border width", dataVisual.BorderWidthMm, 0, 5, .05, "dataBorderWidth")
                 </section>
             }
+            else if (element is DevExtremeComponentElement component)
+            {
+                <section class="property-section component-properties">
+                    <h3>Interactive component</h3>
+                    <p class="property-note">Browser-native @PublicationComponentService.ComponentName(component.ComponentKind), exported with the same embedded DevExtreme runtime as the interactive charts.</p>
+                    <div class="data-source-summary">
+                        <span><b>Control:</b> @PublicationComponentService.ComponentName(component.ComponentKind)</span>
+                        <span><b>Scope:</b> @(component.Scope == PublicationComponentScope.Document ? "All pages" : "This page")</span>
+                        <span><b>Source:</b> @ComponentSource(component)</span>
+                        <span><b>Fields:</b> @component.Fields.Count</span>
+                    </div>
+                    <DxButton Text="Open Component Studio" Click="RequestEditComponent" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text="Manage publication data" Click="RequestManageData" CssClass="wide-button" />
+                    <DxButton Text="Refresh component data" Click="RefreshData" CssClass="wide-button" />
+                    <label class="check-row"><input type="checkbox" checked="@component.ShowTitle" @onchange="ToggleComponentTitle" /> Show component title</label>
+                    <label class="check-row"><input type="checkbox" checked="@(component.Scope == PublicationComponentScope.Document)" @onchange="ToggleComponentScope" /> Synchronize content on all pages</label>
+                    @ColorField("Background", component.Background, "componentBackground")
+                    @ColorField("Border", component.BorderColor, "componentBorder")
+                    @RangeField("Border width", component.BorderWidthMm, 0, 5, .05, "componentBorderWidth")
+                </section>
+            }
             else if (element is ConnectorElement connector)
             {
                 <section class="property-section connector-properties">
@@ -549,6 +571,8 @@
     [Parameter] public EventCallback<DataVisualKind> OnInsertDataVisual { get; set; }
     [Parameter] public EventCallback OnEditDataVisual { get; set; }
     [Parameter] public EventCallback OnManageData { get; set; }
+    [Parameter] public EventCallback<PublicationComponentKind> OnInsertComponent { get; set; }
+    [Parameter] public EventCallback OnEditComponent { get; set; }
     [Parameter] public EventCallback OnInsertVideo { get; set; }
     [Parameter] public EventCallback OnInsertAudio { get; set; }
     [Parameter] public EventCallback OnCreateVideo { get; set; }
@@ -778,9 +802,33 @@
     private void ToggleDataLabels(ChangeEventArgs args) => SetDataVisual(item => item.ShowLabels = ReadBool(args));
     private async Task RefreshData()
     {
-        await State.RefreshWebDataAsync(State.SelectedElement is DataVisualElement visual ? visual.DataObjectId : null, true);
+        var dataObjectId = State.SelectedElement switch
+        {
+            DataVisualElement visual => visual.DataObjectId,
+            DevExtremeComponentElement component when component.Connection.Mode == PublicationComponentDataMode.PublicationDataObject => component.Connection.DataObjectId,
+            _ => null
+        };
+        await State.RefreshWebDataAsync(dataObjectId, true);
         State.RefreshDataVisuals();
     }
+    private Task RequestEditComponent() => OnEditComponent.InvokeAsync();
+    private Task AddComponentDataGrid() => OnInsertComponent.InvokeAsync(PublicationComponentKind.DataGrid);
+    private void ToggleComponentTitle(ChangeEventArgs args)
+    {
+        if (State.SelectedElement is DevExtremeComponentElement component) State.UpdateSelected(_ => component.ShowTitle = ReadBool(args));
+    }
+    private void ToggleComponentScope(ChangeEventArgs args)
+    {
+        if (State.SelectedElement is DevExtremeComponentElement component)
+            State.UpdateSelected(_ => component.Scope = ReadBool(args) ? PublicationComponentScope.Document : PublicationComponentScope.Page);
+    }
+    private string ComponentSource(DevExtremeComponentElement component) => component.Connection.Mode switch
+    {
+        PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot => DataObjectName(component.Connection.DataObjectId),
+        PublicationComponentDataMode.Rest => $"REST · {component.Connection.Url}",
+        PublicationComponentDataMode.OData => $"OData · {component.Connection.Url}",
+        _ => "None"
+    };
     private void ToggleSpreadsheetGridLines(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); }
     private void ToggleSpreadsheetSheetName(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName); }
     private string DataObjectName(Guid id) => State.Document.DataObjects.FirstOrDefault(data => data.Id == id)?.Name ?? "Missing source";
@@ -864,6 +912,8 @@
             if (element is DataVisualElement dataBorder && field == "dataBorder") dataBorder.BorderColor = value;
             if (element is SpreadsheetElement spreadsheet && field == "spreadsheetBackground") spreadsheet.Background = value;
             if (element is SpreadsheetElement spreadsheetBorder && field == "spreadsheetBorder") spreadsheetBorder.BorderColor = value;
+            if (element is DevExtremeComponentElement component && field == "componentBackground") component.Background = value;
+            if (element is DevExtremeComponentElement componentBorder && field == "componentBorder") componentBorder.BorderColor = value;
             if (element is AudioElement audio && field == "audioAccent") audio.AccentColor = value;
         });
     }
@@ -962,6 +1012,10 @@
         if (element is SpreadsheetElement spreadsheet)
         {
             if (field == "spreadsheetBorderWidth") spreadsheet.BorderWidthMm = Math.Clamp(value, 0, 5);
+        }
+        if (element is DevExtremeComponentElement component)
+        {
+            if (field == "componentBorderWidth") component.BorderWidthMm = Math.Clamp(value, 0, 8);
         }
         if (element is WordArtElement word)
         {

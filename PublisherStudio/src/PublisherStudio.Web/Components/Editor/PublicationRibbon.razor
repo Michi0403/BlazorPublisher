@@ -13,7 +13,8 @@
             <DxRibbonApplicationTabItem Text="Export selected object as PNG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportSelectedPng" />
             <DxRibbonApplicationTabItem Text="Export selected object as SVG" IconCssClass="pub-icon pub-icon-vector" Click="RequestExportSelectedSvg" />
         }
-        <DxRibbonApplicationTabItem Text="Export publication as website" IconCssClass="pub-icon pub-icon-web" Click="RequestExportWebsite" />
+        <DxRibbonApplicationTabItem Text="Export interactive presentation as HTML" IconCssClass="pub-icon pub-icon-web" Click="RequestExportWebsite" />
+        <DxRibbonApplicationTabItem Text="Export single-file website" IconCssClass="pub-icon pub-icon-web" Click="RequestExportSite" />
         <DxRibbonApplicationTabItem Text="Export presentation as video" IconCssClass="pub-icon pub-icon-video" Click="RequestExportVideo" />
         <DxRibbonApplicationTabItem Text="Print / Save as PDF" IconCssClass="pub-icon pub-icon-print" Click="RequestPrint" />
     </DxRibbonApplicationTab>
@@ -87,6 +88,39 @@
                 <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-chart" Click="RequestManageData" />
             </DxRibbonItem>
             <DxRibbonItem Text="Barcode / QR" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" Click="RequestBarcode" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Interactive" IconCssClass="pub-icon pub-icon-web">
+            <DxRibbonItem Text="Professional components" IconCssClass="pub-icon pub-icon-command" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Data controls" DropDownCssClass="publisher-ribbon-menu">
+                        <DxRibbonItem Text="Data Grid" Click="AddComponentDataGrid" />
+                        <DxRibbonItem Text="Tree List" Click="AddComponentTreeList" />
+                        <DxRibbonItem Text="Scheduler" Click="AddComponentScheduler" />
+                        <DxRibbonItem Text="Pivot Grid" Click="AddComponentPivotGrid" />
+                </DxRibbonItem>
+                <DxRibbonItem Text="Forms and editors" DropDownCssClass="publisher-ribbon-menu">
+                        <DxRibbonItem Text="Edit Form" Click="AddComponentForm" />
+                        <DxRibbonItem Text="Text Box" Click="AddComponentTextBox" />
+                        <DxRibbonItem Text="Text Area" Click="AddComponentTextArea" />
+                        <DxRibbonItem Text="Number Box" Click="AddComponentNumberBox" />
+                        <DxRibbonItem Text="Date Box" Click="AddComponentDateBox" />
+                        <DxRibbonItem Text="Check Box" Click="AddComponentCheckBox" />
+                        <DxRibbonItem Text="Select Box" Click="AddComponentSelectBox" />
+                        <DxRibbonItem Text="Tag Box" Click="AddComponentTagBox" />
+                        <DxRibbonItem Text="Button" Click="AddComponentButton" />
+                </DxRibbonItem>
+                <DxRibbonItem Text="Navigation and layout" DropDownCssClass="publisher-ribbon-menu">
+                        <DxRibbonItem Text="Menu" Click="AddComponentMenu" />
+                        <DxRibbonItem Text="Context Menu" Click="AddComponentContextMenu" />
+                        <DxRibbonItem Text="Tab Panel" Click="AddComponentTabPanel" />
+                        <DxRibbonItem Text="Multi View" Click="AddComponentMultiView" />
+                        <DxRibbonItem Text="Splitter" Click="AddComponentSplitter" />
+                        <DxRibbonItem Text="Scroll View" Click="AddComponentScrollView" />
+                </DxRibbonItem>
+                <DxRibbonItem Text="Visual collections" DropDownCssClass="publisher-ribbon-menu">
+                        <DxRibbonItem Text="Gallery" Click="AddComponentGallery" />
+                        <DxRibbonItem Text="Tile View" Click="AddComponentTileView" />
+                </DxRibbonItem>
+            </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Drawing" IconCssClass="pub-icon pub-icon-shape">
             <DxRibbonItem Text="Shapes" IconCssClass="pub-icon pub-icon-shape" DropDownCssClass="publisher-ribbon-menu">
@@ -392,6 +426,14 @@
         </DxRibbonGroup>
     </DxRibbonTab>
 
+    <DxRibbonTab Text="Component Tools" Contextual="true" Visible="IsComponentSelected">
+        <DxRibbonGroup Text="Browser component" IconCssClass="pub-icon pub-icon-web">
+            <DxRibbonItem Text="Open Component Studio" IconCssClass="pub-icon pub-icon-properties" IsPrimary="true" Click="RequestEditComponent" />
+            <DxRibbonItem Text="Manage publication data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
+            <DxRibbonItem Text="Refresh component" IconCssClass="pub-icon pub-icon-command" Click="RefreshData" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
     <DxRibbonTab Text="Media Tools" Contextual="true" Visible="IsMediaSelected">
         <DxRibbonGroup Text="Media" IconCssClass="pub-icon pub-icon-media">
             <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Edit in Media Studio" IsPrimary="true" Click="RequestEditMedia" />
@@ -442,6 +484,7 @@
     [Parameter] public EventCallback OnExportSelectedPng { get; set; }
     [Parameter] public EventCallback OnExportSelectedSvg { get; set; }
     [Parameter] public EventCallback OnExportWebsite { get; set; }
+    [Parameter] public EventCallback OnExportSite { get; set; }
     [Parameter] public EventCallback OnExportVideo { get; set; }
     [Parameter] public EventCallback OnInsertPicture { get; set; }
     [Parameter] public EventCallback OnCreatePicture { get; set; }
@@ -465,6 +508,8 @@
     [Parameter] public EventCallback<DataVisualKind> OnInsertDataVisual { get; set; }
     [Parameter] public EventCallback OnEditDataVisual { get; set; }
     [Parameter] public EventCallback OnManageData { get; set; }
+    [Parameter] public EventCallback<PublicationComponentKind> OnInsertComponent { get; set; }
+    [Parameter] public EventCallback OnEditComponent { get; set; }
     [Parameter] public EventCallback OnPreviewPageAnimations { get; set; }
     [Parameter] public EventCallback OnPreviewObjectAnimations { get; set; }
     [Parameter] public EventCallback OnStopAnimations { get; set; }
@@ -491,6 +536,7 @@
     private Task RequestExportSelectedPng() => OnExportSelectedPng.InvokeAsync();
     private Task RequestExportSelectedSvg() => OnExportSelectedSvg.InvokeAsync();
     private Task RequestExportWebsite() => OnExportWebsite.InvokeAsync();
+    private Task RequestExportSite() => OnExportSite.InvokeAsync();
     private Task RequestExportVideo() => OnExportVideo.InvokeAsync();
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
     private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
@@ -526,6 +572,7 @@
     private Task RequestResetWorkspace() => OnResetWorkspace.InvokeAsync();
     private Task RequestEditDataVisual() => OnEditDataVisual.InvokeAsync();
     private Task RequestManageData() => OnManageData.InvokeAsync();
+    private Task RequestEditComponent() => OnEditComponent.InvokeAsync();
     private Task RequestPreviewPageAnimations() => OnPreviewPageAnimations.InvokeAsync();
     private Task RequestPreviewObjectAnimations() => OnPreviewObjectAnimations.InvokeAsync();
     private Task RequestStopAnimations() => OnStopAnimations.InvokeAsync();
@@ -539,6 +586,7 @@
     private bool IsWordArtSelected => State.SelectedElement is WordArtElement;
     private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
     private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
+    private bool IsComponentSelected => State.SelectedElement is DevExtremeComponentElement;
     private bool IsSpreadsheetSelected => State.SelectedElement is SpreadsheetElement;
     private string SpreadsheetGridLinesText => State.SelectedElement is SpreadsheetElement { ShowGridLines: true } ? "Hide grid lines" : "Show grid lines";
     private string SpreadsheetSheetNameText => State.SelectedElement is SpreadsheetElement { ShowSheetName: true } ? "Hide worksheet name" : "Show worksheet name";
@@ -620,6 +668,28 @@
     private Task AddTreeMap() => OnInsertDataVisual.InvokeAsync(DataVisualKind.TreeMap);
     private Task AddDataTable() => OnInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
     private Task AddKpi() => OnInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
+    private Task AddComponent(PublicationComponentKind kind) => OnInsertComponent.InvokeAsync(kind);
+    private Task AddComponentDataGrid() => AddComponent(PublicationComponentKind.DataGrid);
+    private Task AddComponentTreeList() => AddComponent(PublicationComponentKind.TreeList);
+    private Task AddComponentScheduler() => AddComponent(PublicationComponentKind.Scheduler);
+    private Task AddComponentPivotGrid() => AddComponent(PublicationComponentKind.PivotGrid);
+    private Task AddComponentForm() => AddComponent(PublicationComponentKind.Form);
+    private Task AddComponentTextBox() => AddComponent(PublicationComponentKind.TextBox);
+    private Task AddComponentTextArea() => AddComponent(PublicationComponentKind.TextArea);
+    private Task AddComponentNumberBox() => AddComponent(PublicationComponentKind.NumberBox);
+    private Task AddComponentDateBox() => AddComponent(PublicationComponentKind.DateBox);
+    private Task AddComponentCheckBox() => AddComponent(PublicationComponentKind.CheckBox);
+    private Task AddComponentSelectBox() => AddComponent(PublicationComponentKind.SelectBox);
+    private Task AddComponentTagBox() => AddComponent(PublicationComponentKind.TagBox);
+    private Task AddComponentGallery() => AddComponent(PublicationComponentKind.Gallery);
+    private Task AddComponentTileView() => AddComponent(PublicationComponentKind.TileView);
+    private Task AddComponentMenu() => AddComponent(PublicationComponentKind.Menu);
+    private Task AddComponentContextMenu() => AddComponent(PublicationComponentKind.ContextMenu);
+    private Task AddComponentTabPanel() => AddComponent(PublicationComponentKind.TabPanel);
+    private Task AddComponentMultiView() => AddComponent(PublicationComponentKind.MultiView);
+    private Task AddComponentSplitter() => AddComponent(PublicationComponentKind.Splitter);
+    private Task AddComponentScrollView() => AddComponent(PublicationComponentKind.ScrollView);
+    private Task AddComponentButton() => AddComponent(PublicationComponentKind.Button);
     private void RefreshData() => State.RefreshDataVisuals();
     private void MakeCartesian() => SetDataVisualKind(DataVisualKind.CartesianChart);
     private void MakePie() => SetDataVisualKind(DataVisualKind.PieChart);

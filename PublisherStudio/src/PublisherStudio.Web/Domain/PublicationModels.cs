@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.36";
+    public string FormatVersion { get; set; } = "1.37";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -89,7 +89,7 @@ public sealed class GuideLine
 
 public enum GuideOrientation { Horizontal, Vertical }
 public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
-public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual, Barcode, Spreadsheet }
+public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual, Barcode, Spreadsheet, DevExtremeComponent }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ConnectorPathKind { Straight, Elbow, Curved }
 public enum ConnectorMarker { None, Arrow, Triangle, Diamond }
@@ -141,6 +141,7 @@ public sealed record ExternalFileDropRequest(
 [JsonDerivedType(typeof(DataVisualElement), "dataVisual")]
 [JsonDerivedType(typeof(BarcodeElement), "barcode")]
 [JsonDerivedType(typeof(SpreadsheetElement), "spreadsheet")]
+[JsonDerivedType(typeof(DevExtremeComponentElement), "devExtremeComponent")]
 public abstract class PublicationElement
 {
     public Guid Id { get; set; } = Guid.NewGuid();

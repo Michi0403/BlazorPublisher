@@ -3919,6 +3919,22 @@ function websitePresentationRuntime() {
         }
     });
 
+    window.PublisherStudioNavigation = window.PublisherStudioPresentation = {
+        next: goNext,
+        previous: goPrevious,
+        replay: replayCurrent,
+        currentPageId: () => pages[current]?.dataset.pageId || null,
+        goToPage(target) {
+            const value = String(target ?? '').replace(/^#/, '').toLowerCase();
+            const targetIndex = pages.findIndex((page, index) =>
+                String(page.dataset.pageId || '').toLowerCase() === value ||
+                String(page.dataset.pageName || '').trim().toLowerCase() === value ||
+                String(index + 1) === value);
+            if (targetIndex >= 0) return showPage(targetIndex, targetIndex >= current ? 1 : -1, true);
+            return false;
+        }
+    };
+
     addEventListener('resize', fitPages);
     addEventListener('keydown', event => {
         if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); if (!runNextClickGroup()) goNext(); }
@@ -3947,6 +3963,189 @@ function websitePresentationRuntime() {
     };
     startFirstPage();
 }
+
+function websiteSiteRuntime() {
+    const publication = document.querySelector('.website-publication');
+    if (!publication) return;
+    const pages = [...publication.querySelectorAll(':scope > .print-page')];
+    if (!pages.length) return;
+    const numberValue = (value, fallback = 0) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
+    const lower = value => String(value ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const slugify = (value, fallback) => String(value || fallback).trim().toLowerCase()
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || fallback;
+    const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const usedSlugs = new Map();
+    const routes = pages.map((page, index) => {
+        const baseSlug = slugify(page.dataset.pageName, `page-${index + 1}`);
+        const occurrence = (usedSlugs.get(baseSlug) || 0) + 1;
+        usedSlugs.set(baseSlug, occurrence);
+        return {
+            page,
+            id: String(page.dataset.pageId || index + 1),
+            slug: occurrence === 1 ? baseSlug : `${baseSlug}-${occurrence}`,
+            index
+        };
+    });
+    let current = 0;
+    let activeTransition = null;
+
+    publication.classList.add('ps-site');
+    pages.forEach((page, index) => {
+        page.classList.add('ps-site-page');
+        page.hidden = index !== 0;
+        page.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
+    });
+
+    const easing = value => {
+        switch (lower(value)) {
+            case 'linear': return 'linear';
+            case 'easein': return 'cubic-bezier(.42,0,1,1)';
+            case 'easeout': return 'cubic-bezier(0,0,.2,1)';
+            case 'backout': return 'cubic-bezier(.18,.89,.32,1.28)';
+            default: return 'cubic-bezier(.4,0,.2,1)';
+        }
+    };
+    const transitionFrames = (page, entering, direction) => {
+        const kind = lower(page.dataset.transitionKind);
+        const pageDirection = lower(page.dataset.transitionDirection);
+        const sign = direction >= 0 ? 1 : -1;
+        const horizontal = pageDirection === 'right' ? -1 : pageDirection === 'up' || pageDirection === 'down' ? 0 : 1;
+        const vertical = pageDirection === 'down' ? -1 : pageDirection === 'up' ? 1 : 0;
+        const x = 14 * sign * horizontal;
+        const y = 14 * sign * vertical;
+        if (kind === 'none') return [{ opacity: 1 }, { opacity: 1 }];
+        if (kind === 'zoom') return entering
+            ? [{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'scale(1)' }]
+            : [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.04)' }];
+        if (kind === 'wipe') return entering
+            ? [{ opacity: 1, clipPath: x < 0 ? 'inset(0 0 0 100%)' : y < 0 ? 'inset(100% 0 0 0)' : y > 0 ? 'inset(0 0 100% 0)' : 'inset(0 100% 0 0)' }, { opacity: 1, clipPath: 'inset(0)' }]
+            : [{ opacity: 1 }, { opacity: 0 }];
+        if (kind === 'push' || kind === 'slide' || kind === 'flip') return entering
+            ? [{ opacity: .35, transform: `translate(${x}%,${y}%)` }, { opacity: 1, transform: 'translate(0,0)' }]
+            : [{ opacity: 1, transform: 'translate(0,0)' }, { opacity: .25, transform: `translate(${-x / 2}%,${-y / 2}%)` }];
+        return entering ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0 }];
+    };
+    const fitPage = page => {
+        const width = Math.max(1, numberValue(page.dataset.exportWidthPx, page.offsetWidth || 1));
+        const height = Math.max(1, numberValue(page.dataset.exportHeightPx, page.offsetHeight || 1));
+        const scale = Math.min(innerWidth / width, innerHeight / height);
+        page.style.setProperty('--ps-site-scale', String(Math.max(.05, scale)));
+    };
+    const fit = () => pages.forEach(fitPage);
+    const pausePageMedia = page => page?.querySelectorAll?.('video,audio').forEach(media => { try { media.pause(); } catch { } });
+    const routeFor = value => {
+        const normalized = decodeURIComponent(String(value || '').replace(/^#\/?/, '')).toLowerCase();
+        if (!normalized) return routes[0];
+        return routes.find(route => route.slug === normalized || route.id.toLowerCase() === normalized || String(route.index + 1) === normalized) || routes[0];
+    };
+    const setHash = (route, replace) => {
+        const next = `#/${route.slug}`;
+        if (location.hash === next) return;
+        if (replace) history.replaceState({ publisherPage: route.id }, '', next);
+        else history.pushState({ publisherPage: route.id }, '', next);
+    };
+    const showRoute = async (route, options = {}) => {
+        if (!route) return false;
+        const nextIndex = route.index;
+        const previous = pages[current];
+        const next = pages[nextIndex];
+        if (!next) return false;
+        if (activeTransition) { try { activeTransition.cancel(); } catch { } activeTransition = null; }
+        if (nextIndex === current) {
+            next.hidden = false;
+            next.setAttribute('aria-hidden', 'false');
+            fitPage(next);
+            if (options.updateHistory !== false) setHash(route, options.replace === true);
+            return true;
+        }
+        const direction = nextIndex >= current ? 1 : -1;
+        pausePageMedia(previous);
+        next.hidden = false;
+        next.setAttribute('aria-hidden', 'false');
+        next.style.zIndex = '2';
+        previous.style.zIndex = '1';
+        fitPage(next);
+        const duration = reducedMotion ? 1 : Math.max(80, numberValue(next.dataset.transitionDuration, .4) * 1000);
+        const incoming = next.animate(transitionFrames(next, true, direction), { duration, easing: easing(next.dataset.transitionEasing), fill: 'both' });
+        const outgoing = previous.animate(transitionFrames(next, false, direction), { duration, easing: easing(next.dataset.transitionEasing), fill: 'both' });
+        activeTransition = incoming;
+        try { await Promise.all([incoming.finished, outgoing.finished]); } catch { }
+        previous.hidden = true;
+        previous.setAttribute('aria-hidden', 'true');
+        previous.style.zIndex = '';
+        next.style.zIndex = '';
+        try { incoming.cancel(); outgoing.cancel(); } catch { }
+        activeTransition = null;
+        current = nextIndex;
+        document.title = next.dataset.pageName ? `${next.dataset.pageName} · ${publication.dataset.publicationTitle || document.title}` : document.title;
+        if (options.updateHistory !== false) setHash(route, options.replace === true);
+        next.dispatchEvent(new CustomEvent('publisher:page-enter', { bubbles: true, detail: { pageId: route.id, pageName: next.dataset.pageName || '' } }));
+        return true;
+    };
+    const goToPage = (target, options = {}) => {
+        const value = String(target ?? '').toLowerCase();
+        const route = routes.find(item => item.id.toLowerCase() === value || item.slug === value.replace(/^#\/?/, '') || String(item.index + 1) === value) || routeFor(value);
+        return showRoute(route, options);
+    };
+    const next = () => showRoute(routes[Math.min(routes.length - 1, current + 1)]);
+    const previous = () => showRoute(routes[Math.max(0, current - 1)]);
+
+    window.PublisherStudioNavigation = window.PublisherStudioSite = {
+        goToPage,
+        next,
+        previous,
+        currentPageId: () => routes[current]?.id || null,
+        currentPageName: () => pages[current]?.dataset.pageName || '',
+        routes: routes.map(route => ({ id: route.id, slug: route.slug, name: route.page.dataset.pageName || `Page ${route.index + 1}` }))
+    };
+
+    for (const page of pages) {
+        for (const node of page.querySelectorAll('[data-interaction]')) {
+            let interaction;
+            try { interaction = JSON.parse(node.dataset.interaction || '{}'); } catch { interaction = {}; }
+            const action = lower(interaction.action || node.dataset.interactionAction);
+            if (!action || action === 'none') continue;
+            node.classList.add('ps-interactive');
+            node.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (action === 'nextpage') next();
+                else if (action === 'previouspage') previous();
+                else if (action === 'gotopage') goToPage(interaction.targetPageId);
+                else if (action === 'openurl') {
+                    const url = String(interaction.url || '').trim();
+                    if (/^(https?:|mailto:)/i.test(url)) window.open(url, interaction.openInNewWindow === false ? '_self' : '_blank', 'noopener');
+                } else {
+                    const targetId = interaction.targetElementId || node.dataset.elementId;
+                    const target = publication.querySelector(`[data-element-id="${CSS.escape(String(targetId || ''))}"]`);
+                    if (!target) return;
+                    if (action === 'togglevisibility') target.classList.toggle('ps-action-hidden');
+                    else if (action === 'show') target.classList.remove('ps-action-hidden');
+                    else if (action === 'hide') target.classList.add('ps-action-hidden');
+                    else if (action === 'playmedia') target.querySelector('video,audio')?.play?.().catch?.(() => {});
+                    else if (action === 'pausemedia') target.querySelector('video,audio')?.pause?.();
+                }
+            });
+        }
+    }
+
+    addEventListener('resize', fit);
+    addEventListener('hashchange', () => showRoute(routeFor(location.hash), { updateHistory: false }));
+    addEventListener('popstate', () => showRoute(routeFor(location.hash), { updateHistory: false }));
+    addEventListener('keydown', event => {
+        if (event.key === 'PageDown' || event.key === 'ArrowRight') next();
+        else if (event.key === 'PageUp' || event.key === 'ArrowLeft') previous();
+    });
+    fit();
+    const initial = routeFor(location.hash);
+    pages[0].hidden = initial.index !== 0;
+    pages[0].setAttribute('aria-hidden', initial.index === 0 ? 'false' : 'true');
+    current = initial.index;
+    pages.forEach((page, index) => { page.hidden = index !== current; page.setAttribute('aria-hidden', index === current ? 'false' : 'true'); });
+    setHash(initial, true);
+    fitPage(pages[current]);
+}
+
 
 function barcodeColor(value, fallback) {
     const text = String(value || '').trim();
@@ -5032,6 +5231,122 @@ function failStoryPrintPreview(id, message) {
     } catch { }
 }
 
+async function buildPublisherSingleHtml(mode, title) {
+    const source = document.querySelector('.print-publication');
+    if (!source) throw new Error('The publication export surface is not available.');
+    if (window.PublisherStudioLiveDataRuntime) {
+        await window.PublisherStudioLiveDataRuntime.refreshAll(source, { polling: false });
+    }
+    if (window.PublisherStudioComponentRuntime) {
+        await window.PublisherStudioComponentRuntime.refreshAll(source, { polling: false, fetchNow: true });
+    }
+    const fetchExportAsset = async (url, description = 'offline export asset') => {
+        const response = await fetch(url, { cache: 'force-cache' });
+        if (!response.ok) {
+            throw new Error(`The ${description} ${url} is missing (${response.status}). Run Prepare-DevExpressAssets.cmd on the licensed build machine before building or publishing PublisherStudio.`);
+        }
+        return await response.text();
+    };
+    const [devExtremeCss, jquerySource, devExtremeSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource, componentRuntimeSource] = await Promise.all([
+        fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
+        fetchExportAsset('vendor/jquery/jquery.min.js'),
+        fetchExportAsset('vendor/devextreme-dist/js/dx.all.js'),
+        fetchExportAsset('vendor/devextreme-license.js', 'generated DevExtreme runtime license'),
+        fetchExportAsset('vendor/devextreme-license.version', 'DevExtreme runtime-license version marker'),
+        fetchExportAsset('js/liveDataInterop.js'),
+        fetchExportAsset('js/componentRuntime.js')
+    ]);
+    if (!/DevExpress\s*\.\s*config\s*\(/.test(devExtremeLicenseSource) || !/licenseKey\s*:/.test(devExtremeLicenseSource)) {
+        throw new Error('The generated DevExtreme runtime license file is invalid. Run Prepare-DevExpressAssets.cmd again on the licensed build machine.');
+    }
+    const bundledDevExtremeVersion = /Version:\s*([0-9]+(?:\.[0-9]+){2})/.exec(devExtremeSource)?.[1] || '';
+    const licensedDevExtremeVersion = String(devExtremeLicenseVersion || '').trim();
+    if (!bundledDevExtremeVersion || licensedDevExtremeVersion !== bundledDevExtremeVersion) {
+        throw new Error(`The DevExtreme runtime license targets ${licensedDevExtremeVersion || 'an unknown version'}, but the bundled browser runtime is ${bundledDevExtremeVersion || 'unknown'}. Run Prepare-DevExpressAssets.cmd again.`);
+    }
+    const safeScript = value => String(value).replace(/<\/script/gi, '<\\/script');
+    await document.fonts?.ready;
+    await waitForImages(source);
+    refreshContentFit(source);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const publication = source.cloneNode(true);
+    copyComputedStyles(source, publication);
+    publication.removeAttribute('aria-hidden');
+    publication.removeAttribute('style');
+    publication.className = 'website-publication';
+    publication.dataset.publicationTitle = String(title || 'Publication');
+    normalizePublicationPageSizes(publication);
+    const websitePages = [...publication.querySelectorAll(':scope > .print-page')];
+    const websiteFrame = publicationFrameDefinition(websitePages, false);
+    publication.dataset.frameWidthPx = String(websiteFrame.width);
+    publication.dataset.frameHeightPx = String(websiteFrame.height);
+    await inlineLocalMediaSources(publication);
+    publication.querySelectorAll('img').forEach(image => {
+        image.draggable = true;
+        image.removeAttribute('aria-hidden');
+    });
+    const css = collectExportCss();
+    const defaultPublisherApi = /^https?:$/.test(location.protocol) ? location.origin : '';
+    const isSite = mode === 'site';
+    const runtimeFunction = isSite ? websiteSiteRuntime : websitePresentationRuntime;
+    const runtime = `window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${runtimeFunction.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});`;
+    const modeCss = isSite ? `
+:root{color-scheme:light dark}
+html,body{width:100%;height:100%;overflow:hidden!important;background:#111827!important}
+body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
+.website-publication.ps-site{position:fixed;inset:0;display:block!important;overflow:hidden;visibility:visible!important;pointer-events:auto!important;background:#111827}
+.website-publication.ps-site .ps-site-page{position:absolute!important;left:50%!important;top:50%!important;margin:0!important;box-shadow:0 12px 56px #0009;transform:translate(-50%,-50%) scale(var(--ps-site-scale,1))!important;transform-origin:center center!important;will-change:transform,opacity,clip-path}
+.website-publication.ps-site .ps-site-page[hidden]{display:none!important}
+.website-publication .print-element{position:absolute;transform-origin:center}
+.website-publication .print-connector{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform-box:fill-box;transform-origin:center}
+.website-publication .text-frame-content,.website-publication .image-frame,.website-publication .shape,.website-publication .wordart-svg{width:100%;height:100%;overflow:hidden}
+.website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center;pointer-events:auto;-webkit-user-drag:auto;user-select:auto}
+.website-publication video,.website-publication audio{pointer-events:auto;user-select:auto}
+.website-publication .text-frame-content{user-select:text}
+.ps-interactive{cursor:pointer}.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
+@media (prefers-reduced-motion:reduce){.ps-site-page,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
+@media print{html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}.website-publication.ps-site{position:static;display:block!important;overflow:visible;background:#fff}.website-publication.ps-site .ps-site-page,.website-publication.ps-site .ps-site-page[hidden]{position:relative!important;display:block!important;left:auto!important;top:auto!important;margin:0 auto!important;transform:none!important;box-shadow:none;break-after:page}}
+` : `
+:root{color-scheme:dark}
+html,body{width:100%;height:100%;overflow:hidden!important;background:#20242b!important}
+body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
+.website-publication{position:fixed;inset:0;display:grid!important;place-items:center;overflow:hidden;visibility:visible!important;pointer-events:auto!important}
+.ps-stage{position:relative;overflow:hidden;background:#090d14;transform-origin:center center;box-shadow:0 10px 48px #000a}
+.ps-slide{position:absolute;inset:0;display:block;overflow:hidden;transform-origin:center;will-change:transform,opacity,clip-path}
+.ps-slide[hidden]{display:none!important}
+.website-publication .print-page{position:absolute;left:50%;top:50%;overflow:hidden;margin:0;box-shadow:none;background-color:#fff;transform-origin:center;will-change:transform}
+.website-publication .print-element{position:absolute;transform-origin:center}
+.website-publication .print-connector{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform-box:fill-box;transform-origin:center}
+.website-publication .print-connector.ps-interactive{pointer-events:none}
+.website-publication .print-connector.ps-interactive .connector-hit{pointer-events:stroke;cursor:pointer}
+.website-publication .print-connector.ps-interactive:hover{outline:none}
+.website-publication .print-connector.ps-interactive:hover .connector-line{filter:drop-shadow(0 0 2px #48a7e8)}
+.website-publication .text-frame-content,.website-publication .image-frame,.website-publication .shape,.website-publication .wordart-svg{width:100%;height:100%;overflow:hidden}
+.website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center;pointer-events:auto;-webkit-user-drag:auto;user-select:auto}
+.website-publication video,.website-publication audio{pointer-events:auto;user-select:auto}
+.website-publication .text-frame-content{user-select:text}
+.ps-interactive{cursor:pointer}.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
+.ps-controls{position:fixed;z-index:100000;left:50%;bottom:14px;display:flex;align-items:center;gap:7px;min-height:38px;padding:6px 9px;border:1px solid #ffffff38;border-radius:999px;background:#111827dd;box-shadow:0 6px 24px #0009;transform:translateX(-50%);backdrop-filter:blur(10px)}
+.ps-controls[hidden]{display:none!important}.ps-controls button{display:grid;place-items:center;width:31px;height:31px;padding:0;border:1px solid #ffffff38;border-radius:50%;color:#fff;background:#ffffff12;font:600 18px/1 Segoe UI,system-ui,sans-serif;cursor:pointer}.ps-controls button:hover{background:#ffffff2c}.ps-controls button:disabled{opacity:.35;cursor:default}.ps-controls span{min-width:58px;color:#e5e7eb;text-align:center;font-size:12px}
+@media (prefers-reduced-motion:reduce){.ps-slide,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
+@media print{html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}.website-publication{position:static;display:block!important;overflow:visible}.ps-stage{position:static;width:auto!important;height:auto!important;overflow:visible;transform:none!important;box-shadow:none}.ps-slide,.ps-slide[hidden]{position:relative;display:block!important;inset:auto;overflow:hidden;break-after:page}.website-publication .print-page{position:relative;left:auto;top:auto;margin:0 auto;box-shadow:none;transform:none!important}.ps-controls{display:none!important}}
+`;
+    return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<style>${devExtremeCss}
+${css}
+${modeCss}
+</style>
+</head>
+<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(componentRuntimeSource)}</script><script>${safeScript(runtime)}</script></body>
+</html>`;
+}
+
+
 window.publisherStudio = {
     setDocumentDirty(value) { publisherDocumentDirty = Boolean(value); },
     restorePublisherWorkspaceAfterExport(stageId = 'publisher-stage') {
@@ -5221,105 +5536,12 @@ window.publisherStudio = {
     },
 
     async exportWebsite(fileName, title) {
-        const source = document.querySelector('.print-publication');
-        if (!source) throw new Error('The publication export surface is not available.');
-        if (window.PublisherStudioLiveDataRuntime) {
-            await window.PublisherStudioLiveDataRuntime.refreshAll(source, { polling: false });
-        }
-        const fetchExportAsset = async (url, description = 'offline export asset') => {
-            const response = await fetch(url, { cache: 'force-cache' });
-            if (!response.ok) {
-                throw new Error(`The ${description} ${url} is missing (${response.status}). Run Prepare-DevExpressAssets.cmd on the licensed build machine before building or publishing PublisherStudio.`);
-            }
-            return await response.text();
-        };
-        const [devExtremeCss, jquerySource, devExtremeSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource] = await Promise.all([
-            fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
-            fetchExportAsset('vendor/jquery/jquery.min.js'),
-            fetchExportAsset('vendor/devextreme-dist/js/dx.all.js'),
-            fetchExportAsset('vendor/devextreme-license.js', 'generated DevExtreme runtime license'),
-            fetchExportAsset('vendor/devextreme-license.version', 'DevExtreme runtime-license version marker'),
-            fetchExportAsset('js/liveDataInterop.js')
-        ]);
-        if (!/DevExpress\s*\.\s*config\s*\(/.test(devExtremeLicenseSource) || !/licenseKey\s*:/.test(devExtremeLicenseSource)) {
-            throw new Error('The generated DevExtreme runtime license file is invalid. Run Prepare-DevExpressAssets.cmd again on the licensed build machine.');
-        }
-        const bundledDevExtremeVersion = /Version:\s*([0-9]+(?:\.[0-9]+){2})/.exec(devExtremeSource)?.[1] || '';
-        const licensedDevExtremeVersion = String(devExtremeLicenseVersion || '').trim();
-        if (!bundledDevExtremeVersion || licensedDevExtremeVersion !== bundledDevExtremeVersion) {
-            throw new Error(`The DevExtreme runtime license targets ${licensedDevExtremeVersion || 'an unknown version'}, but the bundled browser runtime is ${bundledDevExtremeVersion || 'unknown'}. Run Prepare-DevExpressAssets.cmd again.`);
-        }
-        const safeScript = value => String(value).replace(/<\/script/gi, '<\\/script');
-        await document.fonts?.ready;
-        await waitForImages(source);
-        refreshContentFit(source);
-        await new Promise(resolve => requestAnimationFrame(resolve));
-        const publication = source.cloneNode(true);
-        copyComputedStyles(source, publication);
-        publication.removeAttribute('aria-hidden');
-        publication.removeAttribute('style');
-        publication.className = 'website-publication';
-        normalizePublicationPageSizes(publication);
-        const websitePages = [...publication.querySelectorAll(':scope > .print-page')];
-        const websiteFrame = publicationFrameDefinition(websitePages, false);
-        publication.dataset.frameWidthPx = String(websiteFrame.width);
-        publication.dataset.frameHeightPx = String(websiteFrame.height);
-        await inlineLocalMediaSources(publication);
-        publication.querySelectorAll('img').forEach(image => {
-            image.draggable = true;
-            image.removeAttribute('aria-hidden');
-        });
-        const css = collectExportCss();
-        const defaultPublisherApi = /^https?:$/.test(location.protocol) ? location.origin : "";
-        const runtime = `window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${websitePresentationRuntime.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});`;
-        const html = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escapeHtml(title)}</title>
-<style>${devExtremeCss}
-${css}
-:root{color-scheme:dark}
-html,body{width:100%;height:100%;overflow:hidden!important;background:#20242b!important}
-body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
-.website-publication{position:fixed;inset:0;display:grid!important;place-items:center;overflow:hidden;visibility:visible!important;pointer-events:auto!important}
-.ps-stage{position:relative;overflow:hidden;background:#090d14;transform-origin:center center;box-shadow:0 10px 48px #000a}
-.ps-slide{position:absolute;inset:0;display:block;overflow:hidden;transform-origin:center;will-change:transform,opacity,clip-path}
-.ps-slide[hidden]{display:none!important}
-.website-publication .print-page{position:absolute;left:50%;top:50%;overflow:hidden;margin:0;box-shadow:none;background-color:#fff;transform-origin:center;will-change:transform}
-.website-publication .print-element{position:absolute;transform-origin:center}
-.website-publication .print-connector{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform-box:fill-box;transform-origin:center}
-.website-publication .print-connector.ps-interactive{pointer-events:none}
-.website-publication .print-connector.ps-interactive .connector-hit{pointer-events:stroke;cursor:pointer}
-.website-publication .print-connector.ps-interactive:hover{outline:none}
-.website-publication .print-connector.ps-interactive:hover .connector-line{filter:drop-shadow(0 0 2px #48a7e8)}
-.website-publication .text-frame-content,.website-publication .image-frame,.website-publication .shape,.website-publication .wordart-svg{width:100%;height:100%;overflow:hidden}
-.website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center;pointer-events:auto;-webkit-user-drag:auto;user-select:auto}
-.website-publication video,.website-publication audio{pointer-events:auto;user-select:auto}
-.website-publication .text-frame-content{user-select:text}
-.ps-interactive{cursor:pointer}
-.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}
-.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
-.ps-controls{position:fixed;z-index:100000;left:50%;bottom:14px;display:flex;align-items:center;gap:7px;min-height:38px;padding:6px 9px;border:1px solid #ffffff38;border-radius:999px;background:#111827dd;box-shadow:0 6px 24px #0009;transform:translateX(-50%);backdrop-filter:blur(10px)}
-.ps-controls[hidden]{display:none!important}
-.ps-controls button{display:grid;place-items:center;width:31px;height:31px;padding:0;border:1px solid #ffffff38;border-radius:50%;color:#fff;background:#ffffff12;font:600 18px/1 Segoe UI,system-ui,sans-serif;cursor:pointer}
-.ps-controls button:hover{background:#ffffff2c}
-.ps-controls button:disabled{opacity:.35;cursor:default}
-.ps-controls span{min-width:58px;color:#e5e7eb;text-align:center;font-size:12px}
-@media (prefers-reduced-motion:reduce){.ps-slide,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
-@media print{
-html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}
-.website-publication{position:static;display:block!important;overflow:visible}
-.ps-stage{position:static;width:auto!important;height:auto!important;overflow:visible;transform:none!important;box-shadow:none}
-.ps-slide,.ps-slide[hidden]{position:relative;display:block!important;inset:auto;overflow:hidden;break-after:page}
-.website-publication .print-page{position:relative;left:auto;top:auto;margin:0 auto;box-shadow:none;transform:none!important}
-.ps-controls{display:none!important}
-}
-</style>
-</head>
-<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(runtime)}</script></body>
-</html>`;
+        const html = await buildPublisherSingleHtml('presentation', title);
+        downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
+    },
+
+    async exportSite(fileName, title) {
+        const html = await buildPublisherSingleHtml('site', title);
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
     },
 

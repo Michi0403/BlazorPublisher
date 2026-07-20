@@ -6,6 +6,7 @@ public sealed class EditorStateService : IDisposable
 {
     private readonly PublicationFileService _files;
     private readonly PublicationDataService _data;
+    private readonly PublicationComponentService _components;
     private readonly PublicationMediaAssetStore _mediaAssets;
     private readonly SpreadsheetDocumentService _spreadsheets;
     private readonly PublicationLiveDataRegistry _liveData;
@@ -21,6 +22,7 @@ public sealed class EditorStateService : IDisposable
     public EditorStateService(
         PublicationFileService files,
         PublicationDataService data,
+        PublicationComponentService components,
         PublicationMediaAssetStore mediaAssets,
         SpreadsheetDocumentService spreadsheets,
         PublicationLiveDataRegistry liveData,
@@ -28,6 +30,7 @@ public sealed class EditorStateService : IDisposable
     {
         _files = files;
         _data = data;
+        _components = components;
         _mediaAssets = mediaAssets;
         _spreadsheets = spreadsheets;
         _liveData = liveData;
@@ -499,6 +502,68 @@ public sealed class EditorStateService : IDisposable
         return element;
     }
 
+    public DevExtremeComponentElement AddDevExtremeComponent(PublicationComponentKind kind, double? centerX = null, double? centerY = null)
+    {
+        Capture();
+        var element = _components.Create(Document, kind);
+        element.Name = NextName(PublicationComponentService.ComponentName(kind));
+        element.ZIndex = NextZ();
+        PlaceAt(element, centerX, centerY);
+        CurrentPage.Elements.Add(element);
+        SetSelectionCore([element.Id], element.Id);
+        Notify();
+        return element;
+    }
+
+    public void ApplySelectedComponent(DevExtremeComponentElement draft)
+    {
+        if (SelectedElement is not DevExtremeComponentElement selected || selected.Locked) return;
+        Capture();
+        var priorSharedId = selected.SharedComponentId;
+        _components.CopyConfiguration(draft, selected, preservePlacement: true);
+        _components.Normalize(Document, selected);
+        if (selected.Scope == PublicationComponentScope.Document)
+        {
+            selected.SharedComponentId ??= priorSharedId ?? Guid.NewGuid();
+            SynchronizeDocumentComponent(selected);
+        }
+        else
+        {
+            if (priorSharedId is { } sharedId)
+            {
+                foreach (var page in Document.Pages.Where(page => page.Id != CurrentPage.Id))
+                    page.Elements.RemoveAll(element => element is DevExtremeComponentElement component && component.SharedComponentId == sharedId);
+            }
+            selected.SharedComponentId = null;
+        }
+        Notify();
+    }
+
+    public void SetSelectedComponentScope(PublicationComponentScope scope)
+    {
+        if (SelectedElement is not DevExtremeComponentElement selected || selected.Locked || selected.Scope == scope) return;
+        Capture();
+        var priorSharedId = selected.SharedComponentId;
+        selected.Scope = scope;
+        if (scope == PublicationComponentScope.Document)
+        {
+            selected.SharedComponentId ??= priorSharedId ?? Guid.NewGuid();
+            _components.Normalize(Document, selected);
+            SynchronizeDocumentComponent(selected);
+        }
+        else
+        {
+            if (priorSharedId is { } sharedId)
+            {
+                foreach (var page in Document.Pages.Where(page => page.Id != CurrentPage.Id))
+                    page.Elements.RemoveAll(element => element is DevExtremeComponentElement component && component.SharedComponentId == sharedId);
+            }
+            selected.SharedComponentId = null;
+            _components.Normalize(Document, selected);
+        }
+        Notify();
+    }
+
     public void UpsertDataObject(PublicationDataObject value)
     {
         Capture();
@@ -513,6 +578,10 @@ public sealed class EditorStateService : IDisposable
     public bool DeleteDataObject(Guid id)
     {
         if (Document.Pages.SelectMany(page => page.Elements).OfType<DataVisualElement>().Any(item => item.DataObjectId == id)) return false;
+        if (Document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>().Any(item =>
+            item.Connection.DataObjectId == id
+            || item.Panels.Any(panel => panel.DataObjectId == id)
+            || item.Fields.Any(field => field.LookupDataObjectId == id))) return false;
         var index = Document.DataObjects.FindIndex(data => data.Id == id);
         if (index < 0) return false;
         Capture();
@@ -657,6 +726,16 @@ public sealed class EditorStateService : IDisposable
             Transition = CloneTransition(source.Transition),
             TimelineDurationSeconds = source.TimelineDurationSeconds
         };
+        foreach (var shared in Document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>()
+                     .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
+                     .GroupBy(component => component.SharedComponentId).Select(group => group.First()))
+        {
+            var clone = _components.Clone(shared);
+            clone.Id = Guid.NewGuid();
+            clone.X = Math.Clamp(clone.X, -clone.Width + 2, publicationPage.WidthMm - 2);
+            clone.Y = Math.Clamp(clone.Y, -clone.Height + 2, publicationPage.HeightMm - 2);
+            publicationPage.Elements.Add(clone);
+        }
         Document.Pages.Add(publicationPage);
         SelectedPageId = publicationPage.Id;
         ClearSelectionCore();
@@ -678,6 +757,16 @@ public sealed class EditorStateService : IDisposable
                 item.Interaction.TargetElementId = mappedTarget;
             if (item.Interaction.TargetPageId == CurrentPage.Id)
                 item.Interaction.TargetPageId = clone.Id;
+            if (item is DevExtremeComponentElement component)
+            {
+                foreach (var action in component.Actions)
+                {
+                    if (action.TargetElementId is { } actionTarget && idMap.TryGetValue(actionTarget, out var mappedActionTarget))
+                        action.TargetElementId = mappedActionTarget;
+                    if (action.TargetPageId == CurrentPage.Id)
+                        action.TargetPageId = clone.Id;
+                }
+            }
         }
         foreach (var connector in clone.Elements.OfType<ConnectorElement>())
         {
@@ -711,26 +800,60 @@ public sealed class EditorStateService : IDisposable
         var elements = SelectedElements.Where(element => !element.Locked).ToList();
         if (elements.Count == 0) return;
         Capture();
-        var removedIds = elements.Select(element => element.Id).ToHashSet();
+        var removedIds = new HashSet<Guid>();
+        var removedSharedIds = elements.OfType<DevExtremeComponentElement>()
+            .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
+            .Select(component => component.SharedComponentId!.Value)
+            .ToHashSet();
+
         foreach (var element in elements)
         {
-            CurrentPage.Elements.Remove(element);
+            if (element is DevExtremeComponentElement component && component.SharedComponentId is { } sharedId && removedSharedIds.Contains(sharedId))
+                continue;
+            if (CurrentPage.Elements.Remove(element)) removedIds.Add(element.Id);
             if (element is PublicationMediaElement) _mediaAssets.Remove(element.Id);
         }
 
-        var removedObjectIds = elements.Where(element => element is not ConnectorElement).Select(element => element.Id).ToHashSet();
-        foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>()
-                     .Where(connector => removedObjectIds.Contains(connector.Source.ElementId) || removedObjectIds.Contains(connector.Target.ElementId))
-                     .ToList())
+        if (removedSharedIds.Count > 0)
         {
-            removedIds.Add(connector.Id);
-            CurrentPage.Elements.Remove(connector);
+            foreach (var page in Document.Pages)
+            {
+                foreach (var component in page.Elements.OfType<DevExtremeComponentElement>()
+                             .Where(component => component.SharedComponentId is { } sharedId && removedSharedIds.Contains(sharedId))
+                             .ToList())
+                {
+                    page.Elements.Remove(component);
+                    removedIds.Add(component.Id);
+                }
+            }
         }
 
-        foreach (var item in CurrentPage.Elements)
-            if (item.Interaction.TargetElementId is { } targetId && removedIds.Contains(targetId))
-                item.Interaction.TargetElementId = null;
-        ApplyNormalizedZOrder(OrderedElements());
+        foreach (var page in Document.Pages)
+        {
+            foreach (var connector in page.Elements.OfType<ConnectorElement>()
+                         .Where(connector => removedIds.Contains(connector.Source.ElementId) || removedIds.Contains(connector.Target.ElementId))
+                         .ToList())
+            {
+                removedIds.Add(connector.Id);
+                page.Elements.Remove(connector);
+            }
+
+            foreach (var item in page.Elements)
+            {
+                if (item.Interaction.TargetElementId is { } targetId && removedIds.Contains(targetId))
+                    item.Interaction.TargetElementId = null;
+                if (item is not DevExtremeComponentElement targetComponent) continue;
+                foreach (var action in targetComponent.Actions)
+                {
+                    if (action.TargetElementId is { } actionTargetId && removedIds.Contains(actionTargetId)) action.TargetElementId = null;
+                    if (action.TargetSharedComponentId is { } actionSharedId && removedSharedIds.Contains(actionSharedId)) action.TargetSharedComponentId = null;
+                }
+            }
+
+            var ordered = page.Elements.OrderBy(element => element.ZIndex).ToList();
+            for (var index = 0; index < ordered.Count; index++) ordered[index].ZIndex = index + 1;
+        }
+
         ReindexAnimations();
         ClearSelectionCore();
         CropMode = false;
@@ -1142,6 +1265,11 @@ public sealed class EditorStateService : IDisposable
         if (element is null || (element.Locked && !allowLocked)) return;
         if (capture) Capture();
         update(element);
+        if (element is DevExtremeComponentElement component)
+        {
+            _components.Normalize(Document, component);
+            SynchronizeDocumentComponent(component);
+        }
         Notify();
     }
 
@@ -1155,6 +1283,11 @@ public sealed class EditorStateService : IDisposable
             _liveEditKey = key;
         }
         update(element);
+        if (element is DevExtremeComponentElement component)
+        {
+            _components.Normalize(Document, component);
+            SynchronizeDocumentComponent(component);
+        }
         Notify();
     }
 
@@ -1500,6 +1633,11 @@ public sealed class EditorStateService : IDisposable
             .Select(source => source.GroupId!.Value)
             .Distinct()
             .ToDictionary(groupId => groupId, _ => Guid.NewGuid());
+        var sharedComponentMap = sources.OfType<DevExtremeComponentElement>()
+            .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
+            .Select(component => component.SharedComponentId!.Value)
+            .Distinct()
+            .ToDictionary(sharedId => sharedId, _ => Guid.NewGuid());
 
         var left = objectSources.Count > 0 ? objectSources.Min(source => source.X) : 0;
         var top = objectSources.Count > 0 ? objectSources.Min(source => source.Y) : 0;
@@ -1525,6 +1663,22 @@ public sealed class EditorStateService : IDisposable
                 : null;
             clone.Name = NextName(source.Name);
             clone.ZIndex = nextZ++;
+            if (clone is DevExtremeComponentElement componentClone)
+            {
+                componentClone.SharedComponentId = componentClone.Scope == PublicationComponentScope.Document
+                    && source is DevExtremeComponentElement sourceComponent
+                    && sourceComponent.SharedComponentId is { } sourceSharedId
+                    && sharedComponentMap.TryGetValue(sourceSharedId, out var newSharedId)
+                        ? newSharedId
+                        : null;
+                foreach (var action in componentClone.Actions)
+                {
+                    if (action.TargetElementId is { } actionTargetId && idMap.TryGetValue(actionTargetId, out var mappedActionTarget))
+                        action.TargetElementId = mappedActionTarget;
+                    if (action.TargetSharedComponentId is { } actionSharedId && sharedComponentMap.TryGetValue(actionSharedId, out var mappedSharedTarget))
+                        action.TargetSharedComponentId = mappedSharedTarget;
+                }
+            }
 
             if (clone is ConnectorElement connector)
             {
@@ -1562,6 +1716,8 @@ public sealed class EditorStateService : IDisposable
             clones.Add(clone);
         }
 
+        foreach (var component in clones.OfType<DevExtremeComponentElement>().Where(component => component.Scope == PublicationComponentScope.Document))
+            SynchronizeDocumentComponent(component);
         ReindexAnimations();
         ApplyNormalizedZOrder(OrderedElements());
         SetSelectionCore(clones.Select(clone => clone.Id), clones.FirstOrDefault()?.Id);
@@ -1683,6 +1839,28 @@ public sealed class EditorStateService : IDisposable
             foreach (var item in newest) _undo.Push(item);
         }
         _redo.Clear();
+    }
+
+    private void SynchronizeDocumentComponent(DevExtremeComponentElement source)
+    {
+        if (source.Scope != PublicationComponentScope.Document) return;
+        source.SharedComponentId ??= Guid.NewGuid();
+        foreach (var page in Document.Pages)
+        {
+            var target = page.Elements.OfType<DevExtremeComponentElement>()
+                .FirstOrDefault(component => component.Id != source.Id && component.SharedComponentId == source.SharedComponentId);
+            if (target is null)
+            {
+                if (page.Elements.Contains(source)) continue;
+                target = _components.Clone(source);
+                target.Id = Guid.NewGuid();
+                target.X = Math.Clamp(target.X, -target.Width + 2, page.WidthMm - 2);
+                target.Y = Math.Clamp(target.Y, -target.Height + 2, page.HeightMm - 2);
+                target.ZIndex = page.Elements.Count == 0 ? 1 : page.Elements.Max(element => element.ZIndex) + 1;
+                page.Elements.Add(target);
+            }
+            else _components.CopyConfiguration(source, target, preservePlacement: true);
+        }
     }
 
     private PublicationElement CloneElement(PublicationElement element) => _files.CloneElement(element);

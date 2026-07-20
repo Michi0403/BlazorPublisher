@@ -127,3 +127,17 @@ PublisherStudio uses non-modular DevExtreme browser bundles in three independent
 The editor timeline uses one authoritative playback state per publication page. Blazor allocates a run identifier whenever playback starts and invalidates it on pause, stop, or disposal. The browser stores that identifier with the exact animation-frame state and returns it with every playhead notification. Both sides reject stale work, so a callback that was already dequeued before a restart cannot attach itself to the replacement run.
 
 Playhead reporting is intentionally backpressured. JavaScript allows only one interop notification in flight and replaces intermediate pending positions with the latest value. This keeps rendering load bounded without changing media timing. Clip drag and trim gestures remain optimistic in the DOM, but browser coordinates and committed numeric values are finite and bounded before the authoritative C# media/animation model applies its existing source and timeline constraints.
+
+## Browser-native publication components (v1.0.39)
+
+`DevExtremeComponentElement` is the persisted publication object for browser-native application controls. It is separate from `DataVisualElement`, so the established chart workflow and serialized chart documents do not depend on the generic component catalogue.
+
+`PublicationComponentService` is the normalization and projection boundary. It owns defaults, dataset-derived fields, lookup snapshots, document-scope sharing, safe panel content, and the plain JSON contract consumed by the browser. No Razor or Blazor component instance is serialized into a publication.
+
+`componentRuntime.js` is the common editor/export adapter. It maps the curated component kind to an existing jQuery DevExtreme plugin from `dx.all.js`, constructs `ArrayStore`, `CustomStore`, or `ODataStore` data sources, binds events/actions, hosts nested layout-panel controls, and cleans component instances before reinitialization.
+
+Document-wide controls use `SharedComponentId` for logical identity and a unique `Id` for each page instance. Configuration changes are synchronized while X/Y/width/height stay local to the page. Smart targets store both the concrete element ID and the shared ID; client configuration resolves the shared ID to the current page's instance.
+
+`publisherInterop.js` has a shared single-file HTML builder. The presentation and website modes clone the same print surface and embed the same CSS, jQuery, DevExtreme, public runtime license, live-data runtime, and component runtime. They differ only in their page/navigation runtime and mode CSS.
+
+The catalogue excludes arbitrary DevExpress Blazor, Razor, and ASP.NET Core controls because those require an application runtime or server services that cannot be represented by the one-file export contract.

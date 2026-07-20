@@ -316,3 +316,20 @@ Static checks completed for the v1.0.37 source package:
 - Confirmed Media Studio range and numeric inputs reject non-finite values while the existing trim-start, trim-end, playback-rate, fade, loop, and source-duration calculations remain unchanged.
 - `npm run test:timeline` passes stale-callback, replacement, backpressure, completion, and bounded-media-trim regression cases.
 - JavaScript syntax, JSON, project XML, package version `1.0.38`, and archive integrity are validated in this environment. A full licensed DevExpress browser run and .NET build remain required on the user's development machine because this environment does not contain the .NET SDK or licensed DevExpress NuGet feed.
+
+## v1.0.39 browser-component, REST/OData, and site-export validation
+
+- Confirmed the publication model, insert ribbon, Component Studio, renderer, print surface, file normalization, and editor state all recognize the new `devExtremeComponent` element type.
+- Confirmed all exposed component plugins (`dxDataGrid`, `dxTreeList`, `dxScheduler`, `dxForm`, editor controls, Gallery, Tile View, Menu, Context Menu, Tab Panel, Multi View, Splitter, Scroll View, Pivot Grid, and Button) are present in the bundled DevExtreme 25.2.8 `dx.all.js` file.
+- Confirmed REST uses a DevExtreme `CustomStore` with client/raw and remote/processed modes, load headers/body/path, CRUD URLs/methods, encoded key suffixes, and browser credentials.
+- Confirmed OData uses a DevExtreme `ODataStore`, supports versions 2/3/4 and key types, and uses the configured store for form submission when no explicit submission URL overrides it. Forms update keyed rows when update is enabled and otherwise insert only when insertion is enabled.
+- Confirmed publication datasets, static snapshots, lookup datasets, web polling/webhook snapshots, standalone editor initial values, form validation, selected-row actions, and typed nested-panel data are represented in the common client contract.
+- Confirmed document-wide components retain per-page geometry, synchronize configuration, resolve smart targets to the current page, populate newly added pages, and remove linked copies when returned to page scope. Page/component duplication remaps action targets to duplicated objects.
+- Confirmed menu generation uses stable page IDs and both HTML runtimes expose the common page-navigation API.
+- Confirmed the existing interactive-presentation export remains available and the new website export uses hash routes and browser history.
+- Confirmed both exports use one shared HTML builder and embed jQuery, `dx.all.js`, the generated public runtime license, live-data runtime, and component runtime exactly once in the required order.
+- Confirmed cloned component hosts are cleared before runtime initialization, avoiding duplicate DevExtreme markup in exported HTML.
+- `npm run test:timeline` passes the existing lifecycle/backpressure/trim regression suite.
+- `npm run test:components` passes component-catalogue, bundled-plugin, REST/OData probe, smart-action, synchronized-scope, and single-file-export contract assertions.
+- JavaScript syntax, JSON metadata, project XML, C# syntax, Razor `@code` syntax, archive integrity, and generated-license exclusion are validated in this environment.
+- A full licensed `dotnet restore`/`dotnet build` and interactive DevExpress browser test remain required on the release machine because this environment does not contain the .NET SDK or the licensed DevExpress NuGet feed/runtime identity.

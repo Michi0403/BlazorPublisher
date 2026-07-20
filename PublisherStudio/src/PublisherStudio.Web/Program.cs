@@ -85,6 +85,7 @@ public static class Program
         builder.Services.AddSingleton<SpreadsheetDocumentService>();
         builder.Services.AddSingleton<SpreadsheetSessionStore>();
         builder.Services.AddSingleton<PublicationDataService>();
+        builder.Services.AddSingleton<PublicationComponentService>();
         builder.Services.AddSingleton<PublicationWebhookStore>();
         builder.Services.AddSingleton<PublicationLiveDataRegistry>();
         builder.Services.AddSingleton<PublicationWebDataService>();

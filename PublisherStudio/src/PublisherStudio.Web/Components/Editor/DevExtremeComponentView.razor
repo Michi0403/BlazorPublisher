@@ -1,0 +1,62 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject PublicationComponentService Components
+@inject IJSRuntime JS
+
+<div class="devextreme-publication-component @(Item.ShowTitle ? "has-component-title" : null)" style="@ContainerStyle">
+    @if (Item.ShowTitle)
+    {
+        <div class="devextreme-component-title">@Item.Title</div>
+    }
+    @if (MissingData)
+    {
+        <div class="ps-component-empty">
+            <strong>@Item.Title</strong>
+            <span>Select a publication dataset, REST endpoint, or OData entity in Component Studio.</span>
+        </div>
+    }
+    else
+    {
+        <div id="@ElementId"
+             class="devextreme-component-host"
+             data-ps-component-config="@ClientConfigBase64"></div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    [Parameter, EditorRequired] public DevExtremeComponentElement Item { get; set; } = default!;
+    [Parameter] public Guid CurrentPageId { get; set; }
+    [Parameter] public string IdPrefix { get; set; } = "canvas";
+
+    private readonly string _instanceId = Guid.NewGuid().ToString("N");
+    private string? _lastRenderedConfig;
+    private string ElementId => $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}";
+    private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId);
+    private bool MissingData => Item.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot
+        && Document.DataObjects.All(data => data.Id != Item.Connection.DataObjectId)
+        && !Item.IsLayoutContainer
+        && Item.ComponentKind != PublicationComponentKind.Button;
+    private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (MissingData) return;
+        var config = ClientConfigBase64;
+        if (string.Equals(config, _lastRenderedConfig, StringComparison.Ordinal)) return;
+        try
+        {
+            await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.renderById", ElementId, config);
+            _lastRenderedConfig = config;
+        }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException) { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.disposeById", ElementId); }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException) { }
+    }
+}

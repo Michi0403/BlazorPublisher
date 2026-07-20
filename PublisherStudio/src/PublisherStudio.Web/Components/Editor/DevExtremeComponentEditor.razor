@@ -1,0 +1,570 @@
+@namespace PublisherStudio.Components.Editor
+@inject PublicationComponentService Components
+@inject PublicationDataService DataService
+@inject IJSRuntime JS
+
+@if (Visible && _draft is not null)
+{
+    <div class="modal-backdrop component-modal-backdrop">
+        <section class="component-editor-dialog" role="dialog" aria-modal="true" aria-label="Component Studio">
+            <header>
+                <div>
+                    <strong>Component Studio · @_draft.Title</strong>
+                    <span>Browser-native DevExtreme controls with publication datasets, REST, OData, CRUD, page navigation, and component-to-component actions.</span>
+                </div>
+                <button type="button" class="window-close" @onclick="Cancel">×</button>
+            </header>
+
+            <div class="component-editor-commandbar">
+                <button type="button" class="@SectionClass("general")" @onclick="ShowGeneral">General</button>
+                <button type="button" class="@SectionClass("data")" @onclick="ShowData">Data &amp; API</button>
+                <button type="button" class="@SectionClass("fields")" @onclick="ShowFields">Fields &amp; editors</button>
+                <button type="button" class="@SectionClass("behavior")" @onclick="ShowBehavior">Behavior</button>
+                @if (_draft.IsLayoutContainer)
+                {
+                    <button type="button" class="@SectionClass("layout")" @onclick="ShowLayout">Layout panels</button>
+                }
+                <button type="button" class="@SectionClass("actions")" @onclick="ShowActions">Actions</button>
+                <button type="button" class="@SectionClass("advanced")" @onclick="ShowAdvanced">Advanced</button>
+                <span></span>
+                <button type="button" @onclick="RequestManageData">Manage publication data</button>
+            </div>
+
+            <div class="component-editor-body">
+                <aside class="component-kind-list" aria-label="Component type">
+                    @foreach (var kind in Enum.GetValues<PublicationComponentKind>())
+                    {
+                        <button type="button" class="@(_draft.ComponentKind == kind ? "selected" : null)" @onclick="() => ChangeKind(kind)">
+                            <b>@ComponentIcon(kind)</b>
+                            <span>@PublicationComponentService.ComponentName(kind)</span>
+                        </button>
+                    }
+                </aside>
+
+                <main class="component-settings">
+                    @if (_section == "general")
+                    {
+                        <section class="component-section">
+                            <h3>Identity and scope</h3>
+                            <div class="component-form-grid">
+                                <label>Object name<input @bind="_draft.Name" /></label>
+                                <label>Displayed title<input @bind="_draft.Title" /></label>
+                                <label>Scope
+                                    <select @bind="_draft.Scope">
+                                        <option value="@PublicationComponentScope.Page">This page only</option>
+                                        <option value="@PublicationComponentScope.Document">Document-wide synchronized</option>
+                                    </select>
+                                </label>
+                                <label>Background<input type="color" @bind="_draft.Background" /></label>
+                                <label>Border color<input type="color" @bind="_draft.BorderColor" /></label>
+                                <label>Border width (mm)<input type="number" min="0" max="8" step="0.05" @bind="_draft.BorderWidthMm" /></label>
+                            </div>
+                            <div class="component-option-grid">
+                                <label><input type="checkbox" @bind="_draft.ShowTitle" /> Show component title</label>
+                                <label><input type="checkbox" @bind="_draft.ShowBorders" /> Show internal borders</label>
+                                <label><input type="checkbox" @bind="_draft.WordWrap" /> Wrap cell text</label>
+                            </div>
+                            @if (_draft.Scope == PublicationComponentScope.Document)
+                            {
+                                <p class="component-info">Content, data bindings, fields, actions, and styling stay synchronized on every publication page. Position and size remain page-specific so portrait and landscape pages can use different layouts.</p>
+                            }
+                        </section>
+                    }
+                    else if (_section == "data")
+                    {
+                        <section class="component-section">
+                            <div class="component-section-heading">
+                                <h3>Smart data connection</h3>
+                                @if (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+                                {
+                                    <button type="button" @onclick="CreateNavigationDataset">Use publication pages as menu</button>
+                                }
+                            </div>
+                            <div class="component-form-grid">
+                                <label>Source
+                                    <select @bind="_draft.Connection.Mode" @bind:after="ConnectionModeChanged">
+                                        <option value="@PublicationComponentDataMode.PublicationDataObject">Publication data object</option>
+                                        <option value="@PublicationComponentDataMode.StaticSnapshot">Embedded snapshot only</option>
+                                        <option value="@PublicationComponentDataMode.Rest">REST / JSON endpoint</option>
+                                        <option value="@PublicationComponentDataMode.OData">OData service</option>
+                                    </select>
+                                </label>
+                                <label>Processing
+                                    <select @bind="_draft.Connection.ProcessingMode">
+                                        <option value="@PublicationComponentProcessingMode.Client">Client-side sorting/filtering</option>
+                                        <option value="@PublicationComponentProcessingMode.Remote">Remote/server operations</option>
+                                    </select>
+                                </label>
+                                <label>Key field<input @bind="_draft.Connection.KeyField" @bind:after="SyncKeyField" /></label>
+                            </div>
+
+                            @if (_draft.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot)
+                            {
+                                <div class="component-data-object-row">
+                                    <label>Publication data object
+                                        <select @bind="_draft.Connection.DataObjectId" @bind:after="UseDatasetFieldsIfEmpty">
+                                            @foreach (var data in State.Document.DataObjects)
+                                            {
+                                                <option value="@data.Id">@data.Name · @data.SourceKind</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <button type="button" @onclick="UseDatasetFields">Read fields from dataset</button>
+                                    <button type="button" @onclick="RequestManageData">Open data manager</button>
+                                </div>
+                                <p class="component-info">Publication data objects can already contain embedded tables, spreadsheet selections, web polling, webhook snapshots, or document-object data. The same parsed rows are reused by charts and these controls.</p>
+                            }
+                            else
+                            {
+                                <div class="component-form-grid wide">
+                                    <label class="span-2">Endpoint URL<input @bind="_draft.Connection.Url" placeholder="https://server.example/api/items or /odata/Orders" /></label>
+                                    @if (_draft.Connection.Mode == PublicationComponentDataMode.Rest)
+                                    {
+                                        <label>Load method
+                                            <select @bind="_draft.Connection.LoadMethod">
+                                                @foreach (var method in Enum.GetValues<PublicationComponentHttpMethod>()) { <option value="@method">@method</option> }
+                                            </select>
+                                        </label>
+                                        <label>JSON result path<input @bind="_draft.Connection.JsonPath" placeholder="data.items" /></label>
+                                        @if (_draft.Connection.LoadMethod is not PublicationComponentHttpMethod.Get and not PublicationComponentHttpMethod.Delete)
+                                        {
+                                            <label class="span-2">Load request body<textarea @bind="_draft.Connection.LoadBody" spellcheck="false"></textarea></label>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <label>OData version
+                                            <select @bind="_draft.Connection.ODataVersion"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+                                        </label>
+                                        <label>Key type
+                                            <select @bind="_draft.Connection.KeyType"><option>Int32</option><option>Int64</option><option>String</option><option>Guid</option></select>
+                                        </label>
+                                    }
+                                </div>
+                                <label class="component-header-editor">Request headers <small>one Name: Value pair per line</small>
+                                    <textarea value="@_headersText" @oninput="ChangeHeaders" spellcheck="false" placeholder="Authorization: Bearer …"></textarea>
+                                </label>
+                                <div class="component-api-tools">
+                                    <button type="button" @onclick="TestEndpoint" disabled="@_testingConnection">@(_testingConnection ? "Reading endpoint…" : "Test endpoint and discover fields")</button>
+                                    <label><input type="checkbox" @bind="_draft.Connection.WithCredentials" /> Include browser credentials</label>
+                                    @if (!string.IsNullOrWhiteSpace(_connectionStatus)) { <span>@_connectionStatus</span> }
+                                </div>
+                                <p class="component-warning">The single-file HTML export can call only endpoints the browser is allowed to reach. Any direct URL and header value required by the browser becomes part of the exported HTML. Never embed private credentials in a file you distribute.</p>
+                            }
+
+                            <h3>Editing and CRUD</h3>
+                            <div class="component-option-grid">
+                                <label><input type="checkbox" @bind="_draft.Connection.AllowInsert" /> Allow insert</label>
+                                <label><input type="checkbox" @bind="_draft.Connection.AllowUpdate" /> Allow update</label>
+                                <label><input type="checkbox" @bind="_draft.Connection.AllowDelete" /> Allow delete</label>
+                                <label><input type="checkbox" @bind="_draft.Connection.AppendKeyToWriteUrl" /> Append key to update/delete URL</label>
+                            </div>
+                            @if (_draft.Connection.AllowInsert || _draft.Connection.AllowUpdate || _draft.Connection.AllowDelete)
+                            {
+                                <div class="component-form-grid wide">
+                                    @if (_draft.Connection.AllowInsert)
+                                    {
+                                        <label>Insert method<select @bind="_draft.Connection.InsertMethod">@MethodOptions()</select></label>
+                                        <label>Insert URL<input @bind="_draft.Connection.InsertUrl" placeholder="blank = load URL" /></label>
+                                    }
+                                    @if (_draft.Connection.AllowUpdate)
+                                    {
+                                        <label>Update method<select @bind="_draft.Connection.UpdateMethod">@MethodOptions()</select></label>
+                                        <label>Update URL<input @bind="_draft.Connection.UpdateUrl" placeholder="blank = load URL" /></label>
+                                    }
+                                    @if (_draft.Connection.AllowDelete)
+                                    {
+                                        <label>Delete method<select @bind="_draft.Connection.DeleteMethod">@MethodOptions()</select></label>
+                                        <label>Delete URL<input @bind="_draft.Connection.DeleteUrl" placeholder="blank = load URL" /></label>
+                                    }
+                                </div>
+                            }
+                        </section>
+                    }
+                    else if (_section == "fields")
+                    {
+                        <section class="component-section">
+                            <div class="component-section-heading"><h3>Fields and editors</h3><div><button type="button" @onclick="UseDatasetFields">Reset from dataset</button><button type="button" @onclick="AddField">Add field</button></div></div>
+                            <div class="component-field-table-wrap">
+                                <table class="component-field-table">
+                                    <thead><tr><th>Data field</th><th>Caption</th><th>Type</th><th>Editor</th><th>Visible</th><th>Edit</th><th>Required</th><th>Width</th><th>Pivot area</th><th>Lookup dataset</th><th>Lookup value</th><th>Lookup display</th><th></th></tr></thead>
+                                    <tbody>
+                                        @foreach (var field in _draft.Fields)
+                                        {
+                                            <tr @key="field.Id">
+                                                <td><input @bind="field.DataField" /></td>
+                                                <td><input @bind="field.Caption" /></td>
+                                                <td><select @bind="field.ValueKind">@foreach (var value in Enum.GetValues<PublicationDataValueKind>()) { <option value="@value">@value</option> }</select></td>
+                                                <td><select @bind="field.Editor">@foreach (var value in Enum.GetValues<PublicationComponentEditorKind>()) { <option value="@value">@value</option> }</select></td>
+                                                <td><input type="checkbox" @bind="field.Visible" /></td>
+                                                <td><input type="checkbox" @bind="field.Editable" /></td>
+                                                <td><input type="checkbox" @bind="field.Required" /></td>
+                                                <td><input type="number" min="0" max="2000" @bind="field.Width" /></td>
+                                                <td><select @bind="field.Area">@foreach (var value in Enum.GetValues<PublicationComponentFieldArea>()) { <option value="@value">@value</option> }</select></td>
+                                                <td><select value="@field.LookupDataObjectId" @onchange="args => SetLookupDataObject(field, args)"><option value="">None</option>@foreach (var data in State.Document.DataObjects) { <option value="@data.Id">@data.Name</option> }</select></td>
+                                                <td><input @bind="field.LookupDataField" placeholder="id" /></td>
+                                                <td><input @bind="field.LookupDisplayField" placeholder="name" /></td>
+                                                <td><button type="button" class="danger" @onclick="() => RemoveField(field)">×</button></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="component-form-grid mapping-grid">
+                                <label>Key field<input @bind="_draft.KeyField" @bind:after="SyncConnectionKey" /></label>
+                                <label>Parent field<input @bind="_draft.ParentField" /></label>
+                                <label>Text / title field<input @bind="_draft.TextField" /></label>
+                                <label>Display field<input @bind="_draft.DisplayField" /></label>
+                                <label>Value field<input @bind="_draft.ValueField" /></label>
+                                <label>Image field<input @bind="_draft.ImageField" /></label>
+                                <label>Start date field<input @bind="_draft.StartDateField" /></label>
+                                <label>End date field<input @bind="_draft.EndDateField" /></label>
+                                <label>All-day field<input @bind="_draft.AllDayField" /></label>
+                                <label>Target page field<input @bind="_draft.TargetPageField" /></label>
+                                <label>URL field<input @bind="_draft.UrlField" /></label>
+                            </div>
+                        </section>
+                    }
+                    else if (_section == "behavior")
+                    {
+                        <section class="component-section">
+                            <h3>Interaction and display behavior</h3>
+                            <div class="component-form-grid">
+                                <label>Edit mode<select @bind="_draft.EditMode">@foreach (var value in Enum.GetValues<PublicationComponentEditMode>()) { <option value="@value">@value</option> }</select></label>
+                                <label>Selection<select @bind="_draft.SelectionMode">@foreach (var value in Enum.GetValues<PublicationComponentSelectionMode>()) { <option value="@value">@value</option> }</select></label>
+                                <label>Page size<input type="number" min="1" max="1000" @bind="_draft.PageSize" /></label>
+                                <label>Form columns<input type="number" min="1" max="12" @bind="_draft.ColumnCount" /></label>
+                                <label>Scheduler view<select @bind="_draft.CurrentView"><option>day</option><option>week</option><option>workWeek</option><option>month</option><option>agenda</option></select></label>
+                                <label>Orientation<select @bind="_draft.Orientation"><option>horizontal</option><option>vertical</option></select></label>
+                                <label>Button text<input @bind="_draft.ButtonText" /></label>
+                                <label>Placeholder<input @bind="_draft.Placeholder" /></label>
+                                <label>Initial value<input @bind="_draft.InitialValue" /></label>
+                            </div>
+                            <div class="component-option-grid three">
+                                <label><input type="checkbox" @bind="_draft.ShowFilterRow" /> Filter row</label>
+                                <label><input type="checkbox" @bind="_draft.ShowHeaderFilter" /> Header filter</label>
+                                <label><input type="checkbox" @bind="_draft.ShowSearchPanel" /> Search panel</label>
+                                <label><input type="checkbox" @bind="_draft.ShowGroupPanel" /> Group panel</label>
+                                <label><input type="checkbox" @bind="_draft.ShowColumnChooser" /> Column chooser</label>
+                                <label><input type="checkbox" @bind="_draft.AllowPaging" /> Paging</label>
+                                <label><input type="checkbox" @bind="_draft.AllowSorting" /> Sorting</label>
+                                <label><input type="checkbox" @bind="_draft.AllowFiltering" /> Filtering</label>
+                                <label><input type="checkbox" @bind="_draft.AllowReordering" /> Column reordering</label>
+                                <label><input type="checkbox" @bind="_draft.AllowResizing" /> Column resizing</label>
+                                <label><input type="checkbox" @bind="_draft.AutoExpandAll" /> Expand tree nodes</label>
+                            </div>
+                        </section>
+                    }
+                    else if (_section == "layout")
+                    {
+                        <section class="component-section">
+                            <div class="component-section-heading"><h3>Dynamic layout panels</h3><button type="button" @onclick="AddPanel">Add panel</button></div>
+                            <p class="component-info">Splitter, Tab Panel, Multi View, and Scroll View host browser-native child controls. Each panel can use another publication dataset without a Blazor adapter.</p>
+                            <div class="component-panel-list">
+                                @foreach (var panel in _draft.Panels)
+                                {
+                                    <article @key="panel.Id">
+                                        <div class="component-form-grid wide">
+                                            <label>Title<input @bind="panel.Title" /></label>
+                                            <label>Child component<select @bind="panel.ChildKind">@foreach (var kind in PanelComponentKinds) { <option value="@kind">@PublicationComponentService.ComponentName(kind)</option> }</select></label>
+                                            <label>Dataset<select @bind="panel.DataObjectId">@foreach (var data in State.Document.DataObjects) { <option value="@data.Id">@data.Name</option> }</select></label>
+                                            <label>Size<input @bind="panel.Size" placeholder="50% or 320px" /></label>
+                                            <label>Minimum<input @bind="panel.MinSize" /></label>
+                                            <label>Maximum<input @bind="panel.MaxSize" /></label>
+                                        </div>
+                                        <div class="component-option-grid"><label><input type="checkbox" @bind="panel.Collapsible" /> Collapsible</label><label><input type="checkbox" @bind="panel.Collapsed" /> Initially collapsed</label></div>
+                                        <label>Optional safe HTML content<textarea @bind="panel.ContentHtml"></textarea></label>
+                                        <button type="button" class="danger" @onclick="() => RemovePanel(panel)">Remove panel</button>
+                                    </article>
+                                }
+                            </div>
+                        </section>
+                    }
+                    else if (_section == "actions")
+                    {
+                        <section class="component-section">
+                            <div class="component-section-heading"><h3>Events and actions</h3><button type="button" @onclick="AddAction">Add action</button></div>
+                            <p class="component-info">Actions connect buttons, menus, editors, rows, appointments, and selections to pages, URLs, REST submission, mail preparation, visibility, or other components.</p>
+                            <div class="component-action-list">
+                                @foreach (var action in _draft.Actions)
+                                {
+                                    <article @key="action.Id">
+                                        <div class="component-form-grid wide">
+                                            <label>When<select @bind="action.Trigger">@foreach (var value in Enum.GetValues<PublicationComponentActionTrigger>()) { <option value="@value">@value</option> }</select></label>
+                                            <label>Do<select @bind="action.Action">@foreach (var value in Enum.GetValues<PublicationComponentActionKind>()) { <option value="@value">@Friendly(value.ToString())</option> }</select></label>
+                                            @if (action.Action == PublicationComponentActionKind.GoToPage)
+                                            {
+                                                <label>Target page<select value="@action.TargetPageId" @onchange="args => SetTargetPage(action, args)"><option value="">From data field</option>@foreach (var page in State.Document.Pages) { <option value="@page.Id">@page.Name</option> }</select></label>
+                                            }
+                                            @if (action.Action is PublicationComponentActionKind.ShowElement or PublicationComponentActionKind.HideElement or PublicationComponentActionKind.ToggleElement or PublicationComponentActionKind.SetValue or PublicationComponentActionKind.ApplyFilter or PublicationComponentActionKind.ClearFilter)
+                                            {
+                                                <label>Target component/object<select value="@action.TargetElementId" @onchange="args => SetTargetElement(action, args)"><option value="">Select target</option>@foreach (var target in CurrentPageElements) { <option value="@target.Id">@target.Name</option> }</select></label>
+                                            }
+                                            @if (action.Action is PublicationComponentActionKind.OpenUrl or PublicationComponentActionKind.SubmitRest)
+                                            {
+                                                <label class="span-2">URL<input @bind="action.Url" placeholder="https://… or {{url}}" /></label>
+                                            }
+                                            @if (action.Action == PublicationComponentActionKind.MailTo)
+                                            {
+                                                <label>Recipient<input @bind="action.MailTo" /></label><label>Subject<input @bind="action.MailSubject" /></label><label class="span-2">Body<textarea @bind="action.MailBody"></textarea></label>
+                                            }
+                                            @if (action.Action is PublicationComponentActionKind.SetValue or PublicationComponentActionKind.ApplyFilter)
+                                            {
+                                                <label>Source field<input @bind="action.SourceField" /></label><label>Target field / option<input @bind="action.TargetField" /></label><label class="span-2">Value template<input @bind="action.ValueTemplate" placeholder="{{value}} or {{FieldName}}" /></label>
+                                            }
+                                            <label class="span-2">Confirmation text (optional)<input @bind="action.ConfirmationText" /></label>
+                                            @if (action.Action == PublicationComponentActionKind.CustomScript)
+                                            {
+                                                <label class="span-2">JavaScript body<textarea @bind="action.Script" spellcheck="false"></textarea></label>
+                                            }
+                                        </div>
+                                        <button type="button" class="danger" @onclick="() => RemoveAction(action)">Remove action</button>
+                                    </article>
+                                }
+                            </div>
+                        </section>
+                    }
+                    else
+                    {
+                        <section class="component-section">
+                            <h3>Advanced DevExtreme options</h3>
+                            <label>Options JSON<textarea class="component-code-editor" @bind="_draft.AdvancedOptionsJson" spellcheck="false"></textarea></label>
+                            <p class="component-info">The JSON object is merged after PublisherStudio's generated safe options. It keeps the project file declarative and remains compatible with the single-file export.</p>
+                            <label class="component-script-toggle"><input type="checkbox" @bind="_draft.AllowCustomScript" /> Enable custom JavaScript actions for this component</label>
+                            @if (_draft.AllowCustomScript)
+                            {
+                                <p class="component-warning">Scripts execute with the permissions of the exported page. Use only code you trust. PublisherStudio never enables script actions automatically.</p>
+                            }
+                        </section>
+                    }
+                </main>
+
+                <aside class="component-preview-pane">
+                    <div class="pane-heading"><strong>Live preview</strong><span>@PublicationComponentService.ComponentName(_draft.ComponentKind)</span></div>
+                    <div class="component-preview-frame">
+                        <DevExtremeComponentView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" IdPrefix="studio" />
+                    </div>
+                    <small>The preview and both HTML exports use the same component JSON and browser runtime.</small>
+                </aside>
+            </div>
+
+            <footer>
+                <span>@ValidationMessage</span>
+                <div><button type="button" @onclick="Cancel">Cancel</button><button type="button" class="primary" @onclick="Save" disabled="@(!CanSave)">Apply component</button></div>
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback<DevExtremeComponentElement> Saved { get; set; }
+    [Parameter] public EventCallback Cancelled { get; set; }
+    [Parameter] public EventCallback ManageDataRequested { get; set; }
+
+    private DevExtremeComponentElement? _draft;
+    private Guid? _loadedId;
+    private bool _wasVisible;
+    private string _section = "general";
+    private string _headersText = string.Empty;
+    private bool _testingConnection;
+    private string _connectionStatus = string.Empty;
+
+    private static readonly PublicationComponentKind[] PanelComponentKinds =
+    [
+        PublicationComponentKind.DataGrid, PublicationComponentKind.TreeList, PublicationComponentKind.Form,
+        PublicationComponentKind.Scheduler, PublicationComponentKind.Gallery, PublicationComponentKind.TileView,
+        PublicationComponentKind.PivotGrid, PublicationComponentKind.TextBox, PublicationComponentKind.TextArea,
+        PublicationComponentKind.NumberBox, PublicationComponentKind.DateBox, PublicationComponentKind.CheckBox,
+        PublicationComponentKind.SelectBox, PublicationComponentKind.TagBox, PublicationComponentKind.Button
+    ];
+
+    private IEnumerable<PublicationElement> CurrentPageElements => State.CurrentPage.Elements.Where(element => element.Id != _draft?.Id);
+    private bool CanSave => _draft is not null && !string.IsNullOrWhiteSpace(_draft.Title)
+        && (_draft.Connection.Mode is not (PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData) || !string.IsNullOrWhiteSpace(_draft.Connection.Url));
+    private string ValidationMessage => CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, for direct REST/OData, an endpoint URL.";
+
+    protected override void OnParametersSet()
+    {
+        if (Visible && (!_wasVisible || _loadedId != State.SelectedElementId) && State.SelectedElement is DevExtremeComponentElement selected)
+        {
+            _draft = Components.Clone(selected);
+            _loadedId = selected.Id;
+            _headersText = FormatHeaders(_draft.Connection.Headers);
+            _section = "general";
+            _connectionStatus = string.Empty;
+        }
+        _wasVisible = Visible;
+    }
+
+    private string SectionClass(string value) => _section == value ? "active" : string.Empty;
+    private void ShowGeneral() => _section = "general";
+    private void ShowData() => _section = "data";
+    private void ShowFields() => _section = "fields";
+    private void ShowBehavior() => _section = "behavior";
+    private void ShowLayout() => _section = "layout";
+    private void ShowActions() => _section = "actions";
+    private void ShowAdvanced() => _section = "advanced";
+    private static string ComponentIcon(PublicationComponentKind kind) => kind switch
+    {
+        PublicationComponentKind.DataGrid => "▦", PublicationComponentKind.TreeList => "⌘", PublicationComponentKind.Scheduler => "▣",
+        PublicationComponentKind.Form => "≣", PublicationComponentKind.Gallery => "▧", PublicationComponentKind.TileView => "▥",
+        PublicationComponentKind.Menu => "☰", PublicationComponentKind.ContextMenu => "⋮", PublicationComponentKind.TabPanel => "▤",
+        PublicationComponentKind.MultiView => "▱", PublicationComponentKind.Splitter => "◫", PublicationComponentKind.ScrollView => "↕",
+        PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Button => "▰", _ => "⌨"
+    };
+    private static string Friendly(string value) => PublicationComponentService.Friendly(value);
+
+    private void ChangeKind(PublicationComponentKind kind)
+    {
+        if (_draft is null || _draft.ComponentKind == kind) return;
+        _draft.ComponentKind = kind;
+        _draft.Title = PublicationComponentService.ComponentName(kind);
+        _draft.Name = _draft.Title;
+        if (_draft.IsLayoutContainer && _draft.Panels.Count == 0) AddPanel();
+        if (kind == PublicationComponentKind.Button && _draft.Actions.Count == 0)
+            _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.NextPage });
+        _section = "general";
+    }
+
+    private Task ConnectionModeChanged() { _connectionStatus = string.Empty; return Task.CompletedTask; }
+    private Task SyncKeyField() { if (_draft is not null) _draft.KeyField = _draft.Connection.KeyField; return Task.CompletedTask; }
+    private Task SyncConnectionKey() { if (_draft is not null) _draft.Connection.KeyField = _draft.KeyField; return Task.CompletedTask; }
+    private Task UseDatasetFieldsIfEmpty() { if (_draft?.Fields.Count == 0) UseDatasetFields(); return Task.CompletedTask; }
+    private void UseDatasetFields() { if (_draft is not null) Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true); }
+
+    private void CreateNavigationDataset()
+    {
+        if (_draft is null) return;
+        var rows = State.Document.Pages.Select((page, index) => new
+        {
+            id = index + 1,
+            text = page.Name,
+            targetPageId = page.Id
+        }).ToArray();
+        var data = new PublicationDataObject
+        {
+            Name = "Publication navigation",
+            SourceKind = PublicationDataSourceKind.Json,
+            RawSource = System.Text.Json.JsonSerializer.Serialize(rows)
+        };
+        DataService.ParseInto(data);
+        State.UpsertDataObject(data);
+        _draft.Connection.Mode = PublicationComponentDataMode.PublicationDataObject;
+        _draft.Connection.DataObjectId = data.Id;
+        Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
+        _draft.KeyField = "id";
+        _draft.Connection.KeyField = "id";
+        _draft.TextField = "text";
+        _draft.DisplayField = "text";
+        _draft.TargetPageField = "targetPageId";
+        _draft.Scope = PublicationComponentScope.Document;
+        if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick))
+            _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.GoToPage });
+        _connectionStatus = "Navigation dataset created from the current publication pages.";
+    }
+
+    private void AddField() => _draft?.Fields.Add(new PublicationComponentField { DataField = $"field{(_draft.Fields.Count + 1)}", Caption = $"Field {_draft.Fields.Count + 1}" });
+    private void RemoveField(PublicationComponentField field) => _draft?.Fields.Remove(field);
+    private void AddPanel()
+    {
+        if (_draft is null) return;
+        _draft.Panels.Add(new PublicationComponentPanel
+        {
+            Title = $"Panel {_draft.Panels.Count + 1}",
+            ChildKind = _draft.Panels.Count == 0 ? PublicationComponentKind.DataGrid : PublicationComponentKind.Form,
+            DataObjectId = _draft.Connection.DataObjectId,
+            Size = _draft.Panels.Count == 0 ? "55%" : string.Empty
+        });
+    }
+    private void RemovePanel(PublicationComponentPanel panel) => _draft?.Panels.Remove(panel);
+    private void AddAction() => _draft?.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.None });
+    private void RemoveAction(PublicationComponentAction action) => _draft?.Actions.Remove(action);
+
+    private void ChangeHeaders(ChangeEventArgs args)
+    {
+        _headersText = args.Value?.ToString() ?? string.Empty;
+        if (_draft is not null) _draft.Connection.Headers = ParseHeaders(_headersText);
+    }
+
+    private async Task TestEndpoint()
+    {
+        if (_draft is null || string.IsNullOrWhiteSpace(_draft.Connection.Url)) return;
+        _testingConnection = true;
+        _connectionStatus = string.Empty;
+        try
+        {
+            var text = await JS.InvokeAsync<string>("PublisherStudioComponentRuntime.probeConnection", _draft.Connection);
+            var sample = new PublicationDataObject { Name = "Endpoint preview", SourceKind = PublicationDataSourceKind.Json, RawSource = text };
+            DataService.ParseInto(sample);
+            _draft.Fields = DataService.ResolveColumns(sample).Select((column, index) => new PublicationComponentField
+            {
+                DataField = column.Name, Caption = Friendly(column.Name), ValueKind = column.ValueKind,
+                Editor = column.ValueKind switch { PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox, PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox, PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox, _ => PublicationComponentEditorKind.TextBox },
+                Area = index == 0 ? PublicationComponentFieldArea.Row : column.ValueKind == PublicationDataValueKind.Number ? PublicationComponentFieldArea.Data : PublicationComponentFieldArea.Column
+            }).ToList();
+            if (_draft.Fields.Count > 0)
+            {
+                _draft.KeyField = _draft.Fields.FirstOrDefault(field => string.Equals(field.DataField, "id", StringComparison.OrdinalIgnoreCase))?.DataField ?? _draft.Fields[0].DataField;
+                _draft.Connection.KeyField = _draft.KeyField;
+                _draft.TextField = _draft.Fields.FirstOrDefault(field => new[] { "text", "title", "name", "subject" }.Contains(field.DataField, StringComparer.OrdinalIgnoreCase))?.DataField ?? _draft.Fields[0].DataField;
+                _draft.DisplayField = _draft.TextField;
+                _draft.ValueField = _draft.Fields.FirstOrDefault(field => field.ValueKind == PublicationDataValueKind.Number)?.DataField ?? _draft.Fields[0].DataField;
+            }
+            _connectionStatus = $"Connected: {sample.Rows.Count} sample rows, {_draft.Fields.Count} fields discovered.";
+            _section = "fields";
+        }
+        catch (Exception error) { _connectionStatus = $"Connection failed: {error.Message}"; }
+        finally { _testingConnection = false; }
+    }
+
+    private static List<PublicationWebHeader> ParseHeaders(string value) => value.Replace("\r", string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries)
+        .Select(line => line.Split(':', 2)).Where(parts => parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
+        .Select(parts => new PublicationWebHeader { Name = parts[0].Trim(), Value = parts[1].Trim() }).ToList();
+    private static string FormatHeaders(IEnumerable<PublicationWebHeader> headers) => string.Join(Environment.NewLine, headers.Select(header => $"{header.Name}: {header.Value}"));
+
+    private void SetLookupDataObject(PublicationComponentField field, ChangeEventArgs args)
+    {
+        field.LookupDataObjectId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+        if (field.LookupDataObjectId is not { } dataId) return;
+        var data = State.Document.DataObjects.FirstOrDefault(candidate => candidate.Id == dataId);
+        var columns = DataService.ResolveColumns(data);
+        field.LookupDataField = columns.FirstOrDefault()?.Name ?? string.Empty;
+        field.LookupDisplayField = columns.Skip(1).FirstOrDefault()?.Name ?? field.LookupDataField;
+        if (field.Editor is PublicationComponentEditorKind.Auto or PublicationComponentEditorKind.TextBox)
+            field.Editor = PublicationComponentEditorKind.SelectBox;
+    }
+
+    private void SetTargetPage(PublicationComponentAction action, ChangeEventArgs args) => action.TargetPageId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+    private void SetTargetElement(PublicationComponentAction action, ChangeEventArgs args)
+    {
+        action.TargetElementId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+        action.TargetSharedComponentId = action.TargetElementId is { } targetId
+            ? State.CurrentPage.Elements.OfType<DevExtremeComponentElement>()
+                .FirstOrDefault(component => component.Id == targetId)?.SharedComponentId
+            : null;
+    }
+
+    private RenderFragment MethodOptions() => builder =>
+    {
+        var sequence = 0;
+        foreach (var method in Enum.GetValues<PublicationComponentHttpMethod>())
+        {
+            builder.OpenElement(sequence++, "option");
+            builder.AddAttribute(sequence++, "value", method);
+            builder.AddContent(sequence++, method);
+            builder.CloseElement();
+        }
+    };
+
+    private Task RequestManageData() => ManageDataRequested.InvokeAsync();
+    private async Task Save()
+    {
+        if (_draft is null || !CanSave) return;
+        _draft.Connection.Headers = ParseHeaders(_headersText);
+        Components.Normalize(State.Document, _draft);
+        await Saved.InvokeAsync(_draft);
+    }
+    private Task Cancel() => Cancelled.InvokeAsync();
+}

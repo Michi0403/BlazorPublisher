@@ -289,3 +289,7 @@ See `CHANGELOG-v1.0.41.md` and `docs/ANIMATION_EXPORT.md`. Picture Studio can no
 ## v1.0.42 reversible previews and signal resizing
 
 See `CHANGELOG-v1.0.42.md` and `docs/ANIMATION_EXPORT.md`. **Stop preview** now restores object transforms, dimensions, opacity, visibility, CSS classes, and media state after both ordinary animation previews and Signal Arrow/Connector playback. Signals add independent width/height resizing, page-entry playback starts from a clean baseline, and delegated click/hover monitoring survives rerendered DevExtreme, spreadsheet, chart, and custom HTML targets. These behaviors are included in offline single-file HTML exports.
+
+## v1.0.43 navigable menus and selectable publication fields
+
+See `CHANGELOG-v1.0.43.md`. Menu and Context Menu items can target stable publication pages, external URLs, or no navigation without automatically adding pages. Data-driven menus can bind directly to the self-updating **Publication pages** object. Component Studio now selects source properties and key fields from the active dataset schema, filters behavior settings by component capability, supports horizontal/vertical Menu layout, and avoids loading the DevExtreme bundle twice.

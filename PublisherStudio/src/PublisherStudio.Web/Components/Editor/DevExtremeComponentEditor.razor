@@ -19,6 +19,10 @@
             <div class="component-editor-commandbar">
                 <button type="button" class="@SectionClass("general")" @onclick="ShowGeneral">General</button>
                 <button type="button" class="@SectionClass("data")" @onclick="ShowData">Data &amp; API</button>
+                @if (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+                {
+                    <button type="button" class="@SectionClass("menu")" @onclick="ShowMenuItems">Menu items</button>
+                }
                 <button type="button" class="@SectionClass("fields")" @onclick="ShowFields">Fields &amp; editors</button>
                 <button type="button" class="@SectionClass("behavior")" @onclick="ShowBehavior">Behavior</button>
                 @if (_draft.ComponentKind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap)
@@ -66,8 +70,14 @@
                             </div>
                             <div class="component-option-grid">
                                 <label><input type="checkbox" @bind="_draft.ShowTitle" /> Show component title</label>
-                                <label><input type="checkbox" @bind="_draft.ShowBorders" /> Show internal borders</label>
-                                <label><input type="checkbox" @bind="_draft.WordWrap" /> Wrap cell text</label>
+                                @if (SupportsInternalBorders)
+                                {
+                                    <label><input type="checkbox" @bind="_draft.ShowBorders" /> Show internal borders</label>
+                                }
+                                @if (SupportsWordWrap)
+                                {
+                                    <label><input type="checkbox" @bind="_draft.WordWrap" /> Wrap field text</label>
+                                }
                             </div>
                             @if (_draft.Scope == PublicationComponentScope.Document)
                             {
@@ -82,9 +92,31 @@
                                 <h3>Smart data connection</h3>
                                 @if (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
                                 {
-                                    <button type="button" @onclick="CreateNavigationDataset">Use publication pages as menu</button>
+                                    <button type="button" @onclick="UseLivePageDataset">Use live publication pages</button>
                                 }
                             </div>
+                            @if (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+                            {
+                                <div class="component-form-grid">
+                                    <label>Menu content
+                                        <select @bind="_draft.MenuSourceMode">
+                                            <option value="@PublicationMenuSourceMode.ManualItems">Editable menu items</option>
+                                            <option value="@PublicationMenuSourceMode.DataConnection">Data object / API rows</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <p class="component-info">Editable items may point to a publication page, an external URL, or perform no navigation. Pages are never inserted automatically. Data-driven menus use the text, target-page, URL, key, and parent mappings from Fields &amp; editors.</p>
+                                @if (_draft.MenuSourceMode == PublicationMenuSourceMode.ManualItems)
+                                {
+                                    <button type="button" @onclick="ShowMenuItems">Edit menu items</button>
+                                }
+                            }
+                            @if (IsManualMenu)
+                            {
+                                <div class="component-info">This menu uses its editable item list. No dataset, API, key field, or CRUD configuration is required. Open <b>Menu items</b> to assign an internal page, an external URL, or no navigation to every item.</div>
+                            }
+                            else
+                            {
                             <div class="component-form-grid">
                                 <label>Source
                                     <select @bind="_draft.Connection.Mode" @bind:after="ConnectionModeChanged">
@@ -100,7 +132,15 @@
                                         <option value="@PublicationComponentProcessingMode.Remote">Remote/server operations</option>
                                     </select>
                                 </label>
-                                <label>Key field<input @bind="_draft.Connection.KeyField" @bind:after="SyncKeyField" /></label>
+                                <label>Key field
+                                    <select @bind="_draft.Connection.KeyField" @bind:after="SyncKeyField">
+                                        <option value="">Automatic / not used</option>
+                                        @foreach (var column in SourceColumns)
+                                        {
+                                            <option value="@column.Name">@column.Name (@column.ValueKind)</option>
+                                        }
+                                    </select>
+                                </label>
                             </div>
 
                             @if (_draft.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot)
@@ -184,12 +224,115 @@
                                     }
                                 </div>
                             }
+                            }
+                        </section>
+                    }
+                    else if (_section == "menu")
+                    {
+                        <section class="component-section">
+                            <div class="component-section-heading">
+                                <h3>Menu items</h3>
+                                <div>
+                                    <button type="button" @onclick="AddMenuItem">Add item</button>
+                                    <button type="button" @onclick="AddPublicationPagesToMenu">Add publication pages</button>
+                                </div>
+                            </div>
+                            <div class="component-form-grid">
+                                <label>Menu content
+                                    <select @bind="_draft.MenuSourceMode">
+                                        <option value="@PublicationMenuSourceMode.ManualItems">Editable menu items</option>
+                                        <option value="@PublicationMenuSourceMode.DataConnection">Data object / API rows</option>
+                                    </select>
+                                </label>
+                                @if (_draft.ComponentKind == PublicationComponentKind.Menu)
+                                {
+                                    <label>Build direction
+                                        <select @bind="_draft.Orientation"><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option></select>
+                                    </label>
+                                }
+                            </div>
+                            @if (_draft.MenuSourceMode == PublicationMenuSourceMode.DataConnection)
+                            {
+                                <div class="component-info">This menu is generated from the selected data object or API. Use <b>Fields &amp; editors</b> to choose the text, target-page, URL, key, and optional parent fields. An item navigates to its page when the target-page field has a value; otherwise it opens its URL when the URL field has a value.</div>
+                                <div class="component-section-heading"><span></span><button type="button" @onclick="UseLivePageDataset">Use the self-updating Publication pages object</button></div>
+                            }
+                            else
+                            {
+                                <p class="component-info">Choose a destination per item. “No navigation” is useful for headings or entries handled by custom actions. External-only menus are supported; adding publication pages is optional.</p>
+                                <div class="component-menu-item-list">
+                                    @foreach (var menuItem in _draft.MenuItems)
+                                    {
+                                        <article @key="menuItem.Id">
+                                            <div class="component-form-grid wide">
+                                                <label>Text<input @bind="menuItem.Text" /></label>
+                                                <label>Parent item
+                                                    <select value="@menuItem.ParentId" @onchange="args => SetMenuParent(menuItem, args)">
+                                                        <option value="">Top level</option>
+                                                        @foreach (var parent in _draft.MenuItems.Where(candidate => candidate.Id != menuItem.Id))
+                                                        {
+                                                            <option value="@parent.Id">@parent.Text</option>
+                                                        }
+                                                    </select>
+                                                </label>
+                                                <label>Destination
+                                                    <select @bind="menuItem.Destination">
+                                                        <option value="@PublicationMenuDestinationKind.None">No navigation</option>
+                                                        <option value="@PublicationMenuDestinationKind.Page">Publication page</option>
+                                                        <option value="@PublicationMenuDestinationKind.ExternalUrl">External URL</option>
+                                                    </select>
+                                                </label>
+                                                @if (menuItem.Destination == PublicationMenuDestinationKind.Page)
+                                                {
+                                                    <label>Page
+                                                        <select value="@menuItem.TargetPageId" @onchange="args => SetMenuTargetPage(menuItem, args)">
+                                                            <option value="">Select page</option>
+                                                            @foreach (var publicationPage in State.Document.Pages)
+                                                            {
+                                                                <option value="@publicationPage.Id">@publicationPage.Name</option>
+                                                            }
+                                                        </select>
+                                                    </label>
+                                                }
+                                                else if (menuItem.Destination == PublicationMenuDestinationKind.ExternalUrl)
+                                                {
+                                                    <label class="span-2">External URL<input @bind="menuItem.Url" placeholder="https://example.com" /></label>
+                                                    <label><input type="checkbox" @bind="menuItem.OpenInNewWindow" /> Open in new window</label>
+                                                }
+                                                <label>Icon CSS class<input @bind="menuItem.IconCssClass" placeholder="optional" /></label>
+                                            </div>
+                                            <div class="component-option-grid">
+                                                <label><input type="checkbox" @bind="menuItem.Enabled" /> Enabled</label>
+                                                <label><input type="checkbox" @bind="menuItem.Visible" /> Visible</label>
+                                            </div>
+                                            <button type="button" class="danger" @onclick="() => RemoveMenuItem(menuItem)">Remove item</button>
+                                        </article>
+                                    }
+                                </div>
+                                @if (_draft.MenuItems.Count == 0)
+                                {
+                                    <div class="empty-panel">No menu items yet. Add an external link, a page link, or a non-navigating item.</div>
+                                }
+                            }
                         </section>
                     }
                     else if (_section == "fields")
                     {
                         <section class="component-section">
-                            <div class="component-section-heading"><h3>Fields and editors</h3><div><button type="button" @onclick="UseDatasetFields">Reset from dataset</button><button type="button" @onclick="AddField">Add field</button></div></div>
+                            <div class="component-section-heading">
+                                <h3>Fields and editors</h3>
+                                @if (!IsManualMenu)
+                                {
+                                    <div><button type="button" @onclick="UseDatasetFields">Reset from dataset</button><button type="button" @onclick="AddField">Add field</button></div>
+                                }
+                            </div>
+                            @if (IsManualMenu)
+                            {
+                                <p class="component-info">This menu uses editable menu items, so dataset fields are intentionally not used. Switch Menu content to <b>Data object / API rows</b> when you want a menu generated from source properties.</p>
+                                <button type="button" @onclick="ShowMenuItems">Open editable menu items</button>
+                            }
+                            else
+                            {
+                                <p class="component-info">Each field below maps to a property provisioned by the selected data source. Select the source property rather than guessing its name. Lookup value/display fields are read from the selected lookup object.</p>
                             <div class="component-field-table-wrap">
                                 <table class="component-field-table">
                                     <thead><tr><th>Data field</th><th>Caption</th><th>Type</th><th>Editor</th><th>Visible</th><th>Edit</th><th>Required</th><th>Width</th><th>Pivot area</th><th>Lookup dataset</th><th>Lookup value</th><th>Lookup display</th><th></th></tr></thead>
@@ -197,7 +340,15 @@
                                         @foreach (var field in _draft.Fields)
                                         {
                                             <tr @key="field.Id">
-                                                <td><input @bind="field.DataField" /></td>
+                                                <td>
+                                                    <select value="@field.DataField" @onchange="args => SetFieldDataProperty(field, args)">
+                                                        <option value="">Select source property</option>
+                                                        @foreach (var column in FieldChoices(field))
+                                                        {
+                                                            <option value="@column.Name">@column.Name (@column.ValueKind)</option>
+                                                        }
+                                                    </select>
+                                                </td>
                                                 <td><input @bind="field.Caption" /></td>
                                                 <td><select @bind="field.ValueKind">@foreach (var value in Enum.GetValues<PublicationDataValueKind>()) { <option value="@value">@value</option> }</select></td>
                                                 <td><select @bind="field.Editor">@foreach (var value in Enum.GetValues<PublicationComponentEditorKind>()) { <option value="@value">@value</option> }</select></td>
@@ -205,59 +356,129 @@
                                                 <td><input type="checkbox" @bind="field.Editable" /></td>
                                                 <td><input type="checkbox" @bind="field.Required" /></td>
                                                 <td><input type="number" min="0" max="2000" @bind="field.Width" /></td>
-                                                <td><select @bind="field.Area">@foreach (var value in Enum.GetValues<PublicationComponentFieldArea>()) { <option value="@value">@value</option> }</select></td>
+                                                <td><select @bind="field.Area" disabled="@(_draft.ComponentKind != PublicationComponentKind.PivotGrid)">@foreach (var value in Enum.GetValues<PublicationComponentFieldArea>()) { <option value="@value">@value</option> }</select></td>
                                                 <td><select value="@field.LookupDataObjectId" @onchange="args => SetLookupDataObject(field, args)"><option value="">None</option>@foreach (var data in State.Document.DataObjects) { <option value="@data.Id">@data.Name</option> }</select></td>
-                                                <td><input @bind="field.LookupDataField" placeholder="id" /></td>
-                                                <td><input @bind="field.LookupDisplayField" placeholder="name" /></td>
+                                                <td><select @bind="field.LookupDataField" disabled="@(field.LookupDataObjectId is null)"><option value="">Automatic</option>@foreach (var lookupColumn in LookupColumns(field)) { <option value="@lookupColumn.Name">@lookupColumn.Name</option> }</select></td>
+                                                <td><select @bind="field.LookupDisplayField" disabled="@(field.LookupDataObjectId is null)"><option value="">Automatic</option>@foreach (var lookupColumn in LookupColumns(field)) { <option value="@lookupColumn.Name">@lookupColumn.Name</option> }</select></td>
                                                 <td><button type="button" class="danger" @onclick="() => RemoveField(field)">×</button></td>
                                             </tr>
                                         }
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="component-form-grid mapping-grid">
-                                <label>Key field<input @bind="_draft.KeyField" @bind:after="SyncConnectionKey" /></label>
-                                <label>Parent field<input @bind="_draft.ParentField" /></label>
-                                <label>Text / title field<input @bind="_draft.TextField" /></label>
-                                <label>Display field<input @bind="_draft.DisplayField" /></label>
-                                <label>Value field<input @bind="_draft.ValueField" /></label>
-                                <label>Image field<input @bind="_draft.ImageField" /></label>
-                                <label>Start date field<input @bind="_draft.StartDateField" /></label>
-                                <label>End date field<input @bind="_draft.EndDateField" /></label>
-                                <label>All-day field<input @bind="_draft.AllDayField" /></label>
-                                <label>Target page field<input @bind="_draft.TargetPageField" /></label>
-                                <label>URL field<input @bind="_draft.UrlField" /></label>
-                            </div>
+                            @if (_draft.Fields.Count == 0)
+                            {
+                                <div class="empty-panel">No fields are available. Select a data object and use “Read fields from dataset”, or add a field manually.</div>
+                            }
+                            else
+                            {
+                                <h3>Component field mappings</h3>
+                                <div class="component-form-grid mapping-grid">
+                                    @if (UsesKeyField)
+                                    {
+                                        <label>Key field<select @bind="_draft.KeyField" @bind:after="SyncConnectionKey"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (UsesParentField)
+                                    {
+                                        <label>Parent field<select @bind="_draft.ParentField"><option value="">No hierarchy</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (UsesTextField)
+                                    {
+                                        <label>Text / title field<select @bind="_draft.TextField"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (UsesDisplayField)
+                                    {
+                                        <label>Display field<select @bind="_draft.DisplayField"><option value="">Automatic</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (UsesValueField)
+                                    {
+                                        <label>Value field<select @bind="_draft.ValueField"><option value="">Automatic</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (UsesImageField)
+                                    {
+                                        <label>Image field<select @bind="_draft.ImageField"><option value="">No image</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (_draft.ComponentKind == PublicationComponentKind.Scheduler)
+                                    {
+                                        <label>Start date field<select @bind="_draft.StartDateField"><option value="">Select field</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>End date field<select @bind="_draft.EndDateField"><option value="">Select field</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>All-day field<select @bind="_draft.AllDayField"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+                                    {
+                                        <label>Target page field<select @bind="_draft.TargetPageField"><option value="">No page navigation</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>External URL field<select @bind="_draft.UrlField"><option value="">No external links</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                </div>
+                            }
+                            }
                         </section>
                     }
                     else if (_section == "behavior")
                     {
                         <section class="component-section">
-                            <h3>Interaction and display behavior</h3>
+                            <h3>@PublicationComponentService.ComponentName(_draft.ComponentKind) behavior</h3>
+                            <p class="component-info">Only options supported by the selected component are shown here.</p>
                             <div class="component-form-grid">
-                                <label>Edit mode<select @bind="_draft.EditMode">@foreach (var value in Enum.GetValues<PublicationComponentEditMode>()) { <option value="@value">@value</option> }</select></label>
-                                <label>Selection<select @bind="_draft.SelectionMode">@foreach (var value in Enum.GetValues<PublicationComponentSelectionMode>()) { <option value="@value">@value</option> }</select></label>
-                                <label>Page size<input type="number" min="1" max="1000" @bind="_draft.PageSize" /></label>
-                                <label>Form columns<input type="number" min="1" max="12" @bind="_draft.ColumnCount" /></label>
-                                <label>Scheduler view<select @bind="_draft.CurrentView"><option>day</option><option>week</option><option>workWeek</option><option>month</option><option>agenda</option></select></label>
-                                <label>Orientation<select @bind="_draft.Orientation"><option>horizontal</option><option>vertical</option></select></label>
-                                <label>Button text<input @bind="_draft.ButtonText" /></label>
-                                <label>Placeholder<input @bind="_draft.Placeholder" /></label>
-                                <label>Initial value<input @bind="_draft.InitialValue" /></label>
+                                @if (SupportsEditMode)
+                                {
+                                    <label>Edit mode<select @bind="_draft.EditMode">@foreach (var value in Enum.GetValues<PublicationComponentEditMode>()) { <option value="@value">@value</option> }</select></label>
+                                }
+                                @if (SupportsSelection)
+                                {
+                                    <label>Selection<select @bind="_draft.SelectionMode">@foreach (var value in Enum.GetValues<PublicationComponentSelectionMode>()) { <option value="@value">@value</option> }</select></label>
+                                }
+                                @if (SupportsPageSize)
+                                {
+                                    <label>Page size<input type="number" min="1" max="1000" @bind="_draft.PageSize" /></label>
+                                }
+                                @if (_draft.ComponentKind == PublicationComponentKind.Form)
+                                {
+                                    <label>Form columns<input type="number" min="1" max="12" @bind="_draft.ColumnCount" /></label>
+                                }
+                                @if (_draft.ComponentKind == PublicationComponentKind.Scheduler)
+                                {
+                                    <label>Scheduler view<select @bind="_draft.CurrentView"><option>day</option><option>week</option><option>workWeek</option><option>month</option><option>agenda</option></select></label>
+                                }
+                                @if (SupportsOrientation)
+                                {
+                                    <label>Build direction<select @bind="_draft.Orientation"><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option></select></label>
+                                }
+                                @if (SupportsButtonText)
+                                {
+                                    <label>Button / label text<input @bind="_draft.ButtonText" /></label>
+                                }
+                                @if (SupportsPlaceholder)
+                                {
+                                    <label>Placeholder<input @bind="_draft.Placeholder" /></label>
+                                }
+                                @if (SupportsInitialValue)
+                                {
+                                    <label>Initial value<input @bind="_draft.InitialValue" /></label>
+                                }
                             </div>
-                            <div class="component-option-grid three">
-                                <label><input type="checkbox" @bind="_draft.ShowFilterRow" /> Filter row</label>
-                                <label><input type="checkbox" @bind="_draft.ShowHeaderFilter" /> Header filter</label>
-                                <label><input type="checkbox" @bind="_draft.ShowSearchPanel" /> Search panel</label>
-                                <label><input type="checkbox" @bind="_draft.ShowGroupPanel" /> Group panel</label>
-                                <label><input type="checkbox" @bind="_draft.ShowColumnChooser" /> Column chooser</label>
-                                <label><input type="checkbox" @bind="_draft.AllowPaging" /> Paging</label>
-                                <label><input type="checkbox" @bind="_draft.AllowSorting" /> Sorting</label>
-                                <label><input type="checkbox" @bind="_draft.AllowFiltering" /> Filtering</label>
-                                <label><input type="checkbox" @bind="_draft.AllowReordering" /> Column reordering</label>
-                                <label><input type="checkbox" @bind="_draft.AllowResizing" /> Column resizing</label>
-                                <label><input type="checkbox" @bind="_draft.AutoExpandAll" /> Expand tree nodes</label>
-                            </div>
+                            @if (SupportsGridOptions || _draft.ComponentKind == PublicationComponentKind.TreeList)
+                            {
+                                <div class="component-option-grid three">
+                                    <label><input type="checkbox" @bind="_draft.ShowFilterRow" /> Filter row</label>
+                                    <label><input type="checkbox" @bind="_draft.ShowHeaderFilter" /> Header filter</label>
+                                    <label><input type="checkbox" @bind="_draft.ShowSearchPanel" /> Search panel</label>
+                                    @if (_draft.ComponentKind == PublicationComponentKind.DataGrid)
+                                    {
+                                        <label><input type="checkbox" @bind="_draft.ShowGroupPanel" /> Group panel</label>
+                                    }
+                                    <label><input type="checkbox" @bind="_draft.ShowColumnChooser" /> Column chooser</label>
+                                    <label><input type="checkbox" @bind="_draft.AllowPaging" /> Paging</label>
+                                    <label><input type="checkbox" @bind="_draft.AllowSorting" /> Sorting</label>
+                                    <label><input type="checkbox" @bind="_draft.AllowFiltering" /> Filtering</label>
+                                    <label><input type="checkbox" @bind="_draft.AllowReordering" /> Column reordering</label>
+                                    <label><input type="checkbox" @bind="_draft.AllowResizing" /> Column resizing</label>
+                                    @if (_draft.ComponentKind == PublicationComponentKind.TreeList)
+                                    {
+                                        <label><input type="checkbox" @bind="_draft.AutoExpandAll" /> Expand tree nodes</label>
+                                    }
+                                </div>
+                            }
                         </section>
                     }
                     else if (_section == "map")
@@ -265,9 +486,9 @@
                         <section class="component-section vector-map-editor">
                             <h3>@(_draft.ComponentKind == PublicationComponentKind.VectorMap ? "Vector map designer" : "Interactive map")</h3>
                             <div class="component-form-grid wide">
-                                <label>Latitude field<input @bind="_draft.LatitudeField" /></label>
-                                <label>Longitude field<input @bind="_draft.LongitudeField" /></label>
-                                <label>Label / tooltip field<input @bind="_draft.MarkerTooltipField" /></label>
+                                <label>Latitude field<select @bind="_draft.LatitudeField"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                <label>Longitude field<select @bind="_draft.LongitudeField"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                <label>Label / tooltip field<select @bind="_draft.MarkerTooltipField"><option value="">No label</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                 <label>Center latitude<input type="number" min="-90" max="90" step="0.0001" @bind="_draft.MapCenterLatitude" /></label>
                                 <label>Center longitude<input type="number" min="-180" max="180" step="0.0001" @bind="_draft.MapCenterLongitude" /></label>
                                 <label>Zoom<input type="number" min="1" max="20" step="0.25" @bind="_draft.MapZoom" /></label>
@@ -283,9 +504,9 @@
                                     <label>Provider<select @bind="_draft.MapProvider"><option value="google">Google</option><option value="googleStatic">Google Static</option><option value="bing">Bing</option><option value="azure">Azure</option></select></label>
                                     <label>Map type<select @bind="_draft.MapType"><option value="roadmap">Road map</option><option value="satellite">Satellite</option><option value="hybrid">Hybrid</option></select></label>
                                     <label class="span-2">Provider API key<input type="password" @bind="_draft.MapApiKey" autocomplete="off" /></label>
-                                    <label>Address field<input @bind="_draft.AddressField" /></label>
-                                    <label>Route group field<input @bind="_draft.MapRouteField" /></label>
-                                    <label>Route order field<input @bind="_draft.MapOrderField" /></label>
+                                    <label>Address field<select @bind="_draft.AddressField"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    <label>Route group field<select @bind="_draft.MapRouteField"><option value="">One route</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    <label>Route order field<select @bind="_draft.MapOrderField"><option value="">Row order</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     <label><input type="checkbox" @bind="_draft.MapShowRoutes" /> Build routes from grouped rows</label>
                                 </div>
                                 <p class="component-info">Rows with latitude/longitude become live markers. Rows sharing a route group become an ordered route. Provider maps require the corresponding provider key.</p>
@@ -295,9 +516,9 @@
                                 <div class="component-form-grid wide">
                                     <label>Bundled base map<select @bind="_draft.VectorBaseLayer">@foreach (var value in Enum.GetValues<PublicationVectorMapBaseLayer>()) { <option value="@value">@Friendly(value.ToString())</option> }</select></label>
                                     <label>Projection<select @bind="_draft.VectorProjection"><option value="mercator">Mercator</option><option value="miller">Miller</option><option value="lambert">Lambert</option><option value="equirectangular">Equirectangular</option></select></label>
-                                    <label>Data label field<input @bind="_draft.VectorLabelField" /></label>
-                                    <label>Data value field<input @bind="_draft.VectorValueField" /></label>
-                                    <label>Data color field<input @bind="_draft.VectorColorField" /></label>
+                                    <label>Data label field<select @bind="_draft.VectorLabelField"><option value="">No data label</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    <label>Data value field<select @bind="_draft.VectorValueField"><option value="">No value</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    <label>Data color field<select @bind="_draft.VectorColorField"><option value="">Default color</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     <label><input type="checkbox" @bind="_draft.VectorShowLabels" /> Show labels</label>
                                 </div>
                                 <div class="vector-draw-toolbar">
@@ -377,13 +598,13 @@
                                         <div class="component-form-grid wide">
                                             <label>When<select @bind="action.Trigger">@foreach (var value in Enum.GetValues<PublicationComponentActionTrigger>()) { <option value="@value">@value</option> }</select></label>
                                             <label>Do<select @bind="action.Action">@foreach (var value in Enum.GetValues<PublicationComponentActionKind>()) { <option value="@value">@Friendly(value.ToString())</option> }</select></label>
-                                           @if (action.Action == PublicationComponentActionKind.GoToPage)
+                                           @if (action.Action is PublicationComponentActionKind.GoToPage or PublicationComponentActionKind.Navigate)
                                            {
                                                 <label>
                                                     Target page
                                                     <select value="@action.TargetPageId"
                                                             @onchange="args => SetTargetPage(action, args)">
-                                                        <option value="">From data field</option>
+                                                        <option value="">From item/data field</option>
 
                                                         @foreach (var publicationPage in State.Document.Pages)
                                                         {
@@ -398,9 +619,13 @@
                                             {
                                                 <label>Target component/object<select value="@action.TargetElementId" @onchange="args => SetTargetElement(action, args)"><option value="">Select target</option>@foreach (var target in CurrentPageElements) { <option value="@target.Id">@target.Name</option> }</select></label>
                                             }
-                                            @if (action.Action is PublicationComponentActionKind.OpenUrl or PublicationComponentActionKind.SubmitRest)
+                                            @if (action.Action is PublicationComponentActionKind.OpenUrl or PublicationComponentActionKind.SubmitRest or PublicationComponentActionKind.Navigate)
                                             {
-                                                <label class="span-2">URL<input @bind="action.Url" placeholder="https://… or {{url}}" /></label>
+                                                <label class="span-2">@(action.Action == PublicationComponentActionKind.Navigate ? "Fallback / fixed external URL" : "URL")<input @bind="action.Url" placeholder="https://… or {{url}}" /></label>
+                                            }
+                                            @if (action.Action is PublicationComponentActionKind.OpenUrl or PublicationComponentActionKind.Navigate)
+                                            {
+                                                <label><input type="checkbox" @bind="action.OpenInNewWindow" /> Open external links in new window</label>
                                             }
                                             @if (action.Action == PublicationComponentActionKind.MailTo)
                                             {
@@ -444,7 +669,7 @@
                     <div class="pane-heading"><strong>Live preview</strong><span>@PublicationComponentService.ComponentName(_draft.ComponentKind)</span></div>
                     <div class="component-preview-frame">
                         <DevExtremeComponentView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" IdPrefix="studio"
-                            ElementIdOverride="ps-component-vector-designer" DesignerMode="@(_section == "map" && _draft.ComponentKind == PublicationComponentKind.VectorMap)" />
+                            ElementIdOverride="ps-component-vector-designer" DesignerMode="true" />
                     </div>
                     <small>The preview and both HTML exports use the same component JSON and browser runtime.</small>
                 </aside>
@@ -490,12 +715,33 @@
     ];
 
     private IEnumerable<PublicationElement> CurrentPageElements => State.CurrentPage.Elements.Where(element => element.Id != _draft?.Id);
+    private bool SupportsInternalBorders => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.PivotGrid;
+    private bool SupportsWordWrap => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    private bool SupportsEditMode => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler;
+    private bool SupportsSelection => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    private bool SupportsPageSize => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    private bool SupportsOrientation => _draft?.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.TileView or PublicationComponentKind.Splitter or PublicationComponentKind.ScrollView;
+    private bool SupportsButtonText => _draft?.ComponentKind is PublicationComponentKind.Button or PublicationComponentKind.Form or PublicationComponentKind.CheckBox;
+    private bool SupportsPlaceholder => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+    private bool SupportsInitialValue => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.CheckBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+    private bool SupportsGridOptions => _draft?.ComponentKind == PublicationComponentKind.DataGrid;
+    private bool UsesKeyField => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Form or PublicationComponentKind.Scheduler or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu or PublicationComponentKind.PivotGrid;
+    private bool UsesParentField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    private bool UsesTextField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    private bool UsesDisplayField => _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    private bool UsesValueField => _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+    private bool UsesImageField => _draft?.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+    private bool IsManualMenu => _draft is not null
+        && (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+        && _draft.MenuSourceMode == PublicationMenuSourceMode.ManualItems;
+    private bool UsesDataConnection => !IsManualMenu;
     private bool CanSave => _draft is not null && !string.IsNullOrWhiteSpace(_draft.Title)
-        && (_draft.Connection.Mode is not (PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData) || !string.IsNullOrWhiteSpace(_draft.Connection.Url));
-    private string ValidationMessage => CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, for direct REST/OData, an endpoint URL.";
+        && (!UsesDataConnection || _draft.Connection.Mode is not (PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData) || !string.IsNullOrWhiteSpace(_draft.Connection.Url));
+    private string ValidationMessage => CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, when a data-driven component uses direct REST/OData, an endpoint URL.";
 
     protected override void OnParametersSet()
     {
+        if (Visible) DataService.EnsureBuiltInObjects(State.Document);
         if (Visible && (!_wasVisible || _loadedId != State.SelectedElementId) && State.SelectedElement is DevExtremeComponentElement selected)
         {
             _draft = Components.Clone(selected);
@@ -510,6 +756,7 @@
     private string SectionClass(string value) => _section == value ? "active" : string.Empty;
     private void ShowGeneral() => _section = "general";
     private void ShowData() => _section = "data";
+    private void ShowMenuItems() => _section = "menu";
     private void ShowFields() => _section = "fields";
     private void ShowBehavior() => _section = "behavior";
     private void ShowMap() => _section = "map";
@@ -535,7 +782,14 @@
         if (_draft.IsLayoutContainer && _draft.Panels.Count == 0) AddPanel();
         if (kind == PublicationComponentKind.Button && _draft.Actions.Count == 0)
             _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.NextPage });
-        _section = kind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap ? "map" : "general";
+        if (kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+        {
+            _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+            if (_draft.MenuItems.Count == 0) _draft.MenuItems.Add(new PublicationMenuItem { Text = "Menu item" });
+            if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
+                _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
+        }
+        _section = kind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap ? "map" : kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu ? "menu" : "general";
     }
 
     private string DrawClassMarker => _drawMode == "marker" ? "active" : string.Empty;
@@ -639,23 +893,12 @@
     private Task UseDatasetFieldsIfEmpty() { if (_draft?.Fields.Count == 0) UseDatasetFields(); return Task.CompletedTask; }
     private void UseDatasetFields() { if (_draft is not null) Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true); }
 
-    private void CreateNavigationDataset()
+    private void UseLivePageDataset()
     {
         if (_draft is null) return;
-        var rows = State.Document.Pages.Select((page, index) => new
-        {
-            id = index + 1,
-            text = page.Name,
-            targetPageId = page.Id
-        }).ToArray();
-        var data = new PublicationDataObject
-        {
-            Name = "Publication navigation",
-            SourceKind = PublicationDataSourceKind.Json,
-            RawSource = System.Text.Json.JsonSerializer.Serialize(rows)
-        };
-        DataService.ParseInto(data);
-        State.UpsertDataObject(data);
+        DataService.EnsureBuiltInObjects(State.Document);
+        var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == PublicationDataSourceKind.PublicationPages);
+        _draft.MenuSourceMode = PublicationMenuSourceMode.DataConnection;
         _draft.Connection.Mode = PublicationComponentDataMode.PublicationDataObject;
         _draft.Connection.DataObjectId = data.Id;
         Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
@@ -664,13 +907,72 @@
         _draft.TextField = "text";
         _draft.DisplayField = "text";
         _draft.TargetPageField = "targetPageId";
+        _draft.UrlField = "";
         _draft.Scope = PublicationComponentScope.Document;
-        if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick))
-            _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.GoToPage });
-        _connectionStatus = "Navigation dataset created from the current publication pages.";
+        if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
+            _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
+        _connectionStatus = "The self-updating Publication pages object is selected. Renaming, adding, removing, or reordering pages is reflected automatically.";
     }
 
-    private void AddField() => _draft?.Fields.Add(new PublicationComponentField { DataField = $"field{(_draft.Fields.Count + 1)}", Caption = $"Field {_draft.Fields.Count + 1}" });
+    private void AddMenuItem()
+    {
+        if (_draft is null) return;
+        _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+        _draft.MenuItems.Add(new PublicationMenuItem { Text = $"Menu item {_draft.MenuItems.Count + 1}" });
+    }
+
+    private void AddPublicationPagesToMenu()
+    {
+        if (_draft is null) return;
+        _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+        var existing = _draft.MenuItems.Where(item => item.Destination == PublicationMenuDestinationKind.Page && item.TargetPageId is not null)
+            .Select(item => item.TargetPageId!.Value).ToHashSet();
+        foreach (var page in State.Document.Pages.Where(page => !existing.Contains(page.Id)))
+            _draft.MenuItems.Add(new PublicationMenuItem { Text = page.Name, Destination = PublicationMenuDestinationKind.Page, TargetPageId = page.Id });
+    }
+
+    private void SetMenuParent(PublicationMenuItem item, ChangeEventArgs args)
+        => item.ParentId = Guid.TryParse(args.Value?.ToString(), out var id) && id != item.Id ? id : null;
+
+    private void SetMenuTargetPage(PublicationMenuItem item, ChangeEventArgs args)
+    {
+        item.TargetPageId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+        item.Destination = item.TargetPageId is null ? PublicationMenuDestinationKind.None : PublicationMenuDestinationKind.Page;
+    }
+
+    private void RemoveMenuItem(PublicationMenuItem item)
+    {
+        if (_draft is null) return;
+        _draft.MenuItems.Remove(item);
+        foreach (var child in _draft.MenuItems.Where(candidate => candidate.ParentId == item.Id)) child.ParentId = null;
+    }
+
+    private void AddField()
+    {
+        if (_draft is null) return;
+        var used = _draft.Fields.Select(field => field.DataField).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var column = SourceColumns.FirstOrDefault(candidate => !used.Contains(candidate.Name));
+        if (column is null)
+        {
+            var customName = $"field{_draft.Fields.Count + 1}";
+            _draft.Fields.Add(new PublicationComponentField { DataField = customName, Caption = Friendly(customName) });
+            return;
+        }
+
+        _draft.Fields.Add(new PublicationComponentField
+        {
+            DataField = column.Name,
+            Caption = Friendly(column.Name),
+            ValueKind = column.ValueKind,
+            Editor = column.ValueKind switch
+            {
+                PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox,
+                PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox,
+                PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox,
+                _ => PublicationComponentEditorKind.TextBox
+            }
+        });
+    }
     private void RemoveField(PublicationComponentField field) => _draft?.Fields.Remove(field);
     private void AddPanel()
     {
@@ -728,6 +1030,56 @@
         .Select(line => line.Split(':', 2)).Where(parts => parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
         .Select(parts => new PublicationWebHeader { Name = parts[0].Trim(), Value = parts[1].Trim() }).ToList();
     private static string FormatHeaders(IEnumerable<PublicationWebHeader> headers) => string.Join(Environment.NewLine, headers.Select(header => $"{header.Name}: {header.Value}"));
+
+    private IReadOnlyList<PublicationDataColumn> SourceColumns
+    {
+        get
+        {
+            if (_draft is null) return Array.Empty<PublicationDataColumn>();
+            if (_draft.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot)
+            {
+                var data = State.Document.DataObjects.FirstOrDefault(candidate => candidate.Id == _draft.Connection.DataObjectId);
+                return DataService.ResolveColumns(data);
+            }
+
+            return _draft.Fields
+                .Where(field => !string.IsNullOrWhiteSpace(field.DataField))
+                .GroupBy(field => field.DataField, StringComparer.OrdinalIgnoreCase)
+                .Select(group => new PublicationDataColumn { Name = group.First().DataField, ValueKind = group.First().ValueKind })
+                .ToArray();
+        }
+    }
+
+    private IReadOnlyList<PublicationDataColumn> FieldChoices(PublicationComponentField field)
+    {
+        var columns = SourceColumns.ToList();
+        if (!string.IsNullOrWhiteSpace(field.DataField) && columns.All(column => !string.Equals(column.Name, field.DataField, StringComparison.OrdinalIgnoreCase)))
+            columns.Add(new PublicationDataColumn { Name = field.DataField, ValueKind = field.ValueKind });
+        return columns;
+    }
+
+    private void SetFieldDataProperty(PublicationComponentField field, ChangeEventArgs args)
+    {
+        var previous = field.DataField;
+        field.DataField = args.Value?.ToString() ?? string.Empty;
+        var selected = SourceColumns.FirstOrDefault(column => string.Equals(column.Name, field.DataField, StringComparison.OrdinalIgnoreCase));
+        if (selected is null) return;
+        field.ValueKind = selected.ValueKind;
+        field.Editor = selected.ValueKind switch
+        {
+            PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox,
+            PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox,
+            PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox,
+            _ => PublicationComponentEditorKind.TextBox
+        };
+        if (string.IsNullOrWhiteSpace(field.Caption) || string.Equals(field.Caption, Friendly(previous), StringComparison.OrdinalIgnoreCase))
+            field.Caption = Friendly(selected.Name);
+    }
+
+    private IReadOnlyList<PublicationDataColumn> LookupColumns(PublicationComponentField field)
+        => field.LookupDataObjectId is { } id
+            ? DataService.ResolveColumns(State.Document.DataObjects.FirstOrDefault(data => data.Id == id))
+            : Array.Empty<PublicationDataColumn>();
 
     private void SetLookupDataObject(PublicationComponentField field, ChangeEventArgs args)
     {

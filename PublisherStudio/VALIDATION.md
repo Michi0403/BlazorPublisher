@@ -371,3 +371,14 @@ Static checks completed for the v1.0.37 source package:
 - Package JSON, package lock, web project, and installer project are aligned to `1.0.42`.
 - Publication format is `1.40`; Picture Studio format remains `1.2`.
 - Full .NET compilation requires the .NET SDK and licensed DevExpress build environment and is not available in the packaging environment used for this revision.
+
+## v1.0.43 Menu navigation, schema selection, and runtime-loading validation
+
+- `componentRuntime.js` passes Node syntax validation.
+- Component contract tests execute the Menu ItemClick path for stable page IDs, external URLs, and no-action rows, and also verify navigation fallback, horizontal/vertical orientation, selectable source-property fields, built-in page/document/object datasets, and the offline export runtime contract.
+- `App.razor` unregisters `CommonResources.DevExtremeJS` from the DevExpress Blazor resource manager while retaining PublisherStudio's single pinned manual `dx.all.js` include, preventing a duplicate DevExtreme bundle.
+- Component-specific behavior predicates are limited to controls that consume each setting in the browser runtime.
+- Package JSON, package lock, web project, and installer project are aligned to `1.0.43`.
+- Publication format is `1.41`; Picture Studio format remains `1.2`.
+- JSON and project XML parsing and final ZIP integrity are checked during packaging.
+- A full .NET/DevExpress compile and application run remain release-machine checks because this packaging environment has no .NET SDK or licensed DevExpress NuGet feed.

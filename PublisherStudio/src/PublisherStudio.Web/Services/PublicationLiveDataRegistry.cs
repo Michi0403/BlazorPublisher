@@ -88,7 +88,9 @@ public sealed class PublicationLiveDataRegistry
 
 
     private static bool CanReuseDataSnapshot(LivePublicationSnapshot? previous, PublicationDataObject item)
-        => item.SourceKind != PublicationDataSourceKind.DocumentObjects
+        => (item.SourceKind is not PublicationDataSourceKind.DocumentObjects
+            and not PublicationDataSourceKind.PublicationPages
+            and not PublicationDataSourceKind.PublicationDocument)
             && previous is not null
             && previous.DataObjects.TryGetValue(item.Id, out var snapshot)
             && snapshot.ModifiedUtc == item.ModifiedUtc

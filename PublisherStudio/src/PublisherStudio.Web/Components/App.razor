@@ -8,15 +8,17 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23059669'/%3E%3Cpath d='M20 14h17c10 0 16 5 16 14S47 42 37 42h-7v10H20V14zm10 9v10h7c4 0 6-2 6-5s-2-5-6-5h-7z' fill='white'/%3E%3C/svg%3E" />
     @DxResourceManager.RegisterTheme(Themes.OfficeWhite)
     <link href="_content/DevExpress.Blazor.RichEdit/dx-blazor-richedit.css" rel="stylesheet" />
-    @DxResourceManager.RegisterScripts()
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/devextreme-dist/js/dx.all.js"></script>
+    @DxResourceManager.RegisterScripts((config) => {
+        config.Unregister(CommonResources.DevExtremeJS);
+    })
     <link rel="stylesheet" href="vendor/devextreme-dist/css/dx.light.css" />
     <link rel="stylesheet" href="css/site.css" />
     <HeadOutlet />
 </head>
 <body>
     <Routes />
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/devextreme-dist/js/dx.all.js"></script>
     <script src="vendor/devextreme-dist/js/vectormap-data/world.js"></script>
     <script src="vendor/devextreme-dist/js/vectormap-data/europe.js"></script>
     <script src="vendor/devextreme-dist/js/vectormap-data/eurasia.js"></script>

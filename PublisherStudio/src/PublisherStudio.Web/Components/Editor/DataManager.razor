@@ -21,10 +21,15 @@
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="New data object" IsPrimary="true" Click="CreateNew" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Sample sales data" Click="CreateSample" />
                     </DxRibbonGroup>
+                    <DxRibbonGroup Text="Live publication data">
+                        <DxRibbonItem Text="Pages" Click="SelectLivePages" />
+                        <DxRibbonItem Text="Document" Click="SelectLiveDocument" />
+                        <DxRibbonItem Text="Objects" Click="SelectLiveObjects" />
+                    </DxRibbonGroup>
                     <DxRibbonGroup Text="Source">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-random" Text="Parse / refresh preview" Click="ParseOrRefresh" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Save data object" IsPrimary="true" Click="Save" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete" Enabled="@ExistingDraft" Click="Delete" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete" Enabled="@(ExistingDraft && !IsBuiltInDraft)" Click="Delete" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
@@ -52,11 +57,13 @@
                     <div class="data-form-grid">
                         <label>Name<input value="@_draft.Name" @onchange="ChangeName" /></label>
                         <label>Source
-                            <select value="@_draft.SourceKind" @onchange="ChangeSourceKind">
+                            <select value="@_draft.SourceKind" @onchange="ChangeSourceKind" disabled="@IsBuiltInDraft">
                                 <option value="DelimitedText">CSV / TSV / delimited text</option>
                                 <option value="Json">JSON</option>
                                 <option value="Xml">XML</option>
-                                <option value="DocumentObjects">Publication objects</option>
+                                <option value="PublicationPages">Publication pages (live)</option>
+                                <option value="PublicationDocument">Publication document (live)</option>
+                                <option value="DocumentObjects">Publication objects (live)</option>
                                 <option value="Web">Web / API / webhook</option>
                             </select>
                         </label>
@@ -71,17 +78,31 @@
                         </section>
                     }
 
-                    @if (_draft.SourceKind == PublicationDataSourceKind.DocumentObjects)
+                    @if (_draft.SourceKind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects)
                     {
                         <section class="data-source-help">
-                            <strong>Live publication-object data</strong>
-                            <p>Rows are regenerated from publication objects. The same local API boundary can later feed network viewers and streaming transports.</p>
-                            <label>Scope
-                                <select value="@_draft.DocumentScope" @onchange="ChangeDocumentScope">
-                                    <option value="AllPages">All pages</option>
-                                    <option value="CurrentPage">Current page at render time</option>
-                                </select>
-                            </label>
+                            @if (_draft.SourceKind == PublicationDataSourceKind.PublicationPages)
+                            {
+                                <strong>Self-updating publication pages</strong>
+                                <p>One row per page with stable page ID, name, number, slug, size, orientation, background, and object count. Menus bound to this object update automatically when pages are renamed, inserted, removed, or reordered.</p>
+                            }
+                            else if (_draft.SourceKind == PublicationDataSourceKind.PublicationDocument)
+                            {
+                                <strong>Self-updating publication document</strong>
+                                <p>A single live row containing document name, format version, modification time, page count, and the current page identity and dimensions.</p>
+                            }
+                            else
+                            {
+                                <strong>Self-updating publication objects</strong>
+                                <p>One row per object with page, identity, kind, position, size, rotation, layer, visibility, and lock state.</p>
+                                <label>Scope
+                                    <select value="@_draft.DocumentScope" @onchange="ChangeDocumentScope">
+                                        <option value="AllPages">All pages</option>
+                                        <option value="CurrentPage">Current page at render time</option>
+                                    </select>
+                                </label>
+                            }
+                            <small>This is a built-in live object. Its rows are generated at render/export time and do not need a manual refresh or copied snapshot.</small>
                         </section>
                     }
                     else if (_draft.SourceKind == PublicationDataSourceKind.Web)
@@ -267,6 +288,7 @@
     private string? _error;
     private string _headerLines = string.Empty;
     private bool ExistingDraft => State.Document.DataObjects.Any(data => data.Id == _draft.Id);
+    private bool IsBuiltInDraft => IsBuiltIn(_draft.SourceKind);
     private string DelimiterKey => _draft.Delimiter == "\t" ? "tab" : _draft.Delimiter;
     private string WebDelimiterKey => _draft.Web.Delimiter == "\t" ? "tab" : _draft.Web.Delimiter;
     private string WebhookRoute => $"/api/publisher/webhooks/{_draft.Web.Id}/{_draft.Web.WebhookToken}";
@@ -286,6 +308,7 @@
     {
         if (Visible && !_wasVisible)
         {
+            DataService.EnsureBuiltInObjects(State.Document);
             _error = null;
             SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
         }
@@ -328,7 +351,7 @@
 
     private void ParseSnapshotIfAvailable()
     {
-        if (_draft.SourceKind == PublicationDataSourceKind.DocumentObjects || string.IsNullOrWhiteSpace(_draft.RawSource)) return;
+        if (IsBuiltIn(_draft.SourceKind) || string.IsNullOrWhiteSpace(_draft.RawSource)) return;
         ParsePreview();
     }
 
@@ -392,7 +415,7 @@
 
     private async Task Delete()
     {
-        if (!ExistingDraft) return;
+        if (!ExistingDraft || IsBuiltInDraft) return;
         if (!State.DeleteDataObject(_draft.Id)) { _error = "This data object is still used by a data visual."; return; }
         SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
         await DataChanged.InvokeAsync();
@@ -407,7 +430,24 @@
             .ToList();
     }
 
-    private static string SourceName(PublicationDataObject data) => !string.IsNullOrWhiteSpace(data.SourceReference) ? "Spreadsheet selection" : data.SourceKind == PublicationDataSourceKind.Web ? $"{data.Web.Transport}" : data.SourceKind.ToString();
+    private static string SourceName(PublicationDataObject data) => !string.IsNullOrWhiteSpace(data.SourceReference) ? "Spreadsheet selection" : data.SourceKind switch
+    {
+        PublicationDataSourceKind.PublicationPages => "Live pages",
+        PublicationDataSourceKind.PublicationDocument => "Live document",
+        PublicationDataSourceKind.DocumentObjects => "Live objects",
+        PublicationDataSourceKind.Web => $"{data.Web.Transport}",
+        _ => data.SourceKind.ToString()
+    };
+    private static bool IsBuiltIn(PublicationDataSourceKind kind) => kind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects;
+    private void SelectLivePages() => SelectLive(PublicationDataSourceKind.PublicationPages);
+    private void SelectLiveDocument() => SelectLive(PublicationDataSourceKind.PublicationDocument);
+    private void SelectLiveObjects() => SelectLive(PublicationDataSourceKind.DocumentObjects);
+    private void SelectLive(PublicationDataSourceKind kind)
+    {
+        DataService.EnsureBuiltInObjects(State.Document);
+        var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == kind);
+        Select(data);
+    }
     private int ResolvedRowCount(PublicationDataObject data) => DataService.ResolveRows(State.Document, data, State.SelectedPageId).Count;
     private Task Close() => Closed.InvokeAsync();
     private void ChangeName(ChangeEventArgs args) => _draft.Name = args.Value?.ToString() ?? string.Empty;

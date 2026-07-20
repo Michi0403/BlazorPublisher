@@ -137,3 +137,11 @@ Do not embed private API keys or unrestricted bearer tokens. Put protected opera
 Signal connectors can target a DevExtreme component wrapper or an inner CSS selector. When a Map or VectorMap object is chosen as a motion target and no selector is supplied, PublisherStudio automatically animates the component's inner content source rather than the publication object's outer geometry. Completion selectors may address generated DevExtreme HTML/SVG nodes when a specific chart point, map region, button, or other sub-element must receive a click, hover, highlight, class, or visibility action.
 
 These actions are executed by the embedded offline signal runtime. Component live-data refresh remains governed by the component's data connection and may require network access, but the signal sequence itself does not.
+
+## Menu navigation and live publication schemas (v1.0.43)
+
+Menu rows use stable page IDs, not page labels. Editable menu items store one explicit destination: publication page, external URL, or none. Data-driven menus can map `text`, `targetPageId`, `url`, `id`, and `parentId` from any publication data object. The built-in `Publication pages` object provisions these fields and is regenerated from the current document during rendering and export.
+
+Component Studio derives source-property choices from the selected data object's resolved columns. Direct REST/OData fields become selectable after endpoint discovery. Manual menus deliberately bypass data/API and CRUD requirements.
+
+PublisherStudio loads its pinned DevExtreme `dx.all.js` once. The DevExpress Blazor resource manager still emits the other registered resources but has `CommonResources.DevExtremeJS` unregistered to avoid duplicate bundle initialization.

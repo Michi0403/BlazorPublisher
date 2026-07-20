@@ -30,6 +30,7 @@ public sealed class PublicationDataService
     public void Normalize(PublicationDocument document)
     {
         document.DataObjects ??= [];
+        EnsureBuiltInObjects(document);
         foreach (var data in document.DataObjects)
         {
             data.Name = string.IsNullOrWhiteSpace(data.Name) ? "Data" : data.Name.Trim();
@@ -81,6 +82,14 @@ public sealed class PublicationDataService
                 data.Columns = DocumentObjectColumns();
                 data.Rows = [];
                 break;
+            case PublicationDataSourceKind.PublicationPages:
+                data.Columns = PublicationPageColumns();
+                data.Rows = [];
+                break;
+            case PublicationDataSourceKind.PublicationDocument:
+                data.Columns = PublicationDocumentColumns();
+                data.Rows = [];
+                break;
             case PublicationDataSourceKind.Web:
                 ParseWebSnapshot(data);
                 break;
@@ -93,13 +102,49 @@ public sealed class PublicationDataService
     public IReadOnlyList<PublicationDataRow> ResolveRows(PublicationDocument document, PublicationDataObject? data, Guid currentPageId)
     {
         if (data is null) return [];
-        return data.SourceKind == PublicationDataSourceKind.DocumentObjects
-            ? BuildDocumentRows(document, data.DocumentScope, currentPageId)
-            : data.Rows;
+        return data.SourceKind switch
+        {
+            PublicationDataSourceKind.DocumentObjects => BuildDocumentRows(document, data.DocumentScope, currentPageId),
+            PublicationDataSourceKind.PublicationPages => BuildPublicationPageRows(document),
+            PublicationDataSourceKind.PublicationDocument => BuildPublicationDocumentRows(document, currentPageId),
+            _ => data.Rows
+        };
     }
 
     public IReadOnlyList<PublicationDataColumn> ResolveColumns(PublicationDataObject? data)
-        => data?.SourceKind == PublicationDataSourceKind.DocumentObjects ? DocumentObjectColumns() : data?.Columns ?? [];
+        => data?.SourceKind switch
+        {
+            PublicationDataSourceKind.DocumentObjects => DocumentObjectColumns(),
+            PublicationDataSourceKind.PublicationPages => PublicationPageColumns(),
+            PublicationDataSourceKind.PublicationDocument => PublicationDocumentColumns(),
+            _ => data?.Columns ?? []
+        };
+
+    public void EnsureBuiltInObjects(PublicationDocument document)
+    {
+        document.DataObjects ??= [];
+        EnsureBuiltIn(document, PublicationDataSourceKind.PublicationPages, "Publication pages");
+        EnsureBuiltIn(document, PublicationDataSourceKind.PublicationDocument, "Publication document");
+        EnsureBuiltIn(document, PublicationDataSourceKind.DocumentObjects, "Publication objects");
+    }
+
+    private static void EnsureBuiltIn(PublicationDocument document, PublicationDataSourceKind kind, string name)
+    {
+        if (document.DataObjects.Any(data => data.SourceKind == kind)) return;
+        document.DataObjects.Add(new PublicationDataObject
+        {
+            Name = name,
+            SourceKind = kind,
+            RawSource = string.Empty,
+            Columns = kind switch
+            {
+                PublicationDataSourceKind.PublicationPages => PublicationPageColumns(),
+                PublicationDataSourceKind.PublicationDocument => PublicationDocumentColumns(),
+                _ => DocumentObjectColumns()
+            },
+            Rows = []
+        });
+    }
 
     public IReadOnlyList<DataChartPoint> BuildChartPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
@@ -650,17 +695,54 @@ public sealed class PublicationDataService
 
     private static List<PublicationDataColumn> DocumentObjectColumns() =>
     [
+        new() { Name = "pageId", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "pageName", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "pageNumber", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "objectId", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "objectName", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "kind", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "x", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "y", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "width", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "height", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "rotation", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "layer", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "visible", ValueKind = PublicationDataValueKind.Boolean },
+        new() { Name = "locked", ValueKind = PublicationDataValueKind.Boolean },
+        // Legacy aliases retained so existing publications bound before v1.0.43 do not break.
+        // Other legacy names differ only by casing and are already resolved by case-insensitive rows.
         new() { Name = "Page", ValueKind = PublicationDataValueKind.Text },
-        new() { Name = "Object", ValueKind = PublicationDataValueKind.Text },
-        new() { Name = "Kind", ValueKind = PublicationDataValueKind.Text },
-        new() { Name = "X", ValueKind = PublicationDataValueKind.Number },
-        new() { Name = "Y", ValueKind = PublicationDataValueKind.Number },
-        new() { Name = "Width", ValueKind = PublicationDataValueKind.Number },
-        new() { Name = "Height", ValueKind = PublicationDataValueKind.Number },
-        new() { Name = "Rotation", ValueKind = PublicationDataValueKind.Number },
-        new() { Name = "Layer", ValueKind = PublicationDataValueKind.Number },
-        new() { Name = "Visible", ValueKind = PublicationDataValueKind.Boolean },
-        new() { Name = "Locked", ValueKind = PublicationDataValueKind.Boolean }
+        new() { Name = "Object", ValueKind = PublicationDataValueKind.Text }
+    ];
+
+    private static List<PublicationDataColumn> PublicationPageColumns() =>
+    [
+        new() { Name = "id", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "text", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "pageName", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "targetPageId", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "pageNumber", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "slug", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "width", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "height", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "orientation", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "background", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "elementCount", ValueKind = PublicationDataValueKind.Number }
+    ];
+
+    private static List<PublicationDataColumn> PublicationDocumentColumns() =>
+    [
+        new() { Name = "id", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "name", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "formatVersion", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "modifiedUtc", ValueKind = PublicationDataValueKind.DateTime },
+        new() { Name = "pageCount", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "currentPageId", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "currentPageName", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "currentPageNumber", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "currentPageWidth", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "currentPageHeight", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "currentPageOrientation", ValueKind = PublicationDataValueKind.Text }
     ];
 
     private static IReadOnlyList<PublicationDataRow> BuildDocumentRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
@@ -672,18 +754,79 @@ public sealed class PublicationDataService
         {
             Values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
+                ["pageId"] = page.Id.ToString("D"),
+                ["pageName"] = page.Name,
+                ["pageNumber"] = (document.Pages.IndexOf(page) + 1).ToString(CultureInfo.InvariantCulture),
+                ["objectId"] = element.Id.ToString("D"),
+                ["objectName"] = element.Name,
+                ["kind"] = element.Kind.ToString(),
+                ["x"] = element.X.ToString("0.###", CultureInfo.InvariantCulture),
+                ["y"] = element.Y.ToString("0.###", CultureInfo.InvariantCulture),
+                ["width"] = element.Width.ToString("0.###", CultureInfo.InvariantCulture),
+                ["height"] = element.Height.ToString("0.###", CultureInfo.InvariantCulture),
+                ["rotation"] = element.Rotation.ToString("0.###", CultureInfo.InvariantCulture),
+                ["layer"] = element.ZIndex.ToString(CultureInfo.InvariantCulture),
+                ["visible"] = element.Visible.ToString(),
+                ["locked"] = element.Locked.ToString(),
                 ["Page"] = page.Name,
-                ["Object"] = element.Name,
-                ["Kind"] = element.Kind.ToString(),
-                ["X"] = element.X.ToString("0.###", CultureInfo.InvariantCulture),
-                ["Y"] = element.Y.ToString("0.###", CultureInfo.InvariantCulture),
-                ["Width"] = element.Width.ToString("0.###", CultureInfo.InvariantCulture),
-                ["Height"] = element.Height.ToString("0.###", CultureInfo.InvariantCulture),
-                ["Rotation"] = element.Rotation.ToString("0.###", CultureInfo.InvariantCulture),
-                ["Layer"] = element.ZIndex.ToString(CultureInfo.InvariantCulture),
-                ["Visible"] = element.Visible.ToString(),
-                ["Locked"] = element.Locked.ToString()
+                ["Object"] = element.Name
             }
         })).ToArray();
     }
+
+    private static IReadOnlyList<PublicationDataRow> BuildPublicationPageRows(PublicationDocument document)
+        => document.Pages.Select((page, index) => new PublicationDataRow
+        {
+            Values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["id"] = page.Id.ToString("D"),
+                ["text"] = page.Name,
+                ["pageName"] = page.Name,
+                ["targetPageId"] = page.Id.ToString("D"),
+                ["pageNumber"] = (index + 1).ToString(CultureInfo.InvariantCulture),
+                ["slug"] = Slug(page.Name, index + 1),
+                ["width"] = page.WidthMm.ToString("0.###", CultureInfo.InvariantCulture),
+                ["height"] = page.HeightMm.ToString("0.###", CultureInfo.InvariantCulture),
+                ["orientation"] = page.WidthMm > page.HeightMm ? "landscape" : "portrait",
+                ["background"] = page.Background,
+                ["elementCount"] = page.Elements.Count.ToString(CultureInfo.InvariantCulture)
+            }
+        }).ToArray();
+
+    private static IReadOnlyList<PublicationDataRow> BuildPublicationDocumentRows(PublicationDocument document, Guid currentPageId)
+    {
+        var page = document.Pages.FirstOrDefault(candidate => candidate.Id == currentPageId) ?? document.Pages.FirstOrDefault();
+        var index = page is null ? -1 : document.Pages.IndexOf(page);
+        return
+        [
+            new PublicationDataRow
+            {
+                Values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["id"] = document.Id.ToString("D"),
+                    ["name"] = document.Name,
+                    ["formatVersion"] = document.FormatVersion,
+                    ["modifiedUtc"] = document.ModifiedUtc.ToString("O", CultureInfo.InvariantCulture),
+                    ["pageCount"] = document.Pages.Count.ToString(CultureInfo.InvariantCulture),
+                    ["currentPageId"] = page?.Id.ToString("D") ?? string.Empty,
+                    ["currentPageName"] = page?.Name ?? string.Empty,
+                    ["currentPageNumber"] = (index + 1).ToString(CultureInfo.InvariantCulture),
+                    ["currentPageWidth"] = page?.WidthMm.ToString("0.###", CultureInfo.InvariantCulture) ?? "0",
+                    ["currentPageHeight"] = page?.HeightMm.ToString("0.###", CultureInfo.InvariantCulture) ?? "0",
+                    ["currentPageOrientation"] = page is null ? string.Empty : page.WidthMm > page.HeightMm ? "landscape" : "portrait"
+                }
+            }
+        ];
+    }
+
+    private static string Slug(string value, int fallback)
+    {
+        var text = new string((value ?? string.Empty).Trim().ToLowerInvariant()
+            .Select(character => char.IsLetterOrDigit(character) ? character : '-')
+            .ToArray());
+        while (text.Contains("--", StringComparison.Ordinal)) text = text.Replace("--", "-", StringComparison.Ordinal);
+        text = text.Trim('-');
+        return string.IsNullOrWhiteSpace(text) ? $"page-{fallback}" : text;
+    }
+
 }

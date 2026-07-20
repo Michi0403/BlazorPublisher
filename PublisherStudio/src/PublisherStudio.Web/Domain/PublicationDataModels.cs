@@ -8,6 +8,8 @@ public enum PublicationDataSourceKind
     DelimitedText,
     Xml,
     DocumentObjects,
+    PublicationPages,
+    PublicationDocument,
     Web
 }
 

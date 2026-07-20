@@ -1,12 +1,11 @@
+# License and Third-Party Component Notice
 
 ## Project license
 
 BlazorPublisher aka PublisherStudio is made publicly available under the Apache License, Version 2.0.
 
-The project depends on proprietary DevExpress components. DevExpress is not included, sublicensed, or redistributed by this repository. Building and distributing the application requires a valid DevExpress license and access to the DevExpress NuGet feed. Microsoft .NET and browser platform components remain governed by their own terms.
 Copyright 2026 Michael Fleischer - Do - Germany
 
-No DevExpress binaries, license keys, package payloads, databases, credentials, or user data are included.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with the License.
 
 You may obtain a copy of the License at:

@@ -326,10 +326,14 @@
     }
 
     function menuItems(config, rows) {
-        const values = Array.isArray(rows) ? rows : [];
-        return config.parentField && values.some(row => row?.[config.parentField] !== undefined)
-            ? hierarchy(values, config.keyField || "id", config.parentField)
-            : values;
+        const manual = lower(config.menuSourceMode) === "manualitems";
+        const values = manual ? clone(config.menuItems || []) : (Array.isArray(rows) ? rows : []);
+        const keyField = manual ? "id" : (config.keyField || "id");
+        const parentField = manual ? "parentId" : config.parentField;
+        const visible = values.filter(item => item?.visible !== false);
+        return parentField && visible.some(row => valueFor(row, parentField) !== undefined && valueFor(row, parentField) !== null && String(valueFor(row, parentField)).trim() !== "")
+            ? hierarchy(visible, keyField, parentField)
+            : visible;
     }
 
     function fieldType(field) {
@@ -425,10 +429,36 @@
         });
     }
 
-    function navigateToPage(pageId) {
+    function valueFor(data, field) {
+        if (!data || !field) return undefined;
+        if (Object.prototype.hasOwnProperty.call(data, field)) return data[field];
+        const key = Object.keys(data).find(candidate => lower(candidate) === lower(field));
+        return key ? data[key] : undefined;
+    }
+
+    function navigateToPage(pageId, config, context) {
+        if (pageId === undefined || pageId === null || String(pageId).trim() === "") return false;
+        if (config?.designerMode) {
+            const editorSurface = !!context?.host?.closest?.("#publisher-page");
+            window.dispatchEvent(new CustomEvent("publisherstudio:navigate", { detail: { pageId, componentId: config.id, editorSurface } }));
+            return true;
+        }
         const api = window.PublisherStudioNavigation || window.PublisherStudioPresentation;
         if (api?.goToPage) return api.goToPage(pageId);
-        window.dispatchEvent(new CustomEvent("publisherstudio:navigate", { detail: { pageId } }));
+        window.dispatchEvent(new CustomEvent("publisherstudio:navigate", { detail: { pageId, componentId: config?.id } }));
+        return true;
+    }
+
+    function openComponentUrl(url, openInNewWindow, config, context) {
+        const value = String(url || "").trim();
+        if (!/^(https?:|mailto:)/i.test(value)) throw new Error("Only http, https and mailto links are allowed.");
+        if (config?.designerMode) {
+            const editorSurface = !!context?.host?.closest?.("#publisher-page");
+            window.dispatchEvent(new CustomEvent("publisherstudio:open-url", { detail: { url: value, openInNewWindow: openInNewWindow !== false, componentId: config.id, editorSurface } }));
+            return true;
+        }
+        window.open(value, openInNewWindow === false ? "_self" : "_blank", "noopener");
+        return true;
     }
 
     function showError(message) {
@@ -447,14 +477,21 @@
         try {
             if (kind === "nextpage") (window.PublisherStudioNavigation || window.PublisherStudioPresentation)?.next?.();
             else if (kind === "previouspage") (window.PublisherStudioNavigation || window.PublisherStudioPresentation)?.previous?.();
-            else if (kind === "gotopage") {
+            else if (kind === "navigate") {
+                const pageField = config.targetPageField || "targetPageId";
+                const urlField = config.urlField || "url";
+                const targetPage = action.targetPageId || valueFor(context.data, pageField) || valueFor(context.itemData, pageField);
+                const url = template(action.url || valueFor(context.data, urlField) || valueFor(context.itemData, urlField) || "", context.data);
+                const itemWindow = valueFor(context.itemData, "openInNewWindow") ?? valueFor(context.data, "openInNewWindow");
+                if (targetPage !== undefined && targetPage !== null && String(targetPage).trim() !== "") navigateToPage(targetPage, config, context);
+                else if (url) openComponentUrl(url, itemWindow === undefined ? action.openInNewWindow : itemWindow !== false, config, context);
+            } else if (kind === "gotopage") {
                 const field = config.targetPageField || "targetPageId";
-                navigateToPage(action.targetPageId || context.data?.[field] || context.itemData?.[field]);
+                navigateToPage(action.targetPageId || valueFor(context.data, field) || valueFor(context.itemData, field), config, context);
             } else if (kind === "openurl") {
                 const field = config.urlField || "url";
-                const url = template(action.url || context.data?.[field] || context.itemData?.[field] || "", context.data);
-                if (/^(https?:|mailto:)/i.test(url)) window.open(url, action.openInNewWindow === false ? "_self" : "_blank", "noopener");
-                else throw new Error("Only http, https and mailto links are allowed.");
+                const url = template(action.url || valueFor(context.data, field) || valueFor(context.itemData, field) || "", context.data);
+                openComponentUrl(url, action.openInNewWindow, config, context);
             } else if (kind === "mailto") {
                 const recipient = template(action.mailTo, context.data);
                 const subject = encodeURIComponent(template(action.mailSubject, context.data));
@@ -569,7 +606,9 @@
             ["AppointmentDeleted", "onAppointmentDeleted"]
         ];
         for (const [trigger, eventName] of handlers) {
-            const actions = actionsFor(config, trigger);
+            let actions = actionsFor(config, trigger);
+            if (!actions.length && trigger === "ItemClick" && ["menu", "contextmenu"].includes(lower(config.kind)))
+                actions = [{ trigger: "ItemClick", action: "Navigate", openInNewWindow: true }];
             if (!actions.length) continue;
             const prior = options[eventName];
             options[eventName] = event => {
@@ -608,10 +647,11 @@
     function hierarchy(rows, keyField, parentField) {
         const byKey = new Map();
         const roots = [];
-        for (const row of rows || []) byKey.set(String(row?.[keyField] ?? ""), { ...row, items: [] });
+        for (const row of rows || []) byKey.set(String(valueFor(row, keyField) ?? ""), { ...row, items: [] });
         for (const item of byKey.values()) {
-            const parent = String(item[parentField] ?? "");
-            if (parent && byKey.has(parent) && parent !== String(item[keyField] ?? "")) byKey.get(parent).items.push(item);
+            const parent = String(valueFor(item, parentField) ?? "");
+            const key = String(valueFor(item, keyField) ?? "");
+            if (parent && byKey.has(parent) && parent !== key) byKey.get(parent).items.push(item);
             else roots.push(item);
         }
         return roots;
@@ -909,7 +949,7 @@
                     baseItemHeight: 120,
                     baseItemWidth: 180,
                     itemMargin: 8,
-                    direction: "horizontal",
+                    direction: config.orientation === "vertical" ? "vertical" : "horizontal",
                     itemTemplate(item, index, itemElement) { renderCard(item, config, itemElement?.jquery ? itemElement[0] : itemElement, true); }
                 };
                 break;

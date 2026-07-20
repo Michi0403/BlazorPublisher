@@ -27,6 +27,13 @@ const state = fs.readFileSync(statePath, 'utf8');
 const devExtreme = fs.readFileSync(devExtremePath, 'utf8');
 const css = fs.readFileSync(cssPath, 'utf8');
 
+const dataModel = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Domain', 'PublicationDataModels.cs'), 'utf8');
+const dataService = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'PublicationDataService.cs'), 'utf8');
+const dataManager = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'DataManager.razor'), 'utf8');
+const pageSurface = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'PageSurface.razor'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'App.razor'), 'utf8');
+const publicationModel = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Domain', 'PublicationModels.cs'), 'utf8');
+
 const components = {
   DataGrid: 'dxDataGrid',
   TreeList: 'dxTreeList',
@@ -77,9 +84,43 @@ for (const contract of [
 }
 
 assert.match(editor, /Test endpoint and discover fields/);
-assert.match(editor, /Use publication pages as menu/);
+assert.match(editor, /Use live publication pages/);
 assert.match(editor, /Lookup dataset/);
 assert.match(editor, /Document-wide synchronized/);
+
+assert.match(model, /PublicationMenuDestinationKind/);
+assert.match(model, /ExternalUrl/);
+assert.match(service, /menuItem\.Destination == PublicationMenuDestinationKind\.Page/);
+assert.match(service, /menuItem\.Destination == PublicationMenuDestinationKind\.ExternalUrl/);
+assert.match(runtime, /kind === "navigate"/);
+assert.match(runtime, /publisherstudio:navigate/);
+assert.match(runtime, /publisherstudio:open-url/);
+assert.match(runtime, /itemWindow/);
+assert.match(pageSurface, /NavigateToPage\(string target\)/);
+assert.match(editor, /External-only menus are supported/);
+assert.match(editor, /Build direction/);
+assert.match(editor, /SetFieldDataProperty/);
+assert.match(editor, /Select source property/);
+assert.match(editor, /@foreach \(var column in SourceColumns\)/);
+assert.match(editor, /This menu uses its editable item list/);
+assert.match(runtime, /trigger === "ItemClick" && \["menu", "contextmenu"\]/);
+assert.match(runtime, /action: "Navigate"/);
+assert.match(app, /Unregister\(CommonResources\.DevExtremeJS\)/);
+assert.equal((app.match(/vendor\/devextreme-dist\/js\/dx\.all\.js/g) || []).length, 1, 'App must contain one pinned manual DevExtreme bundle.');
+assert.doesNotMatch(app, /RegisterScripts\(\)/, 'Default DevExtreme registration would duplicate the pinned bundle.');
+assert.ok(app.indexOf('vendor/jquery/jquery.min.js') < app.indexOf('vendor/devextreme-dist/js/dx.all.js'));
+assert.ok(app.indexOf('vendor/devextreme-dist/js/dx.all.js') < app.indexOf('DxResourceManager.RegisterScripts'), 'Pinned jQuery/DevExtreme must load before dependent DevExpress resource scripts.');
+assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.41"/);
+assert.match(editor, /Only options supported by the selected component are shown here/);
+assert.doesNotMatch(editor.slice(editor.indexOf('else if (_section == "behavior")'), editor.indexOf('else if (_section == "map")')), /Scheduler view[\s\S]*without-kind-guard/);
+assert.match(dataModel, /PublicationPages/);
+assert.match(dataModel, /PublicationDocument/);
+assert.match(dataService, /EnsureBuiltInObjects/);
+assert.match(dataService, /BuildPublicationPageRows/);
+assert.match(dataService, /BuildPublicationDocumentRows/);
+assert.match(dataManager, /Self-updating publication pages/);
+assert.match(dataManager, /Self-updating publication document/);
+assert.match(dataManager, /Self-updating publication objects/);
 assert.match(service, /BuildFields\(/);
 assert.match(service, /BuildActions\(/);
 assert.match(service, /PublicationComponentDataMode\.PublicationDataObject \? live : null/);
@@ -120,6 +161,9 @@ assert.match(css, /dxbl-btn-dropdown-toggle/);
 assert.match(exporter, /translate\(\$\{translateX\}px, \$\{translateY\}px\)/);
 assert.match(exporter, /websiteSiteRuntime/);
 assert.match(exporter, /PublisherStudioNavigation/);
+assert.match(exporter, /componentInteractionOwner/);
+assert.match(exporter, /stage\.addEventListener\('dblclick', handlers\.stageDoubleClick, true\)/);
+assert.match(exporter, /Let DevExtreme finish its native click first/);
 assert.match(exporter, /<script>\$\{safeScript\(componentRuntimeSource\)\}<\/script>/);
 
 const requests = [];
@@ -179,4 +223,74 @@ await context.PublisherStudioComponentRuntime.probeConnection({
 });
 assert.match(requests.at(-1).url, /%24top=10|\$top=10/);
 
-console.log('component catalog, REST/OData probe, smart connections, and single-file export contract tests passed');
+// Exercise the actual Menu event path, not only the source contract. This catches
+// regressions where the configured item data renders but ItemClick never reaches
+// stable page navigation or external URL handling.
+let menuOptions;
+let navigatedPage = '';
+let openedUrl = null;
+const menuHost = { closest: () => null };
+const menuInstance = {
+  element: () => [menuHost],
+  getDataSource: () => null,
+  dispose: () => undefined
+};
+const jquery = () => ({
+  dxMenu(argument) {
+    if (argument === 'instance') return menuInstance;
+    menuOptions = argument;
+    return this;
+  }
+});
+jquery.fn = { dxMenu() {} };
+context.jQuery = jquery;
+context.DevExpress = { data: {} };
+context.PublisherStudioNavigation = {
+  goToPage(value) {
+    navigatedPage = String(value);
+    return true;
+  }
+};
+context.open = (url, target) => {
+  openedUrl = { url: String(url), target: String(target) };
+  return null;
+};
+const menuElement = {
+  dataset: {},
+  innerHTML: '',
+  classList: { add() {} },
+  querySelectorAll: () => [],
+  replaceChildren() {},
+  matches: () => false
+};
+const pageId = '11111111-2222-3333-4444-555555555555';
+await context.PublisherStudioComponentRuntime.render(menuElement, {
+  kind: 'Menu',
+  id: 'menu-test',
+  menuSourceMode: 'ManualItems',
+  menuItems: [
+    { id: 'page', text: 'Page', targetPageId: pageId, visible: true, enabled: true },
+    { id: 'external', text: 'External', url: 'https://example.test/help', openInNewWindow: false, visible: true, enabled: true },
+    { id: 'none', text: 'No action', visible: true, enabled: true }
+  ],
+  rows: [],
+  fields: [],
+  actions: [],
+  orientation: 'vertical',
+  designerMode: false,
+  connection: {}
+}, { polling: false, fetchNow: false });
+assert.equal(menuOptions.orientation, 'vertical');
+assert.equal(menuOptions.items.length, 3);
+menuOptions.onItemClick({ component: menuInstance, itemData: menuOptions.items[0] });
+await new Promise(resolve => setTimeout(resolve, 0));
+assert.equal(navigatedPage, pageId);
+menuOptions.onItemClick({ component: menuInstance, itemData: menuOptions.items[1] });
+await new Promise(resolve => setTimeout(resolve, 0));
+assert.deepEqual(openedUrl, { url: 'https://example.test/help', target: '_self' });
+openedUrl = null;
+menuOptions.onItemClick({ component: menuInstance, itemData: menuOptions.items[2] });
+await new Promise(resolve => setTimeout(resolve, 0));
+assert.equal(openedUrl, null);
+
+console.log('component catalog, REST/OData probe, menu navigation, smart connections, and single-file export contract tests passed');

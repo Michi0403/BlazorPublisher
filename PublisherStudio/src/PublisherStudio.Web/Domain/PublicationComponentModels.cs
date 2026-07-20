@@ -159,6 +159,7 @@ public enum PublicationComponentActionTrigger
 public enum PublicationComponentActionKind
 {
     None,
+    Navigate,
     NextPage,
     PreviousPage,
     GoToPage,
@@ -250,6 +251,34 @@ public sealed class PublicationComponentAction
     public string Script { get; set; } = string.Empty;
 }
 
+
+public enum PublicationMenuSourceMode
+{
+    DataConnection,
+    ManualItems
+}
+
+public enum PublicationMenuDestinationKind
+{
+    None,
+    Page,
+    ExternalUrl
+}
+
+public sealed class PublicationMenuItem
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid? ParentId { get; set; }
+    public string Text { get; set; } = "Menu item";
+    public PublicationMenuDestinationKind Destination { get; set; }
+    public Guid? TargetPageId { get; set; }
+    public string Url { get; set; } = string.Empty;
+    public bool OpenInNewWindow { get; set; } = true;
+    public bool Enabled { get; set; } = true;
+    public bool Visible { get; set; } = true;
+    public string IconCssClass { get; set; } = string.Empty;
+}
+
 public sealed class PublicationComponentPanel
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -276,6 +305,8 @@ public sealed class DevExtremeComponentElement : PublicationElement
     public List<PublicationComponentField> Fields { get; set; } = [];
     public List<PublicationComponentAction> Actions { get; set; } = [];
     public List<PublicationComponentPanel> Panels { get; set; } = [];
+    public PublicationMenuSourceMode MenuSourceMode { get; set; } = PublicationMenuSourceMode.DataConnection;
+    public List<PublicationMenuItem> MenuItems { get; set; } = [];
 
     public PublicationComponentEditMode EditMode { get; set; } = PublicationComponentEditMode.ReadOnly;
     public PublicationComponentSelectionMode SelectionMode { get; set; } = PublicationComponentSelectionMode.Single;

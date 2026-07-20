@@ -62,6 +62,7 @@ public sealed class PublicationComponentService
 
     public DevExtremeComponentElement Create(PublicationDocument document, PublicationComponentKind kind)
     {
+        _data.EnsureBuiltInObjects(document);
         var data = EnsureDataObject(document);
         var element = new DevExtremeComponentElement
         {
@@ -87,6 +88,11 @@ public sealed class PublicationComponentService
                 ? PublicationComponentSelectionMode.Single
                 : PublicationComponentSelectionMode.None
         };
+        if (kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+        {
+            element.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+            element.MenuItems.Add(new PublicationMenuItem { Text = "Menu item" });
+        }
         if (kind == PublicationComponentKind.VectorMap)
         {
             element.MapCenterLatitude = 20;
@@ -101,11 +107,13 @@ public sealed class PublicationComponentService
 
     public void Normalize(PublicationDocument document, DevExtremeComponentElement item)
     {
+        _data.EnsureBuiltInObjects(document);
         item.Connection ??= new PublicationComponentConnection();
         item.Connection.Headers ??= [];
         item.Fields ??= [];
         item.Actions ??= [];
         item.Panels ??= [];
+        item.MenuItems ??= [];
         item.VectorFeatures ??= [];
         item.Title = string.IsNullOrWhiteSpace(item.Title) ? ComponentName(item.ComponentKind) : item.Title.Trim();
         item.Name = string.IsNullOrWhiteSpace(item.Name) ? item.Title : item.Name.Trim();
@@ -182,6 +190,23 @@ public sealed class PublicationComponentService
                 if (field.Id == Guid.Empty) field.Id = Guid.NewGuid();
                 return field;
             }).ToList();
+
+        var menuIds = new HashSet<Guid>();
+        foreach (var menuItem in item.MenuItems)
+        {
+            if (menuItem.Id == Guid.Empty || !menuIds.Add(menuItem.Id))
+            {
+                menuItem.Id = Guid.NewGuid();
+                menuIds.Add(menuItem.Id);
+            }
+            menuItem.Text = string.IsNullOrWhiteSpace(menuItem.Text) ? "Menu item" : menuItem.Text.Trim();
+            menuItem.Url ??= string.Empty;
+            menuItem.IconCssClass = SanitizeCssClass(menuItem.IconCssClass);
+            if (menuItem.ParentId == menuItem.Id || (menuItem.ParentId is { } parentId && !item.MenuItems.Any(candidate => candidate.Id == parentId))) menuItem.ParentId = null;
+            if (menuItem.TargetPageId is { } targetPageId && document.Pages.All(page => page.Id != targetPageId)) menuItem.TargetPageId = null;
+            if (menuItem.Destination == PublicationMenuDestinationKind.Page && menuItem.TargetPageId is null) menuItem.Destination = PublicationMenuDestinationKind.None;
+            if (menuItem.Destination == PublicationMenuDestinationKind.ExternalUrl && string.IsNullOrWhiteSpace(menuItem.Url)) menuItem.Destination = PublicationMenuDestinationKind.None;
+        }
 
         foreach (var action in item.Actions)
         {
@@ -260,10 +285,10 @@ public sealed class PublicationComponentService
     {
         Normalize(document, item);
         var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
-        var rows = data is null ? Array.Empty<Dictionary<string, object?>>() : _data.ResolveRows(document, data, currentPageId)
-            .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value, data.Columns.FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind), StringComparer.OrdinalIgnoreCase))
-            .ToArray();
         var columns = data is null ? Array.Empty<PublicationDataColumn>() : _data.ResolveColumns(data).ToArray();
+        var rows = data is null ? Array.Empty<Dictionary<string, object?>>() : _data.ResolveRows(document, data, currentPageId)
+            .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value, columns.FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind), StringComparer.OrdinalIgnoreCase))
+            .ToArray();
         var live = BuildLiveData(document, data);
         var panelConfigs = item.Panels.Select(panel => BuildPanelConfiguration(document, panel, currentPageId)).ToArray();
         return new
@@ -304,6 +329,8 @@ public sealed class PublicationComponentService
             item.UrlField,
             item.CurrentView,
             item.Orientation,
+            menuSourceMode = item.MenuSourceMode.ToString(),
+            menuItems = BuildMenuItems(item),
             item.ColumnCount,
             item.ButtonText,
             item.Placeholder,
@@ -355,6 +382,22 @@ public sealed class PublicationComponentService
         Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(BuildClientConfiguration(document, item, currentPageId, designerMode), _json));
 
 
+    private static object[] BuildMenuItems(DevExtremeComponentElement item)
+        => item.MenuItems.Where(menuItem => menuItem.Visible).Select(menuItem => (object)new
+        {
+            id = menuItem.Id,
+            parentId = menuItem.ParentId,
+            text = menuItem.Text,
+            destination = menuItem.Destination.ToString(),
+            targetPageId = menuItem.Destination == PublicationMenuDestinationKind.Page ? menuItem.TargetPageId : null,
+            url = menuItem.Destination == PublicationMenuDestinationKind.ExternalUrl ? menuItem.Url : string.Empty,
+            openInNewWindow = menuItem.OpenInNewWindow,
+            enabled = menuItem.Enabled,
+            disabled = !menuItem.Enabled,
+            visible = menuItem.Visible,
+            icon = menuItem.IconCssClass
+        }).ToArray();
+
     private object[] BuildFields(PublicationDocument document, IEnumerable<PublicationComponentField> fields, Guid currentPageId)
     {
         return fields.Select(field =>
@@ -367,7 +410,7 @@ public sealed class PublicationComponentService
                 {
                     var rows = _data.ResolveRows(document, data, currentPageId)
                         .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value,
-                            data.Columns.FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
+                            _data.ResolveColumns(data).FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
                             StringComparer.OrdinalIgnoreCase))
                         .ToArray();
                     var columns = _data.ResolveColumns(data);
@@ -441,7 +484,7 @@ public sealed class PublicationComponentService
         var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == panel.DataObjectId);
         var rows = data is null ? Array.Empty<Dictionary<string, object?>>() : _data.ResolveRows(document, data, currentPageId)
             .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value,
-                data.Columns.FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
+                _data.ResolveColumns(data).FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
                 StringComparer.OrdinalIgnoreCase)).ToArray();
         var fields = panel.Fields.Count > 0
             ? panel.Fields
@@ -526,7 +569,10 @@ public sealed class PublicationComponentService
 
     private PublicationDataObject EnsureDataObject(PublicationDocument document)
     {
-        if (document.DataObjects.Count > 0) return document.DataObjects[0];
+        _data.EnsureBuiltInObjects(document);
+        var existing = document.DataObjects.FirstOrDefault(data => data.SourceKind is not PublicationDataSourceKind.PublicationPages
+            and not PublicationDataSourceKind.PublicationDocument and not PublicationDataSourceKind.DocumentObjects);
+        if (existing is not null) return existing;
         var data = _data.CreateSample();
         document.DataObjects.Add(data);
         return data;
@@ -601,8 +647,9 @@ public sealed class PublicationComponentService
                 Action = PublicationComponentActionKind.SubmitRest
             });
         }
-        if (item.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu && item.Actions.Count == 0)
-            item.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.GoToPage });
+        if ((item.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+            && item.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
+            item.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
         if (item.ComponentKind == PublicationComponentKind.Scheduler)
         {
             item.EditMode = item.EditMode == PublicationComponentEditMode.ReadOnly ? PublicationComponentEditMode.Form : item.EditMode;

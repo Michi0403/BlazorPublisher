@@ -774,11 +774,13 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             externalClipboardLikely: false,
             pendingPasteTimer: 0,
             lastInsertionPoint: null,
+            pendingComponentAction: null,
             handlers: {}
         };
 
         const handlers = state.handlers;
         handlers.stagePointerDown = event => pointerDown(state, event);
+        handlers.stageDoubleClick = event => componentDoubleClick(state, event);
         handlers.stagePointerMove = event => pointerMove(state, event);
         handlers.stagePointerUp = event => pointerUp(state, event);
         handlers.stagePointerCancel = event => pointerCancel(state, event);
@@ -824,10 +826,13 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         handlers.documentDragEnd = () => insertionDragEnd(state);
         handlers.documentClick = event => suppressInsertionClick(state, event);
         handlers.scroll = () => nextAnimationFrame(state);
+        handlers.publisherNavigate = event => scheduleComponentNavigation(state, event.detail);
+        handlers.publisherOpenUrl = event => scheduleComponentUrl(state, event.detail);
 
         // Capture phase keeps selection alive even when nested media, SVG, chart,
         // or animation content stops pointer events in its own component tree.
         stage.addEventListener('pointerdown', handlers.stagePointerDown, true);
+        stage.addEventListener('dblclick', handlers.stageDoubleClick, true);
         stage.addEventListener('pointermove', handlers.stagePointerMove);
         stage.addEventListener('pointerup', handlers.stagePointerUp);
         stage.addEventListener('pointercancel', handlers.stagePointerCancel);
@@ -835,6 +840,8 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         window.addEventListener('pointerdown', handlers.windowPointerDown, true);
         window.addEventListener('pointerup', handlers.windowPointerUp, true);
         window.addEventListener('pointercancel', handlers.windowPointerCancel, true);
+        window.addEventListener('publisherstudio:navigate', handlers.publisherNavigate);
+        window.addEventListener('publisherstudio:open-url', handlers.publisherOpenUrl);
         window.addEventListener('blur', handlers.windowBlur);
         document.addEventListener('visibilitychange', handlers.visibilityChange);
         stage.addEventListener('pointerleave', handlers.stagePointerLeave);
@@ -893,6 +900,7 @@ export function disposeCanvas(stageId) {
     if (!state) return;
 
     resetPointerOperation(state, true);
+    cancelPendingComponentAction(state);
     if (state.pendingPasteTimer) clearTimeout(state.pendingPasteTimer);
     state.pendingPasteTimer = 0;
     clearObjectAlignmentFeedback(state);
@@ -904,6 +912,7 @@ export function disposeCanvas(stageId) {
 
     const handlers = state.handlers || {};
     stage.removeEventListener('pointerdown', handlers.stagePointerDown, true);
+    stage.removeEventListener('dblclick', handlers.stageDoubleClick, true);
     stage.removeEventListener('pointermove', handlers.stagePointerMove);
     stage.removeEventListener('pointerup', handlers.stagePointerUp);
     stage.removeEventListener('pointercancel', handlers.stagePointerCancel);
@@ -924,6 +933,8 @@ export function disposeCanvas(stageId) {
     window.removeEventListener('pointerdown', handlers.windowPointerDown, true);
     window.removeEventListener('pointerup', handlers.windowPointerUp, true);
     window.removeEventListener('pointercancel', handlers.windowPointerCancel, true);
+    window.removeEventListener('publisherstudio:navigate', handlers.publisherNavigate);
+    window.removeEventListener('publisherstudio:open-url', handlers.publisherOpenUrl);
     window.removeEventListener('blur', handlers.windowBlur);
     document.removeEventListener('visibilitychange', handlers.visibilityChange);
 
@@ -1432,6 +1443,47 @@ function refreshMovingElements(state, operation) {
     }
 }
 
+function cancelPendingComponentAction(state) {
+    const pending = state?.pendingComponentAction;
+    if (!pending) return;
+    if (pending.timer) clearTimeout(pending.timer);
+    try { pending.popup?.close?.(); } catch { }
+    state.pendingComponentAction = null;
+}
+
+function scheduleComponentNavigation(state, detail) {
+    if (detail?.editorSurface === false) return;
+    cancelPendingComponentAction(state);
+    const target = detail?.pageId;
+    state.pendingComponentAction = {
+        timer: setTimeout(() => {
+            state.pendingComponentAction = null;
+            safeDotNet(state, 'NavigateToPage', String(target ?? ''));
+        }, 420)
+    };
+}
+
+function scheduleComponentUrl(state, detail) {
+    if (detail?.editorSurface === false) return;
+    cancelPendingComponentAction(state);
+    const url = String(detail?.url || '').trim();
+    if (!/^(https?:|mailto:)/i.test(url)) return;
+    const newWindow = detail?.openInNewWindow !== false;
+    let popup = null;
+    if (newWindow) {
+        try { popup = window.open('about:blank', '_blank', 'noopener'); } catch { popup = null; }
+    }
+    state.pendingComponentAction = {
+        popup,
+        timer: setTimeout(() => {
+            state.pendingComponentAction = null;
+            if (newWindow && popup) { try { popup.location.href = url; } catch { window.open(url, '_blank', 'noopener'); } }
+            else if (newWindow) window.open(url, '_blank', 'noopener');
+            else location.href = url;
+        }, 420)
+    };
+}
+
 function registerCanvasClick(state, operation, event) {
     if (!operation?.id || operation.kind === 'resize' || operation.kind?.startsWith('connector-')) return;
     const now = performance.now();
@@ -1440,6 +1492,7 @@ function registerCanvasClick(state, operation, event) {
     const closeInTime = previous && now - previous.time <= 520;
     const closeInSpace = previous && Math.hypot(event.clientX - previous.x, event.clientY - previous.y) <= 10;
     if (sameElement && closeInTime && closeInSpace) {
+        cancelPendingComponentAction(state);
         state.lastCanvasClick = null;
         resetPointerOperation(state, false);
         safeDotNet(state, 'ActivateElement', operation.id);
@@ -1448,6 +1501,23 @@ function registerCanvasClick(state, operation, event) {
         return;
     }
     state.lastCanvasClick = { id: operation.id, time: now, x: event.clientX, y: event.clientY };
+}
+
+function componentInteractionOwner(state, event) {
+    const target = event?.target instanceof Element ? event.target : null;
+    if (!target?.closest?.('.devextreme-component-host')) return null;
+    const owner = target.closest('[data-publication-element][data-element-id]');
+    return owner && state.page.contains(owner) ? owner : null;
+}
+
+function componentDoubleClick(state, event) {
+    const owner = componentInteractionOwner(state, event);
+    if (!owner) return;
+    cancelPendingComponentAction(state);
+    state.lastCanvasClick = null;
+    safeDotNet(state, 'ActivateElement', String(owner.dataset.elementId || ''));
+    event.preventDefault();
+    event.stopPropagation();
 }
 
 function pointerDown(state, event) {
@@ -1475,6 +1545,17 @@ function pointerDown(state, event) {
                 optimisticSelectElement(state, owner, false);
                 safeDotNet(state, 'SelectElement', id, false);
             }
+        }
+        return;
+    }
+
+    const componentOwner = componentInteractionOwner(state, event);
+    if (componentOwner) {
+        const id = String(componentOwner.dataset.elementId || '');
+        if (id && !selectedElementIdSet(state).has(id.toLowerCase())) {
+            optimisticSelectElement(state, componentOwner, false);
+            // Let DevExtreme finish its native click first; the keyed Blazor object can rerender afterwards.
+            setTimeout(() => safeDotNet(state, 'SelectElement', id, false), 0);
         }
         return;
     }

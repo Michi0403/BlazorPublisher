@@ -15,8 +15,8 @@
     @if (State.ConnectorTool != ConnectorToolKind.None)
     {
         <div class="connector-tool-hint" @onclick:stopPropagation="true">
-            <strong>@(State.ConnectorTool == ConnectorToolKind.Arrow ? "Arrow connector" : "Connector")</strong>
-            <span>Drag from a round object port to another port. Press Esc to stop.</span>
+            <strong>@ConnectorToolTitle</strong>
+            <span>@ConnectorToolHint</span>
             <button type="button" @onclick="State.CancelActiveTool">Done</button>
         </div>
     }
@@ -62,7 +62,7 @@
                 if (ConnectorGeometry.TryResolve(State.CurrentPage, connector, out var sourcePoint, out var targetPoint))
                 {
                     var connectorPath = ConnectorGeometry.Path(connector, sourcePoint, targetPoint);
-                    <svg @key="connector.Id" id="element-@connector.Id" class="pub-connector @(State.IsSelected(connector.Id) ? "selected" : null) @(connector.Id == State.SelectedElementId ? "selection-primary" : null) @(connector.Locked ? "locked" : null)"
+                    <svg @key="connector.Id" id="element-@connector.Id" class="pub-connector @(connector.Signal.Enabled ? "signal-connector" : null) @(!connector.Signal.LineVisible ? "signal-line-hidden" : null) @(State.IsSelected(connector.Id) ? "selected" : null) @(connector.Id == State.SelectedElementId ? "selection-primary" : null) @(connector.Locked ? "locked" : null)"
                          style="z-index:@connector.ZIndex"
                          viewBox="0 0 @Inv(State.CurrentPage.WidthMm) @Inv(State.CurrentPage.HeightMm)"
                          preserveAspectRatio="none"
@@ -75,10 +75,13 @@
                          data-interaction-action="@connector.Interaction.Action"
                          data-playback-hidden="@connector.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
                          data-connector-id="@connector.Id"
-                         data-source-element-id="@connector.Source.ElementId" data-source-anchor="@connector.Source.Anchor"
-                         data-target-element-id="@connector.Target.ElementId" data-target-anchor="@connector.Target.Anchor"
+                         data-source-kind="@connector.Source.Kind" data-source-element-id="@connector.Source.ElementId" data-source-anchor="@connector.Source.Anchor" data-source-x="@Inv(connector.Source.X)" data-source-y="@Inv(connector.Source.Y)" data-source-selector="@connector.Source.TargetSelector"
+                         data-target-kind="@connector.Target.Kind" data-target-element-id="@connector.Target.ElementId" data-target-anchor="@connector.Target.Anchor" data-target-x="@Inv(connector.Target.X)" data-target-y="@Inv(connector.Target.Y)" data-target-selector="@connector.Target.TargetSelector"
                          data-path-kind="@connector.PathKind" data-start-marker="@connector.StartMarker" data-end-marker="@connector.EndMarker"
                          data-stroke="@connector.Stroke" data-stroke-width="@Inv(connector.StrokeWidthMm)" data-dash-style="@connector.DashStyle"
+                         data-signal="@PublicationAnimationData.Signal(connector)"
+                         data-signal-enabled="@connector.Signal.Enabled.ToString().ToLowerInvariant()"
+                         data-signal-line-visible="@connector.Signal.LineVisible.ToString().ToLowerInvariant()"
                          @oncontextmenu="args => ShowElementContextMenu(connector, args)" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
                         <defs>
                             @ConnectorMarkerDefinition(connector, true)
@@ -535,6 +538,8 @@
             </DxContextMenuItem>
             <DxContextMenuItem Text="Draw connector" BeginGroup="true" Click="StartConnector" />
             <DxContextMenuItem Text="Draw arrow connector" Click="StartArrowConnector" />
+            <DxContextMenuItem Text="Draw signal connector" Click="StartSignalConnector" />
+            <DxContextMenuItem Text="Draw signal arrow" Click="StartSignalArrow" />
             <DxContextMenuItem Text="Page" BeginGroup="true">
                 <Items>
                     <DxContextMenuItem Text="Add page" Click="AddPage" />
@@ -601,10 +606,27 @@
     };
 
     private string PointerStateText => State.ConnectorTool != ConnectorToolKind.None
-        ? (State.ConnectorTool == ConnectorToolKind.Arrow ? "Draw arrow connector" : "Draw connector")
+        ? State.ConnectorTool switch
+        {
+            ConnectorToolKind.Arrow => "Draw arrow connector",
+            ConnectorToolKind.SignalConnector => "Draw signal connector",
+            ConnectorToolKind.SignalArrow => "Draw signal arrow",
+            _ => "Draw connector"
+        }
         : State.CropMode ? "Crop picture"
         : State.HasMultipleSelection ? $"Move {State.SelectedElements.Count} objects"
         : "Select / move";
+    private string ConnectorToolTitle => State.ConnectorTool switch
+    {
+        ConnectorToolKind.Arrow => "Arrow connector",
+        ConnectorToolKind.SignalConnector => "Signal connector",
+        ConnectorToolKind.SignalArrow => "Signal arrow",
+        _ => "Connector"
+    };
+    private string ConnectorToolHint => State.ConnectorTool is ConnectorToolKind.SignalConnector or ConnectorToolKind.SignalArrow
+        ? "Drag from any object port or empty canvas point to another port or canvas point. Signal actions work offline in exported HTML. Press Esc to stop."
+        : "Drag from a round object port to another port. Press Esc to stop.";
+
     private bool CanResetPointerState => State.ConnectorTool != ConnectorToolKind.None || State.CropMode || State.ContentPanMode;
 
     private string PageStyle
@@ -671,6 +693,7 @@
                 _dataVisualLayoutKey = dataVisualLayoutKey;
                 if (State.CurrentPage.Elements.Any(element => element is DataVisualElement))
                     await _module.InvokeVoidAsync("refreshDataVisualLayout", "publisher-page");
+                await _module.InvokeVoidAsync("initializeSignalConnectors", "publisher-page", new { autoStart = false, editor = true });
             }
         }
         catch (JSDisconnectedException) { }
@@ -740,6 +763,36 @@
         if (!Guid.TryParse(connectorId, out var connectorGuid) || !Guid.TryParse(elementId, out var elementGuid)) return;
         if (!Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor)) return;
         State.ReconnectConnector(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), elementGuid, parsedAnchor);
+    }
+    [JSInvokable]
+    public void CommitSignalConnector(string sourceKind, string sourceId, string sourceAnchor, double sourceX, double sourceY,
+        string targetKind, string targetId, string targetAnchor, double targetX, double targetY, string tool)
+    {
+        if (!TryConnectorEndpoint(sourceKind, sourceId, sourceAnchor, sourceX, sourceY, out var source) ||
+            !TryConnectorEndpoint(targetKind, targetId, targetAnchor, targetX, targetY, out var target)) return;
+        var marker = string.Equals(tool, nameof(ConnectorToolKind.SignalArrow), StringComparison.OrdinalIgnoreCase)
+            ? ConnectorMarker.Arrow : ConnectorMarker.None;
+        State.AddSignalConnector(source, target, marker);
+    }
+    [JSInvokable]
+    public void ReconnectSignalConnector(string connectorId, string endpoint, string kind, string elementId, string anchor, double x, double y)
+    {
+        if (!Guid.TryParse(connectorId, out var connectorGuid) ||
+            !TryConnectorEndpoint(kind, elementId, anchor, x, y, out var replacement)) return;
+        State.ReconnectConnectorEndpoint(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), replacement);
+    }
+    private bool TryConnectorEndpoint(string kind, string elementId, string anchor, double x, double y, out ConnectorEndpoint endpoint)
+    {
+        endpoint = new ConnectorEndpoint();
+        if (!Enum.TryParse<ConnectorEndpointKind>(kind, true, out var parsedKind)) return false;
+        endpoint.Kind = parsedKind;
+        endpoint.X = Math.Clamp(x, 0, State.CurrentPage.WidthMm);
+        endpoint.Y = Math.Clamp(y, 0, State.CurrentPage.HeightMm);
+        if (parsedKind == ConnectorEndpointKind.Canvas) return true;
+        if (!Guid.TryParse(elementId, out var elementGuid) || !Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor)) return false;
+        endpoint.ElementId = elementGuid;
+        endpoint.Anchor = parsedAnchor;
+        return true;
     }
     [JSInvokable] public void CancelActiveTool() => State.CancelActiveTool();
     [JSInvokable] public Task DropInsert(string kind, double x, double y) => RequestCanvasInsert.InvokeAsync(new CanvasInsertRequest(kind, x, y));
@@ -1038,6 +1091,8 @@
     private void AddLine() => State.AddShape(PublicationShape.Line);
     private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
     private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
+    private void StartSignalConnector() => State.SetConnectorTool(ConnectorToolKind.SignalConnector);
+    private void StartSignalArrow() => State.SetConnectorTool(ConnectorToolKind.SignalArrow);
     private void AddPage() => State.AddPage();
     private void DuplicatePage() => State.DuplicatePage();
     private void DeletePage() => State.DeletePage();

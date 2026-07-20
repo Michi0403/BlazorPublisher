@@ -67,3 +67,13 @@ Click interactions require an export policy because video is not interactive. Re
 ## Current implementation boundary
 
 The current package implements the document model, animation/media timeline editor, browser-native media studios, preview engine, interaction authoring, and animated self-contained HTML export. It does not yet write PowerPoint timing XML/native media packages or encode a final video. Those exporters can be added without changing the publication format or editor timeline.
+
+## Offline Signal Arrows and Signal Connectors (v1.0.41)
+
+A signal connector is a normal publication connector plus a serialized `SignalConnectorSettings` payload. Its endpoints may reference an object anchor or a page coordinate. Optional endpoint selectors target an element inside the referenced object, for example `[data-cell='B4']` in a spreadsheet preview.
+
+The browser runtime is shared by editor preview, presentation/site HTML, and video export. It supports page-entry, click, hover, and manual triggers; flying-arrow, draw-path, pulse, and invisible visuals; start/end click or hover gestures; translate/scale/rotate/opacity motion; animated visibility and opacity; highlighting; animation replay; media actions; CSS classes; and signal chaining.
+
+Single-file HTML exports embed the runtime function and the serialized settings directly. No call back to PublisherStudio is made. The exported document therefore remains interactive when opened from local storage with no network. A publication that separately uses REST/OData or other remote live data still needs access to those configured endpoints.
+
+Video export runs the same runtime against the recording DOM. Chained signal durations are included in the page recording duration. Infinite signal loops are recorded as their configured finite repeat count so export termination remains deterministic.

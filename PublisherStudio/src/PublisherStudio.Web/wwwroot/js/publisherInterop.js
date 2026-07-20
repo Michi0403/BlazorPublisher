@@ -1074,6 +1074,18 @@ function connectorToolActive(state) {
     return state.config.connectorTool && state.config.connectorTool !== 'None';
 }
 
+function signalConnectorToolActive(state) {
+    return state.config.connectorTool === 'SignalConnector' || state.config.connectorTool === 'SignalArrow';
+}
+
+function pagePointMm(state, event) {
+    const pageRect = state.page.getBoundingClientRect();
+    return {
+        x: clamp((event.clientX - pageRect.left) / state.config.pxPerMm, 0, number(state.page.dataset.pageWidthMm)),
+        y: clamp((event.clientY - pageRect.top) / state.config.pxPerMm, 0, number(state.page.dataset.pageHeightMm))
+    };
+}
+
 function connectorPath(kind, source, target) {
     if (kind === 'Elbow') {
         const middleX = (source.x + target.x) / 2;
@@ -1178,20 +1190,38 @@ function clearConnectorOperation(state, restoreOriginal) {
 
 function updateConnectorDrag(state, event, operation) {
     operation.target?.port?.classList.remove('connector-port-target');
-    const target = findConnectorTarget(state, event, operation.excludedIds);
+    let target = findConnectorTarget(state, event, operation.excludedIds);
+    if (!target && operation.signal) {
+        target = { kind: 'Canvas', ownerId: '', anchor: 'Center', point: pagePointMm(state, event), port: null };
+    } else if (target) {
+        target.kind = 'Element';
+    }
     if (!target) {
         operation.target = null;
         hideConnectorGhost(state);
         return;
     }
-    target.port.classList.add('connector-port-target');
+    target.port?.classList.add('connector-port-target');
     showConnectorGhost(state, operation, target);
 }
 
 function finishConnectorDrag(state, operation) {
     const target = operation.target;
     if (target) {
-        if (operation.kind === 'connector-new') {
+        const source = operation.sourceEndpoint || {
+            kind: 'Element', ownerId: operation.sourceOwnerId || '', anchor: operation.sourceAnchor || 'Center', point: operation.fixedPoint
+        };
+        if (operation.signal) {
+            if (operation.kind === 'connector-new') {
+                safeDotNet(state, 'CommitSignalConnector',
+                    source.kind, source.ownerId || '', source.anchor || 'Center', source.point.x, source.point.y,
+                    target.kind || 'Element', target.ownerId || '', target.anchor || 'Center', target.point.x, target.point.y,
+                    operation.tool);
+            } else {
+                safeDotNet(state, 'ReconnectSignalConnector', operation.connectorId, operation.endpoint,
+                    target.kind || 'Element', target.ownerId || '', target.anchor || 'Center', target.point.x, target.point.y);
+            }
+        } else if (operation.kind === 'connector-new') {
             safeDotNet(state,
                 'CommitConnector',
                 operation.sourceOwnerId, operation.sourceAnchor,
@@ -1228,14 +1258,21 @@ function anchorPointForElement(element, anchor, pxPerMm) {
     };
 }
 
+function connectorEndpointPoint(state, connector, prefix) {
+    if (String(connector.dataset[`${prefix}Kind`] || 'Element').toLowerCase() === 'canvas') {
+        return { x: number(connector.dataset[`${prefix}X`]), y: number(connector.dataset[`${prefix}Y`]) };
+    }
+    const id = connector.dataset[`${prefix}ElementId`] || '';
+    const element = state.page.querySelector(`[data-element-id="${CSS.escape(id)}"]`);
+    return element ? anchorPointForElement(element, connector.dataset[`${prefix}Anchor`] || 'Center', state.config.pxPerMm) : null;
+}
+
 function updateAttachedConnectors(state, movedId) {
     for (const connector of state.page.querySelectorAll('[data-connector-id]')) {
         if (connector.dataset.sourceElementId !== movedId && connector.dataset.targetElementId !== movedId) continue;
-        const sourceElement = state.page.querySelector(`[data-element-id="${CSS.escape(connector.dataset.sourceElementId)}"]`);
-        const targetElement = state.page.querySelector(`[data-element-id="${CSS.escape(connector.dataset.targetElementId)}"]`);
-        if (!sourceElement || !targetElement) continue;
-        const source = anchorPointForElement(sourceElement, connector.dataset.sourceAnchor, state.config.pxPerMm);
-        const target = anchorPointForElement(targetElement, connector.dataset.targetAnchor, state.config.pxPerMm);
+        const source = connectorEndpointPoint(state, connector, 'source');
+        const target = connectorEndpointPoint(state, connector, 'target');
+        if (!source || !target) continue;
         const path = connectorPath(connector.dataset.pathKind || 'Curved', source, target);
         connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
         const ends = connector.querySelectorAll('.connector-endpoint');
@@ -1447,15 +1484,16 @@ function pointerDown(state, event) {
         const connector = endpoint.closest('[data-connector-id]');
         if (!connector || connector.classList.contains('locked')) return;
         const endpointName = endpoint.dataset.connectorEnd;
-        const otherId = endpointName === 'source' ? connector.dataset.targetElementId : connector.dataset.sourceElementId;
-        const fixedElement = state.page.querySelector(`[data-element-id="${CSS.escape(otherId)}"]`);
-        const fixedAnchor = endpointName === 'source' ? connector.dataset.targetAnchor : connector.dataset.sourceAnchor;
-        if (!fixedElement) return;
+        const otherPrefix = endpointName === 'source' ? 'target' : 'source';
+        const otherId = connector.dataset[`${otherPrefix}ElementId`] || '';
+        const fixedPoint = connectorEndpointPoint(state, connector, otherPrefix);
+        if (!fixedPoint) return;
+        const signal = connector.dataset.signalEnabled === 'true';
         connector.style.visibility = 'hidden';
         state.operation = {
             kind: 'connector-reconnect', pointerId: event.pointerId, connector, connectorId: connector.dataset.connectorId,
-            endpoint: endpointName, fixedPoint: anchorPointForElement(fixedElement, fixedAnchor, state.config.pxPerMm),
-            pathKind: connector.dataset.pathKind || 'Curved', markerEnd: endpointName !== 'source', excludedIds: [otherId]
+            endpoint: endpointName, fixedPoint,
+            pathKind: connector.dataset.pathKind || 'Curved', markerEnd: endpointName !== 'source', excludedIds: otherId ? [otherId] : [], signal
         };
         try { state.stage.setPointerCapture(event.pointerId); } catch { }
         event.preventDefault();
@@ -1468,11 +1506,13 @@ function pointerDown(state, event) {
         state.lastCanvasClick = null;
         const sourceOwnerId = connectorPort.dataset.ownerId;
         connectorPort.classList.add('connector-port-source');
+        const sourcePoint = portPointMm(state, connectorPort);
         state.operation = {
             kind: 'connector-new', pointerId: event.pointerId, sourcePort: connectorPort,
-            sourceOwnerId, sourceAnchor: connectorPort.dataset.anchor, fixedPoint: portPointMm(state, connectorPort),
-            pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow', tool: state.config.connectorTool,
-            excludedIds: [sourceOwnerId]
+            sourceOwnerId, sourceAnchor: connectorPort.dataset.anchor, fixedPoint: sourcePoint,
+            sourceEndpoint: { kind: 'Element', ownerId: sourceOwnerId, anchor: connectorPort.dataset.anchor, point: sourcePoint },
+            pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow' || state.config.connectorTool === 'SignalArrow', tool: state.config.connectorTool,
+            signal: signalConnectorToolActive(state), excludedIds: [sourceOwnerId]
         };
         try { state.stage.setPointerCapture(event.pointerId); } catch { }
         event.preventDefault();
@@ -1500,6 +1540,21 @@ function pointerDown(state, event) {
     }
 
     const element = event.target.closest('[data-publication-element]');
+    if ((!element || !state.page.contains(element)) && state.page.contains(event.target) && signalConnectorToolActive(state)) {
+        state.lastCanvasClick = null;
+        const sourcePoint = pagePointMm(state, event);
+        state.operation = {
+            kind: 'connector-new', pointerId: event.pointerId,
+            sourceOwnerId: '', sourceAnchor: 'Center', fixedPoint: sourcePoint,
+            sourceEndpoint: { kind: 'Canvas', ownerId: '', anchor: 'Center', point: sourcePoint },
+            pathKind: 'Curved', markerEnd: state.config.connectorTool === 'SignalArrow', tool: state.config.connectorTool,
+            signal: true, excludedIds: []
+        };
+        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
     if (!element || !state.page.contains(element)) {
         if (state.page.contains(event.target) && !connectorToolActive(state)) {
             state.lastCanvasClick = null;
@@ -3529,6 +3584,358 @@ function pausePublicationMedia(elementId) {
     pausePublicationMediaNode(document.getElementById(elementId));
 }
 
+function signalConnectorRuntime(root = document, options = {}) {
+    const host = typeof root === 'string' ? document.getElementById(root) : (root || document);
+    if (!host) return null;
+    const lower = value => String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const num = (value, fallback = 0) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
+    const wait = milliseconds => new Promise(resolve => setTimeout(resolve, Math.max(0, milliseconds)));
+    const parse = value => { try { return JSON.parse(value || '{}'); } catch { return {}; } };
+    const bool = value => value === true || String(value).toLowerCase() === 'true';
+    const cssEscape = value => globalThis.CSS?.escape ? CSS.escape(String(value)) : String(value).replace(/["\\]/g, '\\$&');
+    const controllers = new Map();
+    const bindings = [];
+    let disposed = false;
+
+    const pageFor = connector => connector?.closest?.('[data-page-id],.print-page,.publication-page') || host;
+    const connectorId = connector => String(connector?.dataset?.connectorId || connector?.dataset?.elementId || connector?.id || '').replace(/^element-/, '');
+    const elementById = (page, id) => id ? page.querySelector(`[data-element-id="${cssEscape(id)}"]`) || document.getElementById(`element-${id}`) : null;
+    const selectInside = (owner, selector) => {
+        if (!owner || !String(selector || '').trim()) return owner;
+        try { return owner.matches?.(selector) ? owner : owner.querySelector(selector); } catch { return owner; }
+    };
+    const pointTarget = (connector, prefix) => {
+        const page = pageFor(connector);
+        const kind = lower(connector.dataset[`${prefix}Kind`] || 'element');
+        const selector = connector.dataset[`${prefix}Selector`] || '';
+        if (kind !== 'canvas') {
+            const owner = elementById(page, connector.dataset[`${prefix}ElementId`]);
+            return selectInside(owner, selector);
+        }
+        const svg = connector;
+        const viewBox = svg.viewBox?.baseVal;
+        const rect = svg.getBoundingClientRect();
+        if (!rect.width || !rect.height) return page;
+        const x = num(connector.dataset[`${prefix}X`]);
+        const y = num(connector.dataset[`${prefix}Y`]);
+        const clientX = rect.left + (x - (viewBox?.x || 0)) / Math.max(.001, viewBox?.width || rect.width) * rect.width;
+        const clientY = rect.top + (y - (viewBox?.y || 0)) / Math.max(.001, viewBox?.height || rect.height) * rect.height;
+        const previous = connector.style.pointerEvents;
+        connector.style.pointerEvents = 'none';
+        let target = document.elementFromPoint(clientX, clientY);
+        connector.style.pointerEvents = previous;
+        if (target && !page.contains(target)) target = page;
+        return selectInside(target || page, selector);
+    };
+    const configuredTarget = (connector, settings, mode) => {
+        const page = pageFor(connector);
+        const id = mode === 'motion' ? settings.motionTargetElementId : settings.completionTargetElementId;
+        const selector = mode === 'motion' ? settings.motionTargetSelector : settings.completionTargetSelector;
+        const owner = elementById(page, id) || (mode === 'completion' ? pointTarget(connector, 'target') : null);
+        if (mode === 'motion' && owner && !String(selector || '').trim()) {
+            const viewport = owner.matches?.('[data-content-viewport]') ? owner : owner.querySelector?.('[data-content-viewport]');
+            const source = viewport?.querySelector?.(':scope > [data-content-fit-source]');
+            if (source) return source;
+        }
+        return selectInside(owner, selector);
+    };
+    const waitForTarget = async (resolve, signal, timeout = num(options.targetWaitMilliseconds, 2000)) => {
+        const started = performance.now();
+        let target = resolve();
+        while (!target && !signal?.aborted && performance.now() - started < Math.max(0, timeout)) {
+            await wait(40);
+            target = resolve();
+        }
+        return target;
+    };
+    const dispatchGesture = (target, gesture) => {
+        if (!target) return;
+        const kind = lower(gesture);
+        const init = { bubbles: true, cancelable: true, composed: true, view: window };
+        const dispatch = type => {
+            let event;
+            try { event = type.startsWith('pointer') ? new PointerEvent(type, init) : new MouseEvent(type, init); }
+            catch { event = new MouseEvent(type, init); }
+            try { Object.defineProperty(event, 'publisherSignalSynthetic', { value: true }); } catch { }
+            target.dispatchEvent(event);
+        };
+        if (kind === 'click') {
+            for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) dispatch(type);
+        } else if (kind === 'hover') {
+            for (const type of ['pointerover', 'mouseover', 'pointerenter', 'mouseenter']) dispatch(type);
+            target.classList.add('ps-signal-hover');
+            setTimeout(() => {
+                for (const type of ['pointerout', 'mouseout', 'pointerleave', 'mouseleave']) dispatch(type);
+                target.classList.remove('ps-signal-hover');
+            }, 800);
+        }
+    };
+    const replayAnimations = target => {
+        if (!target) return;
+        try {
+            target.getAnimations?.({ subtree: true }).forEach(animation => { animation.cancel(); animation.play(); });
+            target.dispatchEvent(new CustomEvent('publisher:replay-animation', { bubbles: true, detail: { target } }));
+        } catch { }
+    };
+    const animateOpacity = async (target, from, to, duration, signal) => {
+        if (!target?.animate || publicationReducedMotion()) { target.style.opacity = String(to); return; }
+        const animation = target.animate([{ opacity: from }, { opacity: to }], {
+            duration: Math.max(10, duration * 1000), easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards'
+        });
+        signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
+        try { await animation.finished; } catch { }
+        if (!signal?.aborted) target.style.opacity = String(to);
+        animation.cancel();
+    };
+    const setVisibility = async (target, visible, duration, signal) => {
+        if (!target) return;
+        if (visible) {
+            target.classList.remove('ps-action-hidden');
+            target.hidden = false;
+            target.style.visibility = '';
+            const destination = Math.max(0, Math.min(1, num(target.dataset.publisherSignalOpacity, 1)));
+            target.style.opacity = '0';
+            await animateOpacity(target, 0, destination, duration, signal);
+        } else {
+            const start = Math.max(0, Math.min(1, num(getComputedStyle(target).opacity, 1)));
+            target.dataset.publisherSignalOpacity = String(start || 1);
+            await animateOpacity(target, start, 0, duration, signal);
+            if (!signal?.aborted) target.classList.add('ps-action-hidden');
+        }
+    };
+    const applyCompletion = async (connector, settings, signal, chain) => {
+        const action = lower(settings.completionAction);
+        if (!action || action === 'none') return;
+        if (action === 'runsignal') {
+            const next = settings.completionValue || settings.nextConnectorId;
+            if (next) await run(next, { chained: true, signal, chain });
+            return;
+        }
+        const target = await waitForTarget(() => configuredTarget(connector, settings, 'completion'), signal);
+        if (!target) return;
+        const duration = Math.max(.01, num(settings.completionDurationSeconds, .8));
+        const value = String(settings.completionValue || '').trim();
+        if (action === 'click' || action === 'hover') dispatchGesture(target, action);
+        else if (action === 'show') await setVisibility(target, true, duration, signal);
+        else if (action === 'hide') await setVisibility(target, false, duration, signal);
+        else if (action === 'togglevisibility') await setVisibility(target, target.classList.contains('ps-action-hidden') || target.hidden, duration, signal);
+        else if (action === 'setopacity') {
+            const start = Math.max(0, Math.min(1, num(getComputedStyle(target).opacity, 1)));
+            const destination = Math.max(0, Math.min(1, num(value, 1)));
+            await animateOpacity(target, start, destination, duration, signal);
+        }
+        else if (action === 'replayanimation') replayAnimations(target);
+        else if (action === 'playmedia') target.querySelector?.('video,audio')?.play?.().catch?.(() => {});
+        else if (action === 'pausemedia') target.querySelector?.('video,audio')?.pause?.();
+        else if (action === 'togglemediaplayback') {
+            const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
+            if (media) media.paused ? media.play().catch(() => {}) : media.pause();
+        } else if (action === 'highlight') {
+            const color = value || '#facc15';
+            const animation = target.animate?.([
+                { outline: `0 solid ${color}`, boxShadow: `0 0 0 0 ${color}00` },
+                { outline: `4px solid ${color}`, boxShadow: `0 0 0 8px ${color}55`, offset: .35 },
+                { outline: `0 solid ${color}`, boxShadow: `0 0 0 0 ${color}00` }
+            ], { duration: duration * 1000, easing: 'ease-in-out' });
+            try { await animation?.finished; } catch { }
+        } else if (action === 'addcssclass' && value) target.classList.add(...value.split(/\s+/).filter(Boolean));
+        else if (action === 'removecssclass' && value) target.classList.remove(...value.split(/\s+/).filter(Boolean));
+        else if (action === 'togglecssclass' && value) value.split(/\s+/).filter(Boolean).forEach(name => target.classList.toggle(name));
+    };
+    const animateMotion = (connector, settings, signal, resolvedTarget = null) => {
+        const target = resolvedTarget || configuredTarget(connector, settings, 'motion');
+        if (!target?.animate) return null;
+        const x = num(settings.translateXPercent);
+        const y = num(settings.translateYPercent);
+        const scale = Math.max(.01, num(settings.scale, 1));
+        const rotation = num(settings.rotationDegrees);
+        const opacity = Math.max(0, Math.min(1, num(settings.opacity, 1)));
+        if (Math.abs(x) < .001 && Math.abs(y) < .001 && Math.abs(scale - 1) < .001 && Math.abs(rotation) < .001 && Math.abs(opacity - 1) < .001) return null;
+        const computed = getComputedStyle(target);
+        const base = computed.transform === 'none' ? '' : computed.transform;
+        const destination = `${base} translate(${x}%,${y}%) scale(${scale}) rotate(${rotation}deg)`.trim();
+        const duration = Math.max(.05, num(settings.durationSeconds, 1.5)) * 1000;
+        const loop = bool(settings.loop) && options.finiteLoops !== true;
+        const iterations = loop ? Infinity : Math.max(1, Math.round(num(settings.repeatCount, 1)));
+        const animation = target.animate([
+            { transform: base || 'none', opacity: computed.opacity },
+            { transform: destination, opacity }
+        ], {
+            duration,
+            iterations,
+            direction: bool(settings.autoReverse) ? 'alternate' : 'normal',
+            easing: 'cubic-bezier(.4,0,.2,1)',
+            fill: bool(settings.restoreMotionAfterRun) ? 'none' : 'forwards'
+        });
+        signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
+        return animation;
+    };
+    const animateVisual = async (connector, settings, signal) => {
+        const visible = settings.lineVisible !== false && connector.dataset.signalLineVisible !== 'false';
+        const visual = lower(settings.visual || 'flyingarrow');
+        const path = connector.querySelector('.connector-line');
+        const duration = Math.max(.05, num(settings.durationSeconds, 1.5)) * 1000;
+        const iterations = bool(settings.loop) && options.finiteLoops !== true ? Infinity : Math.max(1, Math.round(num(settings.repeatCount, 1)));
+        const direction = bool(settings.autoReverse) ? 'alternate' : 'normal';
+        if (!visible || visual === 'none' || !path) { await wait(duration * (Number.isFinite(iterations) ? iterations : 1)); return; }
+        if (visual === 'drawpath' && path.animate) {
+            const length = path.getTotalLength?.() || 100;
+            const previousDash = path.style.strokeDasharray;
+            const previousOffset = path.style.strokeDashoffset;
+            const animation = path.animate([
+                { strokeDasharray: `${length} ${length}`, strokeDashoffset: length },
+                { strokeDasharray: `${length} ${length}`, strokeDashoffset: 0 }
+            ], { duration, iterations, direction, easing: 'linear' });
+            signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
+            try { await animation.finished; } catch { }
+            path.style.strokeDasharray = previousDash; path.style.strokeDashoffset = previousOffset;
+            return;
+        }
+        if (visual === 'pulse' && path.animate) {
+            const animation = path.animate([
+                { opacity: .3, filter: 'drop-shadow(0 0 0 currentColor)' },
+                { opacity: 1, filter: 'drop-shadow(0 0 5px currentColor)' },
+                { opacity: .3, filter: 'drop-shadow(0 0 0 currentColor)' }
+            ], { duration, iterations, direction, easing: 'ease-in-out' });
+            signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
+            try { await animation.finished; } catch { }
+            return;
+        }
+        const ns = 'http://www.w3.org/2000/svg';
+        const runner = document.createElementNS(ns, 'g');
+        runner.classList.add('publisher-signal-runner');
+        const halo = document.createElementNS(ns, 'circle'); halo.setAttribute('r', '2.4'); halo.setAttribute('fill', 'none'); halo.setAttribute('stroke', connector.dataset.stroke || '#0ea5e9'); halo.setAttribute('stroke-width', '1.1');
+        const arrow = document.createElementNS(ns, 'path'); arrow.setAttribute('d', 'M -4 -2.7 L 3.5 0 L -4 2.7 L -2.2 0 Z'); arrow.setAttribute('fill', connector.dataset.stroke || '#0ea5e9');
+        runner.append(halo, arrow); connector.appendChild(runner);
+        const length = Math.max(.001, path.getTotalLength?.() || 1);
+        const started = performance.now();
+        const finiteIterations = Number.isFinite(iterations) ? iterations : Number.MAX_SAFE_INTEGER;
+        await new Promise(resolve => {
+            const tick = now => {
+                if (signal?.aborted || disposed) { resolve(); return; }
+                const elapsed = now - started;
+                const iteration = Math.floor(elapsed / duration);
+                if (iteration >= finiteIterations) { resolve(); return; }
+                let progress = (elapsed % duration) / duration;
+                if (direction === 'alternate' && iteration % 2 === 1) progress = 1 - progress;
+                const point = path.getPointAtLength(progress * length);
+                const ahead = path.getPointAtLength(Math.min(length, progress * length + Math.max(.1, length / 200)));
+                const angle = Math.atan2(ahead.y - point.y, ahead.x - point.x) * 180 / Math.PI;
+                runner.setAttribute('transform', `translate(${point.x} ${point.y}) rotate(${angle})`);
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        });
+        runner.remove();
+    };
+    async function run(idOrNode, runOptions = {}) {
+        if (disposed) return false;
+        const connector = typeof idOrNode === 'string'
+            ? host.querySelector(`[data-connector-id="${cssEscape(String(idOrNode).replace(/^element-/, ''))}"]`) || document.getElementById(String(idOrNode))
+            : idOrNode;
+        if (!connector) return false;
+        const settings = parse(connector.dataset.signal);
+        if (!bool(settings.enabled) && connector.dataset.signalEnabled !== 'true') return false;
+        const id = connectorId(connector);
+        const chain = runOptions.chain instanceof Set ? new Set(runOptions.chain) : new Set();
+        if (chain.has(id)) {
+            console.warn(`PublisherStudio stopped a circular signal chain at ${id}.`);
+            return false;
+        }
+        chain.add(id);
+        controllers.get(id)?.abort();
+        const controller = new AbortController();
+        runOptions.signal?.addEventListener?.('abort', () => controller.abort(), { once: true });
+        controllers.set(id, controller);
+        const signal = controller.signal;
+        connector.classList.add('ps-signal-running');
+        try {
+            await wait(Math.max(0, num(settings.delaySeconds)) * 1000);
+            if (signal.aborted) return false;
+            const startTarget = lower(settings.startGesture) !== 'none'
+                ? await waitForTarget(() => pointTarget(connector, 'source'), signal)
+                : null;
+            dispatchGesture(startTarget, settings.startGesture);
+            const motionTarget = settings.motionTargetElementId
+                ? await waitForTarget(() => configuredTarget(connector, settings, 'motion'), signal)
+                : null;
+            const motion = animateMotion(connector, settings, signal, motionTarget);
+            await animateVisual(connector, settings, signal);
+            try { await motion?.finished; } catch { }
+            if (signal.aborted) return false;
+            const endTarget = lower(settings.endGesture) !== 'none'
+                ? await waitForTarget(() => pointTarget(connector, 'target'), signal)
+                : null;
+            dispatchGesture(endTarget, settings.endGesture);
+            await applyCompletion(connector, settings, signal, chain);
+            const next = settings.nextConnectorId;
+            if (next && lower(settings.completionAction) !== 'runsignal') await run(next, { chained: true, signal, chain });
+            connector.dispatchEvent(new CustomEvent('publisher:signal-complete', { bubbles: true, detail: { connectorId: id } }));
+            return true;
+        } finally {
+            connector.classList.remove('ps-signal-running');
+            if (controllers.get(id) === controller) controllers.delete(id);
+        }
+    }
+    const stop = id => {
+        if (id) { controllers.get(String(id).replace(/^element-/, ''))?.abort(); return; }
+        controllers.forEach(controller => controller.abort()); controllers.clear();
+    };
+    const signalsIn = page => [...(page || host).querySelectorAll('[data-signal-enabled="true"][data-connector-id]')];
+    const startPage = page => {
+        const current = typeof page === 'string' ? host.querySelector(`[data-page-id="${cssEscape(page)}"]`) : page;
+        if (current) {
+            controllers.forEach((controller, id) => {
+                const connector = host.querySelector(`[data-connector-id="${cssEscape(id)}"]`);
+                if (connector && !current.contains(connector)) controller.abort();
+            });
+        }
+        signalsIn(current || host).forEach(connector => {
+            const settings = parse(connector.dataset.signal);
+            if (lower(settings.trigger) === 'onpageenter') void run(connector);
+        });
+    };
+    const bind = () => {
+        signalsIn(host).forEach(connector => {
+            const settings = parse(connector.dataset.signal);
+            const trigger = lower(settings.trigger);
+            if (trigger !== 'onclick' && trigger !== 'onhover') return;
+            const source = pointTarget(connector, 'source') || connector;
+            const eventName = trigger === 'onclick' ? 'click' : 'pointerenter';
+            const handler = event => {
+                if (event?.publisherSignalSynthetic || event?.isTrusted === false) return;
+                void run(connector);
+            };
+            source.addEventListener(eventName, handler);
+            bindings.push([source, eventName, handler]);
+            if (connector !== source && settings.lineVisible !== false) {
+                connector.style.pointerEvents = 'auto';
+                connector.addEventListener(eventName, handler);
+                bindings.push([connector, eventName, handler]);
+            }
+        });
+        const pageEnter = event => startPage(event.target?.closest?.('[data-page-id]') || event.target);
+        host.addEventListener('publisher:page-enter', pageEnter);
+        bindings.push([host, 'publisher:page-enter', pageEnter]);
+    };
+    const dispose = () => {
+        disposed = true; stop();
+        bindings.splice(0).forEach(([node, eventName, handler]) => node.removeEventListener(eventName, handler));
+        host.querySelectorAll('.publisher-signal-runner').forEach(node => node.remove());
+    };
+    bind();
+    const api = { run, stop, startPage, dispose, root: host };
+    if (options.expose !== false) window.PublisherStudioSignals = api;
+    if (options.autoStart !== false) {
+        queueMicrotask(() => {
+            const visiblePage = [...host.querySelectorAll('[data-page-id]')].find(page => !page.hidden && getComputedStyle(page).display !== 'none') || (host.matches?.('[data-page-id]') ? host : null);
+            startPage(visiblePage || host);
+        });
+    }
+    return api;
+}
+
+
 function websitePresentationRuntime() {
     const publication = document.querySelector('.website-publication');
     if (!publication) return;
@@ -3875,6 +4282,7 @@ function websitePresentationRuntime() {
         cancelPlayback();
         const page = pages[current];
         resetPageVisibility(page);
+        page.dispatchEvent(new CustomEvent('publisher:page-enter', { bubbles: true, detail: { pageId: page.dataset.pageId || '', pageName: page.dataset.pageName || '' } }));
         const timeline = splitTimeline(pageItems(page));
         clickGroups = timeline.clickGroups;
         if (shouldRun) {
@@ -4423,7 +4831,31 @@ function chooseVideoRecordingMimeType() {
 
 function exportedPageDuration(page) {
     const transitionDuration = Math.max(.1, animationNumber(page.dataset.transitionDuration, .55));
-    let duration = Math.max(2.5, transitionDuration + .3, animationNumber(page.dataset.timelineDuration, 0), animationNumber(page.dataset.autoAdvanceSeconds, 0));
+    const signalNodes = [...page.querySelectorAll('[data-signal-enabled="true"][data-signal][data-connector-id]')];
+    const signalSettings = new Map(signalNodes.map(node => {
+        let settings = {}; try { settings = JSON.parse(node.dataset.signal || '{}'); } catch { }
+        return [String(node.dataset.connectorId || ''), settings];
+    }));
+    const signalOwnDuration = settings => {
+        const repeats = Math.max(1, animationNumber(settings?.repeatCount, 1));
+        return Math.max(0, animationNumber(settings?.delaySeconds, 0))
+            + Math.max(.05, animationNumber(settings?.durationSeconds, 1.5)) * repeats
+            + Math.max(0, animationNumber(settings?.completionDurationSeconds, 0));
+    };
+    const signalChainDuration = (id, seen = new Set()) => {
+        if (!id || seen.has(id)) return 0;
+        const settings = signalSettings.get(String(id));
+        if (!settings) return 0;
+        const nextSeen = new Set(seen); nextSeen.add(String(id));
+        const action = animationName(settings.completionAction);
+        const next = action === 'runsignal' ? (settings.completionValue || settings.nextConnectorId) : settings.nextConnectorId;
+        return signalOwnDuration(settings) + signalChainDuration(String(next || ''), nextSeen);
+    };
+    const autoSignalIds = signalNodes
+        .filter(node => { const settings = signalSettings.get(String(node.dataset.connectorId || '')); return animationName(settings?.trigger) === 'onpageenter'; })
+        .map(node => String(node.dataset.connectorId || ''));
+    const signalDuration = Math.max(0, ...(autoSignalIds.length ? autoSignalIds.map(id => signalChainDuration(id)) : [...signalSettings.values()].map(signalOwnDuration)));
+    let duration = Math.max(2.5, transitionDuration + .3, signalDuration + .3, animationNumber(page.dataset.timelineDuration, 0), animationNumber(page.dataset.autoAdvanceSeconds, 0));
     let cursor = 0;
     for (const item of animationItems(page)) {
         const animation = item.animation || {};
@@ -4752,6 +5184,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         frame.style.transform = `scale(${Math.max(.05, scale)})`;
     };
     pages.forEach(fitPage);
+    const videoSignals = signalConnectorRuntime(publication, { autoStart: false, expose: false, finiteLoops: true });
     refreshContentFit(publication);
     fitFrameToViewport();
     window.addEventListener('resize', fitFrameToViewport);
@@ -4811,7 +5244,10 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
             // Animate the fixed-size shell rather than the fitted page. Page transition
             // transforms therefore no longer overwrite the page's centering/scale.
             previewPublicationItems(page, prepareVideoExportPage(page), true, shell);
+            videoSignals?.stop();
+            videoSignals?.startPage(page);
             await waitForExport(duration * 1000);
+            videoSignals?.stop();
             if (cancelled) throw new Error('Video export was cancelled.');
             clearPublicationPreview(page.id || page);
             page.querySelectorAll('video,audio').forEach(media => {
@@ -4854,6 +5290,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         window.removeEventListener('keydown', cancelOnEscape, true);
         if (activeVideoExportCancel === cancelExport) activeVideoExportCancel = null;
         try { window.PublisherStudioLiveDataRuntime?.dispose(overlay); } catch { }
+        try { videoSignals?.dispose(); } catch { }
         overlay.remove();
     }
 }
@@ -5376,7 +5813,7 @@ async function buildPublisherSingleHtml(mode, title) {
     const defaultPublisherApi = /^https?:$/.test(location.protocol) ? location.origin : '';
     const isSite = mode === 'site';
     const runtimeFunction = isSite ? websiteSiteRuntime : websitePresentationRuntime;
-    const runtime = `window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${runtimeFunction.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});`;
+    const runtime = `window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${signalConnectorRuntime.toString()})(document,{autoStart:false,expose:true});(${runtimeFunction.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});`;
     const modeCss = isSite ? `
 :root{color-scheme:light dark}
 html,body{width:100%;height:100%;overflow:hidden!important;background:#111827!important}
@@ -5450,6 +5887,23 @@ window.publisherStudio = {
     prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground = '', dotNetReference) { return prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference); },
     generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
     exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
+    initializeSignalConnectors(rootId, options = {}) {
+        const root = typeof rootId === 'string' ? document.getElementById(rootId) : rootId;
+        if (!root) return false;
+        root.__publisherSignalRuntime?.dispose?.();
+        root.__publisherSignalRuntime = signalConnectorRuntime(root, options);
+        return Boolean(root.__publisherSignalRuntime);
+    },
+    runSignalConnector(elementId) {
+        const id = String(elementId || '').replace(/^element-/, '');
+        const root = document.getElementById('publisher-page') || document;
+        if (!root.__publisherSignalRuntime) root.__publisherSignalRuntime = signalConnectorRuntime(root, { autoStart: false, editor: true });
+        return root.__publisherSignalRuntime?.run(id);
+    },
+    stopSignalConnectors(rootId) {
+        const root = typeof rootId === 'string' ? document.getElementById(rootId) : rootId;
+        root?.__publisherSignalRuntime?.stop?.();
+    },
 
     clickElement(id) { clickElementById(id); },
     focusElement(id) {

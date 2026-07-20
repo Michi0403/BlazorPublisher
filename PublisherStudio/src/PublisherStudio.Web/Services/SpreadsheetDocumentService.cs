@@ -291,7 +291,11 @@ public sealed class SpreadsheetDocumentService
                 var merge = merged.FirstOrDefault(item => item.StartRow == row && item.StartColumn == column);
                 var cell = cells.TryGetValue((row, column), out var existingCell) ? existingCell : new CellPreview(string.Empty, 0);
                 var style = styles.ElementAtOrDefault(cell.StyleIndex) ?? CellStyle.Default;
-                html.Append("<td");
+                var address = ColumnName(column) + row.ToString(CultureInfo.InvariantCulture);
+                html.Append("<td class=\"publisher-sheet-cell\" data-cell=\"")
+                    .Append(address)
+                    .Append("\" data-row=\"").Append(row.ToString(CultureInfo.InvariantCulture))
+                    .Append("\" data-column=\"").Append(column.ToString(CultureInfo.InvariantCulture)).Append('"');
                 if (merge is not null)
                 {
                     var rowSpan = Math.Min(maxRow, merge.EndRow) - row + 1;
@@ -320,14 +324,21 @@ public sealed class SpreadsheetDocumentService
         var rows = ParseDelimited(text, delimiter).ToList();
         var columns = Math.Max(rows.Count == 0 ? 1 : rows.Max(row => row.Count), 1);
         var html = new StringBuilder("<div class=\"spreadsheet-preview-document\"><table><tbody>");
-        foreach (var row in rows)
+        for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
         {
+            var row = rows[rowIndex];
             html.Append("<tr>");
             for (var column = 0; column < columns; column++)
-                html.Append("<td>").Append(WebUtility.HtmlEncode(column < row.Count ? row[column] : string.Empty)).Append("</td>");
+            {
+                var address = ColumnName(column + 1) + (rowIndex + 1).ToString(CultureInfo.InvariantCulture);
+                html.Append("<td class=\"publisher-sheet-cell\" data-cell=\"").Append(address)
+                    .Append("\" data-row=\"").Append((rowIndex + 1).ToString(CultureInfo.InvariantCulture))
+                    .Append("\" data-column=\"").Append((column + 1).ToString(CultureInfo.InvariantCulture)).Append("\">")
+                    .Append(WebUtility.HtmlEncode(column < row.Count ? row[column] : string.Empty)).Append("</td>");
+            }
             html.Append("</tr>");
         }
-        if (rows.Count == 0) html.Append("<tr><td></td></tr>");
+        if (rows.Count == 0) html.Append("<tr><td class=\"publisher-sheet-cell\" data-cell=\"A1\" data-row=\"1\" data-column=\"1\"></td></tr>");
         html.Append("</tbody></table><span class=\"spreadsheet-preview-sheet\">")
             .Append(WebUtility.HtmlEncode(activeSheetName)).Append("</span></div>");
         return html.ToString();
@@ -531,6 +542,19 @@ public sealed class SpreadsheetDocumentService
         var start = ParseCellReference(pieces[0], 1);
         var end = ParseCellReference(pieces.Length > 1 ? pieces[1] : pieces[0], start.Row);
         return new MergedRange(start.Row, start.Column, end.Row, end.Column);
+    }
+
+    private static string ColumnName(int column)
+    {
+        column = Math.Max(1, column);
+        var name = new StringBuilder(4);
+        while (column > 0)
+        {
+            column--;
+            name.Insert(0, (char)('A' + column % 26));
+            column /= 26;
+        }
+        return name.ToString();
     }
 
     private static (int Row, int Column) ParseCellReference(string? reference, int fallbackRow)

@@ -6,7 +6,7 @@ public sealed class PictureDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Picture";
-    public string FormatVersion { get; set; } = "1.1";
+    public string FormatVersion { get; set; } = "1.2";
     public int WidthPx { get; set; } = 1200;
     public int HeightPx { get; set; } = 800;
     public string Background { get; set; } = "transparent";
@@ -47,11 +47,11 @@ public sealed class PictureDocument
 public enum PictureLayerKind { Raster, Text, Shape, Fill, Render, Paint }
 public enum PictureBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighten }
 public enum PictureRasterFitMode { Stretch, Contain, Cover }
-public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line, Arrow, Freeform }
+public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line, Arrow, Freeform, Path }
 public enum PictureFillKind { Solid, LinearGradient, RadialGradient }
 public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette, Bloom, Neon, LensFlare, GrainNoise, MotionBlur, Wind, OceanWaves }
 public enum PictureTextAlignment { Left, Center, Right }
-public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Eraser, Eyedropper, RectangleSelect, EllipseSelect, FreeSelect, MagneticSelect, FillSolid, FillGradient }
+public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Path, Eraser, Eyedropper, RectangleSelect, EllipseSelect, FreeSelect, MagneticSelect, FillSolid, FillGradient }
 public enum PictureStrokeKind { Brush, Pencil, Spray, Toothbrush, Line, Eraser }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
@@ -129,6 +129,8 @@ public sealed class ShapePictureLayer : PictureLayer
     public double StrokeWidthPx { get; set; } = 3;
     public double CornerRadiusPx { get; set; } = 24;
     public List<PicturePoint> PathPoints { get; set; } = [];
+    public bool PathClosed { get; set; } = true;
+    public bool PathSmooth { get; set; }
 }
 
 public sealed class FillPictureLayer : PictureLayer

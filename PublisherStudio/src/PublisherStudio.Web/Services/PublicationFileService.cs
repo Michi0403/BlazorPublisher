@@ -302,13 +302,43 @@ public sealed partial class PublicationFileService
                 if (element.Interaction.TargetPageId is { } targetPageId && document.Pages.All(page => page.Id != targetPageId))
                     element.Interaction.TargetPageId = null;
             }
+            static bool EndpointValid(ConnectorEndpoint endpoint, HashSet<Guid> ids) =>
+                endpoint.Kind == ConnectorEndpointKind.Canvas ||
+                (endpoint.ElementId != Guid.Empty && ids.Contains(endpoint.ElementId));
+
             publicationPage.Elements.RemoveAll(item => item is ConnectorElement connector &&
-                (!objectIds.Contains(connector.Source.ElementId) || !objectIds.Contains(connector.Target.ElementId) || connector.Source.ElementId == connector.Target.ElementId));
+                (!EndpointValid(connector.Source, objectIds) ||
+                 !EndpointValid(connector.Target, objectIds) ||
+                 (connector.Source.Kind == ConnectorEndpointKind.Element &&
+                  connector.Target.Kind == ConnectorEndpointKind.Element &&
+                  connector.Source.ElementId == connector.Target.ElementId)));
             foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>())
+            {
+                connector.Source ??= new ConnectorEndpoint();
+                connector.Target ??= new ConnectorEndpoint();
+                connector.Signal ??= new SignalConnectorSettings();
+                connector.Source.X = Math.Clamp(connector.Source.X, 0, publicationPage.WidthMm);
+                connector.Source.Y = Math.Clamp(connector.Source.Y, 0, publicationPage.HeightMm);
+                connector.Target.X = Math.Clamp(connector.Target.X, 0, publicationPage.WidthMm);
+                connector.Target.Y = Math.Clamp(connector.Target.Y, 0, publicationPage.HeightMm);
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
+                connector.Signal.DelaySeconds = Math.Clamp(connector.Signal.DelaySeconds, 0, 3600);
+                connector.Signal.DurationSeconds = Math.Clamp(connector.Signal.DurationSeconds <= 0 ? 1.5 : connector.Signal.DurationSeconds, .05, 3600);
+                connector.Signal.RepeatCount = Math.Clamp(connector.Signal.RepeatCount <= 0 ? 1 : connector.Signal.RepeatCount, 1, 1000);
+                connector.Signal.Scale = Math.Clamp(connector.Signal.Scale <= 0 ? 1 : connector.Signal.Scale, .01, 100);
+                connector.Signal.Opacity = Math.Clamp(connector.Signal.Opacity, 0, 1);
+                connector.Signal.CompletionDurationSeconds = Math.Clamp(connector.Signal.CompletionDurationSeconds <= 0 ? .8 : connector.Signal.CompletionDurationSeconds, .01, 3600);
+                if (connector.Signal.MotionTargetElementId is { } motionTarget && !elementIds.Contains(motionTarget))
+                    connector.Signal.MotionTargetElementId = null;
+                if (connector.Signal.CompletionTargetElementId is { } completionTarget && !elementIds.Contains(completionTarget))
+                    connector.Signal.CompletionTargetElementId = null;
+                if (connector.Signal.NextConnectorId is { } nextConnector &&
+                    !publicationPage.Elements.OfType<ConnectorElement>().Any(candidate => candidate.Id == nextConnector && candidate.Signal.Enabled))
+                    connector.Signal.NextConnectorId = null;
+            }
         }
 
-        document.FormatVersion = "1.38";
+        document.FormatVersion = "1.39";
         return document;
     }
 

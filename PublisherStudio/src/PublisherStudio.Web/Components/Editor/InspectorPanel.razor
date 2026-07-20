@@ -1,4 +1,5 @@
 @namespace PublisherStudio.Components.Editor
+@inject IJSRuntime JS
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
@@ -451,8 +452,8 @@
             else if (element is ConnectorElement connector)
             {
                 <section class="property-section connector-properties">
-                    <h3>Connector</h3>
-                    <p class="property-note">Drag either round endpoint to another snap port. While no valid port is in range, the preview disappears; releasing restores the original connection.</p>
+                    <h3>@(connector.Signal.Enabled ? "Signal Arrow / Connector" : "Connector")</h3>
+                    <p class="property-note">Normal connectors snap object-to-object. Signal connectors may also end at an exact canvas point and execute offline click, hover, transform, visibility, media, highlight, CSS-class, animation, or chained-signal actions in HTML and video output.</p>
                     <label>Path
                         <select value="@connector.PathKind" @onchange="ChangeConnectorPath">
                             <option value="Straight">Straight</option>
@@ -491,6 +492,137 @@
                         <span><b>From:</b> @EndpointName(connector.Source)</span>
                         <span><b>To:</b> @EndpointName(connector.Target)</span>
                     </div>
+                    <label>Start inner selector
+                        <input value="@connector.Source.TargetSelector" placeholder="Optional CSS selector, e.g. [data-cell='B4']" @onchange="ChangeSignalStartSelector" />
+                    </label>
+                    <label>End inner selector
+                        <input value="@connector.Target.TargetSelector" placeholder="Optional CSS selector inside the endpoint object" @onchange="ChangeSignalEndSelector" />
+                    </label>
+                    @if (connector.Source.Kind == ConnectorEndpointKind.Canvas || connector.Target.Kind == ConnectorEndpointKind.Canvas)
+                    {
+                        <div class="property-grid two">
+                            @if (connector.Source.Kind == ConnectorEndpointKind.Canvas)
+                            {
+                                <label>Start X (mm)<input type="number" step=".1" value="@Inv(connector.Source.X)" @onchange="ChangeSignalStartX" /></label>
+                                <label>Start Y (mm)<input type="number" step=".1" value="@Inv(connector.Source.Y)" @onchange="ChangeSignalStartY" /></label>
+                            }
+                            @if (connector.Target.Kind == ConnectorEndpointKind.Canvas)
+                            {
+                                <label>End X (mm)<input type="number" step=".1" value="@Inv(connector.Target.X)" @onchange="ChangeSignalEndX" /></label>
+                                <label>End Y (mm)<input type="number" step=".1" value="@Inv(connector.Target.Y)" @onchange="ChangeSignalEndY" /></label>
+                            }
+                        </div>
+                    }
+                </section>
+
+                <section class="property-section signal-connector-properties">
+                    <h3>Signal runtime</h3>
+                    <label class="check-row"><input type="checkbox" checked="@connector.Signal.Enabled" @onchange="ToggleSignalEnabled" /> Enable dynamic signal</label>
+                    <label class="check-row"><input type="checkbox" checked="@connector.Signal.LineVisible" @onchange="ToggleSignalLineVisible" /> Draw arrow / connector while it runs</label>
+                    <div class="property-grid two">
+                        <label>Trigger
+                            <select value="@connector.Signal.Trigger" @onchange="ChangeSignalTrigger">
+                                @foreach (var trigger in Enum.GetValues<SignalConnectorTrigger>())
+                                {
+                                    <option value="@trigger">@Friendly(trigger.ToString())</option>
+                                }
+                            </select>
+                        </label>
+                        <label>Visual
+                            <select value="@connector.Signal.Visual" @onchange="ChangeSignalVisual">
+                                @foreach (var visual in Enum.GetValues<SignalConnectorVisual>())
+                                {
+                                    <option value="@visual">@Friendly(visual.ToString())</option>
+                                }
+                            </select>
+                        </label>
+                        <label>Start gesture
+                            <select value="@connector.Signal.StartGesture" @onchange="ChangeSignalStartGesture">
+                                @foreach (var gesture in Enum.GetValues<SignalGesture>())
+                                {
+                                    <option value="@gesture">@gesture</option>
+                                }
+                            </select>
+                        </label>
+                        <label>End gesture
+                            <select value="@connector.Signal.EndGesture" @onchange="ChangeSignalEndGesture">
+                                @foreach (var gesture in Enum.GetValues<SignalGesture>())
+                                {
+                                    <option value="@gesture">@gesture</option>
+                                }
+                            </select>
+                        </label>
+                        <label>Delay (s)<input type="number" min="0" max="3600" step=".05" value="@Inv(connector.Signal.DelaySeconds)" @onchange="ChangeSignalDelay" /></label>
+                        <label>Travel time (s)<input type="number" min=".05" max="3600" step=".05" value="@Inv(connector.Signal.DurationSeconds)" @onchange="ChangeSignalDuration" /></label>
+                        <label>Repeats<input type="number" min="1" max="1000" step="1" value="@connector.Signal.RepeatCount" @onchange="ChangeSignalRepeat" /></label>
+                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.Loop" @onchange="ToggleSignalLoop" /> Loop</label>
+                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.AutoReverse" @onchange="ToggleSignalAutoReverse" /> Auto reverse</label>
+                    </div>
+                    <DxButton Text="Preview signal now" Click="PreviewSignal" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                </section>
+
+                <section class="property-section signal-motion-properties">
+                    <h3>Travel morph / transform</h3>
+                    <label>Target object
+                        <select value="@GuidText(connector.Signal.MotionTargetElementId)" @onchange="ChangeSignalMotionTarget">
+                            <option value="">No transform target</option>
+                            @foreach (var target in SignalTargetElements(connector))
+                            {
+                                <option value="@target.Id">@target.Name</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Inner selector
+                        <input value="@connector.Signal.MotionTargetSelector" placeholder="Optional: img, [data-content-fit-source], .dx-chart" @onchange="ChangeSignalMotionSelector" />
+                    </label>
+                    <div class="property-grid two">
+                        <label>Move X (%)<input type="number" step=".1" value="@Inv(connector.Signal.TranslateXPercent)" @onchange="ChangeSignalMoveX" /></label>
+                        <label>Move Y (%)<input type="number" step=".1" value="@Inv(connector.Signal.TranslateYPercent)" @onchange="ChangeSignalMoveY" /></label>
+                        <label>Scale<input type="number" min=".01" max="100" step=".01" value="@Inv(connector.Signal.Scale)" @onchange="ChangeSignalScale" /></label>
+                        <label>Rotation (°)<input type="number" step=".1" value="@Inv(connector.Signal.RotationDegrees)" @onchange="ChangeSignalRotation" /></label>
+                        <label>Opacity<input type="number" min="0" max="1" step=".01" value="@Inv(connector.Signal.Opacity)" @onchange="ChangeSignalOpacity" /></label>
+                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.RestoreMotionAfterRun" @onchange="ToggleSignalRestoreMotion" /> Restore afterwards</label>
+                    </div>
+                </section>
+
+                <section class="property-section signal-completion-properties">
+                    <h3>At destination</h3>
+                    <label>Action target
+                        <select value="@GuidText(connector.Signal.CompletionTargetElementId)" @onchange="ChangeSignalCompletionTarget">
+                            <option value="">Endpoint / current object</option>
+                            @foreach (var target in SignalTargetElements(connector))
+                            {
+                                <option value="@target.Id">@target.Name</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Inner selector
+                        <input value="@connector.Signal.CompletionTargetSelector" placeholder="Cell, chart point, button, or any exported HTML selector" @onchange="ChangeSignalCompletionSelector" />
+                    </label>
+                    <label>Action
+                        <select value="@connector.Signal.CompletionAction" @onchange="ChangeSignalCompletionAction">
+                            @foreach (var action in Enum.GetValues<SignalCompletionAction>())
+                            {
+                                <option value="@action">@Friendly(action.ToString())</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Action value
+                        <input value="@connector.Signal.CompletionValue" placeholder="Opacity, CSS class, or highlight color" @onchange="ChangeSignalCompletionValue" />
+                    </label>
+                    <label>Action duration (s)
+                        <input type="number" min=".01" max="3600" step=".05" value="@Inv(connector.Signal.CompletionDurationSeconds)" @onchange="ChangeSignalCompletionDuration" />
+                    </label>
+                    <label>Continue with signal
+                        <select value="@GuidText(connector.Signal.NextConnectorId)" @onchange="ChangeSignalNextConnector">
+                            <option value="">Stop here</option>
+                            @foreach (var next in State.CurrentPage.Elements.OfType<ConnectorElement>().Where(item => item.Id != connector.Id && item.Signal.Enabled))
+                            {
+                                <option value="@next.Id">@next.Name</option>
+                            }
+                        </select>
+                    </label>
+                    <p class="property-note">Selectors are evaluated locally inside the exported file. No server or network request is needed. Use one chained signal per cell/chart part when a sequence must highlight several targets in order.</p>
                 </section>
             }
             else if (element is ShapeElement shape)
@@ -701,8 +833,60 @@
 
     private string EndpointName(ConnectorEndpoint endpoint)
     {
+        if (endpoint.Kind == ConnectorEndpointKind.Canvas)
+            return $"Canvas · {endpoint.X:0.##}, {endpoint.Y:0.##} mm";
         var owner = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == endpoint.ElementId);
         return $"{owner?.Name ?? "Missing object"} · {endpoint.Anchor}";
+    }
+
+    private IEnumerable<PublicationElement> SignalTargetElements(ConnectorElement connector) =>
+        State.CurrentPage.Elements.Where(item => item is not ConnectorElement).OrderBy(item => item.Name);
+
+    private static string GuidText(Guid? value) => value?.ToString("D") ?? string.Empty;
+    private static Guid? ParseGuid(ChangeEventArgs args) => Guid.TryParse(args.Value?.ToString(), out var value) ? value : null;
+
+    private void UpdateSignal(Action<SignalConnectorSettings> update)
+    {
+        if (State.SelectedElement is ConnectorElement connector)
+            State.UpdateSelected(_ => update(connector.Signal));
+    }
+
+    private void ToggleSignalEnabled(ChangeEventArgs args) => UpdateSignal(signal => signal.Enabled = ReadBool(args));
+    private void ToggleSignalLineVisible(ChangeEventArgs args) => UpdateSignal(signal => signal.LineVisible = ReadBool(args));
+    private void ToggleSignalLoop(ChangeEventArgs args) => UpdateSignal(signal => signal.Loop = ReadBool(args));
+    private void ToggleSignalAutoReverse(ChangeEventArgs args) => UpdateSignal(signal => signal.AutoReverse = ReadBool(args));
+    private void ToggleSignalRestoreMotion(ChangeEventArgs args) => UpdateSignal(signal => signal.RestoreMotionAfterRun = ReadBool(args));
+    private void ChangeSignalTrigger(ChangeEventArgs args) { if (Enum.TryParse<SignalConnectorTrigger>(args.Value?.ToString(), out var value)) UpdateSignal(signal => signal.Trigger = value); }
+    private void ChangeSignalVisual(ChangeEventArgs args) { if (Enum.TryParse<SignalConnectorVisual>(args.Value?.ToString(), out var value)) UpdateSignal(signal => signal.Visual = value); }
+    private void ChangeSignalStartGesture(ChangeEventArgs args) { if (Enum.TryParse<SignalGesture>(args.Value?.ToString(), out var value)) UpdateSignal(signal => signal.StartGesture = value); }
+    private void ChangeSignalEndGesture(ChangeEventArgs args) { if (Enum.TryParse<SignalGesture>(args.Value?.ToString(), out var value)) UpdateSignal(signal => signal.EndGesture = value); }
+    private void ChangeSignalCompletionAction(ChangeEventArgs args) { if (Enum.TryParse<SignalCompletionAction>(args.Value?.ToString(), out var value)) UpdateSignal(signal => signal.CompletionAction = value); }
+    private void ChangeSignalMotionTarget(ChangeEventArgs args) => UpdateSignal(signal => signal.MotionTargetElementId = ParseGuid(args));
+    private void ChangeSignalCompletionTarget(ChangeEventArgs args) => UpdateSignal(signal => signal.CompletionTargetElementId = ParseGuid(args));
+    private void ChangeSignalNextConnector(ChangeEventArgs args) => UpdateSignal(signal => signal.NextConnectorId = ParseGuid(args));
+    private void ChangeSignalStartSelector(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => connector.Source.TargetSelector = args.Value?.ToString() ?? string.Empty); }
+    private void ChangeSignalEndSelector(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => connector.Target.TargetSelector = args.Value?.ToString() ?? string.Empty); }
+    private void ChangeSignalMotionSelector(ChangeEventArgs args) => UpdateSignal(signal => signal.MotionTargetSelector = args.Value?.ToString() ?? string.Empty);
+    private void ChangeSignalCompletionSelector(ChangeEventArgs args) => UpdateSignal(signal => signal.CompletionTargetSelector = args.Value?.ToString() ?? string.Empty);
+    private void ChangeSignalCompletionValue(ChangeEventArgs args) => UpdateSignal(signal => signal.CompletionValue = args.Value?.ToString() ?? string.Empty);
+    private void ChangeSignalDelay(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.DelaySeconds = Math.Clamp(value, 0, 3600)); }
+    private void ChangeSignalDuration(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.DurationSeconds = Math.Clamp(value, .05, 3600)); }
+    private void ChangeSignalRepeat(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.RepeatCount = Math.Clamp((int)Math.Round(value), 1, 1000)); }
+    private void ChangeSignalMoveX(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.TranslateXPercent = Math.Clamp(value, -10000, 10000)); }
+    private void ChangeSignalMoveY(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.TranslateYPercent = Math.Clamp(value, -10000, 10000)); }
+    private void ChangeSignalScale(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.Scale = Math.Clamp(value, .01, 100)); }
+    private void ChangeSignalRotation(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.RotationDegrees = Math.Clamp(value, -36000, 36000)); }
+    private void ChangeSignalOpacity(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.Opacity = Math.Clamp(value, 0, 1)); }
+    private void ChangeSignalCompletionDuration(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateSignal(signal => signal.CompletionDurationSeconds = Math.Clamp(value, .01, 3600)); }
+    private void ChangeSignalStartX(ChangeEventArgs args) { if (TryDouble(args, out var value) && State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => connector.Source.X = Math.Clamp(value, 0, State.CurrentPage.WidthMm)); }
+    private void ChangeSignalStartY(ChangeEventArgs args) { if (TryDouble(args, out var value) && State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => connector.Source.Y = Math.Clamp(value, 0, State.CurrentPage.HeightMm)); }
+    private void ChangeSignalEndX(ChangeEventArgs args) { if (TryDouble(args, out var value) && State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => connector.Target.X = Math.Clamp(value, 0, State.CurrentPage.WidthMm)); }
+    private void ChangeSignalEndY(ChangeEventArgs args) { if (TryDouble(args, out var value) && State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => connector.Target.Y = Math.Clamp(value, 0, State.CurrentPage.HeightMm)); }
+
+    private async Task PreviewSignal()
+    {
+        if (State.SelectedElement is not ConnectorElement connector) return;
+        await JS.InvokeVoidAsync("publisherStudio.runSignalConnector", $"element-{connector.Id}");
     }
 
     private RenderFragment NumberField(string label, double value, string field) => builder =>

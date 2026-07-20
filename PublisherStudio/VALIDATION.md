@@ -349,3 +349,12 @@ Static checks completed for the v1.0.37 source package:
 - Package JSON, package lock, web project, installer project, release notes, and document format markers are aligned to `1.0.40` / `1.38`.
 - A complete `dotnet restore`/`dotnet build` and licensed interactive DevExpress browser run remain required because this execution environment does not provide the .NET SDK or licensed DevExpress build identity.
 
+
+## v1.0.41 SVG path and offline signal validation
+
+- `node --check` passes for `publisherInterop.js` and `pictureStudioInterop.js`.
+- Existing timeline and DevExtreme component-runtime tests pass.
+- `tests/signalRuntime.test.mjs` verifies the signal domain contract, endpoint and export attributes, embedded offline runtime, synthetic-event recursion guard, finite video loops, chained video duration calculation, stable spreadsheet cell selectors, SVG output, and precise path editing controls.
+- Package JSON, package lock, web project, and installer project are aligned to `1.0.41`.
+- Publication format is `1.39`; Picture Studio format is `1.2`.
+- Full .NET compilation requires the .NET SDK and licensed DevExpress build environment and is not available in the packaging environment used for this revision.

@@ -8,13 +8,31 @@ public static class ConnectorGeometry
 {
     public static bool TryResolve(PublicationPage page, ConnectorElement connector, out PublicationPoint source, out PublicationPoint target)
     {
-        source = default;
-        target = default;
-        var sourceElement = page.Elements.FirstOrDefault(item => item.Id == connector.Source.ElementId && item is not ConnectorElement && item.Visible);
-        var targetElement = page.Elements.FirstOrDefault(item => item.Id == connector.Target.ElementId && item is not ConnectorElement && item.Visible);
-        if (sourceElement is null || targetElement is null) return false;
-        source = Resolve(sourceElement, connector.Source.Anchor);
-        target = Resolve(targetElement, connector.Target.Anchor);
+        return TryResolveEndpoint(page, connector.Source, out source)
+            && TryResolveEndpoint(page, connector.Target, out target);
+    }
+
+    public static bool TryResolveEndpoint(PublicationPage page, ConnectorEndpoint endpoint, out PublicationPoint point)
+    {
+        if (endpoint.Kind == ConnectorEndpointKind.Canvas)
+        {
+            point = new PublicationPoint(
+                Math.Clamp(endpoint.X, 0, Math.Max(0, page.WidthMm)),
+                Math.Clamp(endpoint.Y, 0, Math.Max(0, page.HeightMm)));
+            return true;
+        }
+
+        var element = page.Elements.FirstOrDefault(item =>
+            item.Id == endpoint.ElementId &&
+            item is not ConnectorElement &&
+            item.Visible);
+        if (element is null)
+        {
+            point = default;
+            return false;
+        }
+
+        point = Resolve(element, endpoint.Anchor);
         return true;
     }
 

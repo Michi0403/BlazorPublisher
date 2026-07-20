@@ -281,3 +281,7 @@ See `CHANGELOG-v1.0.39.md` and `docs/COMPONENT_RUNTIME.md`. PublisherStudio now 
 
 See `CHANGELOG-v1.0.40.md` and `docs/COMPONENT_RUNTIME.md`. The main editing studios now use nearly the entire browser viewport. DevExtreme Map and Vector Map are first-class publication components with live data, bundled predefined geographic layers, marker/route bindings, and a click-to-draw vector editor with precise coordinates and GeoJSON import. Text/Docx, spreadsheet, map, and vector-map objects can pan and zoom their visible internal content, and DevExtreme components accept normalized custom CSS classes and inline declarations.
 
+
+## v1.0.41 SVG paths and offline Signal Arrows
+
+See `CHANGELOG-v1.0.41.md` and `docs/ANIMATION_EXPORT.md`. Picture Studio can now download self-contained SVG files and edit path nodes precisely. Signal Arrows and Signal Connectors can join objects or exact page positions, emit click/hover gestures, animate an object's inner viewport, highlight spreadsheet cells or chart/HTML parts, control visibility/media/CSS classes, and continue through a chained signal sequence. The runtime is embedded into standalone presentation and website HTML exports, so these interactions work offline without a PublisherStudio server.

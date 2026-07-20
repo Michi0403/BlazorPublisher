@@ -1,18 +1,19 @@
-# PublisherStudio v1.0.40 release
+# PublisherStudio v1.0.41 release
 
-See `CHANGELOG-v1.0.40.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.41.md`, `docs/ANIMATION_EXPORT.md`, `docs/ARCHITECTURE.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
 
-Source release notes:
+This release adds self-contained SVG output and editable path nodes to Picture Studio, plus offline-capable Signal Arrows and Signal Connectors for interactive and recorded publications.
 
-- Enlarged Text/Docx, Spreadsheet, Picture, Video, Audio, Data, Barcode, and Component Studio dialogs to use nearly the full browser viewport.
-- Fixed dropdown-indicator spacing and centered the Component Studio close glyph.
-- Added DevExtreme Map and Vector Map publication objects with publication-data, REST, OData, polling, print, presentation, and single-file website support.
-- Added bundled World, Europe, Eurasia, Africa, USA, and Canada vector base maps.
-- Added a Vector Map drawing editor for markers, lines, polygons, exact coordinates, feature styling, and GeoJSON import.
-- Added persistent pan/zoom viewports for Text/Docx, Spreadsheet, Map, and Vector Map content.
-- Added normalized custom CSS classes and safe inline CSS declarations for DevExtreme publication components.
-- Publication format is now `1.38`; application/package/installer version is `1.0.40`.
-- DevExtreme remains pinned to `25.2.8`.
-- Run `Prepare-DevExpressAssets.cmd` on the licensed build machine before building or publishing.
-- Run `npm run test:timeline` and `npm run test:components` from `src/PublisherStudio.Web` for the Node regression suites.
-- A licensed end-to-end DevExpress build and browser test remain required on the development/release machine.
+Signal connectors can:
+
+- connect objects or arbitrary page coordinates;
+- run on page entry, click, hover, or manual preview;
+- emit click/hover gestures at both endpoints;
+- animate inner map, vector-map, spreadsheet, and text content;
+- highlight spreadsheet cells and HTML/chart parts through local CSS selectors;
+- show, hide, fade, animate, control media, apply CSS classes, and chain to another signal;
+- run in the editor preview, single-file presentation/site exports, and video export.
+
+Standalone HTML contains the signal runtime and all signal configuration. It does not require a PublisherStudio server. Network-backed live data naturally still needs its configured endpoint to be reachable.
+
+Versions: application/package/installer `1.0.41`, publication format `1.39`, picture format `1.2`.

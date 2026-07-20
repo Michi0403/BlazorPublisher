@@ -5,11 +5,11 @@ const proceduralCache = new Map();
 const layerKinds = ["raster", "text", "shape", "fill", "render", "paint"];
 const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "lighten"];
 const rasterFits = ["stretch", "contain", "cover"];
-const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow", "freeform"];
+const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow", "freeform", "path"];
 const fillKinds = ["solid", "linearGradient", "radialGradient"];
 const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", "lensflare", "grainnoise", "motionblur", "wind", "oceanwaves"];
 const textAlignments = ["left", "center", "right"];
-const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"];
+const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"];
 
 function enumName(value, names, fallback) {
     if (typeof value === "string") return value;
@@ -336,13 +336,26 @@ function drawShapeLayer(ctx, layer) {
     ctx.lineWidth = clamp(layer.strokeWidthPx ?? 3, 0, 200);
     if (shape === "ellipse") {
         ctx.beginPath(); ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, Math.PI * 2);
-    } else if (shape === "freeform") {
+    } else if (shape === "freeform" || shape === "path") {
         const points = Array.isArray(layer.pathPoints) ? layer.pathPoints : [];
+        const closed = shape === "freeform" ? true : layer.pathClosed === true;
+        const smooth = layer.pathSmooth === true;
         ctx.beginPath();
         if (points.length) {
-            ctx.moveTo((Number(points[0].x) || 0) - width / 2, (Number(points[0].y) || 0) - height / 2);
-            for (let index = 1; index < points.length; index++) ctx.lineTo((Number(points[index].x) || 0) - width / 2, (Number(points[index].y) || 0) - height / 2);
-            ctx.closePath();
+            const local = points.map(point => ({ x: (Number(point.x) || 0) - width / 2, y: (Number(point.y) || 0) - height / 2 }));
+            ctx.moveTo(local[0].x, local[0].y);
+            if (smooth && local.length > 2) {
+                for (let index = 1; index < local.length - 1; index++) {
+                    const middleX = (local[index].x + local[index + 1].x) / 2;
+                    const middleY = (local[index].y + local[index + 1].y) / 2;
+                    ctx.quadraticCurveTo(local[index].x, local[index].y, middleX, middleY);
+                }
+                const last = local[local.length - 1];
+                ctx.lineTo(last.x, last.y);
+            } else {
+                for (let index = 1; index < local.length; index++) ctx.lineTo(local[index].x, local[index].y);
+            }
+            if (closed) ctx.closePath();
         } else ctx.rect(x, y, width, height);
     } else if (shape === "arrow") {
         const shaftHalf = Math.max(1, height * .17);
@@ -353,7 +366,7 @@ function drawShapeLayer(ctx, layer) {
         ctx.beginPath(); ctx.moveTo(-width / 2, 0); ctx.lineTo(width / 2, 0); if (ctx.lineWidth > 0) ctx.stroke(); endLayer(ctx); return;
     } else if (shape === "roundedrectangle") roundedRectanglePath(ctx, x, y, width, height, clamp(layer.cornerRadiusPx ?? 24, 0, 2000));
     else { ctx.beginPath(); ctx.rect(x, y, width, height); }
-    if (layer.fillColor !== "transparent") ctx.fill();
+    if (layer.fillColor !== "transparent" && (shape !== "path" || layer.pathClosed === true)) ctx.fill();
     if (ctx.lineWidth > 0 && layer.strokeColor !== "transparent") ctx.stroke();
     endLayer(ctx);
 }
@@ -1157,6 +1170,19 @@ function drawDrawingPreview(ctx, drawing) {
         if (selection) drawAreaSelection(ctx, selection, 1);
         return;
     }
+    if (String(drawing.tool || "").toLowerCase() === "path") {
+        const points = Array.isArray(drawing.points) ? drawing.points : [];
+        if (points.length < 2) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(.45, clamp(drawing.opacity ?? 1, 0, 1));
+        ctx.strokeStyle = cssColor(drawing.color, "#0284c7");
+        ctx.lineWidth = Math.max(.25, Number(drawing.widthPx) || 2);
+        ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.setLineDash([8, 5]);
+        ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+        for (let index = 1; index < points.length; index++) ctx.lineTo(points[index].x, points[index].y);
+        ctx.stroke(); ctx.restore();
+        return;
+    }
     if (!isShapeDrawingTool(drawing.tool)) {
         drawPaintStroke(ctx, drawing, true);
         return;
@@ -1479,7 +1505,7 @@ function beginDrawing(editor, event) {
         commitAreaFill(editor, editor.areaSelection, settings.tool === "fillgradient");
         scheduleEditorRender(editor); event.preventDefault(); return;
     }
-    if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "eraser", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"].includes(settings.tool)) return;
+    if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"].includes(settings.tool)) return;
     const adjustedWidth = settings.tool === "pencil"
         ? Math.min(settings.width, 6)
         : settings.tool === "spray"
@@ -1559,6 +1585,16 @@ function finishDrawing(editor, event, cancel = false) {
     if (!cancel && isShapeDrawingTool(drawing.tool)) {
         const geometry = shapeDrawingGeometry(drawing);
         if (geometry) safeInvoke(editor, "PictureShapeCommitted", drawing.tool, geometry.x, geometry.y, geometry.width, geometry.height, geometry.rotation);
+        scheduleEditorRender(editor);
+        return;
+    }
+    if (!cancel && drawing.tool === "path") {
+        const points = drawing.points;
+        if (points.length >= 2) {
+            const coordinates = [];
+            for (const point of points) coordinates.push(Number(point.x) || 0, Number(point.y) || 0);
+            safeInvoke(editor, "PicturePathCommitted", coordinates, false, true);
+        }
         scheduleEditorRender(editor);
         return;
     }
@@ -1819,6 +1855,213 @@ async function exportPictureStudioDataUrlInChunks(
             // The Blazor circuit may already be gone.
         }
     }
+}
+
+function xmlEscape(value) {
+    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+function svgNumber(value, fallback = 0) {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.round(number * 1000) / 1000 : fallback;
+}
+
+function svgIdentifier(value, fallback = "layer") {
+    const identifier = String(value || fallback).replace(/[^a-z0-9_-]/gi, "-");
+    return identifier || fallback;
+}
+
+function svgLayerTransform(layer) {
+    const width = Math.max(1, svgNumber(layer.width, 1));
+    const height = Math.max(1, svgNumber(layer.height, 1));
+    const centerX = svgNumber(layer.x) + width / 2;
+    const centerY = svgNumber(layer.y) + height / 2;
+    return `translate(${centerX} ${centerY}) rotate(${svgNumber(layer.rotation)})`;
+}
+
+function svgLayerStyle(layer, includeAdjustments = true) {
+    const styles = [];
+    const opacity = clamp(layer.opacity ?? 1, 0, 1);
+    if (opacity < .9999) styles.push(`opacity:${opacity}`);
+    const blend = blendMode(layer.blendMode);
+    if (blend && blend !== "source-over") styles.push(`mix-blend-mode:${blend}`);
+    if (includeAdjustments) {
+        const filter = layerFilter(layer);
+        if (filter && filter !== "brightness(1) contrast(1) saturate(1) hue-rotate(0deg) blur(0px) grayscale(0) sepia(0) invert(0)")
+            styles.push(`filter:${filter}`);
+    }
+    return styles.join(";");
+}
+
+function svgGradient(definitions, layer, width, height, prefix, shape = false) {
+    const fillKind = enumName(layer.fillKind, fillKinds, "solid").toLowerCase();
+    const first = cssColor(shape ? layer.fillColor : layer.primaryColor, shape ? "#60a5fa" : "#dbeafe");
+    const second = cssColor(shape ? layer.secondaryFillColor : layer.secondaryColor, shape ? "#ffffff" : "#6366f1");
+    if (fillKind === "solid") return first;
+    const id = `${prefix}-${fillKind}`;
+    if (fillKind === "radialgradient") {
+        const radius = Math.max(width, height) * .7;
+        definitions.push(`<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="${svgNumber(radius)}"><stop offset="0" stop-color="${xmlEscape(first)}"/><stop offset="1" stop-color="${xmlEscape(second)}"/></radialGradient>`);
+    } else {
+        const angle = svgNumber(shape ? layer.fillAngleDegrees : layer.angleDegrees) * Math.PI / 180;
+        const distance = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
+        const dx = Math.cos(angle) * distance / 2;
+        const dy = Math.sin(angle) * distance / 2;
+        definitions.push(`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${svgNumber(-dx)}" y1="${svgNumber(-dy)}" x2="${svgNumber(dx)}" y2="${svgNumber(dy)}"><stop offset="0" stop-color="${xmlEscape(first)}"/><stop offset="1" stop-color="${xmlEscape(second)}"/></linearGradient>`);
+    }
+    return `url(#${id})`;
+}
+
+function svgPathData(layer, width, height, closeOverride = null) {
+    const points = Array.isArray(layer.pathPoints) ? layer.pathPoints : [];
+    if (!points.length) return `M ${svgNumber(-width / 2)} ${svgNumber(-height / 2)} H ${svgNumber(width / 2)} V ${svgNumber(height / 2)} H ${svgNumber(-width / 2)} Z`;
+    const local = points.map(point => ({
+        x: svgNumber(point.x) - width / 2,
+        y: svgNumber(point.y) - height / 2
+    }));
+    const commands = [`M ${svgNumber(local[0].x)} ${svgNumber(local[0].y)}`];
+    if (layer.pathSmooth === true && local.length > 2) {
+        for (let index = 1; index < local.length - 1; index++) {
+            const middleX = (local[index].x + local[index + 1].x) / 2;
+            const middleY = (local[index].y + local[index + 1].y) / 2;
+            commands.push(`Q ${svgNumber(local[index].x)} ${svgNumber(local[index].y)} ${svgNumber(middleX)} ${svgNumber(middleY)}`);
+        }
+        const last = local[local.length - 1];
+        commands.push(`L ${svgNumber(last.x)} ${svgNumber(last.y)}`);
+    } else {
+        for (let index = 1; index < local.length; index++)
+            commands.push(`L ${svgNumber(local[index].x)} ${svgNumber(local[index].y)}`);
+    }
+    const closed = closeOverride ?? layer.pathClosed === true;
+    if (closed) commands.push("Z");
+    return commands.join(" ");
+}
+
+function svgShapeLayer(layer, definitions, prefix) {
+    const width = Math.max(1, svgNumber(layer.width, 1));
+    const height = Math.max(1, svgNumber(layer.height, 1));
+    const shape = enumName(layer.shape, shapeKinds, "rectangle").toLowerCase();
+    const stroke = cssColor(layer.strokeColor, "#1d4ed8");
+    const strokeWidth = clamp(layer.strokeWidthPx ?? 3, 0, 200);
+    const openPath = shape === "path" && layer.pathClosed !== true;
+    const fill = openPath || shape === "line" ? "none" : svgGradient(definitions, layer, width, height, prefix, true);
+    const common = `fill="${xmlEscape(fill)}" stroke="${xmlEscape(stroke)}" stroke-width="${svgNumber(strokeWidth)}" stroke-linecap="round" stroke-linejoin="round"`;
+    let markup;
+    if (shape === "ellipse") {
+        markup = `<ellipse cx="0" cy="0" rx="${svgNumber(width / 2)}" ry="${svgNumber(height / 2)}" ${common}/>`;
+    } else if (shape === "line") {
+        markup = `<path d="M ${svgNumber(-width / 2)} 0 L ${svgNumber(width / 2)} 0" ${common}/>`;
+    } else if (shape === "arrow") {
+        const shaftHalf = Math.max(1, height * .17);
+        const headStart = Math.max(-width * .15, width * .08);
+        const d = `M ${svgNumber(-width / 2)} ${svgNumber(-shaftHalf)} L ${svgNumber(headStart)} ${svgNumber(-shaftHalf)} L ${svgNumber(headStart)} ${svgNumber(-height / 2)} L ${svgNumber(width / 2)} 0 L ${svgNumber(headStart)} ${svgNumber(height / 2)} L ${svgNumber(headStart)} ${svgNumber(shaftHalf)} L ${svgNumber(-width / 2)} ${svgNumber(shaftHalf)} Z`;
+        markup = `<path d="${d}" ${common}/>`;
+    } else if (shape === "freeform" || shape === "path") {
+        markup = `<path d="${svgPathData(layer, width, height, shape === "freeform" ? true : null)}" ${common}/>`;
+    } else if (shape === "roundedrectangle") {
+        const radius = Math.min(clamp(layer.cornerRadiusPx ?? 24, 0, 2000), width / 2, height / 2);
+        markup = `<rect x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${svgNumber(width)}" height="${svgNumber(height)}" rx="${svgNumber(radius)}" ry="${svgNumber(radius)}" ${common}/>`;
+    } else {
+        markup = `<rect x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${svgNumber(width)}" height="${svgNumber(height)}" ${common}/>`;
+    }
+    return markup;
+}
+
+function svgFillLayer(layer, definitions, prefix) {
+    const width = Math.max(1, svgNumber(layer.width, 1));
+    const height = Math.max(1, svgNumber(layer.height, 1));
+    const fill = svgGradient(definitions, layer, width, height, prefix, false);
+    return `<rect x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${svgNumber(width)}" height="${svgNumber(height)}" fill="${xmlEscape(fill)}"/>`;
+}
+
+function svgTextLayer(layer, definitions, prefix) {
+    const width = Math.max(1, svgNumber(layer.width, 1));
+    const height = Math.max(1, svgNumber(layer.height, 1));
+    const fontSize = clamp(layer.fontSizePx ?? 72, 4, 1024);
+    const family = layer.fontFamily || "Segoe UI";
+    const measure = createCanvas(1, 1).getContext("2d");
+    measure.font = `${layer.italic ? "italic " : ""}${layer.bold ? "700 " : "400 "}${fontSize}px ${family}`;
+    const lines = wrapText(measure, layer.text, width);
+    const lineHeight = fontSize * 1.18;
+    const totalHeight = lines.length * lineHeight;
+    const top = Math.max(-height / 2, -totalHeight / 2);
+    const alignment = enumName(layer.alignment, textAlignments, "center").toLowerCase();
+    const anchor = alignment === "left" ? "start" : alignment === "right" ? "end" : "middle";
+    const x = alignment === "left" ? -width / 2 : alignment === "right" ? width / 2 : 0;
+    const clipId = `${prefix}-clip`;
+    definitions.push(`<clipPath id="${clipId}"><rect x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${svgNumber(width)}" height="${svgNumber(height)}"/></clipPath>`);
+    const shadow = layer.shadowEnabled
+        ? `filter:drop-shadow(${svgNumber(layer.shadowOffsetXPx)}px ${svgNumber(layer.shadowOffsetYPx)}px ${svgNumber(clamp(layer.shadowBlurPx ?? 8, 0, 200))}px ${cssColor(layer.shadowColor, "#00000080")})`
+        : "";
+    const outlineWidth = clamp(layer.outlineWidthPx ?? 0, 0, 64) * 2;
+    const outline = outlineWidth > 0 && layer.outlineColor !== "transparent"
+        ? `stroke="${xmlEscape(cssColor(layer.outlineColor, "#000000"))}" stroke-width="${svgNumber(outlineWidth)}" paint-order="stroke fill" stroke-linejoin="round"`
+        : "";
+    const spans = lines.map((line, index) => `<tspan x="${svgNumber(x)}" y="${svgNumber(top + fontSize * .86 + index * lineHeight)}">${xmlEscape(line)}</tspan>`).join("");
+    return `<text clip-path="url(#${clipId})" x="${svgNumber(x)}" text-anchor="${anchor}" font-family="${xmlEscape(family)}" font-size="${svgNumber(fontSize)}" font-weight="${layer.bold ? "700" : "400"}" font-style="${layer.italic ? "italic" : "normal"}" fill="${xmlEscape(cssColor(layer.fillColor, "#17365d"))}" ${outline} style="${xmlEscape(shadow)}">${spans}</text>`;
+}
+
+async function svgRasterizedLayer(layer) {
+    const width = Math.max(1, Math.round(svgNumber(layer.width, 1)));
+    const height = Math.max(1, Math.round(svgNumber(layer.height, 1)));
+    const canvas = createCanvas(width, height);
+    const context = canvas.getContext("2d", { alpha: true, desynchronized: false });
+    context.clearRect(0, 0, width, height);
+    const local = {
+        ...layer,
+        x: 0,
+        y: 0,
+        width,
+        height,
+        rotation: 0,
+        opacity: 1,
+        blendMode: "Normal"
+    };
+    await drawLayer(context, local);
+    const dataUrl = canvas.toDataURL("image/png");
+    return `<image x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${width}" height="${height}" href="${dataUrl}" preserveAspectRatio="none"/>`;
+}
+
+export async function createPictureStudioSvg(documentModel) {
+    const document = normalizeDocument(documentModel);
+    const definitions = [];
+    const layers = [];
+    for (let index = 0; index < document.layers.length; index++) {
+        const layer = document.layers[index];
+        if (!layer || layer.visible === false || clamp(layer.opacity ?? 1, 0, 1) <= 0) continue;
+        const kind = layerKind(layer);
+        const prefix = `ps-${svgIdentifier(layer.id, `layer-${index}`)}-${index}`;
+        let markup;
+        let adjustments = true;
+        if (kind === "shape") markup = svgShapeLayer(layer, definitions, prefix);
+        else if (kind === "text") markup = svgTextLayer(layer, definitions, prefix);
+        else if (kind === "fill") markup = svgFillLayer(layer, definitions, prefix);
+        else {
+            markup = await svgRasterizedLayer(layer);
+            adjustments = false;
+        }
+        const style = svgLayerStyle(layer, adjustments);
+        layers.push(`<g id="${prefix}" data-picture-layer-id="${xmlEscape(layer.id || "")}" data-picture-layer-kind="${xmlEscape(kind)}" transform="${svgLayerTransform(layer)}"${style ? ` style="${xmlEscape(style)}"` : ""}>${markup}</g>`);
+    }
+    const metadata = xmlEscape(JSON.stringify(document));
+    const background = document.background && document.background !== "transparent"
+        ? `<rect width="100%" height="100%" fill="${xmlEscape(document.background)}"/>`
+        : "";
+    const defs = definitions.length ? `<defs>${definitions.join("")}</defs>` : "";
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${document.widthPx}" height="${document.heightPx}" viewBox="0 0 ${document.widthPx} ${document.heightPx}">
+<title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.2">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
+}
+
+export async function downloadPictureStudioSvg(documentModel, fileName) {
+    const svg = await createPictureStudioSvg(documentModel);
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    try {
+        const anchor = globalThis.document.createElement("a");
+        anchor.href = url; anchor.download = fileName || "picture.svg";
+        globalThis.document.body.appendChild(anchor); anchor.click(); anchor.remove();
+    } finally { setTimeout(() => URL.revokeObjectURL(url), 2000); }
 }
 
 export async function downloadPictureStudio(documentModel, fileName, mimeType = "image/png", quality = 1) {

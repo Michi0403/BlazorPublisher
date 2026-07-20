@@ -25,13 +25,19 @@
             {
                 @if (element is ConnectorElement connector && ConnectorGeometry.TryResolve(publicationPage, connector, out var sourcePoint, out var targetPoint))
                 {
-                    <svg class="print-connector" style="z-index:@connector.ZIndex"
+                    <svg id="element-@connector.Id" class="print-connector @(connector.Signal.Enabled ? "signal-connector" : null) @(!connector.Signal.LineVisible ? "signal-line-hidden" : null)" style="z-index:@connector.ZIndex"
                          data-publication-element data-element-id="@connector.Id"
                          data-group-id="@connector.GroupId"
                          data-animations="@PublicationAnimationData.Animations(connector)"
                          data-interaction="@PublicationAnimationData.Interaction(connector)"
                          data-interaction-action="@connector.Interaction.Action"
-                         data-playback-hidden="@connector.HiddenAtPresentationStart.ToString().ToLowerInvariant()" viewBox="0 0 @Inv(publicationPage.WidthMm) @Inv(publicationPage.HeightMm)" preserveAspectRatio="none">
+                         data-playback-hidden="@connector.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
+                         data-connector-id="@connector.Id"
+                         data-source-kind="@connector.Source.Kind" data-source-element-id="@connector.Source.ElementId" data-source-anchor="@connector.Source.Anchor" data-source-x="@Inv(connector.Source.X)" data-source-y="@Inv(connector.Source.Y)" data-source-selector="@connector.Source.TargetSelector"
+                         data-target-kind="@connector.Target.Kind" data-target-element-id="@connector.Target.ElementId" data-target-anchor="@connector.Target.Anchor" data-target-x="@Inv(connector.Target.X)" data-target-y="@Inv(connector.Target.Y)" data-target-selector="@connector.Target.TargetSelector"
+                         data-path-kind="@connector.PathKind" data-signal="@PublicationAnimationData.Signal(connector)"
+                         data-signal-enabled="@connector.Signal.Enabled.ToString().ToLowerInvariant()" data-signal-line-visible="@connector.Signal.LineVisible.ToString().ToLowerInvariant()"
+                         viewBox="0 0 @Inv(publicationPage.WidthMm) @Inv(publicationPage.HeightMm)" preserveAspectRatio="none">
                         <defs>@ConnectorMarkerDefinition(connector, true)@ConnectorMarkerDefinition(connector, false)</defs>
                         <path class="connector-hit" d="@ConnectorGeometry.Path(connector, sourcePoint, targetPoint)" fill="none" stroke="transparent" stroke-width="4"></path>
                         <path class="connector-line" d="@ConnectorGeometry.Path(connector, sourcePoint, targetPoint)" fill="none" stroke="@connector.Stroke" stroke-width="@Inv(connector.StrokeWidthMm)" stroke-dasharray="@ConnectorGeometry.DashArray(connector)" marker-start="@MarkerUrl(connector, true)" marker-end="@MarkerUrl(connector, false)"></path>

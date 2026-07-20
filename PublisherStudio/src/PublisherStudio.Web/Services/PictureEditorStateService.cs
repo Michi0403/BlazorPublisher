@@ -185,6 +185,37 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    public ShapePictureLayer AddPath(IReadOnlyList<PicturePoint> points, string strokeColor, double strokeWidth, bool closed = false, bool smooth = true)
+    {
+        if (points.Count < 2) return AddShape(PictureShapeKind.Path);
+        var minX = points.Min(point => point.X);
+        var minY = points.Min(point => point.Y);
+        var maxX = points.Max(point => point.X);
+        var maxY = points.Max(point => point.Y);
+        var width = Math.Max(1, maxX - minX);
+        var height = Math.Max(1, maxY - minY);
+        Capture();
+        var layer = new ShapePictureLayer
+        {
+            Name = NextName("Path"),
+            Shape = PictureShapeKind.Path,
+            FillColor = closed ? strokeColor : "transparent",
+            StrokeColor = string.IsNullOrWhiteSpace(strokeColor) ? "#1d4ed8" : strokeColor,
+            StrokeWidthPx = Math.Clamp(strokeWidth, .25, 512),
+            X = minX,
+            Y = minY,
+            Width = width,
+            Height = height,
+            PathClosed = closed,
+            PathSmooth = smooth,
+            PathPoints = points.Select(point => new PicturePoint { X = point.X - minX, Y = point.Y - minY }).ToList()
+        };
+        Document.Layers.Add(layer);
+        SelectedLayerId = layer.Id;
+        Notify();
+        return layer;
+    }
+
     public ShapePictureLayer AddAreaFill(string selectionKind, IReadOnlyList<PicturePoint> points, string primaryColor, string secondaryColor, bool gradient)
     {
         if (points.Count < 2) return AddShape(PictureShapeKind.Rectangle);

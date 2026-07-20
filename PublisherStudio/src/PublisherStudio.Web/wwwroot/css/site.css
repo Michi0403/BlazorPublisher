@@ -2053,3 +2053,27 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     }
     .vector-point-table { grid-template-columns: 1fr 1fr; }
 }
+
+/* Offline signal arrows/connectors. The runtime is embedded into single-file exports. */
+.signal-connector.signal-line-hidden .connector-line { opacity: 0; }
+.publication-page .signal-connector.signal-line-hidden.selected .connector-line,
+.publication-page .signal-connector.signal-line-hidden.selection-primary .connector-line { opacity: .26; stroke-dasharray: 2 1.2; }
+.signal-connector.ps-signal-running .connector-line { filter: drop-shadow(0 0 2px currentColor); }
+.publisher-signal-runner { pointer-events: none; transform-box: fill-box; transform-origin: center; filter: drop-shadow(0 0 1.5px rgba(255,255,255,.85)) drop-shadow(0 0 3px currentColor); }
+.ps-signal-hover { outline: 2px solid #38bdf8 !important; outline-offset: 2px; }
+.ps-action-hidden { visibility: hidden !important; pointer-events: none !important; }
+@media (prefers-reduced-motion: reduce) {
+    .publisher-signal-runner { display: none; }
+}
+
+
+.picture-path-toolbar { display:flex; gap:6px; margin:8px 0 6px; }
+.picture-path-toolbar button { min-height:28px; padding:3px 9px; }
+.picture-path-points { display:grid; gap:4px; max-height:210px; overflow:auto; padding:4px; border:1px solid #cbd5e1; border-radius:4px; background:#f8fafc; }
+.picture-path-point-row { display:grid; grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) 28px; gap:5px; align-items:end; }
+.picture-path-point-row > span { align-self:center; text-align:center; font-size:11px; color:#64748b; }
+.picture-path-point-row label { display:grid; grid-template-columns:12px minmax(0,1fr); gap:3px; align-items:center; margin:0; font-size:11px; }
+.picture-path-point-row input { min-width:0; width:100%; }
+.picture-path-point-row button { width:28px; height:28px; padding:0; }
+
+/* PublisherStudio 1.0.41: offline Signal Arrows, SVG paths, and precise path nodes. */

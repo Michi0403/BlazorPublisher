@@ -144,3 +144,11 @@ The catalogue excludes arbitrary DevExpress Blazor, Razor, and ASP.NET Core cont
 
 Version 1.0.40 extends this contract with `dxMap`/`dxVectorMap`, serialized geographic features, bundled vector-map data scripts, normalized component CSS, and a common inner-content viewport. The viewport is deliberately separate from publication-object geometry: the outer element remains the layout box while offset/scale determine which part of its text, spreadsheet, or map content is visible.
 
+
+## Signal runtime and picture SVG contract (v1.0.41)
+
+`ConnectorElement.Signal` stores the dynamic behavior while `ConnectorEndpoint` can address either an element anchor or an exact page coordinate. `PublicationAnimationData.Signal` serializes this payload into connector `data-signal` attributes. The same `signalConnectorRuntime` function is initialized in the editor and embedded by source into standalone HTML, avoiding a separate runtime file or server dependency.
+
+The runtime resolves endpoint gestures and action targets locally. Object IDs select publication wrappers, while optional selectors descend into generated HTML, spreadsheet cells, DevExtreme SVG/canvas wrappers, or user-authored component markup. Motion targeting defaults to the inner `[data-content-fit-source]` of content-viewported objects so map and spreadsheet pans/zooms do not move the outer layout box.
+
+Picture Studio format `1.2` adds open/smoothed `Path` layers. SVG export serializes text, fills, shapes, and paths as vector markup. Layers whose canvas rendering is intentionally procedural or pixel-based are rasterized individually and embedded as data URLs, preserving standalone portability and layer order without flattening the entire SVG into one bitmap.

@@ -28,7 +28,7 @@ public sealed class PictureDocumentService
 
     public void Normalize(PictureDocument document)
     {
-        document.FormatVersion = "1.1";
+        document.FormatVersion = "1.2";
         document.WidthPx = Math.Clamp(document.WidthPx, 16, 8192);
         document.HeightPx = Math.Clamp(document.HeightPx, 16, 8192);
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .65 : document.Zoom, .05, 4);
@@ -65,6 +65,15 @@ public sealed class PictureDocumentService
                 case ShapePictureLayer shape:
                     shape.StrokeWidthPx = Math.Clamp(shape.StrokeWidthPx, 0, 200);
                     shape.CornerRadiusPx = Math.Clamp(shape.CornerRadiusPx, 0, 2000);
+                    shape.PathPoints ??= [];
+                    if (shape.PathPoints.Count > 20000) shape.PathPoints = shape.PathPoints.Take(20000).ToList();
+                    foreach (var point in shape.PathPoints)
+                    {
+                        point.X = Math.Clamp(point.X, -16384, 32768);
+                        point.Y = Math.Clamp(point.Y, -16384, 32768);
+                    }
+                    if (shape.Shape == PictureShapeKind.Path && shape.PathPoints.Count < 2)
+                        shape.Shape = PictureShapeKind.Freeform;
                     break;
                 case RenderPictureLayer render:
                     render.Detail = Math.Clamp(render.Detail, 1, 8);

@@ -134,6 +134,8 @@
             <DxRibbonItem Text="Connectors" IconCssClass="pub-icon pub-icon-connector" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-connector" Text="Connector" Click="StartConnector" />
                 <DxRibbonItem Text="Arrow connector" IconCssClass="pub-icon pub-icon-arrow" Click="StartArrowConnector" />
+                <DxRibbonItem Text="Signal connector" IconCssClass="pub-icon pub-icon-connector" Click="StartSignalConnector" />
+                <DxRibbonItem Text="Signal arrow" IconCssClass="pub-icon pub-icon-arrow" Click="StartSignalArrow" />
             </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text="Pages" IconCssClass="pub-icon pub-icon-page">
@@ -475,6 +477,8 @@
             <DxRibbonItem IconCssClass="pub-icon pub-icon-shape" Text="Shape commands" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-connector" Text="Draw connector" Click="StartConnector" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="Draw arrow" Click="StartArrowConnector" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-connector" Text="Draw signal connector" Click="StartSignalConnector" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="Draw signal arrow" Click="StartSignalArrow" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-rotate" Text="Rotate left" Click="RotateLeft" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-rotate" Text="Rotate right" Click="RotateRight" />
             </DxRibbonItem>
@@ -724,6 +728,8 @@
     private void SetDataVisualKind(DataVisualKind kind) => State.UpdateSelected(element => { if (element is DataVisualElement visual) visual.VisualKind = kind; });
     private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
     private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
+    private void StartSignalConnector() => State.SetConnectorTool(ConnectorToolKind.SignalConnector);
+    private void StartSignalArrow() => State.SetConnectorTool(ConnectorToolKind.SignalArrow);
     private void AddPage() => State.AddPage();
     private void DuplicatePage() => State.DuplicatePage();
     private void DeletePage() => State.DeletePage();

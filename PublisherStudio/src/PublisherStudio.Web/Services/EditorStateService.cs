@@ -658,15 +658,39 @@ public sealed class EditorStateService : IDisposable
         var source = CurrentPage.Elements.FirstOrDefault(item => item.Id == sourceElementId && item is not ConnectorElement);
         var target = CurrentPage.Elements.FirstOrDefault(item => item.Id == targetElementId && item is not ConnectorElement);
         if (source is null || target is null) return null;
+        return AddConnectorCore(
+            new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = sourceElementId, Anchor = sourceAnchor },
+            new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = targetElementId, Anchor = targetAnchor },
+            endMarker,
+            signal: false);
+    }
+
+    public ConnectorElement? AddSignalConnector(ConnectorEndpoint source, ConnectorEndpoint target, ConnectorMarker endMarker = ConnectorMarker.Arrow)
+        => AddConnectorCore(source, target, endMarker, signal: true);
+
+    private ConnectorElement? AddConnectorCore(ConnectorEndpoint source, ConnectorEndpoint target, ConnectorMarker endMarker, bool signal)
+    {
+        if (source.Kind == ConnectorEndpointKind.Element && target.Kind == ConnectorEndpointKind.Element &&
+            source.ElementId != Guid.Empty && source.ElementId == target.ElementId) return null;
+        if (!ConnectorGeometry.TryResolveEndpoint(CurrentPage, source, out _) ||
+            !ConnectorGeometry.TryResolveEndpoint(CurrentPage, target, out _)) return null;
+
         Capture();
         var connector = new ConnectorElement
         {
-            Name = NextName(endMarker == ConnectorMarker.None ? "Connector" : "Arrow Connector"),
-            Source = new ConnectorEndpoint { ElementId = sourceElementId, Anchor = sourceAnchor },
-            Target = new ConnectorEndpoint { ElementId = targetElementId, Anchor = targetAnchor },
+            Name = NextName(signal ? (endMarker == ConnectorMarker.None ? "Signal Connector" : "Signal Arrow") : (endMarker == ConnectorMarker.None ? "Connector" : "Arrow Connector")),
+            Source = source,
+            Target = target,
             EndMarker = endMarker,
             PathKind = ConnectorPathKind.Curved,
-            ZIndex = NextZ()
+            ZIndex = NextZ(),
+            Signal = new SignalConnectorSettings
+            {
+                Enabled = signal,
+                LineVisible = true,
+                Trigger = signal ? SignalConnectorTrigger.OnPageEnter : SignalConnectorTrigger.Manual,
+                Visual = signal ? SignalConnectorVisual.FlyingArrow : SignalConnectorVisual.None
+            }
         };
         CurrentPage.Elements.Add(connector);
         SetSelectionCore([connector.Id], connector.Id);
@@ -675,16 +699,26 @@ public sealed class EditorStateService : IDisposable
     }
 
     public void ReconnectConnector(Guid connectorId, bool sourceEnd, Guid elementId, ConnectorAnchor anchor)
+        => ReconnectConnectorEndpoint(connectorId, sourceEnd, new ConnectorEndpoint
+        {
+            Kind = ConnectorEndpointKind.Element,
+            ElementId = elementId,
+            Anchor = anchor
+        });
+
+    public void ReconnectConnectorEndpoint(Guid connectorId, bool sourceEnd, ConnectorEndpoint replacement)
     {
         var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
-        var target = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
-        if (connector is null || target is null || connector.Locked) return;
-        var otherId = sourceEnd ? connector.Target.ElementId : connector.Source.ElementId;
-        if (otherId == elementId) return;
+        if (connector is null || connector.Locked || !ConnectorGeometry.TryResolveEndpoint(CurrentPage, replacement, out _)) return;
+        var other = sourceEnd ? connector.Target : connector.Source;
+        if (replacement.Kind == ConnectorEndpointKind.Element &&
+            other.Kind == ConnectorEndpointKind.Element &&
+            replacement.ElementId != Guid.Empty &&
+            replacement.ElementId == other.ElementId) return;
+
         Capture();
-        var endpoint = sourceEnd ? connector.Source : connector.Target;
-        endpoint.ElementId = elementId;
-        endpoint.Anchor = anchor;
+        if (sourceEnd) connector.Source = replacement;
+        else connector.Target = replacement;
         SetSelectionCore([connector.Id], connector.Id);
         Notify();
     }

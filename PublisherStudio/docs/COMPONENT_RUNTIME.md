@@ -1,6 +1,6 @@
 # PublisherStudio browser component runtime
 
-PublisherStudio v1.0.40 provides browser-native DevExtreme components as publication elements. This subsystem intentionally does **not** embed arbitrary DevExpress Blazor or ASP.NET Core controls. Exported publications must remain usable as a single HTML file, so only controls available in the bundled non-modular DevExtreme browser runtime are exposed.
+PublisherStudio v1.0.41 provides browser-native DevExtreme components as publication elements. This subsystem intentionally does **not** embed arbitrary DevExpress Blazor or ASP.NET Core controls. Exported publications must remain usable as a single HTML file, so only controls available in the bundled non-modular DevExtreme browser runtime are exposed.
 
 ## Supported catalogue
 
@@ -131,3 +131,9 @@ Do not embed private API keys or unrestricted bearer tokens. Put protected opera
 - ODataStore: https://js.devexpress.com/jQuery/Documentation/ApiReference/Data_Layer/ODataStore/
 - Data source stores: https://js.devexpress.com/jQuery/Documentation/ApiReference/Data_Layer/DataSource/Configuration/store/
 - Component gallery: https://js.devexpress.com/jQuery/Demos/WidgetsGallery/
+
+## Signal targeting (v1.0.41)
+
+Signal connectors can target a DevExtreme component wrapper or an inner CSS selector. When a Map or VectorMap object is chosen as a motion target and no selector is supplied, PublisherStudio automatically animates the component's inner content source rather than the publication object's outer geometry. Completion selectors may address generated DevExtreme HTML/SVG nodes when a specific chart point, map region, button, or other sub-element must receive a click, hover, highlight, class, or visibility action.
+
+These actions are executed by the embedded offline signal runtime. Component live-data refresh remains governed by the component's data connection and may require network access, but the signal sequence itself does not.

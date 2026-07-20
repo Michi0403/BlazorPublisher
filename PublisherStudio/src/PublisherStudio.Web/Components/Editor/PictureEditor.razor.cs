@@ -79,6 +79,7 @@ public partial class PictureEditor
     private string EllipseToolText => ToolText(PictureDrawTool.Ellipse, "Ellipse");
     private string ArrowToolText => ToolText(PictureDrawTool.Arrow, "Arrow");
     private string LineToolText => ToolText(PictureDrawTool.Line, "Line");
+    private string PathToolText => ToolText(PictureDrawTool.Path, "Path");
     private string EraserToolText => ToolText(PictureDrawTool.Eraser, "Eraser");
     private string EyedropperToolText => ToolText(PictureDrawTool.Eyedropper, "Eyedropper");
     private string RectangleSelectToolText => ToolText(PictureDrawTool.RectangleSelect, "Rectangle select");
@@ -95,6 +96,7 @@ public partial class PictureEditor
         PictureDrawTool.Select => "Drag layers directly. Corner handles resize; the round handle rotates. Right-click for layer commands.",
         PictureDrawTool.Eyedropper => "Click the rendered canvas to pick a color, then the Brush tool becomes active.",
         PictureDrawTool.Line => "Drag from the line start to its end. Hold the pointer down for a live preview.",
+        PictureDrawTool.Path => "Draw a freehand vector path. It remains an editable shape layer and can be open, closed, straight, or smoothed.",
         PictureDrawTool.Eraser => "Draw over strokes on a paint layer to erase them non-destructively.",
         PictureDrawTool.RectangleSelect => "Drag a rectangular area selection. Use a fill tool to turn it into an editable layer.",
         PictureDrawTool.EllipseSelect => "Drag an elliptical area selection. Use a fill tool to turn it into an editable layer.",
@@ -262,6 +264,17 @@ public partial class PictureEditor
             _ => PictureShapeKind.Rectangle
         };
         State.AddShapeAt(shape, x, y, width, height, rotation);
+        SetDrawTool(PictureDrawTool.Select);
+    }
+
+    [JSInvokable]
+    public void PicturePathCommitted(double[] coordinates, bool closed, bool smooth)
+    {
+        if (coordinates.Length < 4) return;
+        var points = new List<PicturePoint>(coordinates.Length / 2);
+        for (var index = 0; index + 1 < coordinates.Length; index += 2)
+            points.Add(new PicturePoint { X = coordinates[index], Y = coordinates[index + 1] });
+        State.AddPath(points, _drawColor, _drawWidth, closed, smooth);
         SetDrawTool(PictureDrawTool.Select);
     }
 
@@ -551,6 +564,12 @@ public partial class PictureEditor
 
     private async Task DownloadPng() => await Download("image/png", "png", 1d);
     private async Task DownloadJpeg() => await Download("image/jpeg", "jpg", .92d);
+    private async Task DownloadSvg()
+    {
+        if (_module is null) return;
+        var fileName = $"{PublicationFileService.SafeFileName(State.Document.Name)}.svg";
+        await _module.InvokeVoidAsync("downloadPictureStudioSvg", State.Document, fileName);
+    }
 
     private async Task Download(string mimeType, string extension, double quality)
     {
@@ -582,6 +601,7 @@ public partial class PictureEditor
     private void EllipseTool() => SetDrawTool(PictureDrawTool.Ellipse);
     private void ArrowTool() => SetDrawTool(PictureDrawTool.Arrow);
     private void LineTool() => SetDrawTool(PictureDrawTool.Line);
+    private void PathTool() => SetDrawTool(PictureDrawTool.Path);
     private void EraserTool() => SetDrawTool(PictureDrawTool.Eraser);
     private void EyedropperTool() => SetDrawTool(PictureDrawTool.Eyedropper);
     private void RectangleSelectTool() => SetDrawTool(PictureDrawTool.RectangleSelect);
@@ -717,6 +737,7 @@ public partial class PictureEditor
     private void ShapeEllipse() => WithShape(layer => layer.Shape = PictureShapeKind.Ellipse);
     private void ShapeArrow() => WithShape(layer => layer.Shape = PictureShapeKind.Arrow);
     private void ShapeLine() => WithShape(layer => layer.Shape = PictureShapeKind.Line);
+    private void ShapePath() => WithShape(layer => layer.Shape = PictureShapeKind.Path);
     private void FillSolid() => WithFill(layer => layer.FillKind = PictureFillKind.Solid);
     private void FillLinearGradient() => WithFill(layer => layer.FillKind = PictureFillKind.LinearGradient);
     private void FillRadialGradient() => WithFill(layer => layer.FillKind = PictureFillKind.RadialGradient);
@@ -861,6 +882,33 @@ public partial class PictureEditor
     private void ChangeShapeStroke(ChangeEventArgs args) => WithShape(layer => layer.StrokeColor = Text(args));
     private void ChangeShapeStrokeWidth(ChangeEventArgs args) => WithShape(layer => layer.StrokeWidthPx = Number(args, layer.StrokeWidthPx));
     private void ChangeShapeRadius(ChangeEventArgs args) => WithShape(layer => layer.CornerRadiusPx = Number(args, layer.CornerRadiusPx));
+    private void ToggleShapePathClosed(ChangeEventArgs args) => WithShape(layer => layer.PathClosed = Bool(args));
+    private void ToggleShapePathSmooth(ChangeEventArgs args) => WithShape(layer => layer.PathSmooth = Bool(args));
+    private void AddShapePathPoint() => WithShape(layer =>
+    {
+        layer.PathPoints ??= [];
+        var previous = layer.PathPoints.LastOrDefault();
+        layer.PathPoints.Add(new PicturePoint
+        {
+            X = Math.Clamp((previous?.X ?? layer.Width / 2) + 20, 0, Math.Max(1, layer.Width)),
+            Y = Math.Clamp(previous?.Y ?? layer.Height / 2, 0, Math.Max(1, layer.Height))
+        });
+    });
+    private void RemoveShapePathPoint(int index) => WithShape(layer =>
+    {
+        if (layer.PathPoints is { Count: > 2 } && index >= 0 && index < layer.PathPoints.Count)
+            layer.PathPoints.RemoveAt(index);
+    });
+    private void ReverseShapePath() => WithShape(layer => { layer.PathPoints?.Reverse(); });
+    private void ChangeShapePathPointX(int index, ChangeEventArgs args) => ChangeShapePathPoint(index, args, true);
+    private void ChangeShapePathPointY(int index, ChangeEventArgs args) => ChangeShapePathPoint(index, args, false);
+    private void ChangeShapePathPoint(int index, ChangeEventArgs args, bool horizontal) => WithShape(layer =>
+    {
+        if (layer.PathPoints is null || index < 0 || index >= layer.PathPoints.Count) return;
+        var point = layer.PathPoints[index];
+        if (horizontal) point.X = Math.Clamp(Number(args, point.X), -16384, 32768);
+        else point.Y = Math.Clamp(Number(args, point.Y), -16384, 32768);
+    });
 
     private void ChangeFillKind(ChangeEventArgs args)
     {

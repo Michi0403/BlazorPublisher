@@ -88,6 +88,7 @@
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-ellipse" Text="@EllipseToolText" Click="EllipseTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="@ArrowToolText" Click="ArrowTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@LineToolText" Click="LineTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@PathToolText" Click="PathTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="@EraserToolText" Click="EraserTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-eyedropper" Text="@EyedropperToolText" Click="EyedropperTool" />
                         </DxRibbonItem>
@@ -124,6 +125,7 @@
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download" DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download PNG" Click="DownloadPng" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download JPEG" Click="DownloadJpeg" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download SVG" Click="DownloadSvg" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Publication">
@@ -513,6 +515,31 @@
                                                 <input type="number" min="0" max="2000" value="@Inv(shapeLayer.CornerRadiusPx)" @onchange="ChangeShapeRadius" />
                                             </label>
                                         </div>
+                                        @if (shapeLayer.Shape is PictureShapeKind.Path or PictureShapeKind.Freeform)
+                                        {
+                                            <div class="picture-check-grid">
+                                                <label><input type="checkbox" checked="@shapeLayer.PathClosed" @onchange="ToggleShapePathClosed" /> Close path</label>
+                                                <label><input type="checkbox" checked="@shapeLayer.PathSmooth" @onchange="ToggleShapePathSmooth" /> Smooth path</label>
+                                            </div>
+                                            <div class="picture-path-toolbar">
+                                                <button type="button" @onclick="AddShapePathPoint">Add point</button>
+                                                <button type="button" @onclick="ReverseShapePath">Reverse</button>
+                                            </div>
+                                            <div class="picture-path-points" aria-label="Path points">
+                                                @for (var pointIndex = 0; pointIndex < shapeLayer.PathPoints.Count; pointIndex++)
+                                                {
+                                                    var index = pointIndex;
+                                                    var point = shapeLayer.PathPoints[index];
+                                                    <div class="picture-path-point-row">
+                                                        <span>@(index + 1)</span>
+                                                        <label>X <input type="number" step=".1" value="@Inv(point.X)" @onchange="args => ChangeShapePathPointX(index, args)" /></label>
+                                                        <label>Y <input type="number" step=".1" value="@Inv(point.Y)" @onchange="args => ChangeShapePathPointY(index, args)" /></label>
+                                                        <button type="button" class="danger" disabled="@(shapeLayer.PathPoints.Count <= 2)" @onclick="() => RemoveShapePathPoint(index)" title="Remove point">×</button>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <p class="picture-property-note">The Path tool creates editable vector points. Edit X/Y for precise nodes, reverse the direction, or add/remove points. Open paths use the stroke only; closed paths can also use the selected fill.</p>
+                                        }
                                         @if (shapeLayer.FillKind != PictureFillKind.Solid)
                                         {
                                             <label>Fill angle
@@ -842,6 +869,7 @@
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Ellipse, "Ellipse"))" Click="ShapeEllipse" />
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Arrow, "Arrow"))" Click="ShapeArrow" />
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Line, "Line"))" Click="ShapeLine" />
+                            <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Path, "Path"))" Click="ShapePath" />
                         </Items>
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="Fill type">

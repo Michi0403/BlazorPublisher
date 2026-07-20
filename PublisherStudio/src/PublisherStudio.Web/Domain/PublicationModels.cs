@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.38";
+    public string FormatVersion { get; set; } = "1.39";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -95,7 +95,17 @@ public enum ConnectorPathKind { Straight, Elbow, Curved }
 public enum ConnectorMarker { None, Arrow, Triangle, Diamond }
 public enum ConnectorDashStyle { Solid, Dash, Dot }
 public enum ConnectorAnchor { TopLeft, Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, Center }
-public enum ConnectorToolKind { None, Line, Arrow }
+public enum ConnectorToolKind { None, Line, Arrow, SignalConnector, SignalArrow }
+public enum ConnectorEndpointKind { Element, Canvas }
+public enum SignalConnectorTrigger { OnPageEnter, OnClick, OnHover, Manual }
+public enum SignalConnectorVisual { FlyingArrow, DrawPath, Pulse, None }
+public enum SignalGesture { None, Click, Hover }
+public enum SignalCompletionAction
+{
+    None, Click, Hover, Show, Hide, ToggleVisibility, SetOpacity, ReplayAnimation,
+    PlayMedia, PauseMedia, ToggleMediaPlayback, Highlight, AddCssClass, RemoveCssClass,
+    ToggleCssClass, RunSignal
+}
 public enum ImageMaskShape { Rectangle, RoundedRectangle, Ellipse }
 public enum StoryStorageFormat { Html, OpenXml }
 public enum SpreadsheetStorageFormat { Xlsx, Xlsm, Xls, Csv, Text }
@@ -310,8 +320,41 @@ public sealed class BarcodeElement : PublicationElement
 
 public sealed class ConnectorEndpoint
 {
+    public ConnectorEndpointKind Kind { get; set; } = ConnectorEndpointKind.Element;
     public Guid ElementId { get; set; }
     public ConnectorAnchor Anchor { get; set; } = ConnectorAnchor.Right;
+    public double X { get; set; }
+    public double Y { get; set; }
+    public string TargetSelector { get; set; } = string.Empty;
+}
+
+public sealed class SignalConnectorSettings
+{
+    public bool Enabled { get; set; }
+    public bool LineVisible { get; set; } = true;
+    public SignalConnectorTrigger Trigger { get; set; } = SignalConnectorTrigger.OnPageEnter;
+    public SignalConnectorVisual Visual { get; set; } = SignalConnectorVisual.FlyingArrow;
+    public double DelaySeconds { get; set; }
+    public double DurationSeconds { get; set; } = 1.5;
+    public int RepeatCount { get; set; } = 1;
+    public bool Loop { get; set; }
+    public bool AutoReverse { get; set; }
+    public SignalGesture StartGesture { get; set; }
+    public SignalGesture EndGesture { get; set; }
+    public Guid? MotionTargetElementId { get; set; }
+    public string MotionTargetSelector { get; set; } = string.Empty;
+    public double TranslateXPercent { get; set; }
+    public double TranslateYPercent { get; set; }
+    public double Scale { get; set; } = 1;
+    public double RotationDegrees { get; set; }
+    public double Opacity { get; set; } = 1;
+    public bool RestoreMotionAfterRun { get; set; }
+    public Guid? CompletionTargetElementId { get; set; }
+    public string CompletionTargetSelector { get; set; } = string.Empty;
+    public SignalCompletionAction CompletionAction { get; set; }
+    public string CompletionValue { get; set; } = string.Empty;
+    public double CompletionDurationSeconds { get; set; } = .8;
+    public Guid? NextConnectorId { get; set; }
 }
 
 public sealed class ConnectorElement : PublicationElement
@@ -325,6 +368,7 @@ public sealed class ConnectorElement : PublicationElement
     public ConnectorDashStyle DashStyle { get; set; }
     public string Stroke { get; set; } = "#245b85";
     public double StrokeWidthMm { get; set; } = 0.7;
+    public SignalConnectorSettings Signal { get; set; } = new();
 }
 
 public sealed class WordArtElement : PublicationElement

@@ -16,4 +16,8 @@ public static class PublicationAnimationData
 
     public static string Interaction(PublicationElement element) => JsonSerializer.Serialize(
         element.Interaction ?? new PublicationInteraction(), Options);
+
+    public static string Signal(ConnectorElement connector) => JsonSerializer.Serialize(
+        connector.Signal ?? new SignalConnectorSettings(), Options);
+
 }

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>PublisherStudio.Setup</AssemblyName>
-    <Version>1.0.39</Version>
+    <Version>1.0.40</Version>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
     <RuntimeIdentifiers>
       win-x64;

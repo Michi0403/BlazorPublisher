@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.37";
+    public string FormatVersion { get; set; } = "1.38";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -173,6 +173,9 @@ public sealed class TextFrameElement : PublicationElement
     public string BorderColor { get; set; } = "transparent";
     public double BorderWidth { get; set; }
     public PublicationContentFitMode ContentFit { get; set; } = PublicationContentFitMode.Clip;
+    public double ContentOffsetX { get; set; }
+    public double ContentOffsetY { get; set; }
+    public double ContentScale { get; set; } = 1;
 }
 
 public sealed class SpreadsheetElement : PublicationElement
@@ -189,6 +192,9 @@ public sealed class SpreadsheetElement : PublicationElement
     public string BorderColor { get; set; } = "#94a3b8";
     public double BorderWidthMm { get; set; } = 0.25;
     public PublicationContentFitMode ContentFit { get; set; } = PublicationContentFitMode.Clip;
+    public double ContentOffsetX { get; set; }
+    public double ContentOffsetY { get; set; }
+    public double ContentScale { get; set; } = 1;
 }
 
 public sealed class ImageFrameElement : PublicationElement

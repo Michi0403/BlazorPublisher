@@ -29,7 +29,49 @@ public enum PublicationComponentKind
     Splitter,
     ScrollView,
     PivotGrid,
+    Map,
+    VectorMap,
     Button
+}
+
+
+public enum PublicationVectorMapBaseLayer
+{
+    World,
+    Europe,
+    Eurasia,
+    Africa,
+    Usa,
+    Canada,
+    None
+}
+
+public enum PublicationVectorFeatureKind
+{
+    Marker,
+    Line,
+    Polygon
+}
+
+public sealed class PublicationMapPoint
+{
+    public double Longitude { get; set; }
+    public double Latitude { get; set; }
+}
+
+public sealed class PublicationVectorMapFeature
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = "Feature";
+    public PublicationVectorFeatureKind Kind { get; set; } = PublicationVectorFeatureKind.Marker;
+    public List<PublicationMapPoint> Points { get; set; } = [];
+    public string Color { get; set; } = "#2563eb";
+    public string BorderColor { get; set; } = "#1e3a8a";
+    public double Opacity { get; set; } = .82;
+    public double Width { get; set; } = 3;
+    public double Size { get; set; } = 14;
+    public string Label { get; set; } = string.Empty;
+    public double? Value { get; set; }
 }
 
 public enum PublicationComponentScope
@@ -275,6 +317,36 @@ public sealed class DevExtremeComponentElement : PublicationElement
     public string BorderColor { get; set; } = "#cbd5e1";
     public double BorderWidthMm { get; set; } = .25;
 
+    public string CustomCssClass { get; set; } = string.Empty;
+    public string CustomCss { get; set; } = string.Empty;
+    public double ContentOffsetX { get; set; }
+    public double ContentOffsetY { get; set; }
+    public double ContentScale { get; set; } = 1;
+
+    public string MapProvider { get; set; } = "google";
+    public string MapType { get; set; } = "roadmap";
+    public string MapApiKey { get; set; } = string.Empty;
+    public double MapCenterLatitude { get; set; } = 51.1657;
+    public double MapCenterLongitude { get; set; } = 10.4515;
+    public double MapZoom { get; set; } = 4;
+    public bool MapControls { get; set; } = true;
+    public bool MapAutoAdjust { get; set; } = true;
+    public bool MapShowRoutes { get; set; } = true;
+    public string LatitudeField { get; set; } = "latitude";
+    public string LongitudeField { get; set; } = "longitude";
+    public string AddressField { get; set; } = "address";
+    public string MarkerTooltipField { get; set; } = "text";
+    public string MapRouteField { get; set; } = "routeId";
+    public string MapOrderField { get; set; } = "order";
+
+    public PublicationVectorMapBaseLayer VectorBaseLayer { get; set; } = PublicationVectorMapBaseLayer.World;
+    public string VectorProjection { get; set; } = "mercator";
+    public bool VectorShowLabels { get; set; } = true;
+    public string VectorLabelField { get; set; } = "name";
+    public string VectorValueField { get; set; } = "value";
+    public string VectorColorField { get; set; } = "color";
+    public List<PublicationVectorMapFeature> VectorFeatures { get; set; } = [];
+
     /// <summary>Additional DevExtreme options merged after the safe generated options.</summary>
     public string AdvancedOptionsJson { get; set; } = "{}";
     public bool AllowCustomScript { get; set; }
@@ -284,4 +356,7 @@ public sealed class DevExtremeComponentElement : PublicationElement
         or PublicationComponentKind.TabPanel
         or PublicationComponentKind.MultiView
         or PublicationComponentKind.ScrollView;
+
+    [JsonIgnore]
+    public bool SupportsContentViewport => ComponentKind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap;
 }

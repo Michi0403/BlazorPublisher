@@ -128,7 +128,7 @@ The editor timeline uses one authoritative playback state per publication page. 
 
 Playhead reporting is intentionally backpressured. JavaScript allows only one interop notification in flight and replaces intermediate pending positions with the latest value. This keeps rendering load bounded without changing media timing. Clip drag and trim gestures remain optimistic in the DOM, but browser coordinates and committed numeric values are finite and bounded before the authoritative C# media/animation model applies its existing source and timeline constraints.
 
-## Browser-native publication components (v1.0.39)
+## Browser-native publication components (v1.0.39+)
 
 `DevExtremeComponentElement` is the persisted publication object for browser-native application controls. It is separate from `DataVisualElement`, so the established chart workflow and serialized chart documents do not depend on the generic component catalogue.
 
@@ -141,3 +141,6 @@ Document-wide controls use `SharedComponentId` for logical identity and a unique
 `publisherInterop.js` has a shared single-file HTML builder. The presentation and website modes clone the same print surface and embed the same CSS, jQuery, DevExtreme, public runtime license, live-data runtime, and component runtime. They differ only in their page/navigation runtime and mode CSS.
 
 The catalogue excludes arbitrary DevExpress Blazor, Razor, and ASP.NET Core controls because those require an application runtime or server services that cannot be represented by the one-file export contract.
+
+Version 1.0.40 extends this contract with `dxMap`/`dxVectorMap`, serialized geographic features, bundled vector-map data scripts, normalized component CSS, and a common inner-content viewport. The viewport is deliberately separate from publication-object geometry: the outer element remains the layout box while offset/scale determine which part of its text, spreadsheet, or map content is visible.
+

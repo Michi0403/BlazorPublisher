@@ -1,16 +1,18 @@
-# PublisherStudio v1.0.39 release
+# PublisherStudio v1.0.40 release
 
-See `CHANGELOG-v1.0.39.md` and `docs/COMPONENT_RUNTIME.md`.
+See `CHANGELOG-v1.0.40.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
 
 Source release notes:
 
-- Added browser-native Data Grid, Tree List, Scheduler, Pivot Grid, Form/editor, collection, navigation, button, and layout-container publication objects.
-- Added direct REST/JSON `CustomStore` and OData `ODataStore` connections with field discovery, client/remote processing, CRUD, headers, credentials, and reusable publication datasets.
-- Added smart component actions for page navigation, REST/form submission, mail preparation, refresh, visibility, component values, and filters.
-- Added page-local and document-wide synchronized components with page-specific placement.
-- Added Menu/Context Menu page navigation and a second single-file website export with hash routing and browser history.
-- Preserved existing standalone charts and the current interactive-presentation HTML export.
-- Both exports remain one HTML file and embed the existing DevExtreme runtime only once.
-- Publication format is now `1.37`; application/package version is `1.0.39`.
+- Enlarged Text/Docx, Spreadsheet, Picture, Video, Audio, Data, Barcode, and Component Studio dialogs to use nearly the full browser viewport.
+- Fixed dropdown-indicator spacing and centered the Component Studio close glyph.
+- Added DevExtreme Map and Vector Map publication objects with publication-data, REST, OData, polling, print, presentation, and single-file website support.
+- Added bundled World, Europe, Eurasia, Africa, USA, and Canada vector base maps.
+- Added a Vector Map drawing editor for markers, lines, polygons, exact coordinates, feature styling, and GeoJSON import.
+- Added persistent pan/zoom viewports for Text/Docx, Spreadsheet, Map, and Vector Map content.
+- Added normalized custom CSS classes and safe inline CSS declarations for DevExtreme publication components.
+- Publication format is now `1.38`; application/package/installer version is `1.0.40`.
+- DevExtreme remains pinned to `25.2.8`.
 - Run `Prepare-DevExpressAssets.cmd` on the licensed build machine before building or publishing.
 - Run `npm run test:timeline` and `npm run test:components` from `src/PublisherStudio.Web` for the Node regression suites.
+- A licensed end-to-end DevExpress build and browser test remain required on the development/release machine.

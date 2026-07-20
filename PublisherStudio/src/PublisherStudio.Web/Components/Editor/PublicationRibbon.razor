@@ -96,6 +96,8 @@
                         <DxRibbonItem Text="Tree List" Click="AddComponentTreeList" />
                         <DxRibbonItem Text="Scheduler" Click="AddComponentScheduler" />
                         <DxRibbonItem Text="Pivot Grid" Click="AddComponentPivotGrid" />
+                        <DxRibbonItem Text="Map" Click="AddComponentMap" />
+                        <DxRibbonItem Text="Vector Map" Click="AddComponentVectorMap" />
                 </DxRibbonItem>
                 <DxRibbonItem Text="Forms and editors" DropDownCssClass="publisher-ribbon-menu">
                         <DxRibbonItem Text="Edit Form" Click="AddComponentForm" />
@@ -327,6 +329,8 @@
                 <DxRibbonItem Text="Fill and crop" Click="TextFitFill" />
                 <DxRibbonItem Text="Stretch to frame" Click="TextFitStretch" />
             </DxRibbonItem>
+            <DxRibbonItem Text="@(State.ContentPanMode ? "Finish positioning text" : "Position visible text")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
+            <DxRibbonItem Text="Reset text position" IconCssClass="pub-icon pub-icon-command" Click="ResetContentViewport" />
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -396,6 +400,8 @@
                 <DxRibbonItem Text="Fill and crop" Click="SpreadsheetFitFill" />
                 <DxRibbonItem Text="Stretch to frame" Click="SpreadsheetFitStretch" />
             </DxRibbonItem>
+            <DxRibbonItem Text="@(State.ContentPanMode ? "Finish positioning worksheet" : "Position visible worksheet")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
+            <DxRibbonItem Text="Reset worksheet position" IconCssClass="pub-icon pub-icon-command" Click="ResetContentViewport" />
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -431,6 +437,11 @@
             <DxRibbonItem Text="Open Component Studio" IconCssClass="pub-icon pub-icon-properties" IsPrimary="true" Click="RequestEditComponent" />
             <DxRibbonItem Text="Manage publication data" IconCssClass="pub-icon pub-icon-data" Click="RequestManageData" />
             <DxRibbonItem Text="Refresh component" IconCssClass="pub-icon pub-icon-command" Click="RefreshData" />
+            @if (IsMapComponentSelected)
+            {
+                <DxRibbonItem Text="@(State.ContentPanMode ? "Finish positioning map" : "Position visible map")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
+                <DxRibbonItem Text="Reset map position" IconCssClass="pub-icon pub-icon-command" Click="ResetContentViewport" />
+            }
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -573,6 +584,8 @@
     private Task RequestEditDataVisual() => OnEditDataVisual.InvokeAsync();
     private Task RequestManageData() => OnManageData.InvokeAsync();
     private Task RequestEditComponent() => OnEditComponent.InvokeAsync();
+    private void ToggleContentPan() => State.ToggleContentPanMode();
+    private void ResetContentViewport() => State.ResetContentViewport();
     private Task RequestPreviewPageAnimations() => OnPreviewPageAnimations.InvokeAsync();
     private Task RequestPreviewObjectAnimations() => OnPreviewObjectAnimations.InvokeAsync();
     private Task RequestStopAnimations() => OnStopAnimations.InvokeAsync();
@@ -587,6 +600,7 @@
     private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
     private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
     private bool IsComponentSelected => State.SelectedElement is DevExtremeComponentElement;
+    private bool IsMapComponentSelected => State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
     private bool IsSpreadsheetSelected => State.SelectedElement is SpreadsheetElement;
     private string SpreadsheetGridLinesText => State.SelectedElement is SpreadsheetElement { ShowGridLines: true } ? "Hide grid lines" : "Show grid lines";
     private string SpreadsheetSheetNameText => State.SelectedElement is SpreadsheetElement { ShowSheetName: true } ? "Hide worksheet name" : "Show worksheet name";
@@ -673,6 +687,8 @@
     private Task AddComponentTreeList() => AddComponent(PublicationComponentKind.TreeList);
     private Task AddComponentScheduler() => AddComponent(PublicationComponentKind.Scheduler);
     private Task AddComponentPivotGrid() => AddComponent(PublicationComponentKind.PivotGrid);
+    private Task AddComponentMap() => AddComponent(PublicationComponentKind.Map);
+    private Task AddComponentVectorMap() => AddComponent(PublicationComponentKind.VectorMap);
     private Task AddComponentForm() => AddComponent(PublicationComponentKind.Form);
     private Task AddComponentTextBox() => AddComponent(PublicationComponentKind.TextBox);
     private Task AddComponentTextArea() => AddComponent(PublicationComponentKind.TextArea);

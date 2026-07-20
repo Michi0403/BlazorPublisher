@@ -14,6 +14,7 @@ const editorPath = path.join(root, 'src', 'PublisherStudio.Web', 'Components', '
 const viewPath = path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'DevExtremeComponentView.razor');
 const statePath = path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'EditorStateService.cs');
 const devExtremePath = path.join(root, 'src', 'PublisherStudio.Web', 'wwwroot', 'vendor', 'devextreme-dist', 'js', 'dx.all.js');
+const cssPath = path.join(root, 'src', 'PublisherStudio.Web', 'wwwroot', 'css', 'site.css');
 
 const runtime = fs.readFileSync(runtimePath, 'utf8');
 const exporter = fs.readFileSync(exportPath, 'utf8');
@@ -24,6 +25,7 @@ const editor = fs.readFileSync(editorPath, 'utf8');
 const view = fs.readFileSync(viewPath, 'utf8');
 const state = fs.readFileSync(statePath, 'utf8');
 const devExtreme = fs.readFileSync(devExtremePath, 'utf8');
+const css = fs.readFileSync(cssPath, 'utf8');
 
 const components = {
   DataGrid: 'dxDataGrid',
@@ -46,6 +48,8 @@ const components = {
   Splitter: 'dxSplitter',
   ScrollView: 'dxScrollView',
   PivotGrid: 'dxPivotGrid',
+  Map: 'dxMap',
+  VectorMap: 'dxVectorMap',
   Button: 'dxButton'
 };
 
@@ -99,6 +103,21 @@ assert.match(view, /string\.Equals\(config, _lastRenderedConfig, StringCompariso
 assert.match(exporter, /buildPublisherSingleHtml\('presentation'/);
 assert.match(exporter, /buildPublisherSingleHtml\('site'/);
 assert.match(exporter, /fetchExportAsset\('js\/componentRuntime\.js'\)/);
+assert.match(exporter, /vectormap-data\/world\.js/);
+assert.match(editor, /Vector map designer/);
+assert.match(editor, /Import GeoJSON/);
+assert.match(model, /PublicationVectorMapFeature/);
+assert.match(state, /CommitContentViewport/);
+assert.match(view, /data-content-viewport/);
+assert.match(runtime, /CheckBox", "Map", "VectorMap"\]\.includes/);
+assert.match(exporter, /contentFitScaleX/);
+assert.match(runtime, /fetchDataObjectLive\(state\.config\.connection\.dataObjectLive\)/);
+assert.match(runtime, /clearInterval\(state\.timer\)/);
+assert.match(ribbon, /Position visible text/);
+assert.match(ribbon, /Position visible worksheet/);
+assert.match(ribbon, /Position visible map/);
+assert.match(css, /dxbl-btn-dropdown-toggle/);
+assert.match(exporter, /translate\(\$\{translateX\}px, \$\{translateY\}px\)/);
 assert.match(exporter, /websiteSiteRuntime/);
 assert.match(exporter, /PublisherStudioNavigation/);
 assert.match(exporter, /<script>\$\{safeScript\(componentRuntimeSource\)\}<\/script>/);

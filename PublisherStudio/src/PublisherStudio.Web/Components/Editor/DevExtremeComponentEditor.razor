@@ -1,4 +1,5 @@
 @namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
 @inject PublicationComponentService Components
 @inject PublicationDataService DataService
 @inject IJSRuntime JS
@@ -12,7 +13,7 @@
                     <strong>Component Studio · @_draft.Title</strong>
                     <span>Browser-native DevExtreme controls with publication datasets, REST, OData, CRUD, page navigation, and component-to-component actions.</span>
                 </div>
-                <button type="button" class="window-close" @onclick="Cancel">×</button>
+                <button type="button" class="window-close" @onclick="Cancel"><span aria-hidden="true">×</span></button>
             </header>
 
             <div class="component-editor-commandbar">
@@ -20,6 +21,10 @@
                 <button type="button" class="@SectionClass("data")" @onclick="ShowData">Data &amp; API</button>
                 <button type="button" class="@SectionClass("fields")" @onclick="ShowFields">Fields &amp; editors</button>
                 <button type="button" class="@SectionClass("behavior")" @onclick="ShowBehavior">Behavior</button>
+                @if (_draft.ComponentKind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap)
+                {
+                    <button type="button" class="@SectionClass("map")" @onclick="ShowMap">Map &amp; drawing</button>
+                }
                 @if (_draft.IsLayoutContainer)
                 {
                     <button type="button" class="@SectionClass("layout")" @onclick="ShowLayout">Layout panels</button>
@@ -255,6 +260,86 @@
                             </div>
                         </section>
                     }
+                    else if (_section == "map")
+                    {
+                        <section class="component-section vector-map-editor">
+                            <h3>@(_draft.ComponentKind == PublicationComponentKind.VectorMap ? "Vector map designer" : "Interactive map")</h3>
+                            <div class="component-form-grid wide">
+                                <label>Latitude field<input @bind="_draft.LatitudeField" /></label>
+                                <label>Longitude field<input @bind="_draft.LongitudeField" /></label>
+                                <label>Label / tooltip field<input @bind="_draft.MarkerTooltipField" /></label>
+                                <label>Center latitude<input type="number" min="-90" max="90" step="0.0001" @bind="_draft.MapCenterLatitude" /></label>
+                                <label>Center longitude<input type="number" min="-180" max="180" step="0.0001" @bind="_draft.MapCenterLongitude" /></label>
+                                <label>Zoom<input type="number" min="1" max="20" step="0.25" @bind="_draft.MapZoom" /></label>
+                            </div>
+                            <div class="component-option-grid">
+                                <label><input type="checkbox" @bind="_draft.MapControls" /> Navigation controls</label>
+                                <label><input type="checkbox" @bind="_draft.MapAutoAdjust" /> Auto-fit markers</label>
+                            </div>
+
+                            @if (_draft.ComponentKind == PublicationComponentKind.Map)
+                            {
+                                <div class="component-form-grid wide">
+                                    <label>Provider<select @bind="_draft.MapProvider"><option value="google">Google</option><option value="googleStatic">Google Static</option><option value="bing">Bing</option><option value="azure">Azure</option></select></label>
+                                    <label>Map type<select @bind="_draft.MapType"><option value="roadmap">Road map</option><option value="satellite">Satellite</option><option value="hybrid">Hybrid</option></select></label>
+                                    <label class="span-2">Provider API key<input type="password" @bind="_draft.MapApiKey" autocomplete="off" /></label>
+                                    <label>Address field<input @bind="_draft.AddressField" /></label>
+                                    <label>Route group field<input @bind="_draft.MapRouteField" /></label>
+                                    <label>Route order field<input @bind="_draft.MapOrderField" /></label>
+                                    <label><input type="checkbox" @bind="_draft.MapShowRoutes" /> Build routes from grouped rows</label>
+                                </div>
+                                <p class="component-info">Rows with latitude/longitude become live markers. Rows sharing a route group become an ordered route. Provider maps require the corresponding provider key.</p>
+                            }
+                            else
+                            {
+                                <div class="component-form-grid wide">
+                                    <label>Bundled base map<select @bind="_draft.VectorBaseLayer">@foreach (var value in Enum.GetValues<PublicationVectorMapBaseLayer>()) { <option value="@value">@Friendly(value.ToString())</option> }</select></label>
+                                    <label>Projection<select @bind="_draft.VectorProjection"><option value="mercator">Mercator</option><option value="miller">Miller</option><option value="lambert">Lambert</option><option value="equirectangular">Equirectangular</option></select></label>
+                                    <label>Data label field<input @bind="_draft.VectorLabelField" /></label>
+                                    <label>Data value field<input @bind="_draft.VectorValueField" /></label>
+                                    <label>Data color field<input @bind="_draft.VectorColorField" /></label>
+                                    <label><input type="checkbox" @bind="_draft.VectorShowLabels" /> Show labels</label>
+                                </div>
+                                <div class="vector-draw-toolbar">
+                                    <button type="button" class="@DrawClassMarker" @onclick="SetMarkerDrawMode">Marker</button>
+                                    <button type="button" class="@DrawClassLine" @onclick="SetLineDrawMode">Line</button>
+                                    <button type="button" class="@DrawClassPolygon" @onclick="SetPolygonDrawMode">Polygon</button>
+                                    <button type="button" @onclick="FinishFeature">Finish shape</button>
+                                    <button type="button" @onclick="UndoPoint">Undo point</button>
+                                    <button type="button" class="danger" @onclick="ClearFeatures">Clear drawings</button>
+                                </div>
+                                <p class="component-info">Choose a drawing tool, then click directly in the live preview. Coordinates are stored as precise longitude/latitude values and remain editable below.</p>
+                                <div class="component-panel-list vector-feature-list">
+                                    @foreach (var feature in _draft.VectorFeatures)
+                                    {
+                                        <article @key="feature.Id" class="@(feature.Id == _activeFeatureId ? "active-feature" : null)">
+                                            <div class="component-section-heading"><strong>@feature.Name</strong><button type="button" class="danger" @onclick="() => RemoveFeature(feature)">Remove</button></div>
+                                            <div class="component-form-grid wide">
+                                                <label>Name<input @bind="feature.Name" /></label>
+                                                <label>Kind<select @bind="feature.Kind">@foreach (var kind in Enum.GetValues<PublicationVectorFeatureKind>()) { <option value="@kind">@kind</option> }</select></label>
+                                                <label>Fill / marker color<input type="color" @bind="feature.Color" /></label>
+                                                <label>Border color<input type="color" @bind="feature.BorderColor" /></label>
+                                                <label>Opacity<input type="number" min="0" max="1" step="0.05" @bind="feature.Opacity" /></label>
+                                                <label>Line width<input type="number" min="0.25" max="40" step="0.25" @bind="feature.Width" /></label>
+                                                <label>Marker size<input type="number" min="2" max="100" step="1" @bind="feature.Size" /></label>
+                                                <label>Label<input @bind="feature.Label" /></label>
+                                            </div>
+                                            <div class="vector-point-table">
+                                                @for (var pointIndex = 0; pointIndex < feature.Points.Count; pointIndex++)
+                                                {
+                                                    var point = feature.Points[pointIndex];
+                                                    <label>Lng <input type="number" min="-180" max="180" step="0.000001" @bind="point.Longitude" /></label>
+                                                    <label>Lat <input type="number" min="-90" max="90" step="0.000001" @bind="point.Latitude" /></label>
+                                                }
+                                            </div>
+                                        </article>
+                                    }
+                                </div>
+                                <label>Import GeoJSON FeatureCollection<textarea class="component-code-editor" @bind="_geoJson" spellcheck="false" placeholder="Paste Point, LineString, Polygon, MultiLineString, or MultiPolygon GeoJSON"></textarea></label>
+                                <div class="component-section-heading"><span>@_geoJsonStatus</span><button type="button" @onclick="ImportGeoJson">Import GeoJSON</button></div>
+                            }
+                        </section>
+                    }
                     else if (_section == "layout")
                     {
                         <section class="component-section">
@@ -341,6 +426,9 @@
                     {
                         <section class="component-section">
                             <h3>Advanced DevExtreme options</h3>
+                            <div class="component-form-grid wide"><label>Custom CSS class<input @bind="_draft.CustomCssClass" placeholder="my-component compact" /></label></div>
+                            <label>Custom inline CSS declarations<textarea class="component-code-editor" @bind="_draft.CustomCss" spellcheck="false" placeholder="box-shadow: 0 10px 30px rgba(0,0,0,.18); border-radius: 12px"></textarea></label>
+                            <p class="component-info">CSS declarations are applied to the component frame. Unsafe script-like CSS and selector blocks are removed when the component is saved.</p>
                             <label>Options JSON<textarea class="component-code-editor" @bind="_draft.AdvancedOptionsJson" spellcheck="false"></textarea></label>
                             <p class="component-info">The JSON object is merged after PublisherStudio's generated safe options. It keeps the project file declarative and remains compatible with the single-file export.</p>
                             <label class="component-script-toggle"><input type="checkbox" @bind="_draft.AllowCustomScript" /> Enable custom JavaScript actions for this component</label>
@@ -355,7 +443,8 @@
                 <aside class="component-preview-pane">
                     <div class="pane-heading"><strong>Live preview</strong><span>@PublicationComponentService.ComponentName(_draft.ComponentKind)</span></div>
                     <div class="component-preview-frame">
-                        <DevExtremeComponentView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" IdPrefix="studio" />
+                        <DevExtremeComponentView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" IdPrefix="studio"
+                            ElementIdOverride="ps-component-vector-designer" DesignerMode="@(_section == "map" && _draft.ComponentKind == PublicationComponentKind.VectorMap)" />
                     </div>
                     <small>The preview and both HTML exports use the same component JSON and browser runtime.</small>
                 </aside>
@@ -383,6 +472,12 @@
     private string _headersText = string.Empty;
     private bool _testingConnection;
     private string _connectionStatus = string.Empty;
+    private string _drawMode = string.Empty;
+    private Guid? _activeFeatureId;
+    private string _geoJson = string.Empty;
+    private string _geoJsonStatus = string.Empty;
+    private DotNetObjectReference<DevExtremeComponentEditor>? _self;
+    private bool _designerAttached;
 
     private static readonly PublicationComponentKind[] PanelComponentKinds =
     [
@@ -390,7 +485,8 @@
         PublicationComponentKind.Scheduler, PublicationComponentKind.Gallery, PublicationComponentKind.TileView,
         PublicationComponentKind.PivotGrid, PublicationComponentKind.TextBox, PublicationComponentKind.TextArea,
         PublicationComponentKind.NumberBox, PublicationComponentKind.DateBox, PublicationComponentKind.CheckBox,
-        PublicationComponentKind.SelectBox, PublicationComponentKind.TagBox, PublicationComponentKind.Button
+        PublicationComponentKind.SelectBox, PublicationComponentKind.TagBox, PublicationComponentKind.Map,
+        PublicationComponentKind.VectorMap, PublicationComponentKind.Button
     ];
 
     private IEnumerable<PublicationElement> CurrentPageElements => State.CurrentPage.Elements.Where(element => element.Id != _draft?.Id);
@@ -416,6 +512,7 @@
     private void ShowData() => _section = "data";
     private void ShowFields() => _section = "fields";
     private void ShowBehavior() => _section = "behavior";
+    private void ShowMap() => _section = "map";
     private void ShowLayout() => _section = "layout";
     private void ShowActions() => _section = "actions";
     private void ShowAdvanced() => _section = "advanced";
@@ -425,7 +522,7 @@
         PublicationComponentKind.Form => "≣", PublicationComponentKind.Gallery => "▧", PublicationComponentKind.TileView => "▥",
         PublicationComponentKind.Menu => "☰", PublicationComponentKind.ContextMenu => "⋮", PublicationComponentKind.TabPanel => "▤",
         PublicationComponentKind.MultiView => "▱", PublicationComponentKind.Splitter => "◫", PublicationComponentKind.ScrollView => "↕",
-        PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Button => "▰", _ => "⌨"
+        PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Map => "⌖", PublicationComponentKind.VectorMap => "◈", PublicationComponentKind.Button => "▰", _ => "⌨"
     };
     private static string Friendly(string value) => PublicationComponentService.Friendly(value);
 
@@ -438,7 +535,102 @@
         if (_draft.IsLayoutContainer && _draft.Panels.Count == 0) AddPanel();
         if (kind == PublicationComponentKind.Button && _draft.Actions.Count == 0)
             _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.NextPage });
-        _section = "general";
+        _section = kind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap ? "map" : "general";
+    }
+
+    private string DrawClassMarker => _drawMode == "marker" ? "active" : string.Empty;
+    private string DrawClassLine => _drawMode == "line" ? "active" : string.Empty;
+    private string DrawClassPolygon => _drawMode == "polygon" ? "active" : string.Empty;
+    private void SetDrawMode(string mode) { _drawMode = mode; _activeFeatureId = null; }
+    private void SetMarkerDrawMode() => SetDrawMode("marker");
+    private void SetLineDrawMode() => SetDrawMode("line");
+    private void SetPolygonDrawMode() => SetDrawMode("polygon");
+    private void FinishFeature() { _activeFeatureId = null; _drawMode = string.Empty; }
+    private void UndoPoint()
+    {
+        var feature = _draft?.VectorFeatures.FirstOrDefault(item => item.Id == _activeFeatureId) ?? _draft?.VectorFeatures.LastOrDefault();
+        if (feature?.Points.Count > 0) feature.Points.RemoveAt(feature.Points.Count - 1);
+    }
+    private void RemoveFeature(PublicationVectorMapFeature feature) { _draft?.VectorFeatures.Remove(feature); if (_activeFeatureId == feature.Id) _activeFeatureId = null; }
+    private void ClearFeatures() { _draft?.VectorFeatures.Clear(); _activeFeatureId = null; }
+
+    [JSInvokable]
+    public void AddVectorDesignerPoint(double longitude, double latitude)
+    {
+        if (_draft is null || string.IsNullOrWhiteSpace(_drawMode)) return;
+        var kind = _drawMode switch { "line" => PublicationVectorFeatureKind.Line, "polygon" => PublicationVectorFeatureKind.Polygon, _ => PublicationVectorFeatureKind.Marker };
+        PublicationVectorMapFeature? feature = null;
+        if (kind != PublicationVectorFeatureKind.Marker && _activeFeatureId is { } active)
+            feature = _draft.VectorFeatures.FirstOrDefault(item => item.Id == active && item.Kind == kind);
+        if (feature is null)
+        {
+            feature = new PublicationVectorMapFeature { Name = $"{kind} {_draft.VectorFeatures.Count + 1}", Kind = kind, Color = kind == PublicationVectorFeatureKind.Marker ? "#ef4444" : "#2563eb" };
+            _draft.VectorFeatures.Add(feature);
+            _activeFeatureId = kind == PublicationVectorFeatureKind.Marker ? null : feature.Id;
+        }
+        feature.Points.Add(new PublicationMapPoint { Longitude = Math.Clamp(longitude, -180, 180), Latitude = Math.Clamp(latitude, -90, 90) });
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void ImportGeoJson()
+    {
+        if (_draft is null || string.IsNullOrWhiteSpace(_geoJson)) return;
+        try
+        {
+            using var json = System.Text.Json.JsonDocument.Parse(_geoJson);
+            var root = json.RootElement;
+            var items = root.TryGetProperty("features", out var features) ? features.EnumerateArray().ToArray() : new[] { root };
+            var added = 0;
+            foreach (var item in items)
+            {
+                if (!item.TryGetProperty("geometry", out var geometry)) geometry = item;
+                if (!geometry.TryGetProperty("type", out var typeProperty) || !geometry.TryGetProperty("coordinates", out var coordinates)) continue;
+                var type = typeProperty.GetString() ?? string.Empty;
+                var properties = item.TryGetProperty("properties", out var p) ? p : default;
+                var name = properties.ValueKind == System.Text.Json.JsonValueKind.Object && properties.TryGetProperty("name", out var n) ? n.GetString() ?? $"Feature {_draft.VectorFeatures.Count + 1}" : $"Feature {_draft.VectorFeatures.Count + 1}";
+                foreach (var parsed in ParseGeoGeometry(type, coordinates, name)) { _draft.VectorFeatures.Add(parsed); added++; }
+            }
+            _geoJsonStatus = $"Imported {added} feature(s).";
+        }
+        catch (Exception error) { _geoJsonStatus = $"GeoJSON import failed: {error.Message}"; }
+    }
+
+    private static IEnumerable<PublicationVectorMapFeature> ParseGeoGeometry(string type, System.Text.Json.JsonElement coordinates, string name)
+    {
+        PublicationVectorMapFeature Feature(PublicationVectorFeatureKind kind, IEnumerable<System.Text.Json.JsonElement> points) => new()
+        {
+            Name = name, Kind = kind, Points = points.Where(point => point.ValueKind == System.Text.Json.JsonValueKind.Array && point.GetArrayLength() >= 2)
+                .Select(point => new PublicationMapPoint { Longitude = point[0].GetDouble(), Latitude = point[1].GetDouble() }).ToList()
+        };
+        if (type.Equals("Point", StringComparison.OrdinalIgnoreCase)) return new[] { Feature(PublicationVectorFeatureKind.Marker, new[] { coordinates }) };
+        if (type.Equals("LineString", StringComparison.OrdinalIgnoreCase)) return new[] { Feature(PublicationVectorFeatureKind.Line, coordinates.EnumerateArray()) };
+        if (type.Equals("Polygon", StringComparison.OrdinalIgnoreCase)) return coordinates.GetArrayLength() > 0
+            ? new[] { Feature(PublicationVectorFeatureKind.Polygon, coordinates[0].EnumerateArray()) }
+            : Array.Empty<PublicationVectorMapFeature>();
+        if (type.Equals("MultiLineString", StringComparison.OrdinalIgnoreCase)) return coordinates.EnumerateArray().Select((line, index) => Feature(PublicationVectorFeatureKind.Line, line.EnumerateArray())).ToArray();
+        if (type.Equals("MultiPolygon", StringComparison.OrdinalIgnoreCase)) return coordinates.EnumerateArray().Where(polygon => polygon.GetArrayLength() > 0).Select(polygon => Feature(PublicationVectorFeatureKind.Polygon, polygon[0].EnumerateArray())).ToArray();
+        return Array.Empty<PublicationVectorMapFeature>();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var shouldAttach = Visible && _draft?.ComponentKind == PublicationComponentKind.VectorMap && _section == "map";
+        if (shouldAttach && !_designerAttached)
+        {
+            _self ??= DotNetObjectReference.Create(this);
+            try { _designerAttached = await JS.InvokeAsync<bool>("PublisherStudioComponentRuntime.attachVectorDesigner", "ps-component-vector-designer", _self); } catch { _designerAttached = false; }
+        }
+        else if (!shouldAttach && _designerAttached)
+        {
+            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer"); } catch { }
+            _designerAttached = false;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer"); } catch { }
+        _self?.Dispose();
     }
 
     private Task ConnectionModeChanged() { _connectionStatus = string.Empty; return Task.CompletedTask; }

@@ -47,6 +47,7 @@ public sealed class EditorStateService : IDisposable
     public bool IsDirty { get; private set; }
     public long Revision { get; private set; }
     public bool CropMode { get; private set; }
+    public bool ContentPanMode { get; private set; }
     public ConnectorToolKind ConnectorTool { get; private set; }
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
@@ -72,6 +73,7 @@ public sealed class EditorStateService : IDisposable
         SelectedPageId = Document.Pages[0].Id;
         ClearSelectionCore();
         CropMode = false;
+        ContentPanMode = false;
         ConnectorTool = ConnectorToolKind.None;
         _undo.Clear();
         _redo.Clear();
@@ -90,6 +92,7 @@ public sealed class EditorStateService : IDisposable
         SelectedPageId = Document.Pages[0].Id;
         ClearSelectionCore();
         CropMode = false;
+        ContentPanMode = false;
         ConnectorTool = ConnectorToolKind.None;
         _undo.Clear();
         _redo.Clear();
@@ -137,6 +140,7 @@ public sealed class EditorStateService : IDisposable
         SelectedPageId = id;
         ClearSelectionCore();
         CropMode = false;
+        ContentPanMode = false;
         ConnectorTool = ConnectorToolKind.None;
         EndLiveEdit();
         _lastInsertionX = null;
@@ -151,6 +155,7 @@ public sealed class EditorStateService : IDisposable
             if (_selectedElementIds.Count == 0 && SelectedElementId is null) return;
             ClearSelectionCore();
             CropMode = false;
+            ContentPanMode = false;
             EndLiveEdit();
             Notify(false);
             return;
@@ -180,9 +185,11 @@ public sealed class EditorStateService : IDisposable
         else SelectedElementId = _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
 
         var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
+        var contentPanChanged = ContentPanMode && (_selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
         if (cropChanged) CropMode = false;
+        if (contentPanChanged) ContentPanMode = false;
         EndLiveEdit();
-        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged) Notify(false);
+        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged || contentPanChanged) Notify(false);
     }
 
     public void SetSelection(IEnumerable<Guid> ids)
@@ -201,9 +208,11 @@ public sealed class EditorStateService : IDisposable
         var previousSelection = _selectedElementIds.ToHashSet();
         SetSelectionCore(expanded.Select(element => element.Id), requested.LastOrDefault()?.Id);
         var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
+        var contentPanChanged = ContentPanMode && (_selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
         if (cropChanged) CropMode = false;
+        if (contentPanChanged) ContentPanMode = false;
         EndLiveEdit();
-        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged)
+        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged || contentPanChanged)
             Notify(false);
     }
 
@@ -217,6 +226,7 @@ public sealed class EditorStateService : IDisposable
         if (SelectedElementId == id) return;
         SelectedElementId = id;
         if (CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement)) CropMode = false;
+        if (ContentPanMode && (_selectedElementIds.Count != 1 || !CanPanContent(SelectedElement))) ContentPanMode = false;
         EndLiveEdit();
         Notify(false);
     }
@@ -683,6 +693,7 @@ public sealed class EditorStateService : IDisposable
     {
         ConnectorTool = ConnectorTool == tool ? ConnectorToolKind.None : tool;
         CropMode = false;
+        ContentPanMode = false;
         Notify(false);
     }
 
@@ -690,6 +701,7 @@ public sealed class EditorStateService : IDisposable
     {
         ConnectorTool = ConnectorToolKind.None;
         CropMode = false;
+        ContentPanMode = false;
         Notify(false);
     }
 
@@ -857,6 +869,7 @@ public sealed class EditorStateService : IDisposable
         ReindexAnimations();
         ClearSelectionCore();
         CropMode = false;
+        ContentPanMode = false;
         Notify();
     }
 
@@ -896,6 +909,7 @@ public sealed class EditorStateService : IDisposable
         if (ids.Length == 0) return;
         SetSelectionCore(ids, ids[0]);
         CropMode = false;
+        ContentPanMode = false;
         ConnectorTool = ConnectorToolKind.None;
         EndLiveEdit();
         Notify(false);
@@ -1340,8 +1354,47 @@ public sealed class EditorStateService : IDisposable
     {
         if (SelectedElement is not ImageFrameElement) return;
         CropMode = !CropMode;
+        if (CropMode) ContentPanMode = false;
         Notify(false);
     }
+
+    public void ToggleContentPanMode()
+    {
+        if (!CanPanContent(SelectedElement)) return;
+        ContentPanMode = !ContentPanMode;
+        if (ContentPanMode)
+        {
+            CropMode = false;
+            ConnectorTool = ConnectorToolKind.None;
+        }
+        Notify(false);
+    }
+
+    public void CommitContentViewport(Guid id, double offsetX, double offsetY, double scale)
+    {
+        var element = CurrentPage.Elements.FirstOrDefault(candidate => candidate.Id == id);
+        if (!CanPanContent(element) || element!.Locked) return;
+        Capture();
+        var x = Math.Clamp(offsetX, -500, 500);
+        var y = Math.Clamp(offsetY, -500, 500);
+        var zoom = Math.Clamp(scale, .1, 12);
+        switch (element)
+        {
+            case TextFrameElement text: text.ContentOffsetX = x; text.ContentOffsetY = y; text.ContentScale = zoom; break;
+            case SpreadsheetElement sheet: sheet.ContentOffsetX = x; sheet.ContentOffsetY = y; sheet.ContentScale = zoom; break;
+            case DevExtremeComponentElement component: component.ContentOffsetX = x; component.ContentOffsetY = y; component.ContentScale = zoom; break;
+        }
+        Notify();
+    }
+
+    public void ResetContentViewport()
+    {
+        if (!CanPanContent(SelectedElement)) return;
+        CommitContentViewport(SelectedElement!.Id, 0, 0, 1);
+    }
+
+    public static bool CanPanContent(PublicationElement? element) => element is TextFrameElement or SpreadsheetElement
+        or DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
 
     public void AddGuide(GuideOrientation orientation)
     {
@@ -1499,6 +1552,7 @@ public sealed class EditorStateService : IDisposable
         SelectedPageId = Document.Pages[Math.Min(selectedPageIndex, Document.Pages.Count - 1)].Id;
         ClearSelectionCore();
         CropMode = false;
+        ContentPanMode = false;
         ConnectorTool = ConnectorToolKind.None;
         _liveEditKey = null;
         Notify();
@@ -1722,6 +1776,7 @@ public sealed class EditorStateService : IDisposable
         ApplyNormalizedZOrder(OrderedElements());
         SetSelectionCore(clones.Select(clone => clone.Id), clones.FirstOrDefault()?.Id);
         CropMode = false;
+        ContentPanMode = false;
         ConnectorTool = ConnectorToolKind.None;
         Notify();
     }

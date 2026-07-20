@@ -1856,3 +1856,200 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .ps-component-panel-html { padding:7px 9px; overflow:auto; border-bottom:1px solid #d9e1e7; background:#f8fafc; color:#334155; font-size:11px; }
 .ps-component-panel-widget { min-width:0; min-height:0; overflow:hidden; }
 .ps-component-scroll-content { padding:12px; box-sizing:border-box; }
+
+/* PublisherStudio 1.0.40: larger studios, stable dropdowns, content viewports and map designer. */
+.modal-backdrop,
+.editor-modal-backdrop {
+    padding: 8px !important;
+}
+
+.story-editor-dialog,
+.spreadsheet-editor-dialog,
+.data-manager-dialog,
+.data-visual-editor-dialog,
+.picture-studio-dialog,
+.media-studio-window,
+.barcode-editor-dialog,
+.component-editor-dialog {
+    width: min(1880px, calc(100vw - 16px)) !important;
+    height: min(1180px, calc(100vh - 16px)) !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 16px) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+}
+
+.spreadsheet-data-object-dialog {
+    width: min(1400px, calc(100% - 24px)) !important;
+    height: min(900px, calc(100% - 24px)) !important;
+    max-width: calc(100% - 24px) !important;
+    max-height: calc(100% - 24px) !important;
+}
+
+.window-close {
+    display: inline-grid !important;
+    place-items: center !important;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    line-height: 1 !important;
+    text-align: center;
+}
+.window-close > span {
+    display: block;
+    line-height: 1;
+    transform: translateY(-1px);
+    overflow: visible !important;
+    color: inherit !important;
+    font: 400 20px/1 Arial, sans-serif !important;
+    text-overflow: clip !important;
+}
+.component-editor-commandbar { grid-template-columns: repeat(8, max-content) 1fr max-content; }
+
+.component-editor-dialog select,
+.component-editor-dialog input[list],
+.story-editor-dialog select,
+.spreadsheet-editor-dialog select,
+.data-manager-dialog select,
+.data-visual-editor-dialog select,
+.picture-studio-dialog select,
+.media-studio-window select,
+.barcode-editor-dialog select {
+    padding-right: 30px !important;
+    background-position: right 8px center !important;
+}
+
+.categorized-ribbon [class*="dropdown"] svg,
+.categorized-ribbon [class*="drop-down"] svg,
+.categorized-ribbon [class*="dropdown"]::before,
+.categorized-ribbon [class*="drop-down"]::before {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    vertical-align: middle !important;
+}
+.categorized-ribbon [class*="dropdown"],
+.categorized-ribbon [class*="drop-down"] {
+    overflow: visible !important;
+}
+.categorized-ribbon [class*="dropdown"] > svg:last-child,
+.categorized-ribbon [class*="drop-down"] > svg:last-child {
+    flex: 0 0 auto !important;
+    margin-inline-start: 4px !important;
+}
+
+.categorized-ribbon .dxbl-btn-dropdown-toggle,
+.categorized-ribbon [class*="dropdown-toggle"] {
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 14px !important;
+    width: 14px !important;
+    height: 18px !important;
+    margin: 0 0 0 3px !important;
+    padding: 0 !important;
+    transform: none !important;
+    vertical-align: middle !important;
+}
+.categorized-ribbon .dxbl-btn-dropdown-toggle::before,
+.categorized-ribbon .dxbl-btn-dropdown-toggle::after,
+.categorized-ribbon [class*="dropdown-toggle"]::before,
+.categorized-ribbon [class*="dropdown-toggle"]::after {
+    position: static !important;
+    inset: auto !important;
+    margin: 0 !important;
+    transform: none !important;
+}
+
+.publication-content-frame,
+.devextreme-component-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+.devextreme-component-viewport {
+    min-height: 0;
+    flex: 1 1 auto;
+}
+.devextreme-component-source {
+    width: 100%;
+    height: 100%;
+}
+.devextreme-component-source > .devextreme-component-host {
+    width: 100%;
+    height: 100%;
+}
+.content-pan-mode [data-content-viewport] {
+    cursor: grab;
+    outline: 2px dashed rgba(37, 99, 235, .85);
+    outline-offset: -2px;
+}
+.content-pan-mode [data-content-viewport]:active { cursor: grabbing; }
+.content-pan-mode [data-content-fit-source] { pointer-events: none; user-select: none; }
+.content-pan-help {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    z-index: 20;
+    transform: translateX(-50%);
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, .88);
+    color: #fff;
+    font: 600 11px/1.2 "Segoe UI", sans-serif;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.vector-draw-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 8px 0;
+}
+.vector-draw-toolbar button.active {
+    background: #2563eb;
+    border-color: #1d4ed8;
+    color: #fff;
+}
+.vector-feature-list article.active-feature {
+    box-shadow: inset 3px 0 #2563eb;
+}
+.vector-point-table {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(110px, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+}
+.vector-point-table label {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 5px;
+}
+.vector-point-table input { min-width: 0; }
+
+@media (max-width: 720px) {
+    .modal-backdrop, .editor-modal-backdrop { padding: 4px !important; }
+    .story-editor-dialog,
+    .spreadsheet-editor-dialog,
+    .data-manager-dialog,
+    .data-visual-editor-dialog,
+    .picture-studio-dialog,
+    .media-studio-window,
+    .barcode-editor-dialog,
+    .component-editor-dialog {
+        width: calc(100vw - 8px) !important;
+        height: calc(100vh - 8px) !important;
+        max-width: calc(100vw - 8px) !important;
+        max-height: calc(100vh - 8px) !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+    }
+    .vector-point-table { grid-template-columns: 1fr 1fr; }
+}

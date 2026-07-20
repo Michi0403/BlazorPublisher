@@ -108,6 +108,9 @@ public sealed partial class PublicationFileService
             text.DocumentBackground = NormalizeCssBackground(text.DocumentBackground);
             text.PaddingMm = Math.Clamp(text.PaddingMm, 0, 50);
             text.BorderWidth = Math.Clamp(text.BorderWidth, 0, 5);
+            text.ContentOffsetX = Math.Clamp(text.ContentOffsetX, -500, 500);
+            text.ContentOffsetY = Math.Clamp(text.ContentOffsetY, -500, 500);
+            text.ContentScale = Math.Clamp(text.ContentScale <= 0 ? 1 : text.ContentScale, .1, 12);
             if (text.DocumentContent is null || text.DocumentContent.Length == 0)
             {
                 text.DocumentContent = RichTextDocumentFactory.CreateOpenXml("Text frame");
@@ -166,6 +169,9 @@ public sealed partial class PublicationFileService
             }
             spreadsheet.WorkbookFileName = _spreadsheets.NormalizeWorkbookFileName(spreadsheet.WorkbookFileName, spreadsheet.StorageFormat);
             spreadsheet.BorderWidthMm = Math.Clamp(spreadsheet.BorderWidthMm, 0, 8);
+            spreadsheet.ContentOffsetX = Math.Clamp(spreadsheet.ContentOffsetX, -500, 500);
+            spreadsheet.ContentOffsetY = Math.Clamp(spreadsheet.ContentOffsetY, -500, 500);
+            spreadsheet.ContentScale = Math.Clamp(spreadsheet.ContentScale <= 0 ? 1 : spreadsheet.ContentScale, .1, 12);
             // Never trust preview HTML stored in an externally edited publication file. Rebuild it
             // deterministically from the embedded workbook package on every load.
             spreadsheet.PreviewHtml = _spreadsheets.RenderPreviewHtml(spreadsheet.WorkbookContent, spreadsheet.StorageFormat, out var sheetName);
@@ -302,7 +308,7 @@ public sealed partial class PublicationFileService
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
         }
 
-        document.FormatVersion = "1.37";
+        document.FormatVersion = "1.38";
         return document;
     }
 

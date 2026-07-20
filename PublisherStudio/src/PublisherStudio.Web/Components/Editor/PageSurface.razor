@@ -31,7 +31,7 @@
     </div>
 
     <div id="publisher-scroll-area" class="page-scroll-area">
-        <div id="publisher-page" class="publication-page @(State.CropMode ? "crop-mode" : null)"
+        <div id="publisher-page" class="publication-page @(State.CropMode ? "crop-mode" : null) @(State.ContentPanMode ? "content-pan-mode" : null)"
              style="@PageStyle"
              data-px-per-mm="@Inv(PixelsPerMm)"
              data-zoom="@Inv(State.Document.Zoom)"
@@ -126,10 +126,14 @@
                     @switch (element)
                     {
                         case TextFrameElement text:
-                            <div class="text-frame-content publication-content-frame fit-@text.ContentFit.ToString().ToLowerInvariant()" data-content-fit="@text.ContentFit.ToString().ToLowerInvariant()" data-content-kind="text" data-publisher-print-fill="true" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                            <div class="text-frame-content publication-content-frame fit-@text.ContentFit.ToString().ToLowerInvariant()" data-content-fit="@text.ContentFit.ToString().ToLowerInvariant()" data-content-kind="text" data-content-viewport data-content-offset-x="@Inv(text.ContentOffsetX)" data-content-offset-y="@Inv(text.ContentOffsetY)" data-content-scale="@Inv(text.ContentScale)" data-publisher-print-fill="true" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@Mm(text.BorderWidth) solid @text.BorderColor">
                                     <div class="publication-content-source" data-content-fit-source>
                                         @((MarkupString)text.PreviewHtml)
                                     </div>
+                                    @if (State.ContentPanMode && element.Id == State.SelectedElementId)
+                                    {
+                                        <div class="content-pan-help">Drag content · mouse wheel zooms</div>
+                                    }
                                 </div>
                             break;
                         case ImageFrameElement image:
@@ -142,7 +146,7 @@
                                 @if (State.CropMode && element.Id == State.SelectedElementId)
                                 {
                                     <div class="crop-thirds" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-                                    <div class="crop-help">Drag picture · mouse wheel zooms · double-click finishes</div>
+                                    <div class="crop-help">Drag picture · mouse wheel zooms</div>
                                 }
                             </div>
                             break;
@@ -184,10 +188,14 @@
                             <DevExtremeComponentView @key="component.Id" Document="State.Document" Item="component" CurrentPageId="State.SelectedPageId" />
                             break;
                         case SpreadsheetElement spreadsheet:
-                            <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
+                            <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
                                 <div class="publication-content-source" data-content-fit-source>
                                     @((MarkupString)spreadsheet.PreviewHtml)
                                 </div>
+                                @if (State.ContentPanMode && element.Id == State.SelectedElementId)
+                                {
+                                    <div class="content-pan-help">Drag sheet · mouse wheel zooms</div>
+                                }
                                 @if (spreadsheet.ShowSheetName)
                                 {
                                     <span class="spreadsheet-sheet-badge"><i class="pub-icon pub-icon-spreadsheet"></i>@spreadsheet.ActiveSheetName</span>
@@ -205,7 +213,7 @@
                             <span class="connector-port connector-port-@AnchorCss(anchor)" data-connector-port data-owner-id="@element.Id" data-anchor="@anchor" title="Connect at @anchor"></span>
                         }
                     }
-                    @if (element.Id == State.SelectedElementId && !State.HasMultipleSelection && !element.Locked && !(State.CropMode && element is ImageFrameElement))
+                    @if (element.Id == State.SelectedElementId && !State.HasMultipleSelection && !element.Locked && !(State.CropMode && element is ImageFrameElement) && !(State.ContentPanMode && EditorStateService.CanPanContent(element)))
                     {
                         foreach (var handle in Handles)
                         {
@@ -251,6 +259,8 @@
                     <DxContextMenuItem Text="@(CheckedText(textFrame.ContentFit == PublicationContentFitMode.Stretch, "Stretch to frame"))" Click="TextFitStretch" />
                 </Items>
             </DxContextMenuItem>
+            <DxContextMenuItem Text="@(State.ContentPanMode ? "Finish positioning content" : "Position visible content")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
+            <DxContextMenuItem Text="Reset content position" Click="ResetContentViewport" />
         }
         @if (State.SelectedElement is ImageFrameElement imageFrame)
         {
@@ -312,6 +322,8 @@
                     <DxContextMenuItem Text="@(CheckedText(spreadsheet.ContentFit == PublicationContentFitMode.Stretch, "Stretch to frame"))" Click="SpreadsheetFitStretch" />
                 </Items>
             </DxContextMenuItem>
+            <DxContextMenuItem Text="@(State.ContentPanMode ? "Finish positioning worksheet" : "Position visible worksheet")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
+            <DxContextMenuItem Text="Reset worksheet position" Click="ResetContentViewport" />
         }
         @if (State.SelectedElement is DataVisualElement dataVisual)
         {
@@ -361,6 +373,11 @@
                     <DxContextMenuItem Text="@(CheckedText(component.Scope == PublicationComponentScope.Document, "All pages"))" Click="ComponentDocumentScope" />
                 </Items>
             </DxContextMenuItem>
+            @if (component.SupportsContentViewport)
+            {
+                <DxContextMenuItem Text="@(State.ContentPanMode ? "Finish positioning map" : "Position visible map")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
+                <DxContextMenuItem Text="Reset map position" Click="ResetContentViewport" />
+            }
         }
         @if (State.SelectedElement is ShapeElement shape)
         {
@@ -588,7 +605,7 @@
         : State.CropMode ? "Crop picture"
         : State.HasMultipleSelection ? $"Move {State.SelectedElements.Count} objects"
         : "Select / move";
-    private bool CanResetPointerState => State.ConnectorTool != ConnectorToolKind.None || State.CropMode;
+    private bool CanResetPointerState => State.ConnectorTool != ConnectorToolKind.None || State.CropMode || State.ContentPanMode;
 
     private string PageStyle
     {
@@ -612,7 +629,7 @@
         var selectionKey = string.Join(",", selectedElementIds);
         var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
         var initializationKey = $"{State.CurrentPage.Id:N}|" +
-            $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.CropMode}|{State.Document.View.RulerUnit}|" +
+            $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
             $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
             $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
             $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
@@ -631,6 +648,7 @@
                     {
                         pxPerMm = PixelsPerMm,
                         cropMode = State.CropMode,
+                        contentPanMode = State.ContentPanMode,
                         unit = State.Document.View.RulerUnit.ToString(),
                         rulersVisible = State.Document.View.RulersVisible,
                         guidesVisible = State.Document.View.GuidesVisible,
@@ -706,6 +724,7 @@
     }
     [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) { if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height); }
     [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) { if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale); }
+    [JSInvokable] public void CommitContentViewport(string id, double offsetX, double offsetY, double scale) { if (Guid.TryParse(id, out var guid)) State.CommitContentViewport(guid, offsetX, offsetY, scale); }
     [JSInvokable] public void AddGuideAt(string orientation, double positionMm) { if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed)) State.AddGuideAt(parsed, positionMm); }
     [JSInvokable] public void CommitGuide(string id, double positionMm) { if (Guid.TryParse(id, out var guid)) State.CommitGuide(guid, positionMm); }
     [JSInvokable] public void DeleteGuide(string id) { if (Guid.TryParse(id, out var guid)) State.DeleteGuide(guid); }
@@ -947,6 +966,8 @@
         _ => "KPI progress"
     };
     private void ToggleCrop() => State.ToggleCropMode();
+    private void ToggleContentPan() => State.ToggleContentPanMode();
+    private void ResetContentViewport() => State.ResetContentViewport();
     private void SetTextFrame(Action<TextFrameElement> update)
     {
         if (State.SelectedElement is TextFrameElement item) State.UpdateSelected(_ => update(item));

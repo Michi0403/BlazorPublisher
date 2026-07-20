@@ -333,3 +333,19 @@ Static checks completed for the v1.0.37 source package:
 - `npm run test:components` passes component-catalogue, bundled-plugin, REST/OData probe, smart-action, synchronized-scope, and single-file-export contract assertions.
 - JavaScript syntax, JSON metadata, project XML, C# syntax, Razor `@code` syntax, archive integrity, and generated-license exclusion are validated in this environment.
 - A full licensed `dotnet restore`/`dotnet build` and interactive DevExpress browser test remain required on the release machine because this environment does not contain the .NET SDK or the licensed DevExpress NuGet feed/runtime identity.
+
+## v1.0.40 map, viewport, CSS, and studio-layout validation
+
+- Confirmed Map and Vector Map are present in the persisted enum, insert ribbon, Component Studio catalogue, runtime plugin map, client contract, print surface, and single-file export asset list.
+- Confirmed the application and both HTML export modes load the bundled World, Europe, Eurasia, Africa, USA, and Canada DevExtreme vector-map data scripts after `dx.all.js`.
+- Confirmed direct REST/OData and live publication-data rows are materialized before the initial Map/Vector Map render and on polling refresh. Map refresh updates marker and route options; Vector Map refresh updates its layers.
+- Confirmed the Vector Map editor can create marker, line, and polygon features from preview clicks, edit exact longitude/latitude values, style each feature, undo points, remove/clear drawings, and import supported GeoJSON geometries.
+- Confirmed Text/Docx, Spreadsheet, Map, and Vector Map store content X/Y offset and scale, expose position/reset commands, suppress object resize handles while positioning, commit through editor state for undo/redo, and preserve the transform in print and HTML output.
+- Confirmed content positioning composes with the existing fit/fill/stretch transform rather than replacing it.
+- Confirmed custom CSS class tokens and inline declarations are normalized; selector braces and script-like CSS constructs are rejected before preview/export.
+- Confirmed all major studios use viewport-bounded width/height and no longer retain desktop minimum sizes on narrow screens.
+- `node --check` passes for `componentRuntime.js` and `publisherInterop.js`.
+- `node tests/componentRuntime.test.mjs` and `node tests/timelineInterop.test.mjs` pass.
+- Package JSON, package lock, web project, installer project, release notes, and document format markers are aligned to `1.0.40` / `1.38`.
+- A complete `dotnet restore`/`dotnet build` and licensed interactive DevExpress browser run remain required because this execution environment does not provide the .NET SDK or licensed DevExpress build identity.
+

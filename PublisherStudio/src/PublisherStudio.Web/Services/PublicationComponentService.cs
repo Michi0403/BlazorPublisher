@@ -78,7 +78,7 @@ public sealed class PublicationComponentService
             ShowTitle = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler
                 or PublicationComponentKind.Form or PublicationComponentKind.Gallery or PublicationComponentKind.TileView
                 or PublicationComponentKind.PivotGrid or PublicationComponentKind.Splitter or PublicationComponentKind.TabPanel
-                or PublicationComponentKind.MultiView or PublicationComponentKind.ScrollView,
+                or PublicationComponentKind.MultiView or PublicationComponentKind.ScrollView or PublicationComponentKind.Map or PublicationComponentKind.VectorMap,
             ShowFilterRow = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList,
             ShowSearchPanel = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.PivotGrid,
             AllowPaging = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList,
@@ -87,6 +87,12 @@ public sealed class PublicationComponentService
                 ? PublicationComponentSelectionMode.Single
                 : PublicationComponentSelectionMode.None
         };
+        if (kind == PublicationComponentKind.VectorMap)
+        {
+            element.MapCenterLatitude = 20;
+            element.MapCenterLongitude = 0;
+            element.MapZoom = 1;
+        }
         ApplyFieldsFromDataObject(document, element, replace: true);
         ApplyKindDefaults(document, element);
         Normalize(document, element);
@@ -100,11 +106,37 @@ public sealed class PublicationComponentService
         item.Fields ??= [];
         item.Actions ??= [];
         item.Panels ??= [];
+        item.VectorFeatures ??= [];
         item.Title = string.IsNullOrWhiteSpace(item.Title) ? ComponentName(item.ComponentKind) : item.Title.Trim();
         item.Name = string.IsNullOrWhiteSpace(item.Name) ? item.Title : item.Name.Trim();
         item.PageSize = Math.Clamp(item.PageSize <= 0 ? 20 : item.PageSize, 1, 1000);
         item.ColumnCount = Math.Clamp(item.ColumnCount <= 0 ? 1 : item.ColumnCount, 1, 12);
         item.BorderWidthMm = Math.Clamp(item.BorderWidthMm, 0, 8);
+        item.ContentOffsetX = Math.Clamp(item.ContentOffsetX, -500, 500);
+        item.ContentOffsetY = Math.Clamp(item.ContentOffsetY, -500, 500);
+        item.ContentScale = Math.Clamp(item.ContentScale <= 0 ? 1 : item.ContentScale, .1, 12);
+        item.MapCenterLatitude = Math.Clamp(item.MapCenterLatitude, -90, 90);
+        item.MapCenterLongitude = Math.Clamp(item.MapCenterLongitude, -180, 180);
+        item.MapZoom = Math.Clamp(item.MapZoom <= 0 ? 1 : item.MapZoom, 1, 20);
+        item.MapProvider = string.IsNullOrWhiteSpace(item.MapProvider) ? "google" : item.MapProvider.Trim();
+        item.MapType = string.IsNullOrWhiteSpace(item.MapType) ? "roadmap" : item.MapType.Trim();
+        item.VectorProjection = string.IsNullOrWhiteSpace(item.VectorProjection) ? "mercator" : item.VectorProjection.Trim();
+        item.CustomCssClass = SanitizeCssClass(item.CustomCssClass);
+        item.CustomCss = SanitizeInlineCss(item.CustomCss);
+        foreach (var feature in item.VectorFeatures)
+        {
+            if (feature.Id == Guid.Empty) feature.Id = Guid.NewGuid();
+            feature.Name = string.IsNullOrWhiteSpace(feature.Name) ? "Feature" : feature.Name.Trim();
+            feature.Points ??= [];
+            feature.Points = feature.Points.Where(point => double.IsFinite(point.Longitude) && double.IsFinite(point.Latitude)).Select(point => new PublicationMapPoint
+            {
+                Longitude = Math.Clamp(point.Longitude, -180, 180),
+                Latitude = Math.Clamp(point.Latitude, -90, 90)
+            }).ToList();
+            feature.Opacity = Math.Clamp(feature.Opacity, 0, 1);
+            feature.Width = Math.Clamp(feature.Width <= 0 ? 1 : feature.Width, .25, 40);
+            feature.Size = Math.Clamp(feature.Size <= 0 ? 10 : feature.Size, 2, 100);
+        }
         item.Width = Math.Max(24, item.Width);
         item.Height = Math.Max(12, item.Height);
         item.AdvancedOptionsJson = NormalizeJsonObject(item.AdvancedOptionsJson);
@@ -224,7 +256,7 @@ public sealed class PublicationComponentService
         ApplyMappingsFromFields(item);
     }
 
-    public object BuildClientConfiguration(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId)
+    public object BuildClientConfiguration(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false)
     {
         Normalize(document, item);
         var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
@@ -237,6 +269,7 @@ public sealed class PublicationComponentService
         return new
         {
             id = item.Id,
+            designerMode,
             sharedComponentId = item.SharedComponentId,
             kind = item.ComponentKind.ToString(),
             scope = item.Scope.ToString(),
@@ -276,6 +309,34 @@ public sealed class PublicationComponentService
             item.Placeholder,
             item.InitialValue,
             item.Background,
+            item.CustomCssClass,
+            item.CustomCss,
+            item.MapProvider,
+            item.MapType,
+            item.MapApiKey,
+            item.MapCenterLatitude,
+            item.MapCenterLongitude,
+            item.MapZoom,
+            item.MapControls,
+            item.MapAutoAdjust,
+            item.MapShowRoutes,
+            item.LatitudeField,
+            item.LongitudeField,
+            item.AddressField,
+            item.MarkerTooltipField,
+            item.MapRouteField,
+            item.MapOrderField,
+            vectorBaseLayer = item.VectorBaseLayer.ToString(),
+            item.VectorProjection,
+            item.VectorShowLabels,
+            item.VectorLabelField,
+            item.VectorValueField,
+            item.VectorColorField,
+            vectorFeatures = item.VectorFeatures.Select(feature => new
+            {
+                feature.Id, feature.Name, kind = feature.Kind.ToString(), feature.Points, feature.Color, feature.BorderColor,
+                feature.Opacity, feature.Width, feature.Size, feature.Label, feature.Value
+            }).ToArray(),
             item.AdvancedOptionsJson,
             item.AllowCustomScript,
             fields = BuildFields(document, item.Fields, currentPageId),
@@ -290,8 +351,8 @@ public sealed class PublicationComponentService
         };
     }
 
-    public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId) =>
-        Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(BuildClientConfiguration(document, item, currentPageId), _json));
+    public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false) =>
+        Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(BuildClientConfiguration(document, item, currentPageId, designerMode), _json));
 
 
     private object[] BuildFields(PublicationDocument document, IEnumerable<PublicationComponentField> fields, Guid currentPageId)
@@ -494,6 +555,15 @@ public sealed class PublicationComponentService
         item.AllDayField = Find(fields, "allday", "isfullday") ?? item.AllDayField;
         item.TargetPageField = Find(fields, "targetpageid", "pageid", "page") ?? item.TargetPageField;
         item.UrlField = Find(fields, "url", "link", "href") ?? item.UrlField;
+        item.LatitudeField = Find(fields, "latitude", "lat") ?? item.LatitudeField;
+        item.LongitudeField = Find(fields, "longitude", "lng", "lon", "long") ?? item.LongitudeField;
+        item.AddressField = Find(fields, "address", "location", "place") ?? item.AddressField;
+        item.MarkerTooltipField = Find(fields, "tooltip", "label", "text", "title", "name") ?? item.MarkerTooltipField;
+        item.MapRouteField = Find(fields, "routeid", "route", "group") ?? item.MapRouteField;
+        item.MapOrderField = Find(fields, "order", "sequence", "index", "position") ?? item.MapOrderField;
+        item.VectorLabelField = Find(fields, "label", "name", "text", "title") ?? item.VectorLabelField;
+        item.VectorValueField = Find(fields, "value", "amount", "total", "population") ?? item.VectorValueField;
+        item.VectorColorField = Find(fields, "color", "colour", "fill") ?? item.VectorColorField;
         item.Connection.KeyField = item.KeyField;
     }
 
@@ -568,6 +638,7 @@ public sealed class PublicationComponentService
         PublicationComponentKind.Gallery or PublicationComponentKind.TileView => (145, 82),
         PublicationComponentKind.Form => (130, 90),
         PublicationComponentKind.Scheduler or PublicationComponentKind.PivotGrid => (175, 110),
+        PublicationComponentKind.Map or PublicationComponentKind.VectorMap => (180, 115),
         _ => (160, 95)
     };
 
@@ -589,6 +660,8 @@ public sealed class PublicationComponentService
         PublicationComponentKind.MultiView => "Multi View",
         PublicationComponentKind.ScrollView => "Scroll View",
         PublicationComponentKind.PivotGrid => "Pivot Grid",
+        PublicationComponentKind.Map => "Map",
+        PublicationComponentKind.VectorMap => "Vector Map",
         _ => Friendly(kind.ToString())
     };
 
@@ -597,6 +670,21 @@ public sealed class PublicationComponentService
         if (string.IsNullOrWhiteSpace(value)) return string.Empty;
         var result = System.Text.RegularExpressions.Regex.Replace(value.Replace('_', ' '), "([a-z0-9])([A-Z])", "$1 $2");
         return char.ToUpperInvariant(result[0]) + result[1..];
+    }
+
+    private static string SanitizeCssClass(string? value) => string.Join(' ', (value ?? string.Empty)
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Where(token => token.All(character => char.IsLetterOrDigit(character) || character is '-' or '_'))
+        .Take(8));
+
+    private static string SanitizeInlineCss(string? value)
+    {
+        var source = (value ?? string.Empty).Replace("{", string.Empty).Replace("}", string.Empty);
+        var blocked = new[] { "javascript:", "expression(", "@import", "</style", "behavior:", "-moz-binding" };
+        if (blocked.Any(token => source.Contains(token, StringComparison.OrdinalIgnoreCase))) return string.Empty;
+        return string.Join(';', source.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(declaration => declaration.Contains(':'))
+            .Take(64));
     }
 
     private static string NormalizeJsonObject(string? json)

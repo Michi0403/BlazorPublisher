@@ -681,7 +681,40 @@ async function canvasDocumentPaste(state, event) {
 
 
 function measureNaturalContent(source,kind){const ot=source.style.transform,ow=source.style.width,oh=source.style.height;source.style.transform='none';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';const v={width:Math.max(1,source.scrollWidth,source.getBoundingClientRect().width),height:Math.max(1,source.scrollHeight,source.getBoundingClientRect().height)};source.style.transform=ot;source.style.width=ow;source.style.height=oh;return v;}
-export function refreshContentFit(root=document){const frames=root?.matches?.('[data-content-fit]')?[root]:[...(root?.querySelectorAll?.('[data-content-fit]')||[])];for(const frame of frames){const source=frame.querySelector(':scope > [data-content-fit-source]');if(!source)continue;const mode=String(frame.dataset.contentFit||'clip').toLowerCase(),kind=String(frame.dataset.contentKind||'text').toLowerCase();source.style.transform='none';source.style.transformOrigin='0 0';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';if(mode==='clip')continue;const n=measureNaturalContent(source,kind);let sx=Math.max(1,frame.clientWidth)/n.width,sy=Math.max(1,frame.clientHeight)/n.height;if(mode==='fit')sx=sy=Math.min(sx,sy);else if(mode==='fill')sx=sy=Math.max(sx,sy);source.style.transform=`scale(${Math.max(.0001,sx)}, ${Math.max(.0001,sy)})`;}}
+function applyContentViewport(frame, source, fitScaleX = number(frame.dataset.contentFitScaleX, 1), fitScaleY = number(frame.dataset.contentFitScaleY, 1)) {
+    const offsetX = number(frame.dataset.contentOffsetX, 0);
+    const offsetY = number(frame.dataset.contentOffsetY, 0);
+    const scale = clamp(number(frame.dataset.contentScale, 1), .1, 12);
+    const translateX = offsetX * Math.max(1, frame.clientWidth) / 100;
+    const translateY = offsetY * Math.max(1, frame.clientHeight) / 100;
+    source.style.transformOrigin = '0 0';
+    source.style.transform = `translate(${translateX}px, ${translateY}px) scale(${Math.max(.0001, fitScaleX * scale)}, ${Math.max(.0001, fitScaleY * scale)})`;
+}
+
+export function refreshContentFit(root = document) {
+    const frames = root?.matches?.('[data-content-fit]') ? [root] : [...(root?.querySelectorAll?.('[data-content-fit]') || [])];
+    for (const frame of frames) {
+        const source = frame.querySelector(':scope > [data-content-fit-source]');
+        if (!source) continue;
+        const mode = String(frame.dataset.contentFit || 'clip').toLowerCase();
+        const kind = String(frame.dataset.contentKind || 'text').toLowerCase();
+        source.style.transform = 'none';
+        source.style.transformOrigin = '0 0';
+        source.style.width = kind === 'spreadsheet' ? 'max-content' : '100%';
+        source.style.height = kind === 'component' ? '100%' : 'auto';
+        let sx = 1, sy = 1;
+        if (mode !== 'clip') {
+            const natural = measureNaturalContent(source, kind);
+            sx = Math.max(1, frame.clientWidth) / natural.width;
+            sy = Math.max(1, frame.clientHeight) / natural.height;
+            if (mode === 'fit') sx = sy = Math.min(sx, sy);
+            else if (mode === 'fill') sx = sy = Math.max(sx, sy);
+        }
+        frame.dataset.contentFitScaleX = String(sx);
+        frame.dataset.contentFitScaleY = String(sy);
+        applyContentViewport(frame, source, sx, sy);
+    }
+}
 function resizeCursorFor(handle, rotation) {
     // CSS screen coordinates increase downward. 45 degrees therefore follows the
     // NW-SE axis and 135 degrees follows NE-SW; treating them as mathematical
@@ -701,6 +734,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
     const normalizedConfig = {
         pxPerMm: Math.max(.0001, number(config?.pxPerMm, PX_PER_MM_AT_96_DPI)),
         cropMode: Boolean(config?.cropMode),
+        contentPanMode: Boolean(config?.contentPanMode),
         unit: String(config?.unit || 'Millimeter'),
         rulersVisible: config?.rulersVisible !== false,
         guidesVisible: config?.guidesVisible !== false,
@@ -1545,7 +1579,17 @@ function pointerDown(state, event) {
         ...bounds
     };
 
-    if (state.config.cropMode && image && !handle) {
+    const contentViewport = element.querySelector('[data-content-viewport]');
+    const contentSource = contentViewport?.querySelector(':scope > [data-content-fit-source]');
+    if (state.config.contentPanMode && contentViewport && contentSource && !handle) {
+        state.operation = {
+            ...base, kind: 'content-pan', moving: [{ id, element, ...bounds }], movingIds: new Set([id]),
+            viewport: contentViewport, source: contentSource,
+            contentOffsetX: number(contentViewport.dataset.contentOffsetX),
+            contentOffsetY: number(contentViewport.dataset.contentOffsetY),
+            contentScale: number(contentViewport.dataset.contentScale, 1)
+        };
+    } else if (state.config.cropMode && image && !handle) {
         state.operation = {
             ...base,
             kind: 'crop',
@@ -1566,7 +1610,7 @@ function pointerDown(state, event) {
     }
 
     try { state.stage.setPointerCapture(event.pointerId); } catch { }
-    if (handle || state.config.cropMode) event.preventDefault();
+    if (handle || state.config.cropMode || state.config.contentPanMode) event.preventDefault();
 }
 
 function refreshOperationElement(state, operation) {
@@ -1575,6 +1619,7 @@ function refreshOperationElement(state, operation) {
     if (current) {
         operation.element = current;
         if (operation.kind === 'crop') operation.image = current.querySelector('img') || operation.image;
+        if (operation.kind === 'content-pan') { operation.viewport = current.querySelector('[data-content-viewport]') || operation.viewport; operation.source = operation.viewport?.querySelector(':scope > [data-content-fit-source]') || operation.source; }
     }
     return operation.element;
 }
@@ -1622,6 +1667,19 @@ function pointerMove(state, event) {
     operation.moved = true;
     const dx = (event.clientX - operation.startX) / state.config.pxPerMm;
     const dy = (event.clientY - operation.startY) / state.config.pxPerMm;
+
+    if (operation.kind === 'content-pan') {
+        refreshOperationElement(state, operation);
+        const offsetX = clamp(operation.contentOffsetX + dx / Math.max(operation.width, 1) * 100, -500, 500);
+        const offsetY = clamp(operation.contentOffsetY + dy / Math.max(operation.height, 1) * 100, -500, 500);
+        operation.currentContentOffsetX = offsetX;
+        operation.currentContentOffsetY = offsetY;
+        operation.viewport.dataset.contentOffsetX = String(offsetX);
+        operation.viewport.dataset.contentOffsetY = String(offsetY);
+        applyContentViewport(operation.viewport, operation.source);
+        event.preventDefault();
+        return;
+    }
 
     if (operation.kind === 'crop') {
         refreshOperationElement(state, operation);
@@ -1793,7 +1851,11 @@ function pointerUp(state, event) {
         return;
     }
     state.lastCanvasClick = null;
-    if (operation.kind === 'crop') {
+    if (operation.kind === 'content-pan') {
+        safeDotNet(state, 'CommitContentViewport', operation.id,
+            operation.currentContentOffsetX ?? operation.contentOffsetX,
+            operation.currentContentOffsetY ?? operation.contentOffsetY, operation.contentScale);
+    } else if (operation.kind === 'crop') {
         safeDotNet(
             state,
             'CommitCrop',
@@ -1821,6 +1883,25 @@ function pointerCancel(state, event) {
 }
 
 function cropWheel(state, event) {
+    if (state.config.contentPanMode) {
+        const element = event.target.closest('[data-publication-element].selected');
+        const viewport = element?.querySelector('[data-content-viewport]');
+        const source = viewport?.querySelector(':scope > [data-content-fit-source]');
+        if (element && viewport && source && state.page.contains(element)) {
+            event.preventDefault();
+            const id = element.dataset.elementId;
+            const offsetX = number(viewport.dataset.contentOffsetX);
+            const offsetY = number(viewport.dataset.contentOffsetY);
+            const nextScale = clamp(number(viewport.dataset.contentScale, 1) * Math.exp(-event.deltaY * .0015), .1, 12);
+            viewport.dataset.contentScale = String(nextScale);
+            applyContentViewport(viewport, source);
+            const key = `content-${id}`;
+            const previous = state.cropTimers.get(key);
+            if (previous) clearTimeout(previous);
+            state.cropTimers.set(key, setTimeout(() => { state.cropTimers.delete(key); safeDotNet(state, 'CommitContentViewport', id, offsetX, offsetY, nextScale); }, 140));
+            return;
+        }
+    }
     if (!state.config.cropMode) return;
     const element = event.target.closest('[data-publication-element].selected.kind-image');
     if (!element || !state.page.contains(element)) return;
@@ -5247,10 +5328,16 @@ async function buildPublisherSingleHtml(mode, title) {
         }
         return await response.text();
     };
-    const [devExtremeCss, jquerySource, devExtremeSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource, componentRuntimeSource] = await Promise.all([
+    const [devExtremeCss, jquerySource, devExtremeSource, worldMapSource, europeMapSource, eurasiaMapSource, africaMapSource, usaMapSource, canadaMapSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource, componentRuntimeSource] = await Promise.all([
         fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
         fetchExportAsset('vendor/jquery/jquery.min.js'),
         fetchExportAsset('vendor/devextreme-dist/js/dx.all.js'),
+        fetchExportAsset('vendor/devextreme-dist/js/vectormap-data/world.js'),
+        fetchExportAsset('vendor/devextreme-dist/js/vectormap-data/europe.js'),
+        fetchExportAsset('vendor/devextreme-dist/js/vectormap-data/eurasia.js'),
+        fetchExportAsset('vendor/devextreme-dist/js/vectormap-data/africa.js'),
+        fetchExportAsset('vendor/devextreme-dist/js/vectormap-data/usa.js'),
+        fetchExportAsset('vendor/devextreme-dist/js/vectormap-data/canada.js'),
         fetchExportAsset('vendor/devextreme-license.js', 'generated DevExtreme runtime license'),
         fetchExportAsset('vendor/devextreme-license.version', 'DevExtreme runtime-license version marker'),
         fetchExportAsset('js/liveDataInterop.js'),
@@ -5342,7 +5429,7 @@ ${css}
 ${modeCss}
 </style>
 </head>
-<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(componentRuntimeSource)}</script><script>${safeScript(runtime)}</script></body>
+<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(worldMapSource)}</script><script>${safeScript(europeMapSource)}</script><script>${safeScript(eurasiaMapSource)}</script><script>${safeScript(africaMapSource)}</script><script>${safeScript(usaMapSource)}</script><script>${safeScript(canadaMapSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(componentRuntimeSource)}</script><script>${safeScript(runtime)}</script></body>
 </html>`;
 }
 

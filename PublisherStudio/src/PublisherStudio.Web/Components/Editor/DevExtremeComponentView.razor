@@ -3,7 +3,7 @@
 @inject PublicationComponentService Components
 @inject IJSRuntime JS
 
-<div class="devextreme-publication-component @(Item.ShowTitle ? "has-component-title" : null)" style="@ContainerStyle">
+<div class="devextreme-publication-component @(Item.ShowTitle ? "has-component-title" : null) @Item.CustomCssClass" style="@ContainerStyle">
     @if (Item.ShowTitle)
     {
         <div class="devextreme-component-title">@Item.Title</div>
@@ -17,9 +17,12 @@
     }
     else
     {
-        <div id="@ElementId"
-             class="devextreme-component-host"
-             data-ps-component-config="@ClientConfigBase64"></div>
+        <div class="devextreme-component-viewport" data-content-fit="clip" data-content-kind="component" data-content-viewport
+             data-content-offset-x="@Inv(Item.ContentOffsetX)" data-content-offset-y="@Inv(Item.ContentOffsetY)" data-content-scale="@Inv(Item.ContentScale)">
+            <div class="publication-content-source devextreme-component-source" data-content-fit-source>
+                <div id="@ElementId" class="devextreme-component-host" data-ps-component-config="@ClientConfigBase64"></div>
+            </div>
+        </div>
     }
 </div>
 
@@ -28,16 +31,19 @@
     [Parameter, EditorRequired] public DevExtremeComponentElement Item { get; set; } = default!;
     [Parameter] public Guid CurrentPageId { get; set; }
     [Parameter] public string IdPrefix { get; set; } = "canvas";
+    [Parameter] public string? ElementIdOverride { get; set; }
+    [Parameter] public bool DesignerMode { get; set; }
 
     private readonly string _instanceId = Guid.NewGuid().ToString("N");
     private string? _lastRenderedConfig;
-    private string ElementId => $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}";
-    private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId);
+    private string ElementId => string.IsNullOrWhiteSpace(ElementIdOverride) ? $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}" : ElementIdOverride;
+    private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId, DesignerMode);
     private bool MissingData => Item.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot
         && Document.DataObjects.All(data => data.Id != Item.Connection.DataObjectId)
         && !Item.IsLayoutContainer
-        && Item.ComponentKind != PublicationComponentKind.Button;
-    private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor}";
+        && Item.ComponentKind is not PublicationComponentKind.Button and not PublicationComponentKind.Map and not PublicationComponentKind.VectorMap;
+    private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor};{Item.CustomCss}";
+    private static string Inv(double value) => value.ToString("0.####", CultureInfo.InvariantCulture);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

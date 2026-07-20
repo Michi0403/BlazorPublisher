@@ -23,6 +23,8 @@
         Splitter: "dxSplitter",
         ScrollView: "dxScrollView",
         PivotGrid: "dxPivotGrid",
+        Map: "dxMap",
+        VectorMap: "dxVectorMap",
         Button: "dxButton"
     };
 
@@ -681,6 +683,97 @@
         };
     }
 
+    function rowLocation(config, row) {
+        const latitude = number(row?.[config.latitudeField], NaN);
+        const longitude = number(row?.[config.longitudeField], NaN);
+        if (Number.isFinite(latitude) && Number.isFinite(longitude)) return { lat: latitude, lng: longitude };
+        const address = row?.[config.addressField];
+        return address == null || String(address).trim() === "" ? null : String(address);
+    }
+
+    function mapMarkers(config, rows) {
+        return (rows || []).map(row => {
+            const location = rowLocation(config, row);
+            if (!location) return null;
+            const text = row?.[config.markerTooltipField] ?? row?.[config.vectorLabelField] ?? "";
+            return { location, tooltip: text ? { text: String(text), isShown: false } : undefined };
+        }).filter(Boolean);
+    }
+
+    function mapRoutes(config, rows) {
+        if (config.mapShowRoutes === false) return [];
+        const groups = new Map();
+        for (const row of rows || []) {
+            const location = rowLocation(config, row);
+            if (!location) continue;
+            const key = String(row?.[config.mapRouteField] ?? "default");
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push({ location, order: number(row?.[config.mapOrderField], groups.get(key).length) });
+        }
+        return [...groups.values()].filter(group => group.length > 1).map(group => ({
+            locations: group.sort((a, b) => a.order - b.order).map(item => item.location),
+            mode: "driving", opacity: .78, weight: 4
+        }));
+    }
+
+    function sourceName(value) {
+        const name = String(value || "world").toLowerCase();
+        return name === "usa" ? "usa" : name;
+    }
+
+    function vectorGeoJson(config, rows, kind) {
+        const features = [];
+        for (const feature of config.vectorFeatures || []) {
+            if (String(feature.kind || "").toLowerCase() !== kind) continue;
+            const points = (feature.points || []).map(point => [number(point.longitude), number(point.latitude)]);
+            if (!points.length) continue;
+            let geometry;
+            if (kind === "marker") geometry = { type: "Point", coordinates: points[0] };
+            else if (kind === "line") geometry = { type: "LineString", coordinates: points };
+            else {
+                if (points.length < 3) continue;
+                const ring = [...points];
+                const first = ring[0], last = ring[ring.length - 1];
+                if (first[0] !== last[0] || first[1] !== last[1]) ring.push([...first]);
+                geometry = { type: "Polygon", coordinates: [ring] };
+            }
+            features.push({ type: "Feature", id: feature.id, properties: { ...feature }, geometry });
+        }
+        if (kind === "marker") {
+            for (const row of rows || []) {
+                const location = rowLocation(config, row);
+                if (!location || typeof location === "string") continue;
+                features.push({ type: "Feature", properties: {
+                    name: row?.[config.vectorLabelField] ?? row?.[config.markerTooltipField] ?? "",
+                    value: row?.[config.vectorValueField], color: row?.[config.vectorColorField]
+                }, geometry: { type: "Point", coordinates: [location.lng, location.lat] } });
+            }
+        }
+        return { type: "FeatureCollection", features };
+    }
+
+    function vectorLayers(config, rows) {
+        const layers = [];
+        const preset = sourceName(config.vectorBaseLayer);
+        const source = preset === "none" ? null : window.DevExpress?.viz?.map?.sources?.[preset];
+        if (source) layers.push({
+            name: "base", type: "area", dataSource: source,
+            label: { enabled: config.vectorShowLabels !== false, dataField: "name" },
+            hoverEnabled: true
+        });
+        const polygons = vectorGeoJson(config, rows, "polygon");
+        if (polygons.features.length) layers.push({ name: "drawings", type: "area", dataSource: polygons,
+            customize(elements) { elements.forEach(element => { const a = element.attribute("properties") || {}; element.applySettings({ color: a.color || "#2563eb", borderColor: a.borderColor || "#1e3a8a", opacity: number(a.opacity, .82) }); }); } });
+        const lines = vectorGeoJson(config, rows, "line");
+        if (lines.features.length) layers.push({ name: "lines", type: "line", dataSource: lines,
+            customize(elements) { elements.forEach(element => { const a = element.attribute("properties") || {}; element.applySettings({ color: a.color || "#2563eb", width: number(a.width, 3), opacity: number(a.opacity, .9) }); }); } });
+        const markers = vectorGeoJson(config, rows, "marker");
+        if (markers.features.length) layers.push({ name: "markers", type: "marker", dataSource: markers,
+            label: { enabled: config.vectorShowLabels !== false, dataField: "name" },
+            customize(elements) { elements.forEach(element => { const a = element.attribute("properties") || {}; element.applySettings({ color: a.color || "#ef4444", size: number(a.size, 14) }); }); } });
+        return layers;
+    }
+
     function buildOptions(config, element, data) {
         const dataSource = data.dataSource;
         const kind = String(config.kind || "DataGrid");
@@ -878,6 +971,43 @@
                 options = { ...base, dataSource: pivotSource, allowSortingBySummary: true, allowFiltering: config.allowFiltering !== false, allowSorting: config.allowSorting !== false, allowExpandAll: true, showBorders: config.showBorders !== false, showColumnGrandTotals: true, showRowGrandTotals: true, fieldChooser: { enabled: true, height: 400 }, scrolling: { mode: "virtual" } };
                 break;
             }
+            case "Map": {
+                const rows = config.rows || [];
+                const provider = String(config.mapProvider || "google");
+                const apiKey = String(config.mapApiKey || "").trim();
+                options = { ...base, provider, type: config.mapType || "roadmap",
+                    center: { lat: number(config.mapCenterLatitude, 51.1657), lng: number(config.mapCenterLongitude, 10.4515) },
+                    zoom: Math.max(1, number(config.mapZoom, 4)), controls: config.mapControls !== false,
+                    autoAdjust: config.mapAutoAdjust !== false, markers: mapMarkers(config, rows), routes: mapRoutes(config, rows),
+                    apiKey: apiKey ? { [provider]: apiKey } : undefined
+                };
+                break;
+            }
+            case "VectorMap": {
+                const rows = config.rows || [];
+                options = { ...base, layers: vectorLayers(config, rows), projection: config.vectorProjection || "mercator",
+                    center: [number(config.mapCenterLongitude, 10.4515), number(config.mapCenterLatitude, 51.1657)],
+                    zoomFactor: Math.max(1, number(config.mapZoom, 1)), maxZoomFactor: 256, panningEnabled: true, zoomingEnabled: true,
+                    controlBar: { enabled: config.mapControls !== false }, tooltip: { enabled: true, customizeTooltip(info) {
+                        const a = info?.attribute?.("properties") || {}; return { text: String(a.label || a.name || a.value || "") };
+                    } },
+                    onClick(event) {
+                        if (!config.designerMode || !event?.component?.convertToGeo) return;
+                        const sourceEvent = event.event || {};
+                        const nativeEvent = sourceEvent.originalEvent || sourceEvent;
+                        const rect = element.getBoundingClientRect();
+                        const x = Number.isFinite(Number(sourceEvent.x)) ? Number(sourceEvent.x)
+                            : Number.isFinite(Number(nativeEvent?.offsetX)) ? Number(nativeEvent.offsetX)
+                            : number(nativeEvent?.clientX) - rect.left;
+                        const y = Number.isFinite(Number(sourceEvent.y)) ? Number(sourceEvent.y)
+                            : Number.isFinite(Number(nativeEvent?.offsetY)) ? Number(nativeEvent.offsetY)
+                            : number(nativeEvent?.clientY) - rect.top;
+                        const point = event.component.convertToGeo(x, y);
+                        if (Array.isArray(point)) element.dispatchEvent(new CustomEvent("ps-vector-map-point", { detail: { longitude: point[0], latitude: point[1] } }));
+                    }
+                };
+                break;
+            }
             case "Button":
                 options = { ...base, text: config.buttonText || config.title || "Run", type: "default", stylingMode: "contained", onClick: event => executeActions(config, actionsFor(config, "Click"), eventContext(config, event.component, dataSource, event, clone(config.rows?.[0] || {}))) };
                 break;
@@ -890,6 +1020,22 @@
     async function refreshState(element, state) {
         if (!state?.instance) return;
         const kind = String(state.config?.kind || "");
+        if (["Map", "VectorMap"].includes(kind)) {
+            let rows = null;
+            if (state.config.connection?.dataObjectLive?.enabled) {
+                rows = await fetchDataObjectLive(state.config.connection.dataObjectLive);
+            }
+            if (!rows) rows = await materializeRows(state.config, state.data);
+            state.config.rows = rows;
+            if (kind === "Map") {
+                state.instance.option?.("markers", mapMarkers(state.config, rows));
+                state.instance.option?.("routes", mapRoutes(state.config, rows));
+            } else {
+                state.instance.option?.("layers", vectorLayers(state.config, rows));
+            }
+            state.instance.repaint?.();
+            return;
+        }
         if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox"].includes(kind)) {
             const rows = await materializeRows(state.config, state.data);
             state.config.rows = rows;
@@ -944,7 +1090,7 @@
             } catch (error) { showError(error?.message || String(error)); }
         }
         try {
-            if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox"].includes(String(config.kind || "")))
+            if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox", "Map", "VectorMap"].includes(String(config.kind || "")))
                 config.rows = await materializeRows(config, data);
             const plugin = pluginNames[config.kind];
             if (!plugin || typeof window.jQuery.fn[plugin] !== "function") throw new Error(`${config.kind} is not available in the bundled DevExtreme runtime.`);
@@ -1009,6 +1155,20 @@
         disposeById(id) { const element = document.getElementById(id); if (element) dispose(element); },
         refreshAll,
         probeConnection,
+        attachVectorDesigner(id, dotnet) {
+            const element = document.getElementById(id);
+            if (!element) return false;
+            if (element.__psVectorHandler) element.removeEventListener("ps-vector-map-point", element.__psVectorHandler);
+            element.__psVectorHandler = event => dotnet?.invokeMethodAsync?.("AddVectorDesignerPoint", number(event.detail?.longitude), number(event.detail?.latitude));
+            element.addEventListener("ps-vector-map-point", element.__psVectorHandler);
+            return true;
+        },
+        detachVectorDesigner(id) {
+            const element = document.getElementById(id);
+            if (!element?.__psVectorHandler) return;
+            element.removeEventListener("ps-vector-map-point", element.__psVectorHandler);
+            delete element.__psVectorHandler;
+        },
         start,
         dispose(root) {
             if (!root) return;

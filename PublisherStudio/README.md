@@ -276,3 +276,8 @@ See `CHANGELOG-v1.0.38.md`. Repeated playback can no longer leave stale animatio
 ## v1.0.39 browser-native components and single-file sites
 
 See `CHANGELOG-v1.0.39.md` and `docs/COMPONENT_RUNTIME.md`. PublisherStudio now inserts a curated set of browser-native DevExtreme grids, Scheduler, Pivot Grid, forms/editors, menus, galleries, buttons, and layout containers as publication objects. Components bind to publication datasets, direct REST/JSON, or OData; support CRUD and smart cross-component actions; can synchronize across pages; and work in both the preserved interactive-presentation HTML export and a new hash-routed single-file website export. Existing standalone charts remain unchanged.
+
+## v1.0.40 larger studios, maps, and movable embedded content
+
+See `CHANGELOG-v1.0.40.md` and `docs/COMPONENT_RUNTIME.md`. The main editing studios now use nearly the entire browser viewport. DevExtreme Map and Vector Map are first-class publication components with live data, bundled predefined geographic layers, marker/route bindings, and a click-to-draw vector editor with precise coordinates and GeoJSON import. Text/Docx, spreadsheet, map, and vector-map objects can pan and zoom their visible internal content, and DevExtreme components accept normalized custom CSS classes and inline declarations.
+

@@ -304,3 +304,15 @@ Static checks completed for the v1.0.37 source package:
 - Confirmed project publish and release packaging fail when the runtime-license script, metadata, or exact-version marker is absent; MSBuild also rejects a marker that differs from the pinned DevExpress version.
 - Confirmed package metadata is `1.0.37`, DevExtreme remains pinned to `25.2.8`, and the publication document format intentionally remains `1.36`.
 - JavaScript syntax, JSON, XML, Node preparation behavior with a synthetic public runtime file, script-order assertions, and ZIP integrity are checked in this environment. The PowerShell flow was reviewed structurally but could not be executed here because PowerShell is unavailable. Generation of a real runtime key and a licensed end-to-end browser run must be completed on the user's licensed build machine because this environment does not have the user's DevExpress license or the .NET SDK/feed.
+
+## v1.0.38 timeline playback and video-cut validation
+
+- Confirmed every publication timeline playback call receives a monotonically increasing run identifier from Blazor and includes it in playhead callbacks.
+- Confirmed Blazor ignores callbacks whose run identifier is not the currently active run, including callbacks already in flight when Pause, Stop, restart, or disposal occurs.
+- Confirmed animation-frame callbacks compare the exact state object stored for the page. A stale callback from a replaced run cannot schedule another frame, pause media, stop a newer run, or report completion.
+- Confirmed playhead notifications permit only one JS-to-.NET invocation at a time and collapse queued progress to the latest position while retaining the final completion update.
+- Confirmed timeline disposal stops page playback before releasing the module.
+- Confirmed timeline pointer coordinates are clamped to the visible track, CSS positions remain finite, and media/animation commits reject non-finite start/duration values.
+- Confirmed Media Studio range and numeric inputs reject non-finite values while the existing trim-start, trim-end, playback-rate, fade, loop, and source-duration calculations remain unchanged.
+- `npm run test:timeline` passes stale-callback, replacement, backpressure, completion, and bounded-media-trim regression cases.
+- JavaScript syntax, JSON, project XML, package version `1.0.38`, and archive integrity are validated in this environment. A full licensed DevExpress browser run and .NET build remain required on the user's development machine because this environment does not contain the .NET SDK or licensed DevExpress NuGet feed.

@@ -201,8 +201,10 @@ function timelinePointerMove(state, event) {
     const op = state.operation;
     if (!op || op.pointerId !== event.pointerId) return;
     const rect = op.track.getBoundingClientRect();
-    const secondsPerPixel = (op.viewEnd - op.viewStart) / Math.max(1, rect.width);
-    const delta = (event.clientX - op.startX) * secondsPerPixel;
+    const visibleSeconds = Math.max(.1, op.viewEnd - op.viewStart);
+    const secondsPerPixel = visibleSeconds / Math.max(1, rect.width);
+    const pointerX = clamp(number(event.clientX, op.startX), rect.left, rect.right);
+    const delta = (pointerX - op.startX) * secondsPerPixel;
     let start = op.originalStart;
     let duration = op.originalDuration;
     if (op.mode === 'resize-left' || op.mode === 'trim-left') {
@@ -210,14 +212,16 @@ function timelinePointerMove(state, event) {
         start = clamp(op.originalStart + delta, 0, end - .05);
         duration = end - start;
     } else if (op.mode === 'resize-right' || op.mode === 'trim-right') {
-        duration = Math.max(.05, op.originalDuration + delta);
+        duration = clamp(op.originalDuration + delta, .05, 3600 - op.originalStart);
     } else {
-        start = Math.max(0, op.originalStart + delta);
+        start = clamp(op.originalStart + delta, 0, 3600 - op.originalDuration);
     }
+    start = clamp(number(start), 0, 3600);
+    duration = clamp(number(duration, .05), .05, Math.max(.05, 3600 - start));
     op.currentStart = start;
     op.currentDuration = duration;
-    op.clip.style.left = `${(start - op.viewStart) / (op.viewEnd - op.viewStart) * 100}%`;
-    op.clip.style.width = `${Math.max(.35, duration / (op.viewEnd - op.viewStart) * 100)}%`;
+    op.clip.style.left = `${(start - op.viewStart) / visibleSeconds * 100}%`;
+    op.clip.style.width = `${Math.max(.35, duration / visibleSeconds * 100)}%`;
 }
 
 function timelinePointerUp(state, event) {
@@ -287,19 +291,62 @@ function envelopeVolume(item, localSeconds) {
     return clamp(item.volume * gain, 0, 1);
 }
 
-function stopPageState(pageId, rewind = true) {
+function isCurrentPageState(pageId, state) {
+    return pagePlaybackStates.get(pageId) === state && !state.cancelled;
+}
+
+async function flushTimelineNotifications(state) {
+    if (state.notificationInFlight) return;
+    state.notificationInFlight = true;
+    try {
+        while (state.pendingNotification) {
+            const notification = state.pendingNotification;
+            state.pendingNotification = null;
+            if (!notification.finished && !isCurrentPageState(state.pageId, state)) continue;
+            try {
+                await state.dotnet?.invokeMethodAsync(
+                    'TimelinePositionChanged',
+                    state.runId,
+                    notification.seconds,
+                    notification.finished);
+            } catch {
+                state.pendingNotification = null;
+                break;
+            }
+        }
+    } finally {
+        state.notificationInFlight = false;
+        if (state.pendingNotification) void flushTimelineNotifications(state);
+    }
+}
+
+function queueTimelineNotification(state, seconds, finished) {
+    if (state.cancelled && !finished) return;
+    const next = {
+        seconds: clamp(number(seconds), state.start, state.end),
+        finished: Boolean(finished)
+    };
+    if (state.pendingNotification?.finished && !next.finished) return;
+    state.pendingNotification = next;
+    void flushTimelineNotifications(state);
+}
+
+function stopPageState(pageId, rewind = true, expectedState = null, cancelNotifications = true) {
     const state = pagePlaybackStates.get(pageId);
-    if (!state) return;
+    if (!state || (expectedState && state !== expectedState)) return false;
+    state.cancelled = true;
     cancelAnimationFrame(state.frame);
     for (const animation of state.animations) { try { animation.cancel(); } catch { } }
     for (const item of state.mediaItems) {
         item.media.pause();
         if (rewind) item.media.currentTime = item.trimStart;
     }
-    pagePlaybackStates.delete(pageId);
+    if (pagePlaybackStates.get(pageId) === state) pagePlaybackStates.delete(pageId);
+    if (cancelNotifications) state.pendingNotification = null;
+    return true;
 }
 
-export function playPublicationTimeline(pageId, startSeconds, endSeconds, dotnet) {
+export function playPublicationTimeline(pageId, startSeconds, endSeconds, dotnet, runId) {
     const page = document.getElementById(pageId);
     if (!page) return;
     stopPageState(pageId, false);
@@ -323,7 +370,23 @@ export function playPublicationTimeline(pageId, startSeconds, endSeconds, dotnet
         animations.push(animation);
     }
     const medias = mediaItems(page);
-    const state = { page, start, end, wallStart: performance.now(), animations, mediaItems: medias, dotnet, frame: 0, lastNotify: 0, paused: false };
+    const state = {
+        pageId,
+        page,
+        start,
+        end,
+        wallStart: performance.now(),
+        animations,
+        mediaItems: medias,
+        dotnet,
+        runId: Math.trunc(number(runId)),
+        frame: 0,
+        lastNotify: 0,
+        paused: false,
+        cancelled: false,
+        notificationInFlight: false,
+        pendingNotification: null
+    };
     pagePlaybackStates.set(pageId, state);
     for (const item of medias) {
         item.media.pause();
@@ -334,7 +397,7 @@ export function playPublicationTimeline(pageId, startSeconds, endSeconds, dotnet
         if (item.autoPlay && item.trigger !== 'onclick' && local >= 0 && local < mediaLength(item)) item.media.play().catch(() => {});
     }
     const tick = now => {
-        if (!pagePlaybackStates.has(pageId) || state.paused) return;
+        if (!isCurrentPageState(pageId, state) || state.paused) return;
         const seconds = state.start + (now - state.wallStart) / 1000;
         for (const item of medias) {
             const local = seconds - item.start;
@@ -350,16 +413,17 @@ export function playPublicationTimeline(pageId, startSeconds, endSeconds, dotnet
                 else item.media.pause();
             }
         }
+        if (!isCurrentPageState(pageId, state)) return;
         if (now - state.lastNotify > 80) {
             state.lastNotify = now;
-            state.dotnet?.invokeMethodAsync('TimelinePositionChanged', Math.min(end, seconds), false);
+            queueTimelineNotification(state, Math.min(end, seconds), false);
         }
         if (seconds >= end) {
-            stopPageState(pageId, false);
-            state.dotnet?.invokeMethodAsync('TimelinePositionChanged', end, true);
+            queueTimelineNotification(state, end, true);
+            stopPageState(pageId, false, state, false);
             return;
         }
-        state.frame = requestAnimationFrame(tick);
+        if (isCurrentPageState(pageId, state)) state.frame = requestAnimationFrame(tick);
     };
     state.frame = requestAnimationFrame(tick);
 }
@@ -368,6 +432,7 @@ export function pausePublicationTimeline(pageId) {
     const state = pagePlaybackStates.get(pageId);
     if (!state || state.paused) return;
     state.paused = true;
+    state.pendingNotification = null;
     cancelAnimationFrame(state.frame);
     state.pauseAt = state.start + (performance.now() - state.wallStart) / 1000;
     for (const animation of state.animations) animation.pause();

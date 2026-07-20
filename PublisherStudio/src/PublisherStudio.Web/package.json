@@ -1,12 +1,13 @@
 {
   "name": "publisherstudio-web-assets",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "private": true,
   "scripts": {
     "prepare:devexpress": "node tools/prepare-devexpress-assets.mjs",
     "prepare:spreadsheet": "npm run prepare:devexpress",
     "restore:devexpress": "npm ci --legacy-peer-deps --no-audit --no-fund",
-    "restore:spreadsheet": "npm run restore:devexpress"
+    "restore:spreadsheet": "npm run restore:devexpress",
+    "test:timeline": "node ../../tests/timelineInterop.test.mjs"
   },
   "dependencies": {
     "devextreme-dist": "25.2.8",

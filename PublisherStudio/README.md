@@ -268,3 +268,7 @@ Spreadsheet Studio now includes **Create data object**. Select a bounded range, 
 ## v1.0.37 DevExtreme runtime-license export repair
 
 See `CHANGELOG-v1.0.37.md`. The DevExpress browser-asset preparation now generates the official public DevExtreme runtime key from the licensed build identity, validates its version, blocks publish when it is absent, and registers it in the main app, Spreadsheet Studio, and self-contained HTML exports before any DevExtreme component is created. The exported file remains self-contained and end users do not need Node.js or a private DevExpress license.
+
+## v1.0.38 stable video and animation timeline
+
+See `CHANGELOG-v1.0.38.md`. Repeated playback can no longer leave stale animation-frame loops or queued Blazor playhead callbacks behind. Timeline runs are identity-checked end to end, progress updates are coalesced, and extreme pointer movement is bounded before media or animation clips are committed. Existing non-destructive video/audio trimming, clip movement, fades, playback rate, looping, and page-duration behavior are preserved.

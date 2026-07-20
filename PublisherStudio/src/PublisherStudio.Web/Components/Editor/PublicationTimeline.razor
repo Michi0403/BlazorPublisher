@@ -194,6 +194,7 @@
     private IJSObjectReference? _module;
     private DotNetObjectReference<PublicationTimeline>? _self;
     private double _playhead;
+    private long _playbackRunId;
     private double _viewStart;
     private double _viewEnd = 10;
     private Guid? _selectedId;
@@ -234,7 +235,7 @@
     protected override void OnParametersSet()
     {
         var duration = TimelineDuration;
-        if (_viewEnd <= _viewStart || _viewEnd > duration + .001)
+        if (!double.IsFinite(_viewStart) || !double.IsFinite(_viewEnd) || _viewEnd <= _viewStart || _viewEnd > duration + .001)
         {
             _viewStart = 0;
             _viewEnd = duration;
@@ -252,7 +253,7 @@
     private void ViewportChanged(RangeSelectorValueChangedEventArgs args)
     {
         var values = args.CurrentRange.Select(value => Convert.ToDouble(value, CultureInfo.InvariantCulture)).ToArray();
-        if (values.Length < 2) return;
+        if (values.Length < 2 || values.Any(value => !double.IsFinite(value))) return;
         _viewStart = Math.Clamp(Math.Min(values[0], values[1]), 0, TimelineDuration);
         _viewEnd = Math.Clamp(Math.Max(values[0], values[1]), _viewStart + .1, TimelineDuration);
     }
@@ -277,19 +278,26 @@
     private async Task PlayTimeline()
     {
         if (_module is null || _self is null) return;
-        await _module.InvokeVoidAsync("playPublicationTimeline", "publisher-page", _playhead, TimelineDuration, _self);
+        var runId = ++_playbackRunId;
+        await _module.InvokeVoidAsync("playPublicationTimeline", "publisher-page", _playhead, TimelineDuration, _self, runId);
     }
-    private Task PauseTimeline() => _module?.InvokeVoidAsync("pausePublicationTimeline", "publisher-page").AsTask() ?? Task.CompletedTask;
+    private async Task PauseTimeline()
+    {
+        ++_playbackRunId; // Invalidate any playhead notification already crossing JS interop.
+        if (_module is not null) await _module.InvokeVoidAsync("pausePublicationTimeline", "publisher-page");
+    }
     private async Task StopTimeline()
     {
+        ++_playbackRunId; // A stopped/restarted timeline must never accept an older playback callback.
         _playhead = 0;
         if (_module is not null) await _module.InvokeVoidAsync("stopPublicationTimeline", "publisher-page");
     }
     private Task PreviewPage() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
 
     [JSInvokable]
-    public Task TimelinePositionChanged(double seconds, bool finished)
+    public Task TimelinePositionChanged(long runId, double seconds, bool finished)
     {
+        if (runId != _playbackRunId || !double.IsFinite(seconds)) return Task.CompletedTask;
         _playhead = finished ? Math.Min(TimelineDuration, seconds) : Math.Clamp(seconds, 0, TimelineDuration);
         return InvokeAsync(StateHasChanged);
     }
@@ -297,12 +305,14 @@
     [JSInvokable]
     public void CommitAnimationTimelineClip(string id, double startSeconds, double durationSeconds)
     {
+        if (!double.IsFinite(startSeconds) || !double.IsFinite(durationSeconds)) return;
         if (Guid.TryParse(id, out var parsed)) State.SetAnimationTimelineRange(parsed, startSeconds, durationSeconds);
     }
 
     [JSInvokable]
     public void CommitMediaTimelineClip(string id, string mode, double startSeconds, double durationSeconds)
     {
+        if (!double.IsFinite(startSeconds) || !double.IsFinite(durationSeconds)) return;
         if (Guid.TryParse(id, out var parsed)) State.SetMediaTimelineRange(parsed, mode, startSeconds, durationSeconds);
     }
 
@@ -428,16 +438,22 @@
     private static string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
     private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+    private static bool TryDouble(ChangeEventArgs args, out double value) =>
+        double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value) && double.IsFinite(value);
 
     private sealed record TimelineRow(PublicationElement Element, List<PublicationAnimation> Animations);
     private enum TimelineSelectionKind { Background, Element, Animation, Media }
 
     public async ValueTask DisposeAsync()
     {
+        ++_playbackRunId;
         try
         {
-            if (_module is not null) await _module.InvokeVoidAsync("disposePublicationTimeline", "publisher-timeline");
+            if (_module is not null)
+            {
+                await _module.InvokeVoidAsync("stopPublicationTimeline", "publisher-page", false);
+                await _module.InvokeVoidAsync("disposePublicationTimeline", "publisher-timeline");
+            }
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }

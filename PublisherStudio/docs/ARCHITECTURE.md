@@ -121,3 +121,9 @@ The spreadsheet iframe reads the current bounded DevExpress client selection thr
 PublisherStudio uses non-modular DevExtreme browser bundles in three independent browser documents: the main Blazor host, the Spreadsheet Studio iframe, and each exported standalone HTML presentation. Each document must execute the generated public DevExtreme runtime-license script immediately after `dx.all.js` and before it creates a DevExtreme component.
 
 `Prepare-DevExpressAssets.ps1` restores the pinned browser packages and calls the official `devextreme-license` CLI from the same DevExtreme version. The CLI reads the private license only from the licensed developer/build environment and writes a public runtime script plus version metadata under `wwwroot/vendor`. Source archives omit those generated files. Publish is blocked when they are missing, while published applications and standalone HTML exports include only the public/runtime key.
+
+## Timeline playback ownership (v1.0.38)
+
+The editor timeline uses one authoritative playback state per publication page. Blazor allocates a run identifier whenever playback starts and invalidates it on pause, stop, or disposal. The browser stores that identifier with the exact animation-frame state and returns it with every playhead notification. Both sides reject stale work, so a callback that was already dequeued before a restart cannot attach itself to the replacement run.
+
+Playhead reporting is intentionally backpressured. JavaScript allows only one interop notification in flight and replaces intermediate pending positions with the latest value. This keeps rendering load bounded without changing media timing. Clip drag and trim gestures remain optimistic in the DOM, but browser coordinates and committed numeric values are finite and bounded before the authoritative C# media/animation model applies its existing source and timeline constraints.

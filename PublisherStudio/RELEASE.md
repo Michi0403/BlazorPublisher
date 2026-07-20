@@ -1,14 +1,13 @@
-# PublisherStudio v1.0.37 release
+# PublisherStudio v1.0.38 release
 
-See `CHANGELOG-v1.0.37.md`.
+See `CHANGELOG-v1.0.38.md`.
 
 Source release notes:
 
-- Run `Prepare-DevExpressAssets.cmd` after extracting the source package on a machine with Node.js 20+ and a registered valid DevExpress license. The historical `Prepare-SpreadsheetAssets.cmd` command remains an alias.
-- The preparation restores local npm browser assets and invokes `devextreme-license` from the matching `devextreme@25.2.8` package to generate a non-modular public runtime key.
-- The private DevExpress license is never copied into PublisherStudio or into exported HTML. Published installations and HTML exports contain only the generated public/runtime key.
-- `dotnet publish` and `Build-Release.ps1` now stop when the runtime-license file or its version metadata is missing.
-- The main application, Spreadsheet Studio, and standalone HTML export register the runtime key after `dx.all.js` and before any component/runtime initialization.
-- Standalone HTML remains self-contained: DevExtreme CSS, jQuery, DevExtreme, the generated runtime license, and PublisherStudio's live-data runtime are inlined.
-- End-user installations do not require Node.js, npm, npx, internet access, or a private DevExpress license.
-- Publication document format remains `1.36`; this release changes the build/export runtime, not the stored document schema.
+- The publication/video-cut timeline no longer accumulates stale playback loops or delayed playhead callbacks after repeated Play, Pause, Stop, scrub, or timeline reopen operations.
+- Every playback run has an identity shared by JavaScript and Blazor. Old callbacks cannot update or terminate a newer run.
+- JS-to-.NET playhead reporting is coalesced to one in-flight callback, preventing render backlogs from making the playhead appear to accelerate.
+- Clip dragging and trim handles are bounded to the visible timeline track and reject non-finite values without changing valid cut, move, playback-rate, fade, loop, or source-duration behavior.
+- Run `npm run test:timeline` from `src/PublisherStudio.Web` to execute the timeline lifecycle regression test.
+- Run `Prepare-DevExpressAssets.cmd` on the licensed build machine before publishing, as in v1.0.37.
+- Publication document format remains `1.36`; existing projects remain compatible.

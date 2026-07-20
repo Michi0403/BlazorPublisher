@@ -679,7 +679,7 @@
     private void TrimRangeChanged(RangeSelectorValueChangedEventArgs args)
     {
         var values = args.CurrentRange.Select(value => Convert.ToDouble(value, CultureInfo.InvariantCulture)).ToArray();
-        if (values.Length < 2) return;
+        if (values.Length < 2 || values.Any(value => !double.IsFinite(value))) return;
         _trimStart = Math.Clamp(Math.Min(values[0], values[1]), 0, _duration);
         _trimEnd = Math.Clamp(Math.Max(values[0], values[1]), _trimStart + .01, _duration);
         ClampFades();
@@ -933,7 +933,8 @@
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
     private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
-    private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+    private static bool TryDouble(ChangeEventArgs args, out double value) =>
+        double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value) && double.IsFinite(value);
     private static string FormatBytes(long bytes)
     {
         string[] units = ["B", "KB", "MB", "GB", "TB"];

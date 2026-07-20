@@ -1,3 +1,4 @@
+Link to winx64 Installer https://github.com/Michi0403/BlazorPublisher/releases/download/v138/PublisherStudio.Setup.exe
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**

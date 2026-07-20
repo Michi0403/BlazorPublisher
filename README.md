@@ -1,3 +1,6 @@
+Link to Windows x64 Installer and Wrapper, for anything else check the Release Section
+https://github.com/Michi0403/BlazorPublisher/releases/download/v140/PublisherStudio.Setup.exe
+
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**

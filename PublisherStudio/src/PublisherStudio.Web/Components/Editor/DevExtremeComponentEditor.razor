@@ -292,10 +292,23 @@
                                         <div class="component-form-grid wide">
                                             <label>When<select @bind="action.Trigger">@foreach (var value in Enum.GetValues<PublicationComponentActionTrigger>()) { <option value="@value">@value</option> }</select></label>
                                             <label>Do<select @bind="action.Action">@foreach (var value in Enum.GetValues<PublicationComponentActionKind>()) { <option value="@value">@Friendly(value.ToString())</option> }</select></label>
-                                            @if (action.Action == PublicationComponentActionKind.GoToPage)
-                                            {
-                                                <label>Target page<select value="@action.TargetPageId" @onchange="args => SetTargetPage(action, args)"><option value="">From data field</option>@foreach (var page in State.Document.Pages) { <option value="@page.Id">@page.Name</option> }</select></label>
-                                            }
+                                           @if (action.Action == PublicationComponentActionKind.GoToPage)
+                                           {
+                                                <label>
+                                                    Target page
+                                                    <select value="@action.TargetPageId"
+                                                            @onchange="args => SetTargetPage(action, args)">
+                                                        <option value="">From data field</option>
+
+                                                        @foreach (var publicationPage in State.Document.Pages)
+                                                        {
+                                                            <option value="@publicationPage.Id">
+                                                                @publicationPage.Name
+                                                            </option>
+                                                        }
+                                                    </select>
+                                                </label>
+                                           }
                                             @if (action.Action is PublicationComponentActionKind.ShowElement or PublicationComponentActionKind.HideElement or PublicationComponentActionKind.ToggleElement or PublicationComponentActionKind.SetValue or PublicationComponentActionKind.ApplyFilter or PublicationComponentActionKind.ClearFilter)
                                             {
                                                 <label>Target component/object<select value="@action.TargetElementId" @onchange="args => SetTargetElement(action, args)"><option value="">Select target</option>@foreach (var target in CurrentPageElements) { <option value="@target.Id">@target.Name</option> }</select></label>

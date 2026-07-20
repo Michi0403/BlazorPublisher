@@ -802,12 +802,16 @@
     private void ToggleDataLabels(ChangeEventArgs args) => SetDataVisual(item => item.ShowLabels = ReadBool(args));
     private async Task RefreshData()
     {
-        var dataObjectId = State.SelectedElement switch
+        Guid? dataObjectId = State.SelectedElement switch
         {
             DataVisualElement visual => visual.DataObjectId,
-            DevExtremeComponentElement component when component.Connection.Mode == PublicationComponentDataMode.PublicationDataObject => component.Connection.DataObjectId,
+            DevExtremeComponentElement component
+                when component.Connection.Mode ==
+                     PublicationComponentDataMode.PublicationDataObject
+                => component.Connection.DataObjectId,
             _ => null
         };
+
         await State.RefreshWebDataAsync(dataObjectId, true);
         State.RefreshDataVisuals();
     }

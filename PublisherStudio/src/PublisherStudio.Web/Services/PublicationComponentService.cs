@@ -446,7 +446,9 @@ public sealed class PublicationComponentService
             transport = data.Web.Transport.ToString(),
             method = data.Web.Method.ToString(),
             url = data.Web.AllowExportedHtmlFetch ? data.Web.Url : string.Empty,
-            headers = data.Web.AllowExportedHtmlFetch ? data.Web.Headers : Array.Empty<PublicationWebHeader>(),
+            headers = data.Web.AllowExportedHtmlFetch
+    ? data.Web.Headers
+    : new List<PublicationWebHeader>(),
             body = data.Web.AllowExportedHtmlFetch ? data.Web.RequestBody : string.Empty,
             responseFormat = data.Web.ResponseFormat.ToString(),
             jsonPath = data.Web.JsonPath,

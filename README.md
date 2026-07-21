@@ -300,3 +300,8 @@ See `CHANGELOG-v1.0.43.md`. Menu and Context Menu items can target stable public
 ## v1.0.44 component movement and editable connector geometry
 
 See `CHANGELOG-v1.0.44.md`. Editable menus render without a dataset, invalid date values no longer abort DevExtreme rendering, and components can be moved directly from their canvas content while preserving normal clicks. Objects can hold persistent custom connector points anywhere inside their bounds; connector drops can create those points automatically, and selected arrows expose draggable Bézier and route controls.
+
+
+## v1.0.45 component orientation and hidden-panel layout
+
+Vertical DevExtreme menus now use natural row heights instead of DevExtreme's horizontal-menubar `height:100%` item rule, so every item remains visible in Component Studio, on the canvas, and in offline HTML exports. The shared component runtime also observes host resizing and refreshes DevExtreme dimensions after publication-object resizing, tab/multi-view changes, splitter operations, and hidden-panel activation. See `CHANGELOG-v1.0.45.md`.

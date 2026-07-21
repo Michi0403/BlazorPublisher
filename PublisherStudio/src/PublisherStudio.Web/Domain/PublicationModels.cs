@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.41";
+    public string FormatVersion { get; set; } = "1.42";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -140,6 +140,14 @@ public sealed record ExternalFileDropRequest(
     double X,
     double Y);
 
+public sealed class PublicationConnectorPort
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = "Connector point";
+    public double XPercent { get; set; } = .5;
+    public double YPercent { get; set; } = .5;
+}
+
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextFrameElement), "text")]
 [JsonDerivedType(typeof(ImageFrameElement), "image")]
@@ -169,6 +177,7 @@ public abstract class PublicationElement
     public Guid? GroupId { get; set; }
     public List<PublicationAnimation> Animations { get; set; } = [];
     public PublicationInteraction Interaction { get; set; } = new();
+    public List<PublicationConnectorPort> ConnectorPorts { get; set; } = [];
 }
 
 public sealed class TextFrameElement : PublicationElement
@@ -323,6 +332,7 @@ public sealed class ConnectorEndpoint
     public ConnectorEndpointKind Kind { get; set; } = ConnectorEndpointKind.Element;
     public Guid ElementId { get; set; }
     public ConnectorAnchor Anchor { get; set; } = ConnectorAnchor.Right;
+    public Guid? PortId { get; set; }
     public double X { get; set; }
     public double Y { get; set; }
     public string TargetSelector { get; set; } = string.Empty;
@@ -370,6 +380,10 @@ public sealed class ConnectorElement : PublicationElement
     public ConnectorDashStyle DashStyle { get; set; }
     public string Stroke { get; set; } = "#245b85";
     public double StrokeWidthMm { get; set; } = 0.7;
+    public double? Control1X { get; set; }
+    public double? Control1Y { get; set; }
+    public double? Control2X { get; set; }
+    public double? Control2Y { get; set; }
     public SignalConnectorSettings Signal { get; set; } = new();
 }
 

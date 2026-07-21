@@ -34,6 +34,46 @@
         const parsed = Number(value);
         return Number.isFinite(parsed) ? parsed : fallback;
     };
+    const validDate = value => {
+        if (value === null || value === undefined || value === "") return null;
+        if (value instanceof Date) return Number.isFinite(value.getTime()) ? value : null;
+        const parsed = new Date(value);
+        return Number.isFinite(parsed.getTime()) ? parsed : null;
+    };
+
+    function normalizeDateRows(config, rows) {
+        if (!Array.isArray(rows)) return [];
+        const dateFields = new Set((config.fields || [])
+            .filter(column => lower(column?.valueKind) === "datetime")
+            .map(column => String(column.dataField || "").trim())
+            .filter(Boolean));
+        for (const [name, valueKind] of Object.entries(config.columnKinds || {})) {
+            if (lower(valueKind) === "datetime" && String(name).trim()) dateFields.add(String(name).trim());
+        }
+        if (String(config.kind || "") === "Scheduler") {
+            for (const name of [config.startDateField || "startDate", config.endDateField || "endDate"]) if (name) dateFields.add(String(name));
+        }
+        if (!dateFields.size) return rows;
+        const scheduler = String(config.kind || "") === "Scheduler";
+        const startField = String(config.startDateField || "startDate");
+        const endField = String(config.endDateField || "endDate");
+        return rows.map(source => {
+            if (!source || typeof source !== "object") return source;
+            const row = { ...source };
+            for (const name of dateFields) {
+                const key = Object.keys(row).find(candidate => lower(candidate) === lower(name));
+                if (!key) continue;
+                row[key] = validDate(row[key]);
+            }
+            if (scheduler) {
+                const startKey = Object.keys(row).find(candidate => lower(candidate) === lower(startField));
+                const endKey = Object.keys(row).find(candidate => lower(candidate) === lower(endField));
+                if (!startKey || !row[startKey]) return null;
+                if (endKey && !row[endKey]) row[endKey] = new Date(row[startKey].getTime() + 60 * 60 * 1000);
+            }
+            return row;
+        }).filter(row => row !== null);
+    }
     const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     })[character]);
@@ -214,7 +254,7 @@
             async load(loadOptions) {
                 if (connection.allowLoad === false) return rows;
                 const liveRows = await fetchDataObjectLive(connection.dataObjectLive);
-                if (liveRows) return liveRows;
+                if (liveRows) return normalizeDateRows(config, liveRows);
                 if (lower(connection.mode) !== "rest") return rows;
                 const base = resolveUrl(connection.url);
                 if (!base) return rows;
@@ -230,9 +270,10 @@
                 const result = await readResponse(response, connection.jsonPath);
                 if (!rawMode && result.raw && typeof result.raw === "object" && !Array.isArray(result.raw)) {
                     if (Array.isArray(result.raw.data)) return result.raw;
-                    return { data: result.rows, totalCount: number(result.raw.totalCount, result.rows.length), summary: result.raw.summary, groupCount: result.raw.groupCount };
+                    const normalized = normalizeDateRows(config, result.rows);
+                    return { data: normalized, totalCount: number(result.raw.totalCount, normalized.length), summary: result.raw.summary, groupCount: result.raw.groupCount };
                 }
-                return result.rows;
+                return normalizeDateRows(config, result.rows);
             }
         };
         if (connection.allowInsert) storeOptions.insert = async values => {
@@ -334,6 +375,53 @@
         return parentField && visible.some(row => valueFor(row, parentField) !== undefined && valueFor(row, parentField) !== null && String(valueFor(row, parentField)).trim() !== "")
             ? hierarchy(visible, keyField, parentField)
             : visible;
+    }
+
+    function renderBasicMenu(element, config, rows) {
+        const root = document.createElement("div");
+        root.className = `ps-basic-menu ps-basic-menu-${lower(config.orientation) === "vertical" ? "vertical" : "horizontal"}`;
+        const currentRows = Array.isArray(rows) ? rows : [];
+        let currentItems = menuItems(config, currentRows);
+        const renderItems = (items, parent) => {
+            for (const item of items || []) {
+                const wrapper = document.createElement("div");
+                wrapper.className = "ps-basic-menu-item";
+                const button = document.createElement("button");
+                button.type = "button";
+                button.disabled = item?.disabled === true || item?.enabled === false;
+                button.textContent = String(item?.text ?? item?.[config.displayField || config.textField || "text"] ?? "Menu item");
+                button.addEventListener("click", event => {
+                    event.stopPropagation();
+                    let actions = actionsFor(config, "ItemClick");
+                    if (!actions.length) actions = [{ trigger: "ItemClick", action: "Navigate", openInNewWindow: true }];
+                    void executeActions(config, actions, eventContext(config, null, currentRows, { itemData: item, event }, item));
+                });
+                wrapper.append(button);
+                if (Array.isArray(item?.items) && item.items.length) {
+                    const children = document.createElement("div");
+                    children.className = "ps-basic-menu-children";
+                    renderItems(item.items, children);
+                    wrapper.append(children);
+                }
+                parent.append(wrapper);
+            }
+        };
+        const repaint = (items = currentItems) => {
+            root.replaceChildren();
+            renderItems(items, root);
+        };
+        repaint();
+        element.replaceChildren(root);
+        return {
+            dispose() { root.remove(); },
+            repaint() { repaint(); },
+            option(name, value) {
+                if (name === "items" && Array.isArray(value)) {
+                    currentItems = value;
+                    repaint();
+                }
+            }
+        };
     }
 
     function fieldType(field) {
@@ -920,7 +1008,7 @@
             case "NumberBox": options = { ...base, value: number(configuredValue(config), 0), placeholder: config.placeholder || undefined, showSpinButtons: true, showClearButton: true }; break;
             case "DateBox": {
                 const value = configuredValue(config);
-                options = { ...base, value: value ? new Date(value) : null, placeholder: config.placeholder || undefined, type: "datetime", showClearButton: true };
+                options = { ...base, value: validDate(value), placeholder: config.placeholder || undefined, type: "datetime", showClearButton: true };
                 break;
             }
             case "CheckBox": options = { ...base, value: bool(configuredValue(config)), text: config.title || config.buttonText || "Option" }; break;
@@ -955,7 +1043,32 @@
                 break;
             case "Menu": {
                 const items = menuItems(config, config.rows);
-                options = { ...base, height: undefined, items, dataSource: undefined, displayExpr: config.displayField || config.textField || "text", orientation: config.orientation || "horizontal", hideSubmenuOnMouseLeave: true };
+                const orientation = lower(config.orientation) === "vertical" ? "vertical" : "horizontal";
+                options = {
+                    ...base,
+                    height: undefined,
+                    items,
+                    dataSource: undefined,
+                    displayExpr: config.displayField || config.textField || "text",
+                    orientation,
+                    adaptivityEnabled: false,
+                    hideSubmenuOnMouseLeave: true,
+                    itemTemplate(itemData, itemIndex, itemElement) {
+                        const target = itemElement?.jquery ? itemElement[0] : itemElement;
+                        if (!target) return;
+                        const icon = String(itemData?.icon || "").trim();
+                        target.replaceChildren();
+                        if (icon) {
+                            const marker = document.createElement("span");
+                            marker.className = icon;
+                            marker.setAttribute("aria-hidden", "true");
+                            target.append(marker);
+                        }
+                        const label = document.createElement("span");
+                        label.textContent = String(itemData?.text ?? itemData?.[config.displayField || config.textField || "text"] ?? "Menu item");
+                        target.append(label);
+                    }
+                };
                 break;
             }
             case "ContextMenu": {
@@ -1066,6 +1179,7 @@
                 rows = await fetchDataObjectLive(state.config.connection.dataObjectLive);
             }
             if (!rows) rows = await materializeRows(state.config, state.data);
+            rows = normalizeDateRows(state.config, rows);
             state.config.rows = rows;
             if (kind === "Map") {
                 state.instance.option?.("markers", mapMarkers(state.config, rows));
@@ -1077,13 +1191,13 @@
             return;
         }
         if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox"].includes(kind)) {
-            const rows = await materializeRows(state.config, state.data);
+            const rows = normalizeDateRows(state.config, await materializeRows(state.config, state.data));
             state.config.rows = rows;
             if (kind === "Form") state.instance.option?.("formData", clone(rows[0] || {}));
             else if (kind === "Menu" || kind === "ContextMenu") state.instance.option?.("items", menuItems(state.config, rows));
             else {
                 const value = configuredValue(state.config);
-                state.instance.option?.("value", kind === "DateBox" && value ? new Date(value) : kind === "NumberBox" ? number(value, 0) : kind === "CheckBox" ? bool(value) : value ?? "");
+                state.instance.option?.("value", kind === "DateBox" ? validDate(value) : kind === "NumberBox" ? number(value, 0) : kind === "CheckBox" ? bool(value) : value ?? "");
             }
             state.instance.repaint?.();
             return;
@@ -1119,25 +1233,37 @@
             element.innerHTML = '<div class="ps-component-error">DevExtreme browser assets are not loaded.</div>';
             return null;
         }
+        config.rows = normalizeDateRows(config, Array.isArray(config.rows) ? config.rows : []);
         let data = createData(config);
         if (options.fetchNow && config.connection?.dataObjectLive?.enabled) {
             try {
                 const rows = await fetchDataObjectLive(config.connection.dataObjectLive);
                 if (rows) {
-                    config.rows = rows;
+                    config.rows = normalizeDateRows(config, rows);
                     data = createData({ ...config, connection: { ...config.connection, dataObjectLive: null } });
                 }
             } catch (error) { showError(error?.message || String(error)); }
         }
         try {
-            if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox", "Map", "VectorMap"].includes(String(config.kind || "")))
-                config.rows = await materializeRows(config, data);
+            if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox", "Map", "VectorMap", "Scheduler"].includes(String(config.kind || "")))
+                config.rows = normalizeDateRows(config, await materializeRows(config, data));
             const plugin = pluginNames[config.kind];
             if (!plugin || typeof window.jQuery.fn[plugin] !== "function") throw new Error(`${config.kind} is not available in the bundled DevExtreme runtime.`);
             const optionsValue = buildOptions(config, element, data);
             const $element = window.jQuery(element);
             $element[plugin](optionsValue);
             const instance = $element[plugin]("instance");
+            if (config.kind === "Menu") {
+                const expectedItems = menuItems(config, config.rows || []);
+                await Promise.resolve();
+                if (expectedItems.length && typeof element.querySelector === "function" && !element.querySelector(".dx-menu-item")) {
+                    try { instance?.dispose?.(); } catch { }
+                    const fallback = renderBasicMenu(element, config, config.rows || []);
+                    const fallbackState = { config, instance: fallback, data, dataSource: data.dataSource, pivotSource: null, timer: null, fallback: true };
+                    states.set(element, fallbackState);
+                    return fallback;
+                }
+            }
             const state = { config, instance, data, dataSource: instance?.getDataSource?.() || data.dataSource, pivotSource: data.pivotSource, timer: null };
             states.set(element, state);
             const interval = number(config.connection?.dataObjectLive?.refreshIntervalSeconds, 0);
@@ -1151,6 +1277,15 @@
             return instance;
         } catch (error) {
             console.error("PublisherStudio component rendering failed.", error);
+            if (["Menu", "ContextMenu"].includes(String(config.kind || ""))) {
+                try {
+                    const instance = renderBasicMenu(element, config, config.rows || []);
+                    states.set(element, { config, instance, data, dataSource: data?.dataSource, pivotSource: null, timer: null, fallback: true });
+                    return instance;
+                } catch (fallbackError) {
+                    console.error("PublisherStudio menu fallback failed.", fallbackError);
+                }
+            }
             element.innerHTML = `<div class="ps-component-error"><strong>${escapeHtml(config.title || config.kind)}</strong><span>${escapeHtml(error?.message || String(error))}</span></div>`;
             return null;
         }

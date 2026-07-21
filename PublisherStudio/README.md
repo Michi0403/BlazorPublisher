@@ -293,3 +293,7 @@ See `CHANGELOG-v1.0.42.md` and `docs/ANIMATION_EXPORT.md`. **Stop preview** now 
 ## v1.0.43 navigable menus and selectable publication fields
 
 See `CHANGELOG-v1.0.43.md`. Menu and Context Menu items can target stable publication pages, external URLs, or no navigation without automatically adding pages. Data-driven menus can bind directly to the self-updating **Publication pages** object. Component Studio now selects source properties and key fields from the active dataset schema, filters behavior settings by component capability, supports horizontal/vertical Menu layout, and avoids loading the DevExtreme bundle twice.
+
+## v1.0.44 component movement and editable connector geometry
+
+See `CHANGELOG-v1.0.44.md`. Editable menus render without a dataset, invalid date values no longer abort DevExtreme rendering, and components can be moved directly from their canvas content while preserving normal clicks. Objects can hold persistent custom connector points anywhere inside their bounds; connector drops can create those points automatically, and selected arrows expose draggable Bézier and route controls.

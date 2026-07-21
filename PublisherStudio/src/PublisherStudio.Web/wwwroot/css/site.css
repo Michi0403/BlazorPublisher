@@ -419,6 +419,7 @@ button { cursor: pointer; }
 .pub-connector .connector-line { fill: none; pointer-events: none; vector-effect: non-scaling-stroke; }
 .pub-connector .connector-hit { fill: none; stroke: transparent; stroke-width: 4mm; pointer-events: stroke; cursor: pointer; }
 .pub-connector.selected .connector-line { filter: drop-shadow(0 0 1.5px #ffffff) drop-shadow(0 0 2px #1787d4); }
+.pub-connector.selected .connector-hit, .pub-connector.selection-primary .connector-hit { cursor: move; }
 .pub-connector.locked .connector-hit { cursor: not-allowed; }
 .connector-endpoint { fill: #fff; stroke: #075985; stroke-width: .45mm; pointer-events: all; cursor: crosshair; vector-effect: non-scaling-stroke; }
 .connector-ghost { z-index: 9999; display: none; color: #1177b7; }
@@ -2077,3 +2078,27 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .picture-path-point-row button { width:28px; height:28px; padding:0; }
 
 /* PublisherStudio 1.0.41: offline Signal Arrows, SVG paths, and precise path nodes. */
+
+/* Editable connector routing and custom attachment points. */
+.connector-tool-active .connector-port-custom,
+.pub-element.selected > .connector-port-custom,
+.pub-element.selected .connector-port-preview { display: block !important; animation: publisher-port-pulse .8s ease-in-out infinite alternate; }
+.connector-port-preview { pointer-events: none; }
+@keyframes publisher-port-pulse { from { box-shadow: 0 0 0 2px #fff, 0 0 0 3px #0ea5e9; } to { box-shadow: 0 0 0 3px #fff, 0 0 0 7px #0ea5e955; } }
+.connector-control-guide { fill: none; stroke: #0ea5e9; stroke-width: .35mm; stroke-dasharray: 1.3 1.1; pointer-events: none; vector-effect: non-scaling-stroke; }
+.connector-control-point { fill: #fff; stroke: #0369a1; stroke-width: .45mm; cursor: move; pointer-events: all; vector-effect: non-scaling-stroke; }
+.connector-route-handle { fill: #fde047; stroke: #075985; stroke-width: .4mm; cursor: move; pointer-events: all; vector-effect: non-scaling-stroke; }
+
+/* Browser-native fallback keeps menu items usable if a DevExtreme widget rejects bad legacy data. */
+.ps-basic-menu { display: flex; align-items: stretch; gap: 2px; width: 100%; min-height: 34px; font: inherit; }
+.ps-basic-menu-vertical { flex-direction: column; align-items: stretch; }
+.ps-basic-menu-horizontal { flex-direction: row; flex-wrap: wrap; }
+.ps-basic-menu-item { position: relative; }
+.ps-basic-menu-item > button { min-height: 34px; padding: 6px 12px; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.ps-basic-menu-item > button:hover { background: #e8f3fb; }
+.ps-basic-menu-item > button:disabled { opacity: .5; cursor: default; }
+.ps-basic-menu-children { display: none; position: absolute; z-index: 50; min-width: 160px; padding: 3px; border: 1px solid #cbd5e1; background: #fff; box-shadow: 0 8px 24px #0f172a22; }
+.ps-basic-menu-item:hover > .ps-basic-menu-children,
+.ps-basic-menu-item:focus-within > .ps-basic-menu-children { display: block; }
+.ps-basic-menu-vertical .ps-basic-menu-children { left: 100%; top: 0; }
+.ps-basic-menu-horizontal .ps-basic-menu-children { left: 0; top: 100%; }

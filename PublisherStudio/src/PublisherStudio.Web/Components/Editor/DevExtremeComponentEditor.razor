@@ -1043,16 +1043,10 @@
             }
 
             return _draft.Fields
-               .Where(column => !string.IsNullOrWhiteSpace(column.DataField))
-               .DistinctBy(
-                   column => column.DataField!,
-                   StringComparer.OrdinalIgnoreCase)
-               .Select(column => new PublicationDataColumn
-               {
-                   Name = column.DataField!,
-                   ValueKind = column.ValueKind
-               })
-               .ToArray();
+                .Where(column => !string.IsNullOrWhiteSpace(column.DataField))
+                .DistinctBy(column => column.DataField, StringComparer.OrdinalIgnoreCase)
+                .Select(column => new PublicationDataColumn { Name = column.DataField, ValueKind = column.ValueKind })
+                .ToArray();
         }
     }
 

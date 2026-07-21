@@ -266,6 +266,19 @@ function resetPointerOperation(state, restoreDom = false) {
     state.operation = null;
     try { state.stage.releasePointerCapture(operation.pointerId); } catch { }
 
+    if (operation.kind === 'connector-control') {
+        const controls = operation.originalControls;
+        if (operation.connector && controls) {
+            operation.connector.dataset.control1X = String(controls.c1.x);
+            operation.connector.dataset.control1Y = String(controls.c1.y);
+            operation.connector.dataset.control2X = String(controls.c2.x);
+            operation.connector.dataset.control2Y = String(controls.c2.y);
+            const path = connectorPath(operation.connector.dataset.pathKind || 'Curved', operation.source, operation.target, controls);
+            operation.connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
+            updateConnectorControlAppearance(operation.connector, operation.source, operation.target, controls);
+        }
+        return;
+    }
     if (operation.kind?.startsWith('connector-')) {
         state.operation = operation;
         clearConnectorOperation(state, true);
@@ -726,6 +739,31 @@ function resizeCursorFor(handle, rotation) {
 function updateResizeHandleCursors(root=document){for(const element of root.querySelectorAll?.('.pub-element')||[]){const rotation=parseRotation(element);for(const handle of element.querySelectorAll('[data-resize-handle]'))handle.style.cursor=resizeCursorFor(handle.dataset.resizeHandle,rotation);}}
 
 
+export function elementRelativePoint(pageId, elementId, clientX, clientY) {
+    const page = typeof pageId === 'string' ? document.getElementById(pageId) : pageId;
+    const element = page?.querySelector?.(`[data-element-id="${CSS.escape(String(elementId || ''))}"]`);
+    if (!element) return [.5, .5];
+    const stage = page.closest?.('.publication-stage') || document.getElementById('publisher-stage');
+    const state = stage ? canvasStates.get(stage) : null;
+    if (state) {
+        const point = relativePointForElement(state, element, { clientX: number(clientX), clientY: number(clientY) });
+        return [point.x, point.y];
+    }
+    const rect = element.getBoundingClientRect();
+    return [
+        rect.width > 0 ? clamp((number(clientX) - rect.left) / rect.width, 0, 1) : .5,
+        rect.height > 0 ? clamp((number(clientY) - rect.top) / rect.height, 0, 1) : .5
+    ];
+}
+
+export function initializeSignalConnectors(rootId, options = {}) {
+    const root = typeof rootId === 'string' ? document.getElementById(rootId) : rootId;
+    if (!root) return false;
+    root.__publisherSignalRuntime?.dispose?.();
+    root.__publisherSignalRuntime = signalConnectorRuntime(root, options);
+    return Boolean(root.__publisherSignalRuntime);
+}
+
 export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) {
     const stage = document.getElementById(stageId);
     const scroll = document.getElementById(scrollId);
@@ -775,6 +813,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             pendingPasteTimer: 0,
             lastInsertionPoint: null,
             pendingComponentAction: null,
+            suppressNextComponentClickUntil: 0,
             handlers: {}
         };
 
@@ -824,7 +863,15 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         };
         handlers.documentDragStart = event => insertionDragStart(state, event);
         handlers.documentDragEnd = () => insertionDragEnd(state);
-        handlers.documentClick = event => suppressInsertionClick(state, event);
+        handlers.documentClick = event => {
+            if (performance.now() < number(state.suppressNextComponentClickUntil) && event.target?.closest?.('.devextreme-component-host')) {
+                state.suppressNextComponentClickUntil = 0;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return;
+            }
+            suppressInsertionClick(state, event);
+        };
         handlers.scroll = () => nextAnimationFrame(state);
         handlers.publisherNavigate = event => scheduleComponentNavigation(state, event.detail);
         handlers.publisherOpenUrl = event => scheduleComponentUrl(state, event.detail);
@@ -833,9 +880,9 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         // or animation content stops pointer events in its own component tree.
         stage.addEventListener('pointerdown', handlers.stagePointerDown, true);
         stage.addEventListener('dblclick', handlers.stageDoubleClick, true);
-        stage.addEventListener('pointermove', handlers.stagePointerMove);
-        stage.addEventListener('pointerup', handlers.stagePointerUp);
-        stage.addEventListener('pointercancel', handlers.stagePointerCancel);
+        stage.addEventListener('pointermove', handlers.stagePointerMove, true);
+        stage.addEventListener('pointerup', handlers.stagePointerUp, true);
+        stage.addEventListener('pointercancel', handlers.stagePointerCancel, true);
         stage.addEventListener('lostpointercapture', handlers.lostPointerCapture);
         window.addEventListener('pointerdown', handlers.windowPointerDown, true);
         window.addEventListener('pointerup', handlers.windowPointerUp, true);
@@ -913,9 +960,9 @@ export function disposeCanvas(stageId) {
     const handlers = state.handlers || {};
     stage.removeEventListener('pointerdown', handlers.stagePointerDown, true);
     stage.removeEventListener('dblclick', handlers.stageDoubleClick, true);
-    stage.removeEventListener('pointermove', handlers.stagePointerMove);
-    stage.removeEventListener('pointerup', handlers.stagePointerUp);
-    stage.removeEventListener('pointercancel', handlers.stagePointerCancel);
+    stage.removeEventListener('pointermove', handlers.stagePointerMove, true);
+    stage.removeEventListener('pointerup', handlers.stagePointerUp, true);
+    stage.removeEventListener('pointercancel', handlers.stagePointerCancel, true);
     stage.removeEventListener('lostpointercapture', handlers.lostPointerCapture);
     stage.removeEventListener('pointerleave', handlers.stagePointerLeave);
     stage.removeEventListener('wheel', handlers.stageWheel);
@@ -1097,26 +1144,106 @@ function pagePointMm(state, event) {
     };
 }
 
-function connectorPath(kind, source, target) {
+function defaultConnectorControls(source, target) {
+    const dx = Math.max(12, Math.abs(target.x - source.x) * .48);
+    const direction = target.x >= source.x ? 1 : -1;
+    return {
+        first: { x: source.x + dx * direction, y: source.y },
+        second: { x: target.x - dx * direction, y: target.y }
+    };
+}
+
+function connectorPath(kind, source, target, controls = null) {
     if (kind === 'Elbow') {
         const middleX = (source.x + target.x) / 2;
         return `M ${source.x} ${source.y} L ${middleX} ${source.y} L ${middleX} ${target.y} L ${target.x} ${target.y}`;
     }
     if (kind === 'Curved') {
-        const dx = Math.max(12, Math.abs(target.x - source.x) * .48);
-        const direction = target.x >= source.x ? 1 : -1;
-        return `M ${source.x} ${source.y} C ${source.x + dx * direction} ${source.y}, ${target.x - dx * direction} ${target.y}, ${target.x} ${target.y}`;
+        const value = controls || defaultConnectorControls(source, target);
+        const first = value.first || value.c1;
+        const second = value.second || value.c2;
+        return `M ${source.x} ${source.y} C ${first.x} ${first.y}, ${second.x} ${second.y}, ${target.x} ${target.y}`;
     }
     return `M ${source.x} ${source.y} L ${target.x} ${target.y}`;
 }
 
 function portPointMm(state, port) {
+    const owner = port.closest?.('[data-publication-element][data-element-id]');
+    if (owner && port.dataset.portId) {
+        return pointForElementRelative(owner, {
+            x: clamp(number(port.style.left) / 100, 0, 1),
+            y: clamp(number(port.style.top) / 100, 0, 1)
+        }, state.config.pxPerMm);
+    }
     const pageRect = state.page.getBoundingClientRect();
     const rect = port.getBoundingClientRect();
     return {
         x: (rect.left + rect.width / 2 - pageRect.left) / state.config.pxPerMm,
         y: (rect.top + rect.height / 2 - pageRect.top) / state.config.pxPerMm
     };
+}
+
+function relativePointForElement(state, element, event) {
+    const point = pagePointMm(state, event);
+    const bounds = elementMm(element, state.config.pxPerMm);
+    const centerX = bounds.x + bounds.width / 2;
+    const centerY = bounds.y + bounds.height / 2;
+    const radians = -parseRotation(element) * Math.PI / 180;
+    const dx = point.x - centerX;
+    const dy = point.y - centerY;
+    const localX = centerX + dx * Math.cos(radians) - dy * Math.sin(radians);
+    const localY = centerY + dx * Math.sin(radians) + dy * Math.cos(radians);
+    return {
+        x: bounds.width > 0 ? clamp((localX - bounds.x) / bounds.width, 0, 1) : .5,
+        y: bounds.height > 0 ? clamp((localY - bounds.y) / bounds.height, 0, 1) : .5
+    };
+}
+
+function pointForElementRelative(element, relative, pxPerMm) {
+    const bounds = elementMm(element, pxPerMm);
+    const centerX = bounds.x + bounds.width / 2;
+    const centerY = bounds.y + bounds.height / 2;
+    const rawX = bounds.x + bounds.width * clamp(relative.x, 0, 1);
+    const rawY = bounds.y + bounds.height * clamp(relative.y, 0, 1);
+    const radians = parseRotation(element) * Math.PI / 180;
+    const dx = rawX - centerX;
+    const dy = rawY - centerY;
+    return {
+        x: centerX + dx * Math.cos(radians) - dy * Math.sin(radians),
+        y: centerY + dx * Math.sin(radians) + dy * Math.cos(radians)
+    };
+}
+
+function createConnectorPortPreview(owner, relative, className = '') {
+    const preview = document.createElement('span');
+    preview.className = `connector-port connector-port-custom connector-port-preview ${className}`.trim();
+    preview.style.left = `${clamp(relative.x, 0, 1) * 100}%`;
+    preview.style.top = `${clamp(relative.y, 0, 1) * 100}%`;
+    owner.appendChild(preview);
+    return preview;
+}
+
+function dynamicConnectorTarget(state, event, excluded) {
+    for (const candidate of document.elementsFromPoint(event.clientX, event.clientY)) {
+        const owner = candidate.closest?.('[data-publication-element][data-element-id]');
+        if (!owner || !state.page.contains(owner) || owner.matches('[data-connector-id]') || owner.classList.contains('locked')) continue;
+        const ownerId = String(owner.dataset.elementId || '');
+        if (!ownerId || excluded.has(ownerId)) continue;
+        const relative = relativePointForElement(state, owner, event);
+        return {
+            port: null,
+            preview: createConnectorPortPreview(owner, relative, 'connector-port-target'),
+            ownerId,
+            anchor: 'Center',
+            portId: '',
+            createPort: true,
+            relativeX: relative.x,
+            relativeY: relative.y,
+            point: pointForElementRelative(owner, relative, state.config.pxPerMm),
+            kind: 'Element'
+        };
+    }
+    return null;
 }
 
 function findConnectorTarget(state, event, excludedIds = []) {
@@ -1137,11 +1264,16 @@ function findConnectorTarget(state, event, excludedIds = []) {
                 port,
                 ownerId: port.dataset.ownerId,
                 anchor: port.dataset.anchor,
-                point: portPointMm(state, port)
+                portId: port.dataset.portId || '',
+                createPort: false,
+                relativeX: number(port.style.left) / 100 || 0,
+                relativeY: number(port.style.top) / 100 || 0,
+                point: portPointMm(state, port),
+                kind: 'Element'
             };
         }
     }
-    return best;
+    return best || dynamicConnectorTarget(state, event, excluded);
 }
 
 function ensureConnectorGhost(state, markerEnd) {
@@ -1195,12 +1327,15 @@ function clearConnectorOperation(state, restoreOriginal) {
         state.connectorGhost = null;
     }
     if (operation?.target?.port) operation.target.port.classList.remove('connector-port-target');
+    operation?.target?.preview?.remove?.();
+    operation?.sourcePreview?.remove?.();
     if (operation?.sourcePort) operation.sourcePort.classList.remove('connector-port-source');
     if (operation?.kind?.startsWith('connector-')) state.operation = null;
 }
 
 function updateConnectorDrag(state, event, operation) {
     operation.target?.port?.classList.remove('connector-port-target');
+    operation.target?.preview?.remove?.();
     let target = findConnectorTarget(state, event, operation.excludedIds);
     if (!target && operation.signal) {
         target = { kind: 'Canvas', ownerId: '', anchor: 'Center', point: pagePointMm(state, event), port: null };
@@ -1220,26 +1355,18 @@ function finishConnectorDrag(state, operation) {
     const target = operation.target;
     if (target) {
         const source = operation.sourceEndpoint || {
-            kind: 'Element', ownerId: operation.sourceOwnerId || '', anchor: operation.sourceAnchor || 'Center', point: operation.fixedPoint
+            kind: 'Element', ownerId: operation.sourceOwnerId || '', anchor: operation.sourceAnchor || 'Center',
+            portId: '', createPort: false, relativeX: 0.5, relativeY: 0.5, point: operation.fixedPoint
         };
-        if (operation.signal) {
-            if (operation.kind === 'connector-new') {
-                safeDotNet(state, 'CommitSignalConnector',
-                    source.kind, source.ownerId || '', source.anchor || 'Center', source.point.x, source.point.y,
-                    target.kind || 'Element', target.ownerId || '', target.anchor || 'Center', target.point.x, target.point.y,
-                    operation.tool);
-            } else {
-                safeDotNet(state, 'ReconnectSignalConnector', operation.connectorId, operation.endpoint,
-                    target.kind || 'Element', target.ownerId || '', target.anchor || 'Center', target.point.x, target.point.y);
-            }
-        } else if (operation.kind === 'connector-new') {
-            safeDotNet(state,
-                'CommitConnector',
-                operation.sourceOwnerId, operation.sourceAnchor,
-                target.ownerId, target.anchor, operation.tool);
+        if (operation.kind === 'connector-new') {
+            safeDotNet(state, 'CommitConnectorAdvanced',
+                source.kind || 'Element', source.ownerId || '', source.anchor || 'Center', source.portId || '', Boolean(source.createPort), number(source.relativeX, .5), number(source.relativeY, .5), number(source.point?.x), number(source.point?.y),
+                target.kind || 'Element', target.ownerId || '', target.anchor || 'Center', target.portId || '', Boolean(target.createPort), number(target.relativeX, .5), number(target.relativeY, .5), number(target.point?.x), number(target.point?.y),
+                operation.tool || (operation.markerEnd ? 'Arrow' : 'Connector'));
         } else {
-            safeDotNet(state,
-                'ReconnectConnector', operation.connectorId, operation.endpoint, target.ownerId, target.anchor);
+            safeDotNet(state, 'ReconnectConnectorAdvanced', operation.connectorId, operation.endpoint,
+                target.kind || 'Element', target.ownerId || '', target.anchor || 'Center', target.portId || '', Boolean(target.createPort),
+                number(target.relativeX, .5), number(target.relativeY, .5), number(target.point?.x), number(target.point?.y));
         }
     }
     clearConnectorOperation(state, true);
@@ -1275,7 +1402,58 @@ function connectorEndpointPoint(state, connector, prefix) {
     }
     const id = connector.dataset[`${prefix}ElementId`] || '';
     const element = state.page.querySelector(`[data-element-id="${CSS.escape(id)}"]`);
-    return element ? anchorPointForElement(element, connector.dataset[`${prefix}Anchor`] || 'Center', state.config.pxPerMm) : null;
+    if (!element) return null;
+    const portId = connector.dataset[`${prefix}PortId`] || '';
+    if (portId) {
+        const port = element.querySelector(`[data-connector-port][data-port-id="${CSS.escape(portId)}"]`);
+        if (port) return portPointMm(state, port);
+    }
+    return anchorPointForElement(element, connector.dataset[`${prefix}Anchor`] || 'Center', state.config.pxPerMm);
+}
+
+function connectorControls(connector, source, target) {
+    const distance = Math.max(16, Math.min(70, Math.hypot(target.x - source.x, target.y - source.y) * .45));
+    const anchored = (point, anchor) => {
+        const value = { ...point };
+        const name = String(anchor || 'Center').toLowerCase();
+        if (name.includes('top')) value.y -= distance;
+        else if (name.includes('bottom')) value.y += distance;
+        else if (name === 'left') value.x -= distance;
+        else if (name === 'right') value.x += distance;
+        return value;
+    };
+    const defaults = {
+        c1: anchored(source, connector.dataset.sourceAnchor),
+        c2: anchored(target, connector.dataset.targetAnchor)
+    };
+    return {
+        c1: {
+            x: Number.isFinite(Number.parseFloat(connector.dataset.control1X)) ? number(connector.dataset.control1X) : defaults.c1.x,
+            y: Number.isFinite(Number.parseFloat(connector.dataset.control1Y)) ? number(connector.dataset.control1Y) : defaults.c1.y
+        },
+        c2: {
+            x: Number.isFinite(Number.parseFloat(connector.dataset.control2X)) ? number(connector.dataset.control2X) : defaults.c2.x,
+            y: Number.isFinite(Number.parseFloat(connector.dataset.control2Y)) ? number(connector.dataset.control2Y) : defaults.c2.y
+        }
+    };
+}
+
+function updateConnectorControlAppearance(connector, source, target, controls) {
+    const guide = connector.querySelector('.connector-control-guide');
+    if (guide) guide.setAttribute('d', `M ${source.x} ${source.y} L ${controls.c1.x} ${controls.c1.y} M ${target.x} ${target.y} L ${controls.c2.x} ${controls.c2.y}`);
+    const first = connector.querySelector('[data-connector-control="1"]');
+    const second = connector.querySelector('[data-connector-control="2"]');
+    const route = connector.querySelector('[data-connector-control="route"]');
+    if (first) { first.setAttribute('cx', controls.c1.x); first.setAttribute('cy', controls.c1.y); }
+    if (second) { second.setAttribute('cx', controls.c2.x); second.setAttribute('cy', controls.c2.y); }
+    if (route) {
+        const x = (controls.c1.x + controls.c2.x) / 2;
+        const y = (controls.c1.y + controls.c2.y) / 2;
+        const width = number(route.getAttribute('width'), 2);
+        const height = number(route.getAttribute('height'), 2);
+        route.setAttribute('x', x - width / 2);
+        route.setAttribute('y', y - height / 2);
+    }
 }
 
 function updateAttachedConnectors(state, movedId) {
@@ -1284,11 +1462,13 @@ function updateAttachedConnectors(state, movedId) {
         const source = connectorEndpointPoint(state, connector, 'source');
         const target = connectorEndpointPoint(state, connector, 'target');
         if (!source || !target) continue;
-        const path = connectorPath(connector.dataset.pathKind || 'Curved', source, target);
+        const controls = connectorControls(connector, source, target);
+        const path = connectorPath(connector.dataset.pathKind || 'Curved', source, target, controls);
         connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
         const ends = connector.querySelectorAll('.connector-endpoint');
         if (ends[0]) { ends[0].setAttribute('cx', source.x); ends[0].setAttribute('cy', source.y); }
         if (ends[1]) { ends[1].setAttribute('cx', target.x); ends[1].setAttribute('cy', target.y); }
+        updateConnectorControlAppearance(connector, source, target, controls);
     }
 }
 
@@ -1550,13 +1730,52 @@ function pointerDown(state, event) {
     }
 
     const componentOwner = componentInteractionOwner(state, event);
-    if (componentOwner) {
+    if (componentOwner && !connectorToolActive(state)) {
         const id = String(componentOwner.dataset.elementId || '');
-        if (id && !selectedElementIdSet(state).has(id.toLowerCase())) {
+        const wasSelected = selectedElementIdSet(state).has(id.toLowerCase());
+        if (id && !wasSelected) {
+            // Keep selection optimistic while the pointer is down. Updating Blazor here
+            // recreates the DevExtreme host before the drag threshold is reached and
+            // makes the component look resize-only. Commit the selection on pointerup,
+            // or let CommitMove select the object after an actual drag.
             optimisticSelectElement(state, componentOwner, false);
-            // Let DevExtreme finish its native click first; the keyed Blazor object can rerender afterwards.
-            setTimeout(() => safeDotNet(state, 'SelectElement', id, false), 0);
         }
+        if (id && !componentOwner.classList.contains('locked')) {
+            const bounds = elementMm(componentOwner, state.config.pxPerMm);
+            const moving = movingNodesForPointer(state, componentOwner, false, wasSelected)
+                .filter(item => !item.classList.contains('locked') && !item.matches('[data-connector-id]'))
+                .map(item => ({ id: item.dataset.elementId, element: item, ...elementMm(item, state.config.pxPerMm) }));
+            if (!moving.some(item => item.id === id)) moving.unshift({ id, element: componentOwner, ...bounds });
+            const groupBounds = movingBounds(moving);
+            state.operation = {
+                kind: 'component-pending', pointerId: event.pointerId, id, element: componentOwner,
+                startX: event.clientX, startY: event.clientY, moved: false, wasSelected, additive: false, pendingToggle: false,
+                selectionCommitPending: !wasSelected,
+                moving, movingIds: new Set(moving.map(item => item.id)), movingBounds: groupBounds,
+                x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height
+            };
+        }
+        return;
+    }
+
+    const connectorControl = event.target.closest('[data-connector-control]');
+    if (connectorControl && state.page.contains(connectorControl)) {
+        const connector = connectorControl.closest('[data-connector-id]');
+        if (!connector || connector.classList.contains('locked')) return;
+        const source = connectorEndpointPoint(state, connector, 'source');
+        const target = connectorEndpointPoint(state, connector, 'target');
+        if (!source || !target) return;
+        const controls = connectorControls(connector, source, target);
+        state.operation = {
+            kind: 'connector-control', pointerId: event.pointerId, connector,
+            connectorId: connector.dataset.connectorId, control: connectorControl.dataset.connectorControl,
+            startPoint: pagePointMm(state, event), source, target,
+            originalControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } },
+            currentControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } }
+        };
+        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        event.preventDefault();
+        event.stopPropagation();
         return;
     }
 
@@ -1582,6 +1801,29 @@ function pointerDown(state, event) {
         return;
     }
 
+    const connectorBody = event.target.closest('[data-connector-id]');
+    if (connectorBody && state.page.contains(connectorBody) &&
+        !connectorBody.classList.contains('locked') &&
+        (connectorBody.classList.contains('selected') || connectorBody.classList.contains('selection-primary')) &&
+        event.target.closest('.connector-line,.connector-hit')) {
+        const source = connectorEndpointPoint(state, connectorBody, 'source');
+        const target = connectorEndpointPoint(state, connectorBody, 'target');
+        if (source && target) {
+            const controls = connectorControls(connectorBody, source, target);
+            state.operation = {
+                kind: 'connector-control', pointerId: event.pointerId, connector: connectorBody,
+                connectorId: connectorBody.dataset.connectorId, control: 'route',
+                startPoint: pagePointMm(state, event), source, target,
+                originalControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } },
+                currentControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } }
+            };
+            try { state.stage.setPointerCapture(event.pointerId); } catch { }
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+    }
+
     const connectorPort = event.target.closest('[data-connector-port]');
     if (connectorPort && state.page.contains(connectorPort) && connectorToolActive(state)) {
         state.lastCanvasClick = null;
@@ -1591,7 +1833,12 @@ function pointerDown(state, event) {
         state.operation = {
             kind: 'connector-new', pointerId: event.pointerId, sourcePort: connectorPort,
             sourceOwnerId, sourceAnchor: connectorPort.dataset.anchor, fixedPoint: sourcePoint,
-            sourceEndpoint: { kind: 'Element', ownerId: sourceOwnerId, anchor: connectorPort.dataset.anchor, point: sourcePoint },
+            sourceEndpoint: {
+                kind: 'Element', ownerId: sourceOwnerId, anchor: connectorPort.dataset.anchor || 'Center',
+                portId: connectorPort.dataset.portId || '', createPort: false,
+                relativeX: number(connectorPort.style.left) / 100 || .5, relativeY: number(connectorPort.style.top) / 100 || .5,
+                point: sourcePoint
+            },
             pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow' || state.config.connectorTool === 'SignalArrow', tool: state.config.connectorTool,
             signal: signalConnectorToolActive(state), excludedIds: [sourceOwnerId]
         };
@@ -1627,7 +1874,7 @@ function pointerDown(state, event) {
         state.operation = {
             kind: 'connector-new', pointerId: event.pointerId,
             sourceOwnerId: '', sourceAnchor: 'Center', fixedPoint: sourcePoint,
-            sourceEndpoint: { kind: 'Canvas', ownerId: '', anchor: 'Center', point: sourcePoint },
+            sourceEndpoint: { kind: 'Canvas', ownerId: '', anchor: 'Center', portId: '', createPort: false, relativeX: .5, relativeY: .5, point: sourcePoint },
             pathKind: 'Curved', markerEnd: state.config.connectorTool === 'SignalArrow', tool: state.config.connectorTool,
             signal: true, excludedIds: []
         };
@@ -1673,9 +1920,23 @@ function pointerDown(state, event) {
     const additive = Boolean(event.ctrlKey || event.metaKey || event.shiftKey);
     const activeConnectorTool = connectorToolActive(state);
     if (activeConnectorTool) {
-        // Connector mode owns the canvas until the user completes it or presses Esc.
-        // A slightly missed port must not silently switch back to selection mode.
+        // Dropping directly on an object creates a persistent custom attachment point.
+        const relative = relativePointForElement(state, element, event);
+        const sourcePoint = pointForElementRelative(element, relative, state.config.pxPerMm);
+        const sourcePreview = createConnectorPortPreview(element, relative, 'connector-port-source');
+        state.operation = {
+            kind: 'connector-new', pointerId: event.pointerId, sourcePreview,
+            sourceOwnerId: id, sourceAnchor: 'Center', fixedPoint: sourcePoint,
+            sourceEndpoint: {
+                kind: 'Element', ownerId: id, anchor: 'Center', portId: '', createPort: true,
+                relativeX: relative.x, relativeY: relative.y, point: sourcePoint
+            },
+            pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow' || state.config.connectorTool === 'SignalArrow',
+            tool: state.config.connectorTool, signal: signalConnectorToolActive(state), excludedIds: [id]
+        };
+        try { state.stage.setPointerCapture(event.pointerId); } catch { }
         event.preventDefault();
+        event.stopPropagation();
         return;
     }
     const pendingToggle = additive && wasSelected;
@@ -1789,6 +2050,36 @@ function pointerMove(state, event) {
         return;
     }
 
+    if (operation.kind === 'connector-control') {
+        const point = pagePointMm(state, event);
+        const controls = {
+            c1: { ...operation.originalControls.c1 },
+            c2: { ...operation.originalControls.c2 }
+        };
+        if (operation.control === 'route') {
+            const dx = point.x - operation.startPoint.x;
+            const dy = point.y - operation.startPoint.y;
+            controls.c1.x += dx; controls.c1.y += dy;
+            controls.c2.x += dx; controls.c2.y += dy;
+        } else if (operation.control === '1') controls.c1 = point;
+        else controls.c2 = point;
+        controls.c1.x = clamp(controls.c1.x, 0, number(state.page.dataset.pageWidthMm));
+        controls.c1.y = clamp(controls.c1.y, 0, number(state.page.dataset.pageHeightMm));
+        controls.c2.x = clamp(controls.c2.x, 0, number(state.page.dataset.pageWidthMm));
+        controls.c2.y = clamp(controls.c2.y, 0, number(state.page.dataset.pageHeightMm));
+        operation.currentControls = controls;
+        operation.connector.dataset.pathKind = 'Curved';
+        operation.connector.dataset.control1X = String(controls.c1.x);
+        operation.connector.dataset.control1Y = String(controls.c1.y);
+        operation.connector.dataset.control2X = String(controls.c2.x);
+        operation.connector.dataset.control2Y = String(controls.c2.y);
+        const path = connectorPath('Curved', operation.source, operation.target, controls);
+        operation.connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
+        updateConnectorControlAppearance(operation.connector, operation.source, operation.target, controls);
+        event.preventDefault();
+        return;
+    }
+
     if (operation.kind === 'guide') {
         const position = guidePositionFromPointer(state, operation.orientation, event);
         operation.currentPosition = position;
@@ -1799,6 +2090,15 @@ function pointerMove(state, event) {
     }
 
     const movementPixels = Math.hypot(event.clientX - operation.startX, event.clientY - operation.startY);
+    if (operation.kind === 'component-pending') {
+        if (movementPixels < 5) return;
+        operation.kind = 'move';
+        operation.moved = true;
+        state.lastCanvasClick = null;
+        cancelPendingComponentAction(state);
+        state.suppressNextComponentClickUntil = performance.now() + 350;
+        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+    }
     if (!operation.moved && movementPixels < (operation.kind === 'resize' ? 1.5 : 3)) return;
     operation.moved = true;
     const dx = (event.clientX - operation.startX) / state.config.pxPerMm;
@@ -1949,11 +2249,32 @@ function pointerUp(state, event) {
 
     if (operation.kind === 'connector-new' || operation.kind === 'connector-reconnect') {
         state.lastCanvasClick = null;
-        // Pointerup can be the first event that reaches the destination port during
-        // a fast drag, so resolve the target once more before committing.
+        // Pointerup can be the first event that reaches the destination during a fast drag.
         updateConnectorDrag(state, event, operation);
         state.operation = operation;
         finishConnectorDrag(state, operation);
+        return;
+    }
+
+    if (operation.kind === 'connector-control') {
+        const controls = operation.currentControls || operation.originalControls;
+        if (operation.control === 'route') {
+            safeDotNet(state, 'CommitConnectorRoute', operation.connectorId,
+                controls.c1.x, controls.c1.y, controls.c2.x, controls.c2.y);
+        } else {
+            const control = operation.control === '1' ? controls.c1 : controls.c2;
+            safeDotNet(state, 'CommitConnectorControl', operation.connectorId, operation.control === '1' ? 1 : 2, control.x, control.y);
+        }
+        state.lastCanvasClick = null;
+        event.preventDefault();
+        return;
+    }
+
+    if (operation.kind === 'component-pending') {
+        // No drag occurred: let the native DevExtreme click finish before a Blazor
+        // selection render can replace the widget DOM.
+        if (operation.selectionCommitPending)
+            setTimeout(() => safeDotNet(state, 'SelectElement', operation.id, false), 0);
         return;
     }
 
@@ -2327,7 +2648,7 @@ function cleanPageClone(page) {
     clone.style.margin = '0';
     clone.style.boxShadow = 'none';
     clone.style.backgroundImage = 'none';
-    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help,.connector-port,.connector-endpoint,.connector-hit,.connector-ghost,.spreadsheet-sheet-badge').forEach(item => item.remove());
+    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help,.connector-port,.connector-endpoint,.connector-control-point,.connector-route-handle,.connector-control-guide,.connector-hit,.connector-ghost,.spreadsheet-sheet-badge').forEach(item => item.remove());
     clone.querySelectorAll('.selected').forEach(item => {
         item.classList.remove('selected');
         item.style.outline = 'none';

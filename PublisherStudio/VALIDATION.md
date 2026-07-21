@@ -382,3 +382,16 @@ Static checks completed for the v1.0.37 source package:
 - Publication format is `1.41`; Picture Studio format remains `1.2`.
 - JSON and project XML parsing and final ZIP integrity are checked during packaging.
 - A full .NET/DevExpress compile and application run remain release-machine checks because this packaging environment has no .NET SDK or licensed DevExpress NuGet feed.
+
+## v1.0.44 Menu, date-normalization, component-drag, and connector-route validation
+
+- `node --check` passes for `componentRuntime.js` and `publisherInterop.js`.
+- The Node component contract suite exercises manual Menu rendering configuration, internal page navigation, external URLs, no-action items, vertical orientation, built-in data schemas, offline export wiring, custom connector ports, advanced connector callbacks, and module exports.
+- Timeline and offline Signal Connector/SVG/path regression suites pass unchanged.
+- Source inspection verifies manual Menu/Context Menu configurations bypass missing-dataset blocking, while data-driven variants retain the missing-data guard.
+- Static, REST, and live rows use the same date normalization, including fields discovered through `columnKinds`; invalid dates are replaced with `null`, and invalid Scheduler start rows are removed.
+- Canvas interaction commits DevExtreme selection only after a native click or completed move, avoiding a Blazor rerender during the drag threshold.
+- Connector custom-port IDs, object-relative coordinates, endpoint references, Bézier controls, route commits, reset behavior, print attributes, and file normalization are present in the persisted contract.
+- Package JSON, package lock, web project, and installer project are aligned to `1.0.44`; publication format is `1.42`.
+- JSON and project XML parsing, source delimiter checks, and final ZIP integrity are run during packaging.
+- A full .NET/DevExpress compile and interactive licensed application run remain release-machine checks because this environment has no .NET SDK or licensed DevExpress NuGet feed. Headless Chromium was attempted but the available browser process is restricted and did not complete, so no browser-runtime claim is made for this revision.

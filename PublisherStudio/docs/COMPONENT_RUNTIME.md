@@ -145,3 +145,11 @@ Menu rows use stable page IDs, not page labels. Editable menu items store one ex
 Component Studio derives source-property choices from the selected data object's resolved columns. Direct REST/OData fields become selectable after endpoint discovery. Manual menus deliberately bypass data/API and CRUD requirements.
 
 PublisherStudio loads its pinned DevExtreme `dx.all.js` once. The DevExpress Blazor resource manager still emits the other registered resources but has `CommonResources.DevExtremeJS` unregistered to avoid duplicate bundle initialization.
+
+## Component resilience and canvas geometry (v1.0.44)
+
+Manual Menu and Context Menu configurations are self-contained and do not require a publication data object. Data-driven variants continue to resolve the selected source. The runtime normalizes date fields discovered from both component fields and publication-data schema metadata before passing rows to DevExtreme; Scheduler rows with unusable start dates are skipped.
+
+On the editor canvas, a pointer interaction inside a DevExtreme host remains a native component click until the movement threshold is crossed. Crossing that threshold converts the interaction to a publication-object move without first recreating the Blazor component host.
+
+Publication objects may contain custom connector ports expressed as normalized `XPercent`/`YPercent` coordinates. Connector endpoints can reference those ports by ID. Curved connectors persist two page-space Bézier control points; the editor exposes endpoint, control, and route handles and also allows dragging the selected path to translate both controls.

@@ -38,10 +38,20 @@
     private string? _lastRenderedConfig;
     private string ElementId => string.IsNullOrWhiteSpace(ElementIdOverride) ? $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}" : ElementIdOverride;
     private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId, DesignerMode);
-    private bool MissingData => Item.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot
-        && Document.DataObjects.All(data => data.Id != Item.Connection.DataObjectId)
-        && !Item.IsLayoutContainer
-        && Item.ComponentKind is not PublicationComponentKind.Button and not PublicationComponentKind.Map and not PublicationComponentKind.VectorMap;
+    private bool MissingData => RequiresDataObject
+        && (Item.Connection.Mode == PublicationComponentDataMode.PublicationDataObject
+            || Item.Connection.Mode == PublicationComponentDataMode.StaticSnapshot)
+        && Document.DataObjects.All(data => data.Id != Item.Connection.DataObjectId);
+
+    private bool RequiresDataObject => Item.ComponentKind switch
+    {
+        PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu =>
+            Item.MenuSourceMode == PublicationMenuSourceMode.DataConnection,
+        PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or
+        PublicationComponentKind.Form or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or
+        PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.PivotGrid => true,
+        _ => false
+    };
     private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor};{Item.CustomCss}";
     private static string Inv(double value) => value.ToString("0.####", CultureInfo.InvariantCulture);
 

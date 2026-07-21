@@ -297,6 +297,19 @@ public sealed partial class PublicationFileService
             var objectIds = publicationPage.Elements.Where(item => item is not ConnectorElement).Select(item => item.Id).ToHashSet();
             foreach (var element in publicationPage.Elements)
             {
+                element.ConnectorPorts ??= [];
+                var usedPortIds = new HashSet<Guid>();
+                foreach (var port in element.ConnectorPorts)
+                {
+                    if (port.Id == Guid.Empty || !usedPortIds.Add(port.Id))
+                    {
+                        port.Id = Guid.NewGuid();
+                        usedPortIds.Add(port.Id);
+                    }
+                    port.Name = string.IsNullOrWhiteSpace(port.Name) ? "Connector point" : port.Name.Trim();
+                    port.XPercent = Math.Clamp(port.XPercent, 0, 1);
+                    port.YPercent = Math.Clamp(port.YPercent, 0, 1);
+                }
                 if (element.Interaction.TargetElementId is { } targetId && !elementIds.Contains(targetId))
                     element.Interaction.TargetElementId = null;
                 if (element.Interaction.TargetPageId is { } targetPageId && document.Pages.All(page => page.Id != targetPageId))
@@ -306,6 +319,22 @@ public sealed partial class PublicationFileService
                 endpoint.Kind == ConnectorEndpointKind.Canvas ||
                 (endpoint.ElementId != Guid.Empty && ids.Contains(endpoint.ElementId));
 
+            void NormalizeEndpointPort(ConnectorEndpoint endpoint)
+            {
+                if (endpoint.Kind != ConnectorEndpointKind.Element || endpoint.PortId is not { } portId) return;
+                var owner = publicationPage.Elements.FirstOrDefault(element => element.Id == endpoint.ElementId && element is not ConnectorElement);
+                if (owner is null || owner.ConnectorPorts.All(port => port.Id != portId)) endpoint.PortId = null;
+            }
+            static double? NormalizeControl(double? value, double maximum) =>
+                value is { } coordinate && double.IsFinite(coordinate) ? Math.Clamp(coordinate, 0, maximum) : null;
+
+            foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>())
+            {
+                connector.Source ??= new ConnectorEndpoint();
+                connector.Target ??= new ConnectorEndpoint();
+                connector.Signal ??= new SignalConnectorSettings();
+            }
+
             publicationPage.Elements.RemoveAll(item => item is ConnectorElement connector &&
                 (!EndpointValid(connector.Source, objectIds) ||
                  !EndpointValid(connector.Target, objectIds) ||
@@ -314,13 +343,16 @@ public sealed partial class PublicationFileService
                   connector.Source.ElementId == connector.Target.ElementId)));
             foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>())
             {
-                connector.Source ??= new ConnectorEndpoint();
-                connector.Target ??= new ConnectorEndpoint();
-                connector.Signal ??= new SignalConnectorSettings();
                 connector.Source.X = Math.Clamp(connector.Source.X, 0, publicationPage.WidthMm);
                 connector.Source.Y = Math.Clamp(connector.Source.Y, 0, publicationPage.HeightMm);
                 connector.Target.X = Math.Clamp(connector.Target.X, 0, publicationPage.WidthMm);
                 connector.Target.Y = Math.Clamp(connector.Target.Y, 0, publicationPage.HeightMm);
+                NormalizeEndpointPort(connector.Source);
+                NormalizeEndpointPort(connector.Target);
+                connector.Control1X = NormalizeControl(connector.Control1X, publicationPage.WidthMm);
+                connector.Control1Y = NormalizeControl(connector.Control1Y, publicationPage.HeightMm);
+                connector.Control2X = NormalizeControl(connector.Control2X, publicationPage.WidthMm);
+                connector.Control2Y = NormalizeControl(connector.Control2Y, publicationPage.HeightMm);
                 connector.StrokeWidthMm = Math.Clamp(connector.StrokeWidthMm <= 0 ? .7 : connector.StrokeWidthMm, .1, 12);
                 connector.Signal.DelaySeconds = Math.Clamp(connector.Signal.DelaySeconds, 0, 3600);
                 connector.Signal.DurationSeconds = Math.Clamp(connector.Signal.DurationSeconds <= 0 ? 1.5 : connector.Signal.DurationSeconds, .05, 3600);
@@ -340,7 +372,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.41";
+        document.FormatVersion = "1.42";
         return document;
     }
 

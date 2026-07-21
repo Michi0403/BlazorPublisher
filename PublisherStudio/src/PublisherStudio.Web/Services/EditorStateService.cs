@@ -652,13 +652,51 @@ public sealed class EditorStateService : IDisposable
         _ => "Data Visual"
     };
 
+    public PublicationConnectorPort? AddConnectorPort(Guid elementId, double xPercent = .5, double yPercent = .5)
+    {
+        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
+        if (element is null || element.Locked) return null;
+        Capture();
+        element.ConnectorPorts ??= [];
+        var port = new PublicationConnectorPort
+        {
+            Name = $"Connector point {element.ConnectorPorts.Count + 1}",
+            XPercent = Math.Clamp(xPercent, 0, 1),
+            YPercent = Math.Clamp(yPercent, 0, 1)
+        };
+        element.ConnectorPorts.Add(port);
+        SetSelectionCore([element.Id], element.Id);
+        Notify();
+        return port;
+    }
+
+    public void RemoveConnectorPort(Guid elementId, Guid portId)
+    {
+        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
+        var port = element?.ConnectorPorts.FirstOrDefault(candidate => candidate.Id == portId);
+        if (element is null || port is null || element.Locked) return;
+        Capture();
+        element.ConnectorPorts.Remove(port);
+        foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>())
+        {
+            if (connector.Source.ElementId == elementId && connector.Source.PortId == portId)
+            {
+                connector.Source.PortId = null;
+                connector.Source.Anchor = ConnectorAnchor.Center;
+            }
+            if (connector.Target.ElementId == elementId && connector.Target.PortId == portId)
+            {
+                connector.Target.PortId = null;
+                connector.Target.Anchor = ConnectorAnchor.Center;
+            }
+        }
+        Notify();
+    }
+
     public ConnectorElement? AddConnector(Guid sourceElementId, ConnectorAnchor sourceAnchor, Guid targetElementId, ConnectorAnchor targetAnchor, ConnectorMarker endMarker = ConnectorMarker.Arrow)
     {
         if (sourceElementId == targetElementId) return null;
-        var source = CurrentPage.Elements.FirstOrDefault(item => item.Id == sourceElementId && item is not ConnectorElement);
-        var target = CurrentPage.Elements.FirstOrDefault(item => item.Id == targetElementId && item is not ConnectorElement);
-        if (source is null || target is null) return null;
-        return AddConnectorCore(
+        return AddConnectorAdvanced(
             new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = sourceElementId, Anchor = sourceAnchor },
             new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = targetElementId, Anchor = targetAnchor },
             endMarker,
@@ -666,16 +704,24 @@ public sealed class EditorStateService : IDisposable
     }
 
     public ConnectorElement? AddSignalConnector(ConnectorEndpoint source, ConnectorEndpoint target, ConnectorMarker endMarker = ConnectorMarker.Arrow)
-        => AddConnectorCore(source, target, endMarker, signal: true);
+        => AddConnectorAdvanced(source, target, endMarker, signal: true);
 
-    private ConnectorElement? AddConnectorCore(ConnectorEndpoint source, ConnectorEndpoint target, ConnectorMarker endMarker, bool signal)
+    public ConnectorElement? AddConnectorAdvanced(
+        ConnectorEndpoint source,
+        ConnectorEndpoint target,
+        ConnectorMarker endMarker,
+        bool signal,
+        PublicationConnectorPort? sourcePort = null,
+        PublicationConnectorPort? targetPort = null)
     {
+        if (!TryPrepareEndpoint(source, sourcePort, out var sourceOwner) ||
+            !TryPrepareEndpoint(target, targetPort, out var targetOwner)) return null;
         if (source.Kind == ConnectorEndpointKind.Element && target.Kind == ConnectorEndpointKind.Element &&
             source.ElementId != Guid.Empty && source.ElementId == target.ElementId) return null;
-        if (!ConnectorGeometry.TryResolveEndpoint(CurrentPage, source, out _) ||
-            !ConnectorGeometry.TryResolveEndpoint(CurrentPage, target, out _)) return null;
 
         Capture();
+        AttachPendingPort(source, sourceOwner, sourcePort);
+        AttachPendingPort(target, targetOwner, targetPort);
         var connector = new ConnectorElement
         {
             Name = NextName(signal ? (endMarker == ConnectorMarker.None ? "Signal Connector" : "Signal Arrow") : (endMarker == ConnectorMarker.None ? "Connector" : "Arrow Connector")),
@@ -698,6 +744,41 @@ public sealed class EditorStateService : IDisposable
         return connector;
     }
 
+    private bool TryPrepareEndpoint(ConnectorEndpoint endpoint, PublicationConnectorPort? pendingPort, out PublicationElement? owner)
+    {
+        owner = null;
+        if (endpoint.Kind == ConnectorEndpointKind.Canvas)
+        {
+            endpoint.ElementId = Guid.Empty;
+            endpoint.PortId = null;
+            endpoint.X = Math.Clamp(endpoint.X, 0, CurrentPage.WidthMm);
+            endpoint.Y = Math.Clamp(endpoint.Y, 0, CurrentPage.HeightMm);
+            return true;
+        }
+
+        owner = CurrentPage.Elements.FirstOrDefault(item => item.Id == endpoint.ElementId && item is not ConnectorElement);
+        if (owner is null || owner.Locked) return false;
+        owner.ConnectorPorts ??= [];
+        if (pendingPort is not null)
+        {
+            pendingPort.Id = pendingPort.Id == Guid.Empty ? Guid.NewGuid() : pendingPort.Id;
+            pendingPort.XPercent = Math.Clamp(pendingPort.XPercent, 0, 1);
+            pendingPort.YPercent = Math.Clamp(pendingPort.YPercent, 0, 1);
+            endpoint.PortId = pendingPort.Id;
+            endpoint.Anchor = ConnectorAnchor.Center;
+            return true;
+        }
+        if (endpoint.PortId is { } portId && owner.ConnectorPorts.All(port => port.Id != portId)) endpoint.PortId = null;
+        return true;
+    }
+
+    private static void AttachPendingPort(ConnectorEndpoint endpoint, PublicationElement? owner, PublicationConnectorPort? pendingPort)
+    {
+        if (endpoint.Kind != ConnectorEndpointKind.Element || owner is null || pendingPort is null) return;
+        owner.ConnectorPorts ??= [];
+        if (owner.ConnectorPorts.All(port => port.Id != pendingPort.Id)) owner.ConnectorPorts.Add(pendingPort);
+    }
+
     public void ReconnectConnector(Guid connectorId, bool sourceEnd, Guid elementId, ConnectorAnchor anchor)
         => ReconnectConnectorEndpoint(connectorId, sourceEnd, new ConnectorEndpoint
         {
@@ -706,10 +787,10 @@ public sealed class EditorStateService : IDisposable
             Anchor = anchor
         });
 
-    public void ReconnectConnectorEndpoint(Guid connectorId, bool sourceEnd, ConnectorEndpoint replacement)
+    public void ReconnectConnectorEndpoint(Guid connectorId, bool sourceEnd, ConnectorEndpoint replacement, PublicationConnectorPort? pendingPort = null)
     {
         var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
-        if (connector is null || connector.Locked || !ConnectorGeometry.TryResolveEndpoint(CurrentPage, replacement, out _)) return;
+        if (connector is null || connector.Locked || !TryPrepareEndpoint(replacement, pendingPort, out var owner)) return;
         var other = sourceEnd ? connector.Target : connector.Source;
         if (replacement.Kind == ConnectorEndpointKind.Element &&
             other.Kind == ConnectorEndpointKind.Element &&
@@ -717,9 +798,51 @@ public sealed class EditorStateService : IDisposable
             replacement.ElementId == other.ElementId) return;
 
         Capture();
+        AttachPendingPort(replacement, owner, pendingPort);
         if (sourceEnd) connector.Source = replacement;
         else connector.Target = replacement;
         SetSelectionCore([connector.Id], connector.Id);
+        Notify();
+    }
+
+    public void CommitConnectorControl(Guid connectorId, int controlIndex, double x, double y)
+    {
+        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+        if (connector is null || connector.Locked || controlIndex is < 1 or > 2) return;
+        Capture();
+        connector.PathKind = ConnectorPathKind.Curved;
+        if (controlIndex == 1)
+        {
+            connector.Control1X = Math.Clamp(x, 0, CurrentPage.WidthMm);
+            connector.Control1Y = Math.Clamp(y, 0, CurrentPage.HeightMm);
+        }
+        else
+        {
+            connector.Control2X = Math.Clamp(x, 0, CurrentPage.WidthMm);
+            connector.Control2Y = Math.Clamp(y, 0, CurrentPage.HeightMm);
+        }
+        Notify();
+    }
+
+    public void CommitConnectorRoute(Guid connectorId, double control1X, double control1Y, double control2X, double control2Y)
+    {
+        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+        if (connector is null || connector.Locked) return;
+        Capture();
+        connector.PathKind = ConnectorPathKind.Curved;
+        connector.Control1X = Math.Clamp(control1X, 0, CurrentPage.WidthMm);
+        connector.Control1Y = Math.Clamp(control1Y, 0, CurrentPage.HeightMm);
+        connector.Control2X = Math.Clamp(control2X, 0, CurrentPage.WidthMm);
+        connector.Control2Y = Math.Clamp(control2Y, 0, CurrentPage.HeightMm);
+        Notify();
+    }
+
+    public void ResetConnectorRoute(Guid connectorId)
+    {
+        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+        if (connector is null || connector.Locked) return;
+        Capture();
+        connector.Control1X = connector.Control1Y = connector.Control2X = connector.Control2Y = null;
         Notify();
     }
 
@@ -1274,6 +1397,8 @@ public sealed class EditorStateService : IDisposable
             item.X += dx;
             item.Y += dy;
         }
+        if (!_selectedElementIds.Contains(element.Id))
+            SetSelectionCore(moving.Select(item => item.Id), element.Id);
         Notify();
     }
 

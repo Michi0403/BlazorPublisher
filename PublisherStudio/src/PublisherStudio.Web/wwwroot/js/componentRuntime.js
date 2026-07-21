@@ -40,6 +40,12 @@
         const parsed = new Date(value);
         return Number.isFinite(parsed.getTime()) ? parsed : null;
     };
+    const componentOrientation = (config, fallback = "horizontal") => {
+        const value = lower(config?.orientation);
+        if (value === "vertical") return "vertical";
+        if (value === "horizontal") return "horizontal";
+        return fallback;
+    };
 
     function normalizeDateRows(config, rows) {
         if (!Array.isArray(rows)) return [];
@@ -801,12 +807,90 @@
         render(host, createNestedConfig(parentConfig, panel), { polling: false, fetchNow: false });
     }
 
+    function clearWidgetResidue(element) {
+        if (!element) return;
+        const classes = element.classList && typeof element.classList[Symbol.iterator] === "function"
+            ? [...element.classList]
+            : [];
+        for (const name of classes) {
+            if (name.startsWith("dx-") || name.startsWith("ps-dx-") || name.startsWith("ps-component-orientation-"))
+                element.classList.remove(name);
+        }
+        for (const name of ["role", "tabindex", "aria-activedescendant", "aria-expanded", "aria-haspopup", "aria-owns"])
+            element.removeAttribute?.(name);
+        element.style?.removeProperty?.("width");
+        element.style?.removeProperty?.("height");
+    }
+
+    function applyLayoutClasses(element, config) {
+        const kind = lower(config?.kind);
+        const orientation = componentOrientation(config);
+        element.classList?.remove?.("ps-component-orientation-horizontal", "ps-component-orientation-vertical");
+        element.classList?.add?.(`ps-component-orientation-${orientation}`);
+        element.dataset.psComponentKind = kind;
+        element.dataset.psComponentOrientation = orientation;
+    }
+
+    function refreshNestedLayouts(element) {
+        if (!element?.querySelectorAll) return;
+        for (const child of element.querySelectorAll("[data-ps-component-runtime]")) {
+            if (child === element) continue;
+            const nested = states.get(child);
+            nested?.layout?.schedule?.(true);
+        }
+    }
+
+    function installLayoutObserver(element, state) {
+        if (!element || !state?.instance) return;
+        let frame = null;
+        let lastWidth = -1;
+        let lastHeight = -1;
+        const defer = typeof window.setTimeout === "function" ? window.setTimeout.bind(window) : (callback => { callback(); return 0; });
+        const clearDeferred = typeof window.clearTimeout === "function" ? window.clearTimeout.bind(window) : (() => undefined);
+        const requestFrame = typeof window.requestAnimationFrame === "function" ? window.requestAnimationFrame.bind(window) : (callback => defer(callback, 0));
+        const cancelFrame = typeof window.cancelAnimationFrame === "function" ? window.cancelAnimationFrame.bind(window) : clearDeferred;
+        const run = force => {
+            frame = null;
+            const rect = element.getBoundingClientRect?.();
+            const width = Math.round(number(rect?.width, element.clientWidth || 0) * 10) / 10;
+            const height = Math.round(number(rect?.height, element.clientHeight || 0) * 10) / 10;
+            if (!force && width === lastWidth && height === lastHeight) return;
+            lastWidth = width;
+            lastHeight = height;
+            try { state.instance.updateDimensions?.(); } catch { }
+            try { state.instance.repaint?.(); } catch { }
+            refreshNestedLayouts(element);
+        };
+        const schedule = (force = false) => {
+            if (frame !== null) cancelFrame(frame);
+            frame = requestFrame(() => run(force));
+        };
+        const observer = typeof window.ResizeObserver === "function"
+            ? new window.ResizeObserver(() => schedule(false))
+            : null;
+        let delayed = null;
+        observer?.observe(element);
+        state.layout = {
+            observer,
+            schedule,
+            cancel() {
+                observer?.disconnect();
+                if (frame !== null) cancelFrame(frame);
+                if (delayed !== null) clearDeferred(delayed);
+                frame = null;
+                delayed = null;
+            }
+        };
+        schedule(true);
+        delayed = defer(() => schedule(true), 60);
+    }
+
     function baseOptions(config, element) {
         return {
             width: "100%",
             height: "100%",
             disabled: false,
-            elementAttr: { class: `ps-dx-${lower(config.kind)}` },
+            elementAttr: { class: `ps-dx-${lower(config.kind)} ps-component-orientation-${componentOrientation(config)}` },
             hint: config.title || undefined
         };
     }
@@ -1037,13 +1121,13 @@
                     baseItemHeight: 120,
                     baseItemWidth: 180,
                     itemMargin: 8,
-                    direction: config.orientation === "vertical" ? "vertical" : "horizontal",
+                    direction: componentOrientation(config),
                     itemTemplate(item, index, itemElement) { renderCard(item, config, itemElement?.jquery ? itemElement[0] : itemElement, true); }
                 };
                 break;
             case "Menu": {
                 const items = menuItems(config, config.rows);
-                const orientation = lower(config.orientation) === "vertical" ? "vertical" : "horizontal";
+                const orientation = componentOrientation(config);
                 options = {
                     ...base,
                     height: undefined,
@@ -1077,15 +1161,33 @@
                 break;
             }
             case "TabPanel":
-                options = { ...base, items: config.panels || [], itemTitleTemplate(item, index, itemElement) { const target = itemElement?.jquery ? itemElement[0] : itemElement; target.textContent = item.title || `Tab ${index + 1}`; }, itemTemplate(item, index, itemElement) { renderPanelContent(config, item, itemElement); }, animationEnabled: true, swipeEnabled: true, deferRendering: false };
+                options = {
+                    ...base,
+                    items: config.panels || [],
+                    itemTitleTemplate(item, index, itemElement) { const target = itemElement?.jquery ? itemElement[0] : itemElement; target.textContent = item.title || `Tab ${index + 1}`; },
+                    itemTemplate(item, index, itemElement) { renderPanelContent(config, item, itemElement); },
+                    animationEnabled: true,
+                    swipeEnabled: true,
+                    deferRendering: false,
+                    onSelectionChanged() { setTimeout(() => refreshNestedLayouts(element), 0); }
+                };
                 break;
             case "MultiView":
-                options = { ...base, items: config.panels || [], itemTemplate(item, index, itemElement) { renderPanelContent(config, item, itemElement); }, animationEnabled: true, swipeEnabled: true, loop: false, deferRendering: false };
+                options = {
+                    ...base,
+                    items: config.panels || [],
+                    itemTemplate(item, index, itemElement) { renderPanelContent(config, item, itemElement); },
+                    animationEnabled: true,
+                    swipeEnabled: true,
+                    loop: false,
+                    deferRendering: false,
+                    onSelectionChanged() { setTimeout(() => refreshNestedLayouts(element), 0); }
+                };
                 break;
             case "Splitter":
                 options = {
                     ...base,
-                    orientation: config.orientation || "horizontal",
+                    orientation: componentOrientation(config),
                     items: (config.panels || []).map(panel => ({
                         ...panel,
                         size: panel.size || undefined,
@@ -1094,7 +1196,10 @@
                         collapsible: panel.collapsible !== false,
                         collapsed: !!panel.collapsed,
                         template(itemData, itemIndex, itemElement) { renderPanelContent(config, panel, itemElement); }
-                    }))
+                    })),
+                    onResize() { setTimeout(() => refreshNestedLayouts(element), 0); },
+                    onItemCollapsed() { setTimeout(() => refreshNestedLayouts(element), 0); },
+                    onItemExpanded() { setTimeout(() => refreshNestedLayouts(element), 0); }
                 };
                 break;
             case "ScrollView": {
@@ -1107,7 +1212,7 @@
                     content.innerHTML = `<h3>${escapeHtml(config.title || "Scroll View")}</h3>`;
                     element.append(content);
                 }
-                options = { ...base, direction: config.orientation === "horizontal" ? "horizontal" : "vertical", showScrollbar: "onHover", bounceEnabled: true, useNative: false };
+                options = { ...base, direction: componentOrientation(config, "vertical"), showScrollbar: "onHover", bounceEnabled: true, useNative: false };
                 break;
             }
             case "PivotGrid": {
@@ -1212,6 +1317,7 @@
     function dispose(element) {
         const state = states.get(element);
         if (state?.timer) clearInterval(state.timer);
+        state?.layout?.cancel?.();
         for (const child of [...element.querySelectorAll("[data-ps-component-runtime]")]) {
             if (child !== element) dispose(child);
         }
@@ -1219,6 +1325,7 @@
         try { state?.instance?.dispose?.(); } catch { }
         states.delete(element);
         element.replaceChildren();
+        clearWidgetResidue(element);
     }
 
     async function render(element, rawConfig, options = {}) {
@@ -1229,6 +1336,7 @@
         element.dataset.psComponentRuntime = "true";
         element.dataset.psComponentId = String(config.id || "");
         element.classList.add("ps-component-runtime");
+        applyLayoutClasses(element, config);
         if (!window.jQuery || !window.DevExpress) {
             element.innerHTML = '<div class="ps-component-error">DevExtreme browser assets are not loaded.</div>';
             return null;
@@ -1261,11 +1369,13 @@
                     const fallback = renderBasicMenu(element, config, config.rows || []);
                     const fallbackState = { config, instance: fallback, data, dataSource: data.dataSource, pivotSource: null, timer: null, fallback: true };
                     states.set(element, fallbackState);
+                    installLayoutObserver(element, fallbackState);
                     return fallback;
                 }
             }
             const state = { config, instance, data, dataSource: instance?.getDataSource?.() || data.dataSource, pivotSource: data.pivotSource, timer: null };
             states.set(element, state);
+            installLayoutObserver(element, state);
             const interval = number(config.connection?.dataObjectLive?.refreshIntervalSeconds, 0);
             if (options.polling !== false && interval > 0) {
                 state.timer = setInterval(async () => {
@@ -1280,7 +1390,9 @@
             if (["Menu", "ContextMenu"].includes(String(config.kind || ""))) {
                 try {
                     const instance = renderBasicMenu(element, config, config.rows || []);
-                    states.set(element, { config, instance, data, dataSource: data?.dataSource, pivotSource: null, timer: null, fallback: true });
+                    const fallbackState = { config, instance, data, dataSource: data?.dataSource, pivotSource: null, timer: null, fallback: true };
+                    states.set(element, fallbackState);
+                    installLayoutObserver(element, fallbackState);
                     return instance;
                 } catch (fallbackError) {
                     console.error("PublisherStudio menu fallback failed.", fallbackError);

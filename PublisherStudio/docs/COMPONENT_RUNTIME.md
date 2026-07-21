@@ -153,3 +153,10 @@ Manual Menu and Context Menu configurations are self-contained and do not requir
 On the editor canvas, a pointer interaction inside a DevExtreme host remains a native component click until the movement threshold is crossed. Crossing that threshold converts the interaction to a publication-object move without first recreating the Blazor component host.
 
 Publication objects may contain custom connector ports expressed as normalized `XPercent`/`YPercent` coordinates. Connector endpoints can reference those ports by ID. Curved connectors persist two page-space Bézier control points; the editor exposes endpoint, control, and route handles and also allows dragging the selected path to translate both controls.
+
+
+## Orientation and hidden-container resizing (v1.0.45)
+
+DevExtreme's base Menu CSS assigns `height:100%` to every menu item wrapper. PublisherStudio keeps that behavior for horizontal menubars but overrides it for vertical menus so each item uses its natural row height. Vertical menus remain full-width and scroll inside the publication object only when necessary.
+
+The browser runtime attaches a resize observer to every component host. It calls the component's supported `updateDimensions()` and `repaint()` methods after object resizing or hidden-to-visible transitions. Tab Panel, Multi View, and Splitter additionally refresh their nested component hosts after selection, resize, collapse, and expansion events. The same runtime and collected application CSS are embedded into presentation and website HTML exports.

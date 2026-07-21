@@ -2102,3 +2102,68 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .ps-basic-menu-item:focus-within > .ps-basic-menu-children { display: block; }
 .ps-basic-menu-vertical .ps-basic-menu-children { left: 100%; top: 0; }
 .ps-basic-menu-horizontal .ps-basic-menu-children { left: 0; top: 100%; }
+
+/* PublisherStudio 1.0.45: resilient orientation and nested-widget layout. */
+/* DevExtreme gives every menu item wrapper height:100%. That is useful for a
+   horizontal menubar, but in a vertical menu it places item 2 below one full
+   component height and the publication viewport clips it. Restore natural row
+   heights only for vertical PublisherStudio menus. */
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] {
+    overflow: auto;
+}
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-vertical,
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-items-container,
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-item-wrapper,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-vertical,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-items-container,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-item-wrapper {
+    height: auto !important;
+}
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-vertical,
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-items-container,
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-item-wrapper,
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-item,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-vertical,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-items-container,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-item-wrapper,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-item {
+    width: 100%;
+    box-sizing: border-box;
+}
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-items-container,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-items-container {
+    display: block;
+    white-space: normal;
+}
+
+/* Nested widgets are deliberately allowed to shrink inside tabs, multi-views,
+   splitters and scroll views. Their runtime ResizeObserver performs the final
+   DevExtreme dimension update when a hidden panel becomes visible. */
+.ps-component-panel,
+.ps-component-panel-widget,
+.dx-tabpanel .dx-multiview-wrapper,
+.dx-tabpanel .dx-multiview-item,
+.dx-multiview .dx-multiview-item,
+.dx-splitter-item-content {
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+}
+.ps-component-panel-widget > .ps-component-runtime {
+    width: 100%;
+    height: 100%;
+}
+.devextreme-component-host.ps-dx-menu.ps-component-orientation-vertical .dx-menu-vertical::after,
+.devextreme-component-host[data-ps-component-kind="menu"][data-ps-component-orientation="vertical"] .dx-menu-vertical::after {
+    display: none !important;
+    height: 0 !important;
+    content: none !important;
+}
+
+/* Forms do not provide their own scrolling container. Keep large generated
+   forms usable inside a fixed publication object instead of clipping later rows. */
+.devextreme-component-host.ps-dx-form,
+.devextreme-component-host[data-ps-component-kind="form"] {
+    overflow: auto;
+}

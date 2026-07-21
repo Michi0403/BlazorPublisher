@@ -181,6 +181,14 @@ assert.match(exporter, /export function initializeSignalConnectors/);
 assert.match(exporter, /export function elementRelativePoint/);
 assert.match(runtime, /renderBasicMenu/);
 assert.match(runtime, /validDate/);
+assert.match(runtime, /componentOrientation/);
+assert.match(runtime, /new window\.ResizeObserver/);
+assert.match(runtime, /instance\.updateDimensions/);
+assert.match(runtime, /refreshNestedLayouts/);
+assert.match(runtime, /onItemCollapsed/);
+assert.match(css, /ps-dx-menu\.ps-component-orientation-vertical[\s\S]*dx-menu-item-wrapper[\s\S]*height:\s*auto\s*!important/);
+assert.match(css, /dx-menu-vertical::after[\s\S]*display:\s*none\s*!important/);
+assert.match(css, /ps-dx-form[\s\S]*overflow:\s*auto/);
 assert.match(runtime, /Object\.entries\(config\.columnKinds \|\| \{\}\)/);
 assert.match(exporter, /selectionCommitPending/);
 assert.match(exporter, /event\.target\.closest\('\.connector-line,\.connector-hit'\)/);
@@ -246,6 +254,8 @@ assert.match(requests.at(-1).url, /%24top=10|\$top=10/);
 // regressions where the configured item data renders but ItemClick never reaches
 // stable page navigation or external URL handling.
 let menuOptions;
+let tileViewOptions;
+let splitterOptions;
 let navigatedPage = '';
 let openedUrl = null;
 const menuHost = { closest: () => null };
@@ -254,14 +264,30 @@ const menuInstance = {
   getDataSource: () => null,
   dispose: () => undefined
 };
+const genericInstance = {
+  getDataSource: () => null,
+  updateDimensions: () => undefined,
+  repaint: () => undefined,
+  dispose: () => undefined
+};
 const jquery = () => ({
   dxMenu(argument) {
     if (argument === 'instance') return menuInstance;
     menuOptions = argument;
     return this;
+  },
+  dxTileView(argument) {
+    if (argument === 'instance') return genericInstance;
+    tileViewOptions = argument;
+    return this;
+  },
+  dxSplitter(argument) {
+    if (argument === 'instance') return genericInstance;
+    splitterOptions = argument;
+    return this;
   }
 });
-jquery.fn = { dxMenu() {} };
+jquery.fn = { dxMenu() {}, dxTileView() {}, dxSplitter() {} };
 context.jQuery = jquery;
 context.DevExpress = { data: {} };
 context.PublisherStudioNavigation = {
@@ -312,4 +338,23 @@ menuOptions.onItemClick({ component: menuInstance, itemData: menuOptions.items[2
 await new Promise(resolve => setTimeout(resolve, 0));
 assert.equal(openedUrl, null);
 
-console.log('component catalog, REST/OData probe, menu navigation, smart connections, and single-file export contract tests passed');
+const layoutHost = () => ({
+  dataset: {},
+  innerHTML: '',
+  clientWidth: 640,
+  clientHeight: 360,
+  classList: { add() {}, remove() {} },
+  querySelectorAll: () => [],
+  replaceChildren() {},
+  getBoundingClientRect: () => ({ width: 640, height: 360 })
+});
+await context.PublisherStudioComponentRuntime.render(layoutHost(), {
+  kind: 'TileView', id: 'tile-test', orientation: 'Vertical', rows: [{ text: 'A' }], fields: [], actions: [], connection: {}
+}, { polling: false, fetchNow: false });
+assert.equal(tileViewOptions.direction, 'vertical');
+await context.PublisherStudioComponentRuntime.render(layoutHost(), {
+  kind: 'Splitter', id: 'splitter-test', orientation: 'VERTICAL', rows: [], panels: [], fields: [], actions: [], connection: {}
+}, { polling: false, fetchNow: false });
+assert.equal(splitterOptions.orientation, 'vertical');
+
+console.log('component catalog, REST/OData probe, menu navigation, orientation/layout resilience, smart connections, and single-file export contract tests passed');

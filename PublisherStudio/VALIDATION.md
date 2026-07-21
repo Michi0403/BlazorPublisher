@@ -395,3 +395,16 @@ Static checks completed for the v1.0.37 source package:
 - Package JSON, package lock, web project, and installer project are aligned to `1.0.44`; publication format is `1.42`.
 - JSON and project XML parsing, source delimiter checks, and final ZIP integrity are run during packaging.
 - A full .NET/DevExpress compile and interactive licensed application run remain release-machine checks because this environment has no .NET SDK or licensed DevExpress NuGet feed. Headless Chromium was attempted but the available browser process is restricted and did not complete, so no browser-runtime claim is made for this revision.
+
+
+## v1.0.45 vertical Menu and component-layout validation
+
+- `node --check` passes for `componentRuntime.js`.
+- The component contract suite verifies normalized orientation, shared `ResizeObserver`/`updateDimensions()` handling, nested panel refresh hooks, and the vertical Menu CSS override.
+- The vertical Menu rule specifically overrides DevExtreme's `height:100%` item wrappers with natural row heights and removes the vertical centering pseudo-element.
+- A headless Chromium layout check using the exact bundled DevExtreme rule and the release CSS measured the broken rows at `0/400/800px` before the override and `0/34/68px` after it.
+- The fix is contained in application CSS collected by both single-file HTML exporters, while the shared component runtime is embedded in both exports.
+- Timeline and offline Signal Connector/SVG/path regression suites pass unchanged.
+- Package JSON, package lock, web project, and installer project are aligned to `1.0.45`; publication format remains `1.42`.
+- JSON and project XML parsing, CSS delimiter checks, and final ZIP integrity are run during packaging.
+- A full .NET/DevExpress compile and interactive licensed application run remain release-machine checks because this environment has no .NET SDK or licensed DevExpress NuGet feed.

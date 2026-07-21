@@ -25,6 +25,7 @@
         PivotGrid: "dxPivotGrid",
         Map: "dxMap",
         VectorMap: "dxVectorMap",
+        Chat: "dxChat",
         Button: "dxButton"
     };
 
@@ -679,7 +680,7 @@
         const instanceElement = instance?.element?.()?.get?.(0) || instance?.element?.()?.[0] || instance?.element?.();
         const host = instanceElement?.closest?.("[data-ps-component-config]")
             || document.querySelector(`[data-ps-component-id="${CSS.escape(String(config.id || ""))}"]`);
-        let eventData = data || event?.data || event?.itemData || event?.appointmentData || event?.selectedRowsData?.[0] || null;
+        let eventData = data || event?.data || event?.itemData || event?.message || event?.appointmentData || event?.selectedRowsData?.[0] || null;
         if (!eventData && event && Object.prototype.hasOwnProperty.call(event, "value")) {
             eventData = { [primaryField(config)]: event.value, value: event.value };
         }
@@ -697,7 +698,8 @@
             ["RowRemoved", "onRowRemoved"],
             ["AppointmentAdded", "onAppointmentAdded"],
             ["AppointmentUpdated", "onAppointmentUpdated"],
-            ["AppointmentDeleted", "onAppointmentDeleted"]
+            ["AppointmentDeleted", "onAppointmentDeleted"],
+            ["MessageEntered", "onMessageEntered"]
         ];
         for (const [trigger, eventName] of handlers) {
             let actions = actionsFor(config, trigger);
@@ -712,20 +714,81 @@
         }
     }
 
+    function mediaKind(item, config, source) {
+        const explicit = lower(valueFor(item, config.mediaKindField || "mediaType"));
+        if (["image", "video", "audio"].includes(explicit)) return explicit;
+        const mime = lower(valueFor(item, "mimeType"));
+        if (mime.startsWith("video")) return "video";
+        if (mime.startsWith("audio")) return "audio";
+        if (mime.startsWith("image")) return "image";
+        const value = String(source || "").split(/[?#]/, 1)[0].toLowerCase();
+        if (/\.(mp4|webm|ogv|mov|m4v)$/.test(value)) return "video";
+        if (/\.(mp3|wav|ogg|oga|m4a|aac|flac)$/.test(value)) return "audio";
+        return "image";
+    }
+
+    function allowedMediaSource(value) {
+        const source = String(value || "").trim();
+        if (!source) return "";
+        if (/^(data:|blob:|https?:|\/|\.\.?\/)/i.test(source)) return source;
+        return "";
+    }
+
     function renderCard(item, config, element, tile = false) {
-        const image = item?.[config.imageField || "image"];
-        const title = item?.[config.displayField || config.textField || "text"] ?? item?.[config.valueField || "value"] ?? "";
-        const subtitleField = (config.fields || []).find(field => field.visible !== false && ![config.imageField, config.displayField, config.textField].includes(field.dataField))?.dataField;
-        const subtitle = subtitleField ? item?.[subtitleField] : "";
+        const image = valueFor(item, config.imageField || "image");
+        const source = allowedMediaSource(valueFor(item, config.mediaSourceField || "source") || image);
+        const poster = allowedMediaSource(valueFor(item, config.mediaPosterField || "poster") || image);
+        const title = valueFor(item, config.displayField || config.textField || "text") ?? valueFor(item, config.valueField || "value") ?? "";
+        const altText = valueFor(item, config.mediaAltTextField || "altText") || title || "Media";
+        const kind = mediaKind(item, config, source);
+        const ignoredFields = [config.imageField, config.mediaSourceField, config.mediaPosterField, config.mediaKindField, config.mediaAltTextField, config.displayField, config.textField];
+        const subtitleField = (config.fields || []).find(field => field.visible !== false && !ignoredFields.includes(field.dataField))?.dataField;
+        const subtitle = subtitleField ? valueFor(item, subtitleField) : "";
         const wrapper = document.createElement("article");
-        wrapper.className = tile ? "ps-component-tile" : "ps-component-gallery-item";
-        if (image) {
+        wrapper.className = `${tile ? "ps-component-tile" : "ps-component-gallery-item"} ps-component-media-${kind}`;
+        const mediaFrame = document.createElement("div");
+        mediaFrame.className = "ps-component-media-frame";
+        if (source && kind === "video") {
+            const video = document.createElement("video");
+            video.src = source;
+            if (poster) video.poster = poster;
+            video.preload = "metadata";
+            video.controls = config.mediaShowControls !== false;
+            video.autoplay = false;
+            video.muted = config.mediaMuted !== false;
+            video.loop = config.mediaLoop !== false;
+            video.playsInline = true;
+            video.setAttribute("aria-label", String(altText));
+            mediaFrame.append(video);
+        } else if (source && kind === "audio") {
+            const audioVisual = document.createElement("div");
+            audioVisual.className = "ps-component-audio-visual";
+            audioVisual.innerHTML = '<span class="dx-icon dx-icon-music" aria-hidden="true"></span>';
+            const audio = document.createElement("audio");
+            audio.src = source;
+            audio.preload = "metadata";
+            audio.controls = config.mediaShowControls !== false;
+            audio.autoplay = false;
+            audio.muted = config.mediaMuted !== false;
+            audio.loop = config.mediaLoop !== false;
+            audio.setAttribute("aria-label", String(altText));
+            audioVisual.append(audio);
+            mediaFrame.append(audioVisual);
+        } else if (source) {
             const img = document.createElement("img");
-            img.src = String(image);
-            img.alt = String(title || "Image");
-            wrapper.append(img);
+            img.src = source;
+            img.alt = String(altText);
+            img.loading = "lazy";
+            mediaFrame.append(img);
+        } else {
+            const empty = document.createElement("div");
+            empty.className = "ps-component-media-empty";
+            empty.innerHTML = '<span class="dx-icon dx-icon-imagethumbnail" aria-hidden="true"></span><span>No media source</span>';
+            mediaFrame.append(empty);
         }
+        wrapper.append(mediaFrame);
         const body = document.createElement("div");
+        body.className = "ps-component-media-caption";
         const strong = document.createElement("strong");
         strong.textContent = String(title ?? "");
         body.append(strong);
@@ -736,6 +799,151 @@
         }
         wrapper.append(body);
         element.append(wrapper);
+    }
+
+    function syncMediaPlayback(element, config, activeItem = null) {
+        const media = [...(element?.querySelectorAll?.("video,audio") || [])];
+        for (const node of media) {
+            const active = activeItem ? activeItem.contains?.(node) : !!node.closest?.(".dx-gallery-item-selected");
+            if (!active) {
+                try { node.pause?.(); } catch { }
+                continue;
+            }
+            if (config.mediaAutoPlay) {
+                try { node.play?.().catch?.(() => undefined); } catch { }
+            }
+        }
+    }
+
+    function activeChatPlatform(config) {
+        const query = new URLSearchParams(location.search).get("publisherChatPlatform");
+        const configured = query || window.PublisherStudioChatPlatform || config.chatPlatform || "Preview";
+        return String(configured).trim() || "Preview";
+    }
+
+    function activeChatChannel(config) {
+        const query = new URLSearchParams(location.search).get("publisherChatChannel");
+        const configured = query || window.PublisherStudioChatChannel || config.chatChannel || "";
+        return String(configured).trim();
+    }
+
+    function chatUser(config) {
+        return {
+            id: String(config.chatCurrentUserId || "publisher"),
+            name: String(config.chatCurrentUserName || "Streamer"),
+            avatarUrl: allowedMediaSource(config.chatCurrentUserAvatar) || undefined
+        };
+    }
+
+    function chatMessage(config, row, index = 0) {
+        const text = valueFor(row, config.chatMessageField || "text") ?? valueFor(row, "message") ?? "";
+        const authorId = valueFor(row, config.chatAuthorIdField || "authorId") ?? valueFor(row, "userId") ?? `viewer-${index + 1}`;
+        const authorName = valueFor(row, config.chatAuthorNameField || "authorName") ?? valueFor(row, "userName") ?? valueFor(row, "author") ?? "Viewer";
+        const avatar = allowedMediaSource(valueFor(row, config.chatAuthorAvatarField || "authorAvatar") || valueFor(row, "avatar"));
+        const timestamp = validDate(valueFor(row, config.chatTimestampField || "timestamp")) || new Date();
+        return {
+            id: String(valueFor(row, config.keyField || "id") ?? valueFor(row, "id") ?? `message-${index + 1}`),
+            text: String(text ?? ""),
+            timestamp,
+            author: { id: String(authorId), name: String(authorName), avatarUrl: avatar || undefined },
+            platform: String(valueFor(row, config.chatPlatformField || "platform") || activeChatPlatform(config)),
+            channel: String(valueFor(row, config.chatChannelField || "channel") || activeChatChannel(config))
+        };
+    }
+
+    function chatMessages(config, rows) {
+        const platform = lower(activeChatPlatform(config));
+        const channel = lower(activeChatChannel(config));
+        return (Array.isArray(rows) ? rows : []).filter(row => {
+            const rowPlatform = lower(valueFor(row, config.chatPlatformField || "platform"));
+            const rowChannel = lower(valueFor(row, config.chatChannelField || "channel"));
+            // Untagged preview rows are useful while designing, but never leak into a
+            // Twitch/YouTube/Custom output. A selected channel also requires an exact match.
+            const platformMatches = rowPlatform ? rowPlatform === platform : platform === "preview";
+            const channelMatches = channel ? rowChannel === channel : true;
+            return platformMatches && channelMatches;
+        }).map((row, index) => chatMessage(config, row, index));
+    }
+
+    function chatMessageId(message) {
+        return String(message?.id || "").trim();
+    }
+
+    function mergeChatItems(config, rows, transient = []) {
+        const result = [];
+        const ids = new Set();
+        for (const message of [...chatMessages(config, rows), ...(transient || [])]) {
+            const id = chatMessageId(message);
+            if (id && ids.has(id)) continue;
+            if (id) ids.add(id);
+            result.push(message);
+        }
+        return result;
+    }
+
+    function renderChatMessage(state, message) {
+        if (!state || !message) return false;
+        state.chatMessageIds ||= new Set();
+        state.chatTransient ||= [];
+        const id = chatMessageId(message);
+        if (id && state.chatMessageIds.has(id)) return false;
+        if (id) state.chatMessageIds.add(id);
+        state.chatTransient.push(message);
+        state.instance?.renderMessage?.(message);
+        return true;
+    }
+
+    function applyChatInputState(element, config) {
+        const input = element?.querySelector?.(".dx-chat-messagebox textarea,.dx-chat-messagebox input,textarea.dx-texteditor-input,input.dx-texteditor-input");
+        if (input && config.placeholder) input.setAttribute("placeholder", String(config.placeholder));
+    }
+
+    function publishChatMessage(config, instance, message, element) {
+        const detail = {
+            componentId: String(config.id || ""),
+            platform: activeChatPlatform(config),
+            channel: activeChatChannel(config),
+            message
+        };
+        const state = states.get(element);
+        if (config.chatOptimisticSend !== false) {
+            if (state) renderChatMessage(state, message);
+            else instance?.renderMessage?.(message);
+        }
+        try { window.PublisherStudioChatBridge?.send?.(detail); } catch (error) { showError(error?.message || String(error)); }
+        window.dispatchEvent(new CustomEvent("publisherstudio:chat-send", { detail }));
+        element?.dispatchEvent?.(new CustomEvent("publisherstudio:chat-send", { detail, bubbles: true }));
+    }
+
+    function installChatSubscription(element, state) {
+        const config = state.config;
+        const accept = detail => {
+            if (!detail) return;
+            if (detail.componentId && String(detail.componentId) !== String(config.id || "")) return;
+            if (lower(detail.platform) !== lower(activeChatPlatform(config))) return;
+            const channel = lower(activeChatChannel(config));
+            if (channel && lower(detail.channel) !== channel) return;
+            const source = detail.message || detail;
+            const message = source?.author
+                ? { ...source, id: String(source.id || `message-${Date.now()}`), timestamp: validDate(source.timestamp) || new Date(), platform: String(source.platform || detail.platform || activeChatPlatform(config)), channel: String(source.channel || detail.channel || activeChatChannel(config)) }
+                : chatMessage(config, source, Date.now());
+            renderChatMessage(state, message);
+        };
+        const handler = event => accept(event.detail);
+        window.addEventListener("publisherstudio:chat-message", handler);
+        let bridgeUnsubscribe = null;
+        try {
+            const result = window.PublisherStudioChatBridge?.subscribe?.({
+                componentId: String(config.id || ""),
+                platform: activeChatPlatform(config),
+                channel: activeChatChannel(config)
+            }, accept);
+            if (typeof result === "function") bridgeUnsubscribe = result;
+        } catch (error) { showError(error?.message || String(error)); }
+        state.chatUnsubscribe = () => {
+            window.removeEventListener("publisherstudio:chat-message", handler);
+            try { bridgeUnsubscribe?.(); } catch { }
+        };
     }
 
     function hierarchy(rows, keyField, parentField) {
@@ -1111,7 +1319,9 @@
                     showIndicator: true,
                     showNavButtons: true,
                     stretchImages: true,
-                    itemTemplate(item, index, itemElement) { renderCard(item, config, itemElement?.jquery ? itemElement[0] : itemElement, false); }
+                    itemTemplate(item, index, itemElement) { renderCard(item, config, itemElement?.jquery ? itemElement[0] : itemElement, false); },
+                    onContentReady() { queueMicrotask(() => syncMediaPlayback(element, config)); },
+                    onSelectionChanged() { queueMicrotask(() => syncMediaPlayback(element, config)); }
                 };
                 break;
             case "TileView":
@@ -1122,7 +1332,11 @@
                     baseItemWidth: 180,
                     itemMargin: 8,
                     direction: componentOrientation(config),
-                    itemTemplate(item, index, itemElement) { renderCard(item, config, itemElement?.jquery ? itemElement[0] : itemElement, true); }
+                    itemTemplate(item, index, itemElement) { renderCard(item, config, itemElement?.jquery ? itemElement[0] : itemElement, true); },
+                    onItemClick(event) {
+                        const itemElement = event?.itemElement?.jquery ? event.itemElement[0] : event?.itemElement;
+                        syncMediaPlayback(element, config, itemElement || null);
+                    }
                 };
                 break;
             case "Menu": {
@@ -1266,6 +1480,40 @@
                 };
                 break;
             }
+            case "Chat": {
+                element.classList.toggle("ps-chat-readonly", config.chatAllowSending === false);
+                options = {
+                    ...base,
+                    items: mergeChatItems(config, config.rows || []),
+                    user: chatUser(config),
+                    showAvatar: config.chatShowAvatar !== false,
+                    showUserName: true,
+                    showMessageTimestamp: config.chatShowTimestamp !== false,
+                    showDayHeaders: config.chatShowTimestamp !== false,
+                    messageTimestampFormat: config.chatShowTimestamp === false ? undefined : "shorttime",
+                    editing: { allowDeleting: false, allowUpdating: false },
+                    onContentReady() { queueMicrotask(() => applyChatInputState(element, config)); },
+                    onMessageEntered(event) {
+                        const source = event?.message || {};
+                        const message = {
+                            ...source,
+                            id: String(source.id || `outgoing-${Date.now()}`),
+                            text: String(source.text || ""),
+                            timestamp: validDate(source.timestamp) || new Date(),
+                            author: chatUser(config),
+                            platform: activeChatPlatform(config),
+                            channel: activeChatChannel(config)
+                        };
+                        publishChatMessage(config, event.component, message, element);
+                    },
+                    emptyViewTemplate(data, itemElement) {
+                        const target = itemElement?.jquery ? itemElement[0] : itemElement;
+                        if (!target) return;
+                        target.innerHTML = `<div class="ps-chat-empty"><span class="dx-icon dx-icon-chat" aria-hidden="true"></span><strong>${escapeHtml(activeChatPlatform(config))} chat</strong><small>Messages for other platforms stay hidden.</small></div>`;
+                    }
+                };
+                break;
+            }
             case "Button":
                 options = { ...base, text: config.buttonText || config.title || "Run", type: "default", stylingMode: "contained", onClick: event => executeActions(config, actionsFor(config, "Click"), eventContext(config, event.component, dataSource, event, clone(config.rows?.[0] || {}))) };
                 break;
@@ -1295,11 +1543,17 @@
             state.instance.repaint?.();
             return;
         }
-        if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox"].includes(kind)) {
+        if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox", "Chat"].includes(kind)) {
             const rows = normalizeDateRows(state.config, await materializeRows(state.config, state.data));
             state.config.rows = rows;
             if (kind === "Form") state.instance.option?.("formData", clone(rows[0] || {}));
             else if (kind === "Menu" || kind === "ContextMenu") state.instance.option?.("items", menuItems(state.config, rows));
+            else if (kind === "Chat") {
+                const items = mergeChatItems(state.config, rows, state.chatTransient);
+                state.chatMessageIds = new Set(items.map(chatMessageId).filter(Boolean));
+                state.instance.option?.("items", items);
+                queueMicrotask(() => applyChatInputState(element, state.config));
+            }
             else {
                 const value = configuredValue(state.config);
                 state.instance.option?.("value", kind === "DateBox" ? validDate(value) : kind === "NumberBox" ? number(value, 0) : kind === "CheckBox" ? bool(value) : value ?? "");
@@ -1318,6 +1572,7 @@
         const state = states.get(element);
         if (state?.timer) clearInterval(state.timer);
         state?.layout?.cancel?.();
+        try { state?.chatUnsubscribe?.(); } catch { }
         for (const child of [...element.querySelectorAll("[data-ps-component-runtime]")]) {
             if (child !== element) dispose(child);
         }
@@ -1353,7 +1608,7 @@
             } catch (error) { showError(error?.message || String(error)); }
         }
         try {
-            if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox", "Map", "VectorMap", "Scheduler"].includes(String(config.kind || "")))
+            if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox", "Map", "VectorMap", "Scheduler", "Chat"].includes(String(config.kind || "")))
                 config.rows = normalizeDateRows(config, await materializeRows(config, data));
             const plugin = pluginNames[config.kind];
             if (!plugin || typeof window.jQuery.fn[plugin] !== "function") throw new Error(`${config.kind} is not available in the bundled DevExtreme runtime.`);
@@ -1374,7 +1629,13 @@
                 }
             }
             const state = { config, instance, data, dataSource: instance?.getDataSource?.() || data.dataSource, pivotSource: data.pivotSource, timer: null };
+            if (config.kind === "Chat") {
+                const items = mergeChatItems(config, config.rows || []);
+                state.chatMessageIds = new Set(items.map(chatMessageId).filter(Boolean));
+                state.chatTransient = [];
+            }
             states.set(element, state);
+            if (config.kind === "Chat") installChatSubscription(element, state);
             installLayoutObserver(element, state);
             const interval = number(config.connection?.dataObjectLive?.refreshIntervalSeconds, 0);
             if (options.polling !== false && interval > 0) {
@@ -1435,6 +1696,12 @@
         const elements = scope.matches?.("[data-ps-component-config]") ? [scope] : [...scope.querySelectorAll?.("[data-ps-component-config]") || []];
         elements.forEach(element => render(element, element.dataset.psComponentConfig, { polling: options.polling !== false, fetchNow: options.fetchNow !== false }));
     }
+
+    window.PublisherStudioChatRuntime = window.PublisherStudioChatRuntime || {
+        push(message) { window.dispatchEvent(new CustomEvent("publisherstudio:chat-message", { detail: message })); },
+        setPlatform(platform) { window.PublisherStudioChatPlatform = String(platform || "Preview"); return refreshAll(document, { fetchNow: false }); },
+        setChannel(channel) { window.PublisherStudioChatChannel = String(channel || ""); return refreshAll(document, { fetchNow: false }); }
+    };
 
     window.PublisherStudioComponentRuntime = {
         render,

@@ -94,6 +94,10 @@
                                 {
                                     <button type="button" @onclick="UseLivePageDataset">Use live publication pages</button>
                                 }
+                                @if (_draft.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView)
+                                {
+                                    <button type="button" @onclick="UsePublicationMediaDataset">Use pictures &amp; videos from document</button>
+                                }
                             </div>
                             @if (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
                             {
@@ -110,6 +114,14 @@
                                 {
                                     <button type="button" @onclick="ShowMenuItems">Edit menu items</button>
                                 }
+                            }
+                            @if (_draft.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView)
+                            {
+                                <p class="component-info"><b>Fast media workflow:</b> choose “Use pictures &amp; videos from document” to bind this component to the live Publication media object. Pictures, videos, and audio already inserted in the publication appear automatically; no binary file is copied into a second dataset. REST/JSON media feeds remain available below.</p>
+                            }
+                            @if (_draft.ComponentKind == PublicationComponentKind.Chat)
+                            {
+                                <p class="component-info"><b>Chat data:</b> bind a snapshot/API with one row per message, or let the streaming bridge push messages at runtime. Platform and channel filtering is enforced inside the component so Twitch and YouTube messages are never combined.</p>
                             }
                             @if (IsManualMenu)
                             {
@@ -398,6 +410,23 @@
                                     {
                                         <label>Image field<select @bind="_draft.ImageField"><option value="">No image</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     }
+                                    @if (_draft.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView)
+                                    {
+                                        <label>Media type field<select @bind="_draft.MediaKindField"><option value="">Infer from URL</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Media source field<select @bind="_draft.MediaSourceField"><option value="">Use image field</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Video poster field<select @bind="_draft.MediaPosterField"><option value="">No poster</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Alternative text field<select @bind="_draft.MediaAltTextField"><option value="">Use title</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
+                                    @if (_draft.ComponentKind == PublicationComponentKind.Chat)
+                                    {
+                                        <label>Platform field<select @bind="_draft.ChatPlatformField"><option value="">Use configured platform</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Channel field<select @bind="_draft.ChatChannelField"><option value="">Use configured channel</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Message field<select @bind="_draft.ChatMessageField"><option value="">Select field</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Timestamp field<select @bind="_draft.ChatTimestampField"><option value="">No timestamp</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Author ID field<select @bind="_draft.ChatAuthorIdField"><option value="">Automatic</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Author name field<select @bind="_draft.ChatAuthorNameField"><option value="">Select field</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                        <label>Author avatar field<select @bind="_draft.ChatAuthorAvatarField"><option value="">No avatars</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    }
                                     @if (_draft.ComponentKind == PublicationComponentKind.Scheduler)
                                     {
                                         <label>Start date field<select @bind="_draft.StartDateField"><option value="">Select field</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
@@ -457,6 +486,33 @@
                                     <label>Initial value<input @bind="_draft.InitialValue" /></label>
                                 }
                             </div>
+                            @if (_draft.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView)
+                            {
+                                <div class="component-option-grid three">
+                                    <label><input type="checkbox" @bind="_draft.MediaShowControls" /> Video/audio controls</label>
+                                    <label><input type="checkbox" @bind="_draft.MediaAutoPlay" /> Autoplay active media</label>
+                                    <label><input type="checkbox" @bind="_draft.MediaMuted" /> Mute media</label>
+                                    <label><input type="checkbox" @bind="_draft.MediaLoop" /> Loop media</label>
+                                </div>
+                            }
+                            @if (_draft.ComponentKind == PublicationComponentKind.Chat)
+                            {
+                                <div class="component-form-grid">
+                                    <label>Platform<select @bind="_draft.ChatPlatform">@foreach (var platform in Enum.GetValues<PublicationChatPlatform>()) { <option value="@platform">@platform</option> }</select></label>
+                                    <label>Channel / stream ID<input @bind="_draft.ChatChannel" placeholder="optional until streaming is connected" /></label>
+                                    <label>Sender ID<input @bind="_draft.ChatCurrentUserId" /></label>
+                                    <label>Sender name<input @bind="_draft.ChatCurrentUserName" /></label>
+                                    <label>Sender avatar URL<input @bind="_draft.ChatCurrentUserAvatar" placeholder="optional" /></label>
+                                    <label>Input placeholder<input @bind="_draft.Placeholder" placeholder="Send a message…" /></label>
+                                </div>
+                                <div class="component-option-grid three">
+                                    <label><input type="checkbox" @bind="_draft.ChatAllowSending" /> Show answer field</label>
+                                    <label><input type="checkbox" @bind="_draft.ChatShowAvatar" /> Show avatars</label>
+                                    <label><input type="checkbox" @bind="_draft.ChatShowTimestamp" /> Show timestamps</label>
+                                    <label><input type="checkbox" @bind="_draft.ChatOptimisticSend" /> Show sent message immediately</label>
+                                </div>
+                                <p class="component-info">The runtime accepts a platform adapter through <code>window.PublisherStudioChatBridge</code>. It subscribes and sends only for the selected platform and channel. The same publication can therefore be rendered once for Twitch and once for YouTube without exposing the other platform's chat.</p>
+                            }
                             @if (SupportsGridOptions || _draft.ComponentKind == PublicationComponentKind.TreeList)
                             {
                                 <div class="component-option-grid three">
@@ -711,7 +767,7 @@
         PublicationComponentKind.PivotGrid, PublicationComponentKind.TextBox, PublicationComponentKind.TextArea,
         PublicationComponentKind.NumberBox, PublicationComponentKind.DateBox, PublicationComponentKind.CheckBox,
         PublicationComponentKind.SelectBox, PublicationComponentKind.TagBox, PublicationComponentKind.Map,
-        PublicationComponentKind.VectorMap, PublicationComponentKind.Button
+        PublicationComponentKind.VectorMap, PublicationComponentKind.Chat, PublicationComponentKind.Button
     ];
 
     private IEnumerable<PublicationElement> CurrentPageElements => State.CurrentPage.Elements.Where(element => element.Id != _draft?.Id);
@@ -725,7 +781,7 @@
     private bool SupportsPlaceholder => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
     private bool SupportsInitialValue => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.CheckBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
     private bool SupportsGridOptions => _draft?.ComponentKind == PublicationComponentKind.DataGrid;
-    private bool UsesKeyField => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Form or PublicationComponentKind.Scheduler or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu or PublicationComponentKind.PivotGrid;
+    private bool UsesKeyField => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Form or PublicationComponentKind.Scheduler or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu or PublicationComponentKind.PivotGrid or PublicationComponentKind.Chat;
     private bool UsesParentField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
     private bool UsesTextField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
     private bool UsesDisplayField => _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
@@ -769,7 +825,7 @@
         PublicationComponentKind.Form => "≣", PublicationComponentKind.Gallery => "▧", PublicationComponentKind.TileView => "▥",
         PublicationComponentKind.Menu => "☰", PublicationComponentKind.ContextMenu => "⋮", PublicationComponentKind.TabPanel => "▤",
         PublicationComponentKind.MultiView => "▱", PublicationComponentKind.Splitter => "◫", PublicationComponentKind.ScrollView => "↕",
-        PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Map => "⌖", PublicationComponentKind.VectorMap => "◈", PublicationComponentKind.Button => "▰", _ => "⌨"
+        PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Map => "⌖", PublicationComponentKind.VectorMap => "◈", PublicationComponentKind.Chat => "◉", PublicationComponentKind.Button => "▰", _ => "⌨"
     };
     private static string Friendly(string value) => PublicationComponentService.Friendly(value);
 
@@ -788,6 +844,17 @@
             if (_draft.MenuItems.Count == 0) _draft.MenuItems.Add(new PublicationMenuItem { Text = "Menu item" });
             if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
                 _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
+        }
+        if (kind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView) UsePublicationMediaDataset();
+        if (kind == PublicationComponentKind.Chat)
+        {
+            var chatData = State.Document.DataObjects.FirstOrDefault(data => string.Equals(data.SourceReference, "publisherstudio:chat-preview", StringComparison.Ordinal));
+            if (chatData is not null)
+            {
+                _draft.Connection.Mode = PublicationComponentDataMode.StaticSnapshot;
+                _draft.Connection.DataObjectId = chatData.Id;
+                Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
+            }
         }
         _section = kind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap ? "map" : kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu ? "menu" : "general";
     }
@@ -912,6 +979,26 @@
         if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
             _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
         _connectionStatus = "The self-updating Publication pages object is selected. Renaming, adding, removing, or reordering pages is reflected automatically.";
+    }
+
+    private void UsePublicationMediaDataset()
+    {
+        if (_draft is null) return;
+        DataService.EnsureBuiltInObjects(State.Document);
+        var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == PublicationDataSourceKind.PublicationMedia);
+        _draft.Connection.Mode = PublicationComponentDataMode.PublicationDataObject;
+        _draft.Connection.DataObjectId = data.Id;
+        Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
+        _draft.KeyField = "id";
+        _draft.Connection.KeyField = "id";
+        _draft.TextField = "title";
+        _draft.DisplayField = "title";
+        _draft.ImageField = "image";
+        _draft.MediaKindField = "mediaType";
+        _draft.MediaSourceField = "source";
+        _draft.MediaPosterField = "poster";
+        _draft.MediaAltTextField = "altText";
+        _connectionStatus = "The live Publication media object is selected. Pictures, videos, and audio inserted or removed in the document update this component automatically.";
     }
 
     private void AddMenuItem()

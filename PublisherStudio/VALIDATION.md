@@ -408,3 +408,13 @@ Static checks completed for the v1.0.37 source package:
 - Package JSON, package lock, web project, and installer project are aligned to `1.0.45`; publication format remains `1.42`.
 - JSON and project XML parsing, CSS delimiter checks, and final ZIP integrity are run during packaging.
 - A full .NET/DevExpress compile and interactive licensed application run remain release-machine checks because this environment has no .NET SDK or licensed DevExpress NuGet feed.
+
+
+## v1.0.46 media-data and chat validation
+
+- `npm test` covers the component catalog, media data/runtime contract, platform-isolated Chat mapping, bridge send path, menu/navigation regressions, timeline lifecycle, and offline signal runtime.
+- `node --check` passes for the shared component runtime and Publisher export runtime.
+- The Node VM runtime test instantiates the shared Chat path with a DevExtreme-compatible plugin stub, confirms Twitch rows exclude YouTube and untagged rows, verifies outgoing bridge metadata, and checks incoming-message deduplication.
+- JSON files and project XML parse successfully; application/package/installer versions are aligned to `1.0.46`, and publication format is `1.43`.
+- The final ZIP is checked with `unzip -t`.
+- A complete .NET/DevExpress build requires the local .NET SDK and licensed DevExpress package feed and is not claimed by this environment.

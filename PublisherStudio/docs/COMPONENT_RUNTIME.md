@@ -160,3 +160,26 @@ Publication objects may contain custom connector ports expressed as normalized `
 DevExtreme's base Menu CSS assigns `height:100%` to every menu item wrapper. PublisherStudio keeps that behavior for horizontal menubars but overrides it for vertical menus so each item uses its natural row height. Vertical menus remain full-width and scroll inside the publication object only when necessary.
 
 The browser runtime attaches a resize observer to every component host. It calls the component's supported `updateDimensions()` and `repaint()` methods after object resizing or hidden-to-visible transitions. Tab Panel, Multi View, and Splitter additionally refresh their nested component hosts after selection, resize, collapse, and expansion events. The same runtime and collected application CSS are embedded into presentation and website HTML exports.
+
+
+## Media collections and isolated chat (v1.0.46)
+
+Gallery and Tile View accept ordinary data rows. `mediaType` may be `image`, `video`, or `audio`; `source` contains a data URL, relative URL, or HTTP(S) URL; `poster` is optional for video; `altText` is used for accessibility. The built-in **Publication media** data object produces these fields from media already in the document. This avoids a second upload/store workflow and keeps single-file exports offline-capable when the original media is embedded.
+
+The Chat component uses DevExtreme `dxChat`. Initial/API rows are filtered before rendering. A Twitch output never accepts YouTube or untagged non-preview rows, and a configured channel requires an exact channel match. Incoming and outgoing messages use this bridge contract:
+
+```javascript
+window.PublisherStudioChatBridge = {
+  subscribe({ componentId, platform, channel }, receive) {
+    // Connect to one authenticated platform/channel and call receive({
+    //   platform, channel, message: { id, text, timestamp, author }
+    // });
+    return () => { /* disconnect */ };
+  },
+  send({ componentId, platform, channel, message }) {
+    // Send only through the selected platform adapter.
+  }
+};
+```
+
+The runtime also accepts `publisherstudio:chat-message` events and emits `publisherstudio:chat-send`. `PublisherStudioChatRuntime.setPlatform(...)` and `.setChannel(...)` rerender all chat components, while the `publisherChatPlatform` and `publisherChatChannel` query parameters select a stream-specific output without changing the publication. The adapter is intentionally not bundled with credentials or platform OAuth secrets.

@@ -57,6 +57,7 @@ const components = {
   PivotGrid: 'dxPivotGrid',
   Map: 'dxMap',
   VectorMap: 'dxVectorMap',
+  Chat: 'dxChat',
   Button: 'dxButton'
 };
 
@@ -110,7 +111,7 @@ assert.equal((app.match(/vendor\/devextreme-dist\/js\/dx\.all\.js/g) || []).leng
 assert.doesNotMatch(app, /RegisterScripts\(\)/, 'Default DevExtreme registration would duplicate the pinned bundle.');
 assert.ok(app.indexOf('vendor/jquery/jquery.min.js') < app.indexOf('vendor/devextreme-dist/js/dx.all.js'));
 assert.ok(app.indexOf('vendor/devextreme-dist/js/dx.all.js') < app.indexOf('DxResourceManager.RegisterScripts'), 'Pinned jQuery/DevExtreme must load before dependent DevExpress resource scripts.');
-assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.42"/);
+assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.43"/);
 assert.match(editor, /Only options supported by the selected component are shown here/);
 assert.doesNotMatch(editor.slice(editor.indexOf('else if (_section == "behavior")'), editor.indexOf('else if (_section == "map")')), /Scheduler view[\s\S]*without-kind-guard/);
 assert.match(dataModel, /PublicationPages/);
@@ -121,6 +122,21 @@ assert.match(dataService, /BuildPublicationDocumentRows/);
 assert.match(dataManager, /Self-updating publication pages/);
 assert.match(dataManager, /Self-updating publication document/);
 assert.match(dataManager, /Self-updating publication objects/);
+
+assert.match(dataModel, /PublicationMedia/);
+assert.match(dataService, /BuildPublicationMediaRows/);
+assert.match(dataManager, /Self-updating publication media/);
+assert.match(editor, /Use pictures &amp; videos from document/);
+assert.match(editor, /Platform and channel filtering is enforced/);
+assert.match(runtime, /function chatMessages\(/);
+assert.match(model, /ChatChannelField/);
+assert.match(editor, /Channel field/);
+assert.match(runtime, /platform === "preview"/);
+assert.match(runtime, /rowChannel === channel/);
+assert.match(runtime, /PublisherStudioChatBridge/);
+assert.match(runtime, /publisherstudio:chat-send/);
+assert.match(runtime, /ps-component-media-\$\{kind\}/);
+assert.match(css, /ps-chat-readonly/);
 assert.match(service, /BuildFields\(/);
 assert.match(service, /BuildActions\(/);
 assert.match(service, /PublicationComponentDataMode\.PublicationDataObject \? live : null/);
@@ -204,7 +220,9 @@ const context = {
   Headers,
   setInterval,
   clearInterval,
-  CustomEvent: class CustomEvent {},
+  CustomEvent: class CustomEvent {
+    constructor(type, options = {}) { this.type = type; Object.assign(this, options); }
+  },
   Element: class Element {},
   CSS: { escape: value => String(value).replace(/"/g, '\\"') },
   document: {
@@ -221,6 +239,7 @@ const context = {
     getItem: () => '',
     setItem: () => undefined
   },
+  queueMicrotask,
   atob: value => Buffer.from(value, 'base64').toString('binary'),
   fetch: async (url, options = {}) => {
     requests.push({ url: String(url), options });
@@ -229,6 +248,17 @@ const context = {
       headers: { 'content-type': 'application/json' }
     });
   }
+};
+const windowListeners = new Map();
+context.addEventListener = (type, handler) => {
+  const handlers = windowListeners.get(type) || new Set();
+  handlers.add(handler);
+  windowListeners.set(type, handlers);
+};
+context.removeEventListener = (type, handler) => windowListeners.get(type)?.delete(handler);
+context.dispatchEvent = event => {
+  for (const handler of windowListeners.get(event?.type) || []) handler(event);
+  return true;
 };
 context.window = context;
 vm.runInNewContext(runtime, context, { filename: runtimePath });
@@ -256,6 +286,9 @@ assert.match(requests.at(-1).url, /%24top=10|\$top=10/);
 let menuOptions;
 let tileViewOptions;
 let splitterOptions;
+let chatOptions;
+const renderedChatMessages = [];
+const sentChatMessages = [];
 let navigatedPage = '';
 let openedUrl = null;
 const menuHost = { closest: () => null };
@@ -263,6 +296,13 @@ const menuInstance = {
   element: () => [menuHost],
   getDataSource: () => null,
   dispose: () => undefined
+};
+const chatInstance = {
+  getDataSource: () => null,
+  renderMessage(message) { renderedChatMessages.push(message); },
+  option() {},
+  repaint() {},
+  dispose() {}
 };
 const genericInstance = {
   getDataSource: () => null,
@@ -285,11 +325,25 @@ const jquery = () => ({
     if (argument === 'instance') return genericInstance;
     splitterOptions = argument;
     return this;
+  },
+  dxChat(argument) {
+    if (argument === 'instance') return chatInstance;
+    chatOptions = argument;
+    return this;
   }
 });
-jquery.fn = { dxMenu() {}, dxTileView() {}, dxSplitter() {} };
+jquery.fn = { dxMenu() {}, dxTileView() {}, dxSplitter() {}, dxChat() {} };
 context.jQuery = jquery;
-context.DevExpress = { data: {} };
+context.DevExpress = { data: {
+  ArrayStore: class ArrayStore {
+    constructor(options) { this.options = options; }
+    async load() { return this.options.data || []; }
+  }
+} };
+context.PublisherStudioChatBridge = {
+  send(detail) { sentChatMessages.push(detail); },
+  subscribe() { return () => undefined; }
+};
 context.PublisherStudioNavigation = {
   goToPage(value) {
     navigatedPage = String(value);
@@ -343,8 +397,10 @@ const layoutHost = () => ({
   innerHTML: '',
   clientWidth: 640,
   clientHeight: 360,
-  classList: { add() {}, remove() {} },
+  classList: { add() {}, remove() {}, toggle() {} },
+  querySelector: () => null,
   querySelectorAll: () => [],
+  dispatchEvent: event => context.dispatchEvent(event),
   replaceChildren() {},
   getBoundingClientRect: () => ({ width: 640, height: 360 })
 });
@@ -357,4 +413,31 @@ await context.PublisherStudioComponentRuntime.render(layoutHost(), {
 }, { polling: false, fetchNow: false });
 assert.equal(splitterOptions.orientation, 'vertical');
 
-console.log('component catalog, REST/OData probe, menu navigation, orientation/layout resilience, smart connections, and single-file export contract tests passed');
+const chatHost = layoutHost();
+await context.PublisherStudioComponentRuntime.render(chatHost, {
+  kind: 'Chat', id: 'chat-test', chatPlatform: 'Twitch', chatChannel: 'stream-a',
+  chatPlatformField: 'platform', chatChannelField: 'channel', chatMessageField: 'text',
+  chatTimestampField: 'timestamp', chatAuthorIdField: 'authorId', chatAuthorNameField: 'authorName',
+  chatCurrentUserId: 'publisher', chatCurrentUserName: 'Streamer', chatOptimisticSend: true,
+  rows: [
+    { id: 't1', platform: 'Twitch', channel: 'stream-a', text: 'Twitch only', timestamp: '2026-07-21T12:00:00Z', authorId: 't', authorName: 'Twitch Viewer' },
+    { id: 'y1', platform: 'YouTube', channel: 'stream-a', text: 'YouTube hidden', timestamp: '2026-07-21T12:01:00Z', authorId: 'y', authorName: 'YouTube Viewer' },
+    { id: 'u1', text: 'Untagged hidden', timestamp: '2026-07-21T12:02:00Z', authorId: 'u', authorName: 'Unknown' }
+  ],
+  fields: [], actions: [], connection: {}, keyField: 'id'
+}, { polling: false, fetchNow: false });
+assert.equal(chatOptions.items.length, 1, 'Twitch chat must not contain YouTube or untagged rows.');
+assert.equal(chatOptions.items[0].text, 'Twitch only');
+chatOptions.onMessageEntered({ component: chatInstance, message: { id: 'out-1', text: 'Reply' } });
+assert.equal(sentChatMessages.length, 1);
+assert.equal(sentChatMessages[0].platform, 'Twitch');
+assert.equal(sentChatMessages[0].channel, 'stream-a');
+assert.equal(renderedChatMessages.length, 1, 'Optimistic chat send should render once.');
+context.PublisherStudioChatRuntime.push({ platform: 'YouTube', channel: 'stream-a', message: { id: 'wrong', text: 'Wrong platform', author: { id: 'y', name: 'YouTube' } } });
+assert.equal(renderedChatMessages.length, 1, 'A YouTube bridge message must not enter Twitch chat.');
+context.PublisherStudioChatRuntime.push({ platform: 'Twitch', channel: 'stream-a', message: { id: 'right', text: 'Right platform', author: { id: 't', name: 'Twitch' } } });
+assert.equal(renderedChatMessages.length, 2);
+context.PublisherStudioChatRuntime.push({ platform: 'Twitch', channel: 'stream-a', message: { id: 'right', text: 'Duplicate', author: { id: 't', name: 'Twitch' } } });
+assert.equal(renderedChatMessages.length, 2, 'Repeated message IDs must be deduplicated.');
+
+console.log('component catalog, REST/OData probe, menu navigation, orientation/layout resilience, media data, isolated chat, smart connections, and single-file export contract tests passed');

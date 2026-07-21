@@ -121,6 +121,7 @@
                 <DxRibbonItem Text="Visual collections" DropDownCssClass="publisher-ribbon-menu">
                         <DxRibbonItem Text="Gallery" Click="AddComponentGallery" />
                         <DxRibbonItem Text="Tile View" Click="AddComponentTileView" />
+                        <DxRibbonItem Text="Chat" Click="AddComponentChat" />
                 </DxRibbonItem>
             </DxRibbonItem>
         </DxRibbonGroup>
@@ -703,6 +704,7 @@
     private Task AddComponentTagBox() => AddComponent(PublicationComponentKind.TagBox);
     private Task AddComponentGallery() => AddComponent(PublicationComponentKind.Gallery);
     private Task AddComponentTileView() => AddComponent(PublicationComponentKind.TileView);
+    private Task AddComponentChat() => AddComponent(PublicationComponentKind.Chat);
     private Task AddComponentMenu() => AddComponent(PublicationComponentKind.Menu);
     private Task AddComponentContextMenu() => AddComponent(PublicationComponentKind.ContextMenu);
     private Task AddComponentTabPanel() => AddComponent(PublicationComponentKind.TabPanel);

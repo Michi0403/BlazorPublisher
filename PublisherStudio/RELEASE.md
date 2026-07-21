@@ -1,17 +1,14 @@
-# PublisherStudio v1.0.45 release
+# PublisherStudio v1.0.46 release
 
-See `CHANGELOG-v1.0.45.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.46.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
 
-This release fixes the vertical Menu clipping issue and hardens every Component Studio runtime against stale or hidden container dimensions.
+## Highlights
 
-Key changes:
+- A self-updating **Publication media** object exposes document pictures, videos, and audio to Gallery and Tile View without copying binary data into a second user-managed dataset.
+- Gallery and Tile View render image, video, and audio rows through safe media templates with captions, posters, controls, and active-item playback.
+- Added the DevExtreme **Chat** component with selectable message fields, current-sender settings, platform/channel isolation, live bridge events, and an offline-export runtime contract.
+- Twitch, YouTube, Preview, and Custom chats remain separate. A platform-specific stream output can select its chat using component settings, `publisherChatPlatform`, and `publisherChatChannel`.
 
-- Vertical Menu rows use natural heights, so all configured items display instead of only the first.
-- The fix is shared by the editor, canvas, presentation HTML, and offline website HTML.
-- Menu, Tile View, Splitter, and Scroll View orientation values are normalized consistently.
-- A shared resize observer calls the supported DevExtreme dimension/repaint APIs after component-object resizing and visibility changes.
-- Tab Panel, Multi View, and Splitter explicitly refresh nested controls when their active/available space changes.
+## Versions
 
-Versions: application/package/installer `1.0.45`, publication format `1.42`, picture format `1.2`.
-
-JavaScript syntax, Node runtime contracts, JSON/project XML parsing, CSS delimiter checks, and ZIP integrity are validated in the packaging environment. A complete `dotnet restore`/`dotnet build` and licensed DevExpress application run still require the release machine because this environment does not contain the .NET SDK or licensed DevExpress NuGet feed.
+Application/package/installer `1.0.46`, publication format `1.43`, picture format `1.2`.

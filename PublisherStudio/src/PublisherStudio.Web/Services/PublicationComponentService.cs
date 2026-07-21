@@ -63,7 +63,11 @@ public sealed class PublicationComponentService
     public DevExtremeComponentElement Create(PublicationDocument document, PublicationComponentKind kind)
     {
         _data.EnsureBuiltInObjects(document);
-        var data = EnsureDataObject(document);
+        var data = kind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView
+            ? EnsurePublicationMediaObject(document)
+            : kind == PublicationComponentKind.Chat
+                ? EnsureChatPreviewObject(document)
+                : EnsureDataObject(document);
         var element = new DevExtremeComponentElement
         {
             Name = ComponentName(kind),
@@ -129,6 +133,21 @@ public sealed class PublicationComponentService
         item.MapProvider = string.IsNullOrWhiteSpace(item.MapProvider) ? "google" : item.MapProvider.Trim();
         item.MapType = string.IsNullOrWhiteSpace(item.MapType) ? "roadmap" : item.MapType.Trim();
         item.VectorProjection = string.IsNullOrWhiteSpace(item.VectorProjection) ? "mercator" : item.VectorProjection.Trim();
+        item.MediaKindField = string.IsNullOrWhiteSpace(item.MediaKindField) ? "mediaType" : item.MediaKindField.Trim();
+        item.MediaSourceField = string.IsNullOrWhiteSpace(item.MediaSourceField) ? "source" : item.MediaSourceField.Trim();
+        item.MediaPosterField = string.IsNullOrWhiteSpace(item.MediaPosterField) ? "poster" : item.MediaPosterField.Trim();
+        item.MediaAltTextField = string.IsNullOrWhiteSpace(item.MediaAltTextField) ? "altText" : item.MediaAltTextField.Trim();
+        item.ChatChannel ??= string.Empty;
+        item.ChatPlatformField = string.IsNullOrWhiteSpace(item.ChatPlatformField) ? "platform" : item.ChatPlatformField.Trim();
+        item.ChatChannelField = string.IsNullOrWhiteSpace(item.ChatChannelField) ? "channel" : item.ChatChannelField.Trim();
+        item.ChatMessageField = string.IsNullOrWhiteSpace(item.ChatMessageField) ? "text" : item.ChatMessageField.Trim();
+        item.ChatTimestampField = string.IsNullOrWhiteSpace(item.ChatTimestampField) ? "timestamp" : item.ChatTimestampField.Trim();
+        item.ChatAuthorIdField = string.IsNullOrWhiteSpace(item.ChatAuthorIdField) ? "authorId" : item.ChatAuthorIdField.Trim();
+        item.ChatAuthorNameField = string.IsNullOrWhiteSpace(item.ChatAuthorNameField) ? "authorName" : item.ChatAuthorNameField.Trim();
+        item.ChatAuthorAvatarField = string.IsNullOrWhiteSpace(item.ChatAuthorAvatarField) ? "authorAvatar" : item.ChatAuthorAvatarField.Trim();
+        item.ChatCurrentUserId = string.IsNullOrWhiteSpace(item.ChatCurrentUserId) ? "publisher" : item.ChatCurrentUserId.Trim();
+        item.ChatCurrentUserName = string.IsNullOrWhiteSpace(item.ChatCurrentUserName) ? "Streamer" : item.ChatCurrentUserName.Trim();
+        item.ChatCurrentUserAvatar ??= string.Empty;
         item.CustomCssClass = SanitizeCssClass(item.CustomCssClass);
         item.CustomCss = SanitizeInlineCss(item.CustomCss);
         foreach (var feature in item.VectorFeatures)
@@ -322,6 +341,14 @@ public sealed class PublicationComponentService
             item.ValueField,
             item.DisplayField,
             item.ImageField,
+            item.MediaKindField,
+            item.MediaSourceField,
+            item.MediaPosterField,
+            item.MediaAltTextField,
+            item.MediaShowControls,
+            item.MediaAutoPlay,
+            item.MediaMuted,
+            item.MediaLoop,
             item.StartDateField,
             item.EndDateField,
             item.AllDayField,
@@ -333,6 +360,22 @@ public sealed class PublicationComponentService
             menuItems = BuildMenuItems(item),
             item.ColumnCount,
             item.ButtonText,
+            chatPlatform = item.ChatPlatform.ToString(),
+            item.ChatChannel,
+            item.ChatPlatformField,
+            item.ChatChannelField,
+            item.ChatMessageField,
+            item.ChatTimestampField,
+            item.ChatAuthorIdField,
+            item.ChatAuthorNameField,
+            item.ChatAuthorAvatarField,
+            item.ChatCurrentUserId,
+            item.ChatCurrentUserName,
+            item.ChatCurrentUserAvatar,
+            item.ChatAllowSending,
+            item.ChatShowAvatar,
+            item.ChatShowTimestamp,
+            item.ChatOptimisticSend,
             item.Placeholder,
             item.InitialValue,
             item.Background,
@@ -571,9 +614,33 @@ public sealed class PublicationComponentService
     {
         _data.EnsureBuiltInObjects(document);
         var existing = document.DataObjects.FirstOrDefault(data => data.SourceKind is not PublicationDataSourceKind.PublicationPages
-            and not PublicationDataSourceKind.PublicationDocument and not PublicationDataSourceKind.DocumentObjects);
+            and not PublicationDataSourceKind.PublicationDocument
+            and not PublicationDataSourceKind.DocumentObjects
+            and not PublicationDataSourceKind.PublicationMedia);
         if (existing is not null) return existing;
         var data = _data.CreateSample();
+        document.DataObjects.Add(data);
+        return data;
+    }
+
+    private PublicationDataObject EnsurePublicationMediaObject(PublicationDocument document)
+    {
+        _data.EnsureBuiltInObjects(document);
+        return document.DataObjects.First(data => data.SourceKind == PublicationDataSourceKind.PublicationMedia);
+    }
+
+    private PublicationDataObject EnsureChatPreviewObject(PublicationDocument document)
+    {
+        var existing = document.DataObjects.FirstOrDefault(data => string.Equals(data.SourceReference, "publisherstudio:chat-preview", StringComparison.Ordinal));
+        if (existing is not null) return existing;
+        var data = new PublicationDataObject
+        {
+            Name = "Chat preview",
+            SourceKind = PublicationDataSourceKind.Json,
+            SourceReference = "publisherstudio:chat-preview",
+            RawSource = """[{"id":"welcome-1","platform":"Preview","channel":"","text":"Chat messages stay isolated by platform.","timestamp":"2026-01-01T12:00:00Z","authorId":"viewer-1","authorName":"Viewer","authorAvatar":""}]"""
+        };
+        _data.ParseInto(data);
         document.DataObjects.Add(data);
         return data;
     }
@@ -595,7 +662,18 @@ public sealed class PublicationComponentService
         item.TextField = Find(fields, "text", "title", "name", "subject") ?? fields[0].DataField;
         item.DisplayField = item.TextField;
         item.ValueField = Find(fields, "value", "amount", "total", "id") ?? fields[0].DataField;
-        item.ImageField = Find(fields, "image", "imageurl", "photo", "url") ?? item.ImageField;
+        item.ImageField = Find(fields, "image", "imageurl", "thumbnail", "photo", "poster", "url") ?? item.ImageField;
+        item.MediaKindField = Find(fields, "mediatype", "kind", "type") ?? item.MediaKindField;
+        item.MediaSourceField = Find(fields, "source", "mediaurl", "videourl", "audiourl", "url") ?? item.MediaSourceField;
+        item.MediaPosterField = Find(fields, "poster", "thumbnail", "image") ?? item.MediaPosterField;
+        item.MediaAltTextField = Find(fields, "alttext", "alt", "description", "title", "name") ?? item.MediaAltTextField;
+        item.ChatPlatformField = Find(fields, "platform", "provider", "network") ?? item.ChatPlatformField;
+        item.ChatChannelField = Find(fields, "channel", "streamid", "roomid", "room") ?? item.ChatChannelField;
+        item.ChatMessageField = Find(fields, "text", "message", "body", "content") ?? item.ChatMessageField;
+        item.ChatTimestampField = Find(fields, "timestamp", "createdat", "sentat", "date", "time") ?? item.ChatTimestampField;
+        item.ChatAuthorIdField = Find(fields, "authorid", "userid", "senderid") ?? item.ChatAuthorIdField;
+        item.ChatAuthorNameField = Find(fields, "authorname", "username", "displayname", "sender", "author") ?? item.ChatAuthorNameField;
+        item.ChatAuthorAvatarField = Find(fields, "authoravatar", "avatar", "profileimage") ?? item.ChatAuthorAvatarField;
         item.StartDateField = Find(fields, "startdate", "start", "from") ?? item.StartDateField;
         item.EndDateField = Find(fields, "enddate", "end", "to") ?? item.EndDateField;
         item.AllDayField = Find(fields, "allday", "isfullday") ?? item.AllDayField;
@@ -650,6 +728,20 @@ public sealed class PublicationComponentService
         if ((item.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
             && item.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
             item.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
+        if (item.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView)
+        {
+            item.MediaKindField = string.IsNullOrWhiteSpace(item.MediaKindField) ? "mediaType" : item.MediaKindField;
+            item.MediaSourceField = string.IsNullOrWhiteSpace(item.MediaSourceField) ? "source" : item.MediaSourceField;
+            item.MediaPosterField = string.IsNullOrWhiteSpace(item.MediaPosterField) ? "poster" : item.MediaPosterField;
+            item.MediaAltTextField = string.IsNullOrWhiteSpace(item.MediaAltTextField) ? "altText" : item.MediaAltTextField;
+        }
+        if (item.ComponentKind == PublicationComponentKind.Chat)
+        {
+            item.ShowTitle = false;
+            item.ChatMessageField = string.IsNullOrWhiteSpace(item.ChatMessageField) ? "text" : item.ChatMessageField;
+            item.ChatAuthorNameField = string.IsNullOrWhiteSpace(item.ChatAuthorNameField) ? "authorName" : item.ChatAuthorNameField;
+            item.ChatTimestampField = string.IsNullOrWhiteSpace(item.ChatTimestampField) ? "timestamp" : item.ChatTimestampField;
+        }
         if (item.ComponentKind == PublicationComponentKind.Scheduler)
         {
             item.EditMode = item.EditMode == PublicationComponentEditMode.ReadOnly ? PublicationComponentEditMode.Form : item.EditMode;
@@ -683,6 +775,7 @@ public sealed class PublicationComponentService
         PublicationComponentKind.TextArea => (95, 38),
         PublicationComponentKind.Menu => (150, 18),
         PublicationComponentKind.Gallery or PublicationComponentKind.TileView => (145, 82),
+        PublicationComponentKind.Chat => (105, 125),
         PublicationComponentKind.Form => (130, 90),
         PublicationComponentKind.Scheduler or PublicationComponentKind.PivotGrid => (175, 110),
         PublicationComponentKind.Map or PublicationComponentKind.VectorMap => (180, 115),
@@ -709,6 +802,7 @@ public sealed class PublicationComponentService
         PublicationComponentKind.PivotGrid => "Pivot Grid",
         PublicationComponentKind.Map => "Map",
         PublicationComponentKind.VectorMap => "Vector Map",
+        PublicationComponentKind.Chat => "Chat",
         _ => Friendly(kind.ToString())
     };
 

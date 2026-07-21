@@ -57,7 +57,12 @@ public sealed class PublicationDataService
             }
             foreach (var row in data.Rows)
                 row.Values = new Dictionary<string, string>(row.Values ?? new Dictionary<string, string>(), StringComparer.OrdinalIgnoreCase);
-            if (data.SourceKind != PublicationDataSourceKind.DocumentObjects && (data.Columns.Count == 0 || data.Rows.Count == 0) && !string.IsNullOrWhiteSpace(data.RawSource))
+            if (data.SourceKind is not PublicationDataSourceKind.DocumentObjects
+                and not PublicationDataSourceKind.PublicationPages
+                and not PublicationDataSourceKind.PublicationDocument
+                and not PublicationDataSourceKind.PublicationMedia
+                && (data.Columns.Count == 0 || data.Rows.Count == 0)
+                && !string.IsNullOrWhiteSpace(data.RawSource))
             {
                 try { ParseInto(data); }
                 catch { /* Preserve malformed user source; the manager displays the parse error on demand. */ }
@@ -90,6 +95,10 @@ public sealed class PublicationDataService
                 data.Columns = PublicationDocumentColumns();
                 data.Rows = [];
                 break;
+            case PublicationDataSourceKind.PublicationMedia:
+                data.Columns = PublicationMediaColumns();
+                data.Rows = [];
+                break;
             case PublicationDataSourceKind.Web:
                 ParseWebSnapshot(data);
                 break;
@@ -107,6 +116,7 @@ public sealed class PublicationDataService
             PublicationDataSourceKind.DocumentObjects => BuildDocumentRows(document, data.DocumentScope, currentPageId),
             PublicationDataSourceKind.PublicationPages => BuildPublicationPageRows(document),
             PublicationDataSourceKind.PublicationDocument => BuildPublicationDocumentRows(document, currentPageId),
+            PublicationDataSourceKind.PublicationMedia => BuildPublicationMediaRows(document, data.DocumentScope, currentPageId),
             _ => data.Rows
         };
     }
@@ -117,6 +127,7 @@ public sealed class PublicationDataService
             PublicationDataSourceKind.DocumentObjects => DocumentObjectColumns(),
             PublicationDataSourceKind.PublicationPages => PublicationPageColumns(),
             PublicationDataSourceKind.PublicationDocument => PublicationDocumentColumns(),
+            PublicationDataSourceKind.PublicationMedia => PublicationMediaColumns(),
             _ => data?.Columns ?? []
         };
 
@@ -126,6 +137,7 @@ public sealed class PublicationDataService
         EnsureBuiltIn(document, PublicationDataSourceKind.PublicationPages, "Publication pages");
         EnsureBuiltIn(document, PublicationDataSourceKind.PublicationDocument, "Publication document");
         EnsureBuiltIn(document, PublicationDataSourceKind.DocumentObjects, "Publication objects");
+        EnsureBuiltIn(document, PublicationDataSourceKind.PublicationMedia, "Publication media");
     }
 
     private static void EnsureBuiltIn(PublicationDocument document, PublicationDataSourceKind kind, string name)
@@ -140,6 +152,7 @@ public sealed class PublicationDataService
             {
                 PublicationDataSourceKind.PublicationPages => PublicationPageColumns(),
                 PublicationDataSourceKind.PublicationDocument => PublicationDocumentColumns(),
+                PublicationDataSourceKind.PublicationMedia => PublicationMediaColumns(),
                 _ => DocumentObjectColumns()
             },
             Rows = []
@@ -744,6 +757,101 @@ public sealed class PublicationDataService
         new() { Name = "currentPageHeight", ValueKind = PublicationDataValueKind.Number },
         new() { Name = "currentPageOrientation", ValueKind = PublicationDataValueKind.Text }
     ];
+
+    private static List<PublicationDataColumn> PublicationMediaColumns() =>
+    [
+        new() { Name = "id", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "pageId", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "pageName", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "pageNumber", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "name", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "title", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "mediaType", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "mimeType", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "source", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "image", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "poster", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "altText", ValueKind = PublicationDataValueKind.Text },
+        new() { Name = "duration", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "width", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "height", ValueKind = PublicationDataValueKind.Number },
+        new() { Name = "visible", ValueKind = PublicationDataValueKind.Boolean }
+    ];
+
+    private static string MimeFromDataUrl(string dataUrl, string fallback)
+    {
+        if (!dataUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return fallback;
+        var start = 5;
+        var separator = dataUrl.IndexOf(';', start);
+        var end = separator >= start ? separator : dataUrl.IndexOf(',', start);
+        var value = end > start ? dataUrl[start..end] : string.Empty;
+        return PublicationMediaData.NormalizeMimeType(value, fallback);
+    }
+
+    private static IReadOnlyList<PublicationDataRow> BuildPublicationMediaRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
+    {
+        var pages = scope == DocumentObjectDataScope.CurrentPage
+            ? document.Pages.Where(page => page.Id == currentPageId)
+            : document.Pages;
+        return pages.SelectMany(page => page.Elements.Select(element => (page, element)))
+            .Where(pair => pair.element is ImageFrameElement or VideoElement or AudioElement)
+            .Select(pair =>
+            {
+                var pageNumber = document.Pages.IndexOf(pair.page) + 1;
+                var mediaType = pair.element switch
+                {
+                    ImageFrameElement => "image",
+                    VideoElement => "video",
+                    AudioElement => "audio",
+                    _ => "media"
+                };
+                var source = pair.element switch
+                {
+                    ImageFrameElement image => image.DataUrl,
+                    PublicationMediaElement media => media.DataUrl,
+                    _ => string.Empty
+                };
+                var mimeType = pair.element switch
+                {
+                    ImageFrameElement image when image.DataUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+                        => MimeFromDataUrl(image.DataUrl, "image/png"),
+                    ImageFrameElement => "image/*",
+                    PublicationMediaElement media => PublicationMediaData.NormalizeMimeType(media.MimeType, mediaType == "video" ? "video/mp4" : "audio/mpeg"),
+                    _ => "application/octet-stream"
+                };
+                var poster = pair.element is VideoElement video ? video.PosterDataUrl : string.Empty;
+                var altText = pair.element switch
+                {
+                    ImageFrameElement image => image.AltText,
+                    VideoElement video => video.AltText,
+                    _ => pair.element.Name
+                };
+                var duration = pair.element is PublicationMediaElement timed ? timed.DurationSeconds : 0;
+                var thumbnail = mediaType == "video" && !string.IsNullOrWhiteSpace(poster) ? poster : source;
+                return new PublicationDataRow
+                {
+                    Values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["id"] = pair.element.Id.ToString("D"),
+                        ["pageId"] = pair.page.Id.ToString("D"),
+                        ["pageName"] = pair.page.Name,
+                        ["pageNumber"] = pageNumber.ToString(CultureInfo.InvariantCulture),
+                        ["name"] = pair.element.Name,
+                        ["title"] = pair.element.Name,
+                        ["mediaType"] = mediaType,
+                        ["mimeType"] = mimeType,
+                        ["source"] = source,
+                        ["image"] = thumbnail,
+                        ["poster"] = poster,
+                        ["altText"] = altText,
+                        ["duration"] = duration.ToString("0.###", CultureInfo.InvariantCulture),
+                        ["width"] = pair.element.Width.ToString("0.###", CultureInfo.InvariantCulture),
+                        ["height"] = pair.element.Height.ToString("0.###", CultureInfo.InvariantCulture),
+                        ["visible"] = pair.element.Visible.ToString()
+                    }
+                };
+            }).ToArray();
+    }
 
     private static IReadOnlyList<PublicationDataRow> BuildDocumentRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
     {

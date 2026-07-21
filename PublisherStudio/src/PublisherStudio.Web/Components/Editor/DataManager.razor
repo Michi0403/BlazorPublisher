@@ -64,6 +64,7 @@
                                 <option value="PublicationPages">Publication pages (live)</option>
                                 <option value="PublicationDocument">Publication document (live)</option>
                                 <option value="DocumentObjects">Publication objects (live)</option>
+                                <option value="PublicationMedia">Publication media (live)</option>
                                 <option value="Web">Web / API / webhook</option>
                             </select>
                         </label>
@@ -78,7 +79,7 @@
                         </section>
                     }
 
-                    @if (_draft.SourceKind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects)
+                    @if (_draft.SourceKind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationMedia)
                     {
                         <section class="data-source-help">
                             @if (_draft.SourceKind == PublicationDataSourceKind.PublicationPages)
@@ -90,6 +91,17 @@
                             {
                                 <strong>Self-updating publication document</strong>
                                 <p>A single live row containing document name, format version, modification time, page count, and the current page identity and dimensions.</p>
+                            }
+                            else if (_draft.SourceKind == PublicationDataSourceKind.PublicationMedia)
+                            {
+                                <strong>Self-updating publication media</strong>
+                                <p>One row per picture, video, or audio object. Gallery and Tile View can render images and videos directly from the <code>source</code>, <code>poster</code>, and <code>mediaType</code> fields without copying binary files into a second data object.</p>
+                                <label>Scope
+                                    <select value="@_draft.DocumentScope" @onchange="ChangeDocumentScope">
+                                        <option value="AllPages">Media from all pages</option>
+                                        <option value="CurrentPage">Media from the current page</option>
+                                    </select>
+                                </label>
                             }
                             else
                             {
@@ -435,10 +447,11 @@
         PublicationDataSourceKind.PublicationPages => "Live pages",
         PublicationDataSourceKind.PublicationDocument => "Live document",
         PublicationDataSourceKind.DocumentObjects => "Live objects",
+        PublicationDataSourceKind.PublicationMedia => "Live media",
         PublicationDataSourceKind.Web => $"{data.Web.Transport}",
         _ => data.SourceKind.ToString()
     };
-    private static bool IsBuiltIn(PublicationDataSourceKind kind) => kind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects;
+    private static bool IsBuiltIn(PublicationDataSourceKind kind) => kind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationMedia;
     private void SelectLivePages() => SelectLive(PublicationDataSourceKind.PublicationPages);
     private void SelectLiveDocument() => SelectLive(PublicationDataSourceKind.PublicationDocument);
     private void SelectLiveObjects() => SelectLive(PublicationDataSourceKind.DocumentObjects);

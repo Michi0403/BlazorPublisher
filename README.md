@@ -305,3 +305,10 @@ See `CHANGELOG-v1.0.44.md`. Editable menus render without a dataset, invalid dat
 ## v1.0.45 component orientation and hidden-panel layout
 
 Vertical DevExtreme menus now use natural row heights instead of DevExtreme's horizontal-menubar `height:100%` item rule, so every item remains visible in Component Studio, on the canvas, and in offline HTML exports. The shared component runtime also observes host resizing and refreshes DevExtreme dimensions after publication-object resizing, tab/multi-view changes, splitter operations, and hidden-panel activation. See `CHANGELOG-v1.0.45.md`.
+
+
+## v1.0.46 media data and isolated stream chat
+
+Component Studio now includes a media-first Gallery/Tile View workflow and a DevExtreme Chat component. The built-in **Publication media** object is generated from pictures, videos, and audio already placed in the publication, so the normal Publisher insert workflow remains the single source of truth and exported media stays self-contained. Gallery and Tile View can also bind ordinary JSON, REST, or OData rows by selecting media type, source, poster, title, and alternative-text properties.
+
+Chat rows can be mapped to platform, channel, message, timestamp, author ID, author name, and avatar fields. Runtime delivery is platform/channel isolated and can be connected later through `window.PublisherStudioChatBridge`. Offline HTML exports contain the UI and isolation runtime; a real Twitch/YouTube connection still requires the future authenticated streaming adapter. See `CHANGELOG-v1.0.46.md` and `docs/COMPONENT_RUNTIME.md`.

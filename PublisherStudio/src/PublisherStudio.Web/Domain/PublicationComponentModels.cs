@@ -31,9 +31,18 @@ public enum PublicationComponentKind
     PivotGrid,
     Map,
     VectorMap,
+    Chat,
     Button
 }
 
+
+public enum PublicationChatPlatform
+{
+    Preview,
+    Twitch,
+    YouTube,
+    Custom
+}
 
 public enum PublicationVectorMapBaseLayer
 {
@@ -153,7 +162,8 @@ public enum PublicationComponentActionTrigger
     RowRemoved,
     AppointmentAdded,
     AppointmentUpdated,
-    AppointmentDeleted
+    AppointmentDeleted,
+    MessageEntered
 }
 
 public enum PublicationComponentActionKind
@@ -333,6 +343,14 @@ public sealed class DevExtremeComponentElement : PublicationElement
     public string ValueField { get; set; } = "value";
     public string DisplayField { get; set; } = "text";
     public string ImageField { get; set; } = "image";
+    public string MediaKindField { get; set; } = "mediaType";
+    public string MediaSourceField { get; set; } = "source";
+    public string MediaPosterField { get; set; } = "poster";
+    public string MediaAltTextField { get; set; } = "altText";
+    public bool MediaShowControls { get; set; } = true;
+    public bool MediaAutoPlay { get; set; }
+    public bool MediaMuted { get; set; } = true;
+    public bool MediaLoop { get; set; } = true;
     public string StartDateField { get; set; } = "startDate";
     public string EndDateField { get; set; } = "endDate";
     public string AllDayField { get; set; } = "allDay";
@@ -342,6 +360,22 @@ public sealed class DevExtremeComponentElement : PublicationElement
     public string Orientation { get; set; } = "horizontal";
     public int ColumnCount { get; set; } = 2;
     public string ButtonText { get; set; } = "Run";
+    public PublicationChatPlatform ChatPlatform { get; set; } = PublicationChatPlatform.Preview;
+    public string ChatChannel { get; set; } = string.Empty;
+    public string ChatPlatformField { get; set; } = "platform";
+    public string ChatChannelField { get; set; } = "channel";
+    public string ChatMessageField { get; set; } = "text";
+    public string ChatTimestampField { get; set; } = "timestamp";
+    public string ChatAuthorIdField { get; set; } = "authorId";
+    public string ChatAuthorNameField { get; set; } = "authorName";
+    public string ChatAuthorAvatarField { get; set; } = "authorAvatar";
+    public string ChatCurrentUserId { get; set; } = "publisher";
+    public string ChatCurrentUserName { get; set; } = "Streamer";
+    public string ChatCurrentUserAvatar { get; set; } = string.Empty;
+    public bool ChatAllowSending { get; set; } = true;
+    public bool ChatShowAvatar { get; set; } = true;
+    public bool ChatShowTimestamp { get; set; } = true;
+    public bool ChatOptimisticSend { get; set; } = true;
     public string Placeholder { get; set; } = string.Empty;
     public string InitialValue { get; set; } = string.Empty;
     public string Background { get; set; } = "#ffffff";

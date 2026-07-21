@@ -10,6 +10,7 @@ public enum PublicationDataSourceKind
     DocumentObjects,
     PublicationPages,
     PublicationDocument,
+    PublicationMedia,
     Web
 }
 

@@ -819,11 +819,13 @@ public sealed class PublicationDataService
                     PublicationMediaElement media => PublicationMediaData.NormalizeMimeType(media.MimeType, mediaType == "video" ? "video/mp4" : "audio/mpeg"),
                     _ => "application/octet-stream"
                 };
-                var poster = pair.element is VideoElement video ? video.PosterDataUrl : string.Empty;
+                var poster = pair.element is VideoElement videoElement
+                    ? videoElement.PosterDataUrl
+                    : string.Empty;
                 var altText = pair.element switch
                 {
                     ImageFrameElement image => image.AltText,
-                    VideoElement video => video.AltText,
+                    VideoElement videoWithAltText => videoWithAltText.AltText,
                     _ => pair.element.Name
                 };
                 var duration = pair.element is PublicationMediaElement timed ? timed.DurationSeconds : 0;

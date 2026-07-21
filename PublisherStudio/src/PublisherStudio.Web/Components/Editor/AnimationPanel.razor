@@ -464,6 +464,7 @@
         PublicationElementKind.DataVisual => "▥",
         PublicationElementKind.Spreadsheet => "▦",
         PublicationElementKind.Barcode => "▦",
+        PublicationElementKind.LiveSource => "●",
         _ => "•"
     };
     private static string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");

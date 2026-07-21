@@ -111,7 +111,7 @@ assert.equal((app.match(/vendor\/devextreme-dist\/js\/dx\.all\.js/g) || []).leng
 assert.doesNotMatch(app, /RegisterScripts\(\)/, 'Default DevExtreme registration would duplicate the pinned bundle.');
 assert.ok(app.indexOf('vendor/jquery/jquery.min.js') < app.indexOf('vendor/devextreme-dist/js/dx.all.js'));
 assert.ok(app.indexOf('vendor/devextreme-dist/js/dx.all.js') < app.indexOf('DxResourceManager.RegisterScripts'), 'Pinned jQuery/DevExtreme must load before dependent DevExpress resource scripts.');
-assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.43"/);
+assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.45"/);
 assert.match(editor, /Only options supported by the selected component are shown here/);
 assert.doesNotMatch(editor.slice(editor.indexOf('else if (_section == "behavior")'), editor.indexOf('else if (_section == "map")')), /Scheduler view[\s\S]*without-kind-guard/);
 assert.match(dataModel, /PublicationPages/);

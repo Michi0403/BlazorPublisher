@@ -384,6 +384,76 @@ public sealed class EditorStateService : IDisposable
         return element;
     }
 
+    public LiveSourceElement AddLiveSource(PublicationLiveSourceKind kind, double? centerX = null, double? centerY = null)
+    {
+        Capture();
+        var visual = kind is PublicationLiveSourceKind.Camera or PublicationLiveSourceKind.Screen or PublicationLiveSourceKind.Window
+            or PublicationLiveSourceKind.BrowserTab or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.NetworkMedia;
+        var element = new LiveSourceElement
+        {
+            Name = NextName(kind switch
+            {
+                PublicationLiveSourceKind.BrowserTab => "Browser Tab",
+                PublicationLiveSourceKind.CaptureDevice => "Capture Device",
+                PublicationLiveSourceKind.ApplicationAudio => "Application Audio",
+                PublicationLiveSourceKind.SystemAudio => "System Audio",
+                PublicationLiveSourceKind.NetworkMedia => "Network Media",
+                PublicationLiveSourceKind.NowPlaying => "Now Playing",
+                _ => kind.ToString()
+            }),
+            SourceKind = kind,
+            IncludeAudio = kind is PublicationLiveSourceKind.Screen or PublicationLiveSourceKind.Window or PublicationLiveSourceKind.BrowserTab
+                or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.NetworkMedia,
+            Muted = visual,
+            X = 28,
+            Y = 32,
+            Width = visual ? 120 : 90,
+            Height = visual ? 67.5 : 20,
+            ZIndex = NextZ(),
+            UseDeviceTimestamp = Document.Streaming.PreferDeviceTimestamps,
+            CaptureWidth = Document.Streaming.MasterWidth,
+            CaptureHeight = Document.Streaming.MasterHeight,
+            CaptureFrameRate = Document.Streaming.MasterFrameRate
+        };
+        PlaceAt(element, centerX, centerY);
+        CurrentPage.Elements.Add(element);
+        SetSelectionCore([element.Id], element.Id);
+        Notify();
+        return element;
+    }
+
+    public void UpdateLiveSource(Guid id, Action<LiveSourceElement> update, bool capture = true)
+    {
+        var source = CurrentPage.Elements.OfType<LiveSourceElement>().FirstOrDefault(item => item.Id == id);
+        if (source is null || source.Locked) return;
+        if (capture) Capture();
+        update(source);
+        source.CaptureWidth = Math.Clamp(source.CaptureWidth, 320, 7680);
+        source.CaptureHeight = Math.Clamp(source.CaptureHeight, 180, 4320);
+        source.CaptureFrameRate = Math.Clamp(source.CaptureFrameRate, 15, 120);
+        source.Volume = Math.Clamp(source.Volume, 0, 1);
+        source.AudioDelayMilliseconds = Math.Clamp(source.AudioDelayMilliseconds, -10000, 10000);
+        source.Brightness = Math.Clamp(source.Brightness, 0, 4);
+        source.Contrast = Math.Clamp(source.Contrast, 0, 4);
+        source.Saturation = Math.Clamp(source.Saturation, 0, 4);
+        source.HueRotation = Math.Clamp(source.HueRotation, -360, 360);
+        source.Blur = Math.Clamp(source.Blur, 0, 64);
+        source.ChromaSimilarity = Math.Clamp(source.ChromaSimilarity, 0, 1);
+        source.ChromaSmoothness = Math.Clamp(source.ChromaSmoothness, 0, 1);
+        source.ChromaSpill = Math.Clamp(source.ChromaSpill, 0, 1);
+        source.ChromaResidualOpacity = Math.Clamp(source.ChromaResidualOpacity, 0, 1);
+        SetSelectionCore([source.Id], source.Id);
+        Notify();
+    }
+
+    public void ApplyStreamingSettings(PublicationStreamingSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        Capture();
+        Document.Streaming = settings;
+        Notify();
+    }
+
     public void UpdateMedia(Guid id, Action<PublicationMediaElement> update, bool capture = true)
     {
         var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == id);

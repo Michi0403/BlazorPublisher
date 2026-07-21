@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>1.0.46</Version>
+    <Version>1.0.48</Version>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
     <DevExpressVersion>25.2.8</DevExpressVersion>
     <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
@@ -19,6 +19,9 @@
     <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
     <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PublisherStudio.MediaHost\PublisherStudio.MediaHost.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.RichEdit" Version="$(DevExpressVersion)" />

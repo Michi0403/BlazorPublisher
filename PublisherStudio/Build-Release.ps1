@@ -27,6 +27,8 @@ New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
 
 $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
 $webDirectory = Split-Path -Parent $webProject
+$mediaHostProject = Join-Path $root "src\PublisherStudio.MediaHost\PublisherStudio.MediaHost.csproj"
+$mediaHostFolder = Join-Path $appFolder "MediaHost"
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 
 Write-Host "Preparing local DevExpress client assets and runtime license..." -ForegroundColor Cyan
@@ -55,6 +57,13 @@ dotnet publish $webProject `
     -p:DeleteExistingFiles=true -o $appFolder
 if ($LASTEXITCODE -ne 0) { throw "BlazorPublisher application publish failed." }
 
+Write-Host "Publishing PublisherStudio Media Host for $Runtime..." -ForegroundColor Cyan
+dotnet publish $mediaHostProject `
+    -c $Configuration -f net10.0 -r $Runtime --self-contained true `
+    -p:PublishTrimmed=false -p:PublishSingleFile=false `
+    -p:DeleteExistingFiles=true -o $mediaHostFolder
+if ($LASTEXITCODE -ne 0) { throw "PublisherStudio Media Host publish failed." }
+
 Write-Host "Publishing BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
 dotnet publish $setupProject `
     -c $Configuration -f net10.0 -r $Runtime --self-contained true `
@@ -68,6 +77,10 @@ $setupExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Setup.exe
 
 if (-not (Test-Path (Join-Path $appFolder $appExecutable))) {
     throw "Published application executable not found: $(Join-Path $appFolder $appExecutable)"
+}
+$mediaHostExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.MediaHost.exe" } else { "PublisherStudio.MediaHost" }
+if (-not (Test-Path (Join-Path $mediaHostFolder $mediaHostExecutable))) {
+    throw "Published Media Host executable not found: $(Join-Path $mediaHostFolder $mediaHostExecutable)"
 }
 if (-not (Test-Path (Join-Path $setupFolder $setupExecutable))) {
     throw "Published setup executable not found: $(Join-Path $setupFolder $setupExecutable)"

@@ -96,6 +96,8 @@ public sealed partial class PublicationFileService
             ?? throw new InvalidDataException("The publication file is empty or invalid.");
         document.View ??= new PublicationViewSettings();
         document.Playback ??= new PublicationPlaybackSettings();
+        document.Streaming ??= new PublicationStreamingSettings();
+        NormalizeStreaming(document);
         _data.Normalize(document);
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .8 : document.Zoom, .2, 4);
         document.View.GridSpacingMm = Math.Clamp(document.View.GridSpacingMm <= 0 ? 5 : document.View.GridSpacingMm, .5, 100);
@@ -372,7 +374,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.42";
+        document.FormatVersion = "1.45";
         return document;
     }
 
@@ -760,4 +762,68 @@ public sealed partial class PublicationFileService
     private static partial Regex EventAttributeRegex();
     [GeneratedRegex("(href|src)\\s*=\\s*[\\\"']?\\s*javascript:[^\\s>\\\"']*", RegexOptions.IgnoreCase)]
     private static partial Regex JavascriptUrlRegex();
+    private static void NormalizeStreaming(PublicationDocument document)
+    {
+        var streaming = document.Streaming;
+        streaming.Outputs ??= [];
+        streaming.Recording ??= new PublicationRecordingSettings();
+        streaming.Lan ??= new PublicationLanStreamingSettings();
+        streaming.Hotkeys ??= [];
+        streaming.MasterWidth = Math.Clamp(streaming.MasterWidth <= 0 ? 3840 : streaming.MasterWidth, 320, 7680);
+        streaming.MasterHeight = Math.Clamp(streaming.MasterHeight <= 0 ? 2160 : streaming.MasterHeight, 180, 4320);
+        streaming.MasterFrameRate = Math.Clamp(streaming.MasterFrameRate <= 0 ? 60 : streaming.MasterFrameRate, 15, 120);
+        if (streaming.ProgramPageId is { } pageId && document.Pages.All(page => page.Id != pageId)) streaming.ProgramPageId = null;
+        foreach (var output in streaming.Outputs)
+        {
+            output.Name = string.IsNullOrWhiteSpace(output.Name) ? output.Provider.ToString() : output.Name.Trim();
+            output.Width = Math.Clamp(output.Width <= 0 ? 1920 : output.Width, 320, 7680);
+            output.Height = Math.Clamp(output.Height <= 0 ? 1080 : output.Height, 180, 4320);
+            output.FrameRate = Math.Clamp(output.FrameRate <= 0 ? 60 : output.FrameRate, 15, 120);
+            output.VideoBitrateKbps = Math.Clamp(output.VideoBitrateKbps <= 0 ? 6000 : output.VideoBitrateKbps, 250, 200000);
+            output.AudioBitrateKbps = Math.Clamp(output.AudioBitrateKbps <= 0 ? 160 : output.AudioBitrateKbps, 32, 1024);
+            output.KeyFrameIntervalSeconds = Math.Clamp(output.KeyFrameIntervalSeconds <= 0 ? 2 : output.KeyFrameIntervalSeconds, 1, 10);
+        }
+        streaming.Recording.SelectedOutputIds ??= [];
+        streaming.Recording.SelectedOutputIds = streaming.Recording.SelectedOutputIds.Where(id => streaming.Outputs.Any(output => output.Id == id)).Distinct().ToList();
+        streaming.Recording.SegmentSeconds = Math.Clamp(streaming.Recording.SegmentSeconds <= 0 ? 10 : streaming.Recording.SegmentSeconds, 2, 120);
+        streaming.Lan.Port = Math.Clamp(streaming.Lan.Port <= 0 ? 17848 : streaming.Lan.Port, 1024, 65535);
+        streaming.Lan.Width = Math.Clamp(streaming.Lan.Width <= 0 ? 1920 : streaming.Lan.Width, 320, 7680);
+        streaming.Lan.Height = Math.Clamp(streaming.Lan.Height <= 0 ? 1080 : streaming.Lan.Height, 180, 4320);
+        streaming.Lan.FrameRate = Math.Clamp(streaming.Lan.FrameRate <= 0 ? 60 : streaming.Lan.FrameRate, 15, 120);
+        streaming.Lan.VideoBitrateKbps = Math.Clamp(streaming.Lan.VideoBitrateKbps <= 0 ? 8000 : streaming.Lan.VideoBitrateKbps, 250, 200000);
+        streaming.Lan.ViewerLimit = Math.Clamp(streaming.Lan.ViewerLimit <= 0 ? 50 : streaming.Lan.ViewerLimit, 1, 10000);
+        streaming.Hotkeys = streaming.Hotkeys
+            .Where(item => !string.IsNullOrWhiteSpace(item.Gesture) && !string.IsNullOrWhiteSpace(item.Command))
+            .GroupBy(item => item.Id == Guid.Empty ? Guid.NewGuid() : item.Id)
+            .Select(group => group.First())
+            .ToList();
+        foreach (var hotkey in streaming.Hotkeys)
+        {
+            if (hotkey.Id == Guid.Empty) hotkey.Id = Guid.NewGuid();
+            hotkey.Gesture = hotkey.Gesture.Trim();
+            hotkey.Command = hotkey.Command.Trim();
+            if (hotkey.Command == "SelectPage" && hotkey.TargetId is { } targetPage && document.Pages.All(page => page.Id != targetPage)) hotkey.TargetId = null;
+            if (hotkey.Command == "ToggleOutput" && hotkey.TargetId is { } targetOutput && streaming.Outputs.All(output => output.Id != targetOutput)) hotkey.TargetId = null;
+        }
+        foreach (var source in document.Pages.SelectMany(page => page.Elements).OfType<LiveSourceElement>())
+        {
+            source.CaptureWidth = Math.Clamp(source.CaptureWidth <= 0 ? 1920 : source.CaptureWidth, 320, 7680);
+            source.CaptureHeight = Math.Clamp(source.CaptureHeight <= 0 ? 1080 : source.CaptureHeight, 180, 4320);
+            source.CaptureFrameRate = Math.Clamp(source.CaptureFrameRate <= 0 ? 60 : source.CaptureFrameRate, 15, 120);
+            source.Volume = Math.Clamp(source.Volume, 0, 1);
+            source.AudioDelayMilliseconds = Math.Clamp(source.AudioDelayMilliseconds, -10000, 10000);
+            source.Brightness = Math.Clamp(source.Brightness <= 0 ? 1 : source.Brightness, 0, 4);
+            source.Contrast = Math.Clamp(source.Contrast <= 0 ? 1 : source.Contrast, 0, 4);
+            source.Saturation = Math.Clamp(source.Saturation <= 0 ? 1 : source.Saturation, 0, 4);
+            source.HueRotation = Math.Clamp(source.HueRotation, -360, 360);
+            source.Blur = Math.Clamp(source.Blur, 0, 64);
+            source.ChromaSimilarity = Math.Clamp(source.ChromaSimilarity, 0, 1);
+            source.ChromaSmoothness = Math.Clamp(source.ChromaSmoothness, 0, 1);
+            source.ChromaSpill = Math.Clamp(source.ChromaSpill, 0, 1);
+            source.ChromaResidualOpacity = Math.Clamp(source.ChromaResidualOpacity, 0, 1);
+            source.Width = Math.Max(source.IsVisual ? 30 : 35, source.Width);
+            source.Height = Math.Max(source.IsVisual ? 20 : 12, source.Height);
+        }
+    }
+
 }

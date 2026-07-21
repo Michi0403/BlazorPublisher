@@ -125,6 +125,22 @@
                 </DxRibbonItem>
             </DxRibbonItem>
         </DxRibbonGroup>
+        <DxRibbonGroup Text="Stream components" IconCssClass="pub-icon pub-icon-video">
+            <DxRibbonItem Text="Live video" IconCssClass="pub-icon pub-icon-video" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Camera" Click="AddLiveCamera" />
+                <DxRibbonItem Text="Screen" Click="AddLiveScreen" />
+                <DxRibbonItem Text="Window" Click="AddLiveWindow" />
+                <DxRibbonItem Text="Browser tab" Click="AddLiveBrowserTab" />
+                <DxRibbonItem Text="Capture device" Click="AddLiveCaptureDevice" />
+                <DxRibbonItem Text="Network media" Click="AddLiveNetworkMedia" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Live audio / metadata" IconCssClass="pub-icon pub-icon-audio" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Microphone" Click="AddLiveMicrophone" />
+                <DxRibbonItem Text="System audio" Click="AddLiveSystemAudio" />
+                <DxRibbonItem Text="Application audio" Click="AddLiveApplicationAudio" />
+                <DxRibbonItem Text="Now Playing" Click="AddNowPlaying" />
+            </DxRibbonItem>
+        </DxRibbonGroup>
         <DxRibbonGroup Text="Drawing" IconCssClass="pub-icon pub-icon-shape">
             <DxRibbonItem Text="Shapes" IconCssClass="pub-icon pub-icon-shape" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-rectangle" Text="Rectangle" Click="AddRectangle" />
@@ -144,6 +160,62 @@
                 <DxRibbonItem Text="New page" IconCssClass="pub-icon pub-icon-page" Click="AddPage" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-duplicate" Text="Duplicate page" Click="DuplicatePage" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete page" Enabled="@(State.Document.Pages.Count > 1)" Click="DeletePage" />
+            </DxRibbonItem>
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
+    <DxRibbonTab Text="Streaming">
+        <DxRibbonGroup Text="Session" IconCssClass="pub-icon pub-icon-video">
+            <DxRibbonItem Text="Streaming setup" IconCssClass="pub-icon pub-icon-properties" IsPrimary="true" Click="RequestStreamingSetup" />
+            @if (Streaming.Mode == PublicationStreamSessionMode.Idle)
+            {
+                <DxRibbonItem Text="Dry run" IconCssClass="pub-icon pub-icon-play" Click="RequestStartDryRun" />
+                <DxRibbonItem Text="Start streaming" IconCssClass="pub-icon pub-icon-video" Enabled="@(State.Document.Streaming.Outputs.Any(output => output.Enabled) || State.Document.Streaming.Recording.Enabled || State.Document.Streaming.Lan.Enabled)" Click="RequestStartStreaming" />
+            }
+            else
+            {
+                <DxRibbonItem Text="Stop session" IconCssClass="pub-icon pub-icon-stop" IsPrimary="true" Click="RequestStopStreaming" />
+            }
+            <DxRibbonItem Text="@(Streaming.Recording ? "Recording: On" : "Recording: Off")" IconCssClass="pub-icon pub-icon-record" Enabled="@(Streaming.Mode != PublicationStreamSessionMode.Idle)" Click="RequestToggleRecording" />
+            <DxRibbonItem Text="@Streaming.StatusText" IconCssClass="pub-icon pub-icon-info" Enabled="false" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Program" IconCssClass="pub-icon pub-icon-page">
+            <DxRibbonItem Text="Program page" IconCssClass="pub-icon pub-icon-page" DropDownCssClass="publisher-ribbon-menu">
+                @foreach (var page in State.Document.Pages)
+                {
+                    <DxRibbonItem Text="@CheckText(Streaming.ProgramPageId == page.Id, page.Name)" Click="() => OnSelectProgramPage.InvokeAsync(page.Id)" />
+                }
+            </DxRibbonItem>
+            @foreach (var output in State.Document.Streaming.Outputs)
+            {
+                var enabled = Streaming.Mode == PublicationStreamSessionMode.Idle ? output.Enabled : Streaming.OutputEnabled.GetValueOrDefault(output.Id);
+                <DxRibbonItem Text="@CheckText(enabled, output.Name)" IconCssClass="pub-icon pub-icon-web" Click="() => OnToggleStreamOutput.InvokeAsync(output.Id)" />
+            }
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Chat" IconCssClass="pub-icon pub-icon-command">
+            <DxRibbonItem Text="Operator chat" IconCssClass="pub-icon pub-icon-command" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Preview chat" Click="() => OnSelectChatOutput.InvokeAsync((Guid?)null)" />
+                @foreach (var output in State.Document.Streaming.Outputs.Where(item => item.Enabled))
+                {
+                    <DxRibbonItem Text="@output.Name" Click="() => OnSelectChatOutput.InvokeAsync(output.Id)" />
+                }
+            </DxRibbonItem>
+            <DxRibbonItem Text="Viewers never receive the answer field" Enabled="false" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Live sources" IconCssClass="pub-icon pub-icon-media">
+            <DxRibbonItem Text="Visual source" IconCssClass="pub-icon pub-icon-video" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Camera" Click="AddLiveCamera" />
+                <DxRibbonItem Text="Screen" Click="AddLiveScreen" />
+                <DxRibbonItem Text="Window" Click="AddLiveWindow" />
+                <DxRibbonItem Text="Browser tab" Click="AddLiveBrowserTab" />
+                <DxRibbonItem Text="Capture device" Click="AddLiveCaptureDevice" />
+                <DxRibbonItem Text="Network media" Click="AddLiveNetworkMedia" />
+            </DxRibbonItem>
+            <DxRibbonItem Text="Audio source" IconCssClass="pub-icon pub-icon-audio" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Microphone" Click="AddLiveMicrophone" />
+                <DxRibbonItem Text="System audio" Click="AddLiveSystemAudio" />
+                <DxRibbonItem Text="Application audio" Click="AddLiveApplicationAudio" />
+                <DxRibbonItem Text="Now Playing metadata" Click="AddNowPlaying" />
             </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
@@ -529,6 +601,16 @@
     [Parameter] public EventCallback OnPreviewPageAnimations { get; set; }
     [Parameter] public EventCallback OnPreviewObjectAnimations { get; set; }
     [Parameter] public EventCallback OnStopAnimations { get; set; }
+    [Parameter] public StreamingSessionSnapshot Streaming { get; set; } = new();
+    [Parameter] public EventCallback OnStreamingSetup { get; set; }
+    [Parameter] public EventCallback OnStartDryRun { get; set; }
+    [Parameter] public EventCallback OnStartStreaming { get; set; }
+    [Parameter] public EventCallback OnStopStreaming { get; set; }
+    [Parameter] public EventCallback OnToggleRecording { get; set; }
+    [Parameter] public EventCallback<Guid> OnToggleStreamOutput { get; set; }
+    [Parameter] public EventCallback<Guid> OnSelectProgramPage { get; set; }
+    [Parameter] public EventCallback<PublicationLiveSourceKind> OnInsertLiveSource { get; set; }
+    [Parameter] public EventCallback<Guid?> OnSelectChatOutput { get; set; }
 
     private string CropCommandText => State.CropMode ? "Finish crop" : "Crop";
     private string RulersText => CheckText(State.Document.View.RulersVisible, "Rulers");
@@ -579,6 +661,21 @@
     private Task RequestCreateVideo() => OnCreateVideo.InvokeAsync();
     private Task RequestCreateAudio() => OnCreateAudio.InvokeAsync();
     private Task RequestEditMedia() => OnEditMedia.InvokeAsync();
+    private Task RequestStreamingSetup() => OnStreamingSetup.InvokeAsync();
+    private Task RequestStartDryRun() => OnStartDryRun.InvokeAsync();
+    private Task RequestStartStreaming() => OnStartStreaming.InvokeAsync();
+    private Task RequestStopStreaming() => OnStopStreaming.InvokeAsync();
+    private Task RequestToggleRecording() => OnToggleRecording.InvokeAsync();
+    private Task AddLiveCamera() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Camera);
+    private Task AddLiveScreen() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Screen);
+    private Task AddLiveWindow() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Window);
+    private Task AddLiveBrowserTab() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.BrowserTab);
+    private Task AddLiveCaptureDevice() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.CaptureDevice);
+    private Task AddLiveNetworkMedia() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.NetworkMedia);
+    private Task AddLiveMicrophone() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Microphone);
+    private Task AddLiveSystemAudio() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.SystemAudio);
+    private Task AddLiveApplicationAudio() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.ApplicationAudio);
+    private Task AddNowPlaying() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.NowPlaying);
     private Task RequestBarcode() => OnInsertBarcode.InvokeAsync();
     private Task RequestToggleTimeline() => OnToggleTimeline.InvokeAsync();
     private Task RequestStoryEditor() => OnEditStory.InvokeAsync();

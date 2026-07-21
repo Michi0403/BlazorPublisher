@@ -7,7 +7,7 @@ The v0.8 source tree was checked without restoring proprietary packages.
 - JSON configuration files parse successfully.
 - Project files are valid XML.
 - JavaScript passes `node --check`.
-- C# files and Razor `@code` blocks parse without syntax errors through a Tree-sitter C# grammar; raw-string-aware delimiter scans also pass.
+- C# files and Razor `@code` blocks pass raw-string-aware lexical and delimiter scans; full compilation remains a release-machine check.
 - Direct `@page.` Razor identifier collisions are absent.
 - The dependency scan finds only `DevExpress.Blazor` and `DevExpress.Blazor.RichEdit`, both constrained to `25.2.*`.
 - Connector references are normalized during publication load; broken/self-referencing connectors are discarded.
@@ -418,3 +418,21 @@ Static checks completed for the v1.0.37 source package:
 - JSON files and project XML parse successfully; application/package/installer versions are aligned to `1.0.46`, and publication format is `1.43`.
 - The final ZIP is checked with `unzip -t`.
 - A complete .NET/DevExpress build requires the local .NET SDK and licensed DevExpress package feed and is not claimed by this environment.
+
+## v1.0.47 streaming validation
+
+- Streaming runtime contract tests cover the publication model, live-source insertion, provider output requests, recording variants, browser capture ingest, audio mixing, output context, Windows hotkey contract, FFmpeg orchestration, LAN server, and Now Playing metadata.
+- The Media Host LAN server exposes an explicit-IP, token-protected browser WebM path and VLC-compatible HLS path; path traversal and session mismatch requests are rejected by the source implementation.
+- All project JavaScript files pass `node --check`, and all Node runtime suites pass.
+- JSON files and project XML parse successfully; application/package/installer/Media Host versions are aligned to `1.0.47`, and publication format is `1.44`.
+- A complete .NET/DevExpress compilation still requires a build environment with the .NET 10 SDK and the licensed DevExpress package feed.
+
+## v1.0.48 multi-output streaming validation
+
+- Every project JavaScript file passes `node --check`.
+- All Node runtime suites pass, including component, signal, timeline, and streaming contracts.
+- The streaming suite verifies the clean-base/per-output compositor contract, provider-specific Chat bridge, output recording selection, encrypted Chat-secret storage, Twitch and YouTube adapter source paths, native capture registry, Windows process-loopback activation, WebRTC signaling, HLS, and RTSP delivery contracts.
+- C# source files pass raw-string-aware lexical and delimiter scans, an adjacent duplicate-declaration scan, and targeted Chat-adapter method-count checks; these caught and removed a duplicated Chat-adapter disposal declaration during the review.
+- Project XML and JSON files parse successfully; application/package/installer/Media Host versions are aligned to `1.0.48`, and publication format is `1.45`.
+- FFmpeg 7.1 is available in the packaging environment for command/codec inspection, and all archive entries pass the final ZIP integrity test.
+- A complete .NET/DevExpress compile is not claimed by this environment because it does not contain the .NET 10 SDK or licensed DevExpress package feed. Windows process-loopback audio, physical capture devices, OAuth provider accounts, and live external ingest endpoints remain target-machine integration checks.

@@ -1,6 +1,7 @@
 using DevExpress.Blazor;
 using DevExpress.AspNetCore;
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using System.Net;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -58,6 +59,14 @@ public static class Program
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHttpClient();
+        var dataProtectionPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "PublisherStudio", "DataProtection");
+        Directory.CreateDirectory(dataProtectionPath);
+        var dataProtection = builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
+            .SetApplicationName("PublisherStudio");
+        if (OperatingSystem.IsWindows()) dataProtection.ProtectKeysWithDpapi();
         builder.Services.AddCors(options => options.AddPolicy("PublisherExport", policy =>
             policy.AllowAnyOrigin().WithMethods("GET").AllowAnyHeader()));
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = DevExpress.Blazor.SizeMode.Small);
@@ -92,6 +101,10 @@ public static class Program
         builder.Services.AddSingleton<PublicationFileService>();
         builder.Services.AddSingleton<PublicationMediaAssetStore>();
         builder.Services.AddSingleton<PublicationRecoveryService>();
+        builder.Services.AddSingleton<StreamingProfileStore>();
+        builder.Services.AddSingleton<StreamingMediaHostClient>();
+        builder.Services.AddSingleton<StreamingSessionService>();
+        builder.Services.AddHostedService<StreamingMediaHostLauncher>();
         builder.Services.AddScoped<EditorStateService>();
         builder.Services.AddScoped<PictureEditorStateService>();
 

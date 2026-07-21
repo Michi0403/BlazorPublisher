@@ -1,5 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 @inject IJSRuntime JS
+@inject StreamingProfileStore StreamingProfiles
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
@@ -364,6 +365,92 @@
                     <p class="property-note">The source remains embedded. Trimming, fades, playback rate, and timeline placement are non-destructive.</p>
                 </section>
             }
+            else if (element is LiveSourceElement liveSource)
+            {
+                <section class="property-section live-source-properties">
+                    <h3>Live source</h3>
+                    <div class="data-source-summary">
+                        <span><b>Kind:</b> @liveSource.SourceKind</span>
+                        <span><b>Clock:</b> @(liveSource.UseDeviceTimestamp ? "Device timestamp" : "Session clock")</span>
+                    </div>
+                    <label>Saved device profile
+                        <select value="@GuidText(liveSource.DeviceProfileId)" @onchange="ChangeLiveDeviceProfile">
+                            <option value="">Custom settings</option>
+                            @foreach (var profile in _streamingDeviceProfiles)
+                            {
+                                <option value="@profile.Id">@profile.Name · @profile.Kind</option>
+                            }
+                        </select>
+                    </label>
+                    <button type="button" class="wide-button" @onclick="RefreshStreamingDeviceProfiles">Refresh saved profiles</button>
+                    <label>Capture backend
+                        <select value="@liveSource.CaptureBackend" @onchange="ChangeLiveCaptureBackend">
+                            @foreach (var value in Enum.GetValues<PublicationCaptureBackend>()) { <option value="@value">@value</option> }
+                        </select>
+                    </label>
+                    @if (liveSource.CaptureBackend == PublicationCaptureBackend.Native)
+                    {
+                        <label>Native backend<input value="@liveSource.NativeBackend" @onchange="ChangeLiveNativeBackend" placeholder="dshow, avfoundation, v4l2, wasapi-process-loopback" /></label>
+                    }
+                    <label>Source kind
+                        <select value="@liveSource.SourceKind" @onchange="ChangeLiveSourceKind">
+                            @foreach (var value in Enum.GetValues<PublicationLiveSourceKind>()) { <option value="@value">@value</option> }
+                        </select>
+                    </label>
+                    @if (liveSource.SourceKind is PublicationLiveSourceKind.Camera or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.Microphone)
+                    {
+                        <label>Video / primary device ID<input value="@liveSource.DeviceId" @onchange="ChangeLiveDeviceId" placeholder="Blank uses the default device" /></label>
+                    }
+                    @if (liveSource.SourceKind is PublicationLiveSourceKind.Camera or PublicationLiveSourceKind.CaptureDevice)
+                    {
+                        <label>Audio device ID<input value="@liveSource.AudioDeviceId" @onchange="ChangeLiveAudioDeviceId" placeholder="Optional paired capture-card audio device" /></label>
+                    }
+                    @if (liveSource.SourceKind == PublicationLiveSourceKind.ApplicationAudio)
+                    {
+                        <label>Application / process<input value="@liveSource.ApplicationId" @onchange="ChangeLiveApplicationId" placeholder="discord.exe or another process" /></label>
+                        <label>Window-title hint<input value="@liveSource.WindowTitle" @onchange="ChangeLiveWindowTitle" /></label>
+                    }
+                    @if (liveSource.SourceKind == PublicationLiveSourceKind.NetworkMedia)
+                    {
+                        <label>Network URL<input value="@liveSource.NetworkUrl" @onchange="ChangeLiveNetworkUrl" placeholder="https, rtsp, srt, or provider URL" /></label>
+                    }
+                    @if (liveSource.SourceKind == PublicationLiveSourceKind.NowPlaying)
+                    {
+                        <label>Watched music directory<input value="@liveSource.NowPlayingDirectory" @onchange="ChangeNowPlayingDirectory" /></label>
+                    }
+                    @if (liveSource.IsVisual)
+                    {
+                        <label>Capture width<input type="number" min="320" max="7680" step="2" value="@liveSource.CaptureWidth" @onchange="ChangeLiveCaptureWidth" /></label>
+                        <label>Capture height<input type="number" min="180" max="4320" step="2" value="@liveSource.CaptureHeight" @onchange="ChangeLiveCaptureHeight" /></label>
+                        <label>Capture FPS<input type="number" min="15" max="120" value="@liveSource.CaptureFrameRate" @onchange="ChangeLiveCaptureFrameRate" /></label>
+                        <label>Fit
+                            <select value="@liveSource.FitMode" @onchange="ChangeLiveFit">
+                                @foreach (var value in Enum.GetValues<PublicationLiveSourceFitMode>()) { <option value="@value">@value</option> }
+                            </select>
+                        </label>
+                        @RangeField("Brightness", liveSource.Brightness, 0, 4, .01, "liveBrightness")
+                        @RangeField("Contrast", liveSource.Contrast, 0, 4, .01, "liveContrast")
+                        @RangeField("Saturation", liveSource.Saturation, 0, 4, .01, "liveSaturation")
+                        @RangeField("Hue", liveSource.HueRotation, -360, 360, 1, "liveHue")
+                        @RangeField("Blur", liveSource.Blur, 0, 64, .1, "liveBlur")
+                        <label class="check-row"><input type="checkbox" checked="@liveSource.ChromaKeyEnabled" @onchange="ToggleLiveChroma" /> Chroma key</label>
+                        @if (liveSource.ChromaKeyEnabled)
+                        {
+                            @ColorField("Key color", liveSource.ChromaKeyColor, "liveChromaColor")
+                            @RangeField("Similarity", liveSource.ChromaSimilarity, 0, 1, .01, "liveChromaSimilarity")
+                            @RangeField("Smoothness", liveSource.ChromaSmoothness, 0, 1, .01, "liveChromaSmoothness")
+                            @RangeField("Spill reduction", liveSource.ChromaSpill, 0, 1, .01, "liveChromaSpill")
+                            @RangeField("Keyed residual opacity", liveSource.ChromaResidualOpacity, 0, 1, .01, "liveChromaResidual")
+                        }
+                    }
+                    @RangeField("Volume", liveSource.Volume, 0, 1, .01, "liveVolume")
+                    <label>Audio delay (ms)<input type="number" min="-10000" max="10000" step="1" value="@Inv(liveSource.AudioDelayMilliseconds)" @onchange="ChangeLiveAudioDelay" /></label>
+                    <label class="check-row"><input type="checkbox" checked="@liveSource.IncludeAudio" @onchange="ToggleLiveAudio" /> Include source audio</label>
+                    <label class="check-row"><input type="checkbox" checked="@liveSource.Muted" @onchange="ToggleLiveMuted" /> Mute preview / visual source</label>
+                    <label class="check-row"><input type="checkbox" checked="@liveSource.UseDeviceTimestamp" @onchange="ToggleLiveDeviceTimestamp" /> Use device timestamps</label>
+                    <p class="property-note">Camera, screen, window, tab, microphone, and network media can preview through browser APIs. Isolated application/system audio and global devices are resolved by PublisherStudio.MediaHost.</p>
+                </section>
+            }
             else if (element is SpreadsheetElement spreadsheet)
             {
                 <section class="property-section spreadsheet-properties">
@@ -715,6 +802,15 @@
     [Parameter] public EventCallback OnInsertBarcode { get; set; }
     [Parameter] public EventCallback OnEditBarcode { get; set; }
 
+    private List<StreamingDeviceProfile> _streamingDeviceProfiles = [];
+    private bool _streamingProfilesLoaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (State.SelectedElement is LiveSourceElement && !_streamingProfilesLoaded)
+            await RefreshStreamingDeviceProfiles();
+    }
+
     private string _tab = "properties";
     private DxContextMenu _layerContextMenu = default!;
     private Guid? _contextLayerId;
@@ -811,6 +907,7 @@
         PublicationElementKind.DataVisual => "▥",
         PublicationElementKind.Spreadsheet => "▦",
         PublicationElementKind.Barcode => "▦",
+        PublicationElementKind.LiveSource => "●",
         _ => "◇"
     };
 
@@ -832,6 +929,68 @@
     private void ToggleVideoControls(ChangeEventArgs _) { if (State.SelectedElement is VideoElement video) State.UpdateMedia(video.Id, _ => video.ShowControls = !video.ShowControls); }
     private void ChangeAudioDisplay(ChangeEventArgs args) { if (Enum.TryParse<PublicationAudioDisplayKind>(args.Value?.ToString(), out var value) && State.SelectedElement is AudioElement audio) State.UpdateMedia(audio.Id, _ => audio.DisplayKind = value); }
     private void ToggleAudioControls(ChangeEventArgs _) { if (State.SelectedElement is AudioElement audio) State.UpdateMedia(audio.Id, _ => audio.ShowControls = !audio.ShowControls); }
+
+    private async Task RefreshStreamingDeviceProfiles()
+    {
+        var machine = await StreamingProfiles.LoadAsync();
+        _streamingDeviceProfiles = machine.Devices
+            .OrderBy(profile => profile.Kind)
+            .ThenBy(profile => profile.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        _streamingProfilesLoaded = true;
+    }
+
+    private void ChangeLiveDeviceProfile(ChangeEventArgs args)
+    {
+        var id = ParseGuid(args);
+        if (id is null)
+        {
+            UpdateLiveSource(source => source.DeviceProfileId = null);
+            return;
+        }
+
+        var profile = _streamingDeviceProfiles.FirstOrDefault(item => item.Id == id.Value);
+        if (profile is null) return;
+        UpdateLiveSource(source =>
+        {
+            source.DeviceProfileId = profile.Id;
+            source.SourceKind = profile.Kind;
+            source.DeviceId = profile.DeviceId;
+            source.AudioDeviceId = profile.AudioDeviceId;
+            source.ApplicationId = profile.ApplicationId;
+            source.WindowTitle = profile.WindowTitle;
+            source.CaptureBackend = profile.CaptureBackend;
+            source.NativeBackend = profile.NativeBackend;
+            source.UseDeviceTimestamp = profile.UseDeviceTimestamps;
+        });
+    }
+
+    private void UpdateLiveSource(Action<LiveSourceElement> update)
+    {
+        if (State.SelectedElement is LiveSourceElement source) State.UpdateLiveSource(source.Id, update);
+    }
+    private void ChangeLiveSourceKind(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<PublicationLiveSourceKind>(args.Value?.ToString(), out var value)) return;
+        UpdateLiveSource(source => { source.DeviceProfileId = null; source.SourceKind = value; });
+    }
+    private void ChangeLiveCaptureBackend(ChangeEventArgs args) { if (Enum.TryParse<PublicationCaptureBackend>(args.Value?.ToString(), out var value)) UpdateLiveSource(source => { source.DeviceProfileId = null; source.CaptureBackend = value; }); }
+    private void ChangeLiveNativeBackend(ChangeEventArgs args) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.NativeBackend = args.Value?.ToString() ?? string.Empty; });
+    private void ChangeLiveDeviceId(ChangeEventArgs args) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.DeviceId = args.Value?.ToString() ?? string.Empty; });
+    private void ChangeLiveAudioDeviceId(ChangeEventArgs args) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.AudioDeviceId = args.Value?.ToString() ?? string.Empty; });
+    private void ChangeLiveApplicationId(ChangeEventArgs args) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.ApplicationId = args.Value?.ToString() ?? string.Empty; });
+    private void ChangeLiveWindowTitle(ChangeEventArgs args) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.WindowTitle = args.Value?.ToString() ?? string.Empty; });
+    private void ChangeLiveNetworkUrl(ChangeEventArgs args) => UpdateLiveSource(source => source.NetworkUrl = args.Value?.ToString() ?? string.Empty);
+    private void ChangeNowPlayingDirectory(ChangeEventArgs args) => UpdateLiveSource(source => source.NowPlayingDirectory = args.Value?.ToString() ?? string.Empty);
+    private void ChangeLiveFit(ChangeEventArgs args) { if (Enum.TryParse<PublicationLiveSourceFitMode>(args.Value?.ToString(), out var value)) UpdateLiveSource(source => source.FitMode = value); }
+    private void ChangeLiveCaptureWidth(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) UpdateLiveSource(source => source.CaptureWidth = value); }
+    private void ChangeLiveCaptureHeight(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) UpdateLiveSource(source => source.CaptureHeight = value); }
+    private void ChangeLiveCaptureFrameRate(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) UpdateLiveSource(source => source.CaptureFrameRate = value); }
+    private void ChangeLiveAudioDelay(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLiveSource(source => source.AudioDelayMilliseconds = value); }
+    private void ToggleLiveAudio(ChangeEventArgs _) => UpdateLiveSource(source => source.IncludeAudio = !source.IncludeAudio);
+    private void ToggleLiveMuted(ChangeEventArgs _) => UpdateLiveSource(source => source.Muted = !source.Muted);
+    private void ToggleLiveDeviceTimestamp(ChangeEventArgs _) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.UseDeviceTimestamp = !source.UseDeviceTimestamp; });
+    private void ToggleLiveChroma(ChangeEventArgs _) => UpdateLiveSource(source => source.ChromaKeyEnabled = !source.ChromaKeyEnabled);
 
     private string EndpointName(ConnectorEndpoint endpoint)
     {
@@ -1107,6 +1266,7 @@
             if (element is DevExtremeComponentElement component && field == "componentBackground") component.Background = value;
             if (element is DevExtremeComponentElement componentBorder && field == "componentBorder") componentBorder.BorderColor = value;
             if (element is AudioElement audio && field == "audioAccent") audio.AccentColor = value;
+            if (element is LiveSourceElement live && field == "liveChromaColor") live.ChromaKeyColor = value;
         });
     }
 
@@ -1182,6 +1342,19 @@
             if (field == "mediaVolume") media.Volume = Math.Clamp(value, 0, 1);
             if (field == "mediaFadeIn") media.FadeInSeconds = Math.Clamp(value, 0, media.TimelineLengthSeconds / 2);
             if (field == "mediaFadeOut") media.FadeOutSeconds = Math.Clamp(value, 0, media.TimelineLengthSeconds / 2);
+        }
+        if (element is LiveSourceElement live)
+        {
+            if (field == "liveBrightness") live.Brightness = value;
+            if (field == "liveContrast") live.Contrast = value;
+            if (field == "liveSaturation") live.Saturation = value;
+            if (field == "liveHue") live.HueRotation = value;
+            if (field == "liveBlur") live.Blur = value;
+            if (field == "liveChromaSimilarity") live.ChromaSimilarity = value;
+            if (field == "liveChromaSmoothness") live.ChromaSmoothness = value;
+            if (field == "liveChromaSpill") live.ChromaSpill = value;
+            if (field == "liveChromaResidual") live.ChromaResidualOpacity = value;
+            if (field == "liveVolume") live.Volume = value;
         }
         if (element is TextFrameElement text)
         {

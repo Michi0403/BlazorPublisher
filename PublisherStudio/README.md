@@ -309,3 +309,13 @@ Vertical DevExtreme menus now use natural row heights instead of DevExtreme's ho
 Component Studio now includes a media-first Gallery/Tile View workflow and a DevExtreme Chat component. The built-in **Publication media** object is generated from pictures, videos, and audio already placed in the publication, so the normal Publisher insert workflow remains the single source of truth and exported media stays self-contained. Gallery and Tile View can also bind ordinary JSON, REST, or OData rows by selecting media type, source, poster, title, and alternative-text properties.
 
 Chat rows can be mapped to platform, channel, message, timestamp, author ID, author name, and avatar fields. Runtime delivery is platform/channel isolated and can be connected later through `window.PublisherStudioChatBridge`. Offline HTML exports contain the UI and isolation runtime; a real Twitch/YouTube connection still requires the future authenticated streaming adapter. See `CHANGELOG-v1.0.46.md` and `docs/COMPONENT_RUNTIME.md`.
+
+## v1.0.47 document-first streaming
+
+PublisherStudio now treats live streaming as another output workflow of the publication. The **Streaming** ribbon and **Streaming Studio** configure reusable provider profiles, outputs, recording variants, LAN delivery, devices, timing, and hotkeys. Camera, screen, window, browser-tab, capture-device, microphone, system-audio, application-audio, network-media, and Now Playing sources are inserted as normal page objects.
+
+A bundled `PublisherStudio.MediaHost` project owns FFmpeg pipelines, segmented recording, global Windows hotkeys, HLS, token-protected LAN browser playback, and ID3 metadata. See `CHANGELOG-v1.0.47.md` and `docs/STREAMING.md` for the implemented boundary and the remaining native/per-output compositor extension points.
+
+## v1.0.48 multi-output streaming completion
+
+See `CHANGELOG-v1.0.48.md` and `docs/STREAMING.md`. The publication is captured once as a clean base and composed into independent provider variants only where required. One authored Chat object now renders Twitch-only messages into the Twitch output and YouTube-only messages into the YouTube output, while its answer field remains operator-only. The Media Host adds encrypted Chat OAuth storage, Twitch/YouTube receive/send adapters, native capture discovery, Windows process-tree audio loopback, WebRTC browser delivery, HLS, RTSP, and selected output recording without requiring public streaming.

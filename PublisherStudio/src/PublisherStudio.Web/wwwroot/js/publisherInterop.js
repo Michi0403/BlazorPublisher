@@ -6413,7 +6413,8 @@ async function buildPublisherSingleHtml(mode, title) {
     const defaultPublisherApi = /^https?:$/.test(location.protocol) ? location.origin : '';
     const isSite = mode === 'site';
     const runtimeFunction = isSite ? websiteSiteRuntime : websitePresentationRuntime;
-    const runtime = `window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${signalConnectorRuntime.toString()})(document,{autoStart:false,expose:true});(${runtimeFunction.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});`;
+    const outputContextRuntime = `(()=>{const p=new URLSearchParams(location.search);const platform=p.get('publisherChatPlatform')||p.get('publisherOutputPlatform')||'Preview';const channel=p.get('publisherChatChannel')||'';const mode=p.get('publisherOutputMode')||(platform==='Preview'?'operator':'broadcast');window.PublisherStudioOutputContext={mode,platform,channel,outputId:p.get('publisherOutputId')||''};window.PublisherStudioChatPlatform=platform;window.PublisherStudioChatChannel=channel;})();`;
+    const runtime = `${outputContextRuntime}window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${signalConnectorRuntime.toString()})(document,{autoStart:false,expose:true});(${runtimeFunction.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});`;
     const modeCss = isSite ? `
 :root{color-scheme:light dark}
 html,body{width:100%;height:100%;overflow:hidden!important;background:#111827!important}

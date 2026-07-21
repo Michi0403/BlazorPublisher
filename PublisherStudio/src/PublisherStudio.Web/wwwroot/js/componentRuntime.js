@@ -1,7 +1,7 @@
 (() => {
     "use strict";
 
-    const states = new WeakMap();
+    const states = new Map();
     const pluginNames = {
         DataGrid: "dxDataGrid",
         TreeList: "dxTreeList",
@@ -815,15 +815,27 @@
         }
     }
 
-    function activeChatPlatform(config) {
+    function activeChatPlatform(config, context = null) {
         const query = new URLSearchParams(location.search).get("publisherChatPlatform");
-        const configured = query || window.PublisherStudioChatPlatform || config.chatPlatform || "Preview";
+        const configuredValue = String(config.chatPlatform || "OutputContext");
+        const runtimeContext = context || window.PublisherStudioOutputContext || {};
+        const configured = query || (lower(configuredValue) === "outputcontext"
+            ? (runtimeContext.platform || window.PublisherStudioChatPlatform || "Preview")
+            : configuredValue);
         return String(configured).trim() || "Preview";
     }
 
-    function activeChatChannel(config) {
+    function chatBroadcastMode() {
+        return lower(window.PublisherStudioOutputContext?.mode) === "broadcast";
+    }
+
+    function activeChatChannel(config, context = null) {
         const query = new URLSearchParams(location.search).get("publisherChatChannel");
-        const configured = query || window.PublisherStudioChatChannel || config.chatChannel || "";
+        const outputContext = lower(config.chatPlatform || "OutputContext") === "outputcontext";
+        const runtimeContext = context || window.PublisherStudioOutputContext || {};
+        const configured = query || (outputContext
+            ? (runtimeContext.channel || window.PublisherStudioChatChannel || config.chatChannel || "")
+            : (config.chatChannel || ""));
         return String(configured).trim();
     }
 
@@ -835,7 +847,7 @@
         };
     }
 
-    function chatMessage(config, row, index = 0) {
+    function chatMessage(config, row, index = 0, context = null) {
         const text = valueFor(row, config.chatMessageField || "text") ?? valueFor(row, "message") ?? "";
         const authorId = valueFor(row, config.chatAuthorIdField || "authorId") ?? valueFor(row, "userId") ?? `viewer-${index + 1}`;
         const authorName = valueFor(row, config.chatAuthorNameField || "authorName") ?? valueFor(row, "userName") ?? valueFor(row, "author") ?? "Viewer";
@@ -846,14 +858,14 @@
             text: String(text ?? ""),
             timestamp,
             author: { id: String(authorId), name: String(authorName), avatarUrl: avatar || undefined },
-            platform: String(valueFor(row, config.chatPlatformField || "platform") || activeChatPlatform(config)),
-            channel: String(valueFor(row, config.chatChannelField || "channel") || activeChatChannel(config))
+            platform: String(valueFor(row, config.chatPlatformField || "platform") || activeChatPlatform(config, context)),
+            channel: String(valueFor(row, config.chatChannelField || "channel") || activeChatChannel(config, context))
         };
     }
 
-    function chatMessages(config, rows) {
-        const platform = lower(activeChatPlatform(config));
-        const channel = lower(activeChatChannel(config));
+    function chatMessages(config, rows, context = null) {
+        const platform = lower(activeChatPlatform(config, context));
+        const channel = lower(activeChatChannel(config, context));
         return (Array.isArray(rows) ? rows : []).filter(row => {
             const rowPlatform = lower(valueFor(row, config.chatPlatformField || "platform"));
             const rowChannel = lower(valueFor(row, config.chatChannelField || "channel"));
@@ -862,17 +874,24 @@
             const platformMatches = rowPlatform ? rowPlatform === platform : platform === "preview";
             const channelMatches = channel ? rowChannel === channel : true;
             return platformMatches && channelMatches;
-        }).map((row, index) => chatMessage(config, row, index));
+        }).map((row, index) => chatMessage(config, row, index, context));
     }
 
     function chatMessageId(message) {
         return String(message?.id || "").trim();
     }
 
-    function mergeChatItems(config, rows, transient = []) {
+    function mergeChatItems(config, rows, transient = [], context = null) {
         const result = [];
         const ids = new Set();
-        for (const message of [...chatMessages(config, rows), ...(transient || [])]) {
+        for (const message of [...chatMessages(config, rows, context), ...(transient || []).filter(message => {
+            const platform = lower(activeChatPlatform(config, context));
+            const channel = lower(activeChatChannel(config, context));
+            const messagePlatform = lower(message?.platform);
+            const messageChannel = lower(message?.channel);
+            return (messagePlatform ? messagePlatform === platform : platform === "preview")
+                && (channel ? messageChannel === channel : true);
+        })]) {
             const id = chatMessageId(message);
             if (id && ids.has(id)) continue;
             if (id) ids.add(id);
@@ -901,6 +920,7 @@
     function publishChatMessage(config, instance, message, element) {
         const detail = {
             componentId: String(config.id || ""),
+            outputId: String(window.PublisherStudioOutputContext?.outputId || ""),
             platform: activeChatPlatform(config),
             channel: activeChatChannel(config),
             message
@@ -944,6 +964,52 @@
             window.removeEventListener("publisherstudio:chat-message", handler);
             try { bridgeUnsubscribe?.(); } catch { }
         };
+    }
+
+    function chatBroadcastLayers(context = {}, pageElementId = "publisher-page") {
+        const page = document.getElementById(String(pageElementId || "publisher-page"));
+        const pageRect = page?.getBoundingClientRect?.();
+        if (!pageRect || pageRect.width <= 0 || pageRect.height <= 0) return [];
+        const layers = [];
+        for (const [element, state] of states.entries()) {
+            const config = state?.config;
+            if (!config || lower(config.kind) !== "chat" || !element?.isConnected) continue;
+            const publicationElement = element.closest?.("[data-publication-element]") || element;
+            const rect = publicationElement.getBoundingClientRect?.();
+            if (!rect || rect.width <= 0 || rect.height <= 0) continue;
+            const style = getComputedStyle(publicationElement);
+            const hostStyle = getComputedStyle(element);
+            const bridgeMessages = window.PublisherStudioChatBridge?.getMessages?.(
+                activeChatPlatform(config, context),
+                activeChatChannel(config, context)) || [];
+            const items = mergeChatItems(config, config.rows || [], [...(state.chatTransient || []), ...bridgeMessages], context)
+                .slice(-Math.max(1, number(config.chatMaxVisibleMessages, 12)))
+                .map(message => ({
+                    id: String(message.id || ""),
+                    text: String(message.text || ""),
+                    authorName: String(message.author?.name || "Viewer"),
+                    authorAvatar: String(message.author?.avatarUrl || ""),
+                    timestamp: message.timestamp instanceof Date ? message.timestamp.toISOString() : String(message.timestamp || "")
+                }));
+            layers.push({
+                componentId: String(config.id || element.dataset.psComponentId || ""),
+                x: rect.left - pageRect.left,
+                y: rect.top - pageRect.top,
+                width: rect.width,
+                height: rect.height,
+                pageWidth: pageRect.width,
+                pageHeight: pageRect.height,
+                background: style.backgroundColor || hostStyle.backgroundColor || "rgba(15,23,42,.88)",
+                color: style.color || hostStyle.color || "#f8fafc",
+                fontFamily: style.fontFamily || hostStyle.fontFamily || "system-ui",
+                fontSize: parseFloat(style.fontSize) || 16,
+                borderRadius: parseFloat(style.borderRadius) || 8,
+                platform: activeChatPlatform(config, context),
+                channel: activeChatChannel(config, context),
+                items
+            });
+        }
+        return layers;
     }
 
     function hierarchy(rows, keyField, parentField) {
@@ -1481,7 +1547,8 @@
                 break;
             }
             case "Chat": {
-                element.classList.toggle("ps-chat-readonly", config.chatAllowSending === false);
+                const allowChatSending = config.chatAllowSending !== false && !chatBroadcastMode();
+                element.classList.toggle("ps-chat-readonly", !allowChatSending);
                 options = {
                     ...base,
                     items: mergeChatItems(config, config.rows || []),
@@ -1492,8 +1559,14 @@
                     showDayHeaders: config.chatShowTimestamp !== false,
                     messageTimestampFormat: config.chatShowTimestamp === false ? undefined : "shorttime",
                     editing: { allowDeleting: false, allowUpdating: false },
-                    onContentReady() { queueMicrotask(() => applyChatInputState(element, config)); },
+                    onContentReady() {
+                        queueMicrotask(() => {
+                            applyChatInputState(element, config);
+                            if (!allowChatSending) element.querySelectorAll(".dx-chat-messagebox,.dx-chat-message-box,.dx-chat-input-container").forEach(node => node.remove());
+                        });
+                    },
                     onMessageEntered(event) {
+                        if (!allowChatSending) return;
                         const source = event?.message || {};
                         const message = {
                             ...source,
@@ -1697,10 +1770,18 @@
         elements.forEach(element => render(element, element.dataset.psComponentConfig, { polling: options.polling !== false, fetchNow: options.fetchNow !== false }));
     }
 
+    window.addEventListener("publisherstudio:output-context-changed", () => {
+        for (const [element, state] of states.entries()) {
+            if (lower(state?.config?.kind) !== "chat") continue;
+            render(element, state.config, { polling: false, fetchNow: false });
+        }
+    });
+
     window.PublisherStudioChatRuntime = window.PublisherStudioChatRuntime || {
         push(message) { window.dispatchEvent(new CustomEvent("publisherstudio:chat-message", { detail: message })); },
         setPlatform(platform) { window.PublisherStudioChatPlatform = String(platform || "Preview"); return refreshAll(document, { fetchNow: false }); },
-        setChannel(channel) { window.PublisherStudioChatChannel = String(channel || ""); return refreshAll(document, { fetchNow: false }); }
+        setChannel(channel) { window.PublisherStudioChatChannel = String(channel || ""); return refreshAll(document, { fetchNow: false }); },
+        getBroadcastLayers(context, pageElementId) { return chatBroadcastLayers(context || {}, pageElementId); }
     };
 
     window.PublisherStudioComponentRuntime = {

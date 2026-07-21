@@ -7,6 +7,8 @@
 @inject SpreadsheetDocumentService Spreadsheets
 @inject SpreadsheetSessionStore SpreadsheetSessions
 @inject PublicationRecoveryService Recovery
+@inject StreamingSessionService StreamingSession
+@inject StreamingProfileStore StreamingProfiles
 @inject IJSRuntime JS
 
 <PageTitle>BlazorPublisher</PageTitle>
@@ -68,7 +70,17 @@
                        OnEditComponent="OpenComponentEditor"
                        OnPreviewPageAnimations="PreviewPageAnimations"
                        OnPreviewObjectAnimations="PreviewObjectAnimations"
-                       OnStopAnimations="StopAnimations" />
+                       OnStopAnimations="StopAnimations"
+                       Streaming="StreamingSession.Snapshot"
+                       OnStreamingSetup="OpenStreamingStudio"
+                       OnStartDryRun="StartDryRun"
+                       OnStartStreaming="StartStreaming"
+                       OnStopStreaming="StopStreaming"
+                       OnToggleRecording="ToggleStreamRecording"
+                       OnToggleStreamOutput="ToggleStreamOutput"
+                       OnSelectProgramPage="SelectProgramPage"
+                       OnInsertLiveSource="InsertLiveSource"
+                       OnSelectChatOutput="SelectChatOutput" />
 
     <div class="publisher-quick-insert" aria-label="Drag objects onto the publication page">
         <span>Drag to canvas</span>
@@ -186,6 +198,7 @@
 <DevExtremeComponentEditor Visible="_componentEditorVisible" State="State" Saved="SaveComponentEditor" Cancelled="CancelComponentEditor" ManageDataRequested="OpenDataManagerFromComponent" />
 <DataManager Visible="_dataManagerVisible" State="State" Closed="CloseDataManager" DataChanged="DataManagerChanged" />
 <BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
+<StreamingStudio Visible="_streamingStudioVisible" Document="State.Document" Saved="SaveStreamingStudio" Cancelled="CloseStreamingStudio" />
 
 @if (!string.IsNullOrWhiteSpace(_error))
 {
@@ -212,6 +225,7 @@
     private bool _mediaStudioVisible;
     private bool _timelineVisible;
     private bool _barcodeEditorVisible;
+    private bool _streamingStudioVisible;
     private bool _videoExporting;
     private Guid? _pendingNewBarcodeId;
     private Guid _mediaStudioSessionId;
@@ -234,6 +248,8 @@
     private CancellationTokenSource? _recoverySaveCancellation;
     private long _scheduledRecoveryRevision = -1;
     private bool _disposed;
+    private DotNetObjectReference<Editor>? _streamingHotkeyReference;
+    private string _boundStreamingHotkeys = string.Empty;
     private string? _error;
     private string? _notice;
     private string SelectionStatus => State.ConnectorTool != ConnectorToolKind.None
@@ -245,6 +261,8 @@
     protected override void OnInitialized()
     {
         State.Changed += StateChanged;
+        StreamingSession.Changed += StateChanged;
+        StreamingSession.HotkeyTriggered += HandleGlobalStreamingHotkey;
         _recoveryCandidate = Recovery.TryReadLatest();
     }
 
@@ -256,10 +274,22 @@
             await JS.InvokeVoidAsync("publisherStudio.initializeWorkspace", "publisher-workspace");
             await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty);
         }
+
+        var hotkeySignature = System.Text.Json.JsonSerializer.Serialize(State.Document.Streaming.Hotkeys);
+        if (!string.Equals(hotkeySignature, _boundStreamingHotkeys, StringComparison.Ordinal))
+        {
+            _streamingHotkeyReference ??= DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("publisherStreaming.bindHotkeys", State.Document.Streaming.Hotkeys, _streamingHotkeyReference);
+            _boundStreamingHotkeys = hotkeySignature;
+        }
     }
 
     private void StateChanged()
     {
+        if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle
+            && State.Document.Streaming.FollowSelectedPage
+            && StreamingSession.Snapshot.ProgramPageId != State.SelectedPageId)
+            StreamingSession.SetProgramPage(State.SelectedPageId);
         _ = InvokeAsync(async () =>
         {
             try { await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty); }
@@ -1460,6 +1490,270 @@
         return Task.CompletedTask;
     }
 
+
+    private void HandleGlobalStreamingHotkey(MediaHostHotkeyEvent hotkeyEvent) =>
+        _ = HandleStreamingHotkey(hotkeyEvent.Command, hotkeyEvent.TargetId?.ToString("D"));
+
+    [JSInvokable]
+    public Task HandleStreamingHotkey(string command, string? targetId) => InvokeAsync(async () =>
+    {
+        switch (command?.Trim())
+        {
+            case "ToggleStreaming":
+                if (StreamingSession.Snapshot.Mode == PublicationStreamSessionMode.Idle) await StartStreaming();
+                else await StopStreaming();
+                break;
+            case "ToggleRecording":
+                if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) await ToggleStreamRecording();
+                else ShowNotice("Start a dry run or stream before toggling recording.");
+                break;
+            case "NextPage":
+                await SelectAdjacentStreamingPage(1);
+                break;
+            case "PreviousPage":
+                await SelectAdjacentStreamingPage(-1);
+                break;
+            case "SelectPage" when Guid.TryParse(targetId, out var pageId):
+                await SelectProgramPage(pageId);
+                break;
+            case "ToggleOutput" when Guid.TryParse(targetId, out var outputId):
+                await ToggleStreamOutput(outputId);
+                break;
+        }
+    });
+
+    private async Task SelectAdjacentStreamingPage(int offset)
+    {
+        if (State.Document.Pages.Count == 0) return;
+        var currentId = StreamingSession.Snapshot.ProgramPageId ?? State.SelectedPageId;
+        var currentIndex = State.Document.Pages.FindIndex(page => page.Id == currentId);
+        if (currentIndex < 0) currentIndex = 0;
+        var nextIndex = (currentIndex + offset + State.Document.Pages.Count) % State.Document.Pages.Count;
+        await SelectProgramPage(State.Document.Pages[nextIndex].Id);
+    }
+
+    private async Task OpenStreamingStudio()
+    {
+        await CancelPublisherPointerAsync();
+        _streamingStudioVisible = true;
+    }
+
+    private Task CloseStreamingStudio()
+    {
+        _streamingStudioVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private Task SaveStreamingStudio(PublicationStreamingSettings settings)
+    {
+        State.ApplyStreamingSettings(settings);
+        _streamingStudioVisible = false;
+        ShowNotice("Streaming setup applied. Machine credentials remain outside the publication.");
+        return Task.CompletedTask;
+    }
+
+    private Task InsertLiveSource(PublicationLiveSourceKind kind)
+    {
+        State.AddLiveSource(kind);
+        ShowNotice($"{kind} live source inserted. Activate it on the canvas to grant capture permission.");
+        return Task.CompletedTask;
+    }
+
+    private Task StartDryRun() => StartStreamingSession(dryRun: true);
+    private Task StartStreaming() => StartStreamingSession(dryRun: false);
+
+    private async Task StartStreamingSession(bool dryRun)
+    {
+        if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) return;
+        try
+        {
+            var machine = await StreamingProfiles.LoadAsync();
+            var configuredOutputs = State.Document.Streaming.Outputs
+                .Select(output => new
+                {
+                    Output = output,
+                    Profile = machine.Providers.FirstOrDefault(profile => profile.Id == output.ProfileId && profile.Enabled)
+                })
+                .ToArray();
+            var enabledOutputs = configuredOutputs.Where(item => item.Output.Enabled).ToArray();
+            if (!dryRun)
+            {
+                if (enabledOutputs.Length == 0
+                    && !State.Document.Streaming.Recording.Enabled
+                    && !State.Document.Streaming.Lan.Enabled)
+                    throw new InvalidOperationException("Enable a provider output, recording, or Company/LAN delivery before starting a live session.");
+
+                var missingProfile = enabledOutputs.FirstOrDefault(item => item.Profile is null);
+                if (missingProfile is not null)
+                    throw new InvalidOperationException($"The output '{missingProfile.Output.Name}' has no enabled machine provider profile.");
+
+                var missingEndpoint = enabledOutputs.FirstOrDefault(item => string.IsNullOrWhiteSpace(item.Profile?.Endpoint));
+                if (missingEndpoint is not null)
+                    throw new InvalidOperationException($"The provider profile for '{missingEndpoint.Output.Name}' has no ingest endpoint.");
+            }
+
+            var firstOutput = enabledOutputs.FirstOrDefault(item => item.Profile is not null)?.Output;
+            var platform = dryRun || firstOutput is null ? "Preview" : firstOutput.Provider.ToString();
+            var channel = firstOutput?.ChatChannel ?? string.Empty;
+            if (firstOutput is not null && string.IsNullOrWhiteSpace(channel))
+                channel = configuredOutputs.First(item => item.Output.Id == firstOutput.Id).Profile?.ChannelId ?? string.Empty;
+            await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new
+            {
+                mode = "operator",
+                platform,
+                channel,
+                outputId = firstOutput?.Id.ToString("D") ?? string.Empty
+            });
+            var prepared = await JS.InvokeAsync<bool>("publisherStreaming.prepareProgramCapture", new
+            {
+                pageElementId = "publisher-page",
+                width = State.Document.Streaming.MasterWidth,
+                height = State.Document.Streaming.MasterHeight,
+                frameRate = State.Document.Streaming.MasterFrameRate
+            });
+            if (!prepared) throw new InvalidOperationException("The browser did not prepare the Publisher program capture.");
+
+            await StreamingSession.StartAsync(State.Document, dryRun);
+            if (StreamingSession.Snapshot.SessionId is not { } sessionId)
+                throw new InvalidOperationException(StreamingSession.Snapshot.StatusText);
+            var configuredOutputBitrate = State.Document.Streaming.Outputs
+                .Where(output => output.Enabled)
+                .Select(output => (long)output.VideoBitrateKbps * 1000L)
+                .DefaultIfEmpty(16_000_000L)
+                .Max();
+            var masterQualityBitrate = Math.Clamp(
+                (long)Math.Round(
+                    State.Document.Streaming.MasterWidth
+                    * (double)State.Document.Streaming.MasterHeight
+                    * State.Document.Streaming.MasterFrameRate
+                    * 0.16,
+                    MidpointRounding.AwayFromZero),
+                12_000_000L,
+                120_000_000L);
+            var videoBitrate = (int)Math.Min(int.MaxValue, Math.Max(masterQualityBitrate, configuredOutputBitrate * 2L));
+            var browserOutputs = configuredOutputs.Select(item =>
+            {
+                var selectedForRecording = State.Document.Streaming.Recording.Enabled
+                    && (State.Document.Streaming.Recording.Variant == PublicationStreamRecordingVariant.EachEnabledOutput && item.Output.Enabled
+                        || State.Document.Streaming.Recording.Variant == PublicationStreamRecordingVariant.SelectedOutputs
+                            && State.Document.Streaming.Recording.SelectedOutputIds.Contains(item.Output.Id));
+                return new
+                {
+                    outputId = item.Output.Id.ToString("D"),
+                    enabled = item.Output.Enabled,
+                    captureRequired = item.Output.Enabled || selectedForRecording,
+                    platform = item.Output.Provider.ToString(),
+                    channel = string.IsNullOrWhiteSpace(item.Output.ChatChannel)
+                        ? item.Profile?.ChannelId ?? string.Empty
+                        : item.Output.ChatChannel,
+                    width = item.Output.Width,
+                    height = item.Output.Height,
+                    frameRate = item.Output.FrameRate,
+                    videoBitrateKbps = item.Output.VideoBitrateKbps,
+                    chatEnabled = item.Profile?.ChatEnabled == true
+                };
+            }).ToArray();
+            await JS.InvokeAsync<bool>("publisherStreaming.configureChatBridge", new
+            {
+                mediaHostUrl = $"http://127.0.0.1:{machine.MediaHostPort}",
+                sessionId = sessionId.ToString("D"),
+                outputs = browserOutputs
+            });
+            await JS.InvokeAsync<object>("publisherStreaming.startProgramIngest", new
+            {
+                mediaHostUrl = $"http://127.0.0.1:{machine.MediaHostPort}",
+                sessionId = sessionId.ToString("D"),
+                videoBitsPerSecond = videoBitrate,
+                audioBitsPerSecond = 192_000,
+                outputs = browserOutputs,
+                enableWebRtc = State.Document.Streaming.Lan.Enabled
+                    && State.Document.Streaming.Lan.EnableBrowserWebRtc
+            });
+            ShowNotice(dryRun ? "Dry run active. The current tab is captured but no public provider receives it." : "Streaming session active.");
+        }
+        catch (Exception exception)
+        {
+            try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge"); } catch { }
+            try { await JS.InvokeVoidAsync("publisherStreaming.stopProgramIngest"); } catch { }
+            if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) await StreamingSession.StopAsync();
+            await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" });
+            ShowError(exception);
+        }
+    }
+
+    private async Task StopStreaming()
+    {
+        try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge"); } catch { }
+        try { await JS.InvokeVoidAsync("publisherStreaming.stopProgramIngest"); } catch { }
+        await StreamingSession.StopAsync();
+        await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" });
+        ShowNotice("Streaming session stopped.");
+    }
+
+    private async Task ToggleStreamRecording()
+    {
+        await StreamingSession.ToggleRecordingAsync();
+        ShowNotice(StreamingSession.Snapshot.Recording ? "Recording enabled." : "Recording disabled.");
+    }
+
+    private async Task ToggleStreamOutput(Guid outputId)
+    {
+        if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle)
+        {
+            await StreamingSession.ToggleOutputAsync(outputId);
+            return;
+        }
+        var settings = CloneStreaming(State.Document.Streaming);
+        var output = settings.Outputs.FirstOrDefault(item => item.Id == outputId);
+        if (output is null) return;
+        output.Enabled = !output.Enabled;
+        State.ApplyStreamingSettings(settings);
+    }
+
+    private async Task SelectChatOutput(Guid? outputId)
+    {
+        if (outputId is null)
+        {
+            await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "", outputId = "" });
+            ShowNotice("Chat switched to preview messages.");
+            return;
+        }
+        var output = State.Document.Streaming.Outputs.FirstOrDefault(item => item.Id == outputId.Value);
+        if (output is null) return;
+        var channel = output.ChatChannel;
+        if (string.IsNullOrWhiteSpace(channel))
+        {
+            var machine = await StreamingProfiles.LoadAsync();
+            channel = machine.Providers.FirstOrDefault(profile => profile.Id == output.ProfileId)?.ChannelId ?? string.Empty;
+        }
+        await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new
+        {
+            mode = "operator",
+            platform = output.Provider.ToString(),
+            channel,
+            outputId = output.Id.ToString("D")
+        });
+        ShowNotice($"Operator Chat: {output.Name}. Broadcast outputs remain isolated.");
+    }
+
+    private Task SelectProgramPage(Guid pageId)
+    {
+        var page = State.Document.Pages.FirstOrDefault(item => item.Id == pageId);
+        if (page is null) return Task.CompletedTask;
+        StreamingSession.SetProgramPage(pageId);
+        var settings = CloneStreaming(State.Document.Streaming);
+        settings.ProgramPageId = pageId;
+        settings.FollowSelectedPage = false;
+        State.ApplyStreamingSettings(settings);
+        if (State.SelectedPageId != pageId) State.SelectPage(pageId);
+        ShowNotice($"Program page: {page.Name}");
+        return Task.CompletedTask;
+    }
+
+    private static PublicationStreamingSettings CloneStreaming(PublicationStreamingSettings settings) =>
+        System.Text.Json.JsonSerializer.Deserialize<PublicationStreamingSettings>(
+            System.Text.Json.JsonSerializer.Serialize(settings)) ?? new PublicationStreamingSettings();
+
     private Task OpenStoryEditorById(Guid id)
     {
         State.SelectElement(id);
@@ -1535,6 +1829,10 @@
         if (_disposed) return;
         _disposed = true;
         State.Changed -= StateChanged;
+        StreamingSession.Changed -= StateChanged;
+        StreamingSession.HotkeyTriggered -= HandleGlobalStreamingHotkey;
+        try { _ = JS.InvokeVoidAsync("publisherStreaming.unbindHotkeys"); } catch { }
+        _streamingHotkeyReference?.Dispose();
         _recoverySaveCancellation?.Cancel();
         _recoverySaveCancellation?.Dispose();
         if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);

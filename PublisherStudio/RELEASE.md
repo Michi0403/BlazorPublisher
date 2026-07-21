@@ -1,14 +1,9 @@
-# PublisherStudio v1.0.46 release
+# PublisherStudio v1.0.48 release
 
-See `CHANGELOG-v1.0.46.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.48.md`, `docs/STREAMING.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
 
-## Highlights
+This revision completes the document-first streaming foundation with provider-specific Chat composition, encrypted Chat credentials, Twitch/YouTube Chat adapters, native device discovery/capture, Windows process-loopback audio, browser WebRTC delivery, VLC-compatible HLS and RTSP, and selected recording variants.
 
-- A self-updating **Publication media** object exposes document pictures, videos, and audio to Gallery and Tile View without copying binary data into a second user-managed dataset.
-- Gallery and Tile View render image, video, and audio rows through safe media templates with captions, posters, controls, and active-item playback.
-- Added the DevExtreme **Chat** component with selectable message fields, current-sender settings, platform/channel isolation, live bridge events, and an offline-export runtime contract.
-- Twitch, YouTube, Preview, and Custom chats remain separate. A platform-specific stream output can select its chat using component settings, `publisherChatPlatform`, and `publisherChatChannel`.
+The source package intentionally excludes `bin`, `obj`, `.vs`, `.git`, restored `node_modules`, local credentials, recordings, and generated runtime caches.
 
-## Versions
-
-Application/package/installer `1.0.46`, publication format `1.43`, picture format `1.2`.
+Application/package/installer/Media Host `1.0.48`, publication format `1.45`, picture format `1.2`.

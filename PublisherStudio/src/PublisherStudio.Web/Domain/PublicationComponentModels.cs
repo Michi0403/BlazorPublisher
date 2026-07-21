@@ -38,6 +38,7 @@ public enum PublicationComponentKind
 
 public enum PublicationChatPlatform
 {
+    OutputContext,
     Preview,
     Twitch,
     YouTube,
@@ -360,7 +361,7 @@ public sealed class DevExtremeComponentElement : PublicationElement
     public string Orientation { get; set; } = "horizontal";
     public int ColumnCount { get; set; } = 2;
     public string ButtonText { get; set; } = "Run";
-    public PublicationChatPlatform ChatPlatform { get; set; } = PublicationChatPlatform.Preview;
+    public PublicationChatPlatform ChatPlatform { get; set; } = PublicationChatPlatform.OutputContext;
     public string ChatChannel { get; set; } = string.Empty;
     public string ChatPlatformField { get; set; } = "platform";
     public string ChatChannelField { get; set; } = "channel";

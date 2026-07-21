@@ -198,6 +198,9 @@
                         case DevExtremeComponentElement component:
                             <DevExtremeComponentView @key="component.Id" Document="State.Document" Item="component" CurrentPageId="State.SelectedPageId" DesignerMode="true" />
                             break;
+                        case LiveSourceElement liveSource:
+                            <LiveSourceView @key="liveSource.Id" Item="liveSource" DesignerMode="true" />
+                            break;
                         case SpreadsheetElement spreadsheet:
                             <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
                                 <div class="publication-content-source" data-content-fit-source>

@@ -237,10 +237,10 @@ app.MapGet("/stream/{sessionId:guid}/{**asset}", (Guid sessionId, string? asset,
 app.MapGet("/watch/{sessionId:guid}", (Guid sessionId, MediaSessionRegistry registry) =>
 {
     if (!registry.TryGet(sessionId, out var session) || !session.LanEnabled) return Results.NotFound();
-    return Results.Content($"""
+    return Results.Content($$"""
 <!doctype html><html><head><meta charset="utf-8"><title>PublisherStudio stream</title>
-<style>html,body{{margin:0;background:#050b16;color:#fff;font:16px system-ui;height:100%}}main{{display:grid;place-items:center;height:100%}}section{{text-align:center;max-width:44rem}}code{{color:#93c5fd}}</style></head>
-<body><main><section><h1>{WebUtility.HtmlEncode(session.Name)}</h1><p>The LAN output is prepared. The renderer/encoder must announce its WebRTC or HLS ingest before playback starts.</p><p>Session <code>{sessionId:D}</code></p></section></main></body></html>
+<style>html,body{margin:0;background:#050b16;color:#fff;font:16px system-ui;height:100%}main{display:grid;place-items:center;height:100%}section{text-align:center;max-width:44rem}code{color:#93c5fd}</style></head>
+<body><main><section><h1>{{WebUtility.HtmlEncode(session.Name)}}</h1><p>The LAN output is prepared. The renderer/encoder must announce its WebRTC or HLS ingest before playback starts.</p><p>Session <code>{{sessionId:D}}</code></p></section></main></body></html>
 """, "text/html");
 });
 

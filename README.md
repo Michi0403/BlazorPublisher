@@ -1,5 +1,5 @@
 Link to Windows x64 Installer and Wrapper, for anything else check the Release Section
-https://github.com/Michi0403/BlazorPublisher/releases/download/v140/PublisherStudio.Setup.exe
+https://github.com/Michi0403/BlazorPublisher/releases/download/v145/PublisherStudio.Setup.exe
 
 # PublisherStudio
 

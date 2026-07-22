@@ -1,3 +1,6 @@
+Link to Winx64 setup https://github.com/Michi0403/BlazorPublisher/releases/download/v152/PublisherStudio.Setup.exe
+for everything else check the release section
+
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**

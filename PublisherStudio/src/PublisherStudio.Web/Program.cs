@@ -102,9 +102,9 @@ public static class Program
         builder.Services.AddSingleton<PublicationMediaAssetStore>();
         builder.Services.AddSingleton<PublicationRecoveryService>();
         builder.Services.AddSingleton<StreamingProfileStore>();
+        PublisherStreamingRuntimeExtensions.AddPublisherStreamingRuntime(builder.Services);
         builder.Services.AddSingleton<StreamingMediaHostClient>();
         builder.Services.AddSingleton<StreamingSessionService>();
-        builder.Services.AddHostedService<StreamingMediaHostLauncher>();
         builder.Services.AddScoped<EditorStateService>();
         builder.Services.AddScoped<PictureEditorStateService>();
 
@@ -117,9 +117,11 @@ public static class Program
         app.UseDevExpressControls();
         app.UseStaticFiles();
         app.UseCors();
+        app.UseWebSockets();
         app.UseAntiforgery();
         app.MapStaticAssets();
         app.MapControllers();
+        PublisherStreamingRuntimeExtensions.MapPublisherStreamingRuntime(app);
         app.MapHealthChecks("/health");
         app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
         return app;

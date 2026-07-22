@@ -1,37 +1,37 @@
-using System.Net.Http.Json;
+using System.Text.Json;
 using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services;
 
-public sealed class StreamingMediaHostClient(IHttpClientFactory httpClientFactory, StreamingProfileStore profiles)
+/// <summary>
+/// In-process facade over PublisherStudio's integrated streaming runtime.
+/// No second executable, loopback port, or HTTP client is involved. Browser-facing
+/// capture and ingest sockets remain available as same-origin application endpoints.
+/// </summary>
+public sealed class StreamingMediaHostClient(StreamingProfileStore profiles, MediaSessionRegistry sessions)
 {
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private static readonly JsonSerializerOptions WebJson = new(JsonSerializerDefaults.Web);
     private readonly StreamingProfileStore _profiles = profiles;
+    private readonly MediaSessionRegistry _sessions = sessions;
 
-    public async Task<List<NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
+    public async Task<List<PublisherStudio.Domain.NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var settings = await _profiles.LoadAsync(cancellationToken);
-            using var client = await CreateClientAsync(cancellationToken);
-            var query = string.IsNullOrWhiteSpace(settings.FfmpegPath)
-                ? string.Empty
-                : $"?ffmpegPath={Uri.EscapeDataString(settings.FfmpegPath)}";
-            return await client.GetFromJsonAsync<List<NativeMediaDeviceInfo>>($"api/mediahost/devices{query}", cancellationToken) ?? [];
-        }
-        catch { return []; }
+        var settings = await _profiles.LoadAsync(cancellationToken);
+        var devices = await NativeDeviceDiscovery.DiscoverAsync(settings.FfmpegPath, cancellationToken);
+        return devices
+            .Select(device => new PublisherStudio.Domain.NativeMediaDeviceInfo
+            {
+                Id = device.Id,
+                Name = device.Name,
+                Kind = device.Kind,
+                Backend = device.Backend,
+                ProcessId = device.ProcessId,
+                WindowTitle = device.WindowTitle
+            })
+            .ToList();
     }
 
-    public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            using var client = await CreateClientAsync(cancellationToken);
-            using var response = await client.GetAsync("api/mediahost/capabilities", cancellationToken);
-            return response.IsSuccessStatusCode;
-        }
-        catch { return false; }
-    }
+    public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default) => Task.FromResult(true);
 
     public async Task<MediaHostSessionResponse?> StartAsync(PublicationDocument document, bool dryRun, CancellationToken cancellationToken = default)
     {
@@ -64,6 +64,7 @@ public sealed class StreamingMediaHostClient(IHttpClientFactory httpClientFactor
                 AudioCodec = output.AudioCodec
             });
         }
+
         var recording = new PublicationRecordingSettings
         {
             Enabled = document.Streaming.Recording.Enabled,
@@ -76,8 +77,8 @@ public sealed class StreamingMediaHostClient(IHttpClientFactory httpClientFactor
             SegmentSeconds = document.Streaming.Recording.SegmentSeconds,
             RemuxToMp4AfterStop = document.Streaming.Recording.RemuxToMp4AfterStop
         };
-        using var client = await CreateClientAsync(cancellationToken);
-        using var response = await client.PostAsJsonAsync("api/mediahost/sessions", new MediaHostStartSessionRequest
+
+        var request = new MediaHostStartSessionRequest
         {
             PublicationId = document.Id,
             PublicationName = document.Name,
@@ -92,54 +93,46 @@ public sealed class StreamingMediaHostClient(IHttpClientFactory httpClientFactor
             Recording = recording,
             Lan = document.Streaming.Lan,
             Hotkeys = document.Streaming.Hotkeys
-        }, cancellationToken);
-        if (!response.IsSuccessStatusCode) return null;
-        return await response.Content.ReadFromJsonAsync<MediaHostSessionResponse>(cancellationToken: cancellationToken);
+        };
+
+        try
+        {
+            var session = _sessions.Create(JsonSerializer.SerializeToElement(request, WebJson));
+            return new MediaHostSessionResponse
+            {
+                SessionId = session.Id,
+                Status = session.DryRun ? "dry-run" : "prepared"
+            };
+        }
+        catch
+        {
+            return null;
+        }
     }
 
-    public async Task<bool> StopAsync(Guid sessionId, CancellationToken cancellationToken = default)
-    {
-        using var client = await CreateClientAsync(cancellationToken);
-        using var response = await client.DeleteAsync($"api/mediahost/sessions/{sessionId:D}", cancellationToken);
-        return response.IsSuccessStatusCode;
-    }
+    public Task<bool> StopAsync(Guid sessionId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_sessions.Stop(sessionId));
 
-    public async Task<bool> SetOutputEnabledAsync(Guid sessionId, Guid outputId, bool enabled, CancellationToken cancellationToken = default)
-    {
-        using var client = await CreateClientAsync(cancellationToken);
-        using var response = await client.PutAsJsonAsync($"api/mediahost/sessions/{sessionId:D}/outputs/{outputId:D}", new { enabled }, cancellationToken);
-        return response.IsSuccessStatusCode;
-    }
+    public Task<bool> SetOutputEnabledAsync(Guid sessionId, Guid outputId, bool enabled, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_sessions.SetOutput(sessionId, outputId, enabled));
 
-    public async Task<bool> SetProgramPageAsync(Guid sessionId, Guid pageId, CancellationToken cancellationToken = default)
-    {
-        using var client = await CreateClientAsync(cancellationToken);
-        using var response = await client.PutAsJsonAsync($"api/mediahost/sessions/{sessionId:D}/program-page", new { pageId }, cancellationToken);
-        return response.IsSuccessStatusCode;
-    }
+    public Task<bool> SetProgramPageAsync(Guid sessionId, Guid pageId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_sessions.SetProgramPage(sessionId, pageId));
 
-    public async Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default)
-    {
-        using var client = await CreateClientAsync(cancellationToken);
-        using var response = await client.PutAsJsonAsync($"api/mediahost/sessions/{sessionId:D}/recording", new { enabled }, cancellationToken);
-        return response.IsSuccessStatusCode;
-    }
+    public Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_sessions.SetRecording(sessionId, enabled));
 
-    public async Task<List<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    public Task<List<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        using var client = await CreateClientAsync(cancellationToken);
-        using var response = await client.GetAsync($"api/mediahost/sessions/{sessionId:D}/events", cancellationToken);
-        if (!response.IsSuccessStatusCode) return [];
-        return await response.Content.ReadFromJsonAsync<List<MediaHostHotkeyEvent>>(cancellationToken: cancellationToken) ?? [];
-    }
-
-    private async Task<HttpClient> CreateClientAsync(CancellationToken cancellationToken)
-    {
-        var settings = await _profiles.LoadAsync(cancellationToken);
-        var client = _httpClientFactory.CreateClient(nameof(StreamingMediaHostClient));
-        client.BaseAddress = new Uri($"http://127.0.0.1:{settings.MediaHostPort}/");
-        client.Timeout = TimeSpan.FromSeconds(4);
-        return client;
+        var events = _sessions.DrainEvents(sessionId)
+            .Select(item => new MediaHostHotkeyEvent
+            {
+                Command = item.Command,
+                TargetId = item.TargetId,
+                TriggeredUtc = item.TriggeredUtc
+            })
+            .ToList();
+        return Task.FromResult(events);
     }
 }
 

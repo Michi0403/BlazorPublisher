@@ -1655,13 +1655,13 @@
             }).ToArray();
             await JS.InvokeAsync<bool>("publisherStreaming.configureChatBridge", new
             {
-                mediaHostUrl = $"http://127.0.0.1:{machine.MediaHostPort}",
+                mediaHostUrl = string.Empty,
                 sessionId = sessionId.ToString("D"),
                 outputs = browserOutputs
             });
             await JS.InvokeAsync<object>("publisherStreaming.startProgramIngest", new
             {
-                mediaHostUrl = $"http://127.0.0.1:{machine.MediaHostPort}",
+                mediaHostUrl = string.Empty,
                 sessionId = sessionId.ToString("D"),
                 videoBitsPerSecond = videoBitrate,
                 audioBitsPerSecond = 192_000,

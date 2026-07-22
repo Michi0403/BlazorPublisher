@@ -29,17 +29,17 @@
         'disable recording': 'Turn recording off while preserving the configured recording settings.',
         'use clean master': 'Record the shared publication render before provider-specific scaling and encoding.',
         'use enabled outputs': 'Record a separate file for every currently enabled publication output.',
-        'enable lan output': 'Allow the Media Host to start the configured LAN listener during a session.',
-        'disable lan output': 'Prevent the Media Host from exposing any LAN playback listener.',
+        'enable lan output': 'Allow PublisherStudio to start the configured LAN listener during a session.',
+        'disable lan output': 'Prevent PublisherStudio from exposing any LAN playback listener.',
         'local computer only': 'Bind LAN playback to 127.0.0.1 so only this computer can connect.',
         'browser + hls': 'Enable low-latency browser playback and HLS delivery for browsers or VLC.',
         'add device profile': 'Create a reusable camera, microphone, capture-device, application, or window profile.',
         'refresh browser devices': 'Ask the browser for available cameras and microphones. Permission may be required before labels appear.',
-        'refresh native devices': 'Ask the local Media Host and FFmpeg to discover native capture devices, audio devices, and applications.',
+        'refresh native devices': 'Ask PublisherStudio and FFmpeg to discover native capture devices, audio devices, and applications.',
         'save profiles': 'Save the current reusable device profiles to the machine profile store.',
         'save device profiles': 'Save the current reusable device profiles to the machine profile store.',
-        'add hotkey': 'Add a streaming command shortcut. Global shortcuts are active only while the Media Host session is running.',
-        'save machine options': 'Save FFmpeg, encoder, Media Host, recording-directory, provider, and device settings on this machine.',
+        'add hotkey': 'Add a streaming command shortcut. Global shortcuts are active only while the PublisherStudio streaming session is running.',
+        'save machine options': 'Save FFmpeg, encoder, recording-directory, provider, and device settings on this machine.',
         'apply streaming setup': 'Apply publication-specific output, recording, LAN, page, and hotkey settings and close Streaming Studio.',
         'cancel': 'Close the current studio without applying unsaved changes made in that studio.',
         'close': 'Close the current window or studio.',
@@ -205,8 +205,21 @@
         return tooltip;
     }
 
+    function overlayZIndex() {
+        let highest = 1000;
+        document.querySelectorAll('.dx-overlay-wrapper,.dx-popup-wrapper,.streaming-studio-overlay,[role="dialog"]').forEach(element => {
+            if (!(element instanceof HTMLElement) || element.hidden) return;
+            const style = getComputedStyle(element);
+            if (style.display === 'none' || style.visibility === 'hidden') return;
+            const value = Number.parseInt(style.zIndex, 10);
+            if (Number.isFinite(value)) highest = Math.max(highest, value);
+        });
+        return Math.min(2147483000, highest + 2);
+    }
+
     function position(target) {
         const popup = ensureTooltip();
+        popup.style.zIndex = String(overlayZIndex());
         const rect = target.getBoundingClientRect();
         const popupRect = popup.getBoundingClientRect();
         const margin = 10;
@@ -282,6 +295,8 @@
 
     document.addEventListener('focusout', () => hide(), true);
     document.addEventListener('pointerdown', () => hide(true), true);
+    document.addEventListener('contextmenu', () => hide(true), true);
+    document.addEventListener('click', () => hide(true), true);
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') hide(true);
     }, true);

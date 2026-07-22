@@ -122,6 +122,17 @@ internal static class Program
                 }
                 try
                 {
+                    if (options.CheckFfmpeg && !options.InstallFfmpeg)
+                        FfmpegProvisioner.ReportStatus(logger);
+                    else if (!options.SkipFfmpeg && (options.InstallFfmpeg || options.InstallBlazorPublisher || options.UpdateBlazorPublisher))
+                        await FfmpegProvisioner.EnsureInstalledAsync(logger).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error while checking or installing FFmpeg.");
+                }
+                try
+                {
                     if (options.DesktopShortcuts || options.StartMenuShortcuts)
                         ProvisionWindowsShortcuts(options, logger);
                 }
@@ -196,6 +207,8 @@ internal static class Program
 
             logger.LogInformation($"Extracting BlazorPublisher setup/bootstrap '{setupZipPath}' to '{targetPath}'");
             ExtractZipWithFallback(setupZipPath, targetPath, logger);
+
+            RemoveLegacyMediaHostPayload(targetPath, logger);
 
             logger.LogDebug($"BlazorPublisher installed to '{targetPath}'.");
             logger.LogInformation($"BlazorPublisher app and setup/bootstrap files now reside in '{targetPath}'.");
@@ -1158,6 +1171,86 @@ internal static class Program
       
     }
 
+    private static void RemoveLegacyMediaHostPayload(string installRoot, ILogger logger)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(installRoot) || !Directory.Exists(installRoot))
+                return;
+
+            var normalizedRoot = Path.GetFullPath(installRoot)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                + Path.DirectorySeparatorChar;
+            var removed = 0;
+
+            var legacyDirectories = Directory.EnumerateDirectories(
+                    installRoot,
+                    "MediaHost",
+                    new EnumerationOptions
+                    {
+                        RecurseSubdirectories = true,
+                        IgnoreInaccessible = true,
+                        MatchCasing = MatchCasing.CaseInsensitive,
+                        AttributesToSkip = FileAttributes.ReparsePoint
+                    })
+                .OrderByDescending(path => path.Length)
+                .ToList();
+
+            foreach (var directory in legacyDirectories)
+            {
+                var fullPath = Path.GetFullPath(directory);
+                if (!fullPath.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                try
+                {
+                    Directory.Delete(fullPath, recursive: true);
+                    removed++;
+                    logger.LogInformation("Removed obsolete standalone Media Host directory '{Path}'.", fullPath);
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "Could not remove obsolete Media Host directory '{Path}'.", fullPath);
+                }
+            }
+
+            foreach (var file in Directory.EnumerateFiles(
+                         installRoot,
+                         "PublisherStudio.MediaHost*",
+                         new EnumerationOptions
+                         {
+                             RecurseSubdirectories = true,
+                             IgnoreInaccessible = true,
+                             MatchCasing = MatchCasing.CaseInsensitive,
+                             AttributesToSkip = FileAttributes.ReparsePoint
+                         }))
+            {
+                var fullPath = Path.GetFullPath(file);
+                if (!fullPath.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                try
+                {
+                    File.SetAttributes(fullPath, FileAttributes.Normal);
+                    File.Delete(fullPath);
+                    removed++;
+                    logger.LogInformation("Removed obsolete standalone Media Host file '{Path}'.", fullPath);
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "Could not remove obsolete Media Host file '{Path}'.", fullPath);
+                }
+            }
+
+            if (removed > 0)
+                logger.LogInformation("Removed {Count} obsolete standalone Media Host item(s) during the single-application migration.", removed);
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Legacy Media Host cleanup could not be completed under '{Path}'.", installRoot);
+        }
+    }
+
     private static void DeleteIfExists(string path, ILogger logger)
     {
         try
@@ -1323,6 +1416,9 @@ internal sealed class CliOptions
     public bool Uninstall { get; private set; }
     public bool DesktopShortcuts { get; private set; }
     public bool StartMenuShortcuts { get; private set; }
+    public bool InstallFfmpeg { get; private set; }
+    public bool SkipFfmpeg { get; private set; }
+    public bool CheckFfmpeg { get; private set; }
     public string ShortcutGroupName { get; private set; } = "BlazorPublisher by Michi0403";
     public static CliOptions Parse(string[] args)
     {
@@ -1334,6 +1430,7 @@ internal sealed class CliOptions
             argsList.Add("--force-delete");
             argsList.Add("--start-blazorpublisher");
             argsList.Add("--shortcuts");
+            argsList.Add("--install-ffmpeg");
         }
         for (var i = 0; i < argsList.Count; i++)
         {
@@ -1369,6 +1466,19 @@ internal sealed class CliOptions
                     options.StartBlazorPublisher = true;
                     options.DesktopShortcuts = true;
                     options.StartMenuShortcuts = true;
+                    options.InstallFfmpeg = true;
+                    break;
+                case "--install-ffmpeg":
+                    options.InstallFfmpeg = true;
+                    options.SkipFfmpeg = false;
+                    break;
+                case "--skip-ffmpeg":
+                case "--no-ffmpeg":
+                    options.SkipFfmpeg = true;
+                    options.InstallFfmpeg = false;
+                    break;
+                case "--check-ffmpeg":
+                    options.CheckFfmpeg = true;
                     break;
                 case "--blazorpublisher-zip":
                     options.BlazorPublisherZipPath = NextValue(argsList, ref i, arg);
@@ -1440,6 +1550,9 @@ internal sealed class CliOptions
         $"{nameof(Uninstall)}={Uninstall}",
         $"{nameof(DesktopShortcuts)}={DesktopShortcuts}",
         $"{nameof(StartMenuShortcuts)}={StartMenuShortcuts}",
+        $"{nameof(InstallFfmpeg)}={InstallFfmpeg}",
+        $"{nameof(SkipFfmpeg)}={SkipFfmpeg}",
+        $"{nameof(CheckFfmpeg)}={CheckFfmpeg}",
         $"{nameof(ShortcutGroupName)}={ShortcutGroupName}"
         ]);
     }
@@ -1455,12 +1568,17 @@ Common examples:
   PublisherStudio.Setup --install-blazorpublisher --force-delete --start-blazorpublisher --shortcuts
   PublisherStudio.Setup --update-blazorpublisher --start-blazorpublisher --shortcuts
   PublisherStudio.Setup --start-blazorpublisher --port 58071
+  PublisherStudio.Setup --install-ffmpeg
+  PublisherStudio.Setup --check-ffmpeg
   PublisherStudio.Setup --uninstall --force-delete
 
 Options:
   --install-blazorpublisher         Download and install the latest BlazorPublisher release.
   --update-blazorpublisher          Download and extract the latest BlazorPublisher application and setup release.
-  --start-blazorpublisher           Start PublisherStudio.Web from %LOCALAPPDATA%\BlazorPublisher.
+  --start-blazorpublisher           Start PublisherStudio.Web from the local BlazorPublisher installation.
+  --install-ffmpeg                  Check for FFmpeg and install it with an available OS package manager.
+  --check-ffmpeg                    Report whether FFmpeg is available without installing it.
+  --skip-ffmpeg                     Skip the automatic FFmpeg check/install during app installation or update.
   --blazorpublisher-zip <path>      Override BlazorPublisher application ZIP download path.
   --blazorpublisher-setup-zip <path> Override BlazorPublisher setup ZIP download path.
   --blazorpublisher-exe <path>      Override PublisherStudio.Web executable path.

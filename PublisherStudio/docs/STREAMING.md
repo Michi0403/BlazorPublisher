@@ -17,10 +17,12 @@ The interface changes no runtime boundary: publication JSON still stores profile
 ## Runtime layers
 
 1. **PublisherStudio.Web** authors and renders the publication, requests browser capture permissions, applies GPU/browser filters, mixes browser sources, and creates the clean master plus required output canvases.
-2. **PublisherStudio.MediaHost** owns the long-running session, native capture, FFmpeg encoders, recordings, provider delivery, LAN endpoints, provider Chat connections, Now Playing metadata, and Windows global hotkeys.
+2. **PublisherStudio.Web integrated streaming runtime** owns the long-running session, native capture, FFmpeg encoders, recordings, provider delivery, LAN endpoints, provider Chat connections, Now Playing metadata, and Windows global hotkeys. Its services live under `Services/StreamingRuntime` and compile into the main application executable.
 3. **Machine profiles** store reusable provider/device identities outside publication files. Stream keys and Chat OAuth tokens are protected with ASP.NET Core Data Protection; on Windows the key ring is protected with DPAPI.
 
-The Media Host is deliberately separate from the Blazor circuit. A browser reconnect is not the owner of the encoder, recording, or LAN listener lifetime.
+The solution therefore publishes one `PublisherStudio.Web` application executable. `PublisherStudio.Setup` remains the installation utility, not a required companion runtime. Explicit Company/LAN delivery may open an additional listener inside the same process only when the user enables it.
+
+There is no separately launched Media Host process and no fixed secondary loopback port. Runtime services are application singletons/hosted services inside `PublisherStudio.Web`, while browser-facing HTTP and WebSocket routes use the application origin. A Blazor circuit reconnect is still not the owner of encoder, recording, or LAN-listener lifetime; the main application process is.
 
 ## One authored page, output-specific Chat
 
@@ -29,7 +31,7 @@ The browser captures one clean base publication frame while authored Chat object
 1. scales the clean base to that output's dimensions;
 2. resolves the authored Chat object against the output provider and channel;
 3. draws only that provider's messages into the Chat object's published bounds;
-4. sends the resulting WebM ingest to the matching Media Host output pipeline.
+4. sends the resulting WebM ingest to the matching integrated output pipeline through same-origin WebSockets.
 
 This keeps all non-Chat pixels synchronized while preventing Twitch messages from appearing in the YouTube program and vice versa. The operator can switch Chat tabs and reply through the same authored Chat component. Broadcast mode does not construct the message composer DOM at all.
 
@@ -37,7 +39,7 @@ A variant canvas is generated only when its provider is enabled or it was select
 
 ## Provider Chat adapters
 
-The Media Host maintains a separate channel, bounded history, subscriber set, and send path per output.
+The integrated runtime maintains a separate channel, bounded history, subscriber set, and send path per output.
 
 - **Twitch** uses an authenticated TLS IRC adapter with message tags, timestamps, badges, receive/send, and reconnect.
 - **YouTube** uses the authenticated Live Chat HTTP API with polling, page tokens, deduplication, receive/send, and reconnect.
@@ -49,7 +51,7 @@ Stream keys and Chat OAuth credentials are stored separately. A publication refe
 
 Browser APIs remain the first choice for camera, microphone, screen, window, and browser-tab sources. Live sources enter a 48 kHz audio graph with per-source volume and delay and retain device timestamps where the platform exposes them.
 
-The Media Host additionally provides:
+The integrated runtime additionally provides:
 
 - Windows DirectShow camera/capture-card discovery and capture;
 - macOS AVFoundation discovery and capture;
@@ -58,6 +60,20 @@ The Media Host additionally provides:
 - FFmpeg-backed network sources such as RTSP, RTMP, SRT, UDP, and TCP.
 
 Native sessions are returned to the publication as bounded WebM streams, so they remain ordinary Publisher objects with the existing crop, transform, filter, animation, connector, and output workflows.
+
+## FFmpeg discovery and installation
+
+Browser camera/webcam, microphone, screen, window, and browser-tab sources use browser media APIs first. FFmpeg is required when PublisherStudio must perform native device capture, isolated application audio, network-protocol ingest, provider encoding, recording, HLS, or RTSP.
+
+PublisherStudio searches an explicitly configured path, the application directory, common package-manager locations, and the operating-system `PATH`. InstallerConsole performs the same check and can provision FFmpeg with WinGet/Chocolatey/Scoop on Windows, Homebrew/MacPorts on macOS, or the available package manager on common Linux distributions. The commands are:
+
+```text
+PublisherStudio.Setup --check-ffmpeg
+PublisherStudio.Setup --install-ffmpeg
+PublisherStudio.Setup --skip-ffmpeg
+```
+
+Automatic package-manager installation can require elevation and network access. When provisioning is unavailable, install FFmpeg manually and either expose `ffmpeg` on `PATH` or select its executable in Streaming Studio.
 
 ## Filters
 
@@ -72,7 +88,7 @@ Residual chroma opacity intentionally supports translucent or ghost-like keyed o
 
 ## Encoding and quality
 
-Program capture creates a high-bitrate WebM intermediate. Each required output receives its own configured dimensions and frame rate before the Media Host performs its final provider/recording encode. FFmpeg hardware encoders are discovered and initialization-tested before NVENC, Quick Sync, AMF, or VideoToolbox is selected; software encoders remain the fallback.
+Program capture creates a high-bitrate WebM intermediate. Each required output receives its own configured dimensions and frame rate before the integrated runtime performs its final provider/recording encode. FFmpeg hardware encoders are discovered and initialization-tested before NVENC, Quick Sync, AMF, or VideoToolbox is selected; software encoders remain the fallback.
 
 This is currently a decode/re-encode pipeline. It avoids routing raw 4K frames through Blazor and keeps provider processes isolated, but a future native shared-texture/WebCodecs transport can reduce the intermediate generation further.
 
@@ -90,7 +106,7 @@ Segmented writing limits loss after interruption. FFmpeg input is closed cleanly
 
 LAN delivery binds only to the IP address selected by the user and is disabled by default. It can require a session token and enforce a viewer limit.
 
-- **WebRTC** supplies the lowest-latency browser path through Media Host signaling.
+- **WebRTC** supplies the lowest-latency browser path through same-process PublisherStudio signaling.
 - **WebM/MediaSource** is the browser fallback when WebRTC is unavailable or fails.
 - **HLS** provides a broadly compatible URL for browsers and VLC.
 - **RTSP** provides an RTSP control endpoint with interleaved RTP-over-TCP MPEG-TS delivery for VLC and compatible clients.
@@ -109,4 +125,4 @@ The Streaming Studio surfaces the generated browser, HLS, and RTSP addresses rat
 
 ## Build and hardware verification
 
-The source package includes all implementation projects and runtime tests. A release build still needs the .NET 10 SDK, the licensed DevExpress package feed, FFmpeg, and target-platform hardware/provider credentials. Windows process audio, physical capture devices, real OAuth accounts, and external ingest endpoints must be exercised on the release machine because they cannot be hardware-tested in the source-packaging container.
+The source package includes the main PublisherStudio application, InstallerConsole, and runtime tests. A release build still needs the .NET 10 SDK and licensed DevExpress package feed. FFmpeg is an end-user runtime requirement for native capture, final encoding, recording, and HLS/RTSP delivery; `PublisherStudio.Setup` can detect or install it through an available operating-system package manager. Windows process audio, physical capture devices, real OAuth accounts, and external ingest endpoints must be exercised on the release machine because they cannot be hardware-tested in the source-packaging container.

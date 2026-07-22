@@ -11,6 +11,8 @@ const surface = read('src/PublisherStudio.Web/Components/Editor/PageSurface.razo
 const interop = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
 const tooltips = read('src/PublisherStudio.Web/wwwroot/js/tooltipRuntime.js');
 const app = read('src/PublisherStudio.Web/Components/App.razor');
+const liveSource = read('src/PublisherStudio.Web/Components/Editor/LiveSourceView.razor');
+const streamingInterop = read('src/PublisherStudio.Web/wwwroot/js/streamingInterop.js');
 
 for (const contract of [
   '<DxRibbon', '<DxContextMenu', 'Provider profiles', 'Publication outputs',
@@ -25,11 +27,22 @@ assert.match(interop, /designerInteractionOwner/);
 assert.match(interop, /addEventListener\('dblclick', handlers\.stageDoubleClick, true\)/);
 assert.match(interop, /addEventListener\('contextmenu', handlers\.stageContextMenu, true\)/);
 assert.match(interop, /stopImmediatePropagation\(\)/);
+assert.match(interop, /number\(event\.pageX\)/);
+assert.match(interop, /number\(event\.pageY\)/);
+assert.match(surface, /PageX = pageX/);
+assert.match(surface, /PageY = pageY/);
+assert.match(surface, /Activate live source/);
+assert.match(surface, /PublicationLiveSourceKind\.BrowserTab/);
+assert.match(liveSource, /live-source-activate-/);
+assert.match(streamingInterop, /function activateSource/);
 
 assert.match(tooltips, /MutationObserver/);
 assert.match(tooltips, /\[role="menuitem"\]/);
 assert.match(tooltips, /publisherTooltip/);
 assert.match(tooltips, /PublisherStudioTooltips/);
+assert.match(tooltips, /function overlayZIndex/);
+assert.match(tooltips, /dx-overlay-wrapper/);
+assert.match(tooltips, /document\.addEventListener\('contextmenu', \(\) => hide\(true\)/);
 assert.match(app, /js\/tooltipRuntime\.js/);
 
 console.log('PublishingSuite interface, canvas activation/context-menu, and application tooltip contracts passed');

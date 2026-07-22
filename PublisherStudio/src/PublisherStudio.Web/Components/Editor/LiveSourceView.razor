@@ -27,7 +27,7 @@
     }
     @if (!_active)
     {
-        <button type="button" class="live-source-activate" @onclick="Activate" @onclick:stopPropagation title="Activate live source">
+        <button id="@ActivateButtonId" type="button" class="live-source-activate" @onclick="Activate" @onclick:stopPropagation title="Activate live source">
             <span>@SourceIcon</span><b>Activate @SourceLabel</b><small>@ActivationHint</small>
         </button>
     }
@@ -42,6 +42,7 @@
     [Parameter] public bool DesignerMode { get; set; }
 
     private bool _active;
+    private string ActivateButtonId => $"live-source-activate-{Item.Id:N}";
     private string VideoId => $"live-source-video-{Item.Id:N}";
     private string CanvasId => $"live-source-canvas-{Item.Id:N}";
     private string MeterId => $"live-source-meter-{Item.Id:N}";
@@ -80,7 +81,7 @@
     private string ActivationHint => Item.SourceKind switch
     {
         PublicationLiveSourceKind.ApplicationAudio or PublicationLiveSourceKind.SystemAudio => "Uses the browser audio picker when available; native isolated capture remains the fallback",
-        PublicationLiveSourceKind.NowPlaying => "Reads current MP3 tags through the local Media Host",
+        PublicationLiveSourceKind.NowPlaying => "Reads current MP3 tags through PublisherStudio's integrated streaming runtime",
         _ => "Browser permission may be requested"
     };
     private string FrameStyle => $"background:{Item.Background};--live-brightness:{Inv(Item.Brightness)};--live-contrast:{Inv(Item.Contrast)};--live-saturation:{Inv(Item.Saturation)};--live-hue:{Inv(Item.HueRotation)}deg;--live-blur:{Inv(Item.Blur)}px";
@@ -118,7 +119,7 @@
                 nativeBackend,
                 networkUrl = Item.NetworkUrl,
                 nowPlayingDirectory = Item.NowPlayingDirectory,
-                mediaHostUrl = $"http://127.0.0.1:{machine.MediaHostPort}",
+                mediaHostUrl = string.Empty,
                 ffmpegPath = machine.FfmpegPath,
                 includeAudio = Item.IncludeAudio,
                 muted = Item.Muted,

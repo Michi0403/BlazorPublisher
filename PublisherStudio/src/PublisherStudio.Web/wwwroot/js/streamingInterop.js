@@ -7,6 +7,15 @@
     let programCapture = null;
     let chatBridgeState = null;
 
+    function runtimeHttpBase(configured) {
+        const value = String(configured || "").trim().replace(/\/$/, "");
+        return value || window.location.origin;
+    }
+
+    function runtimeWsBase(configured) {
+        return runtimeHttpBase(configured).replace(/^http/i, "ws");
+    }
+
     function hexColor(value) {
         const match = /^#?([0-9a-f]{6})$/i.exec(String(value || ""));
         const hex = match ? match[1] : "00ff00";
@@ -43,8 +52,7 @@
     }
 
     async function acquireNative(config) {
-        const mediaHostUrl = String(config.mediaHostUrl || "").replace(/\/$/, "");
-        if (!mediaHostUrl) throw new Error("The local Media Host address is missing.");
+        const mediaHostUrl = runtimeHttpBase(config.mediaHostUrl);
         let captureId = "";
         let target = null;
         let objectUrl = "";
@@ -89,7 +97,7 @@
                 })
             });
             const result = await response.json().catch(() => ({}));
-            if (!response.ok || !result.captureId) throw new Error(result.error || "The Media Host could not start native capture.");
+            if (!response.ok || !result.captureId) throw new Error(result.error || "PublisherStudio could not start native capture.");
             captureId = String(result.captureId);
 
             const isAudioOnly = String(config.kind || "").toLowerCase().endsWith("audio")
@@ -133,7 +141,7 @@
                 target.src = objectUrl;
             });
 
-            const wsBase = mediaHostUrl.replace(/^http/i, "ws");
+            const wsBase = runtimeWsBase(mediaHostUrl);
             socket = new WebSocket(`${wsBase}/api/mediahost/native-captures/${encodeURIComponent(captureId)}/websocket`);
             socket.binaryType = "arraybuffer";
             socket.addEventListener("message", event => { queue.push(new Uint8Array(event.data)); pump(); });
@@ -311,7 +319,7 @@
 
     function installNowPlaying(config) {
         const root = document.getElementById(config.metadataId);
-        if (!root || !config.nowPlayingDirectory || !config.mediaHostUrl) return null;
+        if (!root || !config.nowPlayingDirectory) return null;
         const title = root.querySelector("[data-now-playing-title]");
         const artist = root.querySelector("[data-now-playing-artist]");
         const album = root.querySelector("[data-now-playing-album]");
@@ -321,7 +329,7 @@
         const refresh = async () => {
             if (stopped) return;
             try {
-                const url = `${String(config.mediaHostUrl).replace(/\/$/, "")}/api/mediahost/now-playing?directory=${encodeURIComponent(config.nowPlayingDirectory)}`;
+                const url = `${runtimeHttpBase(config.mediaHostUrl)}/api/mediahost/now-playing?directory=${encodeURIComponent(config.nowPlayingDirectory)}`;
                 const response = await fetch(url, { cache: "no-store" });
                 if (response.status === 204) return;
                 if (!response.ok) throw new Error(`Now Playing returned ${response.status}`);
@@ -340,7 +348,7 @@
                     window.dispatchEvent(new CustomEvent("publisherstudio:now-playing-changed", { detail: window.PublisherStudioNowPlaying }));
                 }
             } catch (error) {
-                if (album) album.textContent = error?.message || "Media Host unavailable";
+                if (album) album.textContent = error?.message || "Streaming runtime unavailable";
             }
         };
         refresh();
@@ -653,15 +661,15 @@
     }
 
     async function openIngestSocket(config, outputId = "") {
-        const baseUrl = String(config.mediaHostUrl || "").replace(/^http/i, "ws").replace(/\/$/, "");
-        if (!baseUrl || !config.sessionId) throw new Error("The Media Host session is not available.");
+        const baseUrl = runtimeWsBase(config.mediaHostUrl);
+        if (!config.sessionId) throw new Error("The integrated streaming session is not available.");
         const query = outputId ? `?outputId=${encodeURIComponent(outputId)}` : "";
         const socket = new WebSocket(`${baseUrl}/api/mediahost/sessions/${encodeURIComponent(config.sessionId)}/ingest/websocket${query}`);
         socket.binaryType = "arraybuffer";
         await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error("The Media Host did not accept the browser ingest.")), 5000);
+            const timeout = setTimeout(() => reject(new Error("PublisherStudio did not accept the browser ingest.")), 5000);
             socket.addEventListener("open", () => { clearTimeout(timeout); resolve(); }, { once: true });
-            socket.addEventListener("error", () => { clearTimeout(timeout); reject(new Error("The browser could not connect to the Media Host ingest socket.")); }, { once: true });
+            socket.addEventListener("error", () => { clearTimeout(timeout); reject(new Error("The browser could not connect to PublisherStudio's ingest socket.")); }, { once: true });
         });
         return socket;
     }
@@ -706,7 +714,7 @@
 
     async function startPublisherWebRtc(config, stream) {
         if (!config.enableWebRtc || typeof RTCPeerConnection === "undefined") return;
-        const baseUrl = String(config.mediaHostUrl || "").replace(/^http/i, "ws").replace(/\/$/, "");
+        const baseUrl = runtimeWsBase(config.mediaHostUrl);
         const socket = new WebSocket(`${baseUrl}/api/mediahost/sessions/${encodeURIComponent(config.sessionId)}/webrtc/publisher`);
         programCapture.signalSocket = socket;
         const send = value => { if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(value)); };
@@ -829,9 +837,9 @@
 
     function configureChatBridge(config = {}) {
         stopChatBridge();
-        const mediaHostUrl = String(config.mediaHostUrl || "").replace(/\/$/, "");
+        const mediaHostUrl = runtimeHttpBase(config.mediaHostUrl);
         const sessionId = String(config.sessionId || "");
-        if (!mediaHostUrl || !sessionId) return false;
+        if (!sessionId) return false;
         const outputs = (Array.isArray(config.outputs) ? config.outputs : [])
             .filter(item => item?.outputId && item.captureRequired !== false && item.chatEnabled === true)
             .map(item => ({
@@ -903,7 +911,7 @@
         chatBridgeState = state;
         window.PublisherStudioChatBridge = bridge;
 
-        const wsBase = mediaHostUrl.replace(/^http/i, "ws");
+        const wsBase = runtimeWsBase(mediaHostUrl);
         for (const output of outputs) {
             const socket = new WebSocket(`${wsBase}/api/mediahost/sessions/${encodeURIComponent(sessionId)}/chat/${encodeURIComponent(output.outputId)}/websocket`);
             state.sockets.set(output.outputId, socket);
@@ -992,6 +1000,15 @@
         window.addEventListener("keydown", hotkeyListener, true);
     }
 
+    function activateSource(id) {
+        const normalized = String(id || "").replace(/[^0-9a-f]/gi, "").toLowerCase();
+        if (!normalized) return false;
+        const button = document.getElementById(`live-source-activate-${normalized}`);
+        if (!(button instanceof HTMLButtonElement)) return false;
+        button.click();
+        return true;
+    }
+
     function setOutputContext(context = {}) {
         Object.assign(outputContext, context);
         window.PublisherStudioOutputContext = { ...outputContext };
@@ -1003,6 +1020,7 @@
     window.publisherStreaming = {
         attachSource,
         detachSource,
+        activateSource,
         enumerateDevices,
         chooseDirectory,
         setOutputContext,

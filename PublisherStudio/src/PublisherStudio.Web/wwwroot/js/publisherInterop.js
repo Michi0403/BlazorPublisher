@@ -1718,7 +1718,7 @@ function designerContextMenu(state, event) {
     state.lastCanvasClick = null;
     event.preventDefault();
     event.stopImmediatePropagation();
-    safeDotNet(state, 'OpenElementContextMenu', id, number(event.clientX), number(event.clientY));
+    safeDotNet(state, 'OpenElementContextMenu', id, number(event.clientX), number(event.clientY), number(event.pageX), number(event.pageY), number(event.screenX), number(event.screenY));
 }
 
 function pointerDown(state, event) {

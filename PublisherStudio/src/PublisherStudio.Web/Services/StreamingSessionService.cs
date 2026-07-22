@@ -24,7 +24,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
                 Mode = dryRun ? PublicationStreamSessionMode.DryRun : PublicationStreamSessionMode.Live,
                 ProgramPageId = ResolveProgramPage(document),
                 Recording = document.Streaming.Recording.Enabled,
-                StatusText = "Connecting to local media host…",
+                StatusText = "Preparing integrated streaming runtime…",
                 StartedUtc = DateTimeOffset.UtcNow,
                 OutputEnabled = document.Streaming.Outputs.ToDictionary(item => item.Id, item => item.Enabled)
             };
@@ -33,7 +33,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
             if (response is null)
             {
                 _snapshot.Mode = PublicationStreamSessionMode.Idle;
-                _snapshot.StatusText = "Media Host unavailable. Start PublisherStudio.MediaHost and try again.";
+                _snapshot.StatusText = "The integrated streaming runtime could not prepare the session. Check FFmpeg and the configured sources.";
                 _snapshot.MediaHostConnected = false;
                 _snapshot.StartedUtc = null;
             }

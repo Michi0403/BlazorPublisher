@@ -147,7 +147,7 @@
                         else
                         {
                             <section class="streaming-settings-card">
-                                <div class="streaming-card-heading"><div><h3>Identity and delivery</h3><p>Name the profile and choose how the Media Host reaches the provider.</p></div></div>
+                                <div class="streaming-card-heading"><div><h3>Identity and delivery</h3><p>Name the profile and choose how PublisherStudio reaches the provider.</p></div></div>
                                 <div class="streaming-form-grid two-column">
                                     <label data-help="A friendly reusable name shown when publication outputs choose this profile."><span>Profile name</span><input @bind="_providerDraft.Name" /></label>
                                     <label data-help="Select the streaming platform. Recommended output defaults follow this choice."><span>Provider</span><select @bind="_providerDraft.Provider">@foreach (var value in Enum.GetValues<PublicationStreamProvider>()) { <option value="@value">@value</option> }</select></label>
@@ -261,7 +261,7 @@
                                     <label class="streaming-check-field span-2"><input type="checkbox" @bind="_draft.Recording.Enabled" /><span><b>Record when a session starts</b><small>The recording pipeline remains isolated from every provider encoder.</small></span></label>
                                     <label data-help="Clean Master records the shared publication before provider scaling. Other variants record output-specific encodes."><span>Variant</span><select @bind="_draft.Recording.Variant">@foreach (var value in Enum.GetValues<PublicationStreamRecordingVariant>()) { <option value="@value">@RecordingVariantName(value)</option> }</select></label>
                                     <label><span>Container</span><select @bind="_draft.Recording.Container"><option value="mkv">MKV — crash tolerant</option><option value="mp4">MP4</option><option value="webm">WebM</option></select></label>
-                                    <label class="span-2" data-help="Native folder used by the Media Host. Leave blank to use the machine default recording directory."><span>Destination directory</span><input @bind="_draft.Recording.DestinationDirectory" placeholder="Use machine default when blank" /><small>Enter a native path; browsers intentionally do not reveal a selected folder's full path.</small></label>
+                                    <label class="span-2" data-help="Native folder used by PublisherStudio. Leave blank to use the machine default recording directory."><span>Destination directory</span><input @bind="_draft.Recording.DestinationDirectory" placeholder="Use machine default when blank" /><small>Enter a native path; browsers intentionally do not reveal a selected folder's full path.</small></label>
                                     <label><span>Segment seconds</span><input type="number" min="2" max="120" @bind="_draft.Recording.SegmentSeconds" /></label>
                                     <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.Recording.RemuxToMp4AfterStop" /><span><b>Remux MKV to MP4</b><small>Create a convenient MP4 after clean shutdown.</small></span></label>
                                 </div>
@@ -317,7 +317,7 @@
                                 <i class="pub-icon pub-icon-lock"></i>
                                 <span>Exposure</span>
                                 <strong>@LanExposureText</strong>
-                                <small>The Media Host reports final browser, HLS, and RTSP URLs after the session starts.</small>
+                                <small>PublisherStudio reports final browser, HLS, and RTSP URLs after the session starts.</small>
                             </aside>
                         </div>
 
@@ -406,10 +406,10 @@
                         </section>
 
                         <section class="streaming-settings-card">
-                            <div class="streaming-card-heading"><div><h3>Native devices and applications</h3><p>The local Media Host discovers capture cards, audio devices, and visible processes.</p></div><button type="button" @onclick="RefreshNativeDevices"><i class="pub-icon pub-icon-redo"></i>Refresh native devices</button></div>
+                            <div class="streaming-card-heading"><div><h3>Native devices and applications</h3><p>PublisherStudio discovers capture cards, audio devices, and visible processes through its integrated runtime.</p></div><button type="button" @onclick="RefreshNativeDevices"><i class="pub-icon pub-icon-redo"></i>Refresh native devices</button></div>
                             @if (_nativeDevices.Count == 0)
                             {
-                                <div class="streaming-inline-empty">No native targets listed. Start PublisherStudio.MediaHost, verify FFmpeg, then refresh.</div>
+                                <div class="streaming-inline-empty">No native targets listed. Verify FFmpeg and the operating-system capture permissions, then refresh.</div>
                             }
                             else
                             {
@@ -433,25 +433,25 @@
                 {
                     <main class="streaming-content-pane streaming-content-wide">
                         <header class="streaming-page-heading">
-                            <div><h2>Advanced streaming options</h2><p>Configure the local Media Host, program-page behavior, encoders, and session hotkeys.</p></div>
+                            <div><h2>Advanced streaming options</h2><p>Configure the integrated streaming runtime, program-page behavior, encoders, and session hotkeys.</p></div>
                             <button type="button" class="primary-button" @onclick="SaveMachineOptions"><i class="pub-icon pub-icon-save"></i>Save machine options</button>
                         </header>
 
                         <section class="streaming-settings-card">
-                            <div class="streaming-card-heading"><div><h3>Media Host and program</h3><p>Machine settings stay local; page-following behavior is stored with the publication.</p></div></div>
+                            <div class="streaming-card-heading"><div><h3>Streaming runtime and program</h3><p>The runtime is part of PublisherStudio; machine settings stay local and page-following behavior is stored with the publication.</p></div></div>
                             <div class="streaming-form-grid three-column">
-                                <label data-help="Path to FFmpeg. Leave blank for automatic discovery by the local Media Host."><span>FFmpeg path</span><input @bind="_machine.FfmpegPath" placeholder="Auto-detect when blank" /></label>
-                                <label><span>Media Host port</span><input type="number" min="1024" max="65535" @bind="_machine.MediaHostPort" /></label>
+                                <label data-help="Path to FFmpeg. Leave blank to search the application folder and the operating-system PATH."><span>FFmpeg path</span><input @bind="_machine.FfmpegPath" placeholder="Auto-detect when blank" /></label>
+                                <label data-help="Streaming capture, device discovery, recording, and ingest run inside this PublisherStudio process."><span>Streaming runtime</span><input value="Integrated into PublisherStudio" readonly /></label>
                                 <label data-help="Auto probes hardware encoders and falls back to software encoding when initialization fails."><span>Encoder preference</span><select @bind="_machine.HardwareEncoder">@foreach (var value in Enum.GetValues<StreamingHardwareEncoderPreference>()) { <option value="@value">@value</option> }</select></label>
                                 <label class="span-2"><span>Default recording directory</span><input @bind="_machine.DefaultRecordingDirectory" /></label>
                                 <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.FollowSelectedPage" /><span><b>Follow selected Publisher page</b><small>Use the current editor page as program.</small></span></label>
                                 <label><span>Fixed program page</span><select @bind="_draft.ProgramPageId" disabled="@_draft.FollowSelectedPage"><option value="">First page</option>@foreach (var documentPage in Document.Pages) { <option value="@documentPage.Id">@documentPage.Name</option> }</select></label>
                             </div>
-                            <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Auto prefers NVENC, Quick Sync, AMF, or VideoToolbox before software encoding. The separate Media Host lets an active session survive a browser reconnect.</span></div>
+                            <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Auto prefers NVENC, Quick Sync, AMF, or VideoToolbox before software encoding. Capture and encoder services run in the same PublisherStudio process; browser reconnects do not create a second application.</span></div>
                         </section>
 
                         <section class="streaming-settings-card">
-                            <div class="streaming-card-heading"><div><h3>Streaming hotkeys</h3><p>In-app hotkeys require focus. Global hotkeys are registered by the Windows Media Host while a session is active.</p></div><button type="button" @onclick="AddHotkey"><i class="pub-icon pub-icon-newpage"></i>Add hotkey</button></div>
+                            <div class="streaming-card-heading"><div><h3>Streaming hotkeys</h3><p>In-app hotkeys require focus. Global hotkeys are registered by PublisherStudio on Windows while a session is active.</p></div><button type="button" @onclick="AddHotkey"><i class="pub-icon pub-icon-newpage"></i>Add hotkey</button></div>
                             <div class="streaming-hotkey-list">
                                 @foreach (var hotkey in _draft.Hotkeys)
                                 {
@@ -480,7 +480,7 @@
                                         {
                                             <div class="hotkey-target-placeholder"><b>No target</b><small>This command applies to the active session.</small></div>
                                         }
-                                        <label class="streaming-check-field compact"><input type="checkbox" @bind="hotkey.Global" /><span><b>Global</b><small>Media Host registers it system-wide.</small></span></label>
+                                        <label class="streaming-check-field compact"><input type="checkbox" @bind="hotkey.Global" /><span><b>Global</b><small>PublisherStudio registers it system-wide.</small></span></label>
                                         <button type="button" class="icon-command-button danger" aria-label="Remove hotkey" @onclick="() => RemoveHotkey(hotkey.Id)">×</button>
                                     </article>
                                 }
@@ -612,7 +612,7 @@
         "recording" => "Choose clean-master or output-specific files without coupling recording reliability to public delivery.",
         "lan" => "Expose internal browser, HLS, or RTSP playback only on an explicitly selected address.",
         "devices" => "Discover browser/native sources and save stable machine profiles for live-source objects.",
-        _ => "Control the local Media Host, program page, encoder preference, and session hotkeys."
+        _ => "Control the integrated streaming runtime, program page, encoder preference, and session hotkeys."
     };
 
     private string SectionIcon => _tab switch
@@ -653,13 +653,13 @@
         ],
         "devices" =>
         [
-            new(1, "Discover sources", "Browser permission reveals cameras/microphones; Media Host finds native devices."),
+            new(1, "Discover sources", "Browser permission reveals cameras/microphones; PublisherStudio finds native devices."),
             new(2, "Save stable profiles", "Store the identifiers and backend hints once on this machine."),
             new(3, "Select from live objects", "Publication live-source elements reference the reusable device profile.")
         ],
         _ =>
         [
-            new(1, "Locate the Media Host", "Leave FFmpeg blank for discovery or specify the native executable path."),
+            new(1, "Check FFmpeg", "Leave FFmpeg blank for automatic discovery or specify the native executable path."),
             new(2, "Choose program behavior", "Follow the selected Publisher page or use a fixed program page."),
             new(3, "Assign hotkeys", "Keep shortcuts local to PublisherStudio or register them globally during sessions.")
         ]
@@ -671,7 +671,7 @@
         "outputs" => "Select an output before using ribbon commands such as Recommended settings, Duplicate, or Remove.",
         "recording" => "Selected-output recording can capture variants even when their public provider delivery is disabled.",
         "lan" => "127.0.0.1 never exposes the listener to another machine. Use a LAN address only when remote viewers are intended.",
-        "devices" => "Browser device labels are hidden until permission is granted; native discovery depends on Media Host and FFmpeg.",
+        "devices" => "Browser device labels are hidden until permission is granted; native discovery depends on operating-system permissions and FFmpeg.",
         _ => "Machine options are saved separately. Apply streaming setup stores only publication-specific page, output, recording, LAN, and hotkey settings."
     };
 
@@ -903,10 +903,28 @@
 
     private async Task RefreshNativeDevices()
     {
-        _nativeDevices = await MediaHost.DiscoverNativeDevicesAsync();
-        _status = _nativeDevices.Count == 0
-            ? "No native devices were reported. Check that PublisherStudio.MediaHost and FFmpeg are available."
-            : $"Found {_nativeDevices.Count} native devices and application targets.";
+        try
+        {
+            var ffmpeg = FfmpegLocator.Resolve(_machine.FfmpegPath);
+            _nativeDevices = await MediaHost.DiscoverNativeDevicesAsync();
+            if (_nativeDevices.Count > 0)
+            {
+                _status = ffmpeg is null
+                    ? $"Found {_nativeDevices.Count} operating-system application targets. Install FFmpeg to discover and use native camera/capture devices."
+                    : $"Found {_nativeDevices.Count} native devices and application targets. FFmpeg: {Path.GetFileName(ffmpeg)}.";
+            }
+            else
+            {
+                _status = ffmpeg is null
+                    ? "FFmpeg was not found. Run PublisherStudio.Setup --install-ffmpeg or configure the executable path, then refresh."
+                    : "No native devices were reported. Check operating-system capture permissions and whether the devices are in use.";
+            }
+        }
+        catch (Exception exception)
+        {
+            _nativeDevices = [];
+            _status = $"Native device discovery failed: {exception.Message}";
+        }
     }
 
     private void SaveNativeDevice(NativeMediaDeviceInfo device)

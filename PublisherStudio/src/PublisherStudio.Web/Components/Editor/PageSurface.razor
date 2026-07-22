@@ -201,7 +201,7 @@
                             <DevExtremeComponentView @key="component.Id" Document="State.Document" Item="component" CurrentPageId="State.SelectedPageId" DesignerMode="true" />
                             break;
                         case LiveSourceElement liveSource:
-                            <LiveSourceView @key="liveSource.Id" Item="liveSource" DesignerMode="true" />
+                            <LiveSourceView @key="(liveSource.Id, liveSource.SourceKind)" Item="liveSource" DesignerMode="true" />
                             break;
                         case SpreadsheetElement spreadsheet:
                             <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
@@ -397,6 +397,36 @@
             {
                 <DxContextMenuItem Text="@(State.ContentPanMode ? "Finish positioning map" : "Position visible map")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
                 <DxContextMenuItem Text="Reset map position" Click="ResetContentViewport" />
+            }
+        }
+        @if (State.SelectedElement is LiveSourceElement liveSource)
+        {
+            <DxContextMenuItem Text="Activate live source" IconCssClass="pub-icon pub-icon-video" BeginGroup="true" Click="ActivateSelectedLiveSource" />
+            <DxContextMenuItem Text="Source type">
+                <Items>
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.Camera, "Camera / webcam"))" Click="LiveSourceCamera" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.Screen, "Screen"))" Click="LiveSourceScreen" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.Window, "Window"))" Click="LiveSourceWindow" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.BrowserTab, "Browser tab"))" Click="LiveSourceBrowserTab" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.CaptureDevice, "Native capture device"))" Click="LiveSourceCaptureDevice" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.Microphone, "Microphone"))" Click="LiveSourceMicrophone" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.SystemAudio, "System audio"))" Click="LiveSourceSystemAudio" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.ApplicationAudio, "Application audio"))" Click="LiveSourceApplicationAudio" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.NetworkMedia, "Network media"))" Click="LiveSourceNetworkMedia" />
+                    <DxContextMenuItem Text="@(CheckedText(liveSource.SourceKind == PublicationLiveSourceKind.NowPlaying, "Now Playing metadata"))" Click="LiveSourceNowPlaying" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="@(CheckedText(liveSource.IncludeAudio, "Include source audio"))" Click="ToggleLiveSourceAudio" />
+            <DxContextMenuItem Text="@(CheckedText(liveSource.Muted, "Muted in preview"))" Click="ToggleLiveSourceMuted" />
+            @if (liveSource.IsVisual)
+            {
+                <DxContextMenuItem Text="Frame fitting">
+                    <Items>
+                        <DxContextMenuItem Text="@(CheckedText(liveSource.FitMode == PublicationLiveSourceFitMode.Contain, "Contain"))" Click="LiveSourceFitContain" />
+                        <DxContextMenuItem Text="@(CheckedText(liveSource.FitMode == PublicationLiveSourceFitMode.Cover, "Cover"))" Click="LiveSourceFitCover" />
+                        <DxContextMenuItem Text="@(CheckedText(liveSource.FitMode == PublicationLiveSourceFitMode.Stretch, "Stretch"))" Click="LiveSourceFitStretch" />
+                    </Items>
+                </DxContextMenuItem>
             }
         }
         @if (State.SelectedElement is ShapeElement shape)
@@ -768,12 +798,25 @@
     }
 
     [JSInvokable]
-    public async Task OpenElementContextMenu(string id, double clientX, double clientY)
+    public async Task OpenElementContextMenu(string id, double clientX, double clientY, double pageX, double pageY, double screenX, double screenY)
     {
         if (!Guid.TryParse(id, out var guid)) return;
         var element = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == guid);
         if (element is null) return;
-        var args = new MouseEventArgs { ClientX = clientX, ClientY = clientY };
+        // DevExpress positions a context menu from PageX/PageY. Supplying only
+        // ClientX/ClientY caused the menu to jump to stale or zero page coordinates.
+        var args = new MouseEventArgs
+        {
+            Type = "contextmenu",
+            Button = 2,
+            Buttons = 2,
+            ClientX = clientX,
+            ClientY = clientY,
+            PageX = pageX,
+            PageY = pageY,
+            ScreenX = screenX,
+            ScreenY = screenY
+        };
         await ShowElementContextMenu(element, args);
     }
     [JSInvokable]
@@ -935,7 +978,7 @@
         PublicationMediaElement => "Double-click to open Audio or Video Studio. Right-click for playback, trim, mute, loop, and timeline commands.",
         BarcodeElement => "Double-click to open Barcode Studio. Right-click for barcode and QR editing commands.",
         WordArtElement => "Right-click for WordArt path commands. Drag to move and use the handles to resize or rotate.",
-        LiveSourceElement => "Right-click for live-source settings. Drag to move and use the handles to resize the capture frame.",
+        LiveSourceElement => "Double-click to activate the live source. Right-click to activate it, change camera/screen/window/device type, and adjust audio or frame fitting.",
         ShapeElement => "Right-click to change the shape type. Drag to move and use the handles to resize or rotate.",
         _ => "Right-click for object commands. Drag to move and use the handles to resize or rotate."
     };
@@ -949,6 +992,7 @@
         if (element is SpreadsheetElement) return RequestEditSpreadsheet.InvokeAsync();
         if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
         if (element is BarcodeElement) return RequestEditBarcode.InvokeAsync();
+        if (element is LiveSourceElement liveSource) return ActivateLiveSource(liveSource);
         return Task.CompletedTask;
     }
 
@@ -1049,6 +1093,36 @@
     private Task InsertAudio() => RequestInsertAudio.InvokeAsync();
     private Task CreateVideo() => RequestCreateVideo.InvokeAsync();
     private Task CreateAudio() => RequestCreateAudio.InvokeAsync();
+    private Task ActivateSelectedLiveSource() => State.SelectedElement is LiveSourceElement liveSource
+        ? ActivateLiveSource(liveSource)
+        : Task.CompletedTask;
+    private async Task ActivateLiveSource(LiveSourceElement liveSource)
+    {
+        try { await JS.InvokeVoidAsync("publisherStreaming.activateSource", liveSource.Id.ToString("N")); }
+        catch { }
+    }
+    private void UpdateSelectedLiveSource(Action<LiveSourceElement> update)
+    {
+        if (State.SelectedElement is LiveSourceElement liveSource) State.UpdateSelected(_ => update(liveSource));
+    }
+    private void SetSelectedLiveSourceKind(PublicationLiveSourceKind kind) => UpdateSelectedLiveSource(source => source.SourceKind = kind);
+    private void LiveSourceCamera() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Camera);
+    private void LiveSourceScreen() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Screen);
+    private void LiveSourceWindow() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Window);
+    private void LiveSourceBrowserTab() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.BrowserTab);
+    private void LiveSourceCaptureDevice() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.CaptureDevice);
+    private void LiveSourceMicrophone() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Microphone);
+    private void LiveSourceSystemAudio() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.SystemAudio);
+    private void LiveSourceApplicationAudio() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.ApplicationAudio);
+    private void LiveSourceNetworkMedia() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.NetworkMedia);
+    private void LiveSourceNowPlaying() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.NowPlaying);
+    private void ToggleLiveSourceAudio() => UpdateSelectedLiveSource(source => source.IncludeAudio = !source.IncludeAudio);
+    private void ToggleLiveSourceMuted() => UpdateSelectedLiveSource(source => source.Muted = !source.Muted);
+    private void SetSelectedLiveSourceFit(PublicationLiveSourceFitMode fit) => UpdateSelectedLiveSource(source => source.FitMode = fit);
+    private void LiveSourceFitContain() => SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Contain);
+    private void LiveSourceFitCover() => SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Cover);
+    private void LiveSourceFitStretch() => SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Stretch);
+
     private Task EditSelectedMedia() => RequestEditMedia.InvokeAsync();
     private Task InsertBarcode() => RequestInsertBarcode.InvokeAsync();
     private Task EditSelectedBarcode() => RequestEditBarcode.InvokeAsync();

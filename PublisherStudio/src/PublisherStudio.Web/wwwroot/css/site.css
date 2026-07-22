@@ -2210,7 +2210,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .devextreme-component-host.ps-dx-chat.ps-chat-readonly .dx-chat-input-container { display:none!important; }
 .devextreme-component-host.ps-dx-chat.dx-chat { height:100%; border:0; background:linear-gradient(180deg,#f8fbfd,#eef4f8); }
 
-/* v1.0.49 unified PublishingSuite Streaming Studio */
+/* v1.0.50 unified PublishingSuite Streaming Studio */
 .streaming-studio-backdrop {
     position: fixed;
     inset: 0;
@@ -3347,7 +3347,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 /* Application-wide explanatory tooltips. JavaScript adds descriptions to native and DevExpress controls. */
 .publisher-help-tooltip {
     position: fixed;
-    z-index: 2147483646;
+    z-index: 1002;
     width: max-content;
     max-width: min(360px, calc(100vw - 20px));
     padding: 8px 10px;

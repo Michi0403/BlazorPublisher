@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherStudio.Web", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherStudio.InstallerConsole", "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj", "{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherStudio.MediaHost", "src\PublisherStudio.MediaHost\PublisherStudio.MediaHost.csproj", "{9A47017C-E6FA-42A7-915E-C1E81B912C2D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,10 +20,6 @@ Global
 		{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9A47017C-E6FA-42A7-915E-C1E81B912C2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A47017C-E6FA-42A7-915E-C1E81B912C2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A47017C-E6FA-42A7-915E-C1E81B912C2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A47017C-E6FA-42A7-915E-C1E81B912C2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

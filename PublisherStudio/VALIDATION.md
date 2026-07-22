@@ -449,3 +449,18 @@ Static checks completed for the v1.0.37 source package:
 - Publication format remains `1.45` and picture format remains `1.2`; no document migration or workflow replacement was introduced.
 - A real `dotnet restore`/`dotnet build` remains unavailable in this environment because the .NET SDK and licensed DevExpress package feed are not installed.
 
+
+## v1.0.50 single-process streaming, popup, and FFmpeg validation
+
+- The solution and release script contain no standalone `PublisherStudio.MediaHost` or `PublisherStudio.StreamingRuntime` executable/project. Streaming implementation files compile as part of `PublisherStudio.Web` under `Services/StreamingRuntime`.
+- Main application startup registers and maps the integrated runtime in-process, enables same-origin WebSockets, and retains application-singleton ownership of sessions, native captures, encoders, Chat, LAN delivery, and Windows global hotkeys.
+- The streaming client performs direct registry/device-discovery calls and contains no `HttpClient` dependency or fixed loopback port.
+- Browser capture, native-capture, ingest, Chat, WebRTC, and Now Playing URLs fall back to `window.location.origin`; the legacy machine-profile port is not used by the interface or runtime.
+- Canvas event forwarding includes client, page, and screen coordinates. `PageSurface` reconstructs complete `MouseEventArgs` so DevExpress context menus receive valid page coordinates.
+- The tooltip runtime derives its z-index from visible DevExpress/dialog overlays and hides before context-menu/click interaction.
+- Live-source double-click and context-menu activation are wired through the existing browser/native capture path, with source-kind, audio, mute, and fitting commands retained in publication history.
+- InstallerConsole and the application share compatible FFmpeg discovery locations. InstallerConsole exposes check/install/skip commands and package-manager fallbacks for Windows, macOS, and Linux.
+- Installer updates remove obsolete `MediaHost` directories and `PublisherStudio.MediaHost*` files left by older releases, so the integrated runtime cannot coexist accidentally with a stale companion payload.
+- Every project JavaScript file passes `node --check`; component, interface workflow, signal, streaming, and timeline Node contract suites pass.
+- Package JSON and project versions are aligned to `1.0.50`; publication format remains `1.45` and picture format remains `1.2`.
+- ZIP integrity and required-file checks are performed during final packaging. A full .NET/DevExpress compile remains a release-machine check because this environment has no .NET 10 SDK or licensed DevExpress package feed.

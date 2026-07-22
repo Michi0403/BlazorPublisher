@@ -42,7 +42,7 @@ Your files remain under the signed-in user's control. PublisherStudio listens on
 - Self-contained animated HTML presentation export with responsive scaling, keyboard/control navigation, fullscreen, replay, looping, automatic advance, and print fallback.
 - Browser print workflow suitable for printing or the browser's Save as PDF command.
 - Insertable QR and linear barcodes with common symbologies, colors, readable text, module designs, and QR error correction.
-- Windows InstallerConsole bootstrapper that downloads the latest GitHub release, installs per-user into AppData, starts the host, updates or uninstalls it, and creates Start Menu command entries without requiring Git.
+- Cross-platform InstallerConsole bootstrapper that downloads the latest release, installs or updates PublisherStudio, starts the single application process, provisions FFmpeg through an available operating-system package manager, and creates Windows shortcuts without requiring Git.
 
 ## Design reference boundary
 
@@ -55,6 +55,7 @@ GIMP and Inkscape were used only as behavioural references for rulers, guides, c
 - A valid DevExpress license.
 - Node.js 20 or newer with npm and npx is a **source-development/build-machine requirement only** for DevExpress client-asset preparation and public DevExtreme runtime-key generation. Normal application use and installed PublisherStudio releases do not invoke Node.js, npm, or npx.
 - A current Chromium-based browser is recommended for the raster/SVG export pipeline.
+- FFmpeg is required for provider encoding, native capture devices, isolated application audio, recording, and HLS/RTSP delivery. Browser webcam, microphone, screen, window, and tab capture can still preview through browser APIs without FFmpeg. `PublisherStudio.Setup` checks and installs FFmpeg by default during installation/update; use `--check-ffmpeg`, `--install-ffmpeg`, or `--skip-ffmpeg` for explicit control.
 
 ## Build and run
 
@@ -314,13 +315,17 @@ Chat rows can be mapped to platform, channel, message, timestamp, author ID, aut
 
 PublisherStudio now treats live streaming as another output workflow of the publication. The **Streaming** ribbon and **Streaming Studio** configure reusable provider profiles, outputs, recording variants, LAN delivery, devices, timing, and hotkeys. Camera, screen, window, browser-tab, capture-device, microphone, system-audio, application-audio, network-media, and Now Playing sources are inserted as normal page objects.
 
-A bundled `PublisherStudio.MediaHost` project owns FFmpeg pipelines, segmented recording, global Windows hotkeys, HLS, token-protected LAN browser playback, and ID3 metadata. See `CHANGELOG-v1.0.47.md` and `docs/STREAMING.md` for the implemented boundary and the remaining native/per-output compositor extension points.
+The streaming runtime owns FFmpeg pipelines, segmented recording, global Windows hotkeys, HLS, token-protected LAN browser playback, and ID3 metadata. In the current solution it is compiled directly into `PublisherStudio.Web`; there is no separately launched Media Host executable. See `CHANGELOG-v1.0.47.md`, `CHANGELOG-v1.0.50.md`, and `docs/STREAMING.md`.
 
 ## v1.0.48 multi-output streaming completion
 
-See `CHANGELOG-v1.0.48.md` and `docs/STREAMING.md`. The publication is captured once as a clean base and composed into independent provider variants only where required. One authored Chat object now renders Twitch-only messages into the Twitch output and YouTube-only messages into the YouTube output, while its answer field remains operator-only. The Media Host adds encrypted Chat OAuth storage, Twitch/YouTube receive/send adapters, native capture discovery, Windows process-tree audio loopback, WebRTC browser delivery, HLS, RTSP, and selected output recording without requiring public streaming.
+See `CHANGELOG-v1.0.48.md` and `docs/STREAMING.md`. The publication is captured once as a clean base and composed into independent provider variants only where required. One authored Chat object now renders Twitch-only messages into the Twitch output and YouTube-only messages into the YouTube output, while its answer field remains operator-only. The integrated runtime adds encrypted Chat OAuth storage, Twitch/YouTube receive/send adapters, native capture discovery, Windows process-tree audio loopback, WebRTC browser delivery, HLS, RTSP, and selected output recording without requiring public streaming.
 
 ## v1.0.49 PublishingSuite interface alignment
 
-See `CHANGELOG-v1.0.49.md`. Streaming Studio now follows the same ribbon, contextual-command, profile-navigation, settings-card, status, and SubApp footer workflow as the rest of PublishingSuite. Canvas double-click and right-click handling now reaches embedded DevExtreme/media/SVG content reliably, and application-wide explanatory tooltips cover native and dynamically rendered controls. Provider, output, recording, LAN, device, hotkey, publication, and Media Host data flows remain unchanged.
+See `CHANGELOG-v1.0.49.md`. Streaming Studio now follows the same ribbon, contextual-command, profile-navigation, settings-card, status, and SubApp footer workflow as the rest of PublishingSuite. Canvas double-click and right-click handling now reaches embedded DevExtreme/media/SVG content reliably, and application-wide explanatory tooltips cover native and dynamically rendered controls. Provider, output, recording, LAN, device, hotkey, publication, and streaming-runtime data flows remain unchanged.
+
+## v1.0.50 single-process streaming and capture reliability
+
+See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media Host was folded into `PublisherStudio.Web`, so native capture, FFmpeg orchestration, recording, provider delivery, Chat, hotkeys, and same-origin browser/WebSocket endpoints now share the main application lifecycle and its dynamically selected loopback port. Native-device refresh no longer calls a fixed `127.0.0.1:17847` service. Context-menu coordinates now preserve browser page coordinates, tooltip stacking follows the active DevExpress overlay, live sources can be activated by double-click or context menu, and the InstallerConsole can detect or install FFmpeg on Windows, macOS, and common Linux distributions. During an update, the installer also removes obsolete standalone Media Host payloads left by older releases.
 

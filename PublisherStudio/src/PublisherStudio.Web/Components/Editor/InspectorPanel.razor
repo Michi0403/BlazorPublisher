@@ -448,7 +448,7 @@
                     <label class="check-row"><input type="checkbox" checked="@liveSource.IncludeAudio" @onchange="ToggleLiveAudio" /> Include source audio</label>
                     <label class="check-row"><input type="checkbox" checked="@liveSource.Muted" @onchange="ToggleLiveMuted" /> Mute preview / visual source</label>
                     <label class="check-row"><input type="checkbox" checked="@liveSource.UseDeviceTimestamp" @onchange="ToggleLiveDeviceTimestamp" /> Use device timestamps</label>
-                    <p class="property-note">Camera, screen, window, tab, microphone, and network media can preview through browser APIs. Isolated application/system audio and global devices are resolved by PublisherStudio.MediaHost.</p>
+                    <p class="property-note">Camera, screen, window, tab, microphone, and network media can preview through browser APIs. Isolated application/system audio and native devices are resolved by PublisherStudio's integrated streaming runtime.</p>
                 </section>
             }
             else if (element is SpreadsheetElement spreadsheet)

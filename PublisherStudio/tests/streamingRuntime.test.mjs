@@ -22,6 +22,7 @@ const processLoopback = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.
 const webProgram = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Program.cs'), 'utf8');
 const inspector = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'InspectorPanel.razor'), 'utf8');
 const profileStore = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'StreamingProfileStore.cs'), 'utf8');
+const twitchOAuth = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'TwitchOAuthService.cs'), 'utf8');
 const componentRuntime = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'wwwroot', 'js', 'componentRuntime.js'), 'utf8');
 const exporter = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'wwwroot', 'js', 'publisherInterop.js'), 'utf8');
 const streamingClient = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'StreamingMediaHostClient.cs'), 'utf8');
@@ -35,12 +36,17 @@ for (const contract of [
   'PublicationStreamingSettings', 'PublicationStreamOutput', 'PublicationRecordingSettings',
   'PublicationLanStreamingSettings', 'PublicationStreamingHotkey', 'LiveSourceElement',
   'ChromaResidualOpacity', 'PreferDeviceTimestamps', 'CaptureWidth', 'CaptureFrameRate', 'StreamingHardwareEncoderPreference',
-  'ChatEnabled', 'ChatSecret', 'HasStoredChatSecret'
+  'ChatEnabled', 'ChatSecret', 'HasStoredChatSecret', 'StreamingProviderAuthenticationMode',
+  'HasStoredOAuthSession', 'OAuthClientId', 'OAuthScopes', 'AutoSelectIngest', 'TwitchIngestCandidate'
 ]) assert.ok(model.includes(contract), `${contract} is missing from the streaming model.`);
 
 assert.match(studio, /Providers/);
 assert.match(studio, /Company \/ LAN/);
 assert.match(studio, /Streaming hotkeys/);
+assert.match(studio, /Twitch web login \(OAuth\)/);
+assert.match(studio, /ConnectTwitchOAuth/);
+assert.match(studio, /Test Twitch endpoints/);
+assert.match(studio, /Automatically choose the best Twitch ingest/);
 assert.match(studio, /Global hotkeys are registered by PublisherStudio on Windows/);
 assert.match(editor, /prepareProgramCapture/);
 assert.match(editor, /startProgramIngest/);
@@ -50,6 +56,9 @@ assert.match(runtime, /windowAudio/);
 assert.match(runtime, /captureFrameRate/);
 assert.match(runtime, /configureChatBridge/);
 assert.match(runtime, /PublisherStudioChatBridge/);
+assert.match(runtime, /reserveExternalAuthorizationWindow/);
+assert.match(runtime, /navigateExternalAuthorizationWindow/);
+assert.match(runtime, /closeExternalAuthorizationWindow/);
 assert.match(runtime, /publisherstream-base-capture/);
 assert.match(runtime, /captureRequired !== false/);
 assert.match(runtime, /getBroadcastLayers/);
@@ -83,6 +92,8 @@ assert.match(rtspServer, /rtpmap:33 MP2T\/90000/);
 assert.match(webRtcHub, /viewer-offer/);
 assert.match(webRtcHub, /publisher-answer/);
 assert.match(encoder, /bandwidthtest=true/);
+assert.match(encoder, /\{stream_key\}/);
+assert.match(encoder, /\{streamKey\}/);
 assert.match(encoder, /-f", "segment/);
 assert.match(encoder, /delete_segments\+append_list/);
 assert.match(encoder, /LanDefinition\.EnableHls/);
@@ -103,6 +114,10 @@ assert.match(inspector, /ChangeLiveDeviceProfile/);
 assert.match(profileStore, /UseDeviceTimestamps/);
 assert.match(profileStore, /ProtectedChatSecret/);
 assert.match(profileStore, /ResolveChatSecretAsync/);
+assert.match(profileStore, /ProtectedOAuthAccessToken/);
+assert.match(profileStore, /ProtectedOAuthRefreshToken/);
+assert.match(profileStore, /SaveTwitchOAuthConnectionAsync/);
+assert.match(profileStore, /retainOAuthSession/);
 assert.match(lanServer, /MediaSource/);
 assert.match(lanServer, /SubscribeIngest/);
 assert.match(lanServer, /RequireAccessToken/);
@@ -111,9 +126,11 @@ assert.match(lanServer, /try \{ sourceBuffer\.mode/);
 assert.match(webProgram, /ProtectKeysWithDpapi/);
 assert.match(webProgram, /AddPublisherStreamingRuntime/);
 assert.match(webProgram, /MapPublisherStreamingRuntime/);
+assert.match(webProgram, /AddHostedService<TwitchOAuthMaintenanceService>/);
 assert.match(mediaHost, /public static class PublisherStreamingRuntimeExtensions/);
-assert.match(mediaHost, /version = "1\.0\.52"/);
+assert.match(mediaHost, /version = "1\.0\.53"/);
 assert.match(streamingClient, /In-process facade/);
+assert.match(streamingClient, /EnsureValidAccessTokenAsync/);
 assert.doesNotMatch(streamingClient, /HttpClient/);
 assert.match(runtime, /return value \|\| window\.location\.origin/);
 assert.match(ffmpegLocator, /AppContext\.BaseDirectory/);
@@ -130,10 +147,36 @@ assert.match(componentRuntime, /chatBroadcastMode/);
 assert.match(exporter, /publisherOutputMode/);
 assert.match(exporter, /publisherChatPlatform/);
 
+assert.match(twitchOAuth, /https:\/\/id\.twitch\.tv\/oauth2\/device/);
+assert.match(twitchOAuth, /urn:ietf:params:oauth:grant-type:device_code/);
+assert.match(twitchOAuth, /channel:read:stream_key/);
+assert.match(twitchOAuth, /chat:read chat:edit/);
+assert.match(twitchOAuth, /https:\/\/api\.twitch\.tv\/helix\/streams\/key/);
+assert.match(twitchOAuth, /https:\/\/ingest\.twitch\.tv\/ingests/);
+assert.match(twitchOAuth, /https:\/\/id\.twitch\.tv\/oauth2\/validate/);
+assert.match(twitchOAuth, /https:\/\/id\.twitch\.tv\/oauth2\/revoke/);
+assert.match(twitchOAuth, /grant_type.*refresh_token/s);
+assert.match(twitchOAuth, /TimeSpan\.FromHours\(1\)/);
+assert.match(twitchOAuth, /MeasureTcpLatencyAsync/);
+assert.match(twitchOAuth, /1935/);
+assert.match(twitchOAuth, /forceValidation: true/);
+
 const listeners = new Map();
 const dispatched = [];
 class MockElement { closest() { return null; } }
+const popupWindows = new Map();
 const windowObject = {
+  open(url = '', name = '') {
+    const popup = {
+      closed: false,
+      document: { title: '', body: { textContent: '' } },
+      location: { href: String(url) },
+      focus() {},
+      close() { this.closed = true; }
+    };
+    popupWindows.set(String(name), popup);
+    return popup;
+  },
   addEventListener(type, callback) { listeners.set(type, callback); },
   removeEventListener(type, callback) { if (listeners.get(type) === callback) listeners.delete(type); },
   dispatchEvent(event) { dispatched.push(event); },
@@ -165,6 +208,12 @@ const context = {
 context.globalThis = context;
 vm.runInNewContext(runtime, context, { filename: runtimePath });
 
+assert.equal(context.window.publisherStreaming.reserveExternalAuthorizationWindow('twitch-oauth'), true);
+assert.equal(context.window.publisherStreaming.navigateExternalAuthorizationWindow('twitch-oauth', 'https://www.twitch.tv/activate'), true);
+assert.equal(popupWindows.get('twitch-oauth').location.href, 'https://www.twitch.tv/activate');
+assert.equal(context.window.publisherStreaming.closeExternalAuthorizationWindow('twitch-oauth'), true);
+assert.equal(popupWindows.get('twitch-oauth').closed, true);
+
 context.window.publisherStreaming.setOutputContext({ mode: 'broadcast', platform: 'Twitch', channel: 'channel-a', outputId: 'out-a' });
 assert.equal(context.window.PublisherStudioOutputContext.platform, 'Twitch');
 assert.equal(context.window.PublisherStudioOutputContext.mode, 'broadcast');
@@ -189,4 +238,4 @@ assert.equal(calls.length, 1, 'Global hotkeys must be owned by the integrated ru
 context.window.publisherStreaming.unbindHotkeys();
 assert.equal(listeners.has('keydown'), false);
 
-console.log('streaming model, per-output Chat compositor, native capture, FFmpeg orchestration, WebRTC/RTSP LAN delivery, hotkey, and Now Playing contract tests passed');
+console.log('streaming model, Twitch OAuth/ingest, per-output Chat compositor, native capture, FFmpeg orchestration, WebRTC/RTSP LAN delivery, hotkey, and Now Playing contract tests passed');

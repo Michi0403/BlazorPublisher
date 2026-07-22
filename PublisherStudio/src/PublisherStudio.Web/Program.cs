@@ -59,6 +59,8 @@ public static class Program
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHttpClient();
+        builder.Services.AddHttpClient(nameof(TwitchOAuthService), client =>
+            client.Timeout = TimeSpan.FromSeconds(20));
         var dataProtectionPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "PublisherStudio", "DataProtection");
@@ -102,6 +104,8 @@ public static class Program
         builder.Services.AddSingleton<PublicationMediaAssetStore>();
         builder.Services.AddSingleton<PublicationRecoveryService>();
         builder.Services.AddSingleton<StreamingProfileStore>();
+        builder.Services.AddSingleton<TwitchOAuthService>();
+        builder.Services.AddHostedService<TwitchOAuthMaintenanceService>();
         PublisherStreamingRuntimeExtensions.AddPublisherStreamingRuntime(builder.Services);
         builder.Services.AddSingleton<StreamingMediaHostClient>();
         builder.Services.AddSingleton<StreamingSessionService>();

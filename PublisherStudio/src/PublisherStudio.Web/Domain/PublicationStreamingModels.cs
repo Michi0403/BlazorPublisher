@@ -13,6 +13,12 @@ public enum PublicationStreamProvider
     LocalNetwork
 }
 
+public enum StreamingProviderAuthenticationMode
+{
+    Manual,
+    OAuth
+}
+
 public enum PublicationStreamTransport
 {
     Rtmp,
@@ -180,7 +186,8 @@ public sealed class StreamingProviderProfile
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "New streaming profile";
     public PublicationStreamProvider Provider { get; set; } = PublicationStreamProvider.Twitch;
-    public PublicationStreamTransport Transport { get; set; } = PublicationStreamTransport.Rtmps;
+    public StreamingProviderAuthenticationMode AuthenticationMode { get; set; } = StreamingProviderAuthenticationMode.Manual;
+    public PublicationStreamTransport Transport { get; set; } = PublicationStreamTransport.Rtmp;
     public string Endpoint { get; set; } = string.Empty;
     public string ChannelId { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
@@ -189,7 +196,46 @@ public sealed class StreamingProviderProfile
     public bool ChatEnabled { get; set; }
     public bool HasStoredChatSecret { get; set; }
     public string ChatSecret { get; set; } = string.Empty;
+    public string OAuthClientId { get; set; } = string.Empty;
+    public bool HasStoredOAuthSession { get; set; }
+    public DateTimeOffset? OAuthAccessTokenExpiresUtc { get; set; }
+    public DateTimeOffset? OAuthLastValidatedUtc { get; set; }
+    public string OAuthScopes { get; set; } = string.Empty;
+    public bool AutoSelectIngest { get; set; } = true;
+    public string IngestServerName { get; set; } = string.Empty;
+    public double? IngestLatencyMilliseconds { get; set; }
+    public DateTimeOffset? IngestLastTestedUtc { get; set; }
     public bool Enabled { get; set; } = true;
+}
+
+public sealed class TwitchIngestCandidate
+{
+    public string Name { get; set; } = string.Empty;
+    public string Endpoint { get; set; } = string.Empty;
+    public string Host { get; set; } = string.Empty;
+    public double? LatencyMilliseconds { get; set; }
+    public bool Reachable { get; set; }
+    public bool IsGlobal { get; set; }
+}
+
+public sealed class TwitchDeviceAuthorization
+{
+    public string DeviceCode { get; set; } = string.Empty;
+    public string UserCode { get; set; } = string.Empty;
+    public string VerificationUri { get; set; } = string.Empty;
+    public int ExpiresInSeconds { get; set; }
+    public int PollIntervalSeconds { get; set; } = 5;
+    public string ClientId { get; set; } = string.Empty;
+    public string Scopes { get; set; } = string.Empty;
+    public DateTimeOffset ExpiresUtc { get; set; }
+}
+
+public sealed class TwitchOAuthConnectionResult
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public StreamingProviderProfile? Profile { get; set; }
+    public List<TwitchIngestCandidate> IngestCandidates { get; set; } = [];
 }
 
 public sealed class StreamingDeviceProfile

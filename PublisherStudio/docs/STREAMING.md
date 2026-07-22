@@ -47,6 +47,26 @@ The integrated runtime maintains a separate channel, bounded history, subscriber
 
 Stream keys and Chat OAuth credentials are stored separately. A publication refers only to a reusable machine profile ID.
 
+## Twitch OAuth and ingest selection
+
+Twitch profiles can use the existing manual endpoint/key fields or **Twitch web login (OAuth)**. OAuth uses Twitch's Device Code Grant for a public desktop client: PublisherStudio opens Twitch's activation page, shows the activation code as a fallback, and polls Twitch until the user completes login, consent, and any MFA challenge. Passwords and MFA values never pass through PublisherStudio.
+
+The Twitch application must be registered by the distributor or user and its public Client ID supplied through one of these locations:
+
+```text
+Streaming Studio > Twitch application Client ID
+appsettings.json > Twitch:ClientId
+PUBLISHERSTUDIO_TWITCH_CLIENT_ID
+```
+
+The authorization requests `channel:read:stream_key`; when live Chat is enabled it also requests `chat:read chat:edit` for the existing IRC adapter. The authorized broadcaster ID and login are read from `/validate`, and Helix supplies the channel stream key. Access tokens, rotating refresh tokens, and the stream key are protected with the same machine-profile Data Protection key ring already used by manual credentials.
+
+PublisherStudio validates maintained Twitch sessions immediately when the application starts and every hour thereafter. It refreshes near-expiry/invalid access tokens through the public-client refresh flow and stores the replacement refresh token. Disconnect attempts to revoke the Twitch access token and always removes the local OAuth session. Manual-compatible encrypted stream and Chat secrets remain available when the profile returns to manual mode.
+
+For ingest selection, PublisherStudio downloads Twitch's unauthenticated ingest list, normalizes `{stream_key}` templates, measures two TCP connection attempts to port 1935 from the current computer, and sorts reachable endpoints by measured latency. Twitch Global remains the fallback when direct measurement is blocked or no regional endpoint responds. The user can accept the automatic result or choose any measured endpoint manually.
+
+Other provider profiles remain manual in this revision. OAuth is not exposed as a fake generic switch: YouTube, Kick, TikTok, and custom providers have different application registration, consent, scope, approval, and stream-provisioning requirements and need dedicated adapters.
+
 ## Capture and timestamps
 
 Browser APIs remain the first choice for camera, microphone, screen, window, and browser-tab sources. Live sources enter a 48 kHz audio graph with per-source volume and delay and retain device timestamps where the platform exposes them.

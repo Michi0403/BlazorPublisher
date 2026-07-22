@@ -487,3 +487,15 @@ Static checks completed for the v1.0.37 source package:
 - Every project JavaScript file passes `node --check`; component, interface, pointer ownership, signal, streaming, and timeline Node contract suites pass.
 - Package JSON, application, installer, and runtime capability versions are aligned to `1.0.52`; publication format remains `1.45` and picture format remains `1.2`.
 - A full .NET/DevExpress compile remains a release-machine check because this environment has no .NET 10 SDK or licensed DevExpress package feed.
+
+## v1.0.53 Twitch OAuth and ingest validation
+
+- Added source-contract coverage for Twitch Device Code Grant endpoints and parameters, `channel:read:stream_key`, optional IRC Chat scopes, Helix stream-key retrieval, `/validate`, refresh-token rotation, token revocation, and the official unauthenticated ingest list.
+- Verified that the integrated maintenance service validates OAuth profiles on startup and hourly, while normal streaming/Chat startup obtains a valid access token through the same serialized refresh path.
+- Verified that OAuth access/refresh tokens and the Twitch stream key use the existing ASP.NET Core Data Protection store and are never returned in public profile models.
+- Verified that changing the configured Client ID clears the incompatible OAuth session, duplicating a profile never copies OAuth or manual secrets, and disconnect returns the profile to manual mode without deleting manual-compatible encrypted credentials.
+- Verified endpoint normalization for both `{stream_key}` and `{streamKey}`, two-sample TCP latency measurement, lowest-reachable ordering, and Twitch Global fallback.
+- Verified the Streaming Studio OAuth/activation-code/reconnect/disconnect and endpoint-selection wiring plus the browser authorization-window interop.
+- Every project JavaScript file passes `node --check`; all Node contract suites pass.
+- Package JSON, application, installer, and runtime capability versions are aligned to `1.0.53`; publication format remains `1.45` and picture format remains `1.2`.
+- A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because the .NET 10 SDK and licensed DevExpress package feed are unavailable. Real Twitch authorization and ingest latency must be exercised with a registered Client ID on the release machine.

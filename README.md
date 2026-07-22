@@ -1,6 +1,3 @@
-Link to Winx64 setup https://github.com/Michi0403/BlazorPublisher/releases/download/v152/PublisherStudio.Setup.exe
-for everything else check the release section
-
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**
@@ -336,6 +333,12 @@ See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media 
 
 See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now release stale hover/tooltips when the pointer moves onto another overlapping publication object, while non-interactive decorative shapes, WordArt, and barcodes no longer consume presentation pointer events. Interactive media, components, data visuals, publication actions, and Signal Arrow click/hover sources remain pointer owners. In the main Publisher frame, explanatory tooltips keep one stable owner while the pointer moves through nested SVG or component children and render through the browser top layer so publication objects and DevExpress stacking contexts cannot cover them. Publication and Signal Arrow coordinate data is unchanged.
 
+
+## v1.0.53 Twitch OAuth and ingest selection
+
+See `CHANGELOG-v1.0.53.md` and `docs/STREAMING.md`. Streaming Studio now supports Twitch public-client Device Code OAuth alongside the unchanged manual stream-key workflow. It retrieves the authorized broadcaster identity and stream key, protects OAuth/refresh credentials with the machine profile store, validates sessions at startup and hourly, rotates refresh tokens, and can select the lowest-latency reachable endpoint from Twitch's official ingest list. A registered Twitch public application Client ID is required.
+
+Other providers remain on their existing manual profiles until a provider-specific OAuth and stream-provisioning adapter is implemented; PublisherStudio does not present a generic OAuth option that cannot actually complete the provider's official flow.
 
 ## v1.0.52 standalone visual tooltip coordinates
 

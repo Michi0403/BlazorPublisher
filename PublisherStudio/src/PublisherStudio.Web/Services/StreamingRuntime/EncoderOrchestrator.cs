@@ -336,9 +336,13 @@ public sealed class EncoderSessionController : IDisposable
         var destination = output.Endpoint.Trim();
         if (!string.IsNullOrWhiteSpace(output.Secret))
         {
-            destination = destination.Contains("{streamKey}", StringComparison.OrdinalIgnoreCase)
-                ? destination.Replace("{streamKey}", Uri.EscapeDataString(output.Secret), StringComparison.OrdinalIgnoreCase)
-                : destination.TrimEnd('/') + "/" + output.Secret.TrimStart('/');
+            var encodedSecret = Uri.EscapeDataString(output.Secret);
+            if (destination.Contains("{streamKey}", StringComparison.OrdinalIgnoreCase))
+                destination = destination.Replace("{streamKey}", encodedSecret, StringComparison.OrdinalIgnoreCase);
+            else if (destination.Contains("{stream_key}", StringComparison.OrdinalIgnoreCase))
+                destination = destination.Replace("{stream_key}", encodedSecret, StringComparison.OrdinalIgnoreCase);
+            else
+                destination = destination.TrimEnd('/') + "/" + output.Secret.TrimStart('/');
         }
         if (output.Provider == 0 && output.TestMode && !destination.Contains("bandwidthtest=true", StringComparison.OrdinalIgnoreCase))
             destination += destination.Contains('?') ? "&bandwidthtest=true" : "?bandwidthtest=true";

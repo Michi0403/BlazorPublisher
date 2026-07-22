@@ -1,5 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 @inject StreamingProfileStore ProfileStore
+@inject TwitchOAuthService TwitchOAuth
 @inject StreamingMediaHostClient MediaHost
 @inject IJSRuntime JS
 @using System.Text.Json
@@ -150,23 +151,96 @@
                                 <div class="streaming-card-heading"><div><h3>Identity and delivery</h3><p>Name the profile and choose how PublisherStudio reaches the provider.</p></div></div>
                                 <div class="streaming-form-grid two-column">
                                     <label data-help="A friendly reusable name shown when publication outputs choose this profile."><span>Profile name</span><input @bind="_providerDraft.Name" /></label>
-                                    <label data-help="Select the streaming platform. Recommended output defaults follow this choice."><span>Provider</span><select @bind="_providerDraft.Provider">@foreach (var value in Enum.GetValues<PublicationStreamProvider>()) { <option value="@value">@value</option> }</select></label>
-                                    <label data-help="Choose RTMP, secure RTMPS, or SRT transport for the provider ingest connection."><span>Transport</span><select @bind="_providerDraft.Transport">@foreach (var value in ProviderTransports) { <option value="@value">@value</option> }</select></label>
-                                    <label data-help="Provider ingest server or complete custom endpoint. Leave blank only when the provider supplies a known default."><span>Ingest endpoint</span><input @bind="_providerDraft.Endpoint" placeholder="Provider ingest server or custom URL" /></label>
-                                    <label data-help="The channel, account, or live-chat identifier used for provider routing and Chat context."><span>Channel / account ID</span><input @bind="_providerDraft.ChannelId" /></label>
-                                    <label data-help="Public account or channel name. Twitch Chat uses this together with the OAuth token."><span>Account name</span><input @bind="_providerDraft.AccountName" /></label>
+                                    <label data-help="Select the streaming platform. Recommended output defaults follow this choice."><span>Provider</span><select value="@_providerDraft.Provider" @onchange="ChangeProvider">@foreach (var value in Enum.GetValues<PublicationStreamProvider>()) { <option value="@value">@value</option> }</select></label>
+                                    @if (_providerDraft.Provider == PublicationStreamProvider.Twitch)
+                                    {
+                                        <label data-help="Use Twitch browser/device authorization or keep the existing manual stream-key workflow."><span>Connection method</span><select value="@_providerDraft.AuthenticationMode" @onchange="ChangeAuthenticationMode"><option value="Manual">Manual stream key</option><option value="OAuth">Twitch web login (OAuth)</option></select></label>
+                                    }
+                                    <label data-help="Choose RTMP, secure RTMPS, or SRT transport for the provider ingest connection. Twitch OAuth currently uses the official RTMP ingest templates."><span>Transport</span><select @bind="_providerDraft.Transport" disabled="@IsTwitchOAuth">@foreach (var value in ProviderTransports) { <option value="@value">@value</option> }</select></label>
+                                    <label data-help="Provider ingest server or complete custom endpoint. Twitch endpoint templates may contain {streamKey}."><span>Ingest endpoint</span><input @bind="_providerDraft.Endpoint" placeholder="Provider ingest server or custom URL" /></label>
+                                    <label data-help="The channel, account, or live-chat identifier used for provider routing and Chat context."><span>Channel / account ID</span><input @bind="_providerDraft.ChannelId" disabled="@IsTwitchOAuth" /></label>
+                                    <label data-help="Public account or channel name. Twitch OAuth fills this from the authorized account."><span>Account name</span><input @bind="_providerDraft.AccountName" disabled="@IsTwitchOAuth" /></label>
                                 </div>
                             </section>
 
-                            <section class="streaming-settings-card">
-                                <div class="streaming-card-heading"><div><h3>Credentials and Chat</h3><p>Secrets are encrypted for the signed-in Windows user and never exported with the publication.</p></div></div>
-                                <div class="streaming-form-grid">
-                                    <label data-help="Enter the stream key or ingest token. Leave it blank when editing to retain the encrypted value already stored."><span>Stream key / ingest token</span><input type="password" @bind="_providerDraft.Secret" placeholder="@(_providerDraft.HasStoredSecret ? "Stored securely — leave blank to keep" : "Stored encrypted for this Windows user")" /></label>
-                                    <label class="streaming-check-field" data-help="Enable the provider-specific operator Chat connection for this profile. Broadcast viewers never receive the answer field."><input type="checkbox" @bind="_providerDraft.ChatEnabled" /><span><b>Connect live Chat</b><small>Use this provider and channel as a compositor Chat context.</small></span></label>
-                                    @if (_providerDraft.ChatEnabled)
+                            @if (_providerDraft.Provider == PublicationStreamProvider.Twitch)
+                            {
+                                <section class="streaming-settings-card">
+                                    <div class="streaming-card-heading">
+                                        <div><h3>Twitch connection</h3><p>OAuth uses Twitch's public-client device authorization. Password and MFA stay on Twitch.</p></div>
+                                        <span class="streaming-state-badge @(_providerDraft.HasStoredOAuthSession ? "enabled" : null)">@TwitchConnectionLabel</span>
+                                    </div>
+                                    @if (IsTwitchOAuth)
                                     {
-                                        <label data-help="OAuth access token used only for Chat receive/send operations. It is stored separately from the stream key."><span>Chat OAuth access token</span><input type="password" @bind="_providerDraft.ChatSecret" placeholder="@(_providerDraft.HasStoredChatSecret ? "Stored securely — leave blank to keep" : "Twitch/YouTube OAuth token, stored encrypted")" /></label>
-                                        <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Twitch uses account name, channel, and OAuth token. YouTube uses the Channel / account ID as the live-chat ID plus an OAuth token with live-chat permissions.</span></div>
+                                        <div class="streaming-form-grid two-column">
+                                            <label class="span-2" data-help="Public Client ID from a Twitch developer application configured for the Device Code Grant flow. It is not a secret."><span>Twitch application Client ID</span><input @bind="_providerDraft.OAuthClientId" placeholder="@TwitchClientIdPlaceholder" /></label>
+                                            <label class="streaming-check-field span-2" data-help="Use Twitch's ingest list and measure TCP connection latency from this computer after authorization."><input type="checkbox" @bind="_providerDraft.AutoSelectIngest" /><span><b>Automatically choose the best Twitch ingest</b><small>Tests the official Twitch ingest list from this machine and selects the lowest reachable latency.</small></span></label>
+                                        </div>
+                                        <div class="streaming-oauth-actions">
+                                            <button type="button" class="primary-button" disabled="@_twitchOAuthBusy" @onclick="ConnectTwitchOAuth"><i class="pub-icon pub-icon-web"></i>@(_providerDraft.HasStoredOAuthSession ? "Reconnect Twitch" : "Connect Twitch")</button>
+                                            @if (_twitchOAuthBusy)
+                                            {
+                                                <button type="button" @onclick="CancelTwitchOAuth">Cancel sign-in</button>
+                                            }
+                                            @if (_providerDraft.HasStoredOAuthSession)
+                                            {
+                                                <button type="button" class="danger-button" disabled="@_twitchOAuthBusy" @onclick="DisconnectTwitchOAuth">Disconnect OAuth</button>
+                                            }
+                                        </div>
+                                        @if (_twitchAuthorization is not null)
+                                        {
+                                            <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Complete Twitch sign-in in the browser. Activation code: <b>@_twitchAuthorization.UserCode</b>. <a href="@_twitchAuthorization.VerificationUri" target="_blank" rel="noopener">Open Twitch authorization</a></span></div>
+                                        }
+                                        <div class="streaming-information-box"><i class="pub-icon pub-icon-lock"></i><span>PublisherStudio never receives the Twitch password or MFA value. It stores the access token, rotating refresh token, and stream key encrypted for the current operating-system user.</span></div>
+                                        @if (_providerDraft.HasStoredOAuthSession)
+                                        {
+                                            <div class="streaming-oauth-summary">
+                                                <span><b>Account</b>@_providerDraft.AccountName</span>
+                                                <span><b>Access token</b>@OAuthExpiryText</span>
+                                                <span><b>Scopes</b>@(_providerDraft.OAuthScopes.Length == 0 ? "Unknown" : _providerDraft.OAuthScopes)</span>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Manual mode keeps the existing endpoint, stream-key, account, and Chat-token fields. Switch to Twitch web login to retrieve the broadcaster identity and stream key through Twitch OAuth.</span></div>
+                                    }
+                                </section>
+
+                                <section class="streaming-settings-card">
+                                    <div class="streaming-card-heading"><div><h3>Twitch ingest selection</h3><p>Refresh the official endpoint list and measure connection latency from this computer.</p></div><span class="streaming-summary-value">@TwitchIngestSummary</span></div>
+                                    <div class="streaming-oauth-actions">
+                                        <button type="button" disabled="@_twitchIngestBusy" @onclick="TestTwitchIngestEndpoints"><i class="pub-icon pub-icon-redo"></i>@(_twitchIngestBusy ? "Testing endpoints…" : "Test Twitch endpoints")</button>
+                                    </div>
+                                    @if (_twitchIngestCandidates.Count > 0)
+                                    {
+                                        <div class="streaming-form-grid compact-top">
+                                            <label><span>Measured Twitch endpoints</span><select value="@_providerDraft.Endpoint" @onchange="SelectTwitchIngestEndpoint">@foreach (var candidate in _twitchIngestCandidates) { <option value="@candidate.Endpoint">@TwitchIngestOption(candidate)</option> }</select></label>
+                                        </div>
+                                    }
+                                </section>
+                            }
+
+                            <section class="streaming-settings-card">
+                                <div class="streaming-card-heading"><div><h3>Credentials and Chat</h3><p>Secrets are encrypted for the signed-in operating-system user and never exported with the publication.</p></div></div>
+                                <div class="streaming-form-grid">
+                                    @if (!IsTwitchOAuth)
+                                    {
+                                        <label data-help="Enter the stream key or ingest token. Leave it blank when editing to retain the encrypted value already stored."><span>Stream key / ingest token</span><input type="password" @bind="_providerDraft.Secret" placeholder="@(_providerDraft.HasStoredSecret ? "Stored securely — leave blank to keep" : "Stored encrypted for this user")" /></label>
+                                    }
+                                    else
+                                    {
+                                        <div class="streaming-information-box"><i class="pub-icon pub-icon-lock"></i><span>The stream key is managed by the Twitch OAuth connection and is not displayed in the editor.</span></div>
+                                    }
+                                    <label class="streaming-check-field" data-help="Enable the provider-specific operator Chat connection for this profile. Broadcast viewers never receive the token."><input type="checkbox" @bind="_providerDraft.ChatEnabled" /><span><b>Connect live Chat</b><small>Use this provider and channel as a compositor Chat context.</small></span></label>
+                                    @if (_providerDraft.ChatEnabled && !IsTwitchOAuth)
+                                    {
+                                        <label data-help="OAuth access token used only for Chat receive/send operations. It is stored separately from the stream key."><span>Chat OAuth access token</span><input type="password" @bind="_providerDraft.ChatSecret" placeholder="@(_providerDraft.HasStoredChatSecret ? "Stored securely — leave blank to keep" : "Provider OAuth token, stored encrypted")" /></label>
+                                        <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Twitch manual Chat uses account name, channel, and an OAuth token. YouTube uses the Channel / account ID as the live-chat ID plus an OAuth token with live-chat permissions.</span></div>
+                                    }
+                                    @if (_providerDraft.ChatEnabled && IsTwitchOAuth && !TwitchOAuthHasChatScopes)
+                                    {
+                                        <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>This Twitch authorization does not include Chat scopes. Reconnect Twitch while “Connect live Chat” is enabled.</span></div>
                                     }
                                     <label class="streaming-check-field" data-help="When enabled, publications can select this provider profile for outputs."><input type="checkbox" @bind="_providerDraft.Enabled" /><span><b>Available to publications</b><small>Hide incomplete or retired profiles without deleting them.</small></span></label>
                                 </div>
@@ -570,6 +644,8 @@
     [Parameter] public EventCallback<PublicationStreamingSettings> Saved { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
+    private const string DefaultTwitchEndpoint = "rtmp://ingest.global-contribute.live-video.net/app/{streamKey}";
+
     private static readonly PublicationStreamTransport[] ProviderTransports =
     [
         PublicationStreamTransport.Rtmp,
@@ -583,6 +659,11 @@
     private PublicationStreamingSettings _draft = new();
     private StreamingMachineSettings _machine = new();
     private StreamingProviderProfile? _providerDraft;
+    private List<TwitchIngestCandidate> _twitchIngestCandidates = [];
+    private TwitchDeviceAuthorization? _twitchAuthorization;
+    private CancellationTokenSource? _twitchOAuthCancellation;
+    private bool _twitchOAuthBusy;
+    private bool _twitchIngestBusy;
     private List<BrowserMediaDeviceInfo> _browserDevices = [];
     private List<NativeMediaDeviceInfo> _nativeDevices = [];
     private Guid? _selectedOutputId;
@@ -594,6 +675,36 @@
     private PublicationStreamOutput? SelectedOutput => _selectedOutputId is { } id
         ? _draft.Outputs.FirstOrDefault(item => item.Id == id)
         : null;
+
+    private bool IsTwitchOAuth => _providerDraft is
+    {
+        Provider: PublicationStreamProvider.Twitch,
+        AuthenticationMode: StreamingProviderAuthenticationMode.OAuth
+    };
+
+    private bool TwitchOAuthHasChatScopes => _providerDraft is not null
+        && _providerDraft.OAuthScopes.Contains("chat:read", StringComparison.OrdinalIgnoreCase)
+        && _providerDraft.OAuthScopes.Contains("chat:edit", StringComparison.OrdinalIgnoreCase);
+
+    private string TwitchClientIdPlaceholder => string.IsNullOrWhiteSpace(TwitchOAuth.DefaultClientId)
+        ? "Twitch public application Client ID"
+        : "Configured by PublisherStudio — leave blank to use it";
+
+    private string TwitchConnectionLabel => _providerDraft is null
+        ? "Not configured"
+        : _providerDraft.AuthenticationMode == StreamingProviderAuthenticationMode.Manual
+            ? "Manual mode"
+            : _providerDraft.HasStoredOAuthSession ? "OAuth connected" : "OAuth not connected";
+
+    private string OAuthExpiryText => _providerDraft?.OAuthAccessTokenExpiresUtc is { } expiresUtc
+        ? expiresUtc <= DateTimeOffset.UtcNow ? "Refresh required" : $"Refreshes automatically · {expiresUtc.ToLocalTime():g}"
+        : "Managed automatically";
+
+    private string TwitchIngestSummary => _providerDraft is null || string.IsNullOrWhiteSpace(_providerDraft.IngestServerName)
+        ? "Not measured"
+        : _providerDraft.IngestLatencyMilliseconds is { } milliseconds
+            ? $"{_providerDraft.IngestServerName} · {milliseconds:0} ms"
+            : _providerDraft.IngestServerName;
 
     private string SectionTitle => _tab switch
     {
@@ -629,8 +740,8 @@
     {
         "providers" =>
         [
-            new(1, "Create a machine profile", "Choose the provider, transport, endpoint, and account identity once."),
-            new(2, "Store credentials", "Save stream and optional Chat secrets encrypted for the current Windows user."),
+            new(1, "Create a machine profile", "Choose the provider and use OAuth where supported, or keep manual endpoint and key entry."),
+            new(2, "Store credentials", "OAuth sessions, stream keys, and optional Chat secrets are encrypted for the current Windows user."),
             new(3, "Use it in outputs", "The publication stores only the provider profile ID, never the secret values.")
         ],
         "outputs" =>
@@ -690,7 +801,14 @@
             _machine = await ProfileStore.LoadAsync();
             _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
             _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
+            _twitchIngestCandidates = [];
+            _twitchAuthorization = null;
             _status = "Machine profiles are reusable across publications.";
+        }
+        else if (!Visible && _wasVisible)
+        {
+            _twitchOAuthCancellation?.Cancel();
+            await CloseTwitchAuthorizationWindowAsync();
         }
         _wasVisible = Visible;
     }
@@ -703,16 +821,209 @@
     private void ShowAdvanced() => _tab = "advanced";
     private void ToggleWorkflowHelp() => _showWorkflowHelp = !_showWorkflowHelp;
 
+    private void ChangeProvider(ChangeEventArgs args)
+    {
+        if (_providerDraft is null
+            || !Enum.TryParse<PublicationStreamProvider>(args.Value?.ToString(), out var provider)) return;
+        _providerDraft.Provider = provider;
+        _twitchOAuthCancellation?.Cancel();
+        _twitchIngestCandidates = [];
+        _twitchAuthorization = null;
+        if (provider == PublicationStreamProvider.Twitch)
+        {
+            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+            if (string.IsNullOrWhiteSpace(_providerDraft.OAuthClientId)) _providerDraft.OAuthClientId = TwitchOAuth.DefaultClientId;
+        }
+        else
+        {
+            _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.Manual;
+        }
+        _status = $"Provider changed to {provider}.";
+    }
+
+    private void ChangeAuthenticationMode(ChangeEventArgs args)
+    {
+        if (_providerDraft is null
+            || !Enum.TryParse<StreamingProviderAuthenticationMode>(args.Value?.ToString(), out var mode)) return;
+        _providerDraft.AuthenticationMode = mode;
+        if (mode == StreamingProviderAuthenticationMode.OAuth)
+        {
+            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+            if (string.IsNullOrWhiteSpace(_providerDraft.OAuthClientId)) _providerDraft.OAuthClientId = TwitchOAuth.DefaultClientId;
+            _status = "Twitch OAuth selected. Connect Twitch to retrieve the account, stream key, and refresh session.";
+        }
+        else
+        {
+            _twitchOAuthCancellation?.Cancel();
+            _status = "Manual Twitch configuration selected.";
+        }
+    }
+
+    private async Task ConnectTwitchOAuth()
+    {
+        if (_providerDraft is null || _providerDraft.Provider != PublicationStreamProvider.Twitch || _twitchOAuthBusy) return;
+        _twitchOAuthCancellation?.Cancel();
+        _twitchOAuthCancellation?.Dispose();
+        var cancellation = new CancellationTokenSource();
+        _twitchOAuthCancellation = cancellation;
+        _twitchOAuthBusy = true;
+        _twitchAuthorization = null;
+        try
+        {
+            await JS.InvokeVoidAsync("publisherStreaming.reserveExternalAuthorizationWindow", "publisherstudio-twitch-oauth");
+            _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.OAuth;
+            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+            _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
+            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+            var saved = await ProfileStore.SaveProviderAsync(_providerDraft, cancellation.Token);
+            _providerDraft = Clone(saved);
+            var authorization = await TwitchOAuth.StartDeviceAuthorizationAsync(
+                _providerDraft.OAuthClientId,
+                _providerDraft.ChatEnabled,
+                cancellation.Token);
+            _twitchAuthorization = authorization;
+            _status = $"Twitch sign-in is waiting in the browser. Activation code: {authorization.UserCode}.";
+            await JS.InvokeVoidAsync(
+                "publisherStreaming.navigateExternalAuthorizationWindow",
+                "publisherstudio-twitch-oauth",
+                authorization.VerificationUri);
+            await InvokeAsync(StateHasChanged);
+
+            var result = await TwitchOAuth.CompleteDeviceAuthorizationAsync(
+                _providerDraft.Id,
+                authorization,
+                _providerDraft.AutoSelectIngest,
+                _providerDraft.Endpoint,
+                cancellation.Token);
+            _machine = await ProfileStore.LoadAsync(cancellation.Token);
+            _providerDraft = result.Profile is not null
+                ? Clone(result.Profile)
+                : _machine.Providers.FirstOrDefault(profile => profile.Id == saved.Id) is { } stored
+                    ? Clone(stored)
+                    : null;
+            _twitchIngestCandidates = result.IngestCandidates;
+            _twitchAuthorization = null;
+            _status = result.Message;
+            await CloseTwitchAuthorizationWindowAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            _status = "Twitch sign-in was cancelled.";
+        }
+        catch (Exception exception)
+        {
+            _status = $"Twitch connection failed: {exception.Message}";
+        }
+        finally
+        {
+            _twitchAuthorization = null;
+            _twitchOAuthBusy = false;
+            if (ReferenceEquals(_twitchOAuthCancellation, cancellation)) _twitchOAuthCancellation = null;
+            cancellation.Dispose();
+            await CloseTwitchAuthorizationWindowAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task CancelTwitchOAuth()
+    {
+        _twitchOAuthCancellation?.Cancel();
+        await CloseTwitchAuthorizationWindowAsync();
+    }
+
+    private async Task CloseTwitchAuthorizationWindowAsync()
+    {
+        try { await JS.InvokeVoidAsync("publisherStreaming.closeExternalAuthorizationWindow", "publisherstudio-twitch-oauth"); }
+        catch { }
+    }
+
+    private async Task DisconnectTwitchOAuth()
+    {
+        if (_providerDraft is null) return;
+        var profileId = _providerDraft.Id;
+        await TwitchOAuth.DisconnectAsync(profileId);
+        _machine = await ProfileStore.LoadAsync();
+        _providerDraft = _machine.Providers.FirstOrDefault(profile => profile.Id == profileId) is { } stored
+            ? Clone(stored)
+            : null;
+        _twitchAuthorization = null;
+        _twitchIngestCandidates = [];
+        _status = "Twitch OAuth disconnected. The provider remains available for manual configuration.";
+    }
+
+    private async Task TestTwitchIngestEndpoints()
+    {
+        if (_providerDraft is null || _providerDraft.Provider != PublicationStreamProvider.Twitch || _twitchIngestBusy) return;
+        _twitchIngestBusy = true;
+        try
+        {
+            _status = "Testing Twitch ingest endpoints from this computer…";
+            await InvokeAsync(StateHasChanged);
+            _twitchIngestCandidates = await TwitchOAuth.TestIngestEndpointsAsync();
+            var selected = _twitchIngestCandidates.FirstOrDefault(candidate => candidate.Reachable)
+                ?? _twitchIngestCandidates.FirstOrDefault(candidate => candidate.IsGlobal);
+            if (selected is not null) ApplyTwitchIngestCandidate(selected);
+            _status = selected is null
+                ? "Twitch did not return a usable ingest endpoint. The existing manual endpoint was left unchanged."
+                : selected.LatencyMilliseconds is { } milliseconds
+                    ? $"Selected {selected.Name} at approximately {milliseconds:0} ms TCP connection latency."
+                    : $"Selected {selected.Name}. Direct latency testing was unavailable, so Twitch global routing remains the fallback.";
+        }
+        catch (Exception exception)
+        {
+            _status = $"Twitch endpoint test failed: {exception.Message}";
+        }
+        finally
+        {
+            _twitchIngestBusy = false;
+        }
+    }
+
+    private void SelectTwitchIngestEndpoint(ChangeEventArgs args)
+    {
+        if (_providerDraft is null) return;
+        var endpoint = args.Value?.ToString() ?? string.Empty;
+        var candidate = _twitchIngestCandidates.FirstOrDefault(item => string.Equals(item.Endpoint, endpoint, StringComparison.Ordinal));
+        if (candidate is not null) ApplyTwitchIngestCandidate(candidate);
+    }
+
+    private void ApplyTwitchIngestCandidate(TwitchIngestCandidate candidate)
+    {
+        if (_providerDraft is null) return;
+        _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+        _providerDraft.Endpoint = candidate.Endpoint;
+        _providerDraft.IngestServerName = candidate.Name;
+        _providerDraft.IngestLatencyMilliseconds = candidate.LatencyMilliseconds;
+        _providerDraft.IngestLastTestedUtc = DateTimeOffset.UtcNow;
+    }
+
+    private static string TwitchIngestOption(TwitchIngestCandidate candidate) =>
+        candidate.Reachable && candidate.LatencyMilliseconds is { } milliseconds
+            ? $"{candidate.Name} — {milliseconds:0} ms"
+            : candidate.Reachable
+                ? $"{candidate.Name} — reachable"
+                : $"{candidate.Name} — unreachable (fallback only)";
+
     private void NewProvider()
     {
-        _providerDraft = new StreamingProviderProfile();
+        _providerDraft = new StreamingProviderProfile
+        {
+            Endpoint = DefaultTwitchEndpoint,
+            OAuthClientId = TwitchOAuth.DefaultClientId
+        };
+        _twitchIngestCandidates = [];
+        _twitchAuthorization = null;
         _tab = "providers";
-        _status = "New provider profile. Save it to make it reusable.";
+        _status = "New provider profile. Choose Twitch OAuth or keep the manual workflow, then save it.";
     }
 
     private void EditProvider(StreamingProviderProfile profile)
     {
         _providerDraft = Clone(profile);
+        _twitchIngestCandidates = [];
+        _twitchAuthorization = null;
         _tab = "providers";
         _status = $"Editing {profile.Name}.";
     }
@@ -720,10 +1031,20 @@
     private async Task SaveProvider()
     {
         if (_providerDraft is null) return;
+        if (_providerDraft.Provider == PublicationStreamProvider.Twitch
+            && _providerDraft.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth)
+        {
+            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+            _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
+            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+        }
+
         var saved = await ProfileStore.SaveProviderAsync(_providerDraft);
         _machine = await ProfileStore.LoadAsync();
         _providerDraft = Clone(saved);
-        _status = $"Saved {saved.Name}.";
+        _status = saved.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth && !saved.HasStoredOAuthSession
+            ? $"Saved {saved.Name}. Connect Twitch to complete OAuth authorization."
+            : $"Saved {saved.Name}.";
     }
 
     private async Task DeleteProvider()
@@ -748,8 +1069,22 @@
         copy.ChatSecret = string.Empty;
         copy.HasStoredSecret = false;
         copy.HasStoredChatSecret = false;
+        copy.HasStoredOAuthSession = false;
+        copy.OAuthAccessTokenExpiresUtc = null;
+        copy.OAuthLastValidatedUtc = null;
+        copy.OAuthScopes = string.Empty;
+        copy.IngestLatencyMilliseconds = null;
+        copy.IngestLastTestedUtc = null;
+        if (copy.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth)
+        {
+            copy.ChannelId = string.Empty;
+            copy.AccountName = string.Empty;
+        }
         _providerDraft = copy;
-        _status = "Provider duplicated. Enter credentials if needed, then save the new profile.";
+        _twitchIngestCandidates = [];
+        _status = copy.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth
+            ? "Provider duplicated without credentials. Save it, then connect the Twitch account."
+            : "Provider duplicated. Enter credentials if needed, then save the new profile.";
     }
 
     private void AddOutput()
@@ -1186,8 +1521,19 @@
         _ => value.ToString()
     };
 
-    private Task Apply() => Saved.InvokeAsync(_draft);
-    private Task Cancel() => Cancelled.InvokeAsync();
+    private async Task Apply()
+    {
+        _twitchOAuthCancellation?.Cancel();
+        await CloseTwitchAuthorizationWindowAsync();
+        await Saved.InvokeAsync(_draft);
+    }
+
+    private async Task Cancel()
+    {
+        _twitchOAuthCancellation?.Cancel();
+        await CloseTwitchAuthorizationWindowAsync();
+        await Cancelled.InvokeAsync();
+    }
     private static T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
     private static string ShortId(string value) => string.IsNullOrWhiteSpace(value) ? "default" : value.Length <= 16 ? value : value[..16] + "…";
 

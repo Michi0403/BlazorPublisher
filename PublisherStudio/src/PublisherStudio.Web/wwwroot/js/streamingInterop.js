@@ -1,5 +1,6 @@
 (() => {
     const sources = new Map();
+    const externalAuthorizationWindows = new Map();
     const outputContext = { mode: "operator", platform: "Preview", channel: "", outputId: "" };
     let hotkeyListener = null;
     let hotkeyReference = null;
@@ -1009,6 +1010,58 @@
         return true;
     }
 
+    function externalAuthorizationWindowName(name) {
+        const normalized = String(name || "publisherstudio-oauth").replace(/[^a-z0-9_-]/gi, "-");
+        return normalized || "publisherstudio-oauth";
+    }
+
+    function reserveExternalAuthorizationWindow(name) {
+        const key = externalAuthorizationWindowName(name);
+        try {
+            const popup = window.open("", key, "popup=yes,width=760,height=820,resizable=yes,scrollbars=yes");
+            if (!popup) return false;
+            try {
+                popup.document.title = "PublisherStudio authorization";
+                if (popup.document.body) popup.document.body.textContent = "Waiting for the provider authorization page…";
+            } catch { }
+            externalAuthorizationWindows.set(key, popup);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    function navigateExternalAuthorizationWindow(name, url) {
+        const key = externalAuthorizationWindowName(name);
+        const destination = String(url || "").trim();
+        if (!destination) return false;
+        let popup = externalAuthorizationWindows.get(key);
+        try {
+            if (!popup || popup.closed) popup = window.open(destination, key, "popup=yes,width=760,height=820,resizable=yes,scrollbars=yes");
+            else popup.location.href = destination;
+            if (!popup) return false;
+            try { popup.opener = null; } catch { }
+            try { popup.focus(); } catch { }
+            externalAuthorizationWindows.set(key, popup);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    function closeExternalAuthorizationWindow(name) {
+        const key = externalAuthorizationWindowName(name);
+        const popup = externalAuthorizationWindows.get(key);
+        externalAuthorizationWindows.delete(key);
+        if (!popup) return false;
+        try {
+            if (!popup.closed) popup.close();
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
     function setOutputContext(context = {}) {
         Object.assign(outputContext, context);
         window.PublisherStudioOutputContext = { ...outputContext };
@@ -1023,6 +1076,9 @@
         activateSource,
         enumerateDevices,
         chooseDirectory,
+        reserveExternalAuthorizationWindow,
+        navigateExternalAuthorizationWindow,
+        closeExternalAuthorizationWindow,
         setOutputContext,
         prepareProgramCapture,
         startProgramIngest,

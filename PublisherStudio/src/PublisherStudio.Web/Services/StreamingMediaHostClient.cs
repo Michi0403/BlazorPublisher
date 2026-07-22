@@ -8,10 +8,11 @@ namespace PublisherStudio.Services;
 /// No second executable, loopback port, or HTTP client is involved. Browser-facing
 /// capture and ingest sockets remain available as same-origin application endpoints.
 /// </summary>
-public sealed class StreamingMediaHostClient(StreamingProfileStore profiles, MediaSessionRegistry sessions)
+public sealed class StreamingMediaHostClient(StreamingProfileStore profiles, TwitchOAuthService twitchOAuth, MediaSessionRegistry sessions)
 {
     private static readonly JsonSerializerOptions WebJson = new(JsonSerializerDefaults.Web);
     private readonly StreamingProfileStore _profiles = profiles;
+    private readonly TwitchOAuthService _twitchOAuth = twitchOAuth;
     private readonly MediaSessionRegistry _sessions = sessions;
 
     public async Task<List<PublisherStudio.Domain.NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
@@ -40,19 +41,31 @@ public sealed class StreamingMediaHostClient(StreamingProfileStore profiles, Med
         foreach (var output in document.Streaming.Outputs)
         {
             var profile = settings.Providers.FirstOrDefault(item => item.Id == output.ProfileId && item.Enabled);
+            var chatSecret = string.Empty;
+            var twitchOAuthChat = profile?.Provider == PublicationStreamProvider.Twitch
+                && profile.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth;
+            var twitchOAuthHasChatScopes = profile is not null
+                && profile.OAuthScopes.Contains("chat:read", StringComparison.OrdinalIgnoreCase)
+                && profile.OAuthScopes.Contains("chat:edit", StringComparison.OrdinalIgnoreCase);
+            if (profile?.ChatEnabled == true && (!twitchOAuthChat || twitchOAuthHasChatScopes))
+            {
+                chatSecret = twitchOAuthChat
+                    ? await _twitchOAuth.EnsureValidAccessTokenAsync(profile.Id, cancellationToken) ?? string.Empty
+                    : await _profiles.ResolveChatSecretAsync(profile.Id, cancellationToken) ?? string.Empty;
+            }
             providers.Add(new MediaHostOutputRequest
             {
                 OutputId = output.Id,
                 Name = output.Name,
                 Enabled = output.Enabled && profile is not null,
                 Provider = output.Provider,
-                Transport = profile?.Transport ?? PublicationStreamTransport.Rtmps,
+                Transport = profile?.Transport ?? PublicationStreamTransport.Rtmp,
                 Endpoint = profile?.Endpoint ?? string.Empty,
                 ChannelId = string.IsNullOrWhiteSpace(output.ChatChannel) ? profile?.ChannelId ?? string.Empty : output.ChatChannel,
                 AccountName = profile?.AccountName ?? string.Empty,
                 Secret = profile is null ? string.Empty : await _profiles.ResolveSecretAsync(profile.Id, cancellationToken) ?? string.Empty,
-                ChatEnabled = profile?.ChatEnabled == true,
-                ChatSecret = profile is null ? string.Empty : await _profiles.ResolveChatSecretAsync(profile.Id, cancellationToken) ?? string.Empty,
+                ChatEnabled = profile?.ChatEnabled == true && !string.IsNullOrWhiteSpace(chatSecret),
+                ChatSecret = chatSecret,
                 TestMode = dryRun || output.UseProviderTestMode,
                 Width = output.Width,
                 Height = output.Height,

@@ -112,7 +112,7 @@ assert.match(webProgram, /ProtectKeysWithDpapi/);
 assert.match(webProgram, /AddPublisherStreamingRuntime/);
 assert.match(webProgram, /MapPublisherStreamingRuntime/);
 assert.match(mediaHost, /public static class PublisherStreamingRuntimeExtensions/);
-assert.match(mediaHost, /version = "1\.0\.50"/);
+assert.match(mediaHost, /version = "1\.0\.51"/);
 assert.match(streamingClient, /In-process facade/);
 assert.doesNotMatch(streamingClient, /HttpClient/);
 assert.match(runtime, /return value \|\| window\.location\.origin/);

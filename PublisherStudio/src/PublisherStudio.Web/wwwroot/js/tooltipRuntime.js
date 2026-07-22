@@ -63,6 +63,7 @@
 
     let tooltip = null;
     let activeTarget = null;
+    let pendingTarget = null;
     let showTimer = 0;
     let hideTimer = 0;
 
@@ -195,22 +196,32 @@
         root.querySelectorAll?.(selector).forEach(prepare);
     }
 
+    function supportsTopLayer(popup) {
+        return typeof popup?.showPopover === 'function' && typeof popup?.hidePopover === 'function';
+    }
+
+    function isPopoverOpen(popup) {
+        if (!supportsTopLayer(popup)) return false;
+        try { return popup.matches(':popover-open'); } catch { return false; }
+    }
+
     function ensureTooltip() {
         if (tooltip?.isConnected) return tooltip;
         tooltip = document.createElement('div');
         tooltip.className = 'publisher-help-tooltip';
         tooltip.setAttribute('role', 'tooltip');
-        tooltip.hidden = true;
+        tooltip.setAttribute('popover', 'manual');
         document.body.appendChild(tooltip);
+        tooltip.hidden = !supportsTopLayer(tooltip);
         return tooltip;
     }
 
     function overlayZIndex() {
         let highest = 1000;
-        document.querySelectorAll('.dx-overlay-wrapper,.dx-popup-wrapper,.streaming-studio-overlay,[role="dialog"]').forEach(element => {
-            if (!(element instanceof HTMLElement) || element.hidden) return;
+        document.querySelectorAll('.dx-overlay-wrapper,.dx-popup-wrapper,.dx-tooltip-wrapper,.streaming-studio-overlay,[role="dialog"],[data-publication-element]').forEach(element => {
+            if (!(element instanceof HTMLElement || element instanceof SVGElement) || element.hidden) return;
             const style = getComputedStyle(element);
-            if (style.display === 'none' || style.visibility === 'hidden') return;
+            if (style.display === 'none' || style.visibility === 'hidden' || Number.parseFloat(style.opacity || '1') <= 0) return;
             const value = Number.parseInt(style.zIndex, 10);
             if (Number.isFinite(value)) highest = Math.max(highest, value);
         });
@@ -234,14 +245,33 @@
         popup.style.top = `${Math.round(top)}px`;
     }
 
+    function openTooltip(popup) {
+        if (supportsTopLayer(popup)) {
+            popup.hidden = false;
+            if (!isPopoverOpen(popup)) {
+                try { popup.showPopover(); }
+                catch { popup.hidden = false; }
+            }
+        } else popup.hidden = false;
+    }
+
+    function closeTooltip(popup) {
+        if (!popup) return;
+        if (supportsTopLayer(popup) && isPopoverOpen(popup)) {
+            try { popup.hidePopover(); return; } catch { }
+        }
+        popup.hidden = true;
+    }
+
     function show(target) {
         const description = target?.dataset?.publisherTooltip;
         if (!description || !target.isConnected) return;
 
+        pendingTarget = null;
         activeTarget = target;
         const popup = ensureTooltip();
         popup.textContent = description;
-        popup.hidden = false;
+        openTooltip(popup);
         requestAnimationFrame(() => {
             if (activeTarget !== target) return;
             popup.classList.add('visible');
@@ -251,40 +281,63 @@
 
     function scheduleShow(target, delay = 420) {
         clearTimeout(hideTimer);
-        clearTimeout(showTimer);
         if (activeTarget === target && tooltip?.classList.contains('visible')) return;
-        showTimer = window.setTimeout(() => show(target), delay);
+        if (pendingTarget === target && showTimer) return;
+        clearTimeout(showTimer);
+        pendingTarget = target;
+        showTimer = window.setTimeout(() => {
+            showTimer = 0;
+            if (pendingTarget === target) show(target);
+        }, delay);
     }
 
     function hide(immediate = false) {
         clearTimeout(showTimer);
         clearTimeout(hideTimer);
+        showTimer = 0;
+        pendingTarget = null;
         const action = () => {
             activeTarget = null;
             if (!tooltip) return;
             tooltip.classList.remove('visible');
             window.setTimeout(() => {
-                if (!tooltip?.classList.contains('visible')) tooltip.hidden = true;
+                if (!tooltip?.classList.contains('visible')) closeTooltip(tooltip);
             }, 120);
         };
         if (immediate) action();
         else hideTimer = window.setTimeout(action, 80);
     }
 
+    function candidateFromNode(node) {
+        if (!(node instanceof Element)) return null;
+        const candidate = node.matches(selector) ? node : node.closest?.(selector);
+        if (!candidate) return null;
+        if (!candidate.dataset.publisherTooltip) prepare(candidate);
+        return candidate.dataset.publisherTooltip ? candidate : null;
+    }
+
     function targetFrom(event) {
-        const target = event.target instanceof Element ? event.target.closest(selector) : null;
-        return target?.dataset?.publisherTooltip ? target : null;
+        const path = typeof event?.composedPath === 'function' ? event.composedPath() : [event?.target];
+        for (const node of path) {
+            const candidate = candidateFromNode(node);
+            if (candidate) return candidate;
+        }
+        return candidateFromNode(event?.target);
     }
 
     document.addEventListener('pointerover', event => {
         const target = targetFrom(event);
-        if (target) scheduleShow(target);
+        if (!target) return;
+        if (target === activeTarget || target === pendingTarget) return;
+        scheduleShow(target);
     }, true);
 
     document.addEventListener('pointerout', event => {
-        const leaving = event.target instanceof Element ? event.target.closest(selector) : null;
-        const next = event.relatedTarget instanceof Node ? event.relatedTarget : null;
-        if (leaving && next && leaving.contains(next)) return;
+        const leaving = targetFrom(event);
+        const next = candidateFromNode(event.relatedTarget);
+        const current = activeTarget || pendingTarget;
+        if (leaving && next === leaving) return;
+        if (current && next === current) return;
         hide();
     }, true);
 
@@ -303,6 +356,13 @@
     window.addEventListener('scroll', () => hide(true), true);
     window.addEventListener('resize', () => {
         if (activeTarget) position(activeTarget);
+    });
+    document.addEventListener('fullscreenchange', () => {
+        if (!activeTarget || !tooltip) return;
+        const target = activeTarget;
+        tooltip.classList.remove('visible');
+        closeTooltip(tooltip);
+        requestAnimationFrame(() => show(target));
     });
 
     const observer = new MutationObserver(records => {

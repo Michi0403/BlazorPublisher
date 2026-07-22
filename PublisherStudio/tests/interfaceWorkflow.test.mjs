@@ -10,6 +10,7 @@ const studio = read('src/PublisherStudio.Web/Components/Editor/StreamingStudio.r
 const surface = read('src/PublisherStudio.Web/Components/Editor/PageSurface.razor');
 const interop = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
 const tooltips = read('src/PublisherStudio.Web/wwwroot/js/tooltipRuntime.js');
+const liveData = read('src/PublisherStudio.Web/wwwroot/js/liveDataInterop.js');
 const app = read('src/PublisherStudio.Web/Components/App.razor');
 const liveSource = read('src/PublisherStudio.Web/Components/Editor/LiveSourceView.razor');
 const streamingInterop = read('src/PublisherStudio.Web/wwwroot/js/streamingInterop.js');
@@ -42,7 +43,20 @@ assert.match(tooltips, /publisherTooltip/);
 assert.match(tooltips, /PublisherStudioTooltips/);
 assert.match(tooltips, /function overlayZIndex/);
 assert.match(tooltips, /dx-overlay-wrapper/);
+assert.match(tooltips, /pendingTarget/);
+assert.match(tooltips, /composedPath/);
+assert.match(tooltips, /showPopover/);
+assert.match(tooltips, /:popover-open/);
+assert.match(tooltips, /next === current/);
 assert.match(tooltips, /document\.addEventListener\('contextmenu', \(\) => hide\(true\)/);
+assert.match(liveData, /function clearVisualInteraction/);
+assert.match(liveData, /hideTooltip/);
+assert.match(liveData, /clearHover/);
+assert.match(liveData, /function bindPointerOwnership/);
+assert.match(interop, /signalSourceIds/);
+assert.match(interop, /ps-pointer-passive/);
+assert.match(interop, /ps-pointer-owner/);
+assert.match(surface, /data-element-kind=/);
 assert.match(app, /js\/tooltipRuntime\.js/);
 
 console.log('PublishingSuite interface, canvas activation/context-menu, and application tooltip contracts passed');

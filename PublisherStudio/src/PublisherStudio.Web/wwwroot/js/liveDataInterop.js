@@ -3,6 +3,48 @@
 
     const states = new Map();
     const decoder = new TextDecoder();
+    let pointerOwnershipBound = false;
+
+    function clearVisualInteraction(state) {
+        const instance = state?.instance;
+        if (!instance) return;
+        try { instance.hideTooltip?.(); } catch { }
+        try { instance.clearHover?.(); } catch { }
+        try {
+            instance.getAllSeries?.().forEach(series => {
+                try { series.clearHover?.(); } catch { }
+                try { series.getAllPoints?.().forEach(point => point.clearHover?.()); } catch { }
+            });
+        } catch { }
+    }
+
+    function eventBelongsTo(element, event) {
+        if (!element || !event) return false;
+        const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+        if (path.includes(element)) return true;
+        return event.target instanceof Node && element.contains(event.target);
+    }
+
+    function clearVisualsOutside(event) {
+        states.forEach((state, element) => {
+            if (!eventBelongsTo(element, event)) clearVisualInteraction(state);
+        });
+    }
+
+    function clearAllVisualInteractions() {
+        states.forEach(clearVisualInteraction);
+    }
+
+    function bindPointerOwnership() {
+        if (pointerOwnershipBound || typeof document === "undefined") return;
+        pointerOwnershipBound = true;
+        document.addEventListener("pointerover", clearVisualsOutside, true);
+        document.addEventListener("pointerdown", clearVisualsOutside, true);
+        document.addEventListener("pointerout", event => {
+            if (!event.relatedTarget) clearAllVisualInteractions();
+        }, true);
+        window.addEventListener("blur", clearAllVisualInteractions);
+    }
 
     function decodeConfig(value) {
         if (!value) return null;
@@ -277,6 +319,7 @@
     function disposeWidget(element) {
         const state = states.get(element);
         if (state?.timer) clearInterval(state.timer);
+        clearVisualInteraction(state);
         try {
             const instance = state?.instance;
             if (instance?.dispose) instance.dispose();
@@ -486,6 +529,7 @@
         if (!config) return;
         const prior = states.get(element);
         if (prior?.timer) clearInterval(prior.timer);
+        clearVisualInteraction(prior);
         try { prior?.instance?.dispose?.(); } catch { }
         element.replaceChildren();
         let rows = Array.isArray(config.rows) ? config.rows : [];
@@ -520,12 +564,13 @@
     }
 
     function start(root, options) {
+        bindPointerOwnership();
         const scope = root || document;
         scope.querySelectorAll("[data-ps-visual-config]").forEach(element => render(element, element.dataset.psVisualConfig, { polling: options?.polling !== false, fetchNow: options?.fetchNow !== false }));
     }
 
     window.PublisherStudioLiveDataRuntime = {
-        renderVisualById(id, config) { return render(document.getElementById(id), config, { polling: false, fetchNow: false }); },
+        renderVisualById(id, config) { bindPointerOwnership(); return render(document.getElementById(id), config, { polling: false, fetchNow: false }); },
         disposeById(id) { const element = document.getElementById(id); if (element) disposeWidget(element); },
         render,
         start,

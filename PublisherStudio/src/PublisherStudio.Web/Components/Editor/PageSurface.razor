@@ -67,6 +67,7 @@
                          viewBox="0 0 @Inv(State.CurrentPage.WidthMm) @Inv(State.CurrentPage.HeightMm)"
                          preserveAspectRatio="none"
                          data-publication-element
+                         data-element-kind="connector"
                          data-help="Double-click to select this connector. Right-click for connector, signal, routing, and endpoint commands."
                          data-element-id="@connector.Id"
                          data-selected="@State.IsSelected(connector.Id).ToString().ToLowerInvariant()"
@@ -112,6 +113,7 @@
             @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible && e is not ConnectorElement))
             {
                 <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
+                     data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
                      data-animations="@PublicationAnimationData.Animations(element)"
                      data-interaction="@PublicationAnimationData.Interaction(element)"
                      data-interaction-action="@element.Interaction.Action"

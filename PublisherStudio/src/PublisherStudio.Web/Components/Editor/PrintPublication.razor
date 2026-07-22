@@ -27,6 +27,7 @@
                 {
                     <svg id="element-@connector.Id" class="print-connector @(connector.Signal.Enabled ? "signal-connector" : null) @(!connector.Signal.LineVisible ? "signal-line-hidden" : null)" style="z-index:@connector.ZIndex"
                          data-publication-element data-element-id="@connector.Id"
+                         data-element-kind="connector"
                          data-group-id="@connector.GroupId"
                          data-animations="@PublicationAnimationData.Animations(connector)"
                          data-interaction="@PublicationAnimationData.Interaction(connector)"
@@ -47,6 +48,7 @@
                 {
                     <div class="print-element" style="@ElementStyle(element)"
                          data-publication-element data-element-id="@element.Id"
+                         data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
                          data-group-id="@element.GroupId"
                          data-animations="@PublicationAnimationData.Animations(element)"
                          data-interaction="@PublicationAnimationData.Interaction(element)"

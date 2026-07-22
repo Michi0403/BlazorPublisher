@@ -4986,9 +4986,24 @@ function websitePresentationRuntime() {
             if (runNextClickGroup()) return;
             if (bool(page.dataset.advanceOnClick)) goNext();
         });
+        const signalSourceIds = new Set([...page.querySelectorAll('[data-signal-enabled="true"][data-connector-id]')].flatMap(connector => {
+            const settings = parse(connector.dataset.signal, {});
+            const trigger = lower(settings.trigger);
+            const sourceId = String(connector.dataset.sourceElementId || '').trim();
+            return sourceId && ['onclick', 'onhover'].includes(trigger) ? [sourceId] : [];
+        }));
         for (const node of page.querySelectorAll('[data-publication-element]')) {
             const interaction = parse(node.dataset.interaction, {});
             const interactionAction = lower(interaction.action);
+            const kind = lower(node.dataset.elementKind);
+            const nativeInteractive = Boolean(node.dataset.mediaKind)
+                || ['datavisual', 'devextremecomponent', 'livesource'].includes(kind)
+                || Boolean(node.querySelector('video,audio,[data-ps-visual-config],[data-ps-component-config],button,a[href],input,select,textarea,[contenteditable="true"]'));
+            const signalSource = signalSourceIds.has(String(node.dataset.elementId || ''));
+            if (nativeInteractive || signalSource) node.classList.add('ps-pointer-owner');
+            if (!nativeInteractive && !signalSource && (!interactionAction || interactionAction === 'none')
+                && ['shape', 'wordart', 'barcode'].includes(kind))
+                node.classList.add('ps-pointer-passive');
             if (node.dataset.mediaKind && lower(node.dataset.mediaTrigger) === 'onclick' && (!interactionAction || interactionAction === 'none')) {
                 node.classList.add('ps-interactive');
                 node.addEventListener('click', event => {
@@ -4998,7 +5013,8 @@ function websitePresentationRuntime() {
                 });
             }
             if (interactionAction === 'none' || !interaction.action) continue;
-            node.classList.add('ps-interactive');
+            node.classList.add('ps-interactive', 'ps-pointer-owner');
+            node.classList.remove('ps-pointer-passive');
             node.addEventListener('click', event => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -5210,12 +5226,29 @@ function websiteSiteRuntime() {
     };
 
     for (const page of pages) {
-        for (const node of page.querySelectorAll('[data-interaction]')) {
+        const signalSourceIds = new Set([...page.querySelectorAll('[data-signal-enabled="true"][data-connector-id]')].flatMap(connector => {
+            let settings;
+            try { settings = JSON.parse(connector.dataset.signal || '{}'); } catch { settings = {}; }
+            const trigger = lower(settings.trigger);
+            const sourceId = String(connector.dataset.sourceElementId || '').trim();
+            return sourceId && ['onclick', 'onhover'].includes(trigger) ? [sourceId] : [];
+        }));
+        for (const node of page.querySelectorAll('[data-publication-element]')) {
             let interaction;
             try { interaction = JSON.parse(node.dataset.interaction || '{}'); } catch { interaction = {}; }
             const action = lower(interaction.action || node.dataset.interactionAction);
+            const kind = lower(node.dataset.elementKind);
+            const nativeInteractive = Boolean(node.dataset.mediaKind)
+                || ['datavisual', 'devextremecomponent', 'livesource'].includes(kind)
+                || Boolean(node.querySelector('video,audio,[data-ps-visual-config],[data-ps-component-config],button,a[href],input,select,textarea,[contenteditable="true"]'));
+            const signalSource = signalSourceIds.has(String(node.dataset.elementId || ''));
+            if (nativeInteractive || signalSource) node.classList.add('ps-pointer-owner');
+            if (!nativeInteractive && !signalSource && (!action || action === 'none')
+                && ['shape', 'wordart', 'barcode'].includes(kind))
+                node.classList.add('ps-pointer-passive');
             if (!action || action === 'none') continue;
-            node.classList.add('ps-interactive');
+            node.classList.add('ps-interactive', 'ps-pointer-owner');
+            node.classList.remove('ps-pointer-passive');
             node.addEventListener('click', event => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -6449,7 +6482,7 @@ body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
 .website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center;pointer-events:auto;-webkit-user-drag:auto;user-select:auto}
 .website-publication video,.website-publication audio{pointer-events:auto;user-select:auto}
 .website-publication .text-frame-content{user-select:text}
-.ps-interactive{cursor:pointer}.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
+.ps-pointer-passive{pointer-events:none!important}.ps-interactive{cursor:pointer}.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
 @media (prefers-reduced-motion:reduce){.ps-site-page,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
 @media print{html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}.website-publication.ps-site{position:static;display:block!important;overflow:visible;background:#fff}.website-publication.ps-site .ps-site-page,.website-publication.ps-site .ps-site-page[hidden]{position:relative!important;display:block!important;left:auto!important;top:auto!important;margin:0 auto!important;transform:none!important;box-shadow:none;break-after:page}}
 ` : `
@@ -6471,7 +6504,7 @@ body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
 .website-publication img{display:block;width:100%;height:100%;max-width:none;transform-origin:center;pointer-events:auto;-webkit-user-drag:auto;user-select:auto}
 .website-publication video,.website-publication audio{pointer-events:auto;user-select:auto}
 .website-publication .text-frame-content{user-select:text}
-.ps-interactive{cursor:pointer}.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
+.ps-pointer-passive{pointer-events:none!important}.ps-interactive{cursor:pointer}.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
 .ps-controls{position:fixed;z-index:100000;left:50%;bottom:14px;display:flex;align-items:center;gap:7px;min-height:38px;padding:6px 9px;border:1px solid #ffffff38;border-radius:999px;background:#111827dd;box-shadow:0 6px 24px #0009;transform:translateX(-50%);backdrop-filter:blur(10px)}
 .ps-controls[hidden]{display:none!important}.ps-controls button{display:grid;place-items:center;width:31px;height:31px;padding:0;border:1px solid #ffffff38;border-radius:50%;color:#fff;background:#ffffff12;font:600 18px/1 Segoe UI,system-ui,sans-serif;cursor:pointer}.ps-controls button:hover{background:#ffffff2c}.ps-controls button:disabled{opacity:.35;cursor:default}.ps-controls span{min-width:58px;color:#e5e7eb;text-align:center;font-size:12px}
 @media (prefers-reduced-motion:reduce){.ps-slide,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}

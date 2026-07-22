@@ -464,3 +464,15 @@ Static checks completed for the v1.0.37 source package:
 - Every project JavaScript file passes `node --check`; component, interface workflow, signal, streaming, and timeline Node contract suites pass.
 - Package JSON and project versions are aligned to `1.0.50`; publication format remains `1.45` and picture format remains `1.2`.
 - ZIP integrity and required-file checks are performed during final packaging. A full .NET/DevExpress compile remains a release-machine check because this environment has no .NET 10 SDK or licensed DevExpress package feed.
+
+## v1.0.51 pointer ownership and tooltip validation
+
+- The supplied standalone publication reproduces stale DevExtreme chart hover: after a chart point is hovered, moving onto the higher-z video leaves the old point and tooltip active. Replacing the embedded live-data runtime with v1.0.51 clears both immediately.
+- Application help tooltips preserve a pending/active owner while the pointer crosses nested SVG, chart, and component descendants; movement within one object no longer restarts the hover delay.
+- Help tooltips use the browser Popover top layer where available, with viewport clamping and an overlay-aware z-index fallback for older browsers.
+- Export runtime marks data visuals, DevExtreme components, media, native controls, publication actions, and Signal Arrow click/hover sources as pointer owners. Only non-interactive Shape, WordArt, and Barcode objects become pointer-passive.
+- Signal Connector/Arrow path geometry, canvas-to-client conversion, runner transforms, source/target IDs, and signal sequencing remain unchanged and are covered by the pointer-ownership contract test.
+- Every project JavaScript file passes `node --check`; component, interface, pointer ownership, signal, streaming, and timeline Node contract suites pass.
+- Package JSON, application, installer, and runtime capability versions are aligned to `1.0.51`; publication format remains `1.45` and picture format remains `1.2`.
+- A full .NET/DevExpress compile remains a release-machine check because this environment has no .NET 10 SDK or licensed DevExpress package feed.
+

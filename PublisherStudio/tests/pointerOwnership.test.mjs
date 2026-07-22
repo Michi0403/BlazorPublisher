@@ -25,6 +25,10 @@ assert.match(liveData, /instance\.hideTooltip\?\.\(\)/);
 assert.match(liveData, /series\.clearHover\?\.\(\)/);
 assert.match(liveData, /point\.clearHover\?\.\(\)/);
 assert.match(liveData, /if \(!event\.relatedTarget\) clearAllVisualInteractions\(\)/);
+assert.match(liveData, /function visualTooltip\(config\)/);
+assert.match(liveData, /closest\?\.\("\.website-publication \[data-publication-element\]"\)/);
+assert.match(liveData, /\{ enabled: true, container: exportedOwner \}/);
+assert.ok((liveData.match(/tooltip: visualTooltip\(config\)/g) || []).length >= 3, 'Exported DevExtreme visual tooltips must use a transformed publication owner as their container.');
 
 assert.equal((exporter.match(/const signalSourceIds = new Set/g) || []).length, 2, 'Presentation and site runtimes must classify Signal Arrow pointer sources.');
 assert.match(exporter, /\['onclick', 'onhover'\]\.includes\(trigger\)/);
@@ -41,4 +45,4 @@ assert.ok(exporter.includes("const x = num(connector.dataset[`${prefix}X`]);"));
 assert.ok(exporter.includes("const y = num(connector.dataset[`${prefix}Y`]);"));
 assert.ok(exporter.includes("runner.setAttribute('transform', `translate(${point.x} ${point.y}) rotate(${angle})`);"));
 
-console.log('tooltip top-layer, stable owner, exported pointer ownership, chart hover cleanup, and Signal Arrow geometry contracts passed');
+console.log('tooltip top-layer, stable owner, export-local visual tooltip placement, pointer ownership, chart hover cleanup, and Signal Arrow geometry contracts passed');

@@ -476,3 +476,14 @@ Static checks completed for the v1.0.37 source package:
 - Package JSON, application, installer, and runtime capability versions are aligned to `1.0.51`; publication format remains `1.45` and picture format remains `1.2`.
 - A full .NET/DevExpress compile remains a release-machine check because this environment has no .NET 10 SDK or licensed DevExpress package feed.
 
+
+## v1.0.52 standalone visual tooltip validation
+
+- The supplied `Untitled Publication (37).html` reproduces a doughnut tooltip rendered in `document.body` while the publication stage and page are transformed. The chart sector receives the correct hover, but the body-level tooltip remains in a different coordinate space.
+- The live-data runtime now gives exported DevExtreme visual tooltips the matching `[data-publication-element]` as their container. The owner inherits page/stage scale, translation, rotation, and animation, and remains overflow-visible inside the clipped publication page.
+- Headless Chromium verification confirms that hovering the green doughnut section creates `.dxc-tooltip` beneath the chart publication object and places its arrow beside the hovered segment at the transformed screen coordinates.
+- Main-application visuals retain the default DevExtreme container because the override is gated by `.website-publication`.
+- Existing hover cleanup still calls `hideTooltip`, clears series and point hover, and releases stale state when the pointer moves onto an overlapping media or component object.
+- Every project JavaScript file passes `node --check`; component, interface, pointer ownership, signal, streaming, and timeline Node contract suites pass.
+- Package JSON, application, installer, and runtime capability versions are aligned to `1.0.52`; publication format remains `1.45` and picture format remains `1.2`.
+- A full .NET/DevExpress compile remains a release-machine check because this environment has no .NET 10 SDK or licensed DevExpress package feed.

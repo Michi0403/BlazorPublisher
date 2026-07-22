@@ -366,11 +366,19 @@
         return number(get(row, field), kind);
     }
 
+    function visualTooltip(config) {
+        const element = config?.__element;
+        const exportedOwner = element?.closest?.(".website-publication [data-publication-element]");
+        return exportedOwner
+            ? { enabled: true, container: exportedOwner }
+            : { enabled: true };
+    }
+
     function common(config) {
         return {
             title: config.showTitle ? { text: config.title || "" } : undefined,
             legend: { visible: config.showLegend !== false },
-            tooltip: { enabled: true },
+            tooltip: visualTooltip(config),
             animation: { enabled: false },
             size: { width: elementSize(config).width, height: elementSize(config).height }
         };
@@ -482,7 +490,7 @@
             case "Sparkline": {
                 plugin = "dxSparkline";
                 const typeMap = { Line: "line", Spline: "spline", StepLine: "stepline", Area: "area", SplineArea: "splinearea", StepArea: "steparea", Bar: "bar", WinLoss: "winloss" };
-                options = { dataSource: points, argumentField: "argument", valueField: "value", type: typeMap[config.sparklineStyle] || "line", tooltip: { enabled: true }, size: elementSize(config) };
+                options = { dataSource: points, argumentField: "argument", valueField: "value", type: typeMap[config.sparklineStyle] || "line", tooltip: visualTooltip(config), size: elementSize(config) };
                 break;
             }
             case "BarGauge":
@@ -499,7 +507,7 @@
             case "Pyramid":
                 plugin = "dxFunnel"; options = Object.assign(common(config), { dataSource: points, argumentField: "argument", valueField: "value", inverted: kind === "Pyramid", label: { visible: !!config.showLabels } }); break;
             case "TreeMap":
-                plugin = "dxTreeMap"; options = Object.assign(common(config), { dataSource: rows.map((row, index) => ({ id: String(get(row, config.argumentField) || index), parent: String(get(row, config.parentField)), label: String(get(row, config.argumentField)), value: measure(config, row, valueField) })), idField: "id", parentField: "parent", labelField: "label", valueField: "value", tooltip: { enabled: true } }); break;
+                plugin = "dxTreeMap"; options = Object.assign(common(config), { dataSource: rows.map((row, index) => ({ id: String(get(row, config.argumentField) || index), parent: String(get(row, config.parentField)), label: String(get(row, config.argumentField)), value: measure(config, row, valueField) })), idField: "id", parentField: "parent", labelField: "label", valueField: "value", tooltip: visualTooltip(config) }); break;
             case "DataTable":
                 plugin = "dxDataGrid"; options = { dataSource: rows, showBorders: true, columnAutoWidth: true, filterRow: { visible: !!config.tableShowFilterRow }, paging: { pageSize: Math.max(1, config.rowLimit || 12) }, pager: { visible: false }, height: "100%", width: "100%" }; break;
             case "KpiProgress": {

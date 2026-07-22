@@ -1,6 +1,6 @@
 {
   "name": "publisherstudio-web-assets",
-  "version": "1.0.51",
+  "version": "1.0.52",
   "private": true,
   "scripts": {
     "prepare:devexpress": "node tools/prepare-devexpress-assets.mjs",

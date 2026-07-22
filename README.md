@@ -333,3 +333,7 @@ See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media 
 
 See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now release stale hover/tooltips when the pointer moves onto another overlapping publication object, while non-interactive decorative shapes, WordArt, and barcodes no longer consume presentation pointer events. Interactive media, components, data visuals, publication actions, and Signal Arrow click/hover sources remain pointer owners. In the main Publisher frame, explanatory tooltips keep one stable owner while the pointer moves through nested SVG or component children and render through the browser top layer so publication objects and DevExpress stacking contexts cannot cover them. Publication and Signal Arrow coordinate data is unchanged.
 
+
+## v1.0.52 standalone visual tooltip coordinates
+
+See `CHANGELOG-v1.0.52.md`. Self-contained presentation and site exports now keep DevExtreme visual tooltips inside the transformed publication object. Doughnut/pie charts and the other live visual types therefore preserve tooltip-to-point alignment while the exported page is centered, fitted, scaled, or animated. Authoring behavior, pointer ownership, overlap cleanup, Signal Arrow geometry, and document coordinates are unchanged.

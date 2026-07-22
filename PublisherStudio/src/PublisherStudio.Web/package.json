@@ -1,6 +1,6 @@
 {
   "name": "publisherstudio-web-assets",
-  "version": "1.0.53",
+  "version": "1.0.54",
   "private": true,
   "scripts": {
     "prepare:devexpress": "node tools/prepare-devexpress-assets.mjs",
@@ -10,9 +10,10 @@
     "test:timeline": "node ../../tests/timelineInterop.test.mjs",
     "test:components": "node ../../tests/componentRuntime.test.mjs",
     "test:signals": "node ../../tests/signalRuntime.test.mjs",
-    "test": "npm run test:timeline && npm run test:components && npm run test:signals && npm run test:streaming && npm run test:interface",
+    "test": "npm run test:timeline && npm run test:components && npm run test:signals && npm run test:streaming && npm run test:interface && npm run test:installer",
     "test:streaming": "node ../../tests/streamingRuntime.test.mjs",
-    "test:interface": "node ../../tests/interfaceWorkflow.test.mjs"
+    "test:interface": "node ../../tests/interfaceWorkflow.test.mjs",
+    "test:installer": "node ../../tests/installerResilience.test.mjs"
   },
   "dependencies": {
     "devextreme-dist": "25.2.8",

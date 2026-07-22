@@ -128,7 +128,7 @@ assert.match(webProgram, /AddPublisherStreamingRuntime/);
 assert.match(webProgram, /MapPublisherStreamingRuntime/);
 assert.match(webProgram, /AddHostedService<TwitchOAuthMaintenanceService>/);
 assert.match(mediaHost, /public static class PublisherStreamingRuntimeExtensions/);
-assert.match(mediaHost, /version = "1\.0\.53"/);
+assert.match(mediaHost, /version = "1\.0\.54"/);
 assert.match(streamingClient, /In-process facade/);
 assert.match(streamingClient, /EnsureValidAccessTokenAsync/);
 assert.doesNotMatch(streamingClient, /HttpClient/);

@@ -334,6 +334,10 @@ See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media 
 See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now release stale hover/tooltips when the pointer moves onto another overlapping publication object, while non-interactive decorative shapes, WordArt, and barcodes no longer consume presentation pointer events. Interactive media, components, data visuals, publication actions, and Signal Arrow click/hover sources remain pointer owners. In the main Publisher frame, explanatory tooltips keep one stable owner while the pointer moves through nested SVG or component children and render through the browser top layer so publication objects and DevExpress stacking contexts cannot cover them. Publication and Signal Arrow coordinate data is unchanged.
 
 
+## v1.0.54 resilient installer and FFmpeg provisioning
+
+See `CHANGELOG-v1.0.54.md`. The setup helper now survives slow or intermittent GitHub/CDN transfers by retrying release metadata, resuming partial release assets, validating cached ZIPs, and staging both payloads before modifying an existing installation. FFmpeg provisioning is pinned to the WinGet community source on Windows, has visible heartbeat output and bounded timeouts, retries once through the package-manager cache, and can no longer keep the installer waiting indefinitely. PublisherStudio remains usable when optional FFmpeg provisioning fails and FFmpeg can be installed later from Streaming Studio or `PublisherStudio.Setup --install-ffmpeg`.
+
 ## v1.0.53 Twitch OAuth and ingest selection
 
 See `CHANGELOG-v1.0.53.md` and `docs/STREAMING.md`. Streaming Studio now supports Twitch public-client Device Code OAuth alongside the unchanged manual stream-key workflow. It retrieves the authorized broadcaster identity and stream key, protects OAuth/refresh credentials with the machine profile store, validates sessions at startup and hourly, rotates refresh tokens, and can select the lowest-latency reachable endpoint from Twitch's official ingest list. A registered Twitch public application Client ID is required.

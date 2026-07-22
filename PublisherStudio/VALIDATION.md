@@ -499,3 +499,15 @@ Static checks completed for the v1.0.37 source package:
 - Every project JavaScript file passes `node --check`; all Node contract suites pass.
 - Package JSON, application, installer, and runtime capability versions are aligned to `1.0.53`; publication format remains `1.45` and picture format remains `1.2`.
 - A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because the .NET 10 SDK and licensed DevExpress package feed are unavailable. Real Twitch authorization and ingest latency must be exercised with a registered Client ID on the release machine.
+
+## v1.0.54 installer resilience validation
+
+- Confirmed WinGet FFmpeg arguments include `--source winget`, `--disable-interactivity`, agreement acceptance, exact package selection, and silent mode.
+- Confirmed each package-manager process is bounded, emits a 30-second heartbeat, is killed as a process tree when timed out, and is constrained by a 15-minute total FFmpeg provisioning budget.
+- Confirmed FFmpeg success requires executable discovery plus a successful `ffmpeg -version` process exit.
+- Confirmed WinGet package-directory discovery is shared by the installer and the runtime FFmpeg locator.
+- Confirmed GitHub metadata lookup retries and release asset transfer retains/resumes `.part` files, applies a two-minute no-data timeout, and retries up to five times.
+- Confirmed cached final ZIP files are opened and checked before reuse.
+- Confirmed both release archives are downloaded and validated before `--force-delete` can remove the installed application.
+- Confirmed permanent application download failure returns a non-zero setup result, while optional FFmpeg provisioning failure leaves PublisherStudio installed and usable.
+- Package JSON, application, installer, and runtime capability versions are aligned to `1.0.54`; publication format remains `1.45` and picture format remains `1.2`.

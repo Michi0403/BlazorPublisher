@@ -118,7 +118,8 @@ internal static class Program
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error in InstallBlazorPublisher.");
+                    logger.LogError(ex, "PublisherStudio installation/update failed before the existing installation was modified.");
+                    return 1;
                 }
                 try
                 {
@@ -174,13 +175,25 @@ internal static class Program
         try
         {
             var zipPath = options.BlazorPublisherZipPath ?? Path.Combine(Environment.CurrentDirectory, BlazorPublisherZipName);
+            var setupZipPath = options.BlazorPublisherSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, BlazorPublisherSetupZipName);
 
+            // Download and validate both payloads before touching an existing installation.
             await DownloadLatestReleaseAssetAsync(
                 BlazorPublisherRepo,
                 zipPath,
                 logger,
                 options,
                 setupAsset: false).ConfigureAwait(false);
+
+            await DownloadLatestReleaseAssetAsync(
+                BlazorPublisherRepo,
+                setupZipPath,
+                logger,
+                options,
+                setupAsset: true).ConfigureAwait(false);
+
+            ValidateZipArchive(zipPath, logger);
+            ValidateZipArchive(setupZipPath, logger);
 
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (string.IsNullOrWhiteSpace(localAppData))
@@ -196,15 +209,6 @@ internal static class Program
             logger.LogInformation($"Extracting BlazorPublisher app '{zipPath}' to '{targetPath}'");
             ExtractZipWithFallback(zipPath, targetPath, logger);
 
-            var setupZipPath = options.BlazorPublisherSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, BlazorPublisherSetupZipName);
-
-            await DownloadLatestReleaseAssetAsync(
-                BlazorPublisherRepo,
-                setupZipPath,
-                logger,
-                options,
-                setupAsset: true).ConfigureAwait(false);
-
             logger.LogInformation($"Extracting BlazorPublisher setup/bootstrap '{setupZipPath}' to '{targetPath}'");
             ExtractZipWithFallback(setupZipPath, targetPath, logger);
 
@@ -216,6 +220,29 @@ internal static class Program
         catch (Exception ex)
         {
             logger.LogError(ex, $"Error in InstallBlazorPublisherAsync. options {options}");
+            throw;
+        }
+    }
+
+    private static void ValidateZipArchive(string path, ILogger logger)
+    {
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Downloaded archive was not found: {path}", path);
+
+        try
+        {
+            using var archive = ZipFile.OpenRead(path);
+            if (archive.Entries.Count == 0)
+                throw new InvalidDataException($"Downloaded archive contains no entries: {path}");
+            logger.LogInformation("Validated archive '{Path}' ({Entries} entries).", path, archive.Entries.Count);
+        }
+        catch (InvalidDataException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            throw new InvalidDataException($"Downloaded archive is invalid or unreadable: {path}", exception);
         }
     }
 
@@ -871,18 +898,17 @@ internal static class Program
     }
 
     private static async Task DownloadLatestReleaseAssetAsync(
-    string repo,
-    string outFile,
-    ILogger logger,
-    CliOptions options,
-    bool setupAsset)
+        string repo,
+        string outFile,
+        ILogger logger,
+        CliOptions options,
+        bool setupAsset)
     {
         try
         {
             ValidateRepo(repo, logger);
             var latestUrl = $"https://api.github.com/repos/{repo}/releases/latest";
-            using var stream = await Http.GetStreamAsync(latestUrl).ConfigureAwait(false);
-            using var json = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+            using var json = await GetJsonWithRetryAsync(latestUrl, logger).ConfigureAwait(false);
 
             var root = json.RootElement;
             var tagName = root.TryGetProperty("tag_name", out var tag) ? tag.GetString() : "unknown";
@@ -945,6 +971,9 @@ internal static class Program
 
             var downloadUrl = selected.Value.GetProperty("browser_download_url").GetString();
             var assetName = selected.Value.GetProperty("name").GetString();
+            var expectedSize = selected.Value.TryGetProperty("size", out var sizeElement) && sizeElement.TryGetInt64(out var parsedSize)
+                ? parsedSize
+                : (long?)null;
 
             if (string.IsNullOrWhiteSpace(downloadUrl))
                 throw new InvalidOperationException($"Selected release asset for {repo} has no download URL.");
@@ -952,7 +981,7 @@ internal static class Program
             logger.LogInformation($"Selected asset: {assetName}");
             logger.LogInformation($"Downloading {assetName} to {outFile}");
 
-            await DownloadFileAsync(downloadUrl, outFile, logger, options).ConfigureAwait(false);
+            await DownloadFileAsync(downloadUrl, outFile, logger, options, expectedSize).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -961,143 +990,225 @@ internal static class Program
         }
     }
 
-    private static async Task DownloadFileAsync(string url, string outFile, ILogger logger, CliOptions options)
+    private static async Task<JsonDocument> GetJsonWithRetryAsync(string url, ILogger logger)
     {
-        try
+        const int maxAttempts = 4;
+        Exception? lastError = null;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            const int maxAttempts = 3;
-            var tempFile = outFile + ".part";
-
-            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            try
             {
-                try
-                {
-                    var directory = Path.GetDirectoryName(Path.GetFullPath(outFile));
-                    if (!string.IsNullOrWhiteSpace(directory))
-                        Directory.CreateDirectory(directory);
-
-                    if (File.Exists(tempFile))
-                        File.Delete(tempFile);
-
-                    logger.LogInformation($"Downloading attempt {attempt}/{maxAttempts}: {url}");
-                    logger.LogInformation($"Target: {outFile}");
-
-                    using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(30));
-
-                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                    request.Headers.UserAgent.ParseAdd("BlazorPublisherSetupTool/1.0");
-                    request.Headers.Accept.ParseAdd("*/*");
-
-                    using var response = await Http.SendAsync(
-                        request,
-                        HttpCompletionOption.ResponseHeadersRead,
-                        cts.Token).ConfigureAwait(false);
-
-                    response.EnsureSuccessStatusCode();
-
-                    var contentLength = response.Content.Headers.ContentLength;
-                    logger.LogInformation(contentLength.HasValue
-                        ? $"Remote size: {FormatBytes(contentLength.Value, logger)}"
-                        : "Remote size: unknown");
-
-                    long totalRead = 0;
-
-                    await using (var input = await response.Content.ReadAsStreamAsync(cts.Token).ConfigureAwait(false))
-                    await using (var output = new FileStream(
-                        tempFile,
-                        FileMode.Create,
-                        FileAccess.Write,
-                        FileShare.None,
-                        bufferSize: 4 * 1024 * 1024,
-                        useAsync: true))
-                    {
-                        var buffer = new byte[4* 1024 * 1024];
-                        var lastLog = DateTimeOffset.UtcNow;
-
-                        while (true)
-                        {
-                            var read = await input.ReadAsync(buffer.AsMemory(0, buffer.Length), cts.Token)
-                                .ConfigureAwait(false);
-
-                            if (read == 0)
-                                break;
-
-                            await output.WriteAsync(buffer.AsMemory(0, read), cts.Token)
-                                .ConfigureAwait(false);
-
-                            totalRead += read;
-
-                            var now = DateTimeOffset.UtcNow;
-                            if (now - lastLog >= TimeSpan.FromSeconds(5))
-                            {
-                                if (contentLength.HasValue && contentLength.Value > 0)
-                                {
-                                    var percent = totalRead * 100.0 / contentLength.Value;
-                                    logger.LogInformation(
-                                        $"Downloaded {FormatBytes(totalRead, logger)} / {FormatBytes(contentLength.Value, logger)} ({percent:F1}%)");
-                                }
-                                else
-                                {
-                                    logger.LogInformation($"Downloaded {FormatBytes(totalRead, logger)}");
-                                }
-
-                                lastLog = now;
-                            }
-                        }
-
-                        await output.FlushAsync(cts.Token).ConfigureAwait(false);
-                    }
-
-                    if (!File.Exists(tempFile))
-                        throw new FileNotFoundException($"Temporary download file does not exist after download: {tempFile}");
-
-                    var actualSize = new FileInfo(tempFile).Length;
-
-                    if (actualSize == 0)
-                        throw new IOException("Downloaded file is empty.");
-
-                    if (contentLength.HasValue && actualSize != contentLength.Value)
-                    {
-                        var missing = contentLength.Value - actualSize;
-                        throw new IOException(
-                            $"Incomplete download. Got {actualSize:N0} bytes, expected {contentLength.Value:N0} bytes. Missing {missing:N0} bytes.");
-                    }
-
-                    await MoveFileWithRetryAsync(tempFile, outFile, logger, options).ConfigureAwait(false);
-
-                    logger.LogInformation($"Download complete: {outFile} ({FormatBytes(actualSize, logger)})");
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWarning(ex, $"Download attempt {attempt}/{maxAttempts} failed.");
-
-                    try
-                    {
-                        if (File.Exists(tempFile))
-                            File.Delete(tempFile);
-                    }
-                    catch
-                    {
-                    }
-
-                    if (attempt == maxAttempts)
-                    {
-                        logger.LogError(ex, $"Download failed permanently. url {url} outFile {outFile}");
-                        throw;
-                    }
-
-                    await Task.Delay(TimeSpan.FromSeconds(2 * attempt)).ConfigureAwait(false);
-                }
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Accept.ParseAdd("application/vnd.github+json");
+                using var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                await using var stream = await response.Content.ReadAsStreamAsync(timeout.Token).ConfigureAwait(false);
+                return await JsonDocument.ParseAsync(stream, cancellationToken: timeout.Token).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                lastError = exception;
+                if (attempt == maxAttempts) break;
+                var delay = TimeSpan.FromSeconds(attempt * 2);
+                logger.LogWarning(exception, "GitHub release lookup attempt {Attempt}/{Attempts} failed. Retrying in {Seconds} seconds.", attempt, maxAttempts, delay.TotalSeconds);
+                await Task.Delay(delay).ConfigureAwait(false);
             }
         }
-        catch (Exception ex)
+
+        throw new HttpRequestException($"Could not retrieve release information from {url} after {maxAttempts} attempts.", lastError);
+    }
+
+    private static async Task DownloadFileAsync(
+        string url,
+        string outFile,
+        ILogger logger,
+        CliOptions options,
+        long? expectedSize)
+    {
+        const int maxAttempts = 5;
+        var tempFile = outFile + ".part";
+        Exception? lastError = null;
+
+        var directory = Path.GetDirectoryName(Path.GetFullPath(outFile));
+        if (!string.IsNullOrWhiteSpace(directory))
+            Directory.CreateDirectory(directory);
+
+        if (File.Exists(outFile) && expectedSize is > 0 && new FileInfo(outFile).Length == expectedSize.Value)
         {
-            logger.LogError(ex, $"Error in DownloadFileAsync. url {url} outFile {outFile}");
+            try
+            {
+                using var cachedArchive = ZipFile.OpenRead(outFile);
+                if (cachedArchive.Entries.Count == 0)
+                    throw new InvalidDataException("Cached archive contains no entries.");
+                logger.LogInformation("Reusing complete cached download '{Path}' ({Size}).", outFile, FormatBytes(expectedSize.Value, logger));
+                return;
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Cached download '{Path}' is invalid and will be downloaded again.", outFile);
+                File.Delete(outFile);
+            }
         }
 
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                var resumeAt = File.Exists(tempFile) ? new FileInfo(tempFile).Length : 0L;
+                if (expectedSize is > 0 && resumeAt > expectedSize.Value)
+                {
+                    logger.LogWarning("Discarding oversized partial download '{Path}'.", tempFile);
+                    File.Delete(tempFile);
+                    resumeAt = 0;
+                }
 
+                if (expectedSize is > 0 && resumeAt == expectedSize.Value)
+                {
+                    await MoveFileWithRetryAsync(tempFile, outFile, logger, options).ConfigureAwait(false);
+                    logger.LogInformation("Recovered complete cached partial download: {Path} ({Size}).", outFile, FormatBytes(expectedSize.Value, logger));
+                    return;
+                }
+
+                logger.LogInformation("Downloading attempt {Attempt}/{Attempts}: {Url}", attempt, maxAttempts, url);
+                logger.LogInformation("Target: {Target}", outFile);
+                if (resumeAt > 0)
+                    logger.LogInformation("Resuming at {Offset} instead of restarting from zero.", FormatBytes(resumeAt, logger));
+
+                using var totalTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.UserAgent.ParseAdd("BlazorPublisherSetupTool/1.0");
+                request.Headers.Accept.ParseAdd("*/*");
+                if (resumeAt > 0)
+                    request.Headers.Range = new RangeHeaderValue(resumeAt, null);
+
+                using var response = await Http.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead,
+                    totalTimeout.Token).ConfigureAwait(false);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable && resumeAt > 0)
+                {
+                    logger.LogWarning("The server rejected the resume offset. Restarting this asset once from zero.");
+                    File.Delete(tempFile);
+                    throw new IOException("Remote server rejected the partial-download resume offset.");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var resumed = response.StatusCode == System.Net.HttpStatusCode.PartialContent && resumeAt > 0;
+                if (!resumed) resumeAt = 0;
+
+                var responseLength = response.Content.Headers.ContentLength;
+                var expectedTotal = expectedSize
+                    ?? response.Content.Headers.ContentRange?.Length
+                    ?? (responseLength.HasValue ? resumeAt + responseLength.Value : (long?)null);
+
+                logger.LogInformation(expectedTotal.HasValue
+                    ? $"Remote size: {FormatBytes(expectedTotal.Value, logger)}"
+                    : "Remote size: unknown");
+
+                long totalRead = resumeAt;
+                var fileMode = resumed ? FileMode.Append : FileMode.Create;
+                var transferStarted = Stopwatch.StartNew();
+
+                await using (var input = await response.Content.ReadAsStreamAsync(totalTimeout.Token).ConfigureAwait(false))
+                await using (var output = new FileStream(
+                    tempFile,
+                    fileMode,
+                    FileAccess.Write,
+                    FileShare.None,
+                    bufferSize: 1024 * 1024,
+                    useAsync: true))
+                {
+                    var buffer = new byte[1024 * 1024];
+                    var lastLog = DateTimeOffset.UtcNow;
+                    long lastLoggedBytes = totalRead;
+
+                    while (true)
+                    {
+                        var read = await ReadWithStallTimeoutAsync(input, buffer, totalTimeout.Token).ConfigureAwait(false);
+                        if (read == 0) break;
+
+                        await output.WriteAsync(buffer.AsMemory(0, read), totalTimeout.Token).ConfigureAwait(false);
+                        totalRead += read;
+
+                        var now = DateTimeOffset.UtcNow;
+                        if (now - lastLog >= TimeSpan.FromSeconds(5))
+                        {
+                            var intervalSeconds = Math.Max(0.001, (now - lastLog).TotalSeconds);
+                            var intervalRate = (totalRead - lastLoggedBytes) / intervalSeconds;
+                            if (expectedTotal is > 0)
+                            {
+                                var percent = Math.Min(100, totalRead * 100.0 / expectedTotal.Value);
+                                logger.LogInformation(
+                                    "Downloaded {Current} / {Total} ({Percent:F1}%) at {Rate}/s",
+                                    FormatBytes(totalRead, logger),
+                                    FormatBytes(expectedTotal.Value, logger),
+                                    percent,
+                                    FormatBytes((long)intervalRate, logger));
+                            }
+                            else
+                            {
+                                logger.LogInformation("Downloaded {Current} at {Rate}/s", FormatBytes(totalRead, logger), FormatBytes((long)intervalRate, logger));
+                            }
+
+                            lastLog = now;
+                            lastLoggedBytes = totalRead;
+                        }
+                    }
+
+                    await output.FlushAsync(totalTimeout.Token).ConfigureAwait(false);
+                }
+
+                if (!File.Exists(tempFile))
+                    throw new FileNotFoundException($"Temporary download file does not exist after download: {tempFile}");
+
+                var actualSize = new FileInfo(tempFile).Length;
+                if (actualSize == 0)
+                    throw new IOException("Downloaded file is empty.");
+
+                if (expectedTotal.HasValue && actualSize != expectedTotal.Value)
+                    throw new IOException($"Incomplete download. Got {actualSize:N0} bytes, expected {expectedTotal.Value:N0} bytes.");
+
+                await MoveFileWithRetryAsync(tempFile, outFile, logger, options).ConfigureAwait(false);
+
+                logger.LogInformation("Download complete: {Path} ({Size}) in {Elapsed:mm\\:ss}.", outFile, FormatBytes(actualSize, logger), transferStarted.Elapsed);
+                return;
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+                logger.LogWarning(ex, "Download attempt {Attempt}/{Attempts} failed. The partial file is retained for resume.", attempt, maxAttempts);
+
+                if (attempt == maxAttempts)
+                    break;
+
+                var delay = TimeSpan.FromSeconds(Math.Min(20, 2 * attempt * attempt));
+                logger.LogInformation("Retrying in {Seconds} seconds...", delay.TotalSeconds);
+                await Task.Delay(delay).ConfigureAwait(false);
+            }
+        }
+
+        logger.LogError(lastError, "Download failed permanently. url {Url} outFile {OutFile}", url, outFile);
+        throw new IOException($"Download failed after {maxAttempts} attempts: {url}", lastError);
     }
+
+    private static async Task<int> ReadWithStallTimeoutAsync(Stream input, byte[] buffer, CancellationToken totalCancellationToken)
+    {
+        using var stallTimeout = CancellationTokenSource.CreateLinkedTokenSource(totalCancellationToken);
+        stallTimeout.CancelAfter(TimeSpan.FromMinutes(2));
+        try
+        {
+            return await input.ReadAsync(buffer.AsMemory(0, buffer.Length), stallTimeout.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!totalCancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException("The download produced no data for two minutes.");
+        }
+    }
+
     private static async Task MoveFileWithRetryAsync(string source, string destination, ILogger logger, CliOptions options)
     {
         try
@@ -1381,7 +1492,7 @@ internal static class Program
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("BlazorPublisherSetupTool", "1.0"));
-            client.Timeout = TimeSpan.FromMinutes(20);
+            client.Timeout = Timeout.InfiniteTimeSpan;
             return client;
         }
         catch (Exception ex)

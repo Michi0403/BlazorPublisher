@@ -62,7 +62,11 @@ public static class FfmpegLocator
             var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var chocolatey = Environment.GetEnvironmentVariable("ChocolateyInstall");
             if (!string.IsNullOrWhiteSpace(local))
+            {
                 yield return Path.Combine(local, "Microsoft", "WinGet", "Links", "ffmpeg.exe");
+                foreach (var candidate in FindWinGetPackageExecutables(local))
+                    yield return candidate;
+            }
             if (!string.IsNullOrWhiteSpace(profile))
                 yield return Path.Combine(profile, "scoop", "shims", "ffmpeg.exe");
             if (!string.IsNullOrWhiteSpace(chocolatey))
@@ -75,6 +79,42 @@ public static class FfmpegLocator
         yield return "/opt/homebrew/bin/ffmpeg";
         yield return "/opt/local/bin/ffmpeg";
         yield return "/snap/bin/ffmpeg";
+    }
+
+
+    private static IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
+    {
+        var packagesRoot = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
+        if (!Directory.Exists(packagesRoot)) yield break;
+
+        IEnumerable<string> packageDirectories;
+        try
+        {
+            packageDirectories = Directory.EnumerateDirectories(packagesRoot, "Gyan.FFmpeg*", SearchOption.TopDirectoryOnly).ToArray();
+        }
+        catch
+        {
+            yield break;
+        }
+
+        foreach (var packageDirectory in packageDirectories)
+        {
+            IEnumerable<string> matches;
+            try
+            {
+                matches = Directory.EnumerateFiles(packageDirectory, "ffmpeg.exe", SearchOption.AllDirectories)
+                    .OrderByDescending(path => path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
+                    .Take(4)
+                    .ToArray();
+            }
+            catch
+            {
+                continue;
+            }
+
+            foreach (var match in matches)
+                yield return match;
+        }
     }
 
     private static bool TryResolveCommand(string command, out string path)

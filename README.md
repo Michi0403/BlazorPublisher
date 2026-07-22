@@ -319,3 +319,8 @@ A bundled `PublisherStudio.MediaHost` project owns FFmpeg pipelines, segmented r
 ## v1.0.48 multi-output streaming completion
 
 See `CHANGELOG-v1.0.48.md` and `docs/STREAMING.md`. The publication is captured once as a clean base and composed into independent provider variants only where required. One authored Chat object now renders Twitch-only messages into the Twitch output and YouTube-only messages into the YouTube output, while its answer field remains operator-only. The Media Host adds encrypted Chat OAuth storage, Twitch/YouTube receive/send adapters, native capture discovery, Windows process-tree audio loopback, WebRTC browser delivery, HLS, RTSP, and selected output recording without requiring public streaming.
+
+## v1.0.49 PublishingSuite interface alignment
+
+See `CHANGELOG-v1.0.49.md`. Streaming Studio now follows the same ribbon, contextual-command, profile-navigation, settings-card, status, and SubApp footer workflow as the rest of PublishingSuite. Canvas double-click and right-click handling now reaches embedded DevExtreme/media/SVG content reliably, and application-wide explanatory tooltips cover native and dynamically rendered controls. Provider, output, recording, LAN, device, hotkey, publication, and Media Host data flows remain unchanged.
+

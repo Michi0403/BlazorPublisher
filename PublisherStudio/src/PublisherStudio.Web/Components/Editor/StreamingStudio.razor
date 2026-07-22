@@ -6,285 +6,563 @@
 
 @if (Visible)
 {
-    <div class="studio-overlay streaming-studio-overlay" role="dialog" aria-modal="true" aria-label="Streaming Studio">
-        <section class="studio-modal streaming-studio-modal">
-            <header class="studio-header">
+    <div class="editor-modal-backdrop streaming-studio-backdrop">
+        <section class="streaming-studio-window" role="dialog" aria-modal="true" aria-label="Streaming Studio">
+            <header class="subapp-titlebar streaming-studio-titlebar">
                 <div>
-                    <h2>Streaming Studio</h2>
-                    <p>Configure reusable provider accounts, publication outputs, recording, LAN delivery, devices, and timing.</p>
+                    <strong>Streaming Studio</strong>
+                    <span>Configure reusable provider accounts, publication outputs, recording, LAN delivery, devices, and timing.</span>
                 </div>
-                <button type="button" class="studio-close" title="Close" @onclick="Cancel">×</button>
+                <button type="button" class="window-close" aria-label="Close Streaming Studio" data-help="Close Streaming Studio without applying publication changes. Machine profiles already saved remain available." @onclick="Cancel"><span aria-hidden="true">×</span></button>
             </header>
 
-            <nav class="studio-tabs streaming-tabs">
-                @TabButton("providers", "Providers")
-                @TabButton("outputs", "Outputs")
-                @TabButton("recording", "Recording")
-                @TabButton("lan", "Company / LAN")
-                @TabButton("devices", "Devices")
-                @TabButton("advanced", "Advanced")
-            </nav>
+            <DxRibbon CssClass="streaming-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Home">
+                    <DxRibbonGroup Text="Workspace" IconCssClass="pub-icon pub-icon-panels">
+                        <DxRibbonItem Text="Providers" IconCssClass="pub-icon pub-icon-web" IsPrimary="@(_tab == "providers")" Click="ShowProviders" />
+                        <DxRibbonItem Text="Outputs" IconCssClass="pub-icon pub-icon-video" IsPrimary="@(_tab == "outputs")" Click="ShowOutputs" />
+                        <DxRibbonItem Text="Recording" IconCssClass="pub-icon pub-icon-media" IsPrimary="@(_tab == "recording")" Click="ShowRecording" />
+                        <DxRibbonItem Text="Company / LAN" IconCssClass="pub-icon pub-icon-web" IsPrimary="@(_tab == "lan")" Click="ShowLan" />
+                        <DxRibbonItem Text="Devices" IconCssClass="pub-icon pub-icon-media" IsPrimary="@(_tab == "devices")" Click="ShowDevices" />
+                        <DxRibbonItem Text="Advanced" IconCssClass="pub-icon pub-icon-properties" IsPrimary="@(_tab == "advanced")" Click="ShowAdvanced" />
+                    </DxRibbonGroup>
 
-            <div class="streaming-studio-body">
+                    @if (_tab == "providers")
+                    {
+                        <DxRibbonGroup Text="Provider profile" IconCssClass="pub-icon pub-icon-web">
+                            <DxRibbonItem Text="New provider" IconCssClass="pub-icon pub-icon-newpage" IsPrimary="true" Click="NewProvider" />
+                            <DxRibbonItem Text="Save provider" IconCssClass="pub-icon pub-icon-save" Enabled="@(_providerDraft is not null)" Click="SaveProvider" />
+                            <DxRibbonItem Text="Duplicate provider" IconCssClass="pub-icon pub-icon-duplicate" Enabled="@(_providerDraft is not null)" Click="DuplicateCurrentProvider" />
+                            <DxRibbonItem Text="Delete provider" IconCssClass="pub-icon pub-icon-delete" Enabled="@(_providerDraft is not null)" Click="DeleteProvider" />
+                        </DxRibbonGroup>
+                    }
+                    else if (_tab == "outputs")
+                    {
+                        <DxRibbonGroup Text="Publication output" IconCssClass="pub-icon pub-icon-video">
+                            <DxRibbonItem Text="Add output" IconCssClass="pub-icon pub-icon-newpage" IsPrimary="true" Click="AddOutput" />
+                            <DxRibbonItem Text="Recommended settings" IconCssClass="pub-icon pub-icon-fit" Enabled="@(SelectedOutput is not null)" Click="ApplySelectedOutputDefaults" />
+                            <DxRibbonItem Text="Duplicate output" IconCssClass="pub-icon pub-icon-duplicate" Enabled="@(SelectedOutput is not null)" Click="DuplicateSelectedOutput" />
+                            <DxRibbonItem Text="Remove output" IconCssClass="pub-icon pub-icon-delete" Enabled="@(SelectedOutput is not null)" Click="RemoveSelectedOutput" />
+                        </DxRibbonGroup>
+                    }
+                    else if (_tab == "recording")
+                    {
+                        <DxRibbonGroup Text="Recording" IconCssClass="pub-icon pub-icon-media">
+                            <DxRibbonItem Text="@(_draft.Recording.Enabled ? "Disable recording" : "Enable recording")" IconCssClass="pub-icon pub-icon-media" IsPrimary="true" Click="ToggleRecording" />
+                            <DxRibbonItem Text="Use clean master" IconCssClass="pub-icon pub-icon-video" Click="UseCleanMasterRecording" />
+                            <DxRibbonItem Text="Use enabled outputs" IconCssClass="pub-icon pub-icon-layers" Click="UseEnabledOutputRecording" />
+                        </DxRibbonGroup>
+                    }
+                    else if (_tab == "lan")
+                    {
+                        <DxRibbonGroup Text="LAN delivery" IconCssClass="pub-icon pub-icon-web">
+                            <DxRibbonItem Text="@(_draft.Lan.Enabled ? "Disable LAN output" : "Enable LAN output")" IconCssClass="pub-icon pub-icon-web" IsPrimary="true" Click="ToggleLan" />
+                            <DxRibbonItem Text="Local computer only" IconCssClass="pub-icon pub-icon-lock" Click="UseLoopbackLan" />
+                            <DxRibbonItem Text="Browser + HLS" IconCssClass="pub-icon pub-icon-play" Click="UseBrowserAndHlsLan" />
+                        </DxRibbonGroup>
+                    }
+                    else if (_tab == "devices")
+                    {
+                        <DxRibbonGroup Text="Device profiles" IconCssClass="pub-icon pub-icon-media">
+                            <DxRibbonItem Text="Add device profile" IconCssClass="pub-icon pub-icon-newpage" IsPrimary="true" Click="AddDeviceProfile" />
+                            <DxRibbonItem Text="Refresh browser devices" IconCssClass="pub-icon pub-icon-redo" Click="RefreshDevices" />
+                            <DxRibbonItem Text="Refresh native devices" IconCssClass="pub-icon pub-icon-redo" Click="RefreshNativeDevices" />
+                            <DxRibbonItem Text="Save profiles" IconCssClass="pub-icon pub-icon-save" Click="SaveMachineOptions" />
+                        </DxRibbonGroup>
+                    }
+                    else
+                    {
+                        <DxRibbonGroup Text="Machine options" IconCssClass="pub-icon pub-icon-properties">
+                            <DxRibbonItem Text="Add hotkey" IconCssClass="pub-icon pub-icon-newpage" IsPrimary="true" Click="AddHotkey" />
+                            <DxRibbonItem Text="Save machine options" IconCssClass="pub-icon pub-icon-save" Click="SaveMachineOptions" />
+                        </DxRibbonGroup>
+                    }
+
+                    <DxRibbonGroup Text="Help" IconCssClass="pub-icon pub-icon-command">
+                        <DxRibbonItem Text="@(_showWorkflowHelp ? "Hide workflow help" : "Show workflow help")" IconCssClass="pub-icon pub-icon-command" Click="ToggleWorkflowHelp" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
+
+            <div class="streaming-section-strip" role="status">
+                <span class="streaming-section-identity"><i class="pub-icon @SectionIcon"></i><b>@SectionTitle</b></span>
+                <span>@SectionDescription</span>
+                <small>Double-click editable canvas objects to open their studio. Right-click for object commands.</small>
+            </div>
+
+            <div class="streaming-studio-workspace @(_showWorkflowHelp ? "help-open" : null)"
+                 @oncontextmenu="ShowWorkspaceContextMenu" @oncontextmenu:preventDefault>
                 @if (_tab == "providers")
                 {
-                    <aside class="streaming-list-pane">
-                        <button type="button" class="primary-button" @onclick="NewProvider">＋ Provider</button>
-                        @foreach (var profile in _machine.Providers)
+                    <aside class="streaming-navigation-pane" aria-label="Provider profiles">
+                        <div class="streaming-pane-heading">
+                            <div><b>Provider profiles</b><span>Stored on this machine</span></div>
+                            <button type="button" class="icon-command-button" aria-label="Add provider profile" data-help="Create a reusable streaming provider profile. The publication stores only its profile ID." @onclick="NewProvider">＋</button>
+                        </div>
+                        <div class="streaming-navigation-list">
+                            @foreach (var profile in _machine.Providers)
+                            {
+                                <button type="button"
+                                        class="streaming-navigation-item @(_providerDraft?.Id == profile.Id ? "selected" : null)"
+                                        @onclick="() => EditProvider(profile)"
+                                        @ondblclick="() => EditProvider(profile)"
+                                        @oncontextmenu="args => ShowProviderContextMenu(profile, args)"
+                                        @oncontextmenu:preventDefault
+                                        @oncontextmenu:stopPropagation
+                                        data-help="Select this provider profile. Double-click also opens it; right-click provides duplicate and delete commands.">
+                                    <span class="streaming-item-icon"><i class="pub-icon pub-icon-web"></i></span>
+                                    <span><b>@profile.Name</b><small>@profile.Provider · @profile.Transport</small></span>
+                                    <em class="status-dot @(profile.Enabled ? "online" : null)" title="@(profile.Enabled ? "Available to publications" : "Disabled")"></em>
+                                </button>
+                            }
+                        </div>
+                        @if (_machine.Providers.Count == 0)
                         {
-                            <button type="button" class="streaming-list-item @(_providerDraft?.Id == profile.Id ? "active" : null)" @onclick="() => EditProvider(profile)">
-                                <b>@profile.Name</b><span>@profile.Provider · @profile.Transport</span>
-                            </button>
+                            <div class="streaming-navigation-empty">
+                                <i class="pub-icon pub-icon-web"></i>
+                                <b>No provider profiles</b>
+                                <span>Create Twitch, YouTube, Kick, TikTok, custom RTMP/RTMPS, SRT, or local profiles.</span>
+                            </div>
                         }
                     </aside>
-                    <main class="streaming-editor-pane">
+
+                    <main class="streaming-content-pane">
+                        <header class="streaming-page-heading">
+                            <div><h2>@(_providerDraft?.Name ?? "Provider profile")</h2><p>Reusable delivery and Chat credentials remain outside the publication file.</p></div>
+                            @if (_providerDraft is not null)
+                            {
+                                <span class="streaming-state-badge @(_providerDraft.Enabled ? "enabled" : null)">@(_providerDraft.Enabled ? "Available" : "Disabled")</span>
+                            }
+                        </header>
+
                         @if (_providerDraft is null)
                         {
-                            <div class="streaming-empty"><b>No provider selected</b><span>Create Twitch, YouTube, Kick, TikTok, custom RTMP/RTMPS, SRT, or local profiles.</span></div>
+                            <div class="streaming-empty-state">
+                                <i class="pub-icon pub-icon-web"></i>
+                                <b>Select or create a provider</b>
+                                <span>Profiles keep endpoints and encrypted secrets reusable across publications.</span>
+                                <button type="button" class="primary-button" @onclick="NewProvider">Create provider profile</button>
+                            </div>
                         }
                         else
                         {
-                            <div class="property-grid streaming-property-grid">
-                                <label>Name<input @bind="_providerDraft.Name" /></label>
-                                <label>Provider<select @bind="_providerDraft.Provider">@foreach (var value in Enum.GetValues<PublicationStreamProvider>()) { <option value="@value">@value</option> }</select></label>
-                                <label>Transport<select @bind="_providerDraft.Transport">@foreach (var value in ProviderTransports) { <option value="@value">@value</option> }</select></label>
-                                <label>Endpoint<input @bind="_providerDraft.Endpoint" placeholder="Provider ingest server or custom URL" /></label>
-                                <label>Channel / account ID<input @bind="_providerDraft.ChannelId" /></label>
-                                <label>Account name<input @bind="_providerDraft.AccountName" /></label>
-                                <label class="span-2">Stream key / ingest token<input type="password" @bind="_providerDraft.Secret" placeholder="@(_providerDraft.HasStoredSecret ? "Stored securely — leave blank to keep" : "Stored encrypted for this Windows user")" /></label>
-                                <label class="check-row"><input type="checkbox" @bind="_providerDraft.ChatEnabled" /> Connect this provider's live Chat</label>
-                                @if (_providerDraft.ChatEnabled)
-                                {
-                                    <label class="span-2">Chat OAuth access token<input type="password" @bind="_providerDraft.ChatSecret" placeholder="@(_providerDraft.HasStoredChatSecret ? "Stored securely — leave blank to keep" : "Twitch/YouTube OAuth token, stored encrypted")" /></label>
-                                    <p class="property-note span-2">Twitch uses the account name, channel and OAuth token. YouTube uses Channel / account ID as the live-chat ID and an OAuth token with live-chat permissions. Chat credentials are independent from the stream key.</p>
-                                }
-                                <label class="check-row"><input type="checkbox" @bind="_providerDraft.Enabled" /> Available to publications</label>
+                            <section class="streaming-settings-card">
+                                <div class="streaming-card-heading"><div><h3>Identity and delivery</h3><p>Name the profile and choose how the Media Host reaches the provider.</p></div></div>
+                                <div class="streaming-form-grid two-column">
+                                    <label data-help="A friendly reusable name shown when publication outputs choose this profile."><span>Profile name</span><input @bind="_providerDraft.Name" /></label>
+                                    <label data-help="Select the streaming platform. Recommended output defaults follow this choice."><span>Provider</span><select @bind="_providerDraft.Provider">@foreach (var value in Enum.GetValues<PublicationStreamProvider>()) { <option value="@value">@value</option> }</select></label>
+                                    <label data-help="Choose RTMP, secure RTMPS, or SRT transport for the provider ingest connection."><span>Transport</span><select @bind="_providerDraft.Transport">@foreach (var value in ProviderTransports) { <option value="@value">@value</option> }</select></label>
+                                    <label data-help="Provider ingest server or complete custom endpoint. Leave blank only when the provider supplies a known default."><span>Ingest endpoint</span><input @bind="_providerDraft.Endpoint" placeholder="Provider ingest server or custom URL" /></label>
+                                    <label data-help="The channel, account, or live-chat identifier used for provider routing and Chat context."><span>Channel / account ID</span><input @bind="_providerDraft.ChannelId" /></label>
+                                    <label data-help="Public account or channel name. Twitch Chat uses this together with the OAuth token."><span>Account name</span><input @bind="_providerDraft.AccountName" /></label>
+                                </div>
+                            </section>
+
+                            <section class="streaming-settings-card">
+                                <div class="streaming-card-heading"><div><h3>Credentials and Chat</h3><p>Secrets are encrypted for the signed-in Windows user and never exported with the publication.</p></div></div>
+                                <div class="streaming-form-grid">
+                                    <label data-help="Enter the stream key or ingest token. Leave it blank when editing to retain the encrypted value already stored."><span>Stream key / ingest token</span><input type="password" @bind="_providerDraft.Secret" placeholder="@(_providerDraft.HasStoredSecret ? "Stored securely — leave blank to keep" : "Stored encrypted for this Windows user")" /></label>
+                                    <label class="streaming-check-field" data-help="Enable the provider-specific operator Chat connection for this profile. Broadcast viewers never receive the answer field."><input type="checkbox" @bind="_providerDraft.ChatEnabled" /><span><b>Connect live Chat</b><small>Use this provider and channel as a compositor Chat context.</small></span></label>
+                                    @if (_providerDraft.ChatEnabled)
+                                    {
+                                        <label data-help="OAuth access token used only for Chat receive/send operations. It is stored separately from the stream key."><span>Chat OAuth access token</span><input type="password" @bind="_providerDraft.ChatSecret" placeholder="@(_providerDraft.HasStoredChatSecret ? "Stored securely — leave blank to keep" : "Twitch/YouTube OAuth token, stored encrypted")" /></label>
+                                        <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Twitch uses account name, channel, and OAuth token. YouTube uses the Channel / account ID as the live-chat ID plus an OAuth token with live-chat permissions.</span></div>
+                                    }
+                                    <label class="streaming-check-field" data-help="When enabled, publications can select this provider profile for outputs."><input type="checkbox" @bind="_providerDraft.Enabled" /><span><b>Available to publications</b><small>Hide incomplete or retired profiles without deleting them.</small></span></label>
+                                </div>
+                            </section>
+
+                            <div class="streaming-content-actions">
+                                <button type="button" class="primary-button" @onclick="SaveProvider"><i class="pub-icon pub-icon-save"></i>Save provider</button>
+                                <button type="button" @onclick="DuplicateCurrentProvider"><i class="pub-icon pub-icon-duplicate"></i>Duplicate</button>
+                                <button type="button" class="danger-button" @onclick="DeleteProvider"><i class="pub-icon pub-icon-delete"></i>Delete</button>
                             </div>
-                            <div class="streaming-inline-actions">
-                                <button type="button" class="primary-button" @onclick="SaveProvider">Save provider</button>
-                                <button type="button" class="danger-button" @onclick="DeleteProvider">Delete</button>
-                            </div>
-                            <p class="property-note">The publication stores only this profile ID. Secrets remain in the machine profile store and are never written into publication JSON or exported HTML.</p>
                         }
                     </main>
                 }
                 else if (_tab == "outputs")
                 {
-                    <main class="streaming-wide-pane">
-                        <div class="streaming-section-heading">
-                            <div><h3>Publication outputs</h3><p>All outputs share one master publication. Each output carries its own provider and Chat context for the compositor.</p></div>
-                            <button type="button" class="primary-button" @onclick="AddOutput">＋ Output</button>
-                        </div>
-                        <div class="property-grid streaming-master-grid">
-                            <label>Master width<input type="number" min="640" max="7680" step="2" @bind="_draft.MasterWidth" /></label>
-                            <label>Master height<input type="number" min="360" max="4320" step="2" @bind="_draft.MasterHeight" /></label>
-                            <label>Master FPS<input type="number" min="15" max="120" @bind="_draft.MasterFrameRate" /></label>
-                            <label class="check-row"><input type="checkbox" @bind="_draft.PreferDeviceTimestamps" /> Prefer device timestamps</label>
-                        </div>
+                    <main class="streaming-content-pane streaming-content-wide">
+                        <header class="streaming-page-heading">
+                            <div><h2>Publication outputs</h2><p>One publication render feeds independently scaled and encoded provider variants.</p></div>
+                            <button type="button" class="primary-button" @onclick="AddOutput"><i class="pub-icon pub-icon-newpage"></i>Add output</button>
+                        </header>
+
+                        <section class="streaming-settings-card">
+                            <div class="streaming-card-heading"><div><h3>Master program</h3><p>The compositor captures the publication once at this resolution and frame rate.</p></div><span class="streaming-summary-value">@_draft.MasterWidth × @_draft.MasterHeight · @_draft.MasterFrameRate fps</span></div>
+                            <div class="streaming-form-grid four-column">
+                                <label data-help="Horizontal pixel size of the shared master publication render."><span>Master width</span><input type="number" min="640" max="7680" step="2" @bind="_draft.MasterWidth" /></label>
+                                <label data-help="Vertical pixel size of the shared master publication render."><span>Master height</span><input type="number" min="360" max="4320" step="2" @bind="_draft.MasterHeight" /></label>
+                                <label data-help="Frames per second produced by the shared compositor before provider scaling."><span>Master FPS</span><input type="number" min="15" max="120" @bind="_draft.MasterFrameRate" /></label>
+                                <label class="streaming-check-field compact" data-help="Prefer source timestamps from cameras and capture devices to reduce drift when available."><input type="checkbox" @bind="_draft.PreferDeviceTimestamps" /><span><b>Device timestamps</b><small>Prefer capture timing over browser arrival timing.</small></span></label>
+                            </div>
+                        </section>
+
                         @if (_draft.Outputs.Count == 0)
                         {
-                            <div class="streaming-empty"><b>No outputs configured</b><span>Add a provider profile first, then create a publication output.</span></div>
+                            <div class="streaming-empty-state">
+                                <i class="pub-icon pub-icon-video"></i>
+                                <b>No publication outputs</b>
+                                <span>Add a provider profile first, then create an independently encoded output.</span>
+                                <button type="button" class="primary-button" @onclick="AddOutput">Add output</button>
+                            </div>
                         }
-                        @foreach (var output in _draft.Outputs)
+                        else
                         {
-                            <section class="streaming-output-card">
-                                <div class="streaming-output-title">
-                                    <label class="check-row"><input type="checkbox" @bind="output.Enabled" /><b>@output.Name</b></label>
-                                    <button type="button" class="danger-button compact" @onclick="() => RemoveOutput(output.Id)">Remove</button>
-                                </div>
-                                <div class="property-grid streaming-property-grid">
-                                    <label>Name<input @bind="output.Name" /></label>
-                                    <label>Provider profile<select value="@output.ProfileId" @onchange="args => ChangeOutputProfile(output, args)"><option value="">Select profile</option>@foreach (var profile in _machine.Providers.Where(item => item.Enabled)) { <option value="@profile.Id">@profile.Name</option> }</select></label>
-                                    <label>Preset<select value="@output.QualityPreset" @onchange="args => ChangeOutputPreset(output, args)">@foreach (var value in Enum.GetValues<PublicationStreamQualityPreset>()) { <option value="@value">@value</option> }</select></label>
-                                    <label class="check-row"><input type="checkbox" @bind="output.UseProviderTestMode" /> Provider test mode</label>
-                                    <label>Width<input type="number" min="320" max="7680" step="2" @bind="output.Width" /></label>
-                                    <label>Height<input type="number" min="180" max="4320" step="2" @bind="output.Height" /></label>
-                                    <label>FPS<input type="number" min="15" max="120" @bind="output.FrameRate" /></label>
-                                    <label>Video bitrate (kbps)<input type="number" min="500" max="100000" step="100" @bind="output.VideoBitrateKbps" /></label>
-                                    <label>Video codec<select @bind="output.VideoCodec">@foreach (var value in Enum.GetValues<PublicationStreamVideoCodec>()) { <option value="@value">@value</option> }</select></label>
-                                    <label>Audio bitrate (kbps)<input type="number" min="64" max="512" step="16" @bind="output.AudioBitrateKbps" /></label>
-                                    <label>Keyframe interval<input type="number" min="1" max="10" @bind="output.KeyFrameIntervalSeconds" /></label>
-                                    <label>Chat channel override<input @bind="output.ChatChannel" placeholder="Use provider channel when blank" /></label>
-                                </div>
-                            </section>
-                        }
-                    </main>
-                }
-                else if (_tab == "recording")
-                {
-                    <main class="streaming-wide-pane">
-                        <div class="streaming-section-heading"><div><h3>Recording</h3><p>Recording is independent from provider delivery and may write a clean master or platform variants.</p></div></div>
-                        <div class="streaming-recording-estimate"><b>Estimated storage</b><span>@EstimatedRecordingStorageText</span></div>
-                        <div class="property-grid streaming-property-grid">
-                            <label class="check-row"><input type="checkbox" @bind="_draft.Recording.Enabled" /> Record when a session starts</label>
-                            <label>Variant<select @bind="_draft.Recording.Variant">@foreach (var value in Enum.GetValues<PublicationStreamRecordingVariant>()) { <option value="@value">@value</option> }</select></label>
-                            <label class="span-2">Destination directory<input @bind="_draft.Recording.DestinationDirectory" placeholder="Use machine default when blank" /><small>Enter a native path. Browsers intentionally do not reveal a selected folder's full path.</small></label>
-                            <label>Container<select @bind="_draft.Recording.Container"><option value="mkv">MKV — crash tolerant</option><option value="mp4">MP4</option><option value="webm">WebM</option></select></label>
-                            <label>Segment seconds<input type="number" min="2" max="120" @bind="_draft.Recording.SegmentSeconds" /></label>
-                            <label class="check-row"><input type="checkbox" @bind="_draft.Recording.RemuxToMp4AfterStop" /> Remux MKV to MP4 after stop</label>
-                        </div>
-                        @if (_draft.Recording.Variant == PublicationStreamRecordingVariant.SelectedOutputs)
-                        {
-                            <div class="streaming-check-list">
+                            <div class="streaming-output-list">
                                 @foreach (var output in _draft.Outputs)
                                 {
-                                    <label class="check-row"><input type="checkbox" checked="@_draft.Recording.SelectedOutputIds.Contains(output.Id)" @onchange="_ => ToggleRecordingOutput(output.Id)" /> @output.Name</label>
+                                    <section class="streaming-output-card @(_selectedOutputId == output.Id ? "selected" : null)"
+                                             @onclick="() => SelectOutput(output.Id)"
+                                             @oncontextmenu="args => ShowOutputContextMenu(output, args)"
+                                             @oncontextmenu:preventDefault
+                                             @oncontextmenu:stopPropagation
+                                             data-help="Click to select this output. Right-click for recommended settings, duplicate, and remove commands.">
+                                        <header>
+                                            <label class="streaming-output-enabled" @onclick:stopPropagation data-help="Turn this provider output on or off without deleting its settings."><input type="checkbox" @bind="output.Enabled" /><span><b>@output.Name</b><small>@output.Provider · @output.Width × @output.Height · @output.FrameRate fps</small></span></label>
+                                            <div class="streaming-output-badges">
+                                                <span>@output.QualityPreset</span>
+                                                <span>@output.VideoBitrateKbps kbps</span>
+                                                <button type="button" class="icon-command-button danger" aria-label="Remove output" data-help="Remove this publication output and its selected recording reference." @onclick:stopPropagation @onclick="() => RemoveOutput(output.Id)">×</button>
+                                            </div>
+                                        </header>
+                                        <div class="streaming-form-grid four-column">
+                                            <label><span>Output name</span><input @bind="output.Name" /></label>
+                                            <label data-help="Choose the reusable machine provider profile used by this output."><span>Provider profile</span><select value="@output.ProfileId" @onchange="args => ChangeOutputProfile(output, args)"><option value="">Select profile</option>@foreach (var profile in _machine.Providers.Where(item => item.Enabled)) { <option value="@profile.Id">@profile.Name</option> }</select></label>
+                                            <label data-help="Apply provider-oriented resolution and bitrate defaults, or choose Custom to keep manual values."><span>Quality preset</span><select value="@output.QualityPreset" @onchange="args => ChangeOutputPreset(output, args)">@foreach (var value in Enum.GetValues<PublicationStreamQualityPreset>()) { <option value="@value">@value</option> }</select></label>
+                                            <label class="streaming-check-field compact"><input type="checkbox" @bind="output.UseProviderTestMode" /><span><b>Provider test mode</b><small>Use the platform's test route when supported.</small></span></label>
+                                            <label><span>Width</span><input type="number" min="320" max="7680" step="2" @bind="output.Width" /></label>
+                                            <label><span>Height</span><input type="number" min="180" max="4320" step="2" @bind="output.Height" /></label>
+                                            <label><span>Frame rate</span><input type="number" min="15" max="120" @bind="output.FrameRate" /></label>
+                                            <label><span>Video bitrate (kbps)</span><input type="number" min="500" max="100000" step="100" @bind="output.VideoBitrateKbps" /></label>
+                                            <label><span>Video codec</span><select @bind="output.VideoCodec">@foreach (var value in Enum.GetValues<PublicationStreamVideoCodec>()) { <option value="@value">@value</option> }</select></label>
+                                            <label><span>Audio bitrate (kbps)</span><input type="number" min="64" max="512" step="16" @bind="output.AudioBitrateKbps" /></label>
+                                            <label><span>Keyframe interval (s)</span><input type="number" min="1" max="10" @bind="output.KeyFrameIntervalSeconds" /></label>
+                                            <label data-help="Override the provider profile's Chat channel for this output. Leave blank to inherit the profile channel."><span>Chat channel override</span><input @bind="output.ChatChannel" placeholder="Use provider channel when blank" /></label>
+                                        </div>
+                                    </section>
                                 }
                             </div>
                         }
                     </main>
                 }
+                else if (_tab == "recording")
+                {
+                    <main class="streaming-content-pane streaming-content-wide">
+                        <header class="streaming-page-heading">
+                            <div><h2>Recording</h2><p>Recording stays independent from provider delivery and can write a clean master or selected output variants.</p></div>
+                            <span class="streaming-state-badge @(_draft.Recording.Enabled ? "enabled" : null)">@(_draft.Recording.Enabled ? "Recording enabled" : "Recording disabled")</span>
+                        </header>
+
+                        <div class="streaming-dashboard-grid">
+                            <section class="streaming-settings-card">
+                                <div class="streaming-card-heading"><div><h3>Recording plan</h3><p>Choose what is written when a streaming or dry-run session starts.</p></div></div>
+                                <div class="streaming-form-grid two-column">
+                                    <label class="streaming-check-field span-2"><input type="checkbox" @bind="_draft.Recording.Enabled" /><span><b>Record when a session starts</b><small>The recording pipeline remains isolated from every provider encoder.</small></span></label>
+                                    <label data-help="Clean Master records the shared publication before provider scaling. Other variants record output-specific encodes."><span>Variant</span><select @bind="_draft.Recording.Variant">@foreach (var value in Enum.GetValues<PublicationStreamRecordingVariant>()) { <option value="@value">@RecordingVariantName(value)</option> }</select></label>
+                                    <label><span>Container</span><select @bind="_draft.Recording.Container"><option value="mkv">MKV — crash tolerant</option><option value="mp4">MP4</option><option value="webm">WebM</option></select></label>
+                                    <label class="span-2" data-help="Native folder used by the Media Host. Leave blank to use the machine default recording directory."><span>Destination directory</span><input @bind="_draft.Recording.DestinationDirectory" placeholder="Use machine default when blank" /><small>Enter a native path; browsers intentionally do not reveal a selected folder's full path.</small></label>
+                                    <label><span>Segment seconds</span><input type="number" min="2" max="120" @bind="_draft.Recording.SegmentSeconds" /></label>
+                                    <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.Recording.RemuxToMp4AfterStop" /><span><b>Remux MKV to MP4</b><small>Create a convenient MP4 after clean shutdown.</small></span></label>
+                                </div>
+                            </section>
+
+                            <aside class="streaming-summary-card">
+                                <i class="pub-icon pub-icon-media"></i>
+                                <span>Estimated storage</span>
+                                <strong>@EstimatedRecordingStorageText</strong>
+                                <small>Actual usage varies with content complexity, codecs, and encoder behavior.</small>
+                            </aside>
+                        </div>
+
+                        @if (_draft.Recording.Variant == PublicationStreamRecordingVariant.SelectedOutputs)
+                        {
+                            <section class="streaming-settings-card">
+                                <div class="streaming-card-heading"><div><h3>Selected output variants</h3><p>These variants may be recorded even when their public provider output is disabled.</p></div></div>
+                                <div class="streaming-selection-grid">
+                                    @foreach (var output in _draft.Outputs)
+                                    {
+                                        <label class="streaming-check-field"><input type="checkbox" checked="@_draft.Recording.SelectedOutputIds.Contains(output.Id)" @onchange="_ => ToggleRecordingOutput(output.Id)" /><span><b>@output.Name</b><small>@output.Width × @output.Height · @output.VideoBitrateKbps kbps</small></span></label>
+                                    }
+                                </div>
+                                @if (_draft.Outputs.Count == 0)
+                                {
+                                    <p class="streaming-inline-empty">Create publication outputs before selecting output-specific recording variants.</p>
+                                }
+                            </section>
+                        }
+                    </main>
+                }
                 else if (_tab == "lan")
                 {
-                    <main class="streaming-wide-pane">
-                        <div class="streaming-section-heading"><div><h3>Company / LAN streaming</h3><p>Explicitly bind the internal stream to an IP. Browser and VLC-compatible delivery can be enabled independently.</p></div></div>
-                        <div class="property-grid streaming-property-grid">
-                            <label class="check-row"><input type="checkbox" @bind="_draft.Lan.Enabled" /> Enable LAN output</label>
-                            <label>Bind address<input @bind="_draft.Lan.BindAddress" placeholder="127.0.0.1 or a selected LAN IP" /></label>
-                            <label>Port<input type="number" min="1024" max="65535" @bind="_draft.Lan.Port" /></label>
-                            <label>Viewer limit<input type="number" min="1" max="10000" @bind="_draft.Lan.ViewerLimit" /></label>
-                            <label>Output width<input type="number" min="320" max="7680" step="2" @bind="_draft.Lan.Width" /></label>
-                            <label>Output height<input type="number" min="180" max="4320" step="2" @bind="_draft.Lan.Height" /></label>
-                            <label>Frame rate<input type="number" min="15" max="120" @bind="_draft.Lan.FrameRate" /></label>
-                            <label>Video bitrate (kbps)<input type="number" min="250" max="200000" step="250" @bind="_draft.Lan.VideoBitrateKbps" /></label>
-                            <label class="check-row"><input type="checkbox" @bind="_draft.Lan.EnableBrowserWebRtc" /> Browser watch page</label>
-                            <label class="check-row"><input type="checkbox" @bind="_draft.Lan.EnableHls" /> HLS for browsers and VLC</label>
-                            <label class="check-row"><input type="checkbox" @bind="_draft.Lan.EnableRtsp" /> RTSP for VLC and production receivers</label>
+                    <main class="streaming-content-pane streaming-content-wide">
+                        <header class="streaming-page-heading">
+                            <div><h2>Company / LAN streaming</h2><p>Bind internal playback explicitly to an IP address and enable browser, HLS, or RTSP delivery independently.</p></div>
+                            <span class="streaming-state-badge @(_draft.Lan.Enabled ? "enabled" : null)">@(_draft.Lan.Enabled ? "LAN output enabled" : "LAN output disabled")</span>
+                        </header>
+
+                        <div class="streaming-dashboard-grid lan">
+                            <section class="streaming-settings-card">
+                                <div class="streaming-card-heading"><div><h3>Listener and access</h3><p>LAN exposure remains disabled until you explicitly enable it.</p></div></div>
+                                <div class="streaming-form-grid three-column">
+                                    <label class="streaming-check-field span-3"><input type="checkbox" @bind="_draft.Lan.Enabled" /><span><b>Enable LAN output</b><small>Start the listener only while a streaming session is active.</small></span></label>
+                                    <label data-help="Use 127.0.0.1 for this computer only, or enter an explicit LAN adapter address for other devices."><span>Bind address</span><input @bind="_draft.Lan.BindAddress" placeholder="127.0.0.1 or selected LAN IP" /></label>
+                                    <label><span>HTTP/WebRTC port</span><input type="number" min="1024" max="65535" @bind="_draft.Lan.Port" /></label>
+                                    <label><span>Viewer limit</span><input type="number" min="1" max="10000" @bind="_draft.Lan.ViewerLimit" /></label>
+                                    <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.Lan.RequireAccessToken" /><span><b>Require access token</b><small>Protect browser and HLS URLs.</small></span></label>
+                                </div>
+                            </section>
+
+                            <aside class="streaming-summary-card security">
+                                <i class="pub-icon pub-icon-lock"></i>
+                                <span>Exposure</span>
+                                <strong>@LanExposureText</strong>
+                                <small>The Media Host reports final browser, HLS, and RTSP URLs after the session starts.</small>
+                            </aside>
+                        </div>
+
+                        <section class="streaming-settings-card">
+                            <div class="streaming-card-heading"><div><h3>Output and protocols</h3><p>Use one LAN encode for the enabled internal delivery protocols.</p></div></div>
+                            <div class="streaming-form-grid four-column">
+                                <label><span>Output width</span><input type="number" min="320" max="7680" step="2" @bind="_draft.Lan.Width" /></label>
+                                <label><span>Output height</span><input type="number" min="180" max="4320" step="2" @bind="_draft.Lan.Height" /></label>
+                                <label><span>Frame rate</span><input type="number" min="15" max="120" @bind="_draft.Lan.FrameRate" /></label>
+                                <label><span>Video bitrate (kbps)</span><input type="number" min="250" max="200000" step="250" @bind="_draft.Lan.VideoBitrateKbps" /></label>
+                            </div>
+                            <div class="streaming-selection-grid protocols">
+                                <label class="streaming-check-field"><input type="checkbox" @bind="_draft.Lan.EnableBrowserWebRtc" /><span><b>Browser watch page</b><small>Low-latency WebRTC with MediaSource fallback.</small></span></label>
+                                <label class="streaming-check-field"><input type="checkbox" @bind="_draft.Lan.EnableHls" /><span><b>HLS</b><small>Browser and VLC-compatible segmented playback.</small></span></label>
+                                <label class="streaming-check-field"><input type="checkbox" @bind="_draft.Lan.EnableRtsp" /><span><b>RTSP</b><small>VLC and production receiver delivery.</small></span></label>
+                            </div>
                             @if (_draft.Lan.EnableRtsp)
                             {
-                                <label>RTSP port<input type="number" min="1024" max="65535" @bind="_draft.Lan.RtspPort" /></label>
+                                <div class="streaming-form-grid three-column compact-top">
+                                    <label><span>RTSP port</span><input type="number" min="1024" max="65535" @bind="_draft.Lan.RtspPort" /></label>
+                                </div>
                             }
-                            <label class="check-row"><input type="checkbox" @bind="_draft.Lan.RequireAccessToken" /> Require access token for browser/HLS</label>
-                        </div>
-                        <p class="property-note">LAN exposure remains disabled by default. The Media Host reports the final browser, HLS, and RTSP URLs after the session starts.</p>
+                        </section>
                     </main>
                 }
                 else if (_tab == "devices")
                 {
-                    <main class="streaming-wide-pane">
-                        <div class="streaming-section-heading">
-                            <div><h3>Reusable device profiles</h3><p>Save cameras, microphones, capture devices, applications, or window hints once and select them from any publication live-source object.</p></div>
-                            <button type="button" @onclick="AddDeviceProfile">＋ Device profile</button>
-                        </div>
-                        <div class="streaming-device-profile-list">
-                            @foreach (var profile in _machine.Devices)
-                            {
-                                <section class="streaming-device-profile" @key="profile.Id">
-                                    <label>Name<input @bind="profile.Name" placeholder="Studio microphone" /></label>
-                                    <label>Source kind<select @bind="profile.Kind">@foreach (var value in Enum.GetValues<PublicationLiveSourceKind>()) { <option value="@value">@value</option> }</select></label>
-                                    <label>Capture backend<select @bind="profile.CaptureBackend">@foreach (var value in Enum.GetValues<PublicationCaptureBackend>()) { <option value="@value">@value</option> }</select></label>
-                                    <label>Video / primary device ID<input @bind="profile.DeviceId" placeholder="Browser/native device identifier" /></label>
-                                    <label>Audio device ID<input @bind="profile.AudioDeviceId" placeholder="Optional capture-card or paired audio device" /></label>
-                                    <label>Native backend<input @bind="profile.NativeBackend" placeholder="dshow, avfoundation, v4l2, wasapi-process-loopback" /></label>
-                                    <label>Application / process<input @bind="profile.ApplicationId" placeholder="discord.exe or process ID" /></label>
-                                    <label>Window-title hint<input @bind="profile.WindowTitle" /></label>
-                                    <label class="check-row"><input type="checkbox" @bind="profile.UseDeviceTimestamps" /> Use device timestamps</label>
-                                    <button type="button" class="danger-button compact" @onclick="() => RemoveDeviceProfile(profile.Id)">Remove</button>
-                                </section>
-                            }
-                        </div>
-                        @if (_machine.Devices.Count == 0)
-                        {
-                            <div class="streaming-empty"><b>No saved device profiles</b><span>Add one manually or save a discovered browser camera or microphone below.</span></div>
-                        }
+                    <main class="streaming-content-pane streaming-content-wide">
+                        <header class="streaming-page-heading">
+                            <div><h2>Reusable device profiles</h2><p>Save capture identities once and select them from publication live-source objects.</p></div>
+                            <button type="button" class="primary-button" @onclick="AddDeviceProfile"><i class="pub-icon pub-icon-newpage"></i>Add device profile</button>
+                        </header>
 
-                        <div class="streaming-section-heading browser-device-heading">
-                            <div><h3>Browser devices</h3><p>Grant permission to reveal camera and microphone labels. Screen, window, and tab capture are selected when the live source starts.</p></div>
-                            <button type="button" @onclick="RefreshDevices">Refresh browser devices</button>
-                        </div>
-                        <div class="streaming-device-grid">
-                            @foreach (var device in _browserDevices)
+                        <section class="streaming-settings-card">
+                            <div class="streaming-card-heading"><div><h3>Saved profiles</h3><p>These machine profiles are reusable across publications.</p></div><span class="streaming-summary-value">@_machine.Devices.Count saved</span></div>
+                            @if (_machine.Devices.Count == 0)
                             {
-                                <article>
-                                    <b>@device.Label</b><span>@device.Kind</span><code>@ShortId(device.DeviceId)</code>
-                                    <button type="button" disabled="@(!CanSaveBrowserDevice(device))" @onclick="() => SaveBrowserDevice(device)">Save as profile</button>
-                                </article>
+                                <div class="streaming-inline-empty">No saved profiles yet. Add one manually or save a discovered browser/native device below.</div>
                             }
-                        </div>
-                        @if (_browserDevices.Count == 0)
-                        {
-                            <div class="streaming-empty"><b>No browser devices listed yet</b><span>Click Refresh and grant camera/microphone permission.</span></div>
-                        }
+                            else
+                            {
+                                <div class="streaming-device-profile-list">
+                                    @foreach (var profile in _machine.Devices)
+                                    {
+                                        <article class="streaming-device-profile-card"
+                                                 @oncontextmenu="args => ShowDeviceContextMenu(profile, args)"
+                                                 @oncontextmenu:preventDefault
+                                                 @oncontextmenu:stopPropagation>
+                                            <header><span class="streaming-item-icon"><i class="pub-icon pub-icon-media"></i></span><div><b>@profile.Name</b><small>@profile.Kind · @profile.CaptureBackend</small></div><button type="button" class="icon-command-button danger" aria-label="Remove device profile" @onclick="() => RemoveDeviceProfile(profile.Id)">×</button></header>
+                                            <div class="streaming-form-grid three-column">
+                                                <label><span>Name</span><input @bind="profile.Name" placeholder="Studio microphone" /></label>
+                                                <label><span>Source kind</span><select @bind="profile.Kind">@foreach (var value in Enum.GetValues<PublicationLiveSourceKind>()) { <option value="@value">@value</option> }</select></label>
+                                                <label><span>Capture backend</span><select @bind="profile.CaptureBackend">@foreach (var value in Enum.GetValues<PublicationCaptureBackend>()) { <option value="@value">@value</option> }</select></label>
+                                                <label><span>Video / primary device ID</span><input @bind="profile.DeviceId" placeholder="Browser/native device identifier" /></label>
+                                                <label><span>Audio device ID</span><input @bind="profile.AudioDeviceId" placeholder="Optional paired audio device" /></label>
+                                                <label><span>Native backend</span><input @bind="profile.NativeBackend" placeholder="dshow, avfoundation, v4l2…" /></label>
+                                                <label><span>Application / process</span><input @bind="profile.ApplicationId" placeholder="discord.exe or process ID" /></label>
+                                                <label><span>Window-title hint</span><input @bind="profile.WindowTitle" /></label>
+                                                <label class="streaming-check-field compact"><input type="checkbox" @bind="profile.UseDeviceTimestamps" /><span><b>Use device timestamps</b><small>Prefer capture timing when available.</small></span></label>
+                                            </div>
+                                        </article>
+                                    }
+                                </div>
+                            }
+                        </section>
 
-                        <div class="streaming-section-heading browser-device-heading">
-                            <div><h3>Native devices and applications</h3><p>The local Media Host discovers capture cards, native audio devices, and visible Windows processes without exposing them to the browser sandbox.</p></div>
-                            <button type="button" @onclick="RefreshNativeDevices">Refresh native devices</button>
-                        </div>
-                        <div class="streaming-device-grid">
-                            @foreach (var device in _nativeDevices)
+                        <section class="streaming-settings-card">
+                            <div class="streaming-card-heading"><div><h3>Browser devices</h3><p>Grant permission to reveal camera and microphone labels.</p></div><button type="button" @onclick="RefreshDevices"><i class="pub-icon pub-icon-redo"></i>Refresh browser devices</button></div>
+                            @if (_browserDevices.Count == 0)
                             {
-                                <article>
-                                    <b>@device.Name</b><span>@device.Kind · @device.Backend</span><code>@ShortId(device.Id)</code>
-                                    @if (!string.IsNullOrWhiteSpace(device.WindowTitle)) { <small>@device.WindowTitle</small> }
-                                    <button type="button" @onclick="() => SaveNativeDevice(device)">Save as profile</button>
-                                </article>
+                                <div class="streaming-inline-empty">No browser devices listed. Refresh and grant camera/microphone permission.</div>
                             }
-                        </div>
-                        @if (_nativeDevices.Count == 0)
-                        {
-                            <div class="streaming-empty"><b>No native devices listed yet</b><span>Start PublisherStudio.MediaHost and click Refresh. Capture-card and microphone discovery uses the configured FFmpeg installation.</span></div>
-                        }
-                        <div class="streaming-inline-actions"><button type="button" class="primary-button" @onclick="SaveMachineOptions">Save device profiles</button></div>
+                            else
+                            {
+                                <div class="streaming-discovery-grid">
+                                    @foreach (var device in _browserDevices)
+                                    {
+                                        <article>
+                                            <span class="streaming-item-icon"><i class="pub-icon pub-icon-media"></i></span>
+                                            <div><b>@device.Label</b><small>@device.Kind</small><code>@ShortId(device.DeviceId)</code></div>
+                                            <button type="button" disabled="@(!CanSaveBrowserDevice(device))" @onclick="() => SaveBrowserDevice(device)">Save as profile</button>
+                                        </article>
+                                    }
+                                </div>
+                            }
+                        </section>
+
+                        <section class="streaming-settings-card">
+                            <div class="streaming-card-heading"><div><h3>Native devices and applications</h3><p>The local Media Host discovers capture cards, audio devices, and visible processes.</p></div><button type="button" @onclick="RefreshNativeDevices"><i class="pub-icon pub-icon-redo"></i>Refresh native devices</button></div>
+                            @if (_nativeDevices.Count == 0)
+                            {
+                                <div class="streaming-inline-empty">No native targets listed. Start PublisherStudio.MediaHost, verify FFmpeg, then refresh.</div>
+                            }
+                            else
+                            {
+                                <div class="streaming-discovery-grid">
+                                    @foreach (var device in _nativeDevices)
+                                    {
+                                        <article>
+                                            <span class="streaming-item-icon"><i class="pub-icon pub-icon-media"></i></span>
+                                            <div><b>@device.Name</b><small>@device.Kind · @device.Backend</small><code>@ShortId(device.Id)</code>@if (!string.IsNullOrWhiteSpace(device.WindowTitle)) { <em>@device.WindowTitle</em> }</div>
+                                            <button type="button" @onclick="() => SaveNativeDevice(device)">Save as profile</button>
+                                        </article>
+                                    }
+                                </div>
+                            }
+                        </section>
+
+                        <div class="streaming-content-actions"><button type="button" class="primary-button" @onclick="SaveMachineOptions"><i class="pub-icon pub-icon-save"></i>Save device profiles</button></div>
                     </main>
                 }
                 else
                 {
-                    <main class="streaming-wide-pane">
-                        <div class="property-grid streaming-property-grid">
-                            <label>FFmpeg path<input @bind="_machine.FfmpegPath" placeholder="Auto-detect when blank" /></label>
-                            <label>Media Host port<input type="number" min="1024" max="65535" @bind="_machine.MediaHostPort" /></label>
-                            <label>Encoder<select @bind="_machine.HardwareEncoder">@foreach (var value in Enum.GetValues<StreamingHardwareEncoderPreference>()) { <option value="@value">@value</option> }</select></label>
-                            <label class="span-2">Default recording directory<input @bind="_machine.DefaultRecordingDirectory" /></label>
-                            <label class="check-row"><input type="checkbox" @bind="_draft.FollowSelectedPage" /> Program follows selected Publisher page</label>
-                            <label>Fixed program page<select @bind="_draft.ProgramPageId"><option value="">First page</option>@foreach (var documentPage in Document.Pages) { <option value="@documentPage.Id">@documentPage.Name</option> }</select></label>
-                        </div>
-                        <div class="streaming-section-heading hotkey-heading">
-                            <div><h3>Streaming hotkeys</h3><p>In-app hotkeys work while PublisherStudio is focused. Global hotkeys are registered by the Windows Media Host while a session is active.</p></div>
-                            <button type="button" @onclick="AddHotkey">＋ Hotkey</button>
-                        </div>
-                        <div class="streaming-hotkey-list">
-                            @foreach (var hotkey in _draft.Hotkeys)
-                            {
-                                <section class="streaming-hotkey-row" @key="hotkey.Id">
-                                    <label>Gesture<input @bind="hotkey.Gesture" placeholder="F9 or Ctrl+Shift+S" /></label>
-                                    <label>Command<select @bind="hotkey.Command">
-                                        <option value="ToggleStreaming">Start / stop streaming</option>
-                                        <option value="ToggleRecording">Toggle recording</option>
-                                        <option value="NextPage">Next program page</option>
-                                        <option value="PreviousPage">Previous program page</option>
-                                        <option value="SelectPage">Select program page</option>
-                                        <option value="ToggleOutput">Toggle provider output</option>
-                                    </select></label>
-                                    @if (hotkey.Command == "SelectPage")
-                                    {
-                                        <label>Page<select @bind="hotkey.TargetId"><option value="">Choose page</option>@foreach (var documentPage in Document.Pages) { <option value="@documentPage.Id">@documentPage.Name</option> }</select></label>
-                                    }
-                                    else if (hotkey.Command == "ToggleOutput")
-                                    {
-                                        <label>Output<select @bind="hotkey.TargetId"><option value="">Choose output</option>@foreach (var output in _draft.Outputs) { <option value="@output.Id">@output.Name</option> }</select></label>
-                                    }
-                                    else
-                                    {
-                                        <span class="hotkey-target-placeholder">No target required</span>
-                                    }
-                                    <label class="check-row"><input type="checkbox" @bind="hotkey.Global" /> Global</label>
-                                    <button type="button" class="danger-button compact" @onclick="() => RemoveHotkey(hotkey.Id)">Remove</button>
-                                </section>
-                            }
-                        </div>
-                        <button type="button" @onclick="SaveMachineOptions">Save machine options</button>
-                        <p class="property-note">Auto probes the installed FFmpeg encoders and prefers NVENC, Quick Sync, AMF, or VideoToolbox before software encoding. The local Media Host remains separate from the Blazor circuit so an active stream can survive a browser reconnect.</p>
+                    <main class="streaming-content-pane streaming-content-wide">
+                        <header class="streaming-page-heading">
+                            <div><h2>Advanced streaming options</h2><p>Configure the local Media Host, program-page behavior, encoders, and session hotkeys.</p></div>
+                            <button type="button" class="primary-button" @onclick="SaveMachineOptions"><i class="pub-icon pub-icon-save"></i>Save machine options</button>
+                        </header>
+
+                        <section class="streaming-settings-card">
+                            <div class="streaming-card-heading"><div><h3>Media Host and program</h3><p>Machine settings stay local; page-following behavior is stored with the publication.</p></div></div>
+                            <div class="streaming-form-grid three-column">
+                                <label data-help="Path to FFmpeg. Leave blank for automatic discovery by the local Media Host."><span>FFmpeg path</span><input @bind="_machine.FfmpegPath" placeholder="Auto-detect when blank" /></label>
+                                <label><span>Media Host port</span><input type="number" min="1024" max="65535" @bind="_machine.MediaHostPort" /></label>
+                                <label data-help="Auto probes hardware encoders and falls back to software encoding when initialization fails."><span>Encoder preference</span><select @bind="_machine.HardwareEncoder">@foreach (var value in Enum.GetValues<StreamingHardwareEncoderPreference>()) { <option value="@value">@value</option> }</select></label>
+                                <label class="span-2"><span>Default recording directory</span><input @bind="_machine.DefaultRecordingDirectory" /></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.FollowSelectedPage" /><span><b>Follow selected Publisher page</b><small>Use the current editor page as program.</small></span></label>
+                                <label><span>Fixed program page</span><select @bind="_draft.ProgramPageId" disabled="@_draft.FollowSelectedPage"><option value="">First page</option>@foreach (var documentPage in Document.Pages) { <option value="@documentPage.Id">@documentPage.Name</option> }</select></label>
+                            </div>
+                            <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Auto prefers NVENC, Quick Sync, AMF, or VideoToolbox before software encoding. The separate Media Host lets an active session survive a browser reconnect.</span></div>
+                        </section>
+
+                        <section class="streaming-settings-card">
+                            <div class="streaming-card-heading"><div><h3>Streaming hotkeys</h3><p>In-app hotkeys require focus. Global hotkeys are registered by the Windows Media Host while a session is active.</p></div><button type="button" @onclick="AddHotkey"><i class="pub-icon pub-icon-newpage"></i>Add hotkey</button></div>
+                            <div class="streaming-hotkey-list">
+                                @foreach (var hotkey in _draft.Hotkeys)
+                                {
+                                    <article class="streaming-hotkey-row"
+                                             @oncontextmenu="args => ShowHotkeyContextMenu(hotkey, args)"
+                                             @oncontextmenu:preventDefault
+                                             @oncontextmenu:stopPropagation>
+                                        <label><span>Gesture</span><input @bind="hotkey.Gesture" placeholder="F9 or Ctrl+Shift+S" /></label>
+                                        <label><span>Command</span><select @bind="hotkey.Command">
+                                            <option value="ToggleStreaming">Start / stop streaming</option>
+                                            <option value="ToggleRecording">Toggle recording</option>
+                                            <option value="NextPage">Next program page</option>
+                                            <option value="PreviousPage">Previous program page</option>
+                                            <option value="SelectPage">Select program page</option>
+                                            <option value="ToggleOutput">Toggle provider output</option>
+                                        </select></label>
+                                        @if (hotkey.Command == "SelectPage")
+                                        {
+                                            <label><span>Page</span><select @bind="hotkey.TargetId"><option value="">Choose page</option>@foreach (var documentPage in Document.Pages) { <option value="@documentPage.Id">@documentPage.Name</option> }</select></label>
+                                        }
+                                        else if (hotkey.Command == "ToggleOutput")
+                                        {
+                                            <label><span>Output</span><select @bind="hotkey.TargetId"><option value="">Choose output</option>@foreach (var output in _draft.Outputs) { <option value="@output.Id">@output.Name</option> }</select></label>
+                                        }
+                                        else
+                                        {
+                                            <div class="hotkey-target-placeholder"><b>No target</b><small>This command applies to the active session.</small></div>
+                                        }
+                                        <label class="streaming-check-field compact"><input type="checkbox" @bind="hotkey.Global" /><span><b>Global</b><small>Media Host registers it system-wide.</small></span></label>
+                                        <button type="button" class="icon-command-button danger" aria-label="Remove hotkey" @onclick="() => RemoveHotkey(hotkey.Id)">×</button>
+                                    </article>
+                                }
+                            </div>
+                        </section>
                     </main>
+                }
+
+                @if (_showWorkflowHelp)
+                {
+                    <aside class="streaming-help-pane">
+                        <header><div><b>@SectionTitle workflow</b><span>Simple rules for predictable sessions</span></div><button type="button" class="icon-command-button" aria-label="Hide workflow help" @onclick="ToggleWorkflowHelp">×</button></header>
+                        @foreach (var step in WorkflowSteps)
+                        {
+                            <article><span>@step.Number</span><div><b>@step.Title</b><p>@step.Text</p></div></article>
+                        }
+                        <div class="streaming-help-tip"><i class="pub-icon pub-icon-command"></i><span>@WorkflowTip</span></div>
+                    </aside>
                 }
             </div>
 
-            <footer class="studio-footer">
-                <span>@_status</span>
-                <div><button type="button" @onclick="Cancel">Cancel</button><button type="button" class="primary-button" @onclick="Apply">Apply streaming setup</button></div>
+            <footer class="subapp-footer streaming-studio-footer">
+                <span><b>@SectionTitle:</b> @_status</span>
+                <div>
+                    <DxButton Text="Cancel" Click="Cancel" />
+                    <DxButton Text="Apply streaming setup" Click="Apply" RenderStyle="ButtonRenderStyle.Primary" />
+                </div>
             </footer>
         </section>
     </div>
 }
+
+<DxContextMenu @ref="_streamingContextMenu">
+    <Items>
+        @if (_contextKind == "provider")
+        {
+            <DxContextMenuItem Text="Edit provider" IconCssClass="pub-icon pub-icon-edit" Click="EditContextProvider" />
+            <DxContextMenuItem Text="Duplicate provider" IconCssClass="pub-icon pub-icon-duplicate" Click="DuplicateContextProvider" />
+            <DxContextMenuItem Text="New provider" IconCssClass="pub-icon pub-icon-newpage" BeginGroup="true" Click="NewProvider" />
+            <DxContextMenuItem Text="Delete provider" IconCssClass="pub-icon pub-icon-delete" BeginGroup="true" Click="DeleteContextProvider" />
+        }
+        else if (_contextKind == "output")
+        {
+            <DxContextMenuItem Text="Select output" IconCssClass="pub-icon pub-icon-select" Click="SelectContextOutput" />
+            <DxContextMenuItem Text="Apply recommended settings" IconCssClass="pub-icon pub-icon-fit" Click="ApplyContextOutputDefaults" />
+            <DxContextMenuItem Text="Duplicate output" IconCssClass="pub-icon pub-icon-duplicate" Click="DuplicateContextOutput" />
+            <DxContextMenuItem Text="Remove output" IconCssClass="pub-icon pub-icon-delete" BeginGroup="true" Click="RemoveContextOutput" />
+        }
+        else if (_contextKind == "device")
+        {
+            <DxContextMenuItem Text="Duplicate device profile" IconCssClass="pub-icon pub-icon-duplicate" Click="DuplicateContextDevice" />
+            <DxContextMenuItem Text="Remove device profile" IconCssClass="pub-icon pub-icon-delete" BeginGroup="true" Click="RemoveContextDevice" />
+        }
+        else if (_contextKind == "hotkey")
+        {
+            <DxContextMenuItem Text="Duplicate hotkey" IconCssClass="pub-icon pub-icon-duplicate" Click="DuplicateContextHotkey" />
+            <DxContextMenuItem Text="Remove hotkey" IconCssClass="pub-icon pub-icon-delete" BeginGroup="true" Click="RemoveContextHotkey" />
+        }
+        else
+        {
+            @if (_tab == "providers")
+            {
+                <DxContextMenuItem Text="New provider" IconCssClass="pub-icon pub-icon-newpage" Click="NewProvider" />
+            }
+            else if (_tab == "outputs")
+            {
+                <DxContextMenuItem Text="Add output" IconCssClass="pub-icon pub-icon-newpage" Click="AddOutput" />
+            }
+            else if (_tab == "devices")
+            {
+                <DxContextMenuItem Text="Add device profile" IconCssClass="pub-icon pub-icon-newpage" Click="AddDeviceProfile" />
+                <DxContextMenuItem Text="Refresh browser devices" IconCssClass="pub-icon pub-icon-redo" Click="RefreshDevices" />
+                <DxContextMenuItem Text="Refresh native devices" IconCssClass="pub-icon pub-icon-redo" Click="RefreshNativeDevices" />
+            }
+            else if (_tab == "advanced")
+            {
+                <DxContextMenuItem Text="Add hotkey" IconCssClass="pub-icon pub-icon-newpage" Click="AddHotkey" />
+            }
+            <DxContextMenuItem Text="@(_showWorkflowHelp ? "Hide workflow help" : "Show workflow help")" IconCssClass="pub-icon pub-icon-command" BeginGroup="true" Click="ToggleWorkflowHelp" />
+        }
+    </Items>
+</DxContextMenu>
 
 @code {
     [Parameter] public bool Visible { get; set; }
@@ -301,12 +579,108 @@
 
     private string _tab = "providers";
     private bool _wasVisible;
+    private bool _showWorkflowHelp = true;
     private PublicationStreamingSettings _draft = new();
     private StreamingMachineSettings _machine = new();
     private StreamingProviderProfile? _providerDraft;
     private List<BrowserMediaDeviceInfo> _browserDevices = [];
     private List<NativeMediaDeviceInfo> _nativeDevices = [];
+    private Guid? _selectedOutputId;
     private string _status = "Ready";
+    private DxContextMenu _streamingContextMenu = default!;
+    private string _contextKind = "workspace";
+    private Guid? _contextId;
+
+    private PublicationStreamOutput? SelectedOutput => _selectedOutputId is { } id
+        ? _draft.Outputs.FirstOrDefault(item => item.Id == id)
+        : null;
+
+    private string SectionTitle => _tab switch
+    {
+        "providers" => "Provider profiles",
+        "outputs" => "Publication outputs",
+        "recording" => "Recording",
+        "lan" => "Company / LAN",
+        "devices" => "Devices",
+        _ => "Advanced"
+    };
+
+    private string SectionDescription => _tab switch
+    {
+        "providers" => "Create reusable provider identities and keep stream/Chat secrets in the machine profile store.",
+        "outputs" => "Map the shared publication program to independently scaled and encoded destinations.",
+        "recording" => "Choose clean-master or output-specific files without coupling recording reliability to public delivery.",
+        "lan" => "Expose internal browser, HLS, or RTSP playback only on an explicitly selected address.",
+        "devices" => "Discover browser/native sources and save stable machine profiles for live-source objects.",
+        _ => "Control the local Media Host, program page, encoder preference, and session hotkeys."
+    };
+
+    private string SectionIcon => _tab switch
+    {
+        "providers" => "pub-icon-web",
+        "outputs" => "pub-icon-video",
+        "recording" => "pub-icon-media",
+        "lan" => "pub-icon-web",
+        "devices" => "pub-icon-media",
+        _ => "pub-icon-properties"
+    };
+
+    private IReadOnlyList<WorkflowStep> WorkflowSteps => _tab switch
+    {
+        "providers" =>
+        [
+            new(1, "Create a machine profile", "Choose the provider, transport, endpoint, and account identity once."),
+            new(2, "Store credentials", "Save stream and optional Chat secrets encrypted for the current Windows user."),
+            new(3, "Use it in outputs", "The publication stores only the provider profile ID, never the secret values.")
+        ],
+        "outputs" =>
+        [
+            new(1, "Set the master program", "Choose the shared compositor resolution and frame rate."),
+            new(2, "Add provider variants", "Each output can scale, encode, test, and route Chat independently."),
+            new(3, "Apply the setup", "The publication keeps output settings while machine profiles remain reusable.")
+        ],
+        "recording" =>
+        [
+            new(1, "Enable recording", "Recording begins with a live or dry-run session."),
+            new(2, "Choose the variant", "Record the clean master, each enabled output, or only selected outputs."),
+            new(3, "Prefer crash tolerance", "MKV segments can be remuxed to MP4 after a clean stop.")
+        ],
+        "lan" =>
+        [
+            new(1, "Choose an address", "Use loopback for this computer or a specific LAN adapter address."),
+            new(2, "Enable protocols", "Browser/WebRTC, HLS, and RTSP can be switched independently."),
+            new(3, "Protect access", "Keep viewer limits and access tokens enabled when other devices can connect.")
+        ],
+        "devices" =>
+        [
+            new(1, "Discover sources", "Browser permission reveals cameras/microphones; Media Host finds native devices."),
+            new(2, "Save stable profiles", "Store the identifiers and backend hints once on this machine."),
+            new(3, "Select from live objects", "Publication live-source elements reference the reusable device profile.")
+        ],
+        _ =>
+        [
+            new(1, "Locate the Media Host", "Leave FFmpeg blank for discovery or specify the native executable path."),
+            new(2, "Choose program behavior", "Follow the selected Publisher page or use a fixed program page."),
+            new(3, "Assign hotkeys", "Keep shortcuts local to PublisherStudio or register them globally during sessions.")
+        ]
+    };
+
+    private string WorkflowTip => _tab switch
+    {
+        "providers" => "Deleting a provider also removes publication outputs in this draft that reference it. Saved publications are unchanged until Apply.",
+        "outputs" => "Select an output before using ribbon commands such as Recommended settings, Duplicate, or Remove.",
+        "recording" => "Selected-output recording can capture variants even when their public provider delivery is disabled.",
+        "lan" => "127.0.0.1 never exposes the listener to another machine. Use a LAN address only when remote viewers are intended.",
+        "devices" => "Browser device labels are hidden until permission is granted; native discovery depends on Media Host and FFmpeg.",
+        _ => "Machine options are saved separately. Apply streaming setup stores only publication-specific page, output, recording, LAN, and hotkey settings."
+    };
+
+    private string LanExposureText => !_draft.Lan.Enabled
+        ? "Disabled"
+        : string.Equals(_draft.Lan.BindAddress?.Trim(), "127.0.0.1", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(_draft.Lan.BindAddress?.Trim(), "localhost", StringComparison.OrdinalIgnoreCase)
+            ? "This computer only"
+            : $"LAN address {_draft.Lan.BindAddress}";
 
     protected override async Task OnParametersSetAsync()
     {
@@ -315,23 +689,33 @@
             _draft = Clone(Document.Streaming);
             _machine = await ProfileStore.LoadAsync();
             _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
+            _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
             _status = "Machine profiles are reusable across publications.";
         }
         _wasVisible = Visible;
     }
 
-    private RenderFragment TabButton(string id, string text) => builder =>
-    {
-        builder.OpenElement(0, "button");
-        builder.AddAttribute(1, "type", "button");
-        builder.AddAttribute(2, "class", _tab == id ? "active" : null);
-        builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => _tab = id));
-        builder.AddContent(4, text);
-        builder.CloseElement();
-    };
+    private void ShowProviders() => _tab = "providers";
+    private void ShowOutputs() => _tab = "outputs";
+    private void ShowRecording() => _tab = "recording";
+    private void ShowLan() => _tab = "lan";
+    private void ShowDevices() => _tab = "devices";
+    private void ShowAdvanced() => _tab = "advanced";
+    private void ToggleWorkflowHelp() => _showWorkflowHelp = !_showWorkflowHelp;
 
-    private void NewProvider() => _providerDraft = new StreamingProviderProfile();
-    private void EditProvider(StreamingProviderProfile profile) => _providerDraft = Clone(profile);
+    private void NewProvider()
+    {
+        _providerDraft = new StreamingProviderProfile();
+        _tab = "providers";
+        _status = "New provider profile. Save it to make it reusable.";
+    }
+
+    private void EditProvider(StreamingProviderProfile profile)
+    {
+        _providerDraft = Clone(profile);
+        _tab = "providers";
+        _status = $"Editing {profile.Name}.";
+    }
 
     private async Task SaveProvider()
     {
@@ -350,7 +734,22 @@
         _machine = await ProfileStore.LoadAsync();
         _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
         _draft.Outputs.RemoveAll(output => output.ProfileId == id);
+        if (SelectedOutput is null) _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
         _status = "Provider deleted.";
+    }
+
+    private void DuplicateCurrentProvider()
+    {
+        if (_providerDraft is null) return;
+        var copy = Clone(_providerDraft);
+        copy.Id = Guid.NewGuid();
+        copy.Name = $"{copy.Name} copy";
+        copy.Secret = string.Empty;
+        copy.ChatSecret = string.Empty;
+        copy.HasStoredSecret = false;
+        copy.HasStoredChatSecret = false;
+        _providerDraft = copy;
+        _status = "Provider duplicated. Enter credentials if needed, then save the new profile.";
     }
 
     private void AddOutput()
@@ -366,7 +765,12 @@
         }
         ApplyRecommendedDefaults(output);
         _draft.Outputs.Add(output);
+        _selectedOutputId = output.Id;
+        _tab = "outputs";
+        _status = $"Added {output.Name}.";
     }
+
+    private void SelectOutput(Guid id) => _selectedOutputId = id;
 
     private void ChangeOutputProfile(PublicationStreamOutput output, ChangeEventArgs args)
     {
@@ -378,6 +782,7 @@
         output.Name = profile.Name;
         output.ChatChannel = profile.ChannelId;
         ApplyRecommendedDefaults(output);
+        _selectedOutputId = output.Id;
     }
 
     private void ChangeOutputPreset(PublicationStreamOutput output, ChangeEventArgs args)
@@ -385,6 +790,7 @@
         if (!Enum.TryParse<PublicationStreamQualityPreset>(args.Value?.ToString(), out var preset)) return;
         output.QualityPreset = preset;
         ApplyQualityPreset(output);
+        _selectedOutputId = output.Id;
     }
 
     private static void ApplyRecommendedDefaults(PublicationStreamOutput output)
@@ -422,15 +828,67 @@
         output.KeyFrameIntervalSeconds = 2;
     }
 
+    private void ApplySelectedOutputDefaults()
+    {
+        if (SelectedOutput is not { } output) return;
+        ApplyRecommendedDefaults(output);
+        _status = $"Applied recommended {output.Provider} settings to {output.Name}.";
+    }
+
+    private void DuplicateSelectedOutput()
+    {
+        if (SelectedOutput is not { } output) return;
+        DuplicateOutput(output);
+    }
+
+    private void DuplicateOutput(PublicationStreamOutput output)
+    {
+        var copy = Clone(output);
+        copy.Id = Guid.NewGuid();
+        copy.Name = $"{copy.Name} copy";
+        _draft.Outputs.Add(copy);
+        _selectedOutputId = copy.Id;
+        _status = $"Duplicated {output.Name}.";
+    }
+
+    private void RemoveSelectedOutput()
+    {
+        if (SelectedOutput is { } output) RemoveOutput(output.Id);
+    }
+
     private void RemoveOutput(Guid id)
     {
+        var removed = _draft.Outputs.FirstOrDefault(output => output.Id == id);
         _draft.Outputs.RemoveAll(output => output.Id == id);
         _draft.Recording.SelectedOutputIds.Remove(id);
+        _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
+        _status = removed is null ? "Output removed." : $"Removed {removed.Name}.";
     }
+
+    private void ToggleRecording() => _draft.Recording.Enabled = !_draft.Recording.Enabled;
+    private void UseCleanMasterRecording() => _draft.Recording.Variant = PublicationStreamRecordingVariant.CleanMaster;
+    private void UseEnabledOutputRecording() => _draft.Recording.Variant = PublicationStreamRecordingVariant.EachEnabledOutput;
 
     private void ToggleRecordingOutput(Guid id)
     {
         if (!_draft.Recording.SelectedOutputIds.Remove(id)) _draft.Recording.SelectedOutputIds.Add(id);
+    }
+
+    private void ToggleLan() => _draft.Lan.Enabled = !_draft.Lan.Enabled;
+
+    private void UseLoopbackLan()
+    {
+        _draft.Lan.BindAddress = "127.0.0.1";
+        _draft.Lan.Enabled = true;
+        _status = "LAN output is limited to this computer.";
+    }
+
+    private void UseBrowserAndHlsLan()
+    {
+        _draft.Lan.EnableBrowserWebRtc = true;
+        _draft.Lan.EnableHls = true;
+        _draft.Lan.Enabled = true;
+        _status = "Browser and HLS LAN delivery enabled.";
     }
 
     private async Task RefreshDevices()
@@ -442,7 +900,6 @@
         }
         catch (Exception exception) { _status = exception.Message; }
     }
-
 
     private async Task RefreshNativeDevices()
     {
@@ -475,14 +932,34 @@
         _status = $"Added {existing.Name}. Save device profiles to reuse it.";
     }
 
-    private void AddDeviceProfile() => _machine.Devices.Add(new StreamingDeviceProfile
+    private void AddDeviceProfile()
     {
-        Name = "New device profile",
-        Kind = PublicationLiveSourceKind.Camera,
-        UseDeviceTimestamps = _draft.PreferDeviceTimestamps
-    });
+        var profile = new StreamingDeviceProfile
+        {
+            Name = "New device profile",
+            Kind = PublicationLiveSourceKind.Camera,
+            UseDeviceTimestamps = _draft.PreferDeviceTimestamps
+        };
+        _machine.Devices.Add(profile);
+        _tab = "devices";
+        _status = "New device profile added.";
+    }
 
-    private void RemoveDeviceProfile(Guid id) => _machine.Devices.RemoveAll(profile => profile.Id == id);
+    private void RemoveDeviceProfile(Guid id)
+    {
+        var profile = _machine.Devices.FirstOrDefault(item => item.Id == id);
+        _machine.Devices.RemoveAll(item => item.Id == id);
+        _status = profile is null ? "Device profile removed." : $"Removed {profile.Name}.";
+    }
+
+    private void DuplicateDeviceProfile(StreamingDeviceProfile profile)
+    {
+        var copy = Clone(profile);
+        copy.Id = Guid.NewGuid();
+        copy.Name = $"{copy.Name} copy";
+        _machine.Devices.Add(copy);
+        _status = $"Duplicated {profile.Name}.";
+    }
 
     private static bool CanSaveBrowserDevice(BrowserMediaDeviceInfo device) =>
         !string.IsNullOrWhiteSpace(device.DeviceId)
@@ -518,13 +995,144 @@
         _status = $"Added {profile.Name}. Save device profiles to reuse it.";
     }
 
-    private void AddHotkey() => _draft.Hotkeys.Add(new PublicationStreamingHotkey { Gesture = "F11", Command = "ToggleStreaming" });
-    private void RemoveHotkey(Guid id) => _draft.Hotkeys.RemoveAll(item => item.Id == id);
+    private void AddHotkey()
+    {
+        _draft.Hotkeys.Add(new PublicationStreamingHotkey { Gesture = "F11", Command = "ToggleStreaming" });
+        _tab = "advanced";
+        _status = "New hotkey added.";
+    }
+
+    private void RemoveHotkey(Guid id)
+    {
+        _draft.Hotkeys.RemoveAll(item => item.Id == id);
+        _status = "Hotkey removed.";
+    }
+
+    private void DuplicateHotkey(PublicationStreamingHotkey hotkey)
+    {
+        var copy = Clone(hotkey);
+        copy.Id = Guid.NewGuid();
+        _draft.Hotkeys.Add(copy);
+        _status = $"Duplicated {hotkey.Gesture}.";
+    }
 
     private async Task SaveMachineOptions()
     {
         await ProfileStore.SaveMachineOptionsAsync(_machine);
-        _status = "Machine options saved.";
+        _status = "Machine options and reusable profiles saved.";
+    }
+
+    private async Task ShowProviderContextMenu(StreamingProviderProfile profile, MouseEventArgs args)
+    {
+        _contextKind = "provider";
+        _contextId = profile.Id;
+        EditProvider(profile);
+        await ShowContextMenu(args);
+    }
+
+    private async Task ShowOutputContextMenu(PublicationStreamOutput output, MouseEventArgs args)
+    {
+        _contextKind = "output";
+        _contextId = output.Id;
+        _selectedOutputId = output.Id;
+        await ShowContextMenu(args);
+    }
+
+    private async Task ShowDeviceContextMenu(StreamingDeviceProfile profile, MouseEventArgs args)
+    {
+        _contextKind = "device";
+        _contextId = profile.Id;
+        await ShowContextMenu(args);
+    }
+
+    private async Task ShowHotkeyContextMenu(PublicationStreamingHotkey hotkey, MouseEventArgs args)
+    {
+        _contextKind = "hotkey";
+        _contextId = hotkey.Id;
+        await ShowContextMenu(args);
+    }
+
+    private async Task ShowWorkspaceContextMenu(MouseEventArgs args)
+    {
+        _contextKind = "workspace";
+        _contextId = null;
+        await ShowContextMenu(args);
+    }
+
+    private async Task ShowContextMenu(MouseEventArgs args)
+    {
+        await InvokeAsync(StateHasChanged);
+        await _streamingContextMenu.ShowAsync(args);
+    }
+
+    private void EditContextProvider()
+    {
+        var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
+        if (profile is not null) EditProvider(profile);
+    }
+
+    private void DuplicateContextProvider()
+    {
+        var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
+        if (profile is null) return;
+        _providerDraft = Clone(profile);
+        DuplicateCurrentProvider();
+    }
+
+    private async Task DeleteContextProvider()
+    {
+        var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
+        if (profile is null) return;
+        _providerDraft = Clone(profile);
+        await DeleteProvider();
+    }
+
+    private void SelectContextOutput()
+    {
+        if (_contextId is { } id) _selectedOutputId = id;
+    }
+
+    private void ApplyContextOutputDefaults()
+    {
+        if (_contextId is not { } id) return;
+        var output = _draft.Outputs.FirstOrDefault(item => item.Id == id);
+        if (output is null) return;
+        _selectedOutputId = id;
+        ApplySelectedOutputDefaults();
+    }
+
+    private void DuplicateContextOutput()
+    {
+        if (_contextId is not { } id) return;
+        var output = _draft.Outputs.FirstOrDefault(item => item.Id == id);
+        if (output is not null) DuplicateOutput(output);
+    }
+
+    private void RemoveContextOutput()
+    {
+        if (_contextId is { } id) RemoveOutput(id);
+    }
+
+    private void DuplicateContextDevice()
+    {
+        var profile = _machine.Devices.FirstOrDefault(item => item.Id == _contextId);
+        if (profile is not null) DuplicateDeviceProfile(profile);
+    }
+
+    private void RemoveContextDevice()
+    {
+        if (_contextId is { } id) RemoveDeviceProfile(id);
+    }
+
+    private void DuplicateContextHotkey()
+    {
+        var hotkey = _draft.Hotkeys.FirstOrDefault(item => item.Id == _contextId);
+        if (hotkey is not null) DuplicateHotkey(hotkey);
+    }
+
+    private void RemoveContextHotkey()
+    {
+        if (_contextId is { } id) RemoveHotkey(id);
     }
 
     private string EstimatedRecordingStorageText
@@ -552,9 +1160,18 @@
         }
     }
 
+    private static string RecordingVariantName(PublicationStreamRecordingVariant value) => value switch
+    {
+        PublicationStreamRecordingVariant.CleanMaster => "Clean master",
+        PublicationStreamRecordingVariant.EachEnabledOutput => "Each enabled output",
+        PublicationStreamRecordingVariant.SelectedOutputs => "Selected outputs",
+        _ => value.ToString()
+    };
+
     private Task Apply() => Saved.InvokeAsync(_draft);
     private Task Cancel() => Cancelled.InvokeAsync();
     private static T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
     private static string ShortId(string value) => string.IsNullOrWhiteSpace(value) ? "default" : value.Length <= 16 ? value : value[..16] + "…";
 
+    private sealed record WorkflowStep(int Number, string Title, string Text);
 }

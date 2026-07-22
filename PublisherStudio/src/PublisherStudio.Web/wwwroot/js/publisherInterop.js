@@ -820,6 +820,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         const handlers = state.handlers;
         handlers.stagePointerDown = event => pointerDown(state, event);
         handlers.stageDoubleClick = event => componentDoubleClick(state, event);
+        handlers.stageContextMenu = event => designerContextMenu(state, event);
         handlers.stagePointerMove = event => pointerMove(state, event);
         handlers.stagePointerUp = event => pointerUp(state, event);
         handlers.stagePointerCancel = event => pointerCancel(state, event);
@@ -880,6 +881,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         // or animation content stops pointer events in its own component tree.
         stage.addEventListener('pointerdown', handlers.stagePointerDown, true);
         stage.addEventListener('dblclick', handlers.stageDoubleClick, true);
+        stage.addEventListener('contextmenu', handlers.stageContextMenu, true);
         stage.addEventListener('pointermove', handlers.stagePointerMove, true);
         stage.addEventListener('pointerup', handlers.stagePointerUp, true);
         stage.addEventListener('pointercancel', handlers.stagePointerCancel, true);
@@ -960,6 +962,7 @@ export function disposeCanvas(stageId) {
     const handlers = state.handlers || {};
     stage.removeEventListener('pointerdown', handlers.stagePointerDown, true);
     stage.removeEventListener('dblclick', handlers.stageDoubleClick, true);
+    stage.removeEventListener('contextmenu', handlers.stageContextMenu, true);
     stage.removeEventListener('pointermove', handlers.stagePointerMove, true);
     stage.removeEventListener('pointerup', handlers.stagePointerUp, true);
     stage.removeEventListener('pointercancel', handlers.stagePointerCancel, true);
@@ -1683,21 +1686,39 @@ function registerCanvasClick(state, operation, event) {
     state.lastCanvasClick = { id: operation.id, time: now, x: event.clientX, y: event.clientY };
 }
 
-function componentInteractionOwner(state, event) {
+function designerInteractionOwner(state, event) {
     const target = event?.target instanceof Element ? event.target : null;
-    if (!target?.closest?.('.devextreme-component-host')) return null;
-    const owner = target.closest('[data-publication-element][data-element-id]');
+    const owner = target?.closest?.('[data-publication-element][data-element-id]');
     return owner && state.page.contains(owner) ? owner : null;
 }
 
+function componentInteractionOwner(state, event) {
+    const target = event?.target instanceof Element ? event.target : null;
+    if (!target?.closest?.('.devextreme-component-host')) return null;
+    return designerInteractionOwner(state, event);
+}
+
 function componentDoubleClick(state, event) {
-    const owner = componentInteractionOwner(state, event);
+    const owner = designerInteractionOwner(state, event);
     if (!owner) return;
     cancelPendingComponentAction(state);
     state.lastCanvasClick = null;
     safeDotNet(state, 'ActivateElement', String(owner.dataset.elementId || ''));
     event.preventDefault();
-    event.stopPropagation();
+    event.stopImmediatePropagation();
+}
+
+function designerContextMenu(state, event) {
+    const owner = designerInteractionOwner(state, event);
+    if (!owner) return;
+    const id = String(owner.dataset.elementId || '');
+    if (!id) return;
+
+    cancelPendingComponentAction(state);
+    state.lastCanvasClick = null;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    safeDotNet(state, 'OpenElementContextMenu', id, number(event.clientX), number(event.clientY));
 }
 
 function pointerDown(state, event) {

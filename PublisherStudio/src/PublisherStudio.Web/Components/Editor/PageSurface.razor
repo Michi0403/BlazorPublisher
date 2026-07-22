@@ -67,6 +67,7 @@
                          viewBox="0 0 @Inv(State.CurrentPage.WidthMm) @Inv(State.CurrentPage.HeightMm)"
                          preserveAspectRatio="none"
                          data-publication-element
+                         data-help="Double-click to select this connector. Right-click for connector, signal, routing, and endpoint commands."
                          data-element-id="@connector.Id"
                          data-selected="@State.IsSelected(connector.Id).ToString().ToLowerInvariant()"
                          data-group-id="@connector.GroupId"
@@ -131,6 +132,7 @@
                      data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)"
                      class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(State.IsSelected(element.Id) ? "selected" : null) @(element.Id == State.SelectedElementId ? "selection-primary" : null) @(element.GroupId is not null ? "grouped" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
+                     data-help="@ElementDesignerHelp(element)"
                      @oncontextmenu="args => ShowElementContextMenu(element, args)"
                      @oncontextmenu:preventDefault
                      @oncontextmenu:stopPropagation>
@@ -764,6 +766,16 @@
         State.SelectElement(guid);
         return DoubleClick(element);
     }
+
+    [JSInvokable]
+    public async Task OpenElementContextMenu(string id, double clientX, double clientY)
+    {
+        if (!Guid.TryParse(id, out var guid)) return;
+        var element = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == guid);
+        if (element is null) return;
+        var args = new MouseEventArgs { ClientX = clientX, ClientY = clientY };
+        await ShowElementContextMenu(element, args);
+    }
     [JSInvokable]
     public void CommitMove(string id, double x, double y, string[]? movingIds = null)
     {
@@ -912,6 +924,21 @@
     [JSInvokable] public void KeyboardRedo() => State.Redo();
     [JSInvokable] public void KeyboardNudge(double dx, double dy) => State.NudgeSelection(dx, dy);
     private void ResetPointerState() => State.CancelActiveTool();
+
+    private static string ElementDesignerHelp(PublicationElement element) => element switch
+    {
+        TextFrameElement => "Double-click to open Story Editor. Right-click for text-frame commands; drag to move and use the handles to resize.",
+        ImageFrameElement => "Double-click to enter picture crop positioning. Right-click to open Picture Studio, replace, crop, fit, or transform the picture.",
+        SpreadsheetElement => "Double-click to open Spreadsheet Studio. Right-click for workbook, sizing, and worksheet-position commands.",
+        DataVisualElement => "Double-click to open Data Visual Studio. Right-click to change the visual type, data, title, legend, and labels.",
+        DevExtremeComponentElement => "Double-click to open Component Studio. Right-click for component data, scope, viewport, and publication-data commands.",
+        PublicationMediaElement => "Double-click to open Audio or Video Studio. Right-click for playback, trim, mute, loop, and timeline commands.",
+        BarcodeElement => "Double-click to open Barcode Studio. Right-click for barcode and QR editing commands.",
+        WordArtElement => "Right-click for WordArt path commands. Drag to move and use the handles to resize or rotate.",
+        LiveSourceElement => "Right-click for live-source settings. Drag to move and use the handles to resize the capture frame.",
+        ShapeElement => "Right-click to change the shape type. Drag to move and use the handles to resize or rotate.",
+        _ => "Right-click for object commands. Drag to move and use the handles to resize or rotate."
+    };
 
     private Task DoubleClick(PublicationElement element)
     {

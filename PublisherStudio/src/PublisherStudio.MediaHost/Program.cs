@@ -22,7 +22,7 @@ app.UseWebSockets();
 
 app.MapGet("/api/mediahost/capabilities", () => Results.Ok(new
 {
-    version = "1.0.48",
+    version = "1.0.49",
     browserCapture = true,
     browserAudioMix = true,
     nativeDeviceDiscovery = true,

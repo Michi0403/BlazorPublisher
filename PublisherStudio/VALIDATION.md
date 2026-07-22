@@ -436,3 +436,16 @@ Static checks completed for the v1.0.37 source package:
 - Project XML and JSON files parse successfully; application/package/installer/Media Host versions are aligned to `1.0.48`, and publication format is `1.45`.
 - FFmpeg 7.1 is available in the packaging environment for command/codec inspection, and all archive entries pass the final ZIP integrity test.
 - A complete .NET/DevExpress compile is not claimed by this environment because it does not contain the .NET 10 SDK or licensed DevExpress package feed. Windows process-loopback audio, physical capture devices, OAuth provider accounts, and live external ingest endpoints remain target-machine integration checks.
+
+## v1.0.49 interface and interaction validation
+
+- Streaming Studio uses the shared DevExpress `DxRibbon`, contextual ribbon groups, SubApp title/footer structure, status strip, profile navigation, card-based property editing, and `DxContextMenu`.
+- Provider profiles, publication outputs, device profiles, and hotkeys expose right-click commands without changing their existing storage or apply/save boundaries.
+- Canvas double-click and context-menu events are captured before nested DevExtreme, media, SVG, or custom content can consume them, then routed to the existing object-specific Blazor handlers.
+- The global tooltip runtime observes dynamically rendered controls and supplies explicit or generated explanations for buttons, fields, selectors, links, tabs, menu items, and publication objects.
+- `npm test` passes timeline, component runtime, signal runtime, streaming runtime, and interface workflow contract suites.
+- `node --check` passes for the modified tooltip and publication-interaction JavaScript.
+- Project XML and JSON files parse successfully; application/package/installer/Media Host versions are aligned to `1.0.49`.
+- Publication format remains `1.45` and picture format remains `1.2`; no document migration or workflow replacement was introduced.
+- A real `dotnet restore`/`dotnet build` remains unavailable in this environment because the .NET SDK and licensed DevExpress package feed are not installed.
+

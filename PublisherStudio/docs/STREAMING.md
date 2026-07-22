@@ -2,6 +2,18 @@
 
 PublisherStudio remains document-first. A live production uses the same publication pages, objects, timelines, animations, connectors, data objects, and hotkeys used by editing and export. Streaming adds output contexts and live sources; it does not introduce a second OBS-style scene graph.
 
+## Streaming Studio authoring workflow
+
+Streaming Studio follows the same PublishingSuite/SubApp pattern as the document editors:
+
+- the ribbon chooses the active workspace and exposes commands for the current provider, output, recording plan, LAN setup, device profile, or machine option;
+- reusable machine profiles use a navigation pane, while publication-specific settings remain in the main property workspace;
+- right-click exposes item-specific commands for provider profiles, outputs, devices, and hotkeys;
+- the optional workflow pane explains the safe order of operations without replacing the normal compact form workflow;
+- **Apply streaming setup** commits only publication settings, while provider/device/FFmpeg machine options retain their existing explicit save actions.
+
+The interface changes no runtime boundary: publication JSON still stores profile references and output settings, while secrets and machine-specific device information remain outside the publication.
+
 ## Runtime layers
 
 1. **PublisherStudio.Web** authors and renders the publication, requests browser capture permissions, applies GPU/browser filters, mixes browser sources, and creates the clean master plus required output canvases.

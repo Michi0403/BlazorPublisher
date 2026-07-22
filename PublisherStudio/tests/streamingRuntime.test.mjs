@@ -97,7 +97,7 @@ assert.match(lanServer, /MediaSource/);
 assert.match(lanServer, /SubscribeIngest/);
 assert.match(lanServer, /RequireAccessToken/);
 assert.match(lanServer, /href=\\"/);
-assert.match(lanServer, /try \{\{ sourceBuffer\.mode/);
+assert.match(lanServer, /try \{ sourceBuffer\.mode/);
 assert.match(webProgram, /ProtectKeysWithDpapi/);
 assert.match(componentRuntime, /PublisherStudioOutputContext/);
 assert.match(componentRuntime, /PublisherStudioOutputContext\?\.mode/);

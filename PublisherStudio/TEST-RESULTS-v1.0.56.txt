@@ -1,0 +1,55 @@
+PublisherStudio v1.0.56 validation results
+==========================================
+
+Environment
+-----------
+Node.js: v22.16.0
+npm: 10.9.2
+.NET SDK: unavailable in this packaging environment
+Git metadata: unavailable in the supplied source archive
+
+Automated Node contract/runtime suites
+--------------------------------------
+Command: cd src/PublisherStudio.Web && npm test
+Result: PASS (9 suites)
+
+PASS timelineInterop lifecycle, backpressure, and bounded trim
+PASS component catalog, REST/OData probe, menu navigation, layout resilience,
+     media data, isolated chat, smart connections, and single-file export
+PASS offline signal connector reset/resize, spreadsheet targeting, SVG output,
+     and path-tool contracts
+PASS tooltip/pointer ownership, visual tooltip placement, chart hover cleanup,
+     and Signal Arrow geometry
+PASS offline system-font discovery and manual-entry integration
+PASS streaming model, Twitch OAuth/ingest, per-output Chat compositor, native
+     capture, FFmpeg orchestration, WebRTC/RTSP delivery, hotkeys, and Now Playing
+PASS PublishingSuite interface, canvas activation/context menu, and tooltips
+PASS installer resilience contracts
+PASS publication settings, repeatable Preview baselines, protected local stream
+     settings, and designer Map gesture ownership
+
+The v1.0.56 suite includes runtime assertions that:
+- an authored inline transform wins over a sampled animated matrix on the next
+  Preview run;
+- the designer Map shield installs only for designer-mode Map components and
+  consumes provider pointer gestures.
+
+JavaScript syntax
+-----------------
+Command: node --check for every non-vendor .js/.mjs project file
+Result: PASS (20 files)
+
+Structured files
+----------------
+JSON parse: PASS (6 non-vendor JSON files)
+XML/MSBuild parse: PASS (2 project files)
+Version alignment: PASS (1.0.56 in web project, installer project, npm package,
+integrated streaming capability endpoint, and version contract tests)
+Publication/picture formats: unchanged at 1.45 / 1.2
+
+Limitations
+-----------
+A full dotnet restore/build was not run because this environment has no .NET 10
+SDK and no licensed DevExpress package feed. Actual OS Data Protection storage,
+provider-backed dxMap interaction, and end-to-end desktop behavior remain final
+release-machine checks.

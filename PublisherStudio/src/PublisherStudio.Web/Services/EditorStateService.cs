@@ -11,6 +11,7 @@ public sealed class EditorStateService : IDisposable
     private readonly SpreadsheetDocumentService _spreadsheets;
     private readonly PublicationLiveDataRegistry _liveData;
     private readonly PublicationWebDataService _webData;
+    private readonly PublicationStreamingSettingsStore _streamingSettings;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private readonly List<PublicationElement> _clipboard = [];
@@ -26,7 +27,8 @@ public sealed class EditorStateService : IDisposable
         PublicationMediaAssetStore mediaAssets,
         SpreadsheetDocumentService spreadsheets,
         PublicationLiveDataRegistry liveData,
-        PublicationWebDataService webData)
+        PublicationWebDataService webData,
+        PublicationStreamingSettingsStore streamingSettings)
     {
         _files = files;
         _data = data;
@@ -35,7 +37,10 @@ public sealed class EditorStateService : IDisposable
         _spreadsheets = spreadsheets;
         _liveData = liveData;
         _webData = webData;
+        _streamingSettings = streamingSettings;
         Document = PublicationDocument.CreateDefault();
+        Document.Streaming = _streamingSettings.LoadOrDefault(Document.Id);
+        _files.NormalizeStreamingSettings(Document);
         SelectedPageId = Document.Pages[0].Id;
         _liveData.Register(Document, _data, SelectedPageId);
     }
@@ -67,9 +72,12 @@ public sealed class EditorStateService : IDisposable
 
     public void NewDocument()
     {
+        PersistStreamingSettings();
         RemoveMediaAssets(Document);
         _liveData.Unregister(Document.Id);
         Document = PublicationDocument.CreateDefault();
+        Document.Streaming = _streamingSettings.LoadOrDefault(Document.Id);
+        _files.NormalizeStreamingSettings(Document);
         SelectedPageId = Document.Pages[0].Id;
         ClearSelectionCore();
         CropMode = false;
@@ -85,9 +93,22 @@ public sealed class EditorStateService : IDisposable
 
     public void Load(string json)
     {
+        PersistStreamingSettings();
         RemoveMediaAssets(Document);
         _liveData.Unregister(Document.Id);
-        Document = _files.Deserialize(json);
+        var hasEmbeddedStreaming = _files.HasEmbeddedStreamingSettings(json);
+        var loaded = _files.Deserialize(json);
+        if (_streamingSettings.TryLoad(loaded.Id, out var localStreaming))
+            loaded.Streaming = localStreaming;
+        else if (hasEmbeddedStreaming)
+        {
+            try { _streamingSettings.Save(loaded.Id, loaded.Streaming); }
+            catch { }
+        }
+        else
+            loaded.Streaming = new PublicationStreamingSettings();
+        _files.NormalizeStreamingSettings(loaded);
+        Document = loaded;
         _mediaAssets.RegisterDocument(Document);
         SelectedPageId = Document.Pages[0].Id;
         ClearSelectionCore();
@@ -449,9 +470,10 @@ public sealed class EditorStateService : IDisposable
     public void ApplyStreamingSettings(PublicationStreamingSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        Capture();
         Document.Streaming = settings;
-        Notify();
+        _files.NormalizeStreamingSettings(Document);
+        PersistStreamingSettings();
+        Notify(false);
     }
 
     public void UpdateMedia(Guid id, Action<PublicationMediaElement> update, bool capture = true)
@@ -1672,16 +1694,19 @@ public sealed class EditorStateService : IDisposable
 
     public void SetZoom(double zoom)
     {
-        Document.Zoom = Math.Clamp(zoom, .2, 4);
-        Notify(false);
+        var normalized = Math.Clamp(zoom, .2, 4);
+        if (NearlyEqual(Document.Zoom, normalized)) return;
+        Document.Zoom = normalized;
+        Notify();
     }
 
     public void ZoomBy(double factor) => SetZoom(Document.Zoom * factor);
 
     public void SetRulerUnit(MeasurementUnit unit)
     {
+        if (Document.View.RulerUnit == unit) return;
         Document.View.RulerUnit = unit;
-        Notify(false);
+        Notify();
     }
 
     public void CycleRulerUnit()
@@ -1696,7 +1721,7 @@ public sealed class EditorStateService : IDisposable
         update(Document.View);
         Document.View.GridSpacingMm = Math.Clamp(Document.View.GridSpacingMm, .5, 100);
         Document.View.ExportDpi = Math.Clamp(Document.View.ExportDpi, 72, 600);
-        Notify(false);
+        Notify();
     }
 
     public void SetPlayback(PublicationPlaybackSettings value)
@@ -1777,7 +1802,10 @@ public sealed class EditorStateService : IDisposable
     private void Restore(string json)
     {
         var selectedPageIndex = Math.Max(0, Document.Pages.FindIndex(p => p.Id == SelectedPageId));
+        var streaming = Document.Streaming;
         Document = _files.Deserialize(json);
+        Document.Streaming = streaming;
+        _files.NormalizeStreamingSettings(Document);
         SelectedPageId = Document.Pages[Math.Min(selectedPageIndex, Document.Pages.Count - 1)].Id;
         ClearSelectionCore();
         CropMode = false;
@@ -2163,5 +2191,15 @@ public sealed class EditorStateService : IDisposable
         Changed?.Invoke();
     }
 
-    public void Dispose() => _liveData.Unregister(Document.Id);
+    private void PersistStreamingSettings()
+    {
+        try { _streamingSettings.Save(Document.Id, Document.Streaming); }
+        catch { }
+    }
+
+    public void Dispose()
+    {
+        PersistStreamingSettings();
+        _liveData.Unregister(Document.Id);
+    }
 }

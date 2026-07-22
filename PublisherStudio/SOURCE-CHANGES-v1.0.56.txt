@@ -1,0 +1,80 @@
+PublisherStudio v1.0.56 source changes
+======================================
+
+Baseline
+--------
+Compared with the supplied/repaired PublisherStudio v1.0.55 source tree.
+The source archive contains no .git directory, so commit-level Git history was
+not available. Existing release/changelog history was preserved.
+
+Functional repairs
+------------------
+1. Repeatable animation Preview
+   - publisherInterop.js clears the prior preview and captures stable per-node
+     base transforms before scheduling animations.
+   - Inline authored transforms take precedence over computed Web Animations
+     matrices, preventing scale/rotate/translate accumulation on repeated runs.
+   - Group members receive their own captured baseline.
+   - timelineInterop.js and the embedded standalone/export runtime use the same
+     inline-first transform rule.
+
+2. Publication-owned standard settings
+   - Zoom, ruler unit, grid/guides, all snapping options, grid spacing, and
+     export DPI continue to live in PublicationDocument and now mark the
+     publication dirty when changed, so Save and recovery include them.
+   - No global application preference store was introduced for these settings.
+
+3. Local protected streaming settings
+   - PublicationFileService removes only the streaming property from saved,
+     recovery, and undo JSON.
+   - PublicationStreamingSettingsStore persists per-publication streaming
+     configuration under Local Application Data using ASP.NET Core Data
+     Protection.
+   - Existing publication files containing embedded streaming configuration are
+     migrated once to the local store.
+   - Undo/redo preserves the active local streaming configuration.
+
+4. Professional Components Map drag stability
+   - Designer-mode Map hosts receive a transparent gesture shield.
+   - Canvas capture-phase selection, movement, double-click, and context-menu
+     handling remain active, while the map provider cannot pan/zoom from the
+     same gesture.
+   - Presentation/export mode and VectorMap remain unchanged.
+
+5. Version and regression coverage
+   - Application, installer, npm package, and integrated streaming capability
+     version aligned to 1.0.56.
+   - Added publicationPersistence.test.mjs and included the existing pointer
+     ownership suite in the main npm test chain.
+
+Changed/added files
+-------------------
+CHANGELOG-v1.0.56.md
+README.md
+RELEASE.md
+VALIDATION.md
+SOURCE-CHANGES-v1.0.56.txt
+TEST-RESULTS-v1.0.56.txt
+src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+src/PublisherStudio.Web/Program.cs
+src/PublisherStudio.Web/PublisherStudio.Web.csproj
+src/PublisherStudio.Web/Services/EditorStateService.cs
+src/PublisherStudio.Web/Services/PublicationFileService.cs
+src/PublisherStudio.Web/Services/PublicationStreamingSettingsStore.cs
+src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs
+src/PublisherStudio.Web/package-lock.json
+src/PublisherStudio.Web/package.json
+src/PublisherStudio.Web/wwwroot/css/site.css
+src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
+src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+src/PublisherStudio.Web/wwwroot/js/timelineInterop.js
+tests/fontIntegration.test.mjs
+tests/publicationPersistence.test.mjs
+tests/streamingRuntime.test.mjs
+
+Compatibility
+-------------
+Publication format remains 1.45.
+Picture format remains 1.2.
+No existing publication element, connector, streaming runtime, font, export,
+or installer workflow was removed.

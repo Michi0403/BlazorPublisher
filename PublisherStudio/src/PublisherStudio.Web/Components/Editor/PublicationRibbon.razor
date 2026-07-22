@@ -174,9 +174,20 @@
             }
             else
             {
-                <DxRibbonItem Text="Stop session" IconCssClass="pub-icon pub-icon-stop" IsPrimary="true" Click="RequestStopStreaming" />
+                @if (Streaming.Mode == PublicationStreamSessionMode.Live && Streaming.OutputEnabled.Values.Any(enabled => enabled))
+                {
+                    <DxRibbonItem Text="Stop streaming" IconCssClass="pub-icon pub-icon-stop" IsPrimary="true" Click="RequestStopStreaming" />
+                }
+                @if (Streaming.Recording)
+                {
+                    <DxRibbonItem Text="Stop recording" IconCssClass="pub-icon pub-icon-stop" IsPrimary="true" Click="RequestStopRecording" />
+                }
+                else
+                {
+                    <DxRibbonItem Text="Start recording" IconCssClass="pub-icon pub-icon-record" Click="RequestToggleRecording" />
+                }
+                <DxRibbonItem Text="Stop session" IconCssClass="pub-icon pub-icon-stop" Click="RequestStopSession" />
             }
-            <DxRibbonItem Text="@(Streaming.Recording ? "Recording: On" : "Recording: Off")" IconCssClass="pub-icon pub-icon-record" Enabled="@(Streaming.Mode != PublicationStreamSessionMode.Idle)" Click="RequestToggleRecording" />
             <DxRibbonItem Text="@Streaming.StatusText" IconCssClass="pub-icon pub-icon-info" Enabled="false" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Program" IconCssClass="pub-icon pub-icon-page">
@@ -606,6 +617,8 @@
     [Parameter] public EventCallback OnStartDryRun { get; set; }
     [Parameter] public EventCallback OnStartStreaming { get; set; }
     [Parameter] public EventCallback OnStopStreaming { get; set; }
+    [Parameter] public EventCallback OnStopRecording { get; set; }
+    [Parameter] public EventCallback OnStopSession { get; set; }
     [Parameter] public EventCallback OnToggleRecording { get; set; }
     [Parameter] public EventCallback<Guid> OnToggleStreamOutput { get; set; }
     [Parameter] public EventCallback<Guid> OnSelectProgramPage { get; set; }
@@ -665,6 +678,8 @@
     private Task RequestStartDryRun() => OnStartDryRun.InvokeAsync();
     private Task RequestStartStreaming() => OnStartStreaming.InvokeAsync();
     private Task RequestStopStreaming() => OnStopStreaming.InvokeAsync();
+    private Task RequestStopRecording() => OnStopRecording.InvokeAsync();
+    private Task RequestStopSession() => OnStopSession.InvokeAsync();
     private Task RequestToggleRecording() => OnToggleRecording.InvokeAsync();
     private Task AddLiveCamera() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Camera);
     private Task AddLiveScreen() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Screen);

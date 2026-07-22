@@ -1,9 +1,11 @@
 @model SpreadsheetEditorViewModel
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject PublisherStudio.Services.SystemFontCatalog SystemFonts
 @{
     Layout = null;
     var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken ?? string.Empty;
     var encodedFileName = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.FileName);
+    var systemFontFamiliesJson = System.Text.Json.JsonSerializer.Serialize(SystemFonts.FontFamilies);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -24,6 +26,28 @@
         const publisherSpreadsheetRequestToken = "@requestToken";
         const publisherSpreadsheetSessionId = "@Model.SessionId";
         const publisherSpreadsheetParentOrigin = window.location.origin;
+        const publisherSystemFontFamilies = @Html.Raw(systemFontFamiliesJson);
+
+        function publisherSpreadsheetApplySystemFonts(control) {
+            try {
+                const item = control?.getRibbonManager?.().getRibbonItemByName?.("FormatFontName");
+                for (const ribbonItem of item?.items || []) {
+                    const widget = ribbonItem?.widget;
+                    if (!widget?.option) continue;
+                    widget.option({
+                        dataSource: publisherSystemFontFamilies,
+                        acceptCustomValue: true,
+                        searchEnabled: true,
+                        onCustomItemCreating: event => {
+                            const value = String(event?.text || "").trim();
+                            event.customItem = value || null;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.warn("PublisherStudio could not apply the system font catalog to Spreadsheet Studio.", error);
+            }
+        }
 
         window.publisherSpreadsheetBridge = {
             control: null,
@@ -108,6 +132,8 @@
                 window.setTimeout(() => {
                     try { this.control?.focus(); } catch (_) { }
                     publisherSpreadsheetRenameRibbonTabs();
+                    publisherSpreadsheetApplySystemFonts(this.control);
+                    window.setTimeout(() => publisherSpreadsheetApplySystemFonts(this.control), 400);
                 }, 100);
             },
 

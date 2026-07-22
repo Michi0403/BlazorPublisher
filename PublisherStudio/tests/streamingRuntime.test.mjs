@@ -10,6 +10,8 @@ const runtime = fs.readFileSync(runtimePath, 'utf8');
 const model = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Domain', 'PublicationStreamingModels.cs'), 'utf8');
 const editor = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Pages', 'Editor.razor'), 'utf8');
 const studio = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'StreamingStudio.razor'), 'utf8');
+const ribbon = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'PublicationRibbon.razor'), 'utf8');
+const sessionService = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'StreamingSessionService.cs'), 'utf8');
 const mediaHost = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'StreamingRuntime', 'StreamingRuntimeEndpoints.cs'), 'utf8');
 const encoder = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'StreamingRuntime', 'EncoderOrchestrator.cs'), 'utf8');
 const lanServer = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'StreamingRuntime', 'LanStreamingServer.cs'), 'utf8');
@@ -46,6 +48,18 @@ assert.match(studio, /Streaming hotkeys/);
 assert.match(studio, /Twitch web login \(OAuth\)/);
 assert.match(studio, /ConnectTwitchOAuth/);
 assert.match(studio, /Test Twitch endpoints/);
+assert.match(ribbon, /Text="Stop streaming"/);
+assert.match(ribbon, /Text="Stop recording"/);
+assert.match(ribbon, /Text="Stop session"/);
+assert.match(editor, /StopStreamingOutputsAsync/);
+assert.match(editor, /SetRecordingAsync\(false\)/);
+assert.match(editor, /StopStreamingSession/);
+assert.match(sessionService, /public async Task<bool> StopStreamingOutputsAsync/);
+assert.match(sessionService, /public async Task<bool> SetRecordingAsync/);
+assert.match(sessionService, /Session active · provider outputs stopped/);
+const oauthFinally = studio.slice(studio.indexOf('finally', studio.indexOf('private async Task ConnectTwitchOAuth')), studio.indexOf('private async Task CancelTwitchOAuth'));
+assert.doesNotMatch(oauthFinally, /CloseTwitchAuthorizationWindowAsync/, 'OAuth failures must leave the authorization window open with an error message.');
+
 assert.match(studio, /Automatically choose the best Twitch ingest/);
 assert.match(studio, /Global hotkeys are registered by PublisherStudio on Windows/);
 assert.match(editor, /prepareProgramCapture/);
@@ -58,7 +72,12 @@ assert.match(runtime, /configureChatBridge/);
 assert.match(runtime, /PublisherStudioChatBridge/);
 assert.match(runtime, /reserveExternalAuthorizationWindow/);
 assert.match(runtime, /navigateExternalAuthorizationWindow/);
+assert.match(runtime, /showExternalAuthorizationMessage/);
 assert.match(runtime, /closeExternalAuthorizationWindow/);
+assert.match(runtime, /async function stopProgramIngest/);
+assert.match(runtime, /recorder\.requestData\(\)/);
+assert.match(runtime, /__publisherPendingWrites/);
+assert.match(runtime, /Promise\.allSettled/);
 assert.match(runtime, /publisherstream-base-capture/);
 assert.match(runtime, /captureRequired !== false/);
 assert.match(runtime, /getBroadcastLayers/);
@@ -128,7 +147,7 @@ assert.match(webProgram, /AddPublisherStreamingRuntime/);
 assert.match(webProgram, /MapPublisherStreamingRuntime/);
 assert.match(webProgram, /AddHostedService<TwitchOAuthMaintenanceService>/);
 assert.match(mediaHost, /public static class PublisherStreamingRuntimeExtensions/);
-assert.match(mediaHost, /version = "1\.0\.54"/);
+assert.match(mediaHost, /version = "1\.0\.56"/);
 assert.match(streamingClient, /In-process facade/);
 assert.match(streamingClient, /EnsureValidAccessTokenAsync/);
 assert.doesNotMatch(streamingClient, /HttpClient/);
@@ -167,10 +186,28 @@ class MockElement { closest() { return null; } }
 const popupWindows = new Map();
 const windowObject = {
   open(url = '', name = '') {
+    const body = {
+      textContent: '',
+      style: { cssText: '' },
+      children: [],
+      replaceChildren() { this.children = []; this.textContent = ''; },
+      append(...items) { this.children.push(...items); }
+    };
+    const document = {
+      title: '',
+      body,
+      createElement(tagName) {
+        return { tagName, textContent: '', type: '', style: {}, addEventListener() {} };
+      }
+    };
+    const location = {
+      href: String(url),
+      replace(value) { this.href = String(value); }
+    };
     const popup = {
       closed: false,
-      document: { title: '', body: { textContent: '' } },
-      location: { href: String(url) },
+      document,
+      location,
       focus() {},
       close() { this.closed = true; }
     };
@@ -182,6 +219,8 @@ const windowObject = {
   dispatchEvent(event) { dispatched.push(event); },
   setInterval,
   clearInterval,
+  setTimeout,
+  clearTimeout,
   PublisherStudioOutputContext: null
 };
 const context = {
@@ -211,6 +250,10 @@ vm.runInNewContext(runtime, context, { filename: runtimePath });
 assert.equal(context.window.publisherStreaming.reserveExternalAuthorizationWindow('twitch-oauth'), true);
 assert.equal(context.window.publisherStreaming.navigateExternalAuthorizationWindow('twitch-oauth', 'https://www.twitch.tv/activate'), true);
 assert.equal(popupWindows.get('twitch-oauth').location.href, 'https://www.twitch.tv/activate');
+assert.equal(context.window.publisherStreaming.showExternalAuthorizationMessage('twitch-oauth', 'Twitch connection failed', 'Invalid client ID'), true);
+await new Promise(resolve => setTimeout(resolve, 80));
+assert.equal(popupWindows.get('twitch-oauth').document.title, 'Twitch connection failed');
+assert.equal(popupWindows.get('twitch-oauth').closed, false, 'An OAuth failure must stay visible instead of immediately closing.');
 assert.equal(context.window.publisherStreaming.closeExternalAuthorizationWindow('twitch-oauth'), true);
 assert.equal(popupWindows.get('twitch-oauth').closed, true);
 

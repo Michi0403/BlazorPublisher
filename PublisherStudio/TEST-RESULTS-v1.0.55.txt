@@ -1,0 +1,65 @@
+PublisherStudio v1.0.55 validation report
+Generated: 2026-07-22T20:32:39Z
+
+Source history inspection
+- Git work tree present: no
+- Commit-level Git history could not be inspected because the supplied archive contains no .git directory.
+- Release/changelog files from v0.2 through v1.0.54 were reviewed instead.
+
+Environment
+- Node: v22.16.0
+- npm: 10.9.2
+- .NET SDK: not installed (dotnet build not run)
+- Fontconfig family names visible on validation host: 1818
+
+Static checks
+- node --check: passed for 19 non-vendor JavaScript/MJS files
+- JSON parse: passed for 6 files
+- XML project parse: passed for 2 files
+
+Automated contract tests
+
+> publisherstudio-web-assets@1.0.55 test
+> npm run test:timeline && npm run test:components && npm run test:signals && npm run test:fonts && npm run test:streaming && npm run test:interface && npm run test:installer
+
+
+> publisherstudio-web-assets@1.0.55 test:timeline
+> node ../../tests/timelineInterop.test.mjs
+
+timelineInterop lifecycle, backpressure, and bounded trim tests passed
+
+> publisherstudio-web-assets@1.0.55 test:components
+> node ../../tests/componentRuntime.test.mjs
+
+component catalog, REST/OData probe, menu navigation, orientation/layout resilience, media data, isolated chat, smart connections, and single-file export contract tests passed
+
+> publisherstudio-web-assets@1.0.55 test:signals
+> node ../../tests/signalRuntime.test.mjs
+
+offline signal connector reset/resize, spreadsheet targeting, SVG output, and path-tool contract tests passed
+
+> publisherstudio-web-assets@1.0.55 test:fonts
+> node ../../tests/fontIntegration.test.mjs
+
+offline system-font discovery and manual-entry integration contracts passed
+
+> publisherstudio-web-assets@1.0.55 test:streaming
+> node ../../tests/streamingRuntime.test.mjs
+
+streaming model, Twitch OAuth/ingest, per-output Chat compositor, native capture, FFmpeg orchestration, WebRTC/RTSP LAN delivery, hotkey, and Now Playing contract tests passed
+
+> publisherstudio-web-assets@1.0.55 test:interface
+> node ../../tests/interfaceWorkflow.test.mjs
+
+PublishingSuite interface, canvas activation/context-menu, and application tooltip contracts passed
+
+> publisherstudio-web-assets@1.0.55 test:installer
+> node ../../tests/installerResilience.test.mjs
+
+installer resilience contract tests passed
+
+Result
+- All Node contract suites passed.
+- The system-font suite verifies offline OS font discovery wiring and preserved manual entry in WordArt, Picture Studio, RichEdit, and Spreadsheet Studio.
+- The streaming suite verifies separate stop-streaming/stop-recording/stop-session controls, final MediaRecorder write draining, and Twitch OAuth error-window lifetime.
+- A full .NET/DevExpress compile remains a release-machine check because this environment does not contain the .NET 10 SDK or licensed DevExpress package feed.

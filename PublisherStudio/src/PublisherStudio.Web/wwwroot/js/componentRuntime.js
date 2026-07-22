@@ -1641,6 +1641,22 @@
         state.instance.repaint?.();
     }
 
+
+    function installDesignerMapShield(element, config) {
+        element.querySelector?.(':scope > .ps-component-designer-map-shield')?.remove?.();
+        if (!config?.designerMode || lower(config.kind) !== "map") return;
+        const shield = document.createElement("div");
+        shield.className = "ps-component-designer-map-shield";
+        shield.setAttribute("aria-hidden", "true");
+        const blockMapGesture = event => {
+            event.preventDefault?.();
+            event.stopImmediatePropagation?.();
+        };
+        for (const type of ["pointerdown", "pointermove", "pointerup", "pointercancel", "mousedown", "mousemove", "mouseup", "click", "dblclick", "contextmenu", "wheel", "touchstart", "touchmove", "touchend"])
+            shield.addEventListener(type, blockMapGesture, { passive: false });
+        element.append(shield);
+    }
+
     function dispose(element) {
         const state = states.get(element);
         if (state?.timer) clearInterval(state.timer);
@@ -1709,6 +1725,7 @@
             }
             states.set(element, state);
             if (config.kind === "Chat") installChatSubscription(element, state);
+            installDesignerMapShield(element, config);
             installLayoutObserver(element, state);
             const interval = number(config.connection?.dataObjectLive?.refreshIntervalSeconds, 0);
             if (options.polling !== false && interval > 0) {

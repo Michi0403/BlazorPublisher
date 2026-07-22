@@ -1,0 +1,27 @@
+@inject SystemFontCatalog SystemFonts
+
+<input type="text"
+       class="@CssClass"
+       value="@Value"
+       list="@_listId"
+       autocomplete="off"
+       spellcheck="false"
+       placeholder="Type or select a system font"
+       title="Select an installed system font or type another font family"
+       @onchange="HandleChanged" />
+<datalist id="@_listId">
+    @foreach (var font in SystemFonts.FontFamilies)
+    {
+        <option value="@font"></option>
+    }
+</datalist>
+
+@code {
+    private readonly string _listId = $"publisher-system-fonts-{Guid.NewGuid():N}";
+
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> Changed { get; set; }
+
+    private Task HandleChanged(ChangeEventArgs args) => Changed.InvokeAsync(args);
+}

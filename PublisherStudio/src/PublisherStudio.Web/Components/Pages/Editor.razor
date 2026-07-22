@@ -76,6 +76,8 @@
                        OnStartDryRun="StartDryRun"
                        OnStartStreaming="StartStreaming"
                        OnStopStreaming="StopStreaming"
+                       OnStopRecording="StopStreamRecording"
+                       OnStopSession="StopStreamingSession"
                        OnToggleRecording="ToggleStreamRecording"
                        OnToggleStreamOutput="ToggleStreamOutput"
                        OnSelectProgramPage="SelectProgramPage"
@@ -1501,7 +1503,7 @@
         {
             case "ToggleStreaming":
                 if (StreamingSession.Snapshot.Mode == PublicationStreamSessionMode.Idle) await StartStreaming();
-                else await StopStreaming();
+                else await StopStreamingSession();
                 break;
             case "ToggleRecording":
                 if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) await ToggleStreamRecording();
@@ -1683,17 +1685,31 @@
 
     private async Task StopStreaming()
     {
+        var stopped = await StreamingSession.StopStreamingOutputsAsync();
+        try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge"); } catch { }
+        await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" });
+        ShowNotice(stopped ? "Provider streaming stopped. Recording and local delivery remain active." : "Some provider outputs could not be stopped. Use Stop session to force a complete shutdown.");
+    }
+
+    private async Task StopStreamRecording()
+    {
+        var stopped = await StreamingSession.SetRecordingAsync(false);
+        ShowNotice(stopped ? "Recording stopped and the current files were finalized." : "Recording could not be stopped. Use Stop session to force a complete shutdown.");
+    }
+
+    private async Task StopStreamingSession()
+    {
         try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge"); } catch { }
         try { await JS.InvokeVoidAsync("publisherStreaming.stopProgramIngest"); } catch { }
         await StreamingSession.StopAsync();
         await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" });
-        ShowNotice("Streaming session stopped.");
+        ShowNotice("Streaming session stopped and recordings were finalized.");
     }
 
     private async Task ToggleStreamRecording()
     {
         await StreamingSession.ToggleRecordingAsync();
-        ShowNotice(StreamingSession.Snapshot.Recording ? "Recording enabled." : "Recording disabled.");
+        ShowNotice(StreamingSession.Snapshot.Recording ? "Recording started." : "Recording stopped and the current files were finalized.");
     }
 
     private async Task ToggleStreamOutput(Guid outputId)

@@ -16,16 +16,13 @@ public partial class PictureEditor
     private const string CanvasHostId = "picture-studio-canvas-host";
     private const double MinDrawWidth = .25;
     private const double MaxDrawWidth = 512;
-    private static readonly string[] PictureFonts =
-    [
-        "Segoe UI", "Arial", "Arial Black", "Calibri", "Cambria", "Georgia", "Impact", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"
-    ];
     private static readonly string[] PictureColors =
     [
         "#000000", "#ffffff", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b", "#92400e"
     ];
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private SystemFontCatalog SystemFonts { get; set; } = default!;
     [Inject] public PictureEditorStateService State { get; set; } = default!;
 
     [Parameter] public bool Visible { get; set; }
@@ -36,6 +33,8 @@ public partial class PictureEditor
     [Parameter] public bool EditingExisting { get; set; }
     [Parameter] public EventCallback<PictureEditorResult> Saved { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
+
+    private IReadOnlyList<string> PictureFonts => SystemFonts.FontFamilies;
 
     private IJSObjectReference? _module;
     private DxContextMenu _pictureContextMenu = default!;

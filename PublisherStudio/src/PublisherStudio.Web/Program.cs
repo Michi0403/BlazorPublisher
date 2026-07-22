@@ -92,6 +92,7 @@ public static class Program
                     hibernation.AllDocumentsOnApplicationEnd = true;
                 }));
         });
+        builder.Services.AddSingleton<SystemFontCatalog>();
         builder.Services.AddSingleton<PictureDocumentService>();
         builder.Services.AddSingleton<SpreadsheetDocumentService>();
         builder.Services.AddSingleton<SpreadsheetSessionStore>();
@@ -104,6 +105,7 @@ public static class Program
         builder.Services.AddSingleton<PublicationMediaAssetStore>();
         builder.Services.AddSingleton<PublicationRecoveryService>();
         builder.Services.AddSingleton<StreamingProfileStore>();
+        builder.Services.AddSingleton<PublicationStreamingSettingsStore>();
         builder.Services.AddSingleton<TwitchOAuthService>();
         builder.Services.AddHostedService<TwitchOAuthMaintenanceService>();
         PublisherStreamingRuntimeExtensions.AddPublisherStreamingRuntime(builder.Services);

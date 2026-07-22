@@ -511,3 +511,26 @@ Static checks completed for the v1.0.37 source package:
 - Confirmed both release archives are downloaded and validated before `--force-delete` can remove the installed application.
 - Confirmed permanent application download failure returns a non-zero setup result, while optional FFmpeg provisioning failure leaves PublisherStudio installed and usable.
 - Package JSON, application, installer, and runtime capability versions are aligned to `1.0.54`; publication format remains `1.45` and picture format remains `1.2`.
+
+## v1.0.55 system-font, OAuth-window, and streaming-stop validation
+
+- The supplied source archive contains no `.git` directory, so commit-level Git history cannot be inspected from it. Release/changelog history from v0.2 through v1.0.54 was reviewed instead, and the repair is packaged as v1.0.55.
+- The shared font catalog is offline-only, enumerates Windows/macOS/Linux system and user font locations, optionally reads Fontconfig, and parses TTF/OTF/TTC/OTC OpenType family-name records.
+- WordArt and Picture Studio use an editable text input with a system-backed datalist; RichEdit sets `AllowUserInput`; Spreadsheet Studio sets `acceptCustomValue`. Manual font-family entry is therefore preserved in every repaired selector.
+- Source-contract tests reject reintroduction of fixed WordArt/Picture font arrays and confirm the system catalog is wired into WordArt, Picture Studio, RichEdit, Spreadsheet Studio, and application dependency injection.
+- Twitch authorization popup reservation/navigation return values are checked. Success and cancellation close the window explicitly; the exception path renders an error and contains no unconditional close in `finally`.
+- The Streaming ribbon exposes separate **Stop streaming**, **Stop recording**, and **Stop session** commands. Provider output shutdown leaves recording and LAN delivery active, while recording can be stopped independently.
+- Browser ingest shutdown requests final recorder data, waits for recorder stop, drains pending Blob-to-WebSocket writes, then closes sockets and media tracks.
+- `node --check` passes for the modified streaming interop. `npm test` passes timeline, component, signal, system-font, streaming, interface, and installer contract suites.
+- Application package, web project, installer project, and runtime capability versions are aligned to `1.0.55`; publication format remains `1.45` and picture format remains `1.2`.
+- A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because no .NET SDK or licensed DevExpress package feed is installed. Real Twitch authorization, provider delivery, FFmpeg finalization, and OS-specific font enumeration remain release-machine checks.
+
+## v1.0.56 preview, publication-settings, and map-drag validation
+
+- Source contracts verify that Preview clears the old run, records a per-node base-transform map, prefers stable inline transforms, and supplies the captured baseline to each Web Animations call. Timeline playback uses the same inline-first baseline.
+- Source contracts verify that standard view settings and zoom mark publications modified and remain serialized in publication JSON.
+- Publication serialization explicitly removes only `streaming`; a protected Local Application Data store persists streaming settings per publication ID and legacy embedded settings migrate locally. Undo/redo preserves the active local streaming configuration.
+- Source contracts verify that designer-mode `Map` components install a gesture shield that blocks map-provider pan/zoom events while allowing the publication canvas capture handler to own selection and frame movement. Presentation/export mode and `VectorMap` are unaffected.
+- JavaScript syntax, Node contract suites, structured-file parsing, archive integrity, and checksum results are recorded in `TEST-RESULTS-v1.0.56.txt`.
+- A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because no .NET SDK or licensed DevExpress package feed is installed. Runtime map-provider behavior and Windows Data Protection persistence remain release-machine checks.
+

@@ -1,11 +1,11 @@
-# PublisherStudio v1.0.54 release
+# PublisherStudio v1.0.56 release
 
-See `CHANGELOG-v1.0.54.md`, `CHANGELOG-v1.0.53.md`, `docs/STREAMING.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.56.md`, `CHANGELOG-v1.0.55.md`, `docs/STREAMING.md`, and `VALIDATION.md`.
 
-This release hardens the setup path after FFmpeg provisioning exposed slow or intermittent GitHub/CDN behavior. PublisherStudio release assets can resume from `.part` files, cached complete ZIPs are validated and reused, metadata and asset transfers retry, stalled reads are bounded, and both payloads are staged before the current installation is touched.
+Animation Preview now clears its previous run and captures stable authored transforms before scheduling animations. Repeated preview or loop triggering restarts cleanly instead of applying transform effects on top of the prior preview.
 
-On Windows, FFmpeg provisioning now uses only the WinGet community source for `Gyan.FFmpeg`, avoiding unrelated Microsoft Store source failures. Package-manager execution has heartbeat output, process-tree termination, retry support, executable verification, and a 15-minute total budget. Failure to provision optional FFmpeg does not invalidate the application installation.
+Publication-owned editor settings now persist reliably: zoom, ruler unit, grid and guide visibility, all snapping options, grid spacing, and export DPI mark the document modified and travel with saved publications or templates. Streaming settings are intentionally removed from publication JSON and kept in an encrypted Local Application Data store keyed by publication ID; legacy embedded settings are migrated locally.
 
-The v1.0.53 Twitch OAuth/ingest implementation and v1.0.52 standalone tooltip-coordinate correction remain included unchanged.
+Professional Components `Map` objects now reserve designer gestures for the publication canvas. Their map provider cannot pan while the object frame is selected or moved, including at non-default canvas zoom and in connector-heavy layouts. Presentation and exported maps remain interactive.
 
-Application and installer version `1.0.54`; publication format `1.45`; picture format `1.2`. There is no separate Media Host executable or release payload.
+Application and installer version `1.0.56`; publication format `1.45`; picture format `1.2`. There is no separate Media Host executable or release payload.

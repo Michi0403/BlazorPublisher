@@ -3413,3 +3413,15 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
         transition: none;
     }
 }
+
+/* In the publication designer a map object belongs to the canvas drag surface.
+   The transparent shield receives map gestures after the canvas capture handler,
+   preventing DevExtreme/Google/Bing from panning the map while its frame moves. */
+.ps-component-designer-map-shield {
+    position:absolute;
+    inset:0;
+    z-index:2147483000;
+    cursor:move;
+    touch-action:none;
+    background:transparent;
+}

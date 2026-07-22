@@ -3643,6 +3643,7 @@ function restorePublicationPreviewSnapshot(snapshot) {
 function capturePublicationPreviewNode(state, node) {
     if (!state?.snapshots || !node || state.snapshots.has(node)) return;
     state.snapshots.set(node, publicationPreviewSnapshot(node));
+    state.baseTransforms?.set?.(node, baseTransform(node));
     if (!node.matches?.('video,audio'))
         node.querySelectorAll?.('video,audio').forEach(media => capturePublicationPreviewNode(state, media));
 }
@@ -3686,14 +3687,16 @@ function animationDirectionVector(direction, distance) {
     }
 }
 function baseTransform(node) {
+    const inline = String(node?.style?.transform || '').trim();
+    if (inline) return inline === 'none' ? '' : inline;
     const value = getComputedStyle(node).transform;
     return !value || value === 'none' ? '' : value;
 }
 function withBase(base, transform) { return `${transform} ${base}`.trim(); }
-function publicationAnimationFrames(node, animation) {
+function publicationAnimationFrames(node, animation, baseOverride = null) {
     const effect = animationName(animation.effect);
     const phase = animationName(animation.phase);
-    const base = baseTransform(node);
+    const base = baseOverride ?? baseTransform(node);
     const vector = animationDirectionVector(animation.direction, animation.distancePercent);
     const scaleAmount = Math.max(0.01, animationNumber(animation.scalePercent, 20) / 100);
     const rotation = animationNumber(animation.rotationDegrees, 360);
@@ -3805,7 +3808,7 @@ function publicationAnimationComposite(animations, restore) {
     };
 }
 
-function runPublicationAnimation(node, animation, delaySeconds = 0) {
+function runPublicationAnimation(node, animation, delaySeconds = 0, baseTransforms = null) {
     if (isMediaAnimationEffect(animation.effect)) return runPublicationMediaAnimation(node, animation, delaySeconds);
     const reducedMotion = publicationReducedMotion();
     const duration = (reducedMotion ? .001 : Math.max(.05, animationNumber(animation.durationSeconds, .6))) * 1000;
@@ -3813,7 +3816,7 @@ function runPublicationAnimation(node, animation, delaySeconds = 0) {
     const iterations = reducedMotion ? 1 : repeat * (animation.autoReverse ? 2 : 1);
     const nodes = publicationAnimationGroupNodes(node);
     const restore = nodes.length > 1 ? publicationGroupTransformOrigins(nodes) : null;
-    const animations = nodes.map(member => member.animate(publicationAnimationFrames(member, animation), {
+    const animations = nodes.map(member => member.animate(publicationAnimationFrames(member, animation, baseTransforms?.get?.(member) ?? null), {
             duration,
             delay: (reducedMotion ? 0 : Math.max(0, delaySeconds)) * 1000,
             easing: animationEasing(animation.easing),
@@ -3904,14 +3907,14 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
         else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
         publicationAnimationGroupNodes(item.node).forEach(node => capturePublicationPreviewNode(state, node));
         if (isMediaAnimationEffect(item.animation.effect)) state.mediaNodes.add(item.node);
-        state.animations.push(runPublicationAnimation(item.node, item.animation, start));
+        state.animations.push(runPublicationAnimation(item.node, item.animation, start, state.baseTransforms));
         previousStart = start;
         previousEnd = start + publicationAnimationSpan(item.animation);
     }
 }
 function previewPublicationItems(root, items, includeTransition, transitionTarget = root) {
     clearPublicationPreview(root.id || root);
-    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set(), cleanupTimer: 0, snapshots: new Map() };
+    const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set(), cleanupTimer: 0, snapshots: new Map(), baseTransforms: new Map() };
     publicationAnimationPreviews.set(root.id || root, state);
     capturePublicationPreviewNode(state, root);
     capturePublicationPreviewNode(state, transitionTarget);
@@ -4595,7 +4598,7 @@ function websitePresentationRuntime() {
             default: return { x: -amount, y: 0 };
         }
     };
-    const baseTransform = node => { const value = getComputedStyle(node).transform; return !value || value === 'none' ? '' : value; };
+    const baseTransform = node => { const inline = String(node?.style?.transform || '').trim(); if (inline) return inline === 'none' ? '' : inline; const value = getComputedStyle(node).transform; return !value || value === 'none' ? '' : value; };
     const compose = (base, extra) => `${extra} ${base}`.trim();
     const frames = (node, animation) => {
         const effect = lower(animation.effect);

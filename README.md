@@ -334,6 +334,14 @@ See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media 
 See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now release stale hover/tooltips when the pointer moves onto another overlapping publication object, while non-interactive decorative shapes, WordArt, and barcodes no longer consume presentation pointer events. Interactive media, components, data visuals, publication actions, and Signal Arrow click/hover sources remain pointer owners. In the main Publisher frame, explanatory tooltips keep one stable owner while the pointer moves through nested SVG or component children and render through the browser top layer so publication objects and DevExpress stacking contexts cannot cover them. Publication and Signal Arrow coordinate data is unchanged.
 
 
+## v1.0.56 repeatable preview, publication settings, and map drag stability
+
+See `CHANGELOG-v1.0.56.md`. Repeated animation Preview runs now restart from the authored element transforms instead of stacking the previous run. Standard canvas settings such as zoom, rulers, grid, guides, snapping, spacing, and export DPI are saved with publications and templates. Streaming routing, recording, LAN, and hotkey settings stay in an encrypted local per-publication store and are omitted from shared publication JSON. Designer-mode Professional Components maps no longer pan their internal map content while the publication frame is dragged; exported and presentation maps remain interactive.
+
+## v1.0.55 offline system fonts and explicit stream stops
+
+See `CHANGELOG-v1.0.55.md` and `docs/STREAMING.md`. WordArt, Picture Studio, RichEdit, Spreadsheet Studio, and their font selectors now read installed font families from the local operating system without contacting an online font service. Editable selectors still accept manual font-family values. Twitch OAuth errors remain visible in the reserved authorization window, and the Streaming ribbon now provides separate stop commands for provider streaming, recording, and the complete session. Final MediaRecorder chunks are drained before ingest sockets close.
+
 ## v1.0.54 resilient installer and FFmpeg provisioning
 
 See `CHANGELOG-v1.0.54.md`. The setup helper now survives slow or intermittent GitHub/CDN transfers by retrying release metadata, resuming partial release assets, validating cached ZIPs, and staging both payloads before modifying an existing installation. FFmpeg provisioning is pinned to the WinGet community source on Windows, has visible heartbeat output and bounded timeouts, retries once through the package-manager cache, and can no longer keep the installer waiting indefinitely. PublisherStudio remains usable when optional FFmpeg provisioning fails and FFmpeg can be installed later from Streaming Studio or `PublisherStudio.Setup --install-ffmpeg`.

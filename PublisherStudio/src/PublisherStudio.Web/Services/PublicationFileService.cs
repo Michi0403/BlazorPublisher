@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using PublisherStudio.Domain;
@@ -79,8 +80,31 @@ public sealed partial class PublicationFileService
     public string Serialize(PublicationDocument document)
     {
         document.ModifiedUtc = DateTimeOffset.UtcNow;
-        return JsonSerializer.Serialize(document, _options);
+        var root = JsonSerializer.SerializeToNode(document, _options) as JsonObject
+            ?? throw new InvalidDataException("The publication could not be serialized.");
+        var streamingProperty = _options.PropertyNamingPolicy?.ConvertName(nameof(PublicationDocument.Streaming))
+            ?? nameof(PublicationDocument.Streaming);
+        root.Remove(streamingProperty);
+        return root.ToJsonString(_options);
     }
+
+    public bool HasEmbeddedStreamingSettings(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return false;
+        try
+        {
+            using var parsed = JsonDocument.Parse(json);
+            if (parsed.RootElement.ValueKind != JsonValueKind.Object) return false;
+            return parsed.RootElement.EnumerateObject().Any(property =>
+                string.Equals(property.Name, nameof(PublicationDocument.Streaming), StringComparison.OrdinalIgnoreCase));
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    public void NormalizeStreamingSettings(PublicationDocument document) => NormalizeStreaming(document);
 
     public PublicationElement CloneElement(PublicationElement element) =>
         JsonSerializer.Deserialize<PublicationElement>(JsonSerializer.Serialize<PublicationElement>(element, _options), _options)

@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @implements IDisposable
 @inject IJSRuntime JS
+@inject SystemFontCatalog SystemFonts
 
 @if (Visible && TextFrame is not null)
 {
@@ -63,6 +64,7 @@
                             @bind-DocumentContent="_content"
                             @bind-Selection="_selection"
                             DocumentLoaded="HandleDocumentLoaded"
+                            CustomizeRibbon="CustomizeRichEditRibbon"
                             MailMergeSettings="@_mailMergeSettingsContent"
                             BarMode="BarMode.Ribbon"
                             ViewType="ViewType.PrintLayout"
@@ -120,6 +122,20 @@
     private string _storyPreviewBackground = "transparent";
     private StoryPreviewResult? _storyPreviewResult;
     private string? _storyPreviewTransferError;
+
+    private void CustomizeRichEditRibbon(IRibbon ribbon)
+    {
+        var fontGroup = ribbon.Tabs[RichEditRibbonTabNames.Home].Groups[RichEditRibbonGroupNames.HomeFont];
+        var fontNameItem = fontGroup.Items[RichEditBarItemNames.FontName];
+        if (fontNameItem.Type != BarItemTypes.ComboBox) return;
+
+        var fontNameComboBox = (IBarComboBox)fontNameItem;
+        fontNameComboBox.Items.Clear();
+        foreach (var font in SystemFonts.FontFamilies)
+            fontNameComboBox.Items.Add(font, font);
+        fontNameComboBox.AllowUserInput = true;
+        fontNameComboBox.Tooltip = "Select an installed system font or type another font family.";
+    }
 
     protected override void OnParametersSet()
     {

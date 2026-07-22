@@ -49,7 +49,7 @@ Stream keys and Chat OAuth credentials are stored separately. A publication refe
 
 ## Twitch OAuth and ingest selection
 
-Twitch profiles can use the existing manual endpoint/key fields or **Twitch web login (OAuth)**. OAuth uses Twitch's Device Code Grant for a public desktop client: PublisherStudio opens Twitch's activation page, shows the activation code as a fallback, and polls Twitch until the user completes login, consent, and any MFA challenge. Passwords and MFA values never pass through PublisherStudio.
+Twitch profiles can use the existing manual endpoint/key fields or **Twitch web login (OAuth)**. OAuth uses Twitch's Device Code Grant for a public desktop client: PublisherStudio reserves and opens Twitch's activation page, shows the activation code as a fallback, and polls Twitch until the user completes login, consent, and any MFA challenge. Passwords and MFA values never pass through PublisherStudio. Successful completion and explicit cancellation close the reserved window; setup, Client ID, or network failures leave it open with a readable error and Close button.
 
 The Twitch application must be registered by the distributor or user and its public Client ID supplied through one of these locations:
 
@@ -114,7 +114,7 @@ This is currently a decode/re-encode pipeline. It avoids routing raw 4K frames t
 
 ## Recording
 
-Recording can be disabled or toggled during a session. Available variants are:
+Recording can be started or stopped explicitly during a session. The ribbon separates **Stop streaming** (provider outputs only), **Stop recording** (recording pipelines only), and **Stop session** (complete shutdown). Available recording variants are:
 
 - clean master;
 - every enabled output;
@@ -141,6 +141,9 @@ The Streaming Studio surfaces the generated browser, HLS, and RTSP addresses rat
 - LAN binding is explicit, token protection is available, and listeners are disabled by default.
 - Per-output bounded queues prevent one blocked encoder from stalling other outputs.
 - Unexpected FFmpeg exits use bounded exponential reconnect while that output remains requested.
+- Provider stop disables public outputs while recording and Company/LAN delivery continue.
+- Recording stop closes FFmpeg input cleanly and schedules any configured MKV-to-MP4 remux without ending the rest of the session.
+- Browser ingest stop requests the final MediaRecorder data, waits for pending WebSocket writes, and closes sockets only after the final chunks are delivered.
 - Session stop disposes provider Chat adapters, encoder processes, recordings, native captures, LAN servers, WebRTC peers, ingest subscribers, and global hotkeys.
 
 ## Build and hardware verification

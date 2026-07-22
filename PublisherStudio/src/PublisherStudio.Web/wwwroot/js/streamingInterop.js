@@ -588,7 +588,7 @@
     }
 
     async function prepareProgramCapture(config = {}) {
-        stopProgramIngest();
+        await stopProgramIngest();
         if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === "undefined")
             throw new Error("This browser cannot capture and encode the Publisher program output.");
         const frameRate = Math.max(15, Math.min(120, Number(config.frameRate || 60)));
@@ -654,7 +654,7 @@
         };
         drawProgramFrame(programCapture);
         connectAllProgramAudio();
-        const ended = () => stopProgramIngest();
+        const ended = () => { void stopProgramIngest(); };
         sourceStream.getVideoTracks()[0]?.addEventListener("ended", ended, { once: true });
         programCapture.ended = ended;
         window.dispatchEvent(new CustomEvent("publisherstudio:program-capture-ready", { detail: { width, height, frameRate } }));
@@ -694,10 +694,20 @@
             frameRate: variant.frameRate,
             outputId: outputId || null
         }));
-        recorder.addEventListener("dataavailable", async event => {
+        const pendingWrites = new Set();
+        recorder.__publisherPendingWrites = pendingWrites;
+        recorder.addEventListener("dataavailable", event => {
             if (!event.data?.size || socket.readyState !== WebSocket.OPEN) return;
-            try { socket.send(await event.data.arrayBuffer()); }
-            catch (error) { console.error("PublisherStudio could not send a program frame chunk", error); }
+            const write = (async () => {
+                try {
+                    const buffer = await event.data.arrayBuffer();
+                    if (socket.readyState === WebSocket.OPEN) socket.send(buffer);
+                } catch (error) {
+                    console.error("PublisherStudio could not send a program frame chunk", error);
+                }
+            })();
+            pendingWrites.add(write);
+            write.finally(() => pendingWrites.delete(write));
         });
         recorder.addEventListener("error", event => {
             window.dispatchEvent(new CustomEvent("publisherstudio:stream-error", { detail: { outputId, message: event.error?.message || "Program encoding failed." } }));
@@ -794,29 +804,47 @@
         return { master: results[0], outputs: results.slice(1) };
     }
 
-    function stopProgramIngest() {
+    async function stopProgramIngest() {
         const state = programCapture;
         programCapture = null;
         document.documentElement.classList.remove("publisherstream-base-capture");
-        if (!state) return;
-        for (const recorder of state.recorders || []) {
-            try { if (recorder.state !== "inactive") recorder.stop(); } catch { }
-        }
+        if (!state) return true;
+
+        try { cancelAnimationFrame(state.drawFrame); } catch { }
+        const recorders = [...(state.recorders || [])];
+        const waitForStop = recorder => new Promise(resolve => {
+            if (!recorder || recorder.state === "inactive") { resolve(); return; }
+            let settled = false;
+            let timeout = 0;
+            const finish = () => {
+                if (settled) return;
+                settled = true;
+                if (timeout) window.clearTimeout(timeout);
+                resolve();
+            };
+            recorder.addEventListener("stop", finish, { once: true });
+            timeout = window.setTimeout(finish, 3000);
+            try { recorder.requestData(); } catch { }
+            try { recorder.stop(); } catch { finish(); }
+        });
+        await Promise.all(recorders.map(waitForStop));
+        await Promise.allSettled(recorders.flatMap(recorder => [...(recorder?.__publisherPendingWrites || [])]));
+
         for (const socket of state.sockets || []) {
             try { if (socket.readyState < WebSocket.CLOSING) socket.close(1000, "PublisherStudio session stopped"); } catch { }
         }
         try { if (state.signalSocket?.readyState < WebSocket.CLOSING) state.signalSocket.close(1000, "PublisherStudio session stopped"); } catch { }
         for (const peer of state.peers?.values?.() || []) { try { peer.close(); } catch { } }
-        try { cancelAnimationFrame(state.drawFrame); } catch { }
         for (const sourceState of sources.values()) disconnectProgramAudio(sourceState);
         try { state.captureAudio?.disconnect?.(); } catch { }
         try { state.audioDestination?.disconnect?.(); } catch { }
-        try { state.audioContext?.close?.(); } catch { }
+        try { await state.audioContext?.close?.(); } catch { }
         state.canvasStream?.getTracks?.().forEach(track => track.stop());
         for (const variant of state.variants?.values?.() || []) variant.stream?.getTracks?.().forEach(track => track.stop());
         state.sourceStream?.getTracks?.().forEach(track => track.stop());
         try { state.video.pause(); state.video.srcObject = null; } catch { }
         window.dispatchEvent(new CustomEvent("publisherstudio:program-capture-stopped"));
+        return true;
     }
 
     function chatKey(platform, channel) {
@@ -1038,10 +1066,50 @@
         let popup = externalAuthorizationWindows.get(key);
         try {
             if (!popup || popup.closed) popup = window.open(destination, key, "popup=yes,width=760,height=820,resizable=yes,scrollbars=yes");
-            else popup.location.href = destination;
+            else popup.location.replace(destination);
             if (!popup) return false;
-            try { popup.opener = null; } catch { }
             try { popup.focus(); } catch { }
+            externalAuthorizationWindows.set(key, popup);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    function showExternalAuthorizationMessage(name, title, message) {
+        const key = externalAuthorizationWindowName(name);
+        let popup = externalAuthorizationWindows.get(key);
+        try {
+            if (!popup || popup.closed) popup = window.open("", key, "popup=yes,width=760,height=820,resizable=yes,scrollbars=yes");
+            if (!popup) return false;
+            try { popup.location.replace("about:blank"); }
+            catch { try { popup.location.href = "about:blank"; } catch { } }
+            let attempts = 0;
+            const renderMessage = () => {
+                try {
+                    if (!popup.document?.body) throw new Error("The authorization window is still navigating.");
+                    popup.document.title = String(title || "PublisherStudio authorization");
+                    popup.document.body.replaceChildren();
+                    popup.document.body.style.cssText = "margin:0;padding:40px;font:16px/1.5 system-ui,sans-serif;background:#f8fafc;color:#172554";
+                    const heading = popup.document.createElement("h1");
+                    heading.textContent = String(title || "PublisherStudio authorization");
+                    heading.style.fontSize = "24px";
+                    const paragraph = popup.document.createElement("p");
+                    paragraph.textContent = String(message || "The authorization could not be completed.");
+                    paragraph.style.whiteSpace = "pre-wrap";
+                    const closeButton = popup.document.createElement("button");
+                    closeButton.type = "button";
+                    closeButton.textContent = "Close";
+                    closeButton.style.cssText = "margin-top:16px;padding:9px 18px;border:0;border-radius:4px;background:#17365d;color:white;cursor:pointer";
+                    closeButton.addEventListener("click", () => popup.close());
+                    popup.document.body.append(heading, paragraph, closeButton);
+                    popup.focus();
+                } catch {
+                    attempts++;
+                    if (attempts < 20 && !popup.closed) window.setTimeout(renderMessage, 50);
+                }
+            };
+            window.setTimeout(renderMessage, 50);
             externalAuthorizationWindows.set(key, popup);
             return true;
         } catch {
@@ -1078,6 +1146,7 @@
         chooseDirectory,
         reserveExternalAuthorizationWindow,
         navigateExternalAuthorizationWindow,
+        showExternalAuthorizationMessage,
         closeExternalAuthorizationWindow,
         setOutputContext,
         prepareProgramCapture,
@@ -1088,6 +1157,6 @@
         bindHotkeys,
         unbindHotkeys,
         getOutputContext: () => ({ ...outputContext }),
-        stopAll: () => { [...sources.keys()].forEach(detachSource); stopChatBridge(); stopProgramIngest(); }
+        stopAll: async () => { [...sources.keys()].forEach(detachSource); stopChatBridge(); await stopProgramIngest(); }
     };
 })();

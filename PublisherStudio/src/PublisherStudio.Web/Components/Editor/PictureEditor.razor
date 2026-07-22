@@ -438,12 +438,7 @@
                                             <textarea rows="4" @onchange="ChangeTextContent">@textLayer.Text</textarea>
                                         </label>
                                         <label>Font
-                                            <select value="@textLayer.FontFamily" @onchange="ChangeTextFont">
-                                                @foreach (var font in PictureFonts)
-                                                {
-                                                    <option value="@font">@font</option>
-                                                }
-                                            </select>
+                                            <SystemFontPicker Value="@textLayer.FontFamily" Changed="ChangeTextFont" />
                                         </label>
                                         <div class="picture-property-grid">
                                             <label>Size
@@ -726,6 +721,10 @@
                 {
                     <DxContextMenuItem Text="Font" IconCssClass="pub-icon pub-icon-text" BeginGroup="true">
                         <Items>
+                            @if (!PictureFonts.Contains(pictureText.FontFamily, StringComparer.OrdinalIgnoreCase))
+                            {
+                                <DxContextMenuItem Text="@(CheckedText(true, pictureText.FontFamily))" Click="() => SetPictureTextFont(pictureText.FontFamily)" />
+                            }
                             @foreach (var font in PictureFonts)
                             {
                                 <DxContextMenuItem Text="@(CheckedText(string.Equals(pictureText.FontFamily, font, StringComparison.OrdinalIgnoreCase), font))" Click="() => SetPictureTextFont(font)" />

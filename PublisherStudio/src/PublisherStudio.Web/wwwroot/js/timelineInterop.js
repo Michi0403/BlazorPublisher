@@ -30,6 +30,8 @@ function vector(direction, distance) {
     }
 }
 function baseTransform(node) {
+    const inline = String(node?.style?.transform || '').trim();
+    if (inline) return inline === 'none' ? '' : inline;
     const value = getComputedStyle(node).transform;
     return !value || value === 'none' ? '' : value;
 }

@@ -872,7 +872,9 @@
         _twitchAuthorization = null;
         try
         {
-            await JS.InvokeVoidAsync("publisherStreaming.reserveExternalAuthorizationWindow", "publisherstudio-twitch-oauth");
+            var popupReserved = await JS.InvokeAsync<bool>("publisherStreaming.reserveExternalAuthorizationWindow", "publisherstudio-twitch-oauth");
+            if (!popupReserved)
+                throw new InvalidOperationException("The Twitch sign-in window was blocked. Allow pop-ups for PublisherStudio and try again.");
             _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.OAuth;
             _providerDraft.Transport = PublicationStreamTransport.Rtmp;
             _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
@@ -885,10 +887,12 @@
                 cancellation.Token);
             _twitchAuthorization = authorization;
             _status = $"Twitch sign-in is waiting in the browser. Activation code: {authorization.UserCode}.";
-            await JS.InvokeVoidAsync(
+            var navigated = await JS.InvokeAsync<bool>(
                 "publisherStreaming.navigateExternalAuthorizationWindow",
                 "publisherstudio-twitch-oauth",
                 authorization.VerificationUri);
+            if (!navigated)
+                throw new InvalidOperationException("PublisherStudio could not open the Twitch authorization page. Allow pop-ups and try again.");
             await InvokeAsync(StateHasChanged);
 
             var result = await TwitchOAuth.CompleteDeviceAuthorizationAsync(
@@ -911,10 +915,20 @@
         catch (OperationCanceledException)
         {
             _status = "Twitch sign-in was cancelled.";
+            await CloseTwitchAuthorizationWindowAsync();
         }
         catch (Exception exception)
         {
             _status = $"Twitch connection failed: {exception.Message}";
+            try
+            {
+                await JS.InvokeAsync<bool>(
+                    "publisherStreaming.showExternalAuthorizationMessage",
+                    "publisherstudio-twitch-oauth",
+                    "Twitch connection failed",
+                    exception.Message);
+            }
+            catch { }
         }
         finally
         {
@@ -922,7 +936,6 @@
             _twitchOAuthBusy = false;
             if (ReferenceEquals(_twitchOAuthCancellation, cancellation)) _twitchOAuthCancellation = null;
             cancellation.Dispose();
-            await CloseTwitchAuthorizationWindowAsync();
             await InvokeAsync(StateHasChanged);
         }
     }

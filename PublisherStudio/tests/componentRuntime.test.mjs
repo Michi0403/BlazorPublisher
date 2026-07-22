@@ -175,7 +175,8 @@ assert.match(runtime, /fetchDataObjectLive\(state\.config\.connection\.dataObjec
 assert.match(runtime, /clearInterval\(state\.timer\)/);
 assert.match(ribbon, /Position visible text/);
 assert.match(ribbon, /Position visible worksheet/);
-assert.match(ribbon, /Position visible map/);
+assert.match(ribbon, /Mouse: pan \/ zoom map/);
+assert.match(ribbon, /Mouse: move map object/);
 assert.match(css, /dxbl-btn-dropdown-toggle/);
 assert.match(exporter, /translate\(\$\{translateX\}px, \$\{translateY\}px\)/);
 assert.match(exporter, /websiteSiteRuntime/);

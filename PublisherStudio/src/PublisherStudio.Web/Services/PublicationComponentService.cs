@@ -300,7 +300,7 @@ public sealed class PublicationComponentService
         ApplyMappingsFromFields(item);
     }
 
-    public object BuildClientConfiguration(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false)
+    public object BuildClientConfiguration(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content")
     {
         Normalize(document, item);
         var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
@@ -314,6 +314,7 @@ public sealed class PublicationComponentService
         {
             id = item.Id,
             designerMode,
+            designerInteractionMode = string.Equals(designerInteractionMode, "object", StringComparison.OrdinalIgnoreCase) ? "object" : "content",
             sharedComponentId = item.SharedComponentId,
             kind = item.ComponentKind.ToString(),
             scope = item.Scope.ToString(),
@@ -421,8 +422,8 @@ public sealed class PublicationComponentService
         };
     }
 
-    public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false) =>
-        Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(BuildClientConfiguration(document, item, currentPageId, designerMode), _json));
+    public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content") =>
+        Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(BuildClientConfiguration(document, item, currentPageId, designerMode, designerInteractionMode), _json));
 
 
     private static object[] BuildMenuItems(DevExtremeComponentElement item)

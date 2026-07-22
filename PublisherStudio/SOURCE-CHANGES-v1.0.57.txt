@@ -1,0 +1,55 @@
+PublisherStudio v1.0.57 source changes
+======================================
+
+Baseline
+--------
+Compared with the repaired PublisherStudio v1.0.56 source tree. The supplied
+source archive contains no .git directory, so commit-level Git history remains
+unavailable. Existing release and changelog history was preserved.
+
+Functional repair
+-----------------
+1. Uniform editor zoom for all publication object content
+   - PageSurface keeps the existing zoom-aware outer object geometry used by
+     drag, resize, snapping, connectors, ports, and selection handles.
+   - A new publication-element-content wrapper lays each object's authored
+     content out at canonical 96-DPI dimensions, then applies the current editor
+     zoom once to the complete subtree.
+   - RichEdit HTML, WordArt, spreadsheets, shapes, barcodes, data visuals,
+     Professional Components, live sources, video, and native audio controls now
+     scale uniformly with pictures and retain identical line wrapping.
+   - Inner millimeter-based padding, borders, masks, and strokes use canonical
+     pixels before the wrapper transform, avoiding double scaling.
+   - publisherInterop keeps the wrapper synchronized during live resize and when
+     a cancelled pointer operation restores the original object bounds.
+   - PrintPublication and all export paths remain unchanged.
+
+2. Regression coverage and version alignment
+   - Added canvasZoomScaling.test.mjs and included it in the npm test chain.
+   - Web application, installer, npm package, lock file, and integrated streaming
+     capability version aligned to 1.0.57.
+
+Changed/added files
+-------------------
+CHANGELOG-v1.0.57.md
+README.md
+RELEASE.md
+VALIDATION.md
+SOURCE-CHANGES-v1.0.57.txt
+TEST-RESULTS-v1.0.57.txt
+src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+src/PublisherStudio.Web/PublisherStudio.Web.csproj
+src/PublisherStudio.Web/package-lock.json
+src/PublisherStudio.Web/package.json
+src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs
+src/PublisherStudio.Web/Components/Editor/PageSurface.razor
+src/PublisherStudio.Web/wwwroot/css/site.css
+src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+tests/canvasZoomScaling.test.mjs
+tests/fontIntegration.test.mjs
+
+Compatibility
+-------------
+Publication format remains 1.45.
+Picture format remains 1.2.
+No publication model or saved-file migration was required.

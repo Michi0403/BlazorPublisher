@@ -42,15 +42,18 @@ assert.match(preview, /runPublicationAnimation\(item\.node, item\.animation, sta
 assert.match(preview, /baseTransforms\?\.get\?\.\(member\) \?\? null/);
 assert.match(timeline, /function baseTransform\(node\)[\s\S]*?node\?\.style\?\.transform/);
 
-// A designer-only transparent shield prevents dxMap from panning while its frame is dragged.
+// Explicit designer interaction modes keep object movement and native map gestures mutually exclusive.
 assert.match(components, /function installDesignerMapShield/);
 assert.match(components, /config\?\.designerMode/);
-assert.match(components, /lower\(config\.kind\) !== "map"/);
+assert.match(components, /isMapKind\(config\)/);
+assert.match(components, /designerMapContentEnabled\(config\)/);
+assert.match(components, /ps-component-designer-object-mode/);
+assert.match(components, /ps-component-designer-content-mode/);
 assert.match(components, /stopImmediatePropagation\?\.\(\)/);
 assert.match(components, /installDesignerMapShield\(element, config\)/);
 assert.match(css, /\.ps-component-designer-map-shield/);
-assert.match(css, /touch-action:none/);
-assert.match(css, /cursor:move/);
+assert.match(css, /touch-action:\s*none/);
+assert.match(css, /cursor:\s*move/);
 
 
 function extractFunction(source, name) {
@@ -75,7 +78,7 @@ function extractFunction(source, name) {
   assert.equal(baseTransform({ style: { transform: '' } }), 'matrix(2, 0, 0, 2, 80, 30)');
 }
 
-// Runtime proof that the map shield is designer-only and consumes provider gestures.
+// Runtime proof that object mode shields both map kinds while content mode leaves native gestures available.
 {
   const listeners = new Map();
   const children = [];
@@ -92,11 +95,12 @@ function extractFunction(source, name) {
       };
     }
   };
-  const install = Function('document', 'lower', `${extractFunction(components, 'installDesignerMapShield')}; return installDesignerMapShield;`)(
+  const install = Function('document', 'isMapKind', 'designerMapContentEnabled', `${extractFunction(components, 'installDesignerMapShield')}; return installDesignerMapShield;`)(
     documentMock,
-    value => String(value || '').toLowerCase()
+    config => ['map', 'vectormap'].includes(String(config?.kind || '').toLowerCase()),
+    config => !config?.designerMode || String(config?.designerInteractionMode || '').toLowerCase() === 'content'
   );
-  install(element, { designerMode: true, kind: 'Map' });
+  install(element, { designerMode: true, designerInteractionMode: 'object', kind: 'VectorMap' });
   assert.equal(children.length, 1);
   assert.ok(listeners.has('pointerdown'));
   let prevented = false;
@@ -110,8 +114,11 @@ function extractFunction(source, name) {
 
   children.length = 0;
   listeners.clear();
-  install(element, { designerMode: false, kind: 'Map' });
+  install(element, { designerMode: true, designerInteractionMode: 'content', kind: 'VectorMap' });
+  assert.equal(children.length, 0);
+
+  install(element, { designerMode: false, designerInteractionMode: 'object', kind: 'Map' });
   assert.equal(children.length, 0);
 }
 
-console.log('publication settings, preview restart, local stream settings, and designer map-drag contracts passed');
+console.log('publication settings, preview restart, local stream settings, and explicit designer map-mode contracts passed');

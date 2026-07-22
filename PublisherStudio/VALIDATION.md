@@ -534,3 +534,26 @@ Static checks completed for the v1.0.37 source package:
 - JavaScript syntax, Node contract suites, structured-file parsing, archive integrity, and checksum results are recorded in `TEST-RESULTS-v1.0.56.txt`.
 - A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because no .NET SDK or licensed DevExpress package feed is installed. Runtime map-provider behavior and Windows Data Protection persistence remain release-machine checks.
 
+
+
+## v1.0.57 uniform canvas-zoom validation
+
+- Verify a publication containing RichEdit text, WordArt, a picture, an audio object with controls, a spreadsheet preview, a barcode, and a Professional Component at 100%, 50%, 75%, 125%, and 200% zoom. Object positions, line wrapping, relative font size, control size, and crop/fit appearance must remain proportional.
+- Repeated zoom changes must not mutate publication element dimensions, text HTML, font sizes, media settings, content offsets, or export output.
+- Drag, resize, snapping, selection handles, connector ports, connector paths, crop mode, and content-pan mode must continue to use the zoom-aware outer object frame.
+- Page export and publication export must remain based on `PrintPublication` and must not contain the editor-only `publication-element-content` wrapper.
+- Run `npm test` from `src/PublisherStudio.Web`; the suite includes `canvasZoomScaling.test.mjs`.
+- JavaScript syntax, structured-file parsing, archive integrity, and checksum results are recorded in `TEST-RESULTS-v1.0.57.txt`.
+
+## v1.0.58 explicit map mouse-mode validation
+
+- Verify both provider Map and Vector Map at 50%, 100%, and 200% canvas zoom with and without attached connectors. In **Move map object**, dragging anywhere inside the component must move only the publication frame; the geographic center and zoom must remain unchanged.
+- Switch to **Pan / zoom map content** through the canvas mouse indicator, Component Tools ribbon, and context menu. Drag and wheel gestures must affect only the selected map viewport; the object's X/Y/width/height and connected-object geometry must remain unchanged.
+- Confirm the current mode is visibly named, the pointer cursor matches the owner, and switching between modes is immediate and repeatable.
+- Select another object, clear selection, create a multi-selection, and switch between two maps. Content mode must end automatically, and no unselected map may continue accepting pan or zoom gestures.
+- Confirm provider Map and Vector Map save manual center/zoom changes with the publication and restore them after reopen. Provider Map must disable auto-adjust after a deliberate manual viewport change.
+- Confirm text and spreadsheet content positioning, picture crop, component activation, connector creation, context menus, presentation interaction, and all export paths remain unchanged.
+- Run `npm test` from `src/PublisherStudio.Web`; the suite includes `mapInteractionModes.test.mjs` and the updated publication-persistence map-mode runtime proof.
+- Run `node --check` for every non-vendor JavaScript and test module, parse project XML and package JSON, and verify the release ZIP with both ZIP CRC checks and SHA-256/SHA-512 checksums.
+- A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because no .NET SDK or licensed DevExpress package feed is installed. Real DevExtreme provider and Vector Map pointer behavior remains a release-machine/browser acceptance check.
+

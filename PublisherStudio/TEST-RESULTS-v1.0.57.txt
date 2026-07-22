@@ -1,0 +1,74 @@
+PublisherStudio v1.0.57 validation results
+==========================================
+
+Baseline and scope
+------------------
+Baseline: repaired PublisherStudio v1.0.56 source archive.
+The archive contains no .git directory, so commit-level Git history was not
+available. Existing changelog and release history was retained.
+
+Reported regression
+-------------------
+At reduced editor zoom, picture geometry scaled but RichEdit text reflowed and
+native audio controls retained their 100% layout. The editor was resizing every
+object frame in CSS pixels without applying the same visual zoom to the complete
+object subtree. Absolute font sizes, native controls, and responsive component
+layouts therefore behaved as if the object itself had been resized.
+
+Repair contract
+---------------
+- Outer publication object geometry remains zoom-aware for drag, resize,
+  snapping, selection, connector ports, and connector routing.
+- Every object's authored subtree is laid out at stable 96-DPI dimensions and
+  receives one editor-only scale transform.
+- Millimeter-based inner padding, borders, masks, and strokes use canonical
+  96-DPI pixels before that transform to avoid double scaling.
+- Live resize and cancelled-resize restoration synchronize the stable content
+  wrapper before recalculating content fit.
+- PrintPublication and export surfaces do not use the editor-only wrapper.
+
+Automated tests
+---------------
+Command: npm test (src/PublisherStudio.Web)
+Result: PASS
+
+10 Node contract suites passed:
+1. timelineInterop.test.mjs
+2. componentRuntime.test.mjs
+3. signalRuntime.test.mjs
+4. pointerOwnership.test.mjs
+5. fontIntegration.test.mjs
+6. canvasZoomScaling.test.mjs
+7. streamingRuntime.test.mjs
+8. interfaceWorkflow.test.mjs
+9. installerResilience.test.mjs
+10. publicationPersistence.test.mjs
+
+The v1.0.57 zoom suite asserts that:
+- all editor object kinds are contained by the stable-layout wrapper;
+- resize handles and connector ports remain outside that transformed wrapper;
+- canonical and zoomed pixels-per-millimeter are separated;
+- RichEdit and spreadsheet inner metrics are not double-scaled;
+- shape and picture physical styling is authored canonically;
+- live resize and cancellation restoration synchronize wrapper dimensions;
+- PrintPublication remains independent of the editor-only zoom wrapper;
+- frame and transformed-content dimensions agree for 20%, 50%, 75%, 100%,
+  125%, 200%, and 400% editor zoom.
+
+Static and structured-file checks
+---------------------------------
+JavaScript/module syntax: PASS (24 non-vendor .js/.mjs files via node --check)
+JSON parsing: PASS (9 files)
+MSBuild/XML parsing: PASS (2 project files)
+Diff whitespace check: PASS
+Version alignment: PASS (1.0.57 in web project, installer project, npm package,
+package lock, streaming capability response, and version contract tests)
+
+Build limitation
+----------------
+A full .NET/DevExpress compile was not run because this environment does not
+contain the .NET SDK or the licensed DevExpress package feed. Final release
+validation should still open the tester publication and compare 50%, 100%, and
+200% canvas zoom on a licensed build machine, including RichEdit text, native
+audio controls, spreadsheets, Professional Components, live resize, crop mode,
+content pan, connectors, and export.

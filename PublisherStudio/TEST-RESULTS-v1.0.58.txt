@@ -1,0 +1,83 @@
+PublisherStudio v1.0.58 validation results
+==========================================
+
+Automated Node contract suites
+------------------------------
+Command: npm test
+Working directory: src/PublisherStudio.Web
+Result: PASS
+
+11 suites passed:
+1. timelineInterop lifecycle, backpressure, and bounded trim
+2. component catalog, REST/OData, menus, layout, media, chat, connections, export
+3. offline signal connectors, spreadsheet targeting, SVG, and path tools
+4. tooltip/pointer ownership, chart cleanup, and Signal Arrow geometry
+5. explicit Map/Vector Map object/content mouse modes
+6. offline system-font discovery and manual font entry
+7. uniform canvas zoom scaling
+8. streaming/Twitch/ingest/chat/native capture/FFmpeg/LAN/hotkey/Now Playing
+9. interface, canvas activation/context menu, and application tooltips
+10. installer resilience
+11. publication settings, repeatable preview, local streaming settings, and
+    explicit designer map-mode runtime proof
+
+The v1.0.58 map-mode suite asserts that:
+- designerInteractionMode is carried in the component configuration;
+- canvas Map and Vector Map default to object mode;
+- Vector Map native panning, zooming, and controls are content-mode-only;
+- provider Map and Vector Map use the same designer shield contract;
+- only the selected active map can own native pointer/wheel/double-click input;
+- selection changes immediately leave content mode in both JavaScript and C#;
+- stale unselected content-mode hosts cannot receive native pointer events;
+- map center/zoom changes are guarded and persisted through CommitMapViewport;
+- the mode is named and switchable in the canvas, ribbon, and context menu;
+- content-pan CSS no longer suppresses every component on the page.
+
+JavaScript/module syntax
+------------------------
+Command: node --check for every non-vendor *.js and *.mjs file under src and tests
+Result: PASS
+Files checked: 22
+
+Structured files and versions
+-----------------------------
+JSON parse: PASS (9 files)
+MSBuild/XML parse: PASS (2 project files)
+Version alignment: PASS
+- PublisherStudio.Web.csproj: 1.0.58
+- PublisherStudio.InstallerConsole.csproj: 1.0.58
+- package.json: 1.0.58
+- package-lock.json root/package: 1.0.58
+- streaming runtime capability endpoint: 1.0.58
+Publication format: 1.45 (unchanged)
+Picture format: 1.2 (unchanged)
+
+Source/package limitations
+--------------------------
+The source archive contains no .git directory, so commit-level Git history is
+not available in this package.
+
+A full dotnet restore/build was not run because this environment has no .NET SDK
+and no licensed DevExpress package feed. Therefore Razor/C# compilation and real
+browser acceptance with the DevExtreme provider Map/Vector Map must still be run
+on the licensed release machine.
+
+Required release-machine acceptance
+-----------------------------------
+- At 50%, 100%, and 200% canvas zoom, drag Map and Vector Map in “Move map object”
+  mode and verify only the frame and attached connectors move.
+- Switch to “Pan / zoom map content” and verify only the selected map viewport
+  responds to drag/wheel/touch while frame geometry remains fixed.
+- Change selection, clear selection, multi-select, and alternate between two maps;
+  verify no unselected map accepts native gestures.
+- Save/reopen and verify the manual center/zoom values are restored.
+- Confirm presentation and HTML exports remain interactive and PDF/image/SVG
+  output remains unchanged.
+
+Release archive
+---------------
+Archive: PublisherStudio-v1.0.58-explicit-map-mouse-modes-source.zip
+ZIP entries: 416
+ZIP CRC / unzip -t: PASS
+Excluded .git, node_modules, bin, and obj directory entries: PASS (0 present)
+SHA-256 and SHA-512 verification for the source ZIP and companion reports: PASS

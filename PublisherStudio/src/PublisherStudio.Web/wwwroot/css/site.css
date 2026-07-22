@@ -169,6 +169,18 @@ button { cursor: pointer; }
     touch-action: none;
 }
 
+/* The object frame follows the zoomed canvas geometry, while its authored content
+   keeps a stable 96-DPI layout and is scaled as one unit. This prevents RichEdit
+   HTML, WordArt, native media controls, spreadsheets, and components from reflowing
+   or retaining their 100% size when the publication canvas zoom changes. */
+.publication-element-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    overflow: visible;
+}
+
 .pub-element.selected { outline: 1.5px solid #1787d4; outline-offset: 1px; }
 .pub-element.locked.selected { outline-style: dashed; }
 .text-frame-content { width: 100%; height: 100%; overflow: hidden; user-select: none; }
@@ -1985,13 +1997,30 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     width: 100%;
     height: 100%;
 }
-.content-pan-mode [data-content-viewport] {
+.content-pan-mode .pub-element.content-pan-target [data-content-viewport] {
     cursor: grab;
     outline: 2px dashed rgba(37, 99, 235, .85);
     outline-offset: -2px;
 }
-.content-pan-mode [data-content-viewport]:active { cursor: grabbing; }
-.content-pan-mode [data-content-fit-source] { pointer-events: none; user-select: none; }
+.content-pan-mode .pub-element.content-pan-target [data-content-viewport]:active { cursor: grabbing; }
+.content-pan-mode .pub-element.content-pan-target:not(.kind-devextremecomponent) [data-content-fit-source] {
+    pointer-events: none;
+    user-select: none;
+}
+.content-pan-mode .pub-element.content-pan-target.kind-devextremecomponent .devextreme-component-host,
+.content-pan-mode .pub-element.content-pan-target.kind-devextremecomponent .devextreme-component-host .dx-widget {
+    cursor: grab;
+}
+.content-pan-mode .pub-element.content-pan-target.kind-devextremecomponent .devextreme-component-host:active,
+.content-pan-mode .pub-element.content-pan-target.kind-devextremecomponent .devextreme-component-host .dx-widget:active {
+    cursor: grabbing;
+}
+/* During the short Blazor rerender window, a map host can still carry its
+   previous content-mode class. Only the active target may receive native map
+   gestures; every stale or unselected content host falls through to its frame. */
+.pub-element.kind-devextremecomponent:not(.content-pan-target) .devextreme-component-host.ps-component-designer-content-mode {
+    pointer-events: none;
+}
 .content-pan-help {
     position: absolute;
     left: 50%;
@@ -3414,9 +3443,9 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     }
 }
 
-/* In the publication designer a map object belongs to the canvas drag surface.
-   The transparent shield receives map gestures after the canvas capture handler,
-   preventing DevExtreme/Google/Bing from panning the map while its frame moves. */
+/* Map widgets have two explicit designer modes. Object mode owns the pointer at
+   the publication canvas; content mode gives the pointer to DevExtreme so the
+   map can pan and zoom. The shield exists only in object mode. */
 .ps-component-designer-map-shield {
     position:absolute;
     inset:0;
@@ -3425,3 +3454,5 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     touch-action:none;
     background:transparent;
 }
+.ps-component-designer-object-mode { touch-action:none; }
+.ps-component-designer-content-mode { touch-action:none; }

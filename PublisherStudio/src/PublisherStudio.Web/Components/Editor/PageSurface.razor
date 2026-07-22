@@ -24,6 +24,10 @@
     <div class="pointer-state-indicator" @onclick:stopPropagation="true" title="Current mouse mode">
         <strong>Mouse</strong>
         <span>@PointerStateText</span>
+        @if (IsMapComponentSelected && !State.HasMultipleSelection && State.ConnectorTool == ConnectorToolKind.None && !State.CropMode)
+        {
+            <button type="button" @onclick="ToggleMapMouseMode">@(State.ContentPanMode ? "Move object" : "Pan map")</button>
+        }
         @if (CanResetPointerState)
         {
             <button type="button" @onclick="ResetPointerState">Reset</button>
@@ -132,16 +136,17 @@
                      data-media-trigger="@(element is PublicationMediaElement mediaTrigger ? mediaTrigger.PlaybackTrigger.ToString() : null)"
                      data-media-fade-in="@(element is PublicationMediaElement mediaFadeIn ? Inv(mediaFadeIn.FadeInSeconds) : null)"
                      data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)"
-                     class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(State.IsSelected(element.Id) ? "selected" : null) @(element.Id == State.SelectedElementId ? "selection-primary" : null) @(element.GroupId is not null ? "grouped" : null) @(element.Locked ? "locked" : null)"
+                     class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(State.IsSelected(element.Id) ? "selected" : null) @(element.Id == State.SelectedElementId ? "selection-primary" : null) @(State.ContentPanMode && element.Id == State.SelectedElementId && EditorStateService.CanPanContent(element) ? "content-pan-target" : null) @(element.GroupId is not null ? "grouped" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
                      data-help="@ElementDesignerHelp(element)"
                      @oncontextmenu="args => ShowElementContextMenu(element, args)"
                      @oncontextmenu:preventDefault
                      @oncontextmenu:stopPropagation>
+                    <div class="publication-element-content" style="@ElementContentStyle(element)" data-editor-content-scale="@Inv(State.Document.Zoom)">
                     @switch (element)
                     {
                         case TextFrameElement text:
-                            <div class="text-frame-content publication-content-frame fit-@text.ContentFit.ToString().ToLowerInvariant()" data-content-fit="@text.ContentFit.ToString().ToLowerInvariant()" data-content-kind="text" data-content-viewport data-content-offset-x="@Inv(text.ContentOffsetX)" data-content-offset-y="@Inv(text.ContentOffsetY)" data-content-scale="@Inv(text.ContentScale)" data-publisher-print-fill="true" style="padding:@Mm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@Mm(text.BorderWidth) solid @text.BorderColor">
+                            <div class="text-frame-content publication-content-frame fit-@text.ContentFit.ToString().ToLowerInvariant()" data-content-fit="@text.ContentFit.ToString().ToLowerInvariant()" data-content-kind="text" data-content-viewport data-content-offset-x="@Inv(text.ContentOffsetX)" data-content-offset-y="@Inv(text.ContentOffsetY)" data-content-scale="@Inv(text.ContentScale)" data-publisher-print-fill="true" style="padding:@ContentMm(text.PaddingMm);background:@StoryBackground(text);--publisher-story-page-background:@text.DocumentBackground;--publisher-print-fill:@StoryBackground(text);border:@ContentMm(text.BorderWidth) solid @text.BorderColor">
                                     <div class="publication-content-source" data-content-fit-source>
                                         @((MarkupString)text.PreviewHtml)
                                     </div>
@@ -200,13 +205,18 @@
                             <DataVisualView @key="dataVisual.Id" Document="State.Document" Item="dataVisual" CurrentPageId="State.SelectedPageId" />
                             break;
                         case DevExtremeComponentElement component:
-                            <DevExtremeComponentView @key="component.Id" Document="State.Document" Item="component" CurrentPageId="State.SelectedPageId" DesignerMode="true" />
+                            <DevExtremeComponentView @key="component.Id" Document="State.Document" Item="component" CurrentPageId="State.SelectedPageId" DesignerMode="true"
+                                DesignerInteractionMode="@(State.ContentPanMode && State.SelectedElementId == component.Id ? "content" : "object")" />
+                            @if (State.ContentPanMode && State.SelectedElementId == component.Id && (component.ComponentKind == PublicationComponentKind.Map || component.ComponentKind == PublicationComponentKind.VectorMap))
+                            {
+                                <div class="content-pan-help">Pan map content · mouse wheel zooms · choose “Move object” to finish</div>
+                            }
                             break;
                         case LiveSourceElement liveSource:
                             <LiveSourceView @key="(liveSource.Id, liveSource.SourceKind)" Item="liveSource" DesignerMode="true" />
                             break;
                         case SpreadsheetElement spreadsheet:
-                            <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
+                            <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@ContentMm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
                                 <div class="publication-content-source" data-content-fit-source>
                                     @((MarkupString)spreadsheet.PreviewHtml)
                                 </div>
@@ -224,6 +234,7 @@
                             <BarcodeView Item="barcode" />
                             break;
                     }
+                    </div>
                     @if (!element.Locked)
                     {
                         foreach (var anchor in ConnectorAnchors)
@@ -397,8 +408,13 @@
             </DxContextMenuItem>
             @if (component.SupportsContentViewport)
             {
-                <DxContextMenuItem Text="@(State.ContentPanMode ? "Finish positioning map" : "Position visible map")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
-                <DxContextMenuItem Text="Reset map position" Click="ResetContentViewport" />
+                <DxContextMenuItem Text="Mouse mode" IconCssClass="pub-icon pub-icon-crop">
+                    <Items>
+                        <DxContextMenuItem Text="@(CheckedText(!State.ContentPanMode, "Move map object"))" Click="UseMapObjectMode" />
+                        <DxContextMenuItem Text="@(CheckedText(State.ContentPanMode, "Pan / zoom map content"))" Click="UseMapContentMode" />
+                    </Items>
+                </DxContextMenuItem>
+                <DxContextMenuItem Text="Reset map frame transform" Click="ResetContentViewport" />
             }
         }
         @if (State.SelectedElement is LiveSourceElement liveSource)
@@ -649,7 +665,8 @@
         ConnectorAnchor.TopLeft, ConnectorAnchor.Top, ConnectorAnchor.TopRight, ConnectorAnchor.Right,
         ConnectorAnchor.BottomRight, ConnectorAnchor.Bottom, ConnectorAnchor.BottomLeft, ConnectorAnchor.Left
     ];
-    private double PixelsPerMm => 3.7795275591 * State.Document.Zoom;
+    private const double BasePixelsPerMm = 3.7795275591;
+    private double PixelsPerMm => BasePixelsPerMm * State.Document.Zoom;
     private string UnitLabel => State.Document.View.RulerUnit switch
     {
         MeasurementUnit.Millimeter => "mm",
@@ -659,6 +676,7 @@
         _ => "mm"
     };
 
+    private bool IsMapComponentSelected => State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
     private string PointerStateText => State.ConnectorTool != ConnectorToolKind.None
         ? State.ConnectorTool switch
         {
@@ -668,7 +686,10 @@
             _ => "Draw connector"
         }
         : State.CropMode ? "Crop picture"
+        : State.ContentPanMode && IsMapComponentSelected ? "Pan / zoom map content"
+        : State.ContentPanMode ? "Position visible content"
         : State.HasMultipleSelection ? $"Move {State.SelectedElements.Count} objects"
+        : IsMapComponentSelected ? "Move map object"
         : "Select / move";
     private string ConnectorToolTitle => State.ConnectorTool switch
     {
@@ -834,6 +855,7 @@
     [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) { if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height); }
     [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) { if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale); }
     [JSInvokable] public void CommitContentViewport(string id, double offsetX, double offsetY, double scale) { if (Guid.TryParse(id, out var guid)) State.CommitContentViewport(guid, offsetX, offsetY, scale); }
+    [JSInvokable] public void CommitMapViewport(string id, double longitude, double latitude, double zoom) { if (Guid.TryParse(id, out var guid)) State.CommitMapViewport(guid, longitude, latitude, zoom); }
     [JSInvokable] public void AddGuideAt(string orientation, double positionMm) { if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed)) State.AddGuideAt(parsed, positionMm); }
     [JSInvokable] public void CommitGuide(string id, double positionMm) { if (Guid.TryParse(id, out var guid)) State.CommitGuide(guid, positionMm); }
     [JSInvokable] public void DeleteGuide(string id) { if (Guid.TryParse(id, out var guid)) State.DeleteGuide(guid); }
@@ -1245,6 +1267,9 @@
     };
     private void ToggleCrop() => State.ToggleCropMode();
     private void ToggleContentPan() => State.ToggleContentPanMode();
+    private void ToggleMapMouseMode() => State.ToggleContentPanMode();
+    private void UseMapObjectMode() { if (State.ContentPanMode) State.ToggleContentPanMode(); }
+    private void UseMapContentMode() { if (!State.ContentPanMode) State.ToggleContentPanMode(); }
     private void ResetContentViewport() => State.ResetContentViewport();
     private void SetTextFrame(Action<TextFrameElement> update)
     {
@@ -1524,15 +1549,16 @@
     private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
 
     private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
+    private string ElementContentStyle(PublicationElement element) => $"width:{ContentMm(element.Width)};height:{ContentMm(element.Height)};transform:scale({Inv(State.Document.Zoom)})";
     private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
-        ? $"background:{shape.Stroke};height:{Mm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
-        : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";
+        ? $"background:{shape.Stroke};height:{ContentMm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
+        : $"background:{shape.Fill};border:{ContentMm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? ContentMm(shape.CornerRadiusMm) : "0")}";
 
     private string ImageFrameStyle(ImageFrameElement image)
     {
-        var radius = image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(image.CornerRadiusMm) : "0";
+        var radius = image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? ContentMm(image.CornerRadiusMm) : "0";
         var shadow = image.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
-        return $"border-radius:{radius};border:{Mm(image.BorderWidthMm)} solid {image.BorderColor};box-shadow:{shadow}";
+        return $"border-radius:{radius};border:{ContentMm(image.BorderWidthMm)} solid {image.BorderColor};box-shadow:{shadow}";
     }
 
     private string ImageStyle(ImageFrameElement image)
@@ -1557,6 +1583,7 @@
     private string GuideStyle(GuideLine guide) => guide.Orientation == GuideOrientation.Horizontal ? $"top:{Mm(guide.PositionMm)}" : $"left:{Mm(guide.PositionMm)}";
     private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
     private string Mm(double mm) => Px(mm * PixelsPerMm);
+    private static string ContentMm(double mm) => Px(mm * BasePixelsPerMm);
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string NullableInv(double? value) => value is { } number ? Inv(number) : string.Empty;
     private static string Percent(double value) => $"{Math.Clamp(value, 0, 1) * 100:0.###}%";

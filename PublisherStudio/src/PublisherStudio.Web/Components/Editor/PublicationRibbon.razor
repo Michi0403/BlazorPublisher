@@ -525,8 +525,8 @@
             <DxRibbonItem Text="Refresh component" IconCssClass="pub-icon pub-icon-command" Click="RefreshData" />
             @if (IsMapComponentSelected)
             {
-                <DxRibbonItem Text="@(State.ContentPanMode ? "Finish positioning map" : "Position visible map")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
-                <DxRibbonItem Text="Reset map position" IconCssClass="pub-icon pub-icon-command" Click="ResetContentViewport" />
+                <DxRibbonItem Text="@(State.ContentPanMode ? "Mouse: move map object" : "Mouse: pan / zoom map")" IconCssClass="pub-icon pub-icon-crop" Click="ToggleContentPan" />
+                <DxRibbonItem Text="Reset map frame transform" IconCssClass="pub-icon pub-icon-command" Click="ResetContentViewport" />
             }
         </DxRibbonGroup>
     </DxRibbonTab>

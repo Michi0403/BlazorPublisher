@@ -334,6 +334,14 @@ See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media 
 See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now release stale hover/tooltips when the pointer moves onto another overlapping publication object, while non-interactive decorative shapes, WordArt, and barcodes no longer consume presentation pointer events. Interactive media, components, data visuals, publication actions, and Signal Arrow click/hover sources remain pointer owners. In the main Publisher frame, explanatory tooltips keep one stable owner while the pointer moves through nested SVG or component children and render through the browser top layer so publication objects and DevExpress stacking contexts cannot cover them. Publication and Signal Arrow coordinate data is unchanged.
 
 
+## v1.0.58 explicit Map and Vector Map mouse modes
+
+See `CHANGELOG-v1.0.58.md`. Professional Component maps now expose two deterministic designer modes: **Move map object** moves the publication frame while native map gestures are blocked; **Pan / zoom map content** gives pointer and wheel ownership only to the selected map. The active mode is shown in the canvas mouse indicator, Component Tools ribbon, and context menu. Selection changes exit content mode, unselected maps cannot keep panning, and manual center/zoom changes are saved with the publication. Export and presentation interaction paths are unchanged.
+
+## v1.0.57 uniform editor zoom
+
+See `CHANGELOG-v1.0.57.md`. Canvas zoom now scales each complete publication object from a stable 96-DPI authored layout. RichEdit text keeps its line wrapping, native audio/video controls shrink and grow with the object, and WordArt, spreadsheets, barcodes, data visuals, live sources, and Professional Components follow the same zoom as pictures. Movement, resizing, snapping, connector geometry, and export rendering remain on their established paths.
+
 ## v1.0.56 repeatable preview, publication settings, and map drag stability
 
 See `CHANGELOG-v1.0.56.md`. Repeated animation Preview runs now restart from the authored element transforms instead of stacking the previous run. Standard canvas settings such as zoom, rulers, grid, guides, snapping, spacing, and export DPI are saved with publications and templates. Streaming routing, recording, LAN, and hotkey settings stay in an encrypted local per-publication store and are omitted from shared publication JSON. Designer-mode Professional Components maps no longer pan their internal map content while the publication frame is dragged; exported and presentation maps remain interactive.

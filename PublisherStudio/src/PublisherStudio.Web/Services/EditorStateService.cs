@@ -206,7 +206,7 @@ public sealed class EditorStateService : IDisposable
         else SelectedElementId = _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
 
         var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
-        var contentPanChanged = ContentPanMode && (_selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
+        var contentPanChanged = ContentPanMode && (previousPrimary != SelectedElementId || _selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
         if (cropChanged) CropMode = false;
         if (contentPanChanged) ContentPanMode = false;
         EndLiveEdit();
@@ -229,7 +229,7 @@ public sealed class EditorStateService : IDisposable
         var previousSelection = _selectedElementIds.ToHashSet();
         SetSelectionCore(expanded.Select(element => element.Id), requested.LastOrDefault()?.Id);
         var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
-        var contentPanChanged = ContentPanMode && (_selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
+        var contentPanChanged = ContentPanMode && (previousPrimary != SelectedElementId || _selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
         if (cropChanged) CropMode = false;
         if (contentPanChanged) ContentPanMode = false;
         EndLiveEdit();
@@ -247,7 +247,7 @@ public sealed class EditorStateService : IDisposable
         if (SelectedElementId == id) return;
         SelectedElementId = id;
         if (CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement)) CropMode = false;
-        if (ContentPanMode && (_selectedElementIds.Count != 1 || !CanPanContent(SelectedElement))) ContentPanMode = false;
+        if (ContentPanMode) ContentPanMode = false;
         EndLiveEdit();
         Notify(false);
     }
@@ -1635,6 +1635,27 @@ public sealed class EditorStateService : IDisposable
             case SpreadsheetElement sheet: sheet.ContentOffsetX = x; sheet.ContentOffsetY = y; sheet.ContentScale = zoom; break;
             case DevExtremeComponentElement component: component.ContentOffsetX = x; component.ContentOffsetY = y; component.ContentScale = zoom; break;
         }
+        Notify();
+    }
+
+    public void CommitMapViewport(Guid id, double longitude, double latitude, double zoom)
+    {
+        var component = CurrentPage.Elements.OfType<DevExtremeComponentElement>().FirstOrDefault(candidate => candidate.Id == id);
+        if (component is null || component.Locked || SelectedElementId != id || !ContentPanMode ||
+            (component.ComponentKind != PublicationComponentKind.Map && component.ComponentKind != PublicationComponentKind.VectorMap)) return;
+
+        var nextLongitude = Math.Clamp(longitude, -180, 180);
+        var nextLatitude = Math.Clamp(latitude, -90, 90);
+        var nextZoom = Math.Clamp(zoom, 1, 20);
+        if (Math.Abs(component.MapCenterLongitude - nextLongitude) < .000001 &&
+            Math.Abs(component.MapCenterLatitude - nextLatitude) < .000001 &&
+            Math.Abs(component.MapZoom - nextZoom) < .0001) return;
+
+        Capture();
+        component.MapCenterLongitude = nextLongitude;
+        component.MapCenterLatitude = nextLatitude;
+        component.MapZoom = nextZoom;
+        if (component.ComponentKind == PublicationComponentKind.Map) component.MapAutoAdjust = false;
         Notify();
     }
 

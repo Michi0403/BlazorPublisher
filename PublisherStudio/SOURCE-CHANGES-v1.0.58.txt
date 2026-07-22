@@ -1,0 +1,100 @@
+PublisherStudio v1.0.58 source changes
+======================================
+
+Repair scope
+------------
+The reported Vector Map behavior was a pointer-ownership race, not a single
+coordinate-scaling defect. The publication canvas could start an object drag
+while DevExtreme was also panning the map. Vector Map was always configured as
+interactive, the previous designer shield covered provider Map only, and the
+content-pan CSS/selection state could remain active outside the intended map.
+
+Explicit object/content modes
+-----------------------------
+src/PublisherStudio.Web/Services/PublicationComponentService.cs
+src/PublisherStudio.Web/Components/Editor/DevExtremeComponentView.razor
+src/PublisherStudio.Web/Components/Editor/DevExtremeComponentEditor.razor
+- Added a designerInteractionMode value to the shared component JSON.
+- Canvas maps receive object mode unless the selected map is explicitly in map
+  content mode. Component Studio previews remain intentionally interactive.
+
+src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
+- Applied the same designer contract to Map and Vector Map.
+- Object mode disables native vector-map panning/zooming and map controls, marks
+  the host as object-owned, and installs a full gesture shield.
+- Content mode removes the shield and restores native pointer, touch, wheel,
+  panning, zooming, and controls.
+- Added debounced Map/Vector Map center and zoom reporting to the editor.
+- Cleans pending viewport timers during component disposal.
+
+src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+- Native map ownership now requires all of: content mode is active, the map is
+  selected, the map host is Map/VectorMap, and its explicit host mode is content.
+- The canvas does not start a competing object drag, wheel transform, or
+  double-click activation while the selected map owns the pointer.
+- Object mode continues through the existing zoom-aware publication drag path.
+- Selection changes disable content mode immediately in the DOM, before the
+  Blazor rerender completes, and remove stale content-pan target ownership.
+- Added a guarded viewport event bridge to CommitMapViewport.
+
+src/PublisherStudio.Web/wwwroot/css/site.css
+- Scoped content-pan pointer suppression and grab cursors to the active selected
+  publication object instead of every content viewport on the page.
+- Added object/content map host classes and the object-mode map shield.
+- A stale content-mode host that is no longer the active target receives no
+  native pointer events during the short rerender transition, so an unselected
+  map cannot keep panning.
+
+Visible mouse-mode controls
+---------------------------
+src/PublisherStudio.Web/Components/Editor/PageSurface.razor
+src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor
+- Added visible “Move map object” and “Pan / zoom map content” states.
+- The mode can be switched from the canvas Mouse indicator, Component Tools
+  ribbon, or the map context menu.
+- Added selected-map content-mode help and mode-specific pointer text.
+- Renamed the old generic reset command to “Reset map frame transform” so it is
+  not confused with the geographic map center/zoom.
+
+State and publication persistence
+---------------------------------
+src/PublisherStudio.Web/Services/EditorStateService.cs
+- Primary-selection changes, multi-selection, and selecting another object leave
+  content mode deterministically.
+- Added guarded Map/Vector Map center/zoom commits with clamping, undo capture,
+  dirty-state notification, and provider Map auto-adjust shutdown after manual
+  viewport movement.
+- Map center and zoom continue to use existing publication fields; no publication
+  format change was required.
+
+Tests
+-----
+tests/mapInteractionModes.test.mjs
+- New explicit-mode, selected-owner, stale-host, viewport-persistence, UI, and
+  scoped-CSS contract suite.
+
+tests/publicationPersistence.test.mjs
+- Replaced the Map-only shield contract with runtime proof for Vector Map object
+  mode, content mode, and non-designer mode.
+
+tests/componentRuntime.test.mjs
+- Updated map-tool UI contracts for the explicit mouse-mode labels.
+
+tests/fontIntegration.test.mjs
+tests/streamingRuntime.test.mjs
+- Updated release-version alignment checks to v1.0.58.
+
+Release metadata
+----------------
+CHANGELOG-v1.0.58.md
+README.md
+RELEASE.md
+VALIDATION.md
+src/PublisherStudio.Web/PublisherStudio.Web.csproj
+src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+src/PublisherStudio.Web/package.json
+src/PublisherStudio.Web/package-lock.json
+src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs
+- Application, installer, npm package, lockfile, and runtime capability version
+  aligned to 1.0.58.
+- Publication format remains 1.45; picture format remains 1.2.

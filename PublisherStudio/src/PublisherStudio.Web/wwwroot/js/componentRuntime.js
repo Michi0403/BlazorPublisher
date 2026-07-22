@@ -48,6 +48,36 @@
         return fallback;
     };
 
+    const isMapKind = config => ["map", "vectormap"].includes(lower(config?.kind));
+    const designerMapContentEnabled = config => !config?.designerMode || lower(config?.designerInteractionMode) === "content";
+
+    function scheduleDesignerMapViewport(element, config, center, zoom) {
+        if (!element || !config?.designerMode || !isMapKind(config) || !designerMapContentEnabled(config)) return;
+        const longitude = Array.isArray(center)
+            ? Number(center[0])
+            : Number(center?.lng ?? center?.longitude);
+        const latitude = Array.isArray(center)
+            ? Number(center[1])
+            : Number(center?.lat ?? center?.latitude);
+        const zoomValue = Number(zoom);
+        if (!Number.isFinite(longitude) || !Number.isFinite(latitude) || !Number.isFinite(zoomValue)) return;
+        if (Math.abs(number(config.mapCenterLongitude) - longitude) < .000001 &&
+            Math.abs(number(config.mapCenterLatitude) - latitude) < .000001 &&
+            Math.abs(number(config.mapZoom, 1) - zoomValue) < .0001) return;
+
+        element.__psMapViewportSnapshot = { longitude, latitude, zoom: zoomValue };
+        if (element.__psMapViewportTimer) clearTimeout(element.__psMapViewportTimer);
+        element.__psMapViewportTimer = setTimeout(() => {
+            element.__psMapViewportTimer = null;
+            const detail = element.__psMapViewportSnapshot;
+            if (!detail || !element.isConnected) return;
+            element.dispatchEvent(new CustomEvent("publisherstudio:map-viewport-changed", {
+                bubbles: true,
+                detail: { componentId: String(config.id || ""), ...detail }
+            }));
+        }, 180);
+    }
+
     function normalizeDateRows(config, rows) {
         if (!Array.isArray(rows)) return [];
         const dateFields = new Set((config.fields || [])
@@ -1513,22 +1543,35 @@
                 const rows = config.rows || [];
                 const provider = String(config.mapProvider || "google");
                 const apiKey = String(config.mapApiKey || "").trim();
+                const mapContentEnabled = designerMapContentEnabled(config);
                 options = { ...base, provider, type: config.mapType || "roadmap",
                     center: { lat: number(config.mapCenterLatitude, 51.1657), lng: number(config.mapCenterLongitude, 10.4515) },
-                    zoom: Math.max(1, number(config.mapZoom, 4)), controls: config.mapControls !== false,
+                    zoom: Math.max(1, number(config.mapZoom, 4)), controls: config.mapControls !== false && mapContentEnabled,
                     autoAdjust: config.mapAutoAdjust !== false, markers: mapMarkers(config, rows), routes: mapRoutes(config, rows),
-                    apiKey: apiKey ? { [provider]: apiKey } : undefined
+                    apiKey: apiKey ? { [provider]: apiKey } : undefined,
+                    onOptionChanged(event) {
+                        if (!["center", "zoom"].includes(String(event?.name || ""))) return;
+                        scheduleDesignerMapViewport(element, config, event.component?.option?.("center"), event.component?.option?.("zoom"));
+                    }
                 };
                 break;
             }
             case "VectorMap": {
                 const rows = config.rows || [];
+                const mapContentEnabled = designerMapContentEnabled(config);
                 options = { ...base, layers: vectorLayers(config, rows), projection: config.vectorProjection || "mercator",
                     center: [number(config.mapCenterLongitude, 10.4515), number(config.mapCenterLatitude, 51.1657)],
-                    zoomFactor: Math.max(1, number(config.mapZoom, 1)), maxZoomFactor: 256, panningEnabled: true, zoomingEnabled: true,
-                    controlBar: { enabled: config.mapControls !== false }, tooltip: { enabled: true, customizeTooltip(info) {
+                    zoomFactor: Math.max(1, number(config.mapZoom, 1)), maxZoomFactor: 256,
+                    panningEnabled: mapContentEnabled, zoomingEnabled: mapContentEnabled,
+                    controlBar: { enabled: config.mapControls !== false && mapContentEnabled }, tooltip: { enabled: true, customizeTooltip(info) {
                         const a = info?.attribute?.("properties") || {}; return { text: String(a.label || a.name || a.value || "") };
                     } },
+                    onCenterChanged(event) {
+                        scheduleDesignerMapViewport(element, config, event?.center, event?.component?.option?.("zoomFactor"));
+                    },
+                    onZoomFactorChanged(event) {
+                        scheduleDesignerMapViewport(element, config, event?.component?.option?.("center"), event?.zoomFactor);
+                    },
                     onClick(event) {
                         if (!config.designerMode || !event?.component?.convertToGeo) return;
                         const sourceEvent = event.event || {};
@@ -1644,10 +1687,15 @@
 
     function installDesignerMapShield(element, config) {
         element.querySelector?.(':scope > .ps-component-designer-map-shield')?.remove?.();
-        if (!config?.designerMode || lower(config.kind) !== "map") return;
+        element.classList?.remove?.("ps-component-designer-object-mode", "ps-component-designer-content-mode");
+        if (!config?.designerMode || !isMapKind(config)) return;
+        const contentMode = designerMapContentEnabled(config);
+        element.classList?.add?.(contentMode ? "ps-component-designer-content-mode" : "ps-component-designer-object-mode");
+        if (contentMode) return;
         const shield = document.createElement("div");
         shield.className = "ps-component-designer-map-shield";
-        shield.setAttribute("aria-hidden", "true");
+        shield.setAttribute("aria-label", "Move map object");
+        shield.title = "Move map object. Switch the Mouse mode to Pan map to move or zoom the map content.";
         const blockMapGesture = event => {
             event.preventDefault?.();
             event.stopImmediatePropagation?.();
@@ -1660,6 +1708,9 @@
     function dispose(element) {
         const state = states.get(element);
         if (state?.timer) clearInterval(state.timer);
+        if (element.__psMapViewportTimer) clearTimeout(element.__psMapViewportTimer);
+        element.__psMapViewportTimer = null;
+        element.__psMapViewportSnapshot = null;
         state?.layout?.cancel?.();
         try { state?.chatUnsubscribe?.(); } catch { }
         for (const child of [...element.querySelectorAll("[data-ps-component-runtime]")]) {

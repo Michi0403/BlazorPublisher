@@ -20,7 +20,8 @@
         <div class="devextreme-component-viewport" data-content-fit="clip" data-content-kind="component" data-content-viewport
              data-content-offset-x="@Inv(Item.ContentOffsetX)" data-content-offset-y="@Inv(Item.ContentOffsetY)" data-content-scale="@Inv(Item.ContentScale)">
             <div class="publication-content-source devextreme-component-source" data-content-fit-source>
-                <div id="@ElementId" class="devextreme-component-host" data-ps-component-config="@ClientConfigBase64"></div>
+                <div id="@ElementId" class="devextreme-component-host" data-ps-component-config="@ClientConfigBase64"
+                     data-ps-designer-interaction="@NormalizedDesignerInteractionMode"></div>
             </div>
         </div>
     }
@@ -33,11 +34,13 @@
     [Parameter] public string IdPrefix { get; set; } = "canvas";
     [Parameter] public string? ElementIdOverride { get; set; }
     [Parameter] public bool DesignerMode { get; set; }
+    [Parameter] public string DesignerInteractionMode { get; set; } = "content";
 
     private readonly string _instanceId = Guid.NewGuid().ToString("N");
     private string? _lastRenderedConfig;
     private string ElementId => string.IsNullOrWhiteSpace(ElementIdOverride) ? $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}" : ElementIdOverride;
-    private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId, DesignerMode);
+    private string NormalizedDesignerInteractionMode => string.Equals(DesignerInteractionMode, "object", StringComparison.OrdinalIgnoreCase) ? "object" : "content";
+    private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId, DesignerMode, NormalizedDesignerInteractionMode);
     private bool MissingData => RequiresDataObject
         && (Item.Connection.Mode == PublicationComponentDataMode.PublicationDataObject
             || Item.Connection.Mode == PublicationComponentDataMode.StaticSnapshot)

@@ -259,6 +259,16 @@ function showObjectAlignmentFeedback(state, operation, result) {
     state.page.appendChild(overlay);
 }
 
+function syncEditorElementContentFrame(state, element, widthMm, heightMm) {
+    const content = element?.querySelector?.(':scope > .publication-element-content');
+    if (!content) return;
+    const zoom = Math.max(.05, number(state?.page?.dataset?.zoom, state?.config?.pxPerMm / PX_PER_MM_AT_96_DPI || 1));
+    const basePixelsPerMm = Math.max(.0001, number(state?.config?.pxPerMm, PX_PER_MM_AT_96_DPI) / zoom);
+    content.style.width = `${Math.max(0, number(widthMm)) * basePixelsPerMm}px`;
+    content.style.height = `${Math.max(0, number(heightMm)) * basePixelsPerMm}px`;
+    content.style.transform = `scale(${zoom})`;
+}
+
 function resetPointerOperation(state, restoreDom = false) {
     clearObjectAlignmentFeedback(state);
     const operation = state?.operation;
@@ -299,6 +309,8 @@ function resetPointerOperation(state, restoreDom = false) {
         element.style.top = `${item.y * state.config.pxPerMm}px`;
         element.style.width = `${item.width * state.config.pxPerMm}px`;
         element.style.height = `${item.height * state.config.pxPerMm}px`;
+        syncEditorElementContentFrame(state, element, item.width, item.height);
+        refreshContentFit(element);
         updateAttachedConnectors(state, item.id);
     }
 }
@@ -876,6 +888,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         handlers.scroll = () => nextAnimationFrame(state);
         handlers.publisherNavigate = event => scheduleComponentNavigation(state, event.detail);
         handlers.publisherOpenUrl = event => scheduleComponentUrl(state, event.detail);
+        handlers.mapViewportChanged = event => commitMapViewportEvent(state, event);
 
         // Capture phase keeps selection alive even when nested media, SVG, chart,
         // or animation content stops pointer events in its own component tree.
@@ -895,6 +908,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         document.addEventListener('visibilitychange', handlers.visibilityChange);
         stage.addEventListener('pointerleave', handlers.stagePointerLeave);
         stage.addEventListener('wheel', handlers.stageWheel, { passive: false });
+        stage.addEventListener('publisherstudio:map-viewport-changed', handlers.mapViewportChanged, true);
         stage.addEventListener('keydown', handlers.stageKeyDown);
         document.addEventListener('keydown', handlers.documentKeyDown, true);
         document.addEventListener('paste', handlers.documentPaste, true);
@@ -969,6 +983,7 @@ export function disposeCanvas(stageId) {
     stage.removeEventListener('lostpointercapture', handlers.lostPointerCapture);
     stage.removeEventListener('pointerleave', handlers.stagePointerLeave);
     stage.removeEventListener('wheel', handlers.stageWheel);
+    stage.removeEventListener('publisherstudio:map-viewport-changed', handlers.mapViewportChanged, true);
     stage.removeEventListener('keydown', handlers.stageKeyDown);
     document.removeEventListener('keydown', handlers.documentKeyDown, true);
     document.removeEventListener('paste', handlers.documentPaste, true);
@@ -1507,13 +1522,20 @@ function selectedElementIdSet(state) {
 function synchronizeSelectionDom(state, ids, primaryId = null) {
     const normalized = new Set([...ids].map(value => String(value || '').toLowerCase()).filter(Boolean));
     const primary = String(primaryId || '').toLowerCase();
+    const previousPrimary = String(state.page?.querySelector?.('[data-publication-element].selection-primary')?.dataset?.elementId || '').toLowerCase();
+    if (state.config?.contentPanMode && (normalized.size !== 1 || previousPrimary !== primary)) {
+        state.config.contentPanMode = false;
+        state.page?.classList?.remove?.('content-pan-mode');
+    }
     state.config.selectedElementIds = normalized;
     for (const item of selectableNodes(state)) {
         const id = String(item.dataset.elementId || '').toLowerCase();
         const selected = normalized.has(id);
+        const contentPanTarget = Boolean(state.config?.contentPanMode && selected && id === primary);
         item.dataset.selected = selected ? 'true' : 'false';
         item.classList.toggle('selected', selected);
         item.classList.toggle('selection-primary', selected && id === primary);
+        item.classList.toggle('content-pan-target', contentPanTarget);
     }
 }
 
@@ -1698,9 +1720,36 @@ function componentInteractionOwner(state, event) {
     return designerInteractionOwner(state, event);
 }
 
+function mapComponentHost(owner) {
+    const host = owner?.querySelector?.('.devextreme-component-host[data-ps-component-kind]');
+    const kind = String(host?.dataset?.psComponentKind || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    return ['map', 'vectormap'].includes(kind) ? host : null;
+}
+
+function componentMapContentInteractionActive(state, owner) {
+    if (!state?.config?.contentPanMode || !owner) return false;
+    const id = String(owner.dataset?.elementId || '').toLowerCase();
+    const selected = id && selectedElementIdSet(state).has(id);
+    const host = mapComponentHost(owner);
+    return Boolean(selected && host && String(host.dataset.psDesignerInteraction || '').toLowerCase() === 'content');
+}
+
+function commitMapViewportEvent(state, event) {
+    const owner = designerInteractionOwner(state, event);
+    if (!componentMapContentInteractionActive(state, owner)) return;
+    const detail = event?.detail || {};
+    const componentId = String(detail.componentId || owner?.dataset?.elementId || '');
+    if (!componentId || componentId.toLowerCase() !== String(owner.dataset.elementId || '').toLowerCase()) return;
+    const longitude = Number(detail.longitude);
+    const latitude = Number(detail.latitude);
+    const zoom = Number(detail.zoom);
+    if (![longitude, latitude, zoom].every(Number.isFinite)) return;
+    safeDotNet(state, 'CommitMapViewport', componentId, longitude, latitude, zoom);
+}
+
 function componentDoubleClick(state, event) {
     const owner = designerInteractionOwner(state, event);
-    if (!owner) return;
+    if (!owner || componentMapContentInteractionActive(state, owner)) return;
     cancelPendingComponentAction(state);
     state.lastCanvasClick = null;
     safeDotNet(state, 'ActivateElement', String(owner.dataset.elementId || ''));
@@ -1752,6 +1801,11 @@ function pointerDown(state, event) {
 
     const componentOwner = componentInteractionOwner(state, event);
     if (componentOwner && !connectorToolActive(state)) {
+        if (componentMapContentInteractionActive(state, componentOwner)) {
+            state.lastCanvasClick = null;
+            cancelPendingComponentAction(state);
+            return;
+        }
         const id = String(componentOwner.dataset.elementId || '');
         const wasSelected = selectedElementIdSet(state).has(id.toLowerCase());
         if (id && !wasSelected) {
@@ -1940,6 +1994,11 @@ function pointerDown(state, event) {
     const wasSelected = selectedElementIdSet(state).has(String(id || '').toLowerCase());
     const additive = Boolean(event.ctrlKey || event.metaKey || event.shiftKey);
     const activeConnectorTool = connectorToolActive(state);
+    if (!activeConnectorTool && componentMapContentInteractionActive(state, element)) {
+        state.lastCanvasClick = null;
+        event.preventDefault();
+        return;
+    }
     if (activeConnectorTool) {
         // Dropping directly on an object creates a persistent custom attachment point.
         const relative = relativePointForElement(state, element, event);
@@ -2204,6 +2263,7 @@ function pointerMove(state, event) {
     operationElement.style.top = `${y * state.config.pxPerMm}px`;
     operationElement.style.width = `${width * state.config.pxPerMm}px`;
     operationElement.style.height = `${height * state.config.pxPerMm}px`;
+    syncEditorElementContentFrame(state, operationElement, width, height);
     refreshContentFit(operationElement);
     updateResizeHandleCursors(operationElement.parentElement || state.page);
     updateAttachedConnectors(state, operation.id);
@@ -2361,6 +2421,8 @@ function pointerCancel(state, event) {
 }
 
 function cropWheel(state, event) {
+    const mapOwner = event.target?.closest?.('[data-publication-element][data-element-id]');
+    if (componentMapContentInteractionActive(state, mapOwner)) return;
     if (state.config.contentPanMode) {
         const element = event.target.closest('[data-publication-element].selected');
         const viewport = element?.querySelector('[data-content-viewport]');

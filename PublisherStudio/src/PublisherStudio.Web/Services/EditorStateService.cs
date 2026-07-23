@@ -1724,6 +1724,13 @@ public sealed class EditorStateService : IDisposable
 
     public void ZoomBy(double factor) => SetZoom(Document.Zoom * factor);
 
+    public void SetCanvasZoomMode(PublicationCanvasZoomMode mode)
+    {
+        if (Document.View.CanvasZoomMode == mode) return;
+        Document.View.CanvasZoomMode = mode;
+        Notify();
+    }
+
     public void SetRulerUnit(MeasurementUnit unit)
     {
         if (Document.View.RulerUnit == unit) return;

@@ -267,12 +267,25 @@ function syncEditorElementContentFrame(state, element, widthMm, heightMm) {
     content.style.width = `${Math.max(0, number(widthMm)) * basePixelsPerMm}px`;
     content.style.height = `${Math.max(0, number(heightMm)) * basePixelsPerMm}px`;
     content.style.setProperty("--publisher-editor-zoom", String(zoom));
-    if (globalThis.CSS?.supports?.("zoom", "1")) {
+    const requestedMode = String(state?.page?.dataset?.zoomMode || state?.config?.zoomMode || "CssLayout").toLowerCase();
+    const strategy = String(content.dataset.editorZoomStrategy || "auto").toLowerCase();
+    const useCssLayoutZoom = requestedMode === "csslayout"
+        && strategy !== "transform"
+        && globalThis.CSS?.supports?.("zoom", "1");
+    if (useCssLayoutZoom) {
         content.style.zoom = String(zoom);
         content.style.transform = "none";
     } else {
-        content.style.removeProperty("zoom");
+        content.style.zoom = "1";
         content.style.transform = `scale(${zoom})`;
+    }
+}
+
+function syncEditorZoomRendering(state) {
+    if (!state?.page) return;
+    for (const element of state.page.querySelectorAll?.('[data-publication-element]:not([data-connector-id])') || []) {
+        const bounds = elementMm(element, state.config.pxPerMm);
+        syncEditorElementContentFrame(state, element, bounds.width, bounds.height);
     }
 }
 
@@ -790,6 +803,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
     if (!stage || !scroll || !page || !stage.isConnected || !scroll.isConnected || !page.isConnected) return false;
     const normalizedConfig = {
         pxPerMm: Math.max(.0001, number(config?.pxPerMm, PX_PER_MM_AT_96_DPI)),
+        zoomMode: String(config?.zoomMode || 'CssLayout'),
         cropMode: Boolean(config?.cropMode),
         contentPanMode: Boolean(config?.contentPanMode),
         unit: String(config?.unit || 'Millimeter'),
@@ -957,6 +971,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
 
     bindRuler(state.horizontalRuler, 'Horizontal', state);
     bindRuler(state.verticalRuler, 'Vertical', state);
+    syncEditorZoomRendering(state);
     refreshContentFit(state.page);
     updateResizeHandleCursors(state.page);
     nextAnimationFrame(state);
@@ -1081,6 +1096,19 @@ function finishRulerGuide(state, orientation, event) {
 function isPublisherEditableTarget(target) {
     if (!(target instanceof Element)) return false;
     return Boolean(target.closest('input,textarea,select,button,a,[role="button"],[role="menuitem"],[contenteditable="true"],[contenteditable=""],[role="textbox"],[role="dialog"],.modal-backdrop,.editor-modal-backdrop'));
+}
+
+
+function isDesignerComponentControlTarget(target, element) {
+    if (!target?.closest || !element || String(element.dataset?.elementKind || '').toLowerCase() !== 'devextremecomponent') return false;
+    const control = target.closest([
+        'button', 'a[href]', 'input', 'textarea', 'select',
+        '[role="button"]', '[role="tab"]', '[role="menuitem"]', '[role="option"]',
+        '.dx-button', '.dx-gallery-nav-button-prev', '.dx-gallery-nav-button-next',
+        '.dx-gallery-indicator-item', '.dx-checkbox', '.dx-switch', '.dx-radiobutton',
+        '.dx-slider-handle', '.dx-scrollbar', '.dx-scrollable-scroll'
+    ].join(','));
+    return Boolean(control && element.contains(control));
 }
 
 function resetCanvasTransientState(state, restoreDom = true) {
@@ -2001,6 +2029,21 @@ function pointerDown(state, event) {
     const wasSelected = selectedElementIdSet(state).has(String(id || '').toLowerCase());
     const additive = Boolean(event.ctrlKey || event.metaKey || event.shiftKey);
     const activeConnectorTool = connectorToolActive(state);
+    if (!activeConnectorTool && isDesignerComponentControlTarget(event.target, element)) {
+        state.lastCanvasClick = null;
+        // A selected component's native controls own the full pointer sequence. This
+        // avoids the canvas taking pointer capture from Gallery navigation buttons
+        // (and other DevExtreme controls), which could otherwise combine one click
+        // with a canvas drag/swipe and advance more than one item. The first click on
+        // an unselected object remains selection-only, as in other design tools.
+        if (!wasSelected || additive) {
+            optimisticSelectElement(state, element, additive);
+            safeDotNet(state, 'SelectElement', id, additive);
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        return;
+    }
     if (!activeConnectorTool && componentMapContentInteractionActive(state, element)) {
         state.lastCanvasClick = null;
         event.preventDefault();

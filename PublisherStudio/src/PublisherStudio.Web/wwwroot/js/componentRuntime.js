@@ -1438,6 +1438,12 @@
                     showIndicator: true,
                     showNavButtons: true,
                     stretchImages: true,
+                    // In the designer the canvas owns drag gestures. Disabling Gallery
+                    // swipe recognition prevents a tiny mouse movement on a nav button
+                    // from being counted as an additional slide change. Exported HTML
+                    // keeps native swipe navigation enabled.
+                    swipeEnabled: !config.designerMode,
+                    animationDuration: config.designerMode ? 0 : 400,
                     itemTemplate(item, index, itemElement) { renderCard(item, config, itemElement?.jquery ? itemElement[0] : itemElement, false); },
                     onContentReady() { queueMicrotask(() => syncMediaPlayback(element, config)); },
                     onSelectionChanged() { queueMicrotask(() => syncMediaPlayback(element, config)); }
@@ -1799,6 +1805,11 @@
         if (!element) return null;
         const config = decodeConfig(rawConfig || element.dataset.psComponentConfig);
         if (!config) return null;
+        const previousState = states.get(element);
+        const previousGalleryIndex = lower(previousState?.config?.kind) === "gallery"
+            && String(previousState?.config?.id || "") === String(config.id || "")
+            ? number(previousState?.instance?.option?.("selectedIndex"), -1)
+            : -1;
         dispose(element);
         element.dataset.psComponentRuntime = "true";
         element.dataset.psComponentId = String(config.id || "");
@@ -1830,6 +1841,8 @@
             const plugin = pluginNames[config.kind];
             if (!plugin || typeof window.jQuery.fn[plugin] !== "function") throw new Error(`${config.kind} is not available in the bundled DevExtreme runtime.`);
             const optionsValue = buildOptions(config, element, data);
+            if (config.kind === "Gallery" && previousGalleryIndex >= 0)
+                optionsValue.selectedIndex = previousGalleryIndex;
             const $element = window.jQuery(element);
             $element[plugin](optionsValue);
             const instance = $element[plugin]("instance");

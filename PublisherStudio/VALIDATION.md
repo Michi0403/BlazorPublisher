@@ -569,3 +569,14 @@ Static checks completed for the v1.0.37 source package:
 - Run `npm test`, `node --check` for every non-vendor JavaScript/test module, JSON/XML parsing, version/format alignment, ZIP CRC validation, and SHA-256/SHA-512 verification. Results are recorded in `TEST-RESULTS-v1.0.59.txt`.
 - A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because no .NET SDK or licensed DevExpress package feed is installed. Provider credentials, real DevExtreme browser rendering, and UHD acceptance remain release-machine checks.
 
+## v1.0.60 Gallery pointer and selectable zoom-renderer validation
+
+- Insert a Gallery with at least five images, select it, and click the previous/next buttons and indicators repeatedly at 50%, 100%, 200%, and 400% application zoom. Every press must advance exactly one item and must not move the publication object.
+- Click a Gallery navigation control while its object is not selected. The first click must select the object without accidental navigation or movement; subsequent control clicks must operate the Gallery. Blank component space must remain available for normal object dragging.
+- Trigger harmless Blazor/runtime rerenders by selecting other ribbon tabs, changing non-Gallery view settings, or resizing the browser. The current Gallery item must remain selected. In website and standalone HTML export, native swipe and animated Gallery navigation must remain enabled.
+- In **View > Zoom**, switch repeatedly between **Sharp CSS layout (default)** and **Compact transform**. The active option must be visibly checked, the page must update immediately, and object dimensions, line wrapping, selection geometry, connectors, crop/content offsets, and publication data must not mutate.
+- Save and reopen the publication and a derived template. The selected canvas rendering mode must be restored. Invalid or older missing values must normalize to Sharp CSS layout.
+- At 300-400% on UHD hardware, compare ordinary text/RichEdit/WordArt/media/spreadsheet content in Sharp CSS and Compact transform modes. Professional Components must remain stable and interactive through their transform-compatible editor path.
+- Confirm PDF, image, SVG, print, website, and standalone HTML output is identical regardless of the editor rendering mode.
+- Run `npm test`, `node --check` for every non-vendor JavaScript/test module, JSON/XML parsing, version/format alignment, ZIP CRC validation, and SHA-256/SHA-512 verification. Results are recorded in `TEST-RESULTS-v1.0.60.txt`.
+- A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because no .NET SDK or licensed DevExpress package feed is installed. Real DevExtreme browser interaction and UHD acceptance remain release-machine checks.

@@ -345,6 +345,10 @@
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text="125%" Click="Zoom125" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text="150%" Click="Zoom150" />
             </DxRibbonItem>
+            <DxRibbonItem Text="@ZoomRenderingText" IconCssClass="pub-icon pub-icon-fit" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="@CssZoomModeText" Click="UseCssZoomMode" />
+                <DxRibbonItem Text="@TransformZoomModeText" Click="UseTransformZoomMode" />
+            </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -635,6 +639,11 @@
     private string SnapObjectsText => CheckText(State.Document.View.SnapToObjects, "Snap to objects");
     private string SnapInObjectsText => CheckText(State.Document.View.SnapInObjects, "Snap in objects");
     private string TimelinePaneText => CheckText(TimelineVisible, "Timeline pane");
+    private string ZoomRenderingText => State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout
+        ? "Rendering: sharp CSS"
+        : "Rendering: compact transform";
+    private string CssZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout, "Sharp CSS layout (default)");
+    private string TransformZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform, "Compact transform");
     private static string CheckText(bool value, string text) => value ? $"✓ {text}" : text;
 
     private Task RequestNew() => OnNew.InvokeAsync();
@@ -883,6 +892,8 @@
     private void Zoom100() => State.SetZoom(1);
     private void Zoom125() => State.SetZoom(1.25);
     private void Zoom150() => State.SetZoom(1.5);
+    private void UseCssZoomMode() => State.SetCanvasZoomMode(PublicationCanvasZoomMode.CssLayout);
+    private void UseTransformZoomMode() => State.SetCanvasZoomMode(PublicationCanvasZoomMode.Transform);
 
     private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
     private void PictureFill() => SetImage(image => image.FitInsideFrame = false);

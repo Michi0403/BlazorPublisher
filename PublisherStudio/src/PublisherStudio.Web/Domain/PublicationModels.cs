@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.46";
+    public string FormatVersion { get; set; } = "1.47";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -64,6 +64,7 @@ public sealed class PublicationViewSettings
     public bool SnapInObjects { get; set; } = true;
     public double GridSpacingMm { get; set; } = 2.5;
     public int ExportDpi { get; set; } = 150;
+    public PublicationCanvasZoomMode CanvasZoomMode { get; set; } = PublicationCanvasZoomMode.CssLayout;
 }
 
 public sealed class PublicationPage
@@ -90,6 +91,7 @@ public sealed class GuideLine
 
 public enum GuideOrientation { Horizontal, Vertical }
 public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
+public enum PublicationCanvasZoomMode { CssLayout, Transform }
 public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual, Barcode, Spreadsheet, DevExtremeComponent, LiveSource }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ConnectorPathKind { Straight, Elbow, Curved }

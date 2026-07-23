@@ -126,6 +126,7 @@ public sealed partial class PublicationFileService
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .8 : document.Zoom, .2, 4);
         document.View.GridSpacingMm = Math.Clamp(document.View.GridSpacingMm <= 0 ? 5 : document.View.GridSpacingMm, .5, 100);
         document.View.ExportDpi = Math.Clamp(document.View.ExportDpi <= 0 ? 150 : document.View.ExportDpi, 72, 600);
+        if (!Enum.IsDefined(document.View.CanvasZoomMode)) document.View.CanvasZoomMode = PublicationCanvasZoomMode.CssLayout;
         if (document.Pages.Count == 0)
             document.Pages.Add(PublicationPage.CreateA4());
         foreach (var text in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<TextFrameElement>())
@@ -401,7 +402,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.46";
+        document.FormatVersion = "1.47";
         return document;
     }
 

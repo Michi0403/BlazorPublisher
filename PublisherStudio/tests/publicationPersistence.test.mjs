@@ -22,6 +22,8 @@ assert.match(files, /HasEmbeddedStreamingSettings/);
 assert.match(state, /public void SetZoom[\s\S]*?Document\.Zoom = normalized;[\s\S]*?Notify\(\);/);
 assert.match(state, /public void SetRulerUnit[\s\S]*?Document\.View\.RulerUnit = unit;[\s\S]*?Notify\(\);/);
 assert.match(state, /public void SetViewOption[\s\S]*?update\(Document\.View\);[\s\S]*?Notify\(\);/);
+assert.match(state, /public void SetCanvasZoomMode\(PublicationCanvasZoomMode mode\)[\s\S]*?Document\.View\.CanvasZoomMode = mode;[\s\S]*?Notify\(\);/);
+assert.match(files, /Enum\.IsDefined\(document\.View\.CanvasZoomMode\)/);
 
 // Stream routing/recording/LAN/hotkey configuration stays local and protected.
 assert.match(program, /AddSingleton<PublicationStreamingSettingsStore>\(\)/);
@@ -121,4 +123,4 @@ function extractFunction(source, name) {
   assert.equal(children.length, 0);
 }
 
-console.log('publication settings, preview restart, local stream settings, and explicit designer map-mode contracts passed');
+console.log('publication settings including canvas zoom rendering, preview restart, local stream settings, and explicit designer map-mode contracts passed');

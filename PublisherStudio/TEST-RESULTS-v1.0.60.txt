@@ -1,0 +1,101 @@
+PublisherStudio v1.0.60 validation results
+==========================================
+
+Automated Node contract suites
+------------------------------
+Command: npm test
+Working directory: src/PublisherStudio.Web
+Result: PASS
+
+12 suites passed:
+1. timeline lifecycle, backpressure, and bounded trimming
+2. component catalog, deterministic designer Gallery navigation, REST/OData,
+   menus, layout, media, chat, connections, and single-file export
+3. offline signal connectors, spreadsheet targeting, SVG, and path tools
+4. tooltip/pointer ownership including embedded DevExtreme controls, chart hover
+   cleanup, and Signal Arrow geometry
+5. explicit Map/Vector Map object/content mouse modes
+6. offline system-font discovery and manual font entry
+7. selectable CSS/transform canvas zoom and DevExtreme compatibility
+8. streaming/Twitch/ingest/chat/native capture/FFmpeg/LAN/hotkey/Now Playing
+9. interface, canvas activation/context menu, and application tooltips
+10. installer resilience
+11. publication settings including persisted canvas rendering mode, repeatable
+    preview, local streaming settings, and map modes
+12. selectable high-DPI zoom, provider-safe Map, stable map viewport, chart
+    mapping, and full-screen studios
+
+The v1.0.60 executable/static contracts assert that:
+- designer Gallery swipe recognition is disabled and its transition duration is
+  zero, while export/runtime retains native swipe and 400 ms animation;
+- a Gallery's selected index is preserved across a harmless runtime rerender;
+- selected embedded DevExtreme buttons, Gallery controls, tabs, menu items,
+  form controls, sliders, and scrollbars own their pointer sequence instead of
+  starting a simultaneous publication-canvas drag;
+- the first embedded-control click on an unselected component remains
+  selection-only;
+- CssLayout and Transform canvas rendering modes are represented in the
+  publication model, default to CssLayout, are selectable in View > Zoom, and
+  are normalized/persisted with publication view settings;
+- CSS layout zoom and transform scaling have separate editor strategies;
+  DevExtreme Professional Components retain the transform-compatible path;
+- every non-connector content frame is resynchronized after canvas/mode
+  initialization so stale inline zoom/transform values are cleared;
+- PrintPublication and export rendering do not use the editor-only wrapper.
+
+JavaScript/module syntax
+------------------------
+Command: node --check for every non-vendor *.js and *.mjs file under src and tests
+Result: PASS
+Files checked: 23
+
+Structured files and versions
+-----------------------------
+JSON parse: PASS (9 files)
+MSBuild/XML parse: PASS (2 project files)
+Version alignment: PASS
+- PublisherStudio.Web.csproj: 1.0.60
+- PublisherStudio.InstallerConsole.csproj: 1.0.60
+- package.json: 1.0.60
+- package-lock.json root/package: 1.0.60
+- streaming runtime capability endpoint: 1.0.60
+Publication format: 1.47
+Picture format: 1.2 (unchanged)
+
+Source/package limitations
+--------------------------
+The supplied source archive contains no .git directory, so commit-level Git
+history is unavailable in this package.
+
+The environment has no dotnet executable and no licensed DevExpress package
+feed. A full .NET 10 restore/build and Razor/C# compilation therefore were not
+run. Real DevExtreme Gallery pointer behavior, Edge/Chromium UHD rendering, and
+licensed publish output remain release-machine checks.
+
+Required release-machine acceptance
+-----------------------------------
+- In the mainframe, use a selected Gallery with at least five items at 50%, 100%,
+  200%, and 400% application zoom. Each button/indicator press must navigate
+  exactly once and must not move the publication object.
+- With the Gallery unselected, confirm the first control click selects only;
+  subsequent clicks operate the control. Dragging blank component space must
+  still move the object.
+- Trigger harmless component/page rerenders and confirm the active Gallery item
+  remains stable. Verify website and standalone HTML exports retain swipe and
+  animated navigation.
+- Switch View > Zoom between Sharp CSS layout and Compact transform repeatedly,
+  save/reopen the publication and a template, and verify mode persistence,
+  authored geometry, connectors, wrapping, and selection behavior.
+- Compare ordinary text/RichEdit/WordArt/media/spreadsheet content at 300-400%
+  on UHD hardware. Verify Professional Components remain stable through their
+  transform-compatible editor path.
+- Confirm PDF, image, SVG, print, website, and standalone HTML output is unchanged
+  by the selected editor renderer.
+
+Release archive
+---------------
+Archive: PublisherStudio-v1.0.60-gallery-zoom-rendering-source.zip
+ZIP file entries: 380
+Excluded .git, node_modules, bin, and obj directory entries: PASS (0 present)
+ZIP CRC / unzip -t: PASS
+SHA-256 and SHA-512 verification for the source ZIP and companion reports: PASS

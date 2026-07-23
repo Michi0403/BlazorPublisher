@@ -111,7 +111,7 @@ assert.equal((app.match(/vendor\/devextreme-dist\/js\/dx\.all\.js/g) || []).leng
 assert.doesNotMatch(app, /RegisterScripts\(\)/, 'Default DevExtreme registration would duplicate the pinned bundle.');
 assert.ok(app.indexOf('vendor/jquery/jquery.min.js') < app.indexOf('vendor/devextreme-dist/js/dx.all.js'));
 assert.ok(app.indexOf('vendor/devextreme-dist/js/dx.all.js') < app.indexOf('DxResourceManager.RegisterScripts'), 'Pinned jQuery/DevExtreme must load before dependent DevExpress resource scripts.');
-assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.46"/);
+assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.47"/);
 assert.match(editor, /Only options supported by the selected component are shown here/);
 assert.doesNotMatch(editor.slice(editor.indexOf('else if (_section == "behavior")'), editor.indexOf('else if (_section == "map")')), /Scheduler view[\s\S]*without-kind-guard/);
 assert.match(dataModel, /PublicationPages/);
@@ -305,6 +305,7 @@ assert.match(requests.at(-1).url, /%24top=10|\$top=10/);
 let menuOptions;
 let tileViewOptions;
 let splitterOptions;
+let galleryOptions;
 let chatOptions;
 const renderedChatMessages = [];
 const sentChatMessages = [];
@@ -329,6 +330,17 @@ const genericInstance = {
   repaint: () => undefined,
   dispose: () => undefined
 };
+let gallerySelectedIndex = 0;
+const galleryInstance = {
+  getDataSource: () => null,
+  option(name, value) {
+    if (arguments.length === 1) return name === 'selectedIndex' ? gallerySelectedIndex : undefined;
+    if (name === 'selectedIndex') gallerySelectedIndex = Number(value);
+  },
+  updateDimensions: () => undefined,
+  repaint: () => undefined,
+  dispose: () => undefined
+};
 const jquery = () => ({
   dxMenu(argument) {
     if (argument === 'instance') return menuInstance;
@@ -345,13 +357,19 @@ const jquery = () => ({
     splitterOptions = argument;
     return this;
   },
+  dxGallery(argument) {
+    if (argument === 'instance') return galleryInstance;
+    galleryOptions = argument;
+    if (Number.isFinite(argument?.selectedIndex)) gallerySelectedIndex = argument.selectedIndex;
+    return this;
+  },
   dxChat(argument) {
     if (argument === 'instance') return chatInstance;
     chatOptions = argument;
     return this;
   }
 });
-jquery.fn = { dxMenu() {}, dxTileView() {}, dxSplitter() {}, dxChat() {} };
+jquery.fn = { dxMenu() {}, dxTileView() {}, dxSplitter() {}, dxGallery() {}, dxChat() {} };
 context.jQuery = jquery;
 context.DevExpress = { data: {
   ArrayStore: class ArrayStore {
@@ -432,6 +450,22 @@ await context.PublisherStudioComponentRuntime.render(layoutHost(), {
 }, { polling: false, fetchNow: false });
 assert.equal(splitterOptions.orientation, 'vertical');
 
+const galleryHost = layoutHost();
+const galleryConfig = {
+  kind: 'Gallery', id: 'gallery-test', designerMode: true,
+  rows: [{ id: 1, text: 'A' }, { id: 2, text: 'B' }, { id: 3, text: 'C' }],
+  fields: [], actions: [], connection: {}, keyField: 'id'
+};
+await context.PublisherStudioComponentRuntime.render(galleryHost, galleryConfig, { polling: false, fetchNow: false });
+assert.equal(galleryOptions.swipeEnabled, false, 'designer Gallery must not combine canvas drag and swipe navigation.');
+assert.equal(galleryOptions.animationDuration, 0, 'designer Gallery navigation must settle on exactly one item immediately.');
+gallerySelectedIndex = 2;
+await context.PublisherStudioComponentRuntime.render(galleryHost, galleryConfig, { polling: false, fetchNow: false });
+assert.equal(galleryOptions.selectedIndex, 2, 'a harmless designer rerender must preserve the current Gallery item.');
+await context.PublisherStudioComponentRuntime.render(layoutHost(), { ...galleryConfig, id: 'gallery-export-test', designerMode: false }, { polling: false, fetchNow: false });
+assert.equal(galleryOptions.swipeEnabled, true, 'export/runtime Gallery keeps native swipe navigation.');
+assert.equal(galleryOptions.animationDuration, 400);
+
 const chatHost = layoutHost();
 await context.PublisherStudioComponentRuntime.render(chatHost, {
   kind: 'Chat', id: 'chat-test', chatPlatform: 'Twitch', chatChannel: 'stream-a',
@@ -459,4 +493,4 @@ assert.equal(renderedChatMessages.length, 2);
 context.PublisherStudioChatRuntime.push({ platform: 'Twitch', channel: 'stream-a', message: { id: 'right', text: 'Duplicate', author: { id: 't', name: 'Twitch' } } });
 assert.equal(renderedChatMessages.length, 2, 'Repeated message IDs must be deduplicated.');
 
-console.log('component catalog, REST/OData probe, menu navigation, orientation/layout resilience, media data, isolated chat, smart connections, and single-file export contract tests passed');
+console.log('component catalog, REST/OData probe, menu navigation, deterministic designer Gallery navigation, orientation/layout resilience, media data, isolated chat, smart connections, and single-file export contract tests passed');

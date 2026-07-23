@@ -35,10 +35,11 @@
     </div>
 
     <div id="publisher-scroll-area" class="page-scroll-area">
-        <div id="publisher-page" class="publication-page @(State.CropMode ? "crop-mode" : null) @(State.ContentPanMode ? "content-pan-mode" : null)"
+        <div id="publisher-page" class="publication-page @CanvasZoomModeClass @(State.CropMode ? "crop-mode" : null) @(State.ContentPanMode ? "content-pan-mode" : null)"
              style="@PageStyle"
              data-px-per-mm="@Inv(PixelsPerMm)"
              data-zoom="@Inv(State.Document.Zoom)"
+             data-zoom-mode="@State.Document.View.CanvasZoomMode.ToString().ToLowerInvariant()"
              data-page-width-mm="@Inv(State.CurrentPage.WidthMm)"
              data-page-height-mm="@Inv(State.CurrentPage.HeightMm)"
              data-page-id="@State.CurrentPage.Id"
@@ -142,7 +143,8 @@
                      @oncontextmenu="args => ShowElementContextMenu(element, args)"
                      @oncontextmenu:preventDefault
                      @oncontextmenu:stopPropagation>
-                    <div class="publication-element-content" style="@ElementContentStyle(element)" data-editor-content-scale="@Inv(State.Document.Zoom)">
+                    <div class="publication-element-content @ElementZoomCompatibilityClass(element)" style="@ElementContentStyle(element)"
+                         data-editor-content-scale="@Inv(State.Document.Zoom)" data-editor-zoom-strategy="@ElementZoomStrategy(element)">
                     @switch (element)
                     {
                         case TextFrameElement text:
@@ -667,6 +669,9 @@
     ];
     private const double BasePixelsPerMm = 3.7795275591;
     private double PixelsPerMm => BasePixelsPerMm * State.Document.Zoom;
+    private string CanvasZoomModeClass => State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform
+        ? "zoom-mode-transform"
+        : "zoom-mode-css";
     private string UnitLabel => State.Document.View.RulerUnit switch
     {
         MeasurementUnit.Millimeter => "mm",
@@ -726,11 +731,11 @@
         var selectionKey = string.Join(",", selectedElementIds);
         var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
         var initializationKey = $"{State.CurrentPage.Id:N}|" +
-            $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
+            $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
             $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
             $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
             $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
-        var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}";
+        var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
 
         _canvasInitializationInProgress = true;
         try
@@ -744,6 +749,7 @@
                     new
                     {
                         pxPerMm = PixelsPerMm,
+                        zoomMode = State.Document.View.CanvasZoomMode.ToString(),
                         cropMode = State.CropMode,
                         contentPanMode = State.ContentPanMode,
                         unit = State.Document.View.RulerUnit.ToString(),
@@ -1550,6 +1556,12 @@
 
     private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
     private string ElementContentStyle(PublicationElement element) => $"width:{ContentMm(element.Width)};height:{ContentMm(element.Height)};--publisher-editor-zoom:{Inv(State.Document.Zoom)}";
+    private static string ElementZoomCompatibilityClass(PublicationElement element) => element is DevExtremeComponentElement
+        ? "zoom-transform-compat"
+        : string.Empty;
+    private static string ElementZoomStrategy(PublicationElement element) => element is DevExtremeComponentElement
+        ? "transform"
+        : "auto";
     private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{ContentMm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{shape.Fill};border:{ContentMm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? ContentMm(shape.CornerRadiusMm) : "0")}";

@@ -170,25 +170,31 @@ button { cursor: pointer; }
 }
 
 /* The object frame follows the zoomed canvas geometry, while its authored content
-   keeps a stable 96-DPI layout and is scaled as one unit. This prevents RichEdit
-   HTML, WordArt, native media controls, spreadsheets, and components from reflowing
-   or retaining their 100% size when the publication canvas zoom changes. */
+   keeps a stable 96-DPI layout and is scaled as one unit. Transform mode is the
+   standards-compatible fallback and the selectable compact rendering mode. */
 .publication-element-content {
     position: absolute;
     left: 0;
     top: 0;
     transform-origin: 0 0;
     overflow: visible;
+    zoom: 1;
     transform: scale(var(--publisher-editor-zoom, 1));
 }
 
-/* CSS zoom re-lays out and rasterizes authored content at the requested editor scale.
-   Chromium/Edge therefore keep text and native controls sharp on UHD displays.
-   The transform rule above remains the standards-compatible fallback. */
+/* Sharp CSS layout zoom is the publication default in Chromium/Edge. DevExtreme
+   widgets deliberately keep transform scaling because their pointer, Gallery,
+   Map, and virtual-layout calculations assume unzoomed CSS coordinates. */
 @supports (zoom: 1) {
-    .publication-element-content {
+    .publication-page.zoom-mode-css .publication-element-content:not(.zoom-transform-compat) {
         zoom: var(--publisher-editor-zoom, 1);
         transform: none;
+    }
+
+    .publication-page.zoom-mode-transform .publication-element-content,
+    .publication-page.zoom-mode-css .publication-element-content.zoom-transform-compat {
+        zoom: 1;
+        transform: scale(var(--publisher-editor-zoom, 1));
     }
 }
 
@@ -3470,7 +3476,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .ps-component-designer-object-mode { touch-action:none; }
 .ps-component-designer-content-mode { touch-action:none; }
 
-/* PublisherStudio 1.0.59: high-DPI workspace, provider-safe maps, and full-screen creative studios. */
+/* PublisherStudio 1.0.60: selectable canvas rendering and deterministic embedded component controls. */
 :root { --publisher-studio-shadow-gap: clamp(8px, 1.1vmin, 18px); }
 
 .modal-backdrop,

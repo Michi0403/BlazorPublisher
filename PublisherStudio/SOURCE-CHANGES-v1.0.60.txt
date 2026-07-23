@@ -1,0 +1,88 @@
+PublisherStudio v1.0.60 source changes
+======================================
+
+Repair scope
+------------
+This repair addresses a Gallery that could advance several items from one
+navigation-button press in the main publication designer and exposes both
+application canvas zoom renderers in the mainframe ribbon. CSS layout zoom stays
+the default; the previous transform renderer remains selectable.
+
+Deterministic designer Gallery navigation
+-----------------------------------------
+src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
+src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+- Disabled DevExtreme Gallery swipe recognition only in designer mode, where the
+  publication canvas already owns drag gestures.
+- Removed designer Gallery transition overlap by using immediate navigation.
+- Preserved the current selected Gallery index across harmless runtime rerenders.
+- Gave native DevExtreme controls inside a selected Professional Component full
+  pointer ownership. Gallery buttons/indicators, buttons, tabs, menu items, form
+  controls, sliders, and scrollbars no longer start a simultaneous canvas drag.
+- Kept the first control click on an unselected component selection-only, which
+  prevents an accidental action while preserving normal design-tool selection.
+- Retained native Gallery swipe and animation in export/runtime mode.
+
+Selectable publication canvas rendering
+----------------------------------------
+src/PublisherStudio.Web/Domain/PublicationModels.cs
+src/PublisherStudio.Web/Services/EditorStateService.cs
+src/PublisherStudio.Web/Services/PublicationFileService.cs
+src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor
+src/PublisherStudio.Web/Components/Editor/PageSurface.razor
+src/PublisherStudio.Web/wwwroot/css/site.css
+src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+- Added persisted PublicationCanvasZoomMode values CssLayout and Transform.
+- Added a View > Zoom ribbon selector with checked Sharp CSS layout (default) and
+  Compact transform options.
+- Included the mode in canvas reinitialization/layout keys and exposed it to the
+  browser runtime through page/config data.
+- Resynchronized all editor object content wrappers when zoom mode changes, so
+  stale inline zoom/transform values cannot survive a mode switch or live resize.
+- Kept ordinary publication content on Chromium CSS layout zoom when selected and
+  supported, with transform scaling as the compact mode and browser fallback.
+- Kept DevExtreme Professional Components on the transform-compatible editor path
+  in both modes to avoid CSS-zoom coordinate conflicts in Gallery, Map, Vector
+  Map, virtual scrolling, and other widget internals.
+- Left PrintPublication and all export paths unchanged.
+- Advanced publication format from 1.46 to 1.47. Invalid/missing mode values
+  normalize to the CSS default.
+
+Tests
+-----
+tests/componentRuntime.test.mjs
+- Added executable Gallery runtime checks for designer swipe/animation settings,
+  selected-index preservation, and unchanged export/runtime behavior.
+
+tests/pointerOwnership.test.mjs
+- Added pointer-ownership contracts for embedded DevExtreme controls and Gallery
+  navigation selectors.
+
+tests/canvasZoomScaling.test.mjs
+- Added persisted zoom-mode, ribbon, CSS/transform strategy, Professional
+  Component compatibility, runtime resynchronization, and export-isolation checks.
+
+tests/publicationPersistence.test.mjs
+- Added zoom-render-mode state/persistence/normalization checks and updated the
+  publication format contract.
+
+tests/componentRuntime.test.mjs
+tests/editorUsabilityRepair.test.mjs
+tests/fontIntegration.test.mjs
+tests/streamingRuntime.test.mjs
+- Updated version/format alignment to v1.0.60 / publication format 1.47.
+
+Release metadata
+----------------
+CHANGELOG-v1.0.60.md
+README.md
+RELEASE.md
+VALIDATION.md
+src/PublisherStudio.Web/PublisherStudio.Web.csproj
+src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+src/PublisherStudio.Web/package.json
+src/PublisherStudio.Web/package-lock.json
+src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs
+- Application, installer, npm package, lockfile, and runtime capability version
+  aligned to 1.0.60.
+- Publication format aligned to 1.47; picture format remains 1.2.

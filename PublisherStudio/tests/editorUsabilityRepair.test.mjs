@@ -21,11 +21,11 @@ const css = read('src/PublisherStudio.Web/wwwroot/css/site.css');
 const publicationModel = read('src/PublisherStudio.Web/Domain/PublicationModels.cs');
 const editorState = read('src/PublisherStudio.Web/Services/EditorStateService.cs');
 
-// High-DPI editor zoom uses Chromium CSS zoom for layout/rasterization and keeps a transform fallback.
+// High-DPI editor zoom uses selectable Chromium CSS layout zoom and compact transform rendering.
 assert.match(surface, /--publisher-editor-zoom:\{Inv\(State\.Document\.Zoom\)\}/);
 assert.match(interop, /CSS\?\.supports\?\.\("zoom", "1"\)/);
 assert.match(interop, /content\.style\.zoom = String\(zoom\)/);
-assert.match(css, /@supports \(zoom: 1\)[\s\S]*\.publication-element-content[\s\S]*zoom: var\(--publisher-editor-zoom, 1\)/);
+assert.match(css, /@supports \(zoom: 1\)[\s\S]*\.publication-page\.zoom-mode-css \.publication-element-content:not\(\.zoom-transform-compat\)[\s\S]*zoom: var\(--publisher-editor-zoom, 1\)/);
 assert.match(css, /\.publication-content-source \{ position:relative;box-sizing:border-box;transform-origin:0 0; \}/);
 assert.match(css, /\.content-pan-target \.publication-content-source \{ will-change:transform; \}/);
 
@@ -74,11 +74,11 @@ assert.match(visualRuntime, /argumentType: "datetime"/);
 assert.match(visualRuntime, /case "average"/);
 assert.match(visualRuntime, /case "count"/);
 assert.match(dataView, /private bool UsesClientVisualization => true;/);
-assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.46"/);
+assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.47"/);
 
 // Creative studios fill the viewport with the same small shadow gap on every side.
 assert.match(css, /--publisher-studio-shadow-gap: clamp\(8px, 1\.1vmin, 18px\)/);
 assert.match(css, /\.modal-backdrop,[\s\S]*\.streaming-studio-backdrop,[\s\S]*\.spreadsheet-data-object-backdrop[\s\S]*padding: var\(--publisher-studio-shadow-gap\) !important/);
 assert.match(css, /\.streaming-studio-window,[\s\S]*\.component-editor-dialog \{[\s\S]*width: 100% !important;[\s\S]*height: 100% !important;[\s\S]*max-width: none !important;/);
 
-console.log('high-DPI zoom, provider-safe map, stable map viewport, real-data chart mapping, and full-screen studio contracts passed');
+console.log('selectable high-DPI zoom, provider-safe map, stable map viewport, real-data chart mapping, and full-screen studio contracts passed');

@@ -580,3 +580,14 @@ Static checks completed for the v1.0.37 source package:
 - Confirm PDF, image, SVG, print, website, and standalone HTML output is identical regardless of the editor rendering mode.
 - Run `npm test`, `node --check` for every non-vendor JavaScript/test module, JSON/XML parsing, version/format alignment, ZIP CRC validation, and SHA-256/SHA-512 verification. Results are recorded in `TEST-RESULTS-v1.0.60.txt`.
 - A full `dotnet restore`/`dotnet build` is not claimed in this packaging environment because no .NET SDK or licensed DevExpress package feed is installed. Real DevExtreme browser interaction and UHD acceptance remain release-machine checks.
+
+
+## v1.0.61 targeted validation
+
+- The mainframe range control uses 20–400 percentage units with deterministic 1% positions.
+- Slider motion does not invoke a Blazor `oninput` state update; publication zoom is committed through `onchange` after the drag finishes.
+- The adjacent number field accepts exact whole percentages and the reset button returns directly to 100%.
+- Plus/minus use exact 5% arithmetic and no multiplicative zoom path remains.
+- The CSS-layout and transform rendering contracts remain unchanged, as do print and export paths.
+- JavaScript syntax, Node contract suites, project JSON/XML parsing, archive integrity, and checksums are checked.
+- A real `dotnet restore`/`build` and browser pointer smoke test remain unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.

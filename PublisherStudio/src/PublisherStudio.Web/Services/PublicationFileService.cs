@@ -123,7 +123,7 @@ public sealed partial class PublicationFileService
         document.Streaming ??= new PublicationStreamingSettings();
         NormalizeStreaming(document);
         _data.Normalize(document);
-        document.Zoom = Math.Clamp(document.Zoom <= 0 ? .8 : document.Zoom, .2, 4);
+        document.Zoom = Math.Clamp(Math.Round((document.Zoom <= 0 ? .8 : document.Zoom) * 100d, MidpointRounding.AwayFromZero) / 100d, .2, 4);
         document.View.GridSpacingMm = Math.Clamp(document.View.GridSpacingMm <= 0 ? 5 : document.View.GridSpacingMm, .5, 100);
         document.View.ExportDpi = Math.Clamp(document.View.ExportDpi <= 0 ? 150 : document.View.ExportDpi, 72, 600);
         if (!Enum.IsDefined(document.View.CanvasZoomMode)) document.View.CanvasZoomMode = PublicationCanvasZoomMode.CssLayout;

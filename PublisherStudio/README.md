@@ -334,6 +334,11 @@ See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media 
 See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now release stale hover/tooltips when the pointer moves onto another overlapping publication object, while non-interactive decorative shapes, WordArt, and barcodes no longer consume presentation pointer events. Interactive media, components, data visuals, publication actions, and Signal Arrow click/hover sources remain pointer owners. In the main Publisher frame, explanatory tooltips keep one stable owner while the pointer moves through nested SVG or component children and render through the browser top layer so publication objects and DevExpress stacking contexts cannot cover them. Publication and Signal Arrow coordinate data is unchanged.
 
 
+
+## v1.0.61 stable exact zoom control
+
+See `CHANGELOG-v1.0.61.md`. The mainframe zoom slider now uses deterministic percentage values and commits only when a drag finishes, so a Blazor canvas rerender cannot pull the native thumb away from the pointer. Plus/minus use exact 5% steps, an editable percentage field accepts exact values, and a dedicated 100% reset is available. Both canvas renderers continue to use live text/vector content rather than bitmap snapshots, which is why Chromium/Edge can keep both modes sharp on UHD displays. Publication format remains `1.47`.
+
 ## v1.0.60 deterministic Gallery controls and selectable zoom rendering
 
 See `CHANGELOG-v1.0.60.md`. Gallery navigation controls in the main publication frame no longer share a pointer sequence with object dragging: selected component controls own their clicks, designer swipe recognition is disabled, and the current item is retained across harmless component rerenders. HTML export keeps native Gallery swipe and animation. The **View > Zoom** ribbon now switches between **Sharp CSS layout (default)** and the previous **Compact transform** renderer, and the choice is saved with the publication/template. Professional Components use the transform-compatible path in either mode to protect DevExtreme pointer and layout calculations, while ordinary document content can use sharp CSS rerasterization. Publication format is `1.47`.

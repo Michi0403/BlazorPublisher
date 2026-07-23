@@ -1,9 +1,9 @@
-# PublisherStudio v1.0.60 release
+# PublisherStudio v1.0.61 release
 
-See `CHANGELOG-v1.0.60.md`, `CHANGELOG-v1.0.59.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.61.md`, `CHANGELOG-v1.0.60.md`, and `VALIDATION.md`.
 
-Gallery controls in the main publication frame now have deterministic pointer ownership. A selected Gallery's navigation buttons and indicators no longer compete with canvas object dragging, designer swipe recognition is disabled, navigation settles on exactly one item, and the current item survives harmless runtime rerenders. Exported HTML keeps normal Gallery swipe and animation behavior.
+The mainframe canvas zoom control now uses deterministic percentages. Range dragging updates the native control locally and commits the publication zoom only when the gesture finishes, avoiding the previous feedback loop where a Blazor canvas rerender changed scroll geometry while the pointer was still down. Plus/minus use exact 5% steps, an editable percentage field supports direct values, and a dedicated 100% reset is available.
 
-The **View > Zoom** ribbon now lets users choose between **Sharp CSS layout (default)** and the previous **Compact transform** renderer. The choice is stored with the publication/template. Ordinary document content uses CSS layout zoom in supported Chromium/Edge builds for sharp UHD rendering; DevExtreme Professional Components retain the transform-compatible path to protect widget pointer and layout calculations. Export and print rendering are unchanged.
+Both **Sharp CSS layout** and **Compact transform** continue to render live DOM/SVG/text from the stable authored-content wrapper. CSS layout zoom participates in layout and rasterization; transform mode composites after layout, but Chromium/Edge can rerasterize live vector glyphs at the current device pixel ratio. This explains why both can appear crystal sharp on UHD hardware while retaining a small quality difference.
 
-Application and installer version `1.0.60`; publication format `1.47`; picture format `1.2`. There is no separate Media Host executable or release payload.
+Application and installer version `1.0.61`; publication format `1.47`; picture format `1.2`. There is no separate Media Host executable or release payload.

@@ -1716,13 +1716,20 @@ public sealed class EditorStateService : IDisposable
 
     public void SetZoom(double zoom)
     {
-        var normalized = Math.Clamp(zoom, .2, 4);
+        var normalizedPercent = Math.Clamp(Math.Round(zoom * 100d, MidpointRounding.AwayFromZero), 20d, 400d);
+        var normalized = normalizedPercent / 100d;
         if (NearlyEqual(Document.Zoom, normalized)) return;
         Document.Zoom = normalized;
         Notify();
     }
 
-    public void ZoomBy(double factor) => SetZoom(Document.Zoom * factor);
+    public void SetZoomPercent(double percent) => SetZoom(percent / 100d);
+
+    public void StepZoomPercent(int deltaPercent)
+    {
+        var currentPercent = Math.Round(Document.Zoom * 100d, MidpointRounding.AwayFromZero);
+        SetZoomPercent(currentPercent + deltaPercent);
+    }
 
     public void SetCanvasZoomMode(PublicationCanvasZoomMode mode)
     {

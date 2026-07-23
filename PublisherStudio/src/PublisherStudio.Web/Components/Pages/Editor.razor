@@ -146,11 +146,17 @@
         <span>Page @(State.Document.Pages.FindIndex(p => p.Id == State.SelectedPageId) + 1) of @State.Document.Pages.Count</span>
         <span>@SelectionStatus</span>
         <span>@State.CurrentPage.WidthMm.ToString("0.#", CultureInfo.InvariantCulture) × @State.CurrentPage.HeightMm.ToString("0.#", CultureInfo.InvariantCulture) mm</span>
-        <label class="zoom-control">Zoom
-            <button type="button" title="Zoom out" @onclick="ZoomOut">−</button>
-            <input type="range" min="0.2" max="4" step="0.05" value="@State.Document.Zoom.ToString(CultureInfo.InvariantCulture)" @oninput="ChangeZoom" />
-            <button type="button" title="Zoom in" @onclick="ZoomIn">+</button>
-            <b>@Math.Round(State.Document.Zoom * 100)%</b>
+        <label class="zoom-control" title="Drag or use the arrow keys in 1% steps, type an exact percentage, or reset to 100%. Slider changes are committed after release so the thumb cannot fight a canvas rerender.">
+            <span>Zoom</span>
+            <button type="button" title="Zoom out by 5%" @onclick="ZoomOut">−</button>
+            <input class="zoom-range" type="range" min="20" max="400" step="1" value="@ZoomPercent"
+                   oninput="const field=this.closest('.zoom-control')?.querySelector('.zoom-percent-input'); if(field) field.value=this.value;"
+                   @onchange="ChangeZoomPercent" aria-label="Canvas zoom" />
+            <button type="button" title="Zoom in by 5%" @onclick="ZoomIn">+</button>
+            <input class="zoom-percent-input" type="number" min="20" max="400" step="1" value="@ZoomPercent"
+                   @onchange="ChangeZoomPercent" aria-label="Exact canvas zoom percentage" />
+            <span aria-hidden="true">%</span>
+            <button type="button" class="zoom-reset" title="Reset zoom to 100%" @onclick="Zoom100">100%</button>
         </label>
     </footer>
 </div>
@@ -1801,14 +1807,17 @@
         State.RenameDocument(args.Value?.ToString() ?? string.Empty);
     }
 
-    private void ChangeZoom(ChangeEventArgs args)
+    private int ZoomPercent => (int)Math.Round(State.Document.Zoom * 100, MidpointRounding.AwayFromZero);
+
+    private void ChangeZoomPercent(ChangeEventArgs args)
     {
-        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var zoom))
-            State.SetZoom(zoom);
+        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var percent))
+            State.SetZoomPercent(percent);
     }
 
-    private void ZoomIn() => State.ZoomBy(1.15);
-    private void ZoomOut() => State.ZoomBy(1 / 1.15);
+    private void ZoomIn() => State.StepZoomPercent(5);
+    private void ZoomOut() => State.StepZoomPercent(-5);
+    private void Zoom100() => State.SetZoomPercent(100);
 
     private void ShowError(Exception ex)
     {

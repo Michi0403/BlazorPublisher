@@ -1,0 +1,100 @@
+PublisherStudio v1.0.61 validation results
+==========================================
+
+Automated Node contract suites
+------------------------------
+Command: npm test
+Working directory: src/PublisherStudio.Web
+Result: PASS
+
+12 suites passed:
+1. timeline lifecycle, backpressure, and bounded trimming
+2. component catalog, deterministic designer Gallery navigation, REST/OData,
+   menus, layout, media, chat, connections, and single-file export
+3. offline signal connectors, spreadsheet targeting, SVG, and path tools
+4. tooltip/pointer ownership including embedded DevExtreme controls, chart hover
+   cleanup, and Signal Arrow geometry
+5. explicit Map/Vector Map object/content mouse modes
+6. offline system-font discovery and manual font entry
+7. selectable CSS/transform canvas zoom, exact-value controls, and DevExtreme
+   compatibility
+8. streaming/Twitch/ingest/chat/native capture/FFmpeg/LAN/hotkey/Now Playing
+9. interface, canvas activation/context menu, and application tooltips
+10. installer resilience
+11. publication settings including persisted canvas rendering mode, repeatable
+    preview, local streaming settings, and map modes
+12. selectable high-DPI zoom, provider-safe Map, stable map viewport, chart
+    mapping, and full-screen studios
+
+The v1.0.61 executable/static contracts assert that:
+- the mainframe zoom range uses integer percent values from 20 through 400;
+- the range does not send a Blazor state update on every pointer movement;
+  publication zoom is committed only through the release/change event;
+- the adjacent number field accepts exact whole-percent values and the dedicated
+  reset button sets 100% directly;
+- plus/minus use deterministic 5% arithmetic and the old multiplicative 1.15
+  path is absent;
+- zoom values are normalized to integer percentages in state changes and while
+  older publications are loaded, eliminating historic values such as 132.25%;
+- CssLayout and Transform remain separate persisted editor rendering modes;
+- both modes continue to render live authored DOM/SVG/text content rather than
+  bitmap snapshots;
+- PrintPublication and export rendering do not use the editor-only zoom control.
+
+JavaScript/module syntax
+------------------------
+Command: node --check for every non-vendor *.js and *.mjs file under src and tests
+Result: PASS
+Files checked: 23
+
+Structured files and versions
+-----------------------------
+JSON parse: PASS (9 files)
+MSBuild/XML parse: PASS (2 project files)
+Version alignment: PASS
+- PublisherStudio.Web.csproj: 1.0.61
+- PublisherStudio.InstallerConsole.csproj: 1.0.61
+- package.json: 1.0.61
+- package-lock.json root/package: 1.0.61
+- streaming runtime capability endpoint: 1.0.61
+Publication format: 1.47 (unchanged)
+Picture format: 1.2 (unchanged)
+
+Browser smoke-test limitation
+-----------------------------
+A minimal Chromium headless check was attempted, but Chromium could not complete
+in this container because its desktop/DBus environment is unavailable. The exact
+range gesture and UHD text comparison therefore remain release-machine browser
+checks.
+
+Source/package limitations
+--------------------------
+The supplied source archive contains no .git directory, so commit-level Git
+history is unavailable in this package.
+
+The environment has no dotnet executable and no licensed DevExpress package
+feed. A full .NET 10 restore/build and Razor/C# compilation therefore were not
+run. Real Edge/Chromium pointer interaction and licensed publish output remain
+release-machine checks.
+
+Required release-machine acceptance
+-----------------------------------
+- Drag the status-bar range at 50%, 100%, 200%, and 400%. The thumb must remain
+  under the pointer and the canvas must update once when the drag is released.
+- Focus the range and use arrow keys to reach exact whole-percent values.
+- Type 100, 137, and 400 into the numeric field and verify exact application,
+  clamping, persistence, and reopening.
+- Use plus/minus repeatedly and verify exact 5% movement with no fractional
+  percentages. Use the 100% button from low and high zoom values.
+- Compare Sharp CSS layout and Compact transform at 300-400% on UHD hardware.
+  Both should keep live text sharp; the expected small compositor/layout quality
+  difference may remain.
+- Confirm PDF, image, SVG, print, website, and standalone HTML output is unchanged.
+
+Release archive
+---------------
+Archive: PublisherStudio-v1.0.61-stable-exact-zoom-source.zip
+ZIP file entries: 383
+Excluded .git, node_modules, bin, and obj directory entries: PASS (0 present)
+ZIP CRC / unzip -t: PASS
+SHA-256 and SHA-512 verification for the source ZIP and companion reports: PASS

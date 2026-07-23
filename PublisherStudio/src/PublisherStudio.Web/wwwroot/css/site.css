@@ -327,10 +327,12 @@ button { cursor: pointer; }
 
 .status-bar { min-width: 0; width: 100%; display: flex; align-items: center; gap: 24px; padding: 0 10px; overflow: hidden; color: #eef6ff; background: #165a89; font-size: 11px; }
 .status-bar > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.zoom-control { min-width: 0; flex: 0 1 auto; display: flex; align-items: center; gap: 6px; margin-left: auto; white-space: nowrap; }
-.zoom-control input { width: clamp(84px, 10vw, 140px); min-width: 64px; padding: 0; }
-.zoom-control b { min-width: 38px; text-align: right; }
+.zoom-control { min-width: 0; flex: 0 1 auto; display: flex; align-items: center; gap: 5px; margin-left: auto; white-space: nowrap; }
+.zoom-control .zoom-range { width: clamp(112px, 12vw, 190px); min-width: 84px; padding: 0; }
+.zoom-control .zoom-percent-input { width: 58px; min-width: 58px; height: 21px; box-sizing: border-box; padding: 0 3px; border: 1px solid #ffffff55; border-radius: 2px; color: white; background: #ffffff12; text-align: right; font: inherit; }
+.zoom-control .zoom-percent-input:focus { outline: 1px solid #fff; outline-offset: 1px; background: #ffffff24; }
 .zoom-control button { display: grid; place-items: center; width: 21px; height: 21px; padding: 0; color: white; border: 1px solid #ffffff55; border-radius: 2px; background: #ffffff12; }
+.zoom-control button.zoom-reset { width: auto; min-width: 34px; padding: 0 5px; }
 .zoom-control button:hover { background: #ffffff30; }
 .hidden-file-input { display: none; }
 .print-publication { position: fixed; left: -100000px; top: 0; visibility: hidden; pointer-events: none; }
@@ -3476,7 +3478,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .ps-component-designer-object-mode { touch-action:none; }
 .ps-component-designer-content-mode { touch-action:none; }
 
-/* PublisherStudio 1.0.60: selectable canvas rendering and deterministic embedded component controls. */
+/* PublisherStudio 1.0.61: selectable canvas rendering and deterministic embedded component controls. */
 :root { --publisher-studio-shadow-gap: clamp(8px, 1.1vmin, 18px); }
 
 .modal-backdrop,

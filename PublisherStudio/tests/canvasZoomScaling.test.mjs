@@ -7,6 +7,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const pageSurface = read('src/PublisherStudio.Web/Components/Editor/PageSurface.razor');
+const editor = read('src/PublisherStudio.Web/Components/Pages/Editor.razor');
 const ribbon = read('src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor');
 const model = read('src/PublisherStudio.Web/Domain/PublicationModels.cs');
 const state = read('src/PublisherStudio.Web/Services/EditorStateService.cs');
@@ -32,6 +33,23 @@ assert.match(pageSurface, /border:@ContentMm\(text\.BorderWidth\)/);
 assert.match(pageSurface, /border:@ContentMm\(spreadsheet\.BorderWidthMm\)/);
 assert.match(pageSurface, /height:\{ContentMm\(Math\.Max\(shape\.StrokeWidth, \.3\)\)\}/);
 assert.match(pageSurface, /border:\{ContentMm\(image\.BorderWidthMm\)\}/);
+
+
+// Mainframe zoom control uses percent units and commits the range only after release.
+// This avoids a Blazor canvas rerender moving the native range thumb mid-drag.
+assert.match(editor, /class="zoom-range" type="range" min="20" max="400" step="1" value="@ZoomPercent"/);
+assert.match(editor, /@onchange="ChangeZoomPercent" aria-label="Canvas zoom"/);
+assert.doesNotMatch(editor, /class="zoom-range"[^>]*@oninput=/);
+assert.match(editor, /class="zoom-percent-input" type="number" min="20" max="400" step="1" value="@ZoomPercent"/);
+assert.match(editor, /private int ZoomPercent => \(int\)Math\.Round\(State\.Document\.Zoom \* 100, MidpointRounding\.AwayFromZero\);/);
+assert.match(editor, /private void ZoomIn\(\) => State\.StepZoomPercent\(5\);/);
+assert.match(editor, /private void ZoomOut\(\) => State\.StepZoomPercent\(-5\);/);
+assert.match(editor, /private void Zoom100\(\) => State\.SetZoomPercent\(100\);/);
+assert.match(state, /public void SetZoomPercent\(double percent\) => SetZoom\(percent \/ 100d\);/);
+assert.match(state, /normalizedPercent = Math\.Clamp\(Math\.Round\(zoom \* 100d, MidpointRounding\.AwayFromZero\), 20d, 400d\);/);
+assert.match(files, /document\.Zoom = Math\.Clamp\(Math\.Round\(\(document\.Zoom <= 0 \? \.8 : document\.Zoom\) \* 100d, MidpointRounding\.AwayFromZero\) \/ 100d, \.2, 4\);/);
+assert.match(state, /public void StepZoomPercent\(int deltaPercent\)[\s\S]*Math\.Round\(Document\.Zoom \* 100d, MidpointRounding\.AwayFromZero\)[\s\S]*SetZoomPercent\(currentPercent \+ deltaPercent\);/);
+assert.doesNotMatch(state, /public void ZoomBy\(double factor\)/);
 
 assert.match(model, /PublicationCanvasZoomMode \{ CssLayout, Transform \}/);
 assert.match(model, /CanvasZoomMode \{ get; set; \} = PublicationCanvasZoomMode\.CssLayout/);
@@ -70,4 +88,4 @@ for (const zoom of [.2, .5, .75, 1, 1.25, 2, 4]) {
     }
 }
 
-console.log('Selectable CSS/transform canvas zoom and DevExtreme compatibility contracts passed.');
+console.log('Selectable CSS/transform canvas zoom, stable exact-value controls, and DevExtreme compatibility contracts passed.');

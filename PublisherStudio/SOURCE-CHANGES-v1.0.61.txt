@@ -1,0 +1,42 @@
+PublisherStudio v1.0.61 source changes
+======================================
+
+Repair scope
+------------
+This repair makes the mainframe canvas zoom control deterministic and explains
+why both selectable editor rendering modes can remain sharp on UHD displays.
+
+Exact zoom control
+------------------
+src/PublisherStudio.Web/Components/Pages/Editor.razor
+src/PublisherStudio.Web/Services/EditorStateService.cs
+src/PublisherStudio.Web/wwwroot/css/site.css
+- Changed the range control from fractional zoom values to integer percentages.
+- Changed range state commits from oninput to onchange so Blazor does not rebuild
+  the zoomed canvas while the native range thumb is still being dragged.
+- Added a live client-side preview in the adjacent exact-value field without a
+  server round trip during the drag.
+- Added an exact numeric percentage input and a direct 100% reset button.
+- Replaced multiplicative 1.15 zoom buttons with deterministic +/-5% steps.
+- Kept the saved publication zoom value and both renderer implementations intact.
+
+Tests
+-----
+tests/canvasZoomScaling.test.mjs
+- Added contracts for percent-based slider values, release-only commits, exact
+  numeric entry, deterministic step buttons, and removal of multiplicative zoom.
+
+Release metadata
+----------------
+CHANGELOG-v1.0.61.md
+README.md
+RELEASE.md
+VALIDATION.md
+src/PublisherStudio.Web/PublisherStudio.Web.csproj
+src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+src/PublisherStudio.Web/package.json
+src/PublisherStudio.Web/package-lock.json
+src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs
+- Application, installer, npm package, lockfile, and runtime capability version
+  aligned to 1.0.61.
+- Publication format remains 1.47; picture format remains 1.2.

@@ -557,15 +557,24 @@
                             @if (_draft.ComponentKind == PublicationComponentKind.Map)
                             {
                                 <div class="component-form-grid wide">
-                                    <label>Provider<select @bind="_draft.MapProvider"><option value="google">Google</option><option value="googleStatic">Google Static</option><option value="bing">Bing</option><option value="azure">Azure</option></select></label>
+                                    <label>Provider<select @bind="_draft.MapProvider"><option value="">Select a provider…</option><option value="google">Google Maps</option><option value="googleStatic">Google Static Maps</option><option value="azure">Azure Maps</option><option value="bing">Bing Maps (legacy)</option></select></label>
                                     <label>Map type<select @bind="_draft.MapType"><option value="roadmap">Road map</option><option value="satellite">Satellite</option><option value="hybrid">Hybrid</option></select></label>
-                                    <label class="span-2">Provider API key<input type="password" @bind="_draft.MapApiKey" autocomplete="off" /></label>
+                                    <label class="span-2">Provider API key<input type="password" @bind="_draft.MapApiKey" autocomplete="off" placeholder="Required before preview or export" /></label>
+                                    @if (UsesGoogleMapProvider)
+                                    {
+                                        <label class="span-2">Google Map ID (optional)<input @bind="_draft.MapId" autocomplete="off" placeholder="Enables Google advanced markers" /></label>
+                                    }
                                     <label>Address field<select @bind="_draft.AddressField"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     <label>Route group field<select @bind="_draft.MapRouteField"><option value="">One route</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     <label>Route order field<select @bind="_draft.MapOrderField"><option value="">Row order</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     <label><input type="checkbox" @bind="_draft.MapShowRoutes" /> Build routes from grouped rows</label>
                                 </div>
-                                <p class="component-info">Rows with latitude/longitude become live markers. Rows sharing a route group become an ordered route. Provider maps require the corresponding provider key.</p>
+                                <div class="component-warning map-provider-gate">
+                                    <strong>External provider gate</strong>
+                                    <span>PublisherStudio does not contact a provider until both a supported provider and an API key are configured. Standalone HTML contains that browser key, so restrict it to the intended origins and APIs.</span>
+                                    <button type="button" @onclick="UseBundledVectorMap">Use bundled keyless Vector Map instead</button>
+                                </div>
+                                <p class="component-info">Rows with latitude/longitude become live markers. Rows sharing a route group become an ordered route. The bundled DevExtreme Map supports Google, Google Static, Azure, and legacy Bing provider contracts; OpenStreetMap is not injected as an unsupported hidden default.</p>
                             }
                             else
                             {
@@ -791,9 +800,16 @@
         && (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
         && _draft.MenuSourceMode == PublicationMenuSourceMode.ManualItems;
     private bool UsesDataConnection => !IsManualMenu;
+    private static readonly HashSet<string> SupportedMapProviders = new(StringComparer.OrdinalIgnoreCase) { "google", "googleStatic", "azure", "bing" };
+    private bool UsesGoogleMapProvider => _draft?.MapProvider is "google" or "googleStatic";
+    private bool MapConfigurationValid => _draft?.ComponentKind != PublicationComponentKind.Map
+        || (SupportedMapProviders.Contains(_draft.MapProvider ?? string.Empty) && !string.IsNullOrWhiteSpace(_draft.MapApiKey));
     private bool CanSave => _draft is not null && !string.IsNullOrWhiteSpace(_draft.Title)
+        && MapConfigurationValid
         && (!UsesDataConnection || _draft.Connection.Mode is not (PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData) || !string.IsNullOrWhiteSpace(_draft.Connection.Url));
-    private string ValidationMessage => CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, when a data-driven component uses direct REST/OData, an endpoint URL.";
+    private string ValidationMessage => _draft?.ComponentKind == PublicationComponentKind.Map && !MapConfigurationValid
+        ? "Select a supported provider and enter its API key. No provider preview request is made before both are present."
+        : CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, when a data-driven component uses direct REST/OData, an endpoint URL.";
 
     protected override void OnParametersSet()
     {
@@ -857,6 +873,15 @@
             }
         }
         _section = kind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap ? "map" : kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu ? "menu" : "general";
+    }
+
+    private void UseBundledVectorMap()
+    {
+        if (_draft is null) return;
+        ChangeKind(PublicationComponentKind.VectorMap);
+        _draft.MapProvider = string.Empty;
+        _draft.MapApiKey = string.Empty;
+        _draft.MapId = string.Empty;
     }
 
     private string DrawClassMarker => _drawMode == "marker" ? "active" : string.Empty;

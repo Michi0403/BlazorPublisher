@@ -142,6 +142,34 @@ public enum SparklineChartStyle
     WinLoss
 }
 
+public enum DataVisualArgumentMode
+{
+    Auto,
+    Discrete,
+    Continuous,
+    DateTime
+}
+
+public enum DataVisualAggregationMode
+{
+    Auto,
+    None,
+    Sum,
+    Average,
+    Minimum,
+    Maximum,
+    Count
+}
+
+public enum DataVisualSortMode
+{
+    DataOrder,
+    ArgumentAscending,
+    ArgumentDescending,
+    ValueAscending,
+    ValueDescending
+}
+
 public sealed class DataVisualElement : PublicationElement
 {
     public override PublicationElementKind Kind => PublicationElementKind.DataVisual;
@@ -154,6 +182,9 @@ public sealed class DataVisualElement : PublicationElement
     public string Title { get; set; } = "Chart";
     public string ArgumentField { get; set; } = string.Empty;
     public string SeriesField { get; set; } = string.Empty;
+    public DataVisualArgumentMode ArgumentMode { get; set; } = DataVisualArgumentMode.Auto;
+    public DataVisualAggregationMode AggregationMode { get; set; } = DataVisualAggregationMode.Auto;
+    public DataVisualSortMode SortMode { get; set; } = DataVisualSortMode.DataOrder;
     public List<string> ValueFields { get; set; } = [];
     public string LowValueField { get; set; } = string.Empty;
     public string HighValueField { get; set; } = string.Empty;

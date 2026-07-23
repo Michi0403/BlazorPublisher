@@ -389,9 +389,10 @@ public sealed class DevExtremeComponentElement : PublicationElement
     public double ContentOffsetY { get; set; }
     public double ContentScale { get; set; } = 1;
 
-    public string MapProvider { get; set; } = "google";
+    public string MapProvider { get; set; } = string.Empty;
     public string MapType { get; set; } = "roadmap";
     public string MapApiKey { get; set; } = string.Empty;
+    public string MapId { get; set; } = string.Empty;
     public double MapCenterLatitude { get; set; } = 51.1657;
     public double MapCenterLongitude { get; set; } = 10.4515;
     public double MapZoom { get; set; } = 4;

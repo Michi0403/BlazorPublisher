@@ -223,6 +223,9 @@ public sealed partial class PublicationFileService
         foreach (var visual in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<DataVisualElement>())
         {
             visual.ValueFields ??= [];
+            if (!Enum.IsDefined(visual.ArgumentMode)) visual.ArgumentMode = DataVisualArgumentMode.Auto;
+            if (!Enum.IsDefined(visual.AggregationMode)) visual.AggregationMode = DataVisualAggregationMode.Auto;
+            if (!Enum.IsDefined(visual.SortMode)) visual.SortMode = DataVisualSortMode.DataOrder;
             visual.LowValueField ??= string.Empty;
             visual.HighValueField ??= string.Empty;
             visual.OpenValueField ??= string.Empty;
@@ -398,7 +401,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.45";
+        document.FormatVersion = "1.46";
         return document;
     }
 

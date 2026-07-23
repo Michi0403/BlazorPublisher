@@ -1,0 +1,128 @@
+PublisherStudio v1.0.59 source changes
+======================================
+
+Repair scope
+------------
+This repair addresses five related usability reports: blurred publication content
+at 300-400% application zoom on UHD displays, Vector Map zoom-control feedback,
+unsafe keyless provider-map defaults, difficult real-data chart mapping, and
+creative editor dialogs that leave avoidable unused margins.
+
+Sharp high-DPI editor zoom
+--------------------------
+src/PublisherStudio.Web/Components/Editor/PageSurface.razor
+src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+src/PublisherStudio.Web/wwwroot/css/site.css
+- Kept publication object geometry on the existing zoom-aware canvas, while the
+  authored content keeps its stable 96-DPI size.
+- Added a per-element editor zoom variable. Chromium/Edge use CSS layout zoom so
+  text, RichEdit HTML, WordArt, native media controls, spreadsheets, charts, and
+  Professional Components are rasterized at the requested zoom instead of
+  magnifying a previously composited low-resolution layer.
+- Retained transform scaling as the standards-compatible fallback.
+- Removed permanent transform-layer promotion from ordinary content; it is used
+  only for an active inner content-pan target.
+- Export/print rendering remains on the existing non-editor path.
+
+Provider-safe Map configuration
+-------------------------------
+src/PublisherStudio.Web/Domain/PublicationComponentModels.cs
+src/PublisherStudio.Web/Services/PublicationComponentService.cs
+src/PublisherStudio.Web/Components/Editor/DevExtremeComponentEditor.razor
+src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
+src/PublisherStudio.Web/wwwroot/css/site.css
+- Removed the implicit Google provider default from new and normalized Map
+  objects. Supported provider names are normalized explicitly.
+- Added persisted Google Map ID support for DevExtreme advanced markers.
+- Component Studio now requires both a supported provider and API key before a
+  provider Map can be applied. It exposes Google, Google Static, Azure, and
+  legacy Bing compatibility plus a one-click switch to bundled Vector Map.
+- The runtime validates provider configuration before DevExtreme construction.
+  Missing provider/key state renders a local placeholder and makes no provider
+  request, including when an older keyless publication is loaded.
+- Added a visible warning that standalone browser exports contain configured
+  browser-side keys and those keys should be provider/API/origin restricted.
+- No unsupported OpenStreetMap tile backend is silently injected into dxMap.
+
+Stable provider Map and Vector Map viewport controls
+---------------------------------------------------
+src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
+src/PublisherStudio.Web/Services/EditorStateService.cs
+src/PublisherStudio.Web/Services/PublicationComponentService.cs
+- Provider initialization, auto-fit, and programmatic option changes no longer
+  trigger publication viewport persistence.
+- Pointer, mouse, touch, wheel, and control-bar gestures are tracked as one user
+  transaction. Center/zoom changes are committed only after pointer/touch release
+  or wheel idle, preventing a Blazor rerender from fighting the control mid-drag.
+- Viewport timers and gesture listeners are cancelled during widget disposal.
+- Vector Map now preserves its native 1..256 zoom-factor range. It is no longer
+  truncated to the provider Map 1..20 limit when normalized or committed.
+- Existing explicit Move map object / Pan-zoom map content ownership is retained.
+
+Real-data chart mapping
+-----------------------
+src/PublisherStudio.Web/Domain/PublicationDataModels.cs
+src/PublisherStudio.Web/Services/PublicationDataService.cs
+src/PublisherStudio.Web/Services/PublicationFileService.cs
+src/PublisherStudio.Web/Components/Editor/DataVisualEditor.razor
+src/PublisherStudio.Web/Components/Editor/DataVisualView.razor
+src/PublisherStudio.Web/wwwroot/js/liveDataInterop.js
+src/PublisherStudio.Web/wwwroot/css/site.css
+- Added persisted argument-axis mode, repeated-category aggregation mode, and
+  point-sort mode. Publication format advanced from 1.45 to 1.46.
+- Added Auto-map fields and a live Mapping check to Chart Studio.
+- Automatic role mapping covers category/time charts, numeric XY/bubble charts,
+  OHLC/stock, Sankey, and TreeMap data while preserving all manual selectors.
+- Value-field choices prefer detected numeric/Boolean measures; missing numeric
+  measures and incomplete specialized role sets produce explicit guidance.
+- Browser chart rendering now converts numeric/date/discrete arguments, groups
+  duplicate argument+series points, applies sum/average/minimum/maximum/count or
+  no aggregation, and sorts by argument or value.
+- Range, bubble, and financial rows remain explicit rather than being collapsed.
+- Range Selector uses its native scale valueType contract; Chart and Polar Chart
+  use argument-axis typing.
+- All visual kinds use the same browser runtime in the editor and interactive
+  export so the configured data semantics are not split between renderers.
+
+Full-viewport creative dialogs
+------------------------------
+src/PublisherStudio.Web/wwwroot/css/site.css
+- Added one responsive shadow-gap variable used equally on all four sides.
+- Story/RichEdit, Spreadsheet, spreadsheet-data selection, Data Manager, Chart
+  Studio, Picture Studio, Media Studio, Streaming Studio, Barcode Studio, and
+  Component Studio fill the remaining viewport instead of retaining fixed
+  desktop width/height caps.
+- Narrow-screen behavior reduces the common gap without removing it.
+
+Tests
+-----
+tests/editorUsabilityRepair.test.mjs
+- New high-DPI zoom, provider-map gate, viewport transaction/range, chart mapping,
+  and full-screen dialog contract suite.
+
+tests/componentRuntime.test.mjs
+- Added executable proof that a Map without provider/key returns the local
+  placeholder before DevExtreme/provider activity and emits no network request.
+- Updated publication format contract.
+
+tests/canvasZoomScaling.test.mjs
+- Updated the editor zoom contract for CSS layout zoom plus transform fallback.
+
+tests/fontIntegration.test.mjs
+tests/streamingRuntime.test.mjs
+- Updated application version-alignment checks to v1.0.59.
+
+Release metadata
+----------------
+CHANGELOG-v1.0.59.md
+README.md
+RELEASE.md
+VALIDATION.md
+src/PublisherStudio.Web/PublisherStudio.Web.csproj
+src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+src/PublisherStudio.Web/package.json
+src/PublisherStudio.Web/package-lock.json
+src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs
+- Application, installer, npm package, lockfile, and runtime capability version
+  aligned to 1.0.59.
+- Publication format aligned to 1.46; picture format remains 1.2.

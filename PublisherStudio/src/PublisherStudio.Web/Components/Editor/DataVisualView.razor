@@ -182,21 +182,7 @@
     private double KpiValue => ChartPoints.FirstOrDefault()?.Value ?? 0;
     private string KpiLabel => $"{KpiValue:0.##} / {Item.MaximumValue:0.##}";
     private double PieInnerDiameter => Item.PieStyle == PieChartStyle.Doughnut ? .55 : 0;
-    private bool UsesClientVisualization => Item.VisualKind is DataVisualKind.PolarChart
-        or DataVisualKind.CircularGauge
-        or DataVisualKind.LinearGauge
-        or DataVisualKind.RangeSelector
-        or DataVisualKind.Sankey
-        or DataVisualKind.Funnel
-        or DataVisualKind.Pyramid
-        or DataVisualKind.TreeMap
-        or DataVisualKind.DataTable
-        || (Item.VisualKind == DataVisualKind.CartesianChart
-            && Item.CartesianStyle is CartesianChartStyle.RangeArea
-                or CartesianChartStyle.RangeBar
-                or CartesianChartStyle.Bubble
-                or CartesianChartStyle.Candlestick
-                or CartesianChartStyle.Stock);
+    private bool UsesClientVisualization => true;
     private string ClientConfigBase64
     {
         get

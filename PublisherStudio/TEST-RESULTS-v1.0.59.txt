@@ -1,0 +1,91 @@
+PublisherStudio v1.0.59 validation results
+==========================================
+
+Automated Node contract suites
+------------------------------
+Command: npm test
+Working directory: src/PublisherStudio.Web
+Result: PASS
+
+12 suites passed:
+1. timeline lifecycle, backpressure, and bounded trimming
+2. component catalog, REST/OData, menus, layout, media, chat, connections, export
+3. offline signal connectors, spreadsheet targeting, SVG, and path tools
+4. tooltip/pointer ownership, chart cleanup, and Signal Arrow geometry
+5. explicit Map/Vector Map object/content mouse modes
+6. offline system-font discovery and manual font entry
+7. uniform canvas zoom scaling
+8. streaming/Twitch/ingest/chat/native capture/FFmpeg/LAN/hotkey/Now Playing
+9. interface, canvas activation/context menu, and application tooltips
+10. installer resilience
+11. publication settings, repeatable preview, local streaming settings, map modes
+12. UHD layout zoom, provider-safe Map, stable map viewport, chart mapping, dialogs
+
+The v1.0.59 usability suite and executable component runtime proof assert that:
+- Chromium CSS zoom is selected when available and the transform fallback remains;
+- ordinary content is not permanently promoted to a transform layer;
+- new Map objects do not have an implicit Google provider;
+- provider Map Apply requires a supported provider plus a non-empty API key;
+- a keyless Map is stopped before DevExtreme construction, renders a local
+  placeholder, and performs no external request in the executable runtime test;
+- Google Map ID/providerConfig is carried into the browser runtime;
+- only a real user gesture can schedule center/zoom persistence;
+- persistence waits for gesture completion/wheel idle and old 180 ms feedback is gone;
+- Vector Map normalization/commit preserves the 1..256 zoom-factor range;
+- chart argument mode, aggregation, sorting, Auto-map, numeric guidance, and typed
+  browser rendering are wired through model, persistence, editor, and runtime;
+- all main creative dialogs, including Streaming Studio and nested spreadsheet
+  data selection, use the same responsive four-sided shadow gap.
+
+JavaScript/module syntax
+------------------------
+Command: node --check for every non-vendor *.js and *.mjs file under src and tests
+Result: PASS
+Files checked: 23
+
+Structured files and versions
+-----------------------------
+JSON parse: PASS (9 files)
+MSBuild/XML parse: PASS (2 project files)
+Version alignment: PASS
+- PublisherStudio.Web.csproj: 1.0.59
+- PublisherStudio.InstallerConsole.csproj: 1.0.59
+- package.json: 1.0.59
+- package-lock.json root/package: 1.0.59
+- streaming runtime capability endpoint: 1.0.59
+Publication format: 1.46
+Picture format: 1.2 (unchanged)
+
+Source/package limitations
+--------------------------
+The supplied source archive contains no .git directory, so commit-level Git
+history is unavailable in this package.
+
+The environment has no dotnet executable and no licensed DevExpress package
+feed. A full .NET 10 restore/build and Razor/C# compilation therefore were not
+run. Real DevExtreme provider rendering, live provider credentials, UHD browser
+acceptance, and licensed publish output remain release-machine checks.
+
+Required release-machine acceptance
+-----------------------------------
+- Compare 100%, 200%, 300%, and 400% application canvas zoom on UHD hardware,
+  independently varying Edge/Chromium browser zoom. Check text, RichEdit, native
+  media controls, spreadsheets, charts, and Professional Components.
+- Use browser network tools to confirm missing provider/key state makes no Google,
+  Azure, Bing, or other map-provider request. Exercise valid Google, Google Static,
+  and Azure credentials; test legacy Bing only with an existing entitled account.
+- Drag/wheel/touch both Map kinds and use the Vector Map control bar repeatedly.
+  Confirm no mid-gesture jump and that zoom factors above 20 persist for Vector Map.
+- Exercise category, numeric, date/time, duplicate-category, multi-series, range,
+  bubble, OHLC/stock, Sankey, and TreeMap datasets in preview and every export.
+- Open every creative studio at multiple browser/window sizes and verify equal
+  shadow margins, readable ribbon/text, and reachable footers/actions.
+- Confirm PDF, image, SVG, print, website, and standalone HTML output remains valid.
+
+Release archive
+---------------
+Archive: PublisherStudio-v1.0.59-uhd-maps-charts-workspace-source.zip
+ZIP file entries: 377
+Excluded .git, node_modules, bin, and obj directory entries: PASS (0 present)
+ZIP CRC / unzip -t: PASS
+SHA-256 and SHA-512 verification for the source ZIP and companion reports: PASS

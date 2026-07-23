@@ -15,7 +15,7 @@ assert.ok(pageSurface.indexOf('publication-element-content') < pageSurface.index
 assert.ok(pageSurface.indexOf('</div>\n                    @if (!element.Locked)') > pageSurface.indexOf('@switch (element)'), 'selection ports and resize handles must remain outside the scaled content wrapper');
 assert.match(pageSurface, /private const double BasePixelsPerMm = 3\.7795275591;/);
 assert.match(pageSurface, /private double PixelsPerMm => BasePixelsPerMm \* State\.Document\.Zoom;/);
-assert.match(pageSurface, /private string ElementContentStyle\(PublicationElement element\) => \$"width:\{ContentMm\(element\.Width\)\};height:\{ContentMm\(element\.Height\)\};transform:scale\(\{Inv\(State\.Document\.Zoom\)\}\)";/);
+assert.match(pageSurface, /private string ElementContentStyle\(PublicationElement element\) => \$"width:\{ContentMm\(element\.Width\)\};height:\{ContentMm\(element\.Height\)\};--publisher-editor-zoom:\{Inv\(State\.Document\.Zoom\)\}";/);
 assert.match(pageSurface, /padding:@ContentMm\(text\.PaddingMm\)/);
 assert.match(pageSurface, /border:@ContentMm\(text\.BorderWidth\)/);
 assert.match(pageSurface, /border:@ContentMm\(spreadsheet\.BorderWidthMm\)/);
@@ -25,7 +25,10 @@ assert.match(css, /\.publication-element-content\s*\{[\s\S]*?position:\s*absolut
 assert.doesNotMatch(printSurface, /publication-element-content/, 'print/export rendering remains on its canonical publication surface');
 assert.match(interop, /function syncEditorElementContentFrame\(state, element, widthMm, heightMm\)/);
 assert.match(interop, /content\.style\.width = `\$\{Math\.max\(0, number\(widthMm\)\) \* basePixelsPerMm\}px`/);
+assert.match(interop, /CSS\?\.supports\?\.\("zoom", "1"\)/);
+assert.match(interop, /content\.style\.zoom = String\(zoom\)/);
 assert.match(interop, /content\.style\.transform = `scale\(\$\{zoom\}\)`/);
+assert.match(css, /@supports \(zoom: 1\)/);
 assert.equal((interop.match(/syncEditorElementContentFrame\(state, /g) || []).length, 3, 'the helper must be defined and used by live resize plus cancellation restore');
 
 const pxPerMm = 3.7795275591;

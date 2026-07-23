@@ -1,9 +1,11 @@
-# PublisherStudio v1.0.58 release
+# PublisherStudio v1.0.59 release
 
-See `CHANGELOG-v1.0.58.md`, `CHANGELOG-v1.0.57.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.59.md`, `CHANGELOG-v1.0.58.md`, and `VALIDATION.md`.
 
-Map and Vector Map editing now uses two explicit, mutually exclusive mouse modes. **Move map object** gives the publication canvas complete drag ownership and blocks native map gestures. **Pan / zoom map content** gives gestures only to the selected map and prevents the publication frame from moving.
+The publication canvas now uses Chromium CSS layout zoom where supported, with the previous transform scaler retained as a fallback. This keeps high-zoom editor text and embedded browser controls sharper on UHD displays without changing PDF, image, SVG, website, standalone HTML, or print rendering.
 
-The current mode is visible in the canvas mouse indicator, Component Tools ribbon, and context menu. Selection changes leave content mode automatically, unselected maps cannot retain pointer ownership, and manually changed map center/zoom values are saved with the publication.
+Provider Map is no longer silently created as a keyless Google map. Component Studio requires an explicitly selected supported provider and API key, the runtime renders a local placeholder and performs no provider request when that configuration is absent, and Google Map ID configuration is exposed for advanced markers. The bundled Vector Map is the keyless/offline alternative. Map/Vector Map viewport persistence now waits for a real user gesture to finish, avoids zoom-control rerender feedback, and retains Vector Map’s native zoom-factor range instead of clamping it to provider-map limits.
 
-Application and installer version `1.0.58`; publication format `1.45`; picture format `1.2`. There is no separate Media Host executable or release payload.
+Chart Studio now exposes argument typing, repeated-category aggregation, point ordering, automatic role mapping, numeric-measure guidance, and the existing specialized range, bubble, financial, Sankey, and TreeMap roles. Browser preview and export use the same typed/aggregated chart runtime. Creative editor dialogs expand to the available viewport with an equal responsive shadow gap.
+
+Application and installer version `1.0.59`; publication format `1.46`; picture format `1.2`. There is no separate Media Host executable or release payload.

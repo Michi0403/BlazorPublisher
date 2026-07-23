@@ -20,7 +20,7 @@ public static class PublisherStreamingRuntimeExtensions
     {
         app.MapGet("/api/mediahost/capabilities", () => Results.Ok(new
         {
-            version = "1.0.58",
+            version = "1.0.59",
             browserCapture = true,
             browserAudioMix = true,
             nativeDeviceDiscovery = true,

@@ -129,8 +129,19 @@ public sealed class PublicationComponentService
         item.ContentScale = Math.Clamp(item.ContentScale <= 0 ? 1 : item.ContentScale, .1, 12);
         item.MapCenterLatitude = Math.Clamp(item.MapCenterLatitude, -90, 90);
         item.MapCenterLongitude = Math.Clamp(item.MapCenterLongitude, -180, 180);
-        item.MapZoom = Math.Clamp(item.MapZoom <= 0 ? 1 : item.MapZoom, 1, 20);
-        item.MapProvider = string.IsNullOrWhiteSpace(item.MapProvider) ? "google" : item.MapProvider.Trim();
+        var mapZoomMaximum = item.ComponentKind == PublicationComponentKind.VectorMap ? 256d : 20d;
+        item.MapZoom = Math.Clamp(item.MapZoom <= 0 ? 1 : item.MapZoom, 1, mapZoomMaximum);
+        var mapProvider = item.MapProvider?.Trim() ?? string.Empty;
+        item.MapProvider = mapProvider.ToLowerInvariant() switch
+        {
+            "google" => "google",
+            "googlestatic" => "googleStatic",
+            "azure" => "azure",
+            "bing" => "bing",
+            _ => string.Empty
+        };
+        item.MapApiKey = item.MapApiKey?.Trim() ?? string.Empty;
+        item.MapId = item.MapId?.Trim() ?? string.Empty;
         item.MapType = string.IsNullOrWhiteSpace(item.MapType) ? "roadmap" : item.MapType.Trim();
         item.VectorProjection = string.IsNullOrWhiteSpace(item.VectorProjection) ? "mercator" : item.VectorProjection.Trim();
         item.MediaKindField = string.IsNullOrWhiteSpace(item.MediaKindField) ? "mediaType" : item.MediaKindField.Trim();
@@ -385,6 +396,7 @@ public sealed class PublicationComponentService
             item.MapProvider,
             item.MapType,
             item.MapApiKey,
+            item.MapId,
             item.MapCenterLatitude,
             item.MapCenterLongitude,
             item.MapZoom,

@@ -179,13 +179,25 @@ button { cursor: pointer; }
     top: 0;
     transform-origin: 0 0;
     overflow: visible;
+    transform: scale(var(--publisher-editor-zoom, 1));
+}
+
+/* CSS zoom re-lays out and rasterizes authored content at the requested editor scale.
+   Chromium/Edge therefore keep text and native controls sharp on UHD displays.
+   The transform rule above remains the standards-compatible fallback. */
+@supports (zoom: 1) {
+    .publication-element-content {
+        zoom: var(--publisher-editor-zoom, 1);
+        transform: none;
+    }
 }
 
 .pub-element.selected { outline: 1.5px solid #1787d4; outline-offset: 1px; }
 .pub-element.locked.selected { outline-style: dashed; }
 .text-frame-content { width: 100%; height: 100%; overflow: hidden; user-select: none; }
 .publication-content-frame { position:relative;box-sizing:border-box;overflow:hidden; }
-.publication-content-source { position:relative;box-sizing:border-box;transform-origin:0 0;will-change:transform; }
+.publication-content-source { position:relative;box-sizing:border-box;transform-origin:0 0; }
+.content-pan-target .publication-content-source { will-change:transform; }
 .publication-content-frame[data-content-kind="text"] > .publication-content-source { width:100%;min-height:100%; }
 .publication-content-frame[data-content-kind="spreadsheet"] > .publication-content-source { display:inline-block;width:max-content;min-width:100%;min-height:100%; }
 .publisher-story-document { position: relative; isolation: isolate; width: 100%; min-height: 100%; box-sizing: border-box; background: var(--publisher-story-page-background, transparent); }
@@ -2072,6 +2084,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     .data-visual-editor-dialog,
     .picture-studio-dialog,
     .media-studio-window,
+    .streaming-studio-window,
     .barcode-editor-dialog,
     .component-editor-dialog {
         width: calc(100vw - 8px) !important;
@@ -3456,3 +3469,87 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 }
 .ps-component-designer-object-mode { touch-action:none; }
 .ps-component-designer-content-mode { touch-action:none; }
+
+/* PublisherStudio 1.0.59: high-DPI workspace, provider-safe maps, and full-screen creative studios. */
+:root { --publisher-studio-shadow-gap: clamp(8px, 1.1vmin, 18px); }
+
+.modal-backdrop,
+.editor-modal-backdrop,
+.media-studio-backdrop,
+.streaming-studio-backdrop,
+.spreadsheet-data-object-backdrop {
+    padding: var(--publisher-studio-shadow-gap) !important;
+}
+
+.story-editor-dialog,
+.spreadsheet-editor-dialog,
+.data-manager-dialog,
+.data-visual-editor-dialog,
+.picture-studio-dialog,
+.media-studio-window,
+.barcode-editor-dialog,
+.component-editor-dialog {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+}
+
+.spreadsheet-data-object-dialog {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+}
+
+.ps-component-map-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 7px;
+    padding: 18px;
+    box-sizing: border-box;
+    border: 1px dashed #8aa1b4;
+    background: repeating-linear-gradient(45deg, #f5f8fa, #f5f8fa 10px, #eef3f6 10px, #eef3f6 20px);
+    color: #29485f;
+    text-align: center;
+}
+.ps-component-map-placeholder .dx-icon { font-size: 28px; }
+.ps-component-map-placeholder p,
+.ps-component-map-placeholder small { max-width: 520px; margin: 0; }
+.ps-component-map-placeholder small { color: #607386; }
+.map-provider-gate { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 12px; }
+.map-provider-gate strong { grid-column: 1; }
+.map-provider-gate span { grid-column: 1; }
+.map-provider-gate button { grid-column: 2; grid-row: 1 / span 2; }
+
+@media (max-width: 720px) {
+    :root { --publisher-studio-shadow-gap: 4px; }
+    .map-provider-gate { grid-template-columns: 1fr; }
+    .map-provider-gate button { grid-column: 1; grid-row: auto; }
+}
+.chart-data-semantics { align-items: end; }
+.chart-mapping-advice {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid #c7d7e4;
+    border-radius: 4px;
+    background: #f4f9fc;
+    color: #35546a;
+    font-size: 11px;
+}
+.chart-mapping-advice button { min-height: 26px; }
+@media (max-width: 720px) {
+    .chart-mapping-advice { grid-template-columns: 1fr; }
+}

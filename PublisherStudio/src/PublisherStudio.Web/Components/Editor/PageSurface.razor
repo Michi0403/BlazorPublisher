@@ -1549,7 +1549,7 @@
     private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
 
     private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
-    private string ElementContentStyle(PublicationElement element) => $"width:{ContentMm(element.Width)};height:{ContentMm(element.Height)};transform:scale({Inv(State.Document.Zoom)})";
+    private string ElementContentStyle(PublicationElement element) => $"width:{ContentMm(element.Width)};height:{ContentMm(element.Height)};--publisher-editor-zoom:{Inv(State.Document.Zoom)}";
     private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{ContentMm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{shape.Fill};border:{ContentMm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? ContentMm(shape.CornerRadiusMm) : "0")}";

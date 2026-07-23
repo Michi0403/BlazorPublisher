@@ -111,7 +111,7 @@ assert.equal((app.match(/vendor\/devextreme-dist\/js\/dx\.all\.js/g) || []).leng
 assert.doesNotMatch(app, /RegisterScripts\(\)/, 'Default DevExtreme registration would duplicate the pinned bundle.');
 assert.ok(app.indexOf('vendor/jquery/jquery.min.js') < app.indexOf('vendor/devextreme-dist/js/dx.all.js'));
 assert.ok(app.indexOf('vendor/devextreme-dist/js/dx.all.js') < app.indexOf('DxResourceManager.RegisterScripts'), 'Pinned jQuery/DevExtreme must load before dependent DevExpress resource scripts.');
-assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.45"/);
+assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.46"/);
 assert.match(editor, /Only options supported by the selected component are shown here/);
 assert.doesNotMatch(editor.slice(editor.indexOf('else if (_section == "behavior")'), editor.indexOf('else if (_section == "map")')), /Scheduler view[\s\S]*without-kind-guard/);
 assert.match(dataModel, /PublicationPages/);
@@ -263,6 +263,24 @@ context.dispatchEvent = event => {
 };
 context.window = context;
 vm.runInNewContext(runtime, context, { filename: runtimePath });
+
+
+// A provider Map without an explicit provider/key must fail closed before DevExtreme
+// can apply its own Google default or issue any provider request.
+const mapRequestsBefore = requests.length;
+const keylessMapHost = {
+  dataset: {}, innerHTML: '', isConnected: true,
+  classList: { add() {}, remove() {}, toggle() {}, [Symbol.iterator]: function* () {} },
+  querySelector: () => null, querySelectorAll: () => [], replaceChildren() {}, removeAttribute() {},
+  style: { removeProperty() {} }
+};
+const keylessMapResult = await context.PublisherStudioComponentRuntime.render(keylessMapHost, {
+  kind: 'Map', id: 'keyless-map', title: 'Provider Map', mapProvider: '', mapApiKey: '',
+  rows: [], fields: [], actions: [], connection: {}
+}, { polling: false, fetchNow: false });
+assert.equal(keylessMapResult, null);
+assert.match(keylessMapHost.innerHTML, /No external map request was made/);
+assert.equal(requests.length, mapRequestsBefore, 'a keyless Map must not issue an external request');
 
 const restRows = JSON.parse(await context.PublisherStudioComponentRuntime.probeConnection({
   mode: 'Rest',

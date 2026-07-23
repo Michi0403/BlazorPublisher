@@ -361,9 +361,92 @@
         element.append(wrapper);
     }
 
+    function columnKind(config, field) {
+        return String(config?.columnKinds?.[field] || config?.columnKinds?.[String(field || "").toLowerCase()] || "").toLowerCase();
+    }
+
     function measure(config, row, field) {
-        const kind = config?.columnKinds?.[field] || config?.columnKinds?.[String(field || "").toLowerCase()] || "";
-        return number(get(row, field), kind);
+        return number(get(row, field), columnKind(config, field));
+    }
+
+    function argumentValue(config, row, index) {
+        const raw = get(row, config.argumentField);
+        const mode = String(config.argumentMode || "Auto").toLowerCase();
+        const kind = columnKind(config, config.argumentField);
+        if (mode === "continuous" || (mode === "auto" && kind === "number")) return number(raw, "number");
+        if (mode === "datetime" || (mode === "auto" && kind === "datetime")) {
+            const date = raw instanceof Date ? raw : new Date(raw);
+            return Number.isFinite(date.getTime()) ? date : new Date(0);
+        }
+        const text = String(raw ?? "").trim();
+        return text || `(blank ${index + 1})`;
+    }
+
+    function argumentKey(value) {
+        if (value instanceof Date) return `date:${value.getTime()}`;
+        return `${typeof value}:${String(value)}`;
+    }
+
+    function argumentAxis(config) {
+        const mode = String(config.argumentMode || "Auto").toLowerCase();
+        const kind = columnKind(config, config.argumentField);
+        if (mode === "datetime" || (mode === "auto" && kind === "datetime")) return { type: "continuous", argumentType: "datetime" };
+        if (mode === "continuous" || (mode === "auto" && kind === "number")) return { type: "continuous", argumentType: "numeric" };
+        return { type: "discrete", discreteAxisDivisionMode: "crossLabels" };
+    }
+
+    function rangeScale(config) {
+        const mode = String(config.argumentMode || "Auto").toLowerCase();
+        const kind = columnKind(config, config.argumentField);
+        if (mode === "datetime" || (mode === "auto" && kind === "datetime")) return { type: "continuous", valueType: "datetime" };
+        if (mode === "continuous" || (mode === "auto" && kind === "number")) return { type: "continuous", valueType: "numeric" };
+        return { type: "discrete", valueType: "string", discreteAxisDivisionMode: "crossLabels" };
+    }
+
+    function sortVisualPoints(config, points) {
+        const mode = String(config.sortMode || "DataOrder").toLowerCase();
+        if (mode === "dataorder") return points;
+        const direction = mode.endsWith("descending") ? -1 : 1;
+        const byValue = mode.startsWith("value");
+        return [...points].sort((left, right) => {
+            const a = byValue ? number(left.value) : left.argument;
+            const b = byValue ? number(right.value) : right.argument;
+            const av = a instanceof Date ? a.getTime() : a;
+            const bv = b instanceof Date ? b.getTime() : b;
+            if (typeof av === "number" && typeof bv === "number") return (av - bv) * direction;
+            return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: "base" }) * direction;
+        });
+    }
+
+    function aggregateVisualPoints(config, points, enabled = true) {
+        if (!enabled) return sortVisualPoints(config, points);
+        const mode = String(config.aggregationMode || "Auto").toLowerCase();
+        if (mode === "none") return sortVisualPoints(config, points);
+        const groups = new Map();
+        points.forEach((point, index) => {
+            const key = `${String(point.series || "")}\u0000${argumentKey(point.argument)}`;
+            const group = groups.get(key) || { ...point, value: 0, __values: [], __first: index };
+            group.__values.push(number(point.value));
+            groups.set(key, group);
+        });
+        const aggregated = [...groups.values()].map(group => {
+            const values = group.__values;
+            let value;
+            switch (mode) {
+                case "average": value = values.reduce((sum, item) => sum + item, 0) / Math.max(1, values.length); break;
+                case "minimum": value = Math.min(...values); break;
+                case "maximum": value = Math.max(...values); break;
+                case "count": value = values.length; break;
+                case "sum":
+                case "auto":
+                default: value = values.reduce((sum, item) => sum + item, 0); break;
+            }
+            const result = { ...group, value };
+            delete result.__values;
+            delete result.__first;
+            return result;
+        });
+        return sortVisualPoints(config, aggregated);
     }
 
     function visualTooltip(config) {
@@ -421,10 +504,10 @@
         const bubble = type === "bubble";
         const { argument, result } = seriesData(config, rows, financial || range || bubble);
         const normalized = [];
-        result.forEach(definition => rows.forEach(row => {
+        result.forEach(definition => rows.forEach((row, index) => {
             if (definition.series !== null && String(get(row, config.seriesField)) !== definition.series) return;
             normalized.push({
-                argument: get(row, argument),
+                argument: argumentValue(config, row, index),
                 series: definition.name,
                 value: measure(config, row, definition.field),
                 low: measure(config, row, config.lowValueField || definition.field),
@@ -440,10 +523,10 @@
         else if (bubble) Object.assign(commonSeriesSettings, { valueField: "value", sizeField: "size" });
         else commonSeriesSettings.valueField = "value";
         return Object.assign(common(config), {
-            dataSource: normalized,
+            dataSource: aggregateVisualPoints(config, normalized, !(financial || range || bubble)),
             commonSeriesSettings,
             seriesTemplate: { nameField: "series" },
-            argumentAxis: { discreteAxisDivisionMode: "crossLabels" }
+            argumentAxis: argumentAxis(config)
         });
     }
 
@@ -452,16 +535,16 @@
         const type = typeMap[config.polarStyle] || "line";
         const { argument, result } = seriesData(config, rows, false);
         const normalized = [];
-        result.forEach(definition => rows.forEach(row => {
+        result.forEach(definition => rows.forEach((row, index) => {
             if (definition.series !== null && String(get(row, config.seriesField)) !== definition.series) return;
             normalized.push({
-                argument: get(row, argument),
+                argument: argumentValue(config, row, index),
                 series: definition.name,
                 value: measure(config, row, definition.field)
             });
         }));
         return Object.assign(common(config), {
-            dataSource: normalized,
+            dataSource: aggregateVisualPoints(config, normalized),
             commonSeriesSettings: {
                 type,
                 argumentField: "argument",
@@ -478,7 +561,8 @@
         const $element = window.jQuery(element);
         const kind = String(config.kind || "CartesianChart");
         const valueField = config.valueFields?.[0] || config.highValueField || config.closeValueField || "Value";
-        const points = rows.map(row => ({ argument: get(row, config.argumentField), value: measure(config, row, valueField) }));
+        const rawPoints = rows.map((row, index) => ({ argument: argumentValue(config, row, index), value: measure(config, row, valueField) }));
+        const points = aggregateVisualPoints(config, rawPoints);
         let plugin, options;
         switch (kind) {
             case "CartesianChart": plugin = "dxChart"; options = chartOptions(config, rows); break;
@@ -500,7 +584,7 @@
             case "LinearGauge":
                 plugin = "dxLinearGauge"; options = Object.assign(common(config), { value: points[0]?.value || 0, subvalues: points.slice(1).map(point => point.value), scale: { startValue: config.minimumValue, endValue: config.maximumValue }, title: config.showTitle ? { text: config.title || "" } : undefined }); break;
             case "RangeSelector":
-                plugin = "dxRangeSelector"; options = { dataSource: points, chart: { series: { argumentField: "argument", valueField: "value", type: mapCartesianType(config.cartesianStyle) } }, scale: {}, size: elementSize(config), title: config.showTitle ? config.title : undefined }; break;
+                plugin = "dxRangeSelector"; options = { dataSource: points, chart: { series: { argumentField: "argument", valueField: "value", type: mapCartesianType(config.cartesianStyle) } }, scale: rangeScale(config), size: elementSize(config), title: config.showTitle ? config.title : undefined }; break;
             case "Sankey":
                 plugin = "dxSankey"; options = Object.assign(common(config), { dataSource: rows.map(row => ({ source: String(get(row, config.argumentField)), target: String(get(row, config.targetField)), weight: measure(config, row, valueField) })), sourceField: "source", targetField: "target", weightField: "weight", label: { visible: !!config.showLabels } }); break;
             case "Funnel":

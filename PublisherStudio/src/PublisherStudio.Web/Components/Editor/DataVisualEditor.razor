@@ -18,6 +18,7 @@
                     <DxRibbonGroup Text="Data" IconCssClass="pub-icon pub-icon-data">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Manage publication data" IsPrimary="true" Click="RequestManage" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Refresh live data" Click="Refresh" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Auto-map fields" Click="AutoMapFields" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Options">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Reset visual options" Click="ResetVisualOptions" />
@@ -78,6 +79,34 @@
 
                         @if (_draft.VisualKind != DataVisualKind.DataTable)
                         {
+                            <div class="data-form-grid chart-data-semantics">
+                                <label>Argument axis
+                                    <select value="@_draft.ArgumentMode" @onchange="ChangeArgumentMode">
+                                        @foreach (var mode in Enum.GetValues<DataVisualArgumentMode>())
+                                        {
+                                            <option value="@mode">@Friendly(mode.ToString())</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Repeated categories
+                                    <select value="@_draft.AggregationMode" @onchange="ChangeAggregationMode" disabled="@(!SupportsAggregation)">
+                                        @foreach (var mode in Enum.GetValues<DataVisualAggregationMode>())
+                                        {
+                                            <option value="@mode">@AggregationLabel(mode)</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Point order
+                                    <select value="@_draft.SortMode" @onchange="ChangeSortMode">
+                                        @foreach (var mode in Enum.GetValues<DataVisualSortMode>())
+                                        {
+                                            <option value="@mode">@Friendly(mode.ToString())</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div class="chart-mapping-advice"><strong>Mapping check</strong><span>@MappingAdvice</span><button type="button" @onclick="AutoMapFields">Auto-map</button></div>
+                            </div>
+
                             <fieldset class="value-field-picker">
                                 <legend>@(AllowsMultipleValueFields ? "Data fields" : "Data field")</legend>
                                 @foreach (var column in MeasureColumns)
@@ -278,11 +307,13 @@
     private DataVisualElement? _draft;
     private PublicationDataObject? CurrentData => _draft is null ? null : State.Document.DataObjects.FirstOrDefault(data => data.Id == _draft.DataObjectId);
     private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(CurrentData);
-    private IReadOnlyList<PublicationDataColumn> MeasureColumns => Columns;
+    private IReadOnlyList<PublicationDataColumn> MeasureColumns => NumericColumns.Count > 0 ? NumericColumns : Columns;
     private IReadOnlyList<PublicationDataColumn> NumericColumns => Columns
         .Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean)
         .ToArray();
     private bool AllowsMultipleValueFields => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge;
+    private bool SupportsAggregation => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sparkline or DataVisualKind.RangeSelector or DataVisualKind.Funnel or DataVisualKind.Pyramid;
+    private string MappingAdvice => BuildMappingAdvice();
     private bool CanSave => _draft is not null && CurrentData is not null && ValidateFields(_draft);
     private string ValidationText => CurrentData is null
         ? "Choose or create a data object."
@@ -360,16 +391,7 @@
     {
         if (_draft is null || !Guid.TryParse(args.Value?.ToString(), out var id)) return;
         _draft.DataObjectId = id;
-        var columns = DataService.ResolveColumns(CurrentData);
-        _draft.ArgumentField = columns.FirstOrDefault()?.Name ?? string.Empty;
-        _draft.SeriesField = string.Empty;
-        _draft.ValueFields = columns
-            .Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean)
-            .Take(2)
-            .Select(column => column.Name)
-            .ToList();
-        if (_draft.ValueFields.Count == 0 && columns.Count > 1) _draft.ValueFields.Add(columns[1].Name);
-        EnsureSpecialFields();
+        AutoMapFields();
     }
 
     private void ToggleValueField(string field, ChangeEventArgs args)
@@ -385,6 +407,9 @@
     private void ChangeTitle(ChangeEventArgs args) { if (_draft is not null) _draft.Title = args.Value?.ToString() ?? string.Empty; }
     private void ChangeArgumentField(ChangeEventArgs args) { if (_draft is not null) _draft.ArgumentField = args.Value?.ToString() ?? string.Empty; }
     private void ChangeSeriesField(ChangeEventArgs args) { if (_draft is not null) _draft.SeriesField = args.Value?.ToString() ?? string.Empty; }
+    private void ChangeArgumentMode(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<DataVisualArgumentMode>(args.Value?.ToString(), out var value)) _draft.ArgumentMode = value; }
+    private void ChangeAggregationMode(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<DataVisualAggregationMode>(args.Value?.ToString(), out var value)) _draft.AggregationMode = value; }
+    private void ChangeSortMode(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<DataVisualSortMode>(args.Value?.ToString(), out var value)) _draft.SortMode = value; }
     private void ChangeLowValueField(ChangeEventArgs args) { if (_draft is not null) _draft.LowValueField = args.Value?.ToString() ?? string.Empty; }
     private void ChangeHighValueField(ChangeEventArgs args) { if (_draft is not null) _draft.HighValueField = args.Value?.ToString() ?? string.Empty; }
     private void ChangeOpenValueField(ChangeEventArgs args) { if (_draft is not null) _draft.OpenValueField = args.Value?.ToString() ?? string.Empty; }
@@ -419,6 +444,9 @@
         _draft.RowLimit = 12;
         _draft.MinimumValue = 0;
         _draft.MaximumValue = 100;
+        _draft.ArgumentMode = DataVisualArgumentMode.Auto;
+        _draft.AggregationMode = DataVisualAggregationMode.Auto;
+        _draft.SortMode = DataVisualSortMode.DataOrder;
     }
     private static string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
 
@@ -437,7 +465,8 @@
     {
         target.DataObjectId = source.DataObjectId; target.VisualKind = source.VisualKind;
         target.CartesianStyle = source.CartesianStyle; target.PieStyle = source.PieStyle; target.PolarStyle = source.PolarStyle; target.SparklineStyle = source.SparklineStyle;
-        target.Title = source.Title; target.ArgumentField = source.ArgumentField; target.SeriesField = source.SeriesField; target.ValueFields = [.. source.ValueFields];
+        target.Title = source.Title; target.ArgumentField = source.ArgumentField; target.SeriesField = source.SeriesField;
+        target.ArgumentMode = source.ArgumentMode; target.AggregationMode = source.AggregationMode; target.SortMode = source.SortMode; target.ValueFields = [.. source.ValueFields];
         target.LowValueField = source.LowValueField; target.HighValueField = source.HighValueField; target.OpenValueField = source.OpenValueField; target.CloseValueField = source.CloseValueField;
         target.SizeField = source.SizeField; target.TargetField = source.TargetField; target.ParentField = source.ParentField;
         target.ShowLegend = source.ShowLegend; target.ShowLabels = source.ShowLabels; target.ShowTitle = source.ShowTitle;
@@ -490,6 +519,95 @@
             builder.OpenElement(sequence++, "option"); builder.AddAttribute(sequence++, "value", column.Name); builder.AddContent(sequence++, column.Name); builder.CloseElement();
         }
         builder.CloseElement(); builder.CloseElement();
+    };
+
+    private void AutoMapFields()
+    {
+        if (_draft is null) return;
+        var columns = Columns;
+        if (columns.Count == 0) return;
+        var numeric = columns.Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean).Select(column => column.Name).ToArray();
+        var dates = columns.Where(column => column.ValueKind == PublicationDataValueKind.DateTime).Select(column => column.Name).ToArray();
+        var text = columns.Where(column => column.ValueKind == PublicationDataValueKind.Text).Select(column => column.Name).ToArray();
+        string First(params IEnumerable<string>[] choices) => choices.SelectMany(value => value).FirstOrDefault() ?? columns[0].Name;
+
+        _draft.SeriesField = string.Empty;
+        _draft.ArgumentMode = DataVisualArgumentMode.Auto;
+        _draft.AggregationMode = DataVisualAggregationMode.Auto;
+        _draft.SortMode = dates.Length > 0 ? DataVisualSortMode.ArgumentAscending : DataVisualSortMode.DataOrder;
+
+        if (_draft.VisualKind == DataVisualKind.Sankey)
+        {
+            _draft.ArgumentField = First(text, dates, columns.Select(column => column.Name));
+            _draft.TargetField = text.FirstOrDefault(name => !string.Equals(name, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase))
+                ?? columns.Select(column => column.Name).FirstOrDefault(name => !string.Equals(name, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
+            _draft.ValueFields = numeric.Take(1).ToList();
+        }
+        else if (_draft.VisualKind == DataVisualKind.TreeMap)
+        {
+            _draft.ArgumentField = First(text, dates, columns.Select(column => column.Name));
+            _draft.ParentField = text.FirstOrDefault(name => !string.Equals(name, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
+            _draft.ValueFields = numeric.Take(1).ToList();
+        }
+        else if (_draft.VisualKind == DataVisualKind.CartesianChart && _draft.CartesianStyle == CartesianChartStyle.Bubble)
+        {
+            _draft.ArgumentField = First(numeric, dates, text);
+            _draft.ValueFields = numeric.Where(name => !string.Equals(name, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase)).Take(1).ToList();
+            _draft.SizeField = numeric.Where(name => !string.Equals(name, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase) && !_draft.ValueFields.Contains(name, StringComparer.OrdinalIgnoreCase)).FirstOrDefault() ?? _draft.ValueFields.FirstOrDefault() ?? string.Empty;
+            _draft.ArgumentMode = numeric.Contains(_draft.ArgumentField, StringComparer.OrdinalIgnoreCase) ? DataVisualArgumentMode.Continuous : DataVisualArgumentMode.Auto;
+        }
+        else if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.Candlestick or CartesianChartStyle.Stock))
+        {
+            _draft.ArgumentField = First(dates, text, columns.Select(column => column.Name));
+            _draft.ValueFields = numeric.Take(1).ToList();
+            _draft.OpenValueField = numeric.ElementAtOrDefault(0) ?? string.Empty;
+            _draft.HighValueField = numeric.ElementAtOrDefault(1) ?? _draft.OpenValueField;
+            _draft.LowValueField = numeric.ElementAtOrDefault(2) ?? _draft.OpenValueField;
+            _draft.CloseValueField = numeric.ElementAtOrDefault(3) ?? _draft.OpenValueField;
+        }
+        else
+        {
+            _draft.ArgumentField = First(dates, text, columns.Select(column => column.Name));
+            _draft.ValueFields = numeric
+                .Where(name => !string.Equals(name, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase))
+                .Take(AllowsMultipleValueFields ? 2 : 1)
+                .ToList();
+            if (_draft.ValueFields.Count == 0)
+                _draft.ValueFields.Add(columns.FirstOrDefault(column => !string.Equals(column.Name, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase))?.Name ?? _draft.ArgumentField);
+        }
+        EnsureSpecialFields();
+    }
+
+    private string BuildMappingAdvice()
+    {
+        if (_draft is null || CurrentData is null) return "Choose a data object.";
+        if (string.IsNullOrWhiteSpace(_draft.ArgumentField)) return "Choose an argument/category field.";
+        if (NumericColumns.Count == 0)
+            return "No numeric or Boolean measure was detected. Check the publication-data column types before building this chart.";
+        if (!string.IsNullOrWhiteSpace(_draft.SeriesField) && string.Equals(_draft.SeriesField, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase))
+            return "Argument and series grouping use the same field. Choose a different series field or None.";
+        if (_draft.ValueFields.Any(field => string.Equals(field, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase)))
+            return "A value field also acts as the argument. This is valid for XY/scatter data but usually wrong for category charts.";
+        if (_draft.VisualKind == DataVisualKind.CartesianChart && _draft.CartesianStyle == CartesianChartStyle.Bubble && NumericColumns.Count < 3)
+            return "Bubble charts work best with three numeric roles: X argument, Y value, and bubble size.";
+        if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.Candlestick or CartesianChartStyle.Stock) && NumericColumns.Count < 4)
+            return "Financial charts require four numeric columns: open, high, low, and close.";
+        if (_draft.VisualKind == DataVisualKind.Sankey && string.IsNullOrWhiteSpace(_draft.TargetField))
+            return "Sankey requires separate source and target fields plus a numeric weight.";
+        if (!SupportsAggregation && _draft.AggregationMode is not (DataVisualAggregationMode.Auto or DataVisualAggregationMode.None))
+            return "Aggregation is not applied to this specialized visual; rows remain explicit.";
+        return _draft.AggregationMode == DataVisualAggregationMode.None
+            ? "Repeated argument/series combinations remain separate points."
+            : "Typed arguments, repeated-category aggregation, and sorting are applied in the browser and export runtime.";
+    }
+
+    private static string AggregationLabel(DataVisualAggregationMode mode) => mode switch
+    {
+        DataVisualAggregationMode.Auto => "Auto (sum duplicates)",
+        DataVisualAggregationMode.None => "Keep every row",
+        DataVisualAggregationMode.Minimum => "Minimum",
+        DataVisualAggregationMode.Maximum => "Maximum",
+        _ => Friendly(mode.ToString())
     };
 
     private void EnsureSpecialFields()

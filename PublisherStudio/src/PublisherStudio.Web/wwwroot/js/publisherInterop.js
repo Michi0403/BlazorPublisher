@@ -266,7 +266,14 @@ function syncEditorElementContentFrame(state, element, widthMm, heightMm) {
     const basePixelsPerMm = Math.max(.0001, number(state?.config?.pxPerMm, PX_PER_MM_AT_96_DPI) / zoom);
     content.style.width = `${Math.max(0, number(widthMm)) * basePixelsPerMm}px`;
     content.style.height = `${Math.max(0, number(heightMm)) * basePixelsPerMm}px`;
-    content.style.transform = `scale(${zoom})`;
+    content.style.setProperty("--publisher-editor-zoom", String(zoom));
+    if (globalThis.CSS?.supports?.("zoom", "1")) {
+        content.style.zoom = String(zoom);
+        content.style.transform = "none";
+    } else {
+        content.style.removeProperty("zoom");
+        content.style.transform = `scale(${zoom})`;
+    }
 }
 
 function resetPointerOperation(state, restoreDom = false) {

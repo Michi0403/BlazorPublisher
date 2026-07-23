@@ -50,9 +50,34 @@
 
     const isMapKind = config => ["map", "vectormap"].includes(lower(config?.kind));
     const designerMapContentEnabled = config => !config?.designerMode || lower(config?.designerInteractionMode) === "content";
+    const mapProviders = new Set(["google", "googlestatic", "azure", "bing"]);
+    const normalizedMapProvider = config => {
+        const provider = lower(config?.mapProvider);
+        return provider === "googlestatic" ? "googleStatic" : mapProviders.has(provider) ? provider : "";
+    };
+    const hasMapProviderConfiguration = config => normalizedMapProvider(config) !== "" && String(config?.mapApiKey || "").trim() !== "";
+
+    function commitDesignerMapViewport(element, config, delay = 420) {
+        if (!element?.__psMapViewportSnapshot || element.__psMapGestureActive) return;
+        if (element.__psMapViewportTimer) clearTimeout(element.__psMapViewportTimer);
+        element.__psMapViewportTimer = setTimeout(() => {
+            element.__psMapViewportTimer = null;
+            const detail = element.__psMapViewportSnapshot;
+            if (!detail || !element.isConnected || !element.__psMapUserGesture || element.__psMapGestureActive) return;
+            config.mapCenterLongitude = detail.longitude;
+            config.mapCenterLatitude = detail.latitude;
+            config.mapZoom = detail.zoom;
+            element.__psMapUserGesture = false;
+            element.dispatchEvent(new CustomEvent("publisherstudio:map-viewport-changed", {
+                bubbles: true,
+                detail: { componentId: String(config.id || ""), ...detail }
+            }));
+        }, delay);
+    }
 
     function scheduleDesignerMapViewport(element, config, center, zoom) {
         if (!element || !config?.designerMode || !isMapKind(config) || !designerMapContentEnabled(config)) return;
+        if (!element.__psMapReady || !element.__psMapUserGesture) return;
         const longitude = Array.isArray(center)
             ? Number(center[0])
             : Number(center?.lng ?? center?.longitude);
@@ -66,16 +91,14 @@
             Math.abs(number(config.mapZoom, 1) - zoomValue) < .0001) return;
 
         element.__psMapViewportSnapshot = { longitude, latitude, zoom: zoomValue };
-        if (element.__psMapViewportTimer) clearTimeout(element.__psMapViewportTimer);
-        element.__psMapViewportTimer = setTimeout(() => {
-            element.__psMapViewportTimer = null;
-            const detail = element.__psMapViewportSnapshot;
-            if (!detail || !element.isConnected) return;
-            element.dispatchEvent(new CustomEvent("publisherstudio:map-viewport-changed", {
-                bubbles: true,
-                detail: { componentId: String(config.id || ""), ...detail }
-            }));
-        }, 180);
+        if (!element.__psMapGestureActive) commitDesignerMapViewport(element, config);
+    }
+
+    function renderMapConfigurationPlaceholder(element, config) {
+        const provider = normalizedMapProvider(config);
+        const reason = provider ? "Enter an API key before this provider can be loaded." : "Select a map provider and enter its API key.";
+        element.classList.add("ps-map-configuration-required");
+        element.innerHTML = `<div class="ps-component-map-placeholder"><span class="dx-icon dx-icon-map" aria-hidden="true"></span><strong>${escapeHtml(config.title || "Map")}</strong><p>${escapeHtml(reason)}</p><small>No external map request was made. Use Vector Map for the bundled keyless map.</small></div>`;
     }
 
     function normalizeDateRows(config, rows) {
@@ -1541,14 +1564,18 @@
             }
             case "Map": {
                 const rows = config.rows || [];
-                const provider = String(config.mapProvider || "google");
+                const provider = normalizedMapProvider(config);
                 const apiKey = String(config.mapApiKey || "").trim();
+                const mapId = String(config.mapId || "").trim();
                 const mapContentEnabled = designerMapContentEnabled(config);
+                const googleProvider = provider === "google" || provider === "googleStatic";
                 options = { ...base, provider, type: config.mapType || "roadmap",
                     center: { lat: number(config.mapCenterLatitude, 51.1657), lng: number(config.mapCenterLongitude, 10.4515) },
                     zoom: Math.max(1, number(config.mapZoom, 4)), controls: config.mapControls !== false && mapContentEnabled,
                     autoAdjust: config.mapAutoAdjust !== false, markers: mapMarkers(config, rows), routes: mapRoutes(config, rows),
-                    apiKey: apiKey ? { [provider]: apiKey } : undefined,
+                    apiKey: { [provider]: apiKey },
+                    providerConfig: googleProvider ? { mapId, useAdvancedMarkers: !!mapId } : undefined,
+                    onReady() { element.__psMapReady = true; },
                     onOptionChanged(event) {
                         if (!["center", "zoom"].includes(String(event?.name || ""))) return;
                         scheduleDesignerMapViewport(element, config, event.component?.option?.("center"), event.component?.option?.("zoom"));
@@ -1566,6 +1593,7 @@
                     controlBar: { enabled: config.mapControls !== false && mapContentEnabled }, tooltip: { enabled: true, customizeTooltip(info) {
                         const a = info?.attribute?.("properties") || {}; return { text: String(a.label || a.name || a.value || "") };
                     } },
+                    onDrawn() { element.__psMapReady = true; },
                     onCenterChanged(event) {
                         scheduleDesignerMapViewport(element, config, event?.center, event?.component?.option?.("zoomFactor"));
                     },
@@ -1688,10 +1716,47 @@
     function installDesignerMapShield(element, config) {
         element.querySelector?.(':scope > .ps-component-designer-map-shield')?.remove?.();
         element.classList?.remove?.("ps-component-designer-object-mode", "ps-component-designer-content-mode");
+        if (element.__psMapGestureCleanup) {
+            try { element.__psMapGestureCleanup(); } catch { }
+            element.__psMapGestureCleanup = null;
+        }
         if (!config?.designerMode || !isMapKind(config)) return;
         const contentMode = designerMapContentEnabled(config);
         element.classList?.add?.(contentMode ? "ps-component-designer-content-mode" : "ps-component-designer-object-mode");
-        if (contentMode) return;
+        if (contentMode) {
+            const controller = new AbortController();
+            const signal = controller.signal;
+            const eventTarget = typeof window !== "undefined" ? window : globalThis;
+            const begin = event => {
+                if (event.type === "pointerdown" && event.button !== 0) return;
+                element.__psMapUserGesture = true;
+                element.__psMapGestureActive = true;
+                if (element.__psMapViewportTimer) clearTimeout(element.__psMapViewportTimer);
+            };
+            const finish = () => {
+                element.__psMapGestureActive = false;
+                commitDesignerMapViewport(element, config, 360);
+            };
+            const wheel = () => {
+                begin({ type: "wheel" });
+                if (element.__psMapWheelTimer) clearTimeout(element.__psMapWheelTimer);
+                element.__psMapWheelTimer = setTimeout(() => {
+                    element.__psMapWheelTimer = null;
+                    finish();
+                }, 520);
+            };
+            element.addEventListener?.("pointerdown", begin, { capture: true, passive: true, signal });
+            element.addEventListener?.("mousedown", begin, { capture: true, passive: true, signal });
+            element.addEventListener?.("touchstart", begin, { capture: true, passive: true, signal });
+            element.addEventListener?.("wheel", wheel, { capture: true, passive: true, signal });
+            eventTarget.addEventListener?.("pointerup", finish, { capture: true, passive: true, signal });
+            eventTarget.addEventListener?.("pointercancel", finish, { capture: true, passive: true, signal });
+            eventTarget.addEventListener?.("mouseup", finish, { capture: true, passive: true, signal });
+            eventTarget.addEventListener?.("touchend", finish, { capture: true, passive: true, signal });
+            eventTarget.addEventListener?.("touchcancel", finish, { capture: true, passive: true, signal });
+            element.__psMapGestureCleanup = () => controller.abort();
+            return;
+        }
         const shield = document.createElement("div");
         shield.className = "ps-component-designer-map-shield";
         shield.setAttribute("aria-label", "Move map object");
@@ -1709,8 +1774,15 @@
         const state = states.get(element);
         if (state?.timer) clearInterval(state.timer);
         if (element.__psMapViewportTimer) clearTimeout(element.__psMapViewportTimer);
+        if (element.__psMapWheelTimer) clearTimeout(element.__psMapWheelTimer);
+        try { element.__psMapGestureCleanup?.(); } catch { }
+        element.__psMapGestureCleanup = null;
         element.__psMapViewportTimer = null;
+        element.__psMapWheelTimer = null;
         element.__psMapViewportSnapshot = null;
+        element.__psMapGestureActive = false;
+        element.__psMapUserGesture = false;
+        element.__psMapReady = false;
         state?.layout?.cancel?.();
         try { state?.chatUnsubscribe?.(); } catch { }
         for (const child of [...element.querySelectorAll("[data-ps-component-runtime]")]) {
@@ -1732,6 +1804,11 @@
         element.dataset.psComponentId = String(config.id || "");
         element.classList.add("ps-component-runtime");
         applyLayoutClasses(element, config);
+        if (String(config.kind || "") === "Map" && !hasMapProviderConfiguration(config)) {
+            renderMapConfigurationPlaceholder(element, config);
+            states.set(element, { config, instance: null, data: null, dataSource: null, timer: null, fallback: true });
+            return null;
+        }
         if (!window.jQuery || !window.DevExpress) {
             element.innerHTML = '<div class="ps-component-error">DevExtreme browser assets are not loaded.</div>';
             return null;

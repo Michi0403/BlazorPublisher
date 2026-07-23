@@ -1646,7 +1646,8 @@ public sealed class EditorStateService : IDisposable
 
         var nextLongitude = Math.Clamp(longitude, -180, 180);
         var nextLatitude = Math.Clamp(latitude, -90, 90);
-        var nextZoom = Math.Clamp(zoom, 1, 20);
+        var zoomMaximum = component.ComponentKind == PublicationComponentKind.VectorMap ? 256d : 20d;
+        var nextZoom = Math.Clamp(zoom, 1, zoomMaximum);
         if (Math.Abs(component.MapCenterLongitude - nextLongitude) < .000001 &&
             Math.Abs(component.MapCenterLatitude - nextLatitude) < .000001 &&
             Math.Abs(component.MapZoom - nextZoom) < .0001) return;

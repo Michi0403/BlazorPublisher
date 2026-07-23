@@ -1,3 +1,6 @@
+Link to Winx64 Installer, for everyone else check the release section. (Linux is tested but not the installers, Mac not tested (and most Mac Users are not able to open a terminal anyway so... "BUT WE THOUGHT AT THEM")
+https://github.com/Michi0403/BlazorPublisher/releases/download/v159/PublisherStudio.Setup.exe
+
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**

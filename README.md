@@ -1,3 +1,5 @@
+Link to WinX64 Installer in the release Section https://github.com/Michi0403/BlazorPublisher/releases/download/v161/PublisherStudio.Setup.exe
+Check Releases for anything else, I won't publish linux and mac installer because I can't confirm them working (also Linux users hate installers so)
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**

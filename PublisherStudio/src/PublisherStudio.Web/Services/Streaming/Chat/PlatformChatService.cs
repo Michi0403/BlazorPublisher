@@ -6,6 +6,7 @@ using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
+using TextEncoding = global::System.Text.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Chat;
 
@@ -173,7 +174,7 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
                     TargetHost = "irc.chat.twitch.tv",
                     EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
                 }, _lifetime.Token);
-                using var reader = new StreamReader(ssl, global::System.Text.Encoding.UTF8, false, 1024, leaveOpen: true);
+                using var reader = new StreamReader(ssl, TextEncoding.UTF8, false, 1024, leaveOpen: true);
                 await using var writer = new StreamWriter(ssl, new UTF8Encoding(false), 1024, leaveOpen: true) { AutoFlush = true, NewLine = "\r\n" };
                 _writer = writer;
                 var token = _output.ChatSecret.StartsWith("oauth:", StringComparison.OrdinalIgnoreCase)
@@ -301,7 +302,7 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
         }, JsonOptions);
         using var request = new HttpRequestMessage(HttpMethod.Post, "https://www.googleapis.com/youtube/v3/liveChat/messages?part=snippet")
         {
-            Content = new StringContent(body, global::System.Text.Encoding.UTF8, "application/json")
+            Content = new StringContent(body, TextEncoding.UTF8, "application/json")
         };
         using var response = await _http.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)

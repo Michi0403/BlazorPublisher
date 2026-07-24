@@ -396,3 +396,8 @@ Other providers remain on their existing manual profiles until a provider-specif
 ## v1.0.52 standalone visual tooltip coordinates
 
 See `CHANGELOG-v1.0.52.md`. Self-contained presentation and site exports now keep DevExtreme visual tooltips inside the transformed publication object. Doughnut/pie charts and the other live visual types therefore preserve tooltip-to-point alignment while the exported page is centered, fitted, scaled, or animated. Authoring behavior, pointer ownership, overlap cleanup, Signal Arrow geometry, and document coordinates are unchanged.
+
+
+## v1.0.67 interpolation-safe compiler correction
+
+See `CHANGELOG-v1.0.67.md`, `AGENTS.md`, ADR-008 and `VALIDATION.md`. The v1.0.66 namespace-collision repair is corrected so `global::` is no longer placed directly in an interpolated-string hole. Streaming Chat and RTSP use the explicit `TextEncoding` alias, and RTSP calculates SDP content length before formatting the header. The compilation-safety contract now rejects the exact parser trap that produced `CS0103`. Runtime behavior, publication format `1.48`, Picture Studio format `1.3`, and package dependencies remain unchanged.

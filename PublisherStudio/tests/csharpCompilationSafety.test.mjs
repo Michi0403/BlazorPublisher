@@ -106,7 +106,7 @@ for (const file of compositionFiles) {
 // sibling namespace named Encoding can shadow System.Text.Encoding in Chat/Lan.
 // Guard common framework identifiers whenever the project contains a conflicting
 // namespace leaf under an enclosing namespace. Existing collisions must use a
-// global:: qualification or an explicit alias.
+// deliberate alias or an explicit global:: qualification.
 const frameworkTypes = new Map([
   ['Encoding', 'System.Text.Encoding'],
   ['Path', 'System.IO.Path'],
@@ -173,7 +173,25 @@ for (const relative of [
   const file = path.join(web, ...relative);
   const text = fs.readFileSync(file, 'utf8');
   assert.doesNotMatch(text, /(^|[^A-Za-z0-9_:.])Encoding\s*\./m);
-  assert.match(text, /global::System\.Text\.Encoding\./);
+  assert.match(text, /^using\s+TextEncoding\s*=\s*global::System\.Text\.Encoding\s*;/m);
+  assert.match(text, /\bTextEncoding\s*\./);
 }
 
-console.log('PublisherStudio C# composition-root and namespace safety checks passed.');
+// `global::` is legal in a normal C# expression, but when it begins an
+// interpolation hole the first colon is parsed as the interpolation format
+// separator. `$"{global::Type.Member}"` therefore resolves an identifier named
+// `global` and produces CS0103. Require an alias/local value or parentheses.
+for (const file of csharpFiles) {
+  const text = stripComments(fs.readFileSync(file, 'utf8'));
+  assert.doesNotMatch(
+    text,
+    /\{\s*global::/,
+    `${path.relative(root, file)} starts an interpolation/expression hole with global::. Use a file-level alias, a local value, or parenthesize the global:: expression.`
+  );
+}
+
+const rtsp = fs.readFileSync(path.join(web, 'Services', 'Streaming', 'Lan', 'RtspLanServer.cs'), 'utf8');
+assert.match(rtsp, /var\s+contentLength\s*=\s*TextEncoding\.ASCII\.GetByteCount\(sdp\)\s*;/);
+assert.match(rtsp, /\$"Content-Length:\s*\{contentLength\}"/);
+
+console.log('PublisherStudio C# composition-root, namespace and interpolation safety checks passed.');

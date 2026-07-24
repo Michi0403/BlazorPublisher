@@ -36,6 +36,6 @@ The enforceable repository contract is in [`AGENTS.md`](../../AGENTS.md). Archit
 
 ## Compiler-visible boundaries
 
-Folder and namespace names participate in C# name resolution. New subnamespace leaves must avoid simple names that collide with framework or project types visible from the same enclosing namespace. Existing compatibility collisions use explicit `global::` qualification or a deliberate alias. Composition-root files (`Program.cs` and service-collection extensions) explicitly import or qualify moved Services, Hubs and HostedServices; they do not rely on IDE caches or accidental global usings.
+Folder and namespace names participate in C# name resolution. New subnamespace leaves must avoid simple names that collide with framework or project types visible from the same enclosing namespace. Existing compatibility collisions use a deliberate file-level alias or explicit `global::` qualification. Aliases are preferred inside interpolated strings because an unparenthesized `{global::...}` hole is parsed as a format expression. Composition-root files (`Program.cs` and service-collection extensions) explicitly import or qualify moved Services, Hubs and HostedServices; they do not rely on IDE caches or accidental global usings.
 
 The `csharpCompilationSafety` contract scans DI registrations and namespace/type collisions. It supplements—but does not replace—a real compiler build.

@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Security.Cryptography;
 using System.Threading.Channels;
+using TextEncoding = global::System.Text.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Lan;
 
@@ -106,11 +107,12 @@ public sealed class RtspLanServer : IAsyncDisposable
                             + "c=IN IP4 0.0.0.0\r\n"
                             + "a=rtpmap:33 MP2T/90000\r\n"
                             + "a=control:trackID=0\r\n";
+                        var contentLength = TextEncoding.ASCII.GetByteCount(sdp);
                         await client.SendControlAsync(Response(200, cseq,
                         [
                             "Content-Type: application/sdp",
                             $"Content-Base: {RequestBase(request.Uri)}/",
-                            $"Content-Length: {global::System.Text.Encoding.ASCII.GetByteCount(sdp)}"
+                            $"Content-Length: {contentLength}"
                         ], sdp), linked.Token);
                         break;
                     }
@@ -177,8 +179,8 @@ public sealed class RtspLanServer : IAsyncDisposable
         var token = query.Select(part => part.Split('=', 2))
             .FirstOrDefault(part => part.Length > 0 && part[0].Equals("token", StringComparison.OrdinalIgnoreCase));
         var supplied = token is { Length: > 1 } ? Uri.UnescapeDataString(token[1]) : string.Empty;
-        var expectedBytes = global::System.Text.Encoding.UTF8.GetBytes(_accessToken);
-        var suppliedBytes = global::System.Text.Encoding.UTF8.GetBytes(supplied);
+        var expectedBytes = TextEncoding.UTF8.GetBytes(_accessToken);
+        var suppliedBytes = TextEncoding.UTF8.GetBytes(supplied);
         return suppliedBytes.Length == expectedBytes.Length && CryptographicOperations.FixedTimeEquals(suppliedBytes, expectedBytes);
     }
 
@@ -203,7 +205,7 @@ public sealed class RtspLanServer : IAsyncDisposable
             var count = buffer.Count;
             if (count >= 4 && buffer[count - 4] == 13 && buffer[count - 3] == 10 && buffer[count - 2] == 13 && buffer[count - 1] == 10) break;
         }
-        var text = global::System.Text.Encoding.ASCII.GetString(buffer.ToArray());
+        var text = TextEncoding.ASCII.GetString(buffer.ToArray());
         var lines = text.Split("\r\n", StringSplitOptions.None);
         var first = lines[0].Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
         if (first.Length < 2) return null;
@@ -223,7 +225,7 @@ public sealed class RtspLanServer : IAsyncDisposable
         var builder = new StringBuilder($"RTSP/1.0 {status} {reason}\r\nCSeq: {cseq}\r\nServer: PublisherStudio\r\n");
         if (headers is not null) foreach (var header in headers) builder.Append(header).Append("\r\n");
         builder.Append("\r\n").Append(body);
-        return global::System.Text.Encoding.ASCII.GetBytes(builder.ToString());
+        return TextEncoding.ASCII.GetBytes(builder.ToString());
     }
 
     public async ValueTask DisposeAsync()

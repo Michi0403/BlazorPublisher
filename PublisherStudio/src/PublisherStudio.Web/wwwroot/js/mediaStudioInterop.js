@@ -34,7 +34,13 @@ function stateFor(id) {
             retainedRecordingMimeType: '',
             retainedRecordingFileName: '',
             keyboardHandler: null,
-            rootId: ''
+            rootId: '',
+            frameStageId: '',
+            frameOverlayId: '',
+            frameResizeObserver: null,
+            frameMetadataHandler: null,
+            frameOverlayMoveHandler: null,
+            frameOverlayLeaveHandler: null
         };
         studioStates.set(id, state);
     }
@@ -78,6 +84,85 @@ function mediaElement(id) {
     return element instanceof HTMLMediaElement ? element : null;
 }
 
+function releaseFrameOverlayBindings(state) {
+    const video = mediaElement(state.id);
+    const overlay = document.getElementById(state.frameOverlayId);
+    if (video && state.frameMetadataHandler) {
+        video.removeEventListener('loadedmetadata', state.frameMetadataHandler);
+        video.removeEventListener('loadeddata', state.frameMetadataHandler);
+    }
+    if (overlay && state.frameOverlayMoveHandler) overlay.removeEventListener('pointermove', state.frameOverlayMoveHandler);
+    if (overlay && state.frameOverlayLeaveHandler) {
+        overlay.removeEventListener('pointerleave', state.frameOverlayLeaveHandler);
+        overlay.removeEventListener('pointercancel', state.frameOverlayLeaveHandler);
+    }
+    try { state.frameResizeObserver?.disconnect(); } catch { }
+    state.frameResizeObserver = null;
+    state.frameMetadataHandler = null;
+    state.frameOverlayMoveHandler = null;
+    state.frameOverlayLeaveHandler = null;
+}
+
+function syncFrameOverlay(state) {
+    const video = mediaElement(state.id);
+    const stage = document.getElementById(state.frameStageId);
+    const overlay = document.getElementById(state.frameOverlayId);
+    if (!(video instanceof HTMLVideoElement) || !stage || !overlay) return;
+
+    const stageBounds = stage.getBoundingClientRect();
+    const videoBounds = video.getBoundingClientRect();
+    const availableWidth = Math.max(1, videoBounds.width);
+    const availableHeight = Math.max(1, videoBounds.height);
+    const sourceWidth = Math.max(1, Number(video.videoWidth) || availableWidth);
+    const sourceHeight = Math.max(1, Number(video.videoHeight) || availableHeight);
+    const scale = Math.min(availableWidth / sourceWidth, availableHeight / sourceHeight);
+    const contentWidth = Math.max(1, sourceWidth * scale);
+    const contentHeight = Math.max(1, sourceHeight * scale);
+    const left = videoBounds.left - stageBounds.left + (availableWidth - contentWidth) / 2;
+    const top = videoBounds.top - stageBounds.top + (availableHeight - contentHeight) / 2;
+
+    overlay.style.left = `${left}px`;
+    overlay.style.top = `${top}px`;
+    overlay.style.width = `${contentWidth}px`;
+    overlay.style.height = `${contentHeight}px`;
+}
+
+function bindFrameOverlay(state, frameStageId, frameOverlayId) {
+    releaseFrameOverlayBindings(state);
+    state.frameStageId = String(frameStageId || '');
+    state.frameOverlayId = String(frameOverlayId || '');
+    if (!state.frameStageId || !state.frameOverlayId) return;
+
+    const video = mediaElement(state.id);
+    const stage = document.getElementById(state.frameStageId);
+    const overlay = document.getElementById(state.frameOverlayId);
+    if (!(video instanceof HTMLVideoElement) || !stage || !overlay) return;
+
+    state.frameMetadataHandler = () => syncFrameOverlay(state);
+    video.addEventListener('loadedmetadata', state.frameMetadataHandler);
+    video.addEventListener('loadeddata', state.frameMetadataHandler);
+
+    state.frameOverlayMoveHandler = event => {
+        const bounds = overlay.getBoundingClientRect();
+        const x = Math.max(0, Math.min(bounds.width, Number(event.clientX) - bounds.left));
+        const y = Math.max(0, Math.min(bounds.height, Number(event.clientY) - bounds.top));
+        overlay.style.setProperty('--media-pointer-x', `${x}px`);
+        overlay.style.setProperty('--media-pointer-y', `${y}px`);
+        overlay.classList.add('pointer-visible');
+    };
+    state.frameOverlayLeaveHandler = () => overlay.classList.remove('pointer-visible');
+    overlay.addEventListener('pointermove', state.frameOverlayMoveHandler);
+    overlay.addEventListener('pointerleave', state.frameOverlayLeaveHandler);
+    overlay.addEventListener('pointercancel', state.frameOverlayLeaveHandler);
+
+    if (typeof ResizeObserver !== 'undefined') {
+        state.frameResizeObserver = new ResizeObserver(() => syncFrameOverlay(state));
+        state.frameResizeObserver.observe(stage);
+        state.frameResizeObserver.observe(video);
+    }
+    requestAnimationFrame(() => syncFrameOverlay(state));
+}
+
 export function clickElement(id) {
     const element = document.getElementById(id);
     if (!element) throw new Error(`Element '${id}' is not available.`);
@@ -85,7 +170,7 @@ export function clickElement(id) {
     element.click();
 }
 
-export function initializeMediaStudio(id, dotnet, sessionId, rootId = "") {
+export function initializeMediaStudio(id, dotnet, sessionId, rootId = "", frameStageId = "", frameOverlayId = "") {
     const state = stateFor(id);
     const nextSessionId = String(sessionId || '');
     if (state.sessionId && state.sessionId !== nextSessionId) releaseRetainedRecording(state);
@@ -113,6 +198,7 @@ export function initializeMediaStudio(id, dotnet, sessionId, rootId = "") {
         state.dotnet?.invokeMethodAsync("MediaStudioShortcutRequested", command).catch(() => {});
     };
     document.addEventListener("keydown", state.keyboardHandler, true);
+    bindFrameOverlay(state, frameStageId, frameOverlayId);
 }
 
 function waitForMetadata(element) {
@@ -491,6 +577,7 @@ export function disposeMediaStudio(id) {
     if (element && state.rangeHandler) element.removeEventListener('timeupdate', state.rangeHandler);
     if (state.keyboardHandler) document.removeEventListener("keydown", state.keyboardHandler, true);
     state.keyboardHandler = null;
+    releaseFrameOverlayBindings(state);
     releaseRetainedRecording(state);
     studioStates.delete(id);
 }

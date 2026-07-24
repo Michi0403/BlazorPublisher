@@ -1133,20 +1133,72 @@ function selectionCoordinates(selection) {
     for (const point of points) values.push(Number(point.x) || 0, Number(point.y) || 0);
     return values;
 }
+function appendAreaSelectionPath(ctx, selection) {
+    const points = Array.isArray(selection?.points) ? selection.points : [];
+    if (points.length < 2) return false;
+    if (selection.kind === "rectangle" || selection.kind === "ellipse") {
+        const a = points[0], b = points[1];
+        const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y);
+        if (selection.kind === "ellipse") ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+        else ctx.rect(x, y, w, h);
+        return true;
+    }
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let index = 1; index < points.length; index++) ctx.lineTo(points[index].x, points[index].y);
+    ctx.closePath();
+    return true;
+}
+
+function areaSelectionHandlePoints(selection) {
+    const points = Array.isArray(selection?.points) ? selection.points : [];
+    if (points.length < 2) return [];
+    if (selection.kind === "rectangle" || selection.kind === "ellipse") {
+        const a = points[0], b = points[1];
+        const left = Math.min(a.x, b.x), top = Math.min(a.y, b.y), right = Math.max(a.x, b.x), bottom = Math.max(a.y, b.y);
+        return [{ x: left, y: top }, { x: right, y: top }, { x: right, y: bottom }, { x: left, y: bottom }];
+    }
+    return points;
+}
+
+function drawSelectionModeVeil(ctx) {
+    ctx.save();
+    ctx.fillStyle = "rgba(2,6,23,.34)";
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
+}
+
 function drawAreaSelection(ctx, selection, zoom) {
     const points = Array.isArray(selection?.points) ? selection.points : [];
     if (points.length < 2) return;
+    const scale = Math.max(.05, zoom);
     ctx.save();
-    ctx.strokeStyle = "#0284c7"; ctx.fillStyle = "rgba(14,165,233,.08)"; ctx.lineWidth = Math.max(.5, 1.4 / Math.max(.05, zoom));
-    ctx.setLineDash([7 / Math.max(.05, zoom), 5 / Math.max(.05, zoom)]);
+    ctx.fillStyle = "rgba(2,6,23,.58)";
     ctx.beginPath();
-    if (selection.kind === "rectangle" || selection.kind === "ellipse") {
-        const a=points[0], b=points[1], x=Math.min(a.x,b.x), y=Math.min(a.y,b.y), w=Math.abs(b.x-a.x), h=Math.abs(b.y-a.y);
-        if (selection.kind === "ellipse") ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2); else ctx.rect(x,y,w,h);
-    } else {
-        ctx.moveTo(points[0].x, points[0].y); for (let i=1;i<points.length;i++) ctx.lineTo(points[i].x,points[i].y); ctx.closePath();
+    ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    appendAreaSelectionPath(ctx, selection);
+    ctx.fill("evenodd");
+
+    ctx.strokeStyle = "#38bdf8";
+    ctx.fillStyle = "rgba(14,165,233,.08)";
+    ctx.lineWidth = Math.max(.5, 1.6 / scale);
+    ctx.setLineDash([7 / scale, 5 / scale]);
+    ctx.beginPath();
+    appendAreaSelectionPath(ctx, selection);
+    ctx.fill();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const radius = Math.max(2.5, 4.5 / scale);
+    for (const point of areaSelectionHandlePoints(selection)) {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.strokeStyle = "#0284c7";
+        ctx.lineWidth = Math.max(.5, 1.2 / scale);
+        ctx.stroke();
     }
-    ctx.fill(); ctx.stroke(); ctx.restore();
+    ctx.restore();
 }
 function magneticSnapPoint(editor, point) {
     let best = point; let distance = 18 / Math.max(.05, editor.zoom || 1);
@@ -1276,6 +1328,7 @@ async function drawDocument(canvas, document, options = {}) {
         if (error) errors.push(error);
     }
     if (options.grid) drawGrid(ctx, document, options.zoom || 1);
+    if (options.selectionMode && !options.previewStroke && !options.areaSelection) drawSelectionModeVeil(ctx);
     if (options.previewStroke) drawDrawingPreview(ctx, options.previewStroke);
     if (options.areaSelection) drawAreaSelection(ctx, options.areaSelection, options.zoom || 1);
     if (options.selectedLayerId) {
@@ -1402,7 +1455,8 @@ function scheduleEditorRender(editor) {
                 selectedLayerId: editor.selectedLayerId,
                 zoom: editor.zoom,
                 previewStroke: editor.pathDraft ? { ...editor.pathDraft, points: [...editor.pathDraft.points, ...(editor.pathDraft.hover ? [editor.pathDraft.hover] : [])] } : editor.drawing,
-                areaSelection: editor.areaSelection
+                areaSelection: editor.areaSelection,
+                selectionMode: isAreaSelectionTool(editor.toolSettings?.tool)
             });
             if (token === editor.renderToken) {
                 const errors = Array.isArray(rendered.pictureStudioErrors) ? rendered.pictureStudioErrors : [];
@@ -1726,10 +1780,50 @@ function finishDrawing(editor, event, cancel = false) {
     scheduleEditorRender(editor);
 }
 
+function pictureSelectionModeLabel(tool) {
+    const name = String(tool || "").toLowerCase();
+    if (name === "ellipseselect") return "Ellipse selection · drag to select";
+    if (name === "freeselect") return "Freehand selection · draw around the area";
+    if (name === "magneticselect") return "Magnetic selection · trace nearby edges";
+    if (name === "polygonselect") return "Polygon selection · click angled vertices";
+    return "Rectangle selection · drag to select";
+}
+
+function pictureGestureSurface(editor) {
+    return editor.canvas?.closest?.(".picture-canvas-surface") || null;
+}
+
+function updatePictureGestureMode(editor) {
+    const surface = pictureGestureSurface(editor);
+    if (!surface) return;
+    const tool = editor.toolSettings?.tool || "select";
+    const active = isAreaSelectionTool(tool);
+    surface.classList.toggle("selection-gesture-active", active);
+    if (!active) surface.classList.remove("pointer-visible");
+    const label = surface.querySelector(".picture-gesture-mode-label");
+    if (label) label.dataset.modeLabel = active ? pictureSelectionModeLabel(tool) : "";
+}
+
+function updatePictureGesturePointer(editor, event) {
+    const surface = pictureGestureSurface(editor);
+    if (!surface || !isAreaSelectionTool(editor.toolSettings?.tool)) return;
+    const bounds = editor.canvas.getBoundingClientRect();
+    const x = Math.max(0, Math.min(bounds.width, Number(event.clientX) - bounds.left));
+    const y = Math.max(0, Math.min(bounds.height, Number(event.clientY) - bounds.top));
+    surface.style.setProperty("--picture-pointer-x", `${x}px`);
+    surface.style.setProperty("--picture-pointer-y", `${y}px`);
+    surface.classList.add("pointer-visible");
+}
+
+function hidePictureGesturePointer(editor) {
+    pictureGestureSurface(editor)?.classList.remove("pointer-visible");
+}
+
 function updateCanvasCursor(editor) {
     if (!editor.canvas) return;
     const tool = editor.toolSettings?.tool || "select";
-    editor.canvas.style.cursor = tool === "select" ? "default" : tool === "eyedropper" ? "copy" : "crosshair";
+    editor.canvas.style.cursor = isAreaSelectionTool(tool) ? "none" : tool === "select" ? "default" : tool === "eyedropper" ? "copy" : "crosshair";
+    updatePictureGestureMode(editor);
 }
 
 function bindEditorCanvas(editor, canvas) {
@@ -1746,6 +1840,7 @@ function bindEditorCanvas(editor, canvas) {
         else beginDrawing(editor, event);
     });
     canvas.addEventListener("pointermove", event => {
+        updatePictureGesturePointer(editor, event);
         if (editor.pathDraft && ["path", "polygonselect"].includes(editor.toolSettings?.tool || "select")) {
             editor.pathDraft.hover = canvasPoint(canvas, event);
             scheduleEditorRender(editor);
@@ -1757,9 +1852,11 @@ function bindEditorCanvas(editor, canvas) {
         else finishInteraction(editor, event);
     });
     canvas.addEventListener("pointercancel", event => {
+        hidePictureGesturePointer(editor);
         if (editor.drawing) finishDrawing(editor, event, true);
         else finishInteraction(editor, event, true);
     });
+    canvas.addEventListener("pointerleave", () => hidePictureGesturePointer(editor));
     canvas.addEventListener("lostpointercapture", event => {
         if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event, true);
         else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
@@ -1883,6 +1980,12 @@ export function disposePictureStudio(canvasId) {
         document.removeEventListener("visibilitychange", handlers.visibilitychange);
     }
     if (editor.canvas) delete editor.canvas.dataset.pictureStudioBound;
+    const gestureSurface = pictureGestureSurface(editor);
+    if (gestureSurface) {
+        gestureSurface.classList.remove("selection-gesture-active", "pointer-visible");
+        gestureSurface.style.removeProperty("--picture-pointer-x");
+        gestureSurface.style.removeProperty("--picture-pointer-y");
+    }
     editor.dotNetRef = null;
     editor.canvas = null;
     editor.document = null;

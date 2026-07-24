@@ -164,8 +164,10 @@ The runtime resolves endpoint gestures and action targets locally. Object IDs se
 Picture Studio format `1.2` adds open/smoothed `Path` layers. SVG export serializes text, fills, shapes, and paths as vector markup. Layers whose canvas rendering is intentionally procedural or pixel-based are rasterized individually and embedded as data URLs, preserving standalone portability and layer order without flattening the entire SVG into one bitmap.
 
 
-## Studio gesture and Z-order ownership (v1.0.68)
+## Studio gesture and Z-order ownership (v1.0.68–1.0.69)
 
 Video Studio and Audio Studio store editable temporal sections as `PublicationMediaSegment` values inside one publication media element. Picture Studio stores area clips inside the selected picture layer. Video frame regions use normalized coordinates; picture regions use document coordinates. These internal edits never create publication siblings or participate in page Z-order.
 
-Studio Components own transient mouse/touch modes and overlays, while `MediaTimelineEditService` and the existing Picture Services own deterministic mutations. The Mainframe remains responsible for applying a Studio result to an existing or newly inserted publication element without changing placement, Z-index, groups, connectors, animation or interaction state. See `docs/architecture/media-gesture-editing.md` and ADR-009.
+Studio Components own transient mouse/touch modes and overlays, while `MediaTimelineEditService` and the existing Picture Services own deterministic mutations. In v1.0.69, spatial workflows use local interaction overlays: the video overlay follows the contained source-frame rectangle and owns input above the native player only while frame-region mode is active; Picture Studio renders a pointer-transparent guide plus a canvas-local selection veil. High-frequency cursor movement remains browser-local.
+
+The Mainframe remains responsible for applying a Studio result to an existing or newly inserted publication element without changing placement, Z-index, groups, connectors, animation or interaction state. See `docs/architecture/media-gesture-editing.md`, ADR-009 and ADR-010.

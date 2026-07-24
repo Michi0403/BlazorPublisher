@@ -85,13 +85,19 @@ assert.match(mediaStudio, /MediaStudioShortcutRequested/);
 assert.match(mediaStudio, /if \(!IsVideo && mode == MediaStudioMouseMode\.FrameRegion\)/);
 
 // Video alone has normalized two-dimensional polygon editing.
+assert.match(mediaStudio, /id="media-studio-frame-overlay-host"/);
 assert.match(mediaStudio, /class="media-studio-frame-overlay"/);
+assert.match(mediaStudio, /class="media-frame-dim"/);
+assert.match(mediaStudio, /FrameOverlayPointerDown/);
+assert.match(mediaStudio, /FrameDimPath/);
+assert.match(mediaStudio, /CancelFrameRegion/);
 assert.match(mediaStudio, /normalizedPoint/);
-assert.match(mediaStudio, /FrameOverlayClicked/);
 assert.match(mediaStudio, /FrameClipCss/);
 assert.match(mediaStudio, /Math\.Sqrt\(x \* x \+ y \* y\)/);
 assert.doesNotMatch(mediaStudio, /Math\.Hypot/);
-assert.match(css, /\.media-studio-preview-shell\.frame-region-mode \.media-studio-frame-overlay/);
+assert.match(css, /\.media-studio-frame-overlay-host\.active/);
+assert.match(css, /\.media-frame-cursor-ring/);
+assert.match(css, /box-shadow:\s*0 0 0 100vmax/);
 assert.match(css, /pointer-events:\s*none/);
 assert.match(css, /touch-action:\s*none/);
 
@@ -119,6 +125,10 @@ assert.match(pictureModels, /bool ClipInverted/);
 assert.match(pictureModels, /FormatVersion \{ get; set; \} = "1\.4"/);
 assert.match(pictureInterop, /"polygonselect"/);
 assert.match(pictureInterop, /getPictureStudioAreaSelection/);
+assert.match(pictureInterop, /drawSelectionModeVeil/);
+assert.match(pictureInterop, /ctx\.fill\("evenodd"\)/);
+assert.match(pictureInterop, /selection-gesture-active/);
+assert.match(pictureEditor, /picture-studio-gesture-guide/);
 assert.match(pictureInterop, /ctx\.clip\(layer\.clipInverted === true \? "evenodd" : "nonzero"\)/);
 assert.match(pictureInterop, /function svgLayerClip/);
 assert.match(pictureInterop, /clipPathUnits="userSpaceOnUse"/);
@@ -141,11 +151,13 @@ assert.match(pictureState, /"free" or "magnetic" or "polygon" => PictureShapeKin
 // Segment asset cleanup and architecture/Z-order safeguards are explicit.
 assert.match(editorState, /foreach \(var segment in media\.Segments\) _mediaAssets\.Remove\(segment\.Id\)/);
 assert.match(agents, /A media sequence, cutline, temporal section or frame\/picture region is canonical content inside the owning media or picture element/);
+assert.match(agents, /Video region overlays must align to the actual rendered source-frame rectangle/);
+assert.match(agents, /Never call `Math\.Clamp\(value, min, max\)` unless `min <= max` is guaranteed/);
 assert.match(agents, /never mutate Mainframe layer order/);
 assert.match(agents, /A gesture may have exactly one owner/);
 assert.match(agents, /Keyboard shortcuts must be scoped to the active Studio root/);
 assert.match(agents, /Every persisted visual edit must be covered in Mainframe preview, print\/PDF, raster\/SVG export, interactive HTML and standalone HTML/);
-assert.match(architecture, /Internal media sections and selection overlays never become page siblings/);
+assert.match(architecture, /Internal media sections and selection overlays never become page siblings or picture layers/);
 assert.match(adr, /never become publication elements or Z-order participants/);
 
 console.log('PublisherStudio media gesture, polygon region, sequence, export and Z-order contracts passed.');

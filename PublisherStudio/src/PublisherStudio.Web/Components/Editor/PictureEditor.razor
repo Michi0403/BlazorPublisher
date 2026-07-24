@@ -263,10 +263,16 @@
                 <main id="picture-studio-canvas-host" class="picture-studio-canvas-host">
                     <div class="picture-canvas-scroll">
                         <div class="picture-canvas-mat">
-                            <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label="Picture canvas"
-                                    @oncontextmenu="ShowCanvasContextMenu"
-                                    @oncontextmenu:preventDefault
-                                    @oncontextmenu:stopPropagation></canvas>
+                            <div id="picture-studio-canvas-surface" class="picture-canvas-surface">
+                                <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label="Picture canvas"
+                                        @oncontextmenu="ShowCanvasContextMenu"
+                                        @oncontextmenu:preventDefault
+                                        @oncontextmenu:stopPropagation></canvas>
+                                <div class="picture-studio-gesture-guide" aria-hidden="true">
+                                    <span class="picture-gesture-cursor-ring"></span>
+                                    <span class="picture-gesture-mode-label"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="picture-canvas-hint">@CanvasHint</div>

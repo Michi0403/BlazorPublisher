@@ -72,26 +72,46 @@
                         {
                             <div id="media-studio-frame-stage" class="media-studio-frame-stage">
                                 <video id="media-studio-preview" src="@_previewSource" poster="@_posterDataUrl" controls playsinline preload="metadata" style="@VideoPreviewClipStyle"></video>
-                                <svg class="media-studio-frame-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none"
-                                     @onclick="FrameOverlayClicked" @ondblclick="FinishFrameRegion" @ondblclick:preventDefault>
-                                    @if (ActiveFramePoints.Count >= 2)
-                                    {
-                                        <polyline class="media-frame-cutline" points="@FramePolylinePoints" />
-                                    }
-                                    @if (ActiveFramePoints.Count >= 3 && !_frameRegionEditing)
-                                    {
-                                        <polygon class="media-frame-selection" points="@FramePolygonPoints" />
-                                    }
-                                    @for (var pointIndex = 0; pointIndex < ActiveFramePoints.Count; pointIndex++)
-                                    {
-                                        var point = ActiveFramePoints[pointIndex];
-                                        <circle class="media-frame-node" cx="@Inv(point.X * 1000)" cy="@Inv(point.Y * 1000)" r="9" />
-                                    }
-                                </svg>
-                                @if (_mouseMode == MediaStudioMouseMode.FrameRegion)
-                                {
-                                    <div class="media-frame-mode-help">Click/tap vertices · Enter or double-click closes · Esc cancels</div>
-                                }
+                                <div id="media-studio-frame-overlay-host"
+                                     class="media-studio-frame-overlay-host @(_mouseMode == MediaStudioMouseMode.FrameRegion ? "active" : null)"
+                                     role="application"
+                                     aria-label="Video frame region selection"
+                                     @onpointerdown="FrameOverlayPointerDown"
+                                     @onpointerdown:preventDefault
+                                     @onpointerdown:stopPropagation
+                                     @ondblclick="FinishFrameRegion"
+                                     @ondblclick:preventDefault
+                                     @ondblclick:stopPropagation
+                                     @oncontextmenu="ShowMediaContextMenu"
+                                     @oncontextmenu:preventDefault
+                                     @oncontextmenu:stopPropagation>
+                                    <svg class="media-studio-frame-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+                                        <path class="media-frame-dim" d="@FrameDimPath" fill-rule="evenodd" />
+                                        @if (ActiveFramePoints.Count >= 2)
+                                        {
+                                            <polyline class="media-frame-cutline" points="@FramePolylinePoints" />
+                                        }
+                                        @if (ActiveFramePoints.Count >= 3)
+                                        {
+                                            <polygon class="media-frame-selection" points="@FramePolygonPoints" />
+                                        }
+                                        @for (var pointIndex = 0; pointIndex < ActiveFramePoints.Count; pointIndex++)
+                                        {
+                                            var point = ActiveFramePoints[pointIndex];
+                                            <circle class="media-frame-node" cx="@Inv(point.X * 1000)" cy="@Inv(point.Y * 1000)" r="9" />
+                                        }
+                                    </svg>
+                                    <span class="media-frame-cursor-ring" aria-hidden="true"></span>
+                                    <div class="media-frame-mode-help">
+                                        <b>Frame region mode</b>
+                                        <span>Click/tap vertices · Enter or double-click applies · Esc cancels</span>
+                                    </div>
+                                    <div class="media-frame-overlay-actions" @onpointerdown:stopPropagation>
+                                        <button type="button" disabled="@(!CanFinishFrameRegion)" @onclick="FinishFrameRegion">Apply region</button>
+                                        <button type="button" disabled="@(!_frameRegionEditing || _frameDraft.Count == 0)" @onclick="RemoveLastFramePoint">Undo point</button>
+                                        <button type="button" @onclick="CancelFrameRegion">Exit mode</button>
+                                    </div>
+                                </div>
                             </div>
                         }
                         else
@@ -150,11 +170,11 @@
                                              AllowMouseSelection="true"
                                              MoveSelectedRangeByClick="true">
                                 <DxRangeSelectorScale StartValue="@(0d)"
-                                                      EndValue="@Math.Max(.1, _duration)"
+                                                      EndValue="@RangeSelectorEnd"
                                                       ValueType="ChartAxisDataType.Numeric"
                                                       TickInterval="@MajorTick"
                                                       MinorTickInterval="@MinorTick"
-                                                      MinRange="@(0.05d)">
+                                                      MinRange="@RangeSelectorMinRange">
                                     <DxRangeSelectorScaleMarker Visible="false" />
                                 </DxRangeSelectorScale>
                                 <DxRangeSelectorSliderMarker Visible="true" />
@@ -375,7 +395,12 @@
     private bool CanPasteFrameRegion => _frameClipboard.Count >= 3;
     private string FramePolylinePoints => string.Join(" ", ActiveFramePoints.Select(point => $"{Inv(point.X * 1000)},{Inv(point.Y * 1000)}"));
     private string FramePolygonPoints => FramePolylinePoints;
-    private string VideoPreviewClipStyle => ActiveFramePoints.Count >= 3 ? $"clip-path:{FrameClipCss(ActiveFramePoints)};" : string.Empty;
+    private string FrameDimPath => ActiveFramePoints.Count >= 3
+        ? $"M 0 0 H 1000 V 1000 H 0 Z M {string.Join(" L ", ActiveFramePoints.Select(point => $"{Inv(point.X * 1000)} {Inv(point.Y * 1000)}"))} Z"
+        : "M 0 0 H 1000 V 1000 H 0 Z";
+    private string VideoPreviewClipStyle => !_frameRegionEditing && _frameClipPolygon.Count >= 3
+        ? $"clip-path:{FrameClipCss(_frameClipPolygon)};"
+        : string.Empty;
     private string MouseModeLabel => _mouseMode switch
     {
         MediaStudioMouseMode.SelectSection => "Select section",
@@ -404,6 +429,8 @@
             : HasSource ? $"{MimeLabel} · {Time(_duration)}" : "Import or record a source to begin.");
     private IEnumerable<double> DisplayWaveform => _waveform.Count > 0 ? _waveform : Enumerable.Repeat(.22, 64);
     private double MaxFade => Math.Max(.05, Math.Min(10, (_trimEnd - _trimStart) / Math.Max(.25, _playbackRate) / 2));
+    private double RangeSelectorEnd => Math.Max(.01, double.IsFinite(_duration) ? _duration : 0);
+    private double RangeSelectorMinRange => Math.Min(.05, RangeSelectorEnd);
     private double MajorTick => _duration switch { <= 10 => 1, <= 30 => 5, <= 120 => 10, <= 600 => 60, _ => 300 };
     private double MinorTick => Math.Max(.1, MajorTick / 5);
 
@@ -497,7 +524,14 @@
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty && SessionId != _initializedSession)
         {
-            await _module.InvokeVoidAsync("initializeMediaStudio", "media-studio-preview", _self, SessionId.ToString("N"), "media-studio-window");
+            await _module.InvokeVoidAsync(
+                "initializeMediaStudio",
+                "media-studio-preview",
+                _self,
+                SessionId.ToString("N"),
+                "media-studio-window",
+                IsVideo ? "media-studio-frame-stage" : string.Empty,
+                IsVideo ? "media-studio-frame-overlay-host" : string.Empty);
             _initializedSession = SessionId;
         }
         return _module;
@@ -511,10 +545,10 @@
         segment.DataUrl = NormalizeMediaDataUrl(_dataUrl, IsVideo ? "video/webm" : "audio/webm");
         segment.MimeType = NormalizeMimeType(_mimeType, IsVideo ? "video/webm" : "audio/webm");
         segment.PosterDataUrl = _posterDataUrl;
-        segment.DurationSeconds = Math.Max(.01, _duration);
-        segment.TrimStartSeconds = Math.Clamp(_trimStart, 0, Math.Max(0, segment.DurationSeconds - .01));
-        segment.TrimEndSeconds = Math.Clamp(_trimEnd > segment.TrimStartSeconds ? _trimEnd : segment.DurationSeconds,
-            segment.TrimStartSeconds + .01, segment.DurationSeconds);
+        segment.DurationSeconds = Math.Max(.01, double.IsFinite(_duration) ? _duration : 0);
+        var trim = NormalizeTrimRange(_trimStart, _trimEnd, segment.DurationSeconds);
+        segment.TrimStartSeconds = trim.Start;
+        segment.TrimEndSeconds = trim.End;
         segment.WaveformSamples = [.. _waveform];
     }
 
@@ -533,11 +567,11 @@
         _dataUrl = segment.DataUrl;
         _mimeType = segment.MimeType;
         _posterDataUrl = segment.PosterDataUrl;
-        _duration = segment.DurationSeconds;
+        _duration = Math.Max(.01, segment.DurationSeconds);
         _trimStart = segment.TrimStartSeconds;
         _trimEnd = segment.EffectiveTrimEndSeconds;
         _waveform = [.. segment.WaveformSamples];
-        ClampFades();
+        ApplyTrimRange(_trimStart, _trimEnd, commit: false);
         RefreshPreviewSource();
         if (seek) _ = SeekSelectedAtPlayheadAsync();
     }
@@ -747,12 +781,16 @@
         _mouseMode = MediaStudioMouseMode.FrameRegion;
     }
 
-    private async Task FrameOverlayClicked(MouseEventArgs args)
+    private async Task FrameOverlayPointerDown(PointerEventArgs args)
     {
-        if (!IsVideo || _mouseMode != MediaStudioMouseMode.FrameRegion) return;
+        if (!IsVideo || args.Button != 0 || _mouseMode != MediaStudioMouseMode.FrameRegion) return;
         if (!_frameRegionEditing) BeginFrameRegion();
         var module = await EnsureMediaModuleAsync();
-        var point = await module.InvokeAsync<MediaFramePoint>("normalizedPoint", "media-studio-frame-stage", args.ClientX, args.ClientY);
+        var point = await module.InvokeAsync<MediaFramePoint>(
+            "normalizedPoint",
+            "media-studio-frame-overlay-host",
+            args.ClientX,
+            args.ClientY);
         point.X = Math.Clamp(point.X, 0, 1);
         point.Y = Math.Clamp(point.Y, 0, 1);
         if (_frameDraft.Count == 0 || Distance(_frameDraft[^1], point) > .003)
@@ -773,12 +811,17 @@
         return Task.CompletedTask;
     }
 
-    private void ClearFrameRegion()
+    private void CancelFrameRegion()
     {
-        _frameClipPolygon.Clear();
         _frameDraft.Clear();
         _frameRegionEditing = false;
         if (_mouseMode == MediaStudioMouseMode.FrameRegion) _mouseMode = MediaStudioMouseMode.SelectSection;
+    }
+
+    private void ClearFrameRegion()
+    {
+        _frameClipPolygon.Clear();
+        CancelFrameRegion();
     }
 
     private void RemoveLastFramePoint()
@@ -827,12 +870,7 @@
                 if (_frameRegionEditing) return FinishFrameRegion();
                 break;
             case "cancel":
-                if (_frameRegionEditing)
-                {
-                    _frameDraft.Clear();
-                    _frameRegionEditing = false;
-                }
-                _mouseMode = MediaStudioMouseMode.SelectSection;
+                CancelFrameRegion();
                 break;
         }
         return InvokeAsync(StateHasChanged);
@@ -846,19 +884,15 @@
     {
         var module = await EnsureMediaModuleAsync();
         var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
-        _trimStart = Math.Clamp(position, 0, Math.Max(0, _trimEnd - .01));
-        ClampFades();
-        CommitSelectedSegment();
+        ApplyTrimRange(position, _trimEnd);
     }
     private async Task SetTrimEndAtPlayhead()
     {
         var module = await EnsureMediaModuleAsync();
         var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
-        _trimEnd = Math.Clamp(position, _trimStart + .01, _duration);
-        ClampFades();
-        CommitSelectedSegment();
+        ApplyTrimRange(_trimStart, position);
     }
-    private void ResetTrim() { _trimStart = 0; _trimEnd = _duration; ClampFades(); CommitSelectedSegment(); }
+    private void ResetTrim() => ApplyTrimRange(0, _duration);
     private void ToggleMutedFromMenu() => _muted = !_muted;
     private void ToggleLoopFromMenu() => _loop = !_loop;
 
@@ -1217,17 +1251,56 @@
 
     private void TrimRangeChanged(RangeSelectorValueChangedEventArgs args)
     {
-        var values = args.CurrentRange.Select(value => Convert.ToDouble(value, CultureInfo.InvariantCulture)).ToArray();
-        if (values.Length < 2 || values.Any(value => !double.IsFinite(value))) return;
-        _trimStart = Math.Clamp(Math.Min(values[0], values[1]), 0, _duration);
-        _trimEnd = Math.Clamp(Math.Max(values[0], values[1]), _trimStart + .01, _duration);
+        if (!double.IsFinite(_duration) || _duration <= 0) return;
+        var values = new List<double>(2);
+        foreach (var value in args.CurrentRange)
+        {
+            if (!TryRangeValue(value, out var number)) return;
+            values.Add(number);
+        }
+        if (values.Count < 2) return;
+        ApplyTrimRange(Math.Min(values[0], values[1]), Math.Max(values[0], values[1]));
+    }
+
+    private static bool TryRangeValue(object? value, out double number)
+    {
+        try
+        {
+            number = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+            if (double.IsFinite(number)) return true;
+        }
+        catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException) { }
+
+        var text = Convert.ToString(value, CultureInfo.CurrentCulture);
+        return double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out number) && double.IsFinite(number);
+    }
+
+    private static (double Start, double End) NormalizeTrimRange(double start, double end, double duration)
+    {
+        var safeDuration = double.IsFinite(duration) ? Math.Max(0, duration) : 0;
+        if (safeDuration <= 0) return (0, 0);
+
+        var minimumSpan = Math.Min(.01, safeDuration);
+        var maximumStart = Math.Max(0, safeDuration - minimumSpan);
+        var safeStart = double.IsFinite(start) ? Math.Clamp(start, 0, maximumStart) : 0;
+        var requestedEnd = double.IsFinite(end) ? end : safeDuration;
+        var minimumEnd = Math.Min(safeDuration, safeStart + minimumSpan);
+        var safeEnd = Math.Clamp(requestedEnd, minimumEnd, safeDuration);
+        return (safeStart, safeEnd);
+    }
+
+    private void ApplyTrimRange(double start, double end, bool commit = true)
+    {
+        var trim = NormalizeTrimRange(start, end, _duration);
+        _trimStart = trim.Start;
+        _trimEnd = trim.End;
         ClampFades();
-        CommitSelectedSegment();
+        if (commit) CommitSelectedSegment();
     }
 
     private void ChangeName(ChangeEventArgs args) { _name = string.IsNullOrWhiteSpace(Text(args)) ? (IsVideo ? "Video" : "Audio") : Text(args); CommitSelectedSegment(); }
-    private void ChangeTrimStart(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimStart = Math.Clamp(value, 0, Math.Max(0, _trimEnd - .01)); ClampFades(); CommitSelectedSegment(); } }
-    private void ChangeTrimEnd(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimEnd = Math.Clamp(value, _trimStart + .01, _duration); ClampFades(); CommitSelectedSegment(); } }
+    private void ChangeTrimStart(ChangeEventArgs args) { if (TryDouble(args, out var value)) ApplyTrimRange(value, _trimEnd); }
+    private void ChangeTrimEnd(ChangeEventArgs args) { if (TryDouble(args, out var value)) ApplyTrimRange(_trimStart, value); }
     private void ChangePlaybackRate(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _playbackRate = Math.Clamp(value, .25, 2); ClampFades(); } }
     private void ChangeVolume(ChangeEventArgs args) { if (TryDouble(args, out var value)) _volume = Math.Clamp(value, 0, 1); }
     private void ChangeFadeIn(ChangeEventArgs args) { if (TryDouble(args, out var value)) _fadeIn = Math.Clamp(value, 0, MaxFade); }

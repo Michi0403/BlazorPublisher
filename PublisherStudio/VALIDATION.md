@@ -659,14 +659,13 @@ Static checks completed for the v1.0.37 source package:
 - Run `tests/csharpCompilationSafety.test.mjs`; it must reject `{global::...}`-style interpolation holes and accept explicit aliases.
 - Run a real `dotnet build` on a licensed developer/build machine. Static tests remain fallback evidence and do not prove full Razor/DevExpress compilation.
 
-## v1.0.68 media-gesture and frontend-composition validation
+## v1.0.69 targeted validation
 
-- Verify Video Studio and Audio Studio expose mutually exclusive Select section, Place playhead and Add cutline modes in the ribbon and status area; Video Studio alone exposes Frame region.
-- Verify mouse and touch timeline presses move the playhead, select the owning section and seek the selected source without creating publication elements.
-- Verify ribbon and context commands add/remove cutlines, copy/paste/delete sections and insert a compatible source into the selected range. Verify Delete, Ctrl/Cmd+C, Ctrl/Cmd+V, Enter and Escape act only while the Studio root is active and ignore editable controls.
-- Verify video frame polygons use normalized coordinates and remain stable for landscape, portrait, square and rotated publication frames. Verify Audio Studio contains no spatial-region mode.
-- Verify Picture Studio rectangle, ellipse, freehand, magnetic and polygon selections can keep, invert/cut, copy and copy-as-layer. Confirm raster rendering and SVG export preserve normal and inverted clips.
-- Edit an existing video, audio or picture element and confirm its Id, X/Y, width/height, rotation, Z-index, group, connectors, animations and interactions do not change.
-- Confirm removed media-section assets are released, every current segment is registered, and Mainframe preview/print/interactive HTML/standalone HTML play the same ordered sequence.
-- Run all Node contract suites, `node --check` for non-vendor JavaScript/test modules, JSON/XML parsing, C#/Razor structural checks, architecture/contract/compilation-safety checks, dependency comparison, ZIP CRC/extracted-content comparison, and SHA-256/SHA-512 verification.
-- Run a real `dotnet build` on a machine with .NET 10 and the licensed DevExpress feed. Static validation must be reported as static validation, not as a successful compiler build.
+- Video frame-region mode has one active pointer owner above the native player and maps points against the actual contained source-frame rectangle.
+- Frame overlay pointer movement is browser-local; `ResizeObserver`, metadata listeners and overlay listeners have disposal paths.
+- Picture Studio selection guides are pointer-transparent and are not serialized as picture layers or publication elements.
+- Spatial selection rendering shades the outside area using an even-odd canvas path and leaves selection boundaries/nodes visible.
+- Audio Studio has no spatial region mode.
+- Trim range normalization guarantees `min <= max` before every affected clamp, including recordings whose duration is shorter than `0.01` seconds or temporarily zero.
+- The DevExpress range-selector minimum span is bounded by the actual finite duration.
+- Run the manual smoke test on a licensed build machine: record a very short screen clip, stop it, download it, activate Frame region, draw/apply/cancel a polygon, then repeat with a letterboxed portrait/landscape source and Picture Studio rectangle/polygon selections.

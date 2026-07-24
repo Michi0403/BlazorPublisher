@@ -1,0 +1,56 @@
+PublisherStudio v1.0.69 validation results
+==========================================
+
+Environment
+-----------
+- Node.js: v22.16.0
+- .NET SDK: unavailable in this environment
+- Licensed DevExpress package feed: unavailable in this environment
+
+Executable contract tests
+-------------------------
+PASS - 18 npm/Node contract suites:
+  1. timelineInterop
+  2. componentRuntime
+  3. signalRuntime
+  4. pointerOwnership
+  5. mapInteractionModes
+  6. fontIntegration
+  7. canvasZoomScaling
+  8. streamingRuntime
+  9. interfaceWorkflow
+ 10. installerResilience
+ 11. publicationPersistence
+ 12. editorUsabilityRepair
+ 13. architectureContract
+ 14. csharpContractOwnership
+ 15. csharpCompilationSafety
+ 16. openInterchange
+ 17. mediaGestureEditing
+ 18. studioInteractionOverlay
+
+The new studioInteractionOverlay contract verifies:
+- Video frame overlay owns pointer input only in Frame region mode.
+- The native player is covered only by the local active overlay.
+- Source-frame alignment accounts for intrinsic dimensions and letterboxing.
+- ResizeObserver and DOM listeners are released.
+- Picture selection feedback remains pointer-transparent and transient.
+- Short recording trim ranges cannot create a Math.Clamp min/max inversion.
+- Repository rules prohibit global Z-index and publication-layer workarounds.
+
+Static and format validation
+----------------------------
+PASS - 32 non-vendor JavaScript/module files passed `node --check`.
+PASS - 9 JSON files parsed successfully.
+PASS - 4 XML/project files parsed successfully.
+PASS - Architecture, contract-ownership and C# compilation-safety tests.
+PASS - Modified MediaStudio/PictureStudio Razor markup and focused delimiter checks.
+PASS - NuGet and npm dependency sets match v1.0.68.
+
+Build limitation
+----------------
+A complete .NET/Razor/DevExpress compilation could not be run because this
+container has no .NET 10 SDK and no licensed DevExpress package feed. Therefore
+this report does not claim a successful compiler build. The reported
+Stop Recording exception path and the affected source expressions were repaired
+directly and are covered by the executable source contracts above.

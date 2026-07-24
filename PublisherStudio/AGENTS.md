@@ -106,6 +106,20 @@ Adapters belong under the owning `Services/<Area>/Import` or `Services/<Area>/Ex
 
 Open specifications do not automatically permit adding an implementation package. Prefer open specifications and existing BCL capabilities. Do not add a NuGet, npm package, native binary or separate process for a format adapter without explicit approval. DTD processing must be prohibited for SVG/XML imports. They must also reject entity expansion, executable content, event attributes and undeclared online dependencies. Package imports must validate archive paths, entry sizes and required manifest/content files. Add deterministic fixtures and architecture tests for every new adapter.
 
+## Frontend gesture overlays and Z-order safety
+
+A gesture may have exactly one owner at a time. Native media controls, a Studio interaction overlay and the Mainframe must never process the same pointer sequence. Mouse/touch modes must be explicit in the ribbon or local toolbar, visually identifiable, keyboard scoped to the active Studio root, and returned to a safe default on commit, cancel, selection change or disposal. Keyboard shortcuts must be scoped to the active Studio root and ignored while the user is typing in an input, textarea, select or content-editable control.
+
+Editor interaction overlays are transient frontend projections, not canonical content. Playheads, cutlines, range shades, crosshairs, region masks, nodes and selection guides must never be added to publication pages, picture layer collections, media segment collections or Mainframe Z-order. Keep them inside a local positioned stacking context owned by the Studio surface. Do not use an application-wide Z-index to solve a local editor problem.
+
+An inactive overlay must use `pointer-events: none`. An active overlay may capture input only for its declared mode and must block the embedded player/control beneath it. Every window/document listener, `ResizeObserver`, object URL, pointer capture and DOM listener must be removed on rebind or disposal. High-frequency pointer movement stays in browser JavaScript/CSS; Blazor Server receives committed points or bounded state changes, not every move event.
+
+Video region overlays must align to the actual rendered source-frame rectangle after `object-fit`, including letterboxing and arbitrary source dimensions. Persist video region points as normalized source coordinates. Picture selections use document coordinates and may contain arbitrary angled polygons. Audio remains one-dimensional and must not receive a spatial region overlay.
+
+A media sequence, cutline, temporal section or frame/picture region is canonical content inside the owning media or picture element. Editing that content must never mutate Mainframe layer order, element identity, position, dimensions, rotation, grouping, connectors, animations or interactions. The Mainframe remains the only owner of publication insertion/update orchestration. Every persisted visual edit must be covered in Mainframe preview, print/PDF, raster/SVG export, interactive HTML and standalone HTML.
+
+Range controls must tolerate zero-length and sub-step media during recording finalization. Never call `Math.Clamp(value, min, max)` unless `min <= max` is guaranteed after duration normalization. Range-selector minimum spans must be derived from the actual finite duration rather than a fixed value that can exceed a short clip.
+
 ## Before adding or moving code
 
 1. Inspect the closest existing implementation.
@@ -114,22 +128,3 @@ Open specifications do not automatically permit adding an implementation package
 4. Keep public behavior and serialized formats compatible unless the task explicitly changes them.
 5. Add or update architecture and behavior tests.
 6. Do not create a new architectural dialect to mirror a tutorial or library sample.
-
-## Frontend composition, Z-order and gesture modes
-
-Studio editors are modal editing surfaces inside the existing PublisherStudio frontend. They must not silently become alternative page composers.
-
-- Applying a Studio result to an existing publication object must preserve that object's `Id`, `X`, `Y`, `Width`, `Height`, `Rotation`, `ZIndex`, `GroupId`, connector endpoints, animation bindings and interaction bindings unless the user explicitly edits that property.
-- A media sequence, cutline, temporal section or frame/picture region is canonical content inside the owning media or picture element. Do not represent internal clip sections as extra publication siblings and do not consume new page Z-index values for editor overlays.
-- Selection polygons, cutlines, playheads, handles and mode hints are local editor overlays. They must live in an editor-local stacking context, use pointer events only in the explicit mode that owns them, and never mutate Mainframe layer order.
-- Every pointer-intensive Studio must expose mutually exclusive, visible mouse/touch modes. A gesture may have exactly one owner. The active mode must be visible in the ribbon/status/context UI and must reset predictably on Escape, apply, cancel and disposal.
-- Pointer capture and global listeners must be released on `pointerup`, `pointercancel`, `lostpointercapture`, browser blur, modal close and component disposal. Never add an anonymous window/document listener that cannot be removed.
-- Keyboard shortcuts must be scoped to the active Studio root, must ignore inputs, textareas, selects and editable content, and must be removed when the Studio closes.
-- Components coordinate UI state and return canonical Domain result contracts. The Mainframe applies those results to the existing/new publication element through its established orchestration; Studio Components must not directly add sibling publication elements or bypass `EditorStateService`.
-- Frontend code must not call Controllers for an in-process Interactive Server workflow when an existing reusable Service or service use case is the correct boundary.
-- Every persisted visual edit must be covered in Mainframe preview, print/PDF, raster/SVG export, interactive HTML and standalone HTML where that media type is supported. A Studio-only preview is not a completed feature.
-- Temporal and spatial edits are different contracts. Audio owns time only. Video may own time plus normalized frame-space polygons. Picture Studio may own document-space polygons. Never copy a two-dimensional mode into Audio or store pixel coordinates where normalized/source-independent coordinates are required.
-- Studio insertion or replacement returns canonical content to the existing Mainframe command. Do not recreate an existing publication element to apply edited media, and do not bypass its established insertion placement or selection workflow.
-- When a persisted media sequence changes, release removed segment assets and register the surviving/current segments. Never reuse a preview asset under a canonical media identifier unless its source and MIME type are the same canonical segment.
-
-Before changing frontend composition or pointer ownership, inspect page Z-order normalization, selection ownership, connector geometry, preview/export projection and disposal paths. Add executable contract checks for new gesture modes and serialized fields.

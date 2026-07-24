@@ -1,9 +1,11 @@
-# PublisherStudio v1.0.67 release
+# PublisherStudio v1.0.68 release
 
-See `CHANGELOG-v1.0.67.md`, `AGENTS.md`, ADR-008, `docs/ARCHITECTURE.md`, `docs/architecture/system-overview.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.68.md`, `AGENTS.md`, ADR-009, `docs/ARCHITECTURE.md`, `docs/architecture/media-gesture-editing.md`, and `VALIDATION.md`.
 
-This release corrects the final compiler issue introduced by the v1.0.66 namespace-collision repair. `global::System.Text.Encoding` must not begin an interpolated-string expression because the interpolation grammar treats the colon as a format separator. RTSP and Platform Chat now use a deliberate `TextEncoding` alias, and the RTSP SDP byte length is computed before the header is formatted.
+This release adds explicit mouse/touch gesture modes and non-destructive section editing to Video Studio and Audio Studio. Timeline clicks synchronize the playhead and selected section; ribbon, context-menu, and scoped keyboard commands add/remove cutlines, copy/paste/delete sections, and insert compatible media into the selected range.
 
-The compilation-safety contract now rejects the exact `{global::...}` pattern and verifies the aliases. This supplements a real .NET build; it does not replace one.
+Video Studio additionally supports arbitrary normalized polygon frame regions. Picture Studio supports rectangle, ellipse, freehand, magnetic, and polygon area selections as layer clips, including inverted cuts and clipboard reuse. Audio remains intentionally one-dimensional.
 
-Application and installer version is `1.0.67`. Publication format remains `1.48`, Picture Studio format remains `1.3`, and no NuGet/npm/native dependency changed.
+All edits remain canonical content inside the existing media or picture element. The Mainframe remains the only publication-element insertion/update owner and preserves identity, placement, Z-order, grouping, connectors, animations, and interactions. The same sequence/region data is projected into editor preview, print/PDF, raster/SVG, interactive HTML, and standalone HTML.
+
+Application and installer version is `1.0.68`. Publication format is `1.49`; Picture Studio format is `1.4`. No NuGet/npm/native dependency changed.

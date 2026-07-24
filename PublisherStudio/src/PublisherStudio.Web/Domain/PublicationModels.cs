@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.48";
+    public string FormatVersion { get; set; } = "1.49";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -275,6 +275,7 @@ public abstract class PublicationMediaElement : PublicationElement
     public bool AutoPlay { get; set; } = true;
     public PublicationMediaPlaybackTrigger PlaybackTrigger { get; set; } = PublicationMediaPlaybackTrigger.OnPageEnter;
     public List<double> WaveformSamples { get; set; } = [];
+    public List<PublicationMediaSegment> Segments { get; set; } = [];
 
     [JsonIgnore]
     public double EffectiveTrimEndSeconds => TrimEndSeconds > TrimStartSeconds
@@ -282,7 +283,22 @@ public abstract class PublicationMediaElement : PublicationElement
         : Math.Max(TrimStartSeconds, DurationSeconds);
 
     [JsonIgnore]
-    public double TimelineLengthSeconds => Math.Max(.05, (EffectiveTrimEndSeconds - TrimStartSeconds) / Math.Max(.1, PlaybackRate));
+    public IReadOnlyList<PublicationMediaSegment> EffectiveSegments => Segments is { Count: > 0 }
+        ? Segments
+        : [new PublicationMediaSegment
+        {
+            Id = Id,
+            Name = Name,
+            DataUrl = DataUrl,
+            MimeType = MimeType,
+            DurationSeconds = DurationSeconds,
+            TrimStartSeconds = TrimStartSeconds,
+            TrimEndSeconds = EffectiveTrimEndSeconds,
+            WaveformSamples = WaveformSamples
+        }];
+
+    [JsonIgnore]
+    public double TimelineLengthSeconds => Math.Max(.05, EffectiveSegments.Sum(segment => segment.SourceLengthSeconds) / Math.Max(.1, PlaybackRate));
 }
 
 public sealed class VideoElement : PublicationMediaElement
@@ -293,6 +309,7 @@ public sealed class VideoElement : PublicationMediaElement
     public bool ShowControls { get; set; } = true;
     public PublicationVideoFitMode FitMode { get; set; } = PublicationVideoFitMode.Contain;
     public string Background { get; set; } = "#111827";
+    public List<MediaFramePoint> FrameClipPolygon { get; set; } = [];
 }
 
 public sealed class AudioElement : PublicationMediaElement

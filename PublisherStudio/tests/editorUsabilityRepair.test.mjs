@@ -74,7 +74,7 @@ assert.match(visualRuntime, /argumentType: "datetime"/);
 assert.match(visualRuntime, /case "average"/);
 assert.match(visualRuntime, /case "count"/);
 assert.match(dataView, /private bool UsesClientVisualization => true;/);
-assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.48"/);
+assert.match(publicationModel, /FormatVersion \{ get; set; \} = "1\.49"/);
 
 // Creative studios fill the viewport with the same small shadow gap on every side.
 assert.match(css, /--publisher-studio-shadow-gap: clamp\(8px, 1\.1vmin, 18px\)/);

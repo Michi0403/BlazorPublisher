@@ -182,8 +182,31 @@ public sealed partial class PublicationFileService
             var fallbackMimeType = media is VideoElement ? "video/webm" : "audio/webm";
             media.MimeType = PublicationMediaData.NormalizeMimeType(media.MimeType, fallbackMimeType);
             media.DataUrl = PublicationMediaData.NormalizeDataUrl(media.DataUrl, media.MimeType);
-            if (media is VideoElement video && string.IsNullOrWhiteSpace(video.AltText))
-                video.AltText = video.Name;
+            media.Segments ??= [];
+            foreach (var segment in media.Segments)
+            {
+                segment.Id = segment.Id == Guid.Empty ? Guid.NewGuid() : segment.Id;
+                segment.Name = string.IsNullOrWhiteSpace(segment.Name) ? media.Name : segment.Name.Trim();
+                segment.DurationSeconds = Math.Clamp(segment.DurationSeconds, .01, 24 * 60 * 60);
+                segment.TrimStartSeconds = Math.Clamp(segment.TrimStartSeconds, 0, Math.Max(0, segment.DurationSeconds - .01));
+                segment.TrimEndSeconds = Math.Clamp(segment.TrimEndSeconds > segment.TrimStartSeconds ? segment.TrimEndSeconds : segment.DurationSeconds, segment.TrimStartSeconds + .01, segment.DurationSeconds);
+                segment.MimeType = PublicationMediaData.NormalizeMimeType(segment.MimeType, fallbackMimeType);
+                segment.DataUrl = PublicationMediaData.NormalizeDataUrl(segment.DataUrl, segment.MimeType);
+                segment.WaveformSamples ??= [];
+                if (segment.WaveformSamples.Count > 256) segment.WaveformSamples = segment.WaveformSamples.Take(256).ToList();
+            }
+            if (media is VideoElement video)
+            {
+                if (string.IsNullOrWhiteSpace(video.AltText)) video.AltText = video.Name;
+                video.FrameClipPolygon ??= [];
+                if (video.FrameClipPolygon.Count > 256) video.FrameClipPolygon = video.FrameClipPolygon.Take(256).ToList();
+                foreach (var point in video.FrameClipPolygon)
+                {
+                    point.X = Math.Clamp(point.X, 0, 1);
+                    point.Y = Math.Clamp(point.Y, 0, 1);
+                }
+                if (video.FrameClipPolygon.Count is > 0 and < 3) video.FrameClipPolygon.Clear();
+            }
         }
 
         foreach (var spreadsheet in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<SpreadsheetElement>())
@@ -429,7 +452,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.48";
+        document.FormatVersion = "1.49";
         return document;
     }
 

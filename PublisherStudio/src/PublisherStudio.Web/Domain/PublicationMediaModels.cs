@@ -1,5 +1,34 @@
 namespace PublisherStudio.Domain;
 
+public enum MediaStudioMouseMode { SelectSection, PlacePlayhead, AddCutLine, FrameRegion }
+
+public sealed class MediaFramePoint
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+}
+
+public sealed class PublicationMediaSegment
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = "Clip";
+    public string DataUrl { get; set; } = string.Empty;
+    public string MimeType { get; set; } = string.Empty;
+    public string PosterDataUrl { get; set; } = string.Empty;
+    public double DurationSeconds { get; set; }
+    public double TrimStartSeconds { get; set; }
+    public double TrimEndSeconds { get; set; }
+    public List<double> WaveformSamples { get; set; } = [];
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public double EffectiveTrimEndSeconds => TrimEndSeconds > TrimStartSeconds
+        ? TrimEndSeconds
+        : Math.Max(TrimStartSeconds, DurationSeconds);
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public double SourceLengthSeconds => Math.Max(.01, EffectiveTrimEndSeconds - TrimStartSeconds);
+}
+
 public sealed class MediaEditorResult
 {
     public PublicationElementKind Kind { get; set; }
@@ -20,6 +49,8 @@ public sealed class MediaEditorResult
     public bool AutoPlay { get; set; } = true;
     public PublicationMediaPlaybackTrigger PlaybackTrigger { get; set; } = PublicationMediaPlaybackTrigger.OnPageEnter;
     public List<double> WaveformSamples { get; set; } = [];
+    public List<PublicationMediaSegment> Segments { get; set; } = [];
+    public List<MediaFramePoint> FrameClipPolygon { get; set; } = [];
 }
 
 public sealed class MediaSourceInfo

@@ -49,14 +49,14 @@ assert.match(openDocumentFixture, /<office:binary-data>/);
 assert.match(openDocumentFixture, /<draw:path/);
 
 // Canonical native models remain authoritative; interchange adapters return explicit issues.
-assert.match(pictureModels, /FormatVersion \{ get; set; \} = "1\.3"/);
+assert.match(pictureModels, /FormatVersion \{ get; set; \} = "1\.4"/);
 assert.match(pictureModels, /JsonDerivedType\(typeof\(SvgPictureLayer\), "svg"\)/);
 assert.match(pictureModels, /public string GroupPath/);
 assert.match(pictureModels, /sealed class SvgPictureLayer/);
 assert.match(interchangeModels, /enum InterchangeIssueSeverity \{ Information, Warning, Loss \}/);
 assert.match(interchangeModels, /sealed class PictureImportResult/);
 assert.match(interchangeModels, /sealed class PublicationImportResult/);
-assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.48"/);
+assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.49"/);
 
 // SVG is retained as vector markup and sanitized before it enters the canonical model.
 assert.match(sanitizer, /DtdProcessing = DtdProcessing\.Prohibit/);
@@ -77,7 +77,7 @@ assert.match(pictureInterop, /svgImportElementVisible/);
 assert.match(pictureInterop, /revealSvgElementForMeasurement/);
 assert.match(pictureInterop, /for \(const element of \[root, \.\.\.root\.querySelectorAll/);
 assert.match(pictureInterop, /data-publisherstudio-picture/);
-assert.match(pictureInterop, /formatVersion: "1\.3"/);
+assert.match(pictureInterop, /formatVersion: "1\.4"/);
 
 // OpenRaster uses only BCL ZIP/XML and preserves layer order, groups, opacity, visibility and locks.
 assert.match(openRaster, /ZipArchive/);

@@ -28,7 +28,7 @@ public sealed class PictureDocumentService
 
     public void Normalize(PictureDocument document)
     {
-        document.FormatVersion = "1.3";
+        document.FormatVersion = "1.4";
         document.WidthPx = Math.Clamp(document.WidthPx, 16, 8192);
         document.HeightPx = Math.Clamp(document.HeightPx, 16, 8192);
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .65 : document.Zoom, .05, 4);
@@ -52,6 +52,14 @@ public sealed class PictureDocumentService
             layer.Grayscale = Math.Clamp(layer.Grayscale, 0, 1);
             layer.Sepia = Math.Clamp(layer.Sepia, 0, 1);
             layer.Invert = Math.Clamp(layer.Invert, 0, 1);
+            layer.ClipPolygon ??= [];
+            if (layer.ClipPolygon.Count > 2048) layer.ClipPolygon = layer.ClipPolygon.Take(2048).ToList();
+            foreach (var point in layer.ClipPolygon)
+            {
+                point.X = Math.Clamp(point.X, -16384, 32768);
+                point.Y = Math.Clamp(point.Y, -16384, 32768);
+            }
+            if (layer.ClipPolygon.Count is > 0 and < 3) layer.ClipPolygon.Clear();
 
             switch (layer)
             {

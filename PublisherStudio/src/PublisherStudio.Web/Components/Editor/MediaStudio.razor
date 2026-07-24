@@ -2,11 +2,12 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inject PublicationMediaAssetStore MediaAssets
+@inject MediaTimelineEditService TimelineEdits
 
 @if (Visible)
 {
     <div class="editor-modal-backdrop media-studio-backdrop">
-        <section class="media-studio-window" role="dialog" aria-modal="true" aria-label="@(IsVideo ? "Video Studio" : "Audio Studio")">
+        <section id="media-studio-window" class="media-studio-window" tabindex="0" role="dialog" aria-modal="true" aria-label="@(IsVideo ? "Video Studio" : "Audio Studio")">
             <header class="media-studio-titlebar">
                 <div>
                     <strong>@(IsVideo ? "Video Studio" : "Audio Studio")</strong>
@@ -42,17 +43,56 @@
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="End at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Reset trim" Enabled="@HasSource" Click="ResetTrim" />
                     </DxRibbonGroup>
+                    <DxRibbonGroup Text="Gestures">
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Select section")" Click="SelectSectionMode" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@MouseModeText(MediaStudioMouseMode.PlacePlayhead, "Place playhead")" Click="PlacePlayheadMode" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="@MouseModeText(MediaStudioMouseMode.AddCutLine, "Add cutline")" Enabled="@HasSource" Click="AddCutLineMode" />
+                        @if (IsVideo)
+                        {
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.FrameRegion, "Frame region")" Enabled="@HasSource" Click="FrameRegionMode" />
+                        }
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Sections">
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Cut at playhead" Enabled="@CanAddCutLine" Click="AddCutLineAtPlayhead" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove cutline" Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy" Enabled="@HasSelectedSegment" Click="CopySelectedSection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-paste" Text="Paste" Enabled="@CanPasteSection" Click="PasteSection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete" Enabled="@CanDeleteSection" Click="DeleteSelectedSection" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Insert into range…" Enabled="@HasSource" Click="OpenInsertMediaPicker" />
+                    </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
             <div class="media-studio-source-state" role="status">@SourceStatus</div>
 
             <div class="media-studio-body">
                 <div class="media-studio-preview-column">
-                    <div class="media-studio-preview-shell @(IsVideo ? "video" : "audio")"
+                    <div class="media-studio-preview-shell @(IsVideo ? "video" : "audio") @(_mouseMode == MediaStudioMouseMode.FrameRegion ? "frame-region-mode" : null)"
                          @oncontextmenu="ShowMediaContextMenu" @oncontextmenu:preventDefault>
                         @if (IsVideo)
                         {
-                            <video id="media-studio-preview" src="@_previewSource" poster="@_posterDataUrl" controls playsinline preload="metadata"></video>
+                            <div id="media-studio-frame-stage" class="media-studio-frame-stage">
+                                <video id="media-studio-preview" src="@_previewSource" poster="@_posterDataUrl" controls playsinline preload="metadata" style="@VideoPreviewClipStyle"></video>
+                                <svg class="media-studio-frame-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none"
+                                     @onclick="FrameOverlayClicked" @ondblclick="FinishFrameRegion" @ondblclick:preventDefault>
+                                    @if (ActiveFramePoints.Count >= 2)
+                                    {
+                                        <polyline class="media-frame-cutline" points="@FramePolylinePoints" />
+                                    }
+                                    @if (ActiveFramePoints.Count >= 3 && !_frameRegionEditing)
+                                    {
+                                        <polygon class="media-frame-selection" points="@FramePolygonPoints" />
+                                    }
+                                    @for (var pointIndex = 0; pointIndex < ActiveFramePoints.Count; pointIndex++)
+                                    {
+                                        var point = ActiveFramePoints[pointIndex];
+                                        <circle class="media-frame-node" cx="@Inv(point.X * 1000)" cy="@Inv(point.Y * 1000)" r="9" />
+                                    }
+                                </svg>
+                                @if (_mouseMode == MediaStudioMouseMode.FrameRegion)
+                                {
+                                    <div class="media-frame-mode-help">Click/tap vertices · Enter or double-click closes · Esc cancels</div>
+                                }
+                            </div>
                         }
                         else
                         {
@@ -75,6 +115,31 @@
 
                     @if (HasSource)
                     {
+                        <div class="media-sequence-editor">
+                            <div class="media-range-caption"><b>Sequence</b><span>@Time(SequenceDuration) · @_segments.Count section@(_segments.Count == 1 ? string.Empty : "s")</span></div>
+                            <div id="media-studio-sequence-timeline" class="media-sequence-timeline mode-@_mouseMode.ToString().ToLowerInvariant()" tabindex="0"
+                                 @onpointerdown="TimelinePointerDown"
+                                 @oncontextmenu="ShowTimelineContextMenu" @oncontextmenu:preventDefault>
+                                @foreach (var segment in _segments)
+                                {
+                                    <button type="button" class="media-sequence-segment @(segment.Id == _selectedSegmentId ? "selected" : null)"
+                                            style="@SegmentStyle(segment)" title="@segment.Name · @Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))">
+                                        <span>@segment.Name</span>
+                                    </button>
+                                }
+                                @foreach (var boundary in CutBoundaryPositions)
+                                {
+                                    <i class="media-cutline" style="left:@Percent(boundary / Math.Max(.01, SequenceDuration))"></i>
+                                }
+                                <i class="media-playhead" style="left:@Percent(_playhead / Math.Max(.01, SequenceDuration))"></i>
+                            </div>
+                            <div class="media-sequence-status">
+                                <span><b>Mode:</b> @MouseModeLabel</span>
+                                <span><b>Playhead:</b> @Time(_playhead)</span>
+                                <span><b>Selected:</b> @SelectedSectionSummary</span>
+                            </div>
+                        </div>
+
                         <div class="media-range-selector" @oncontextmenu="ShowMediaContextMenu" @oncontextmenu:preventDefault>
                             <div class="media-range-caption"><b>Trim range</b><span>@Time(_trimEnd - _trimStart) selected</span></div>
                             <DxRangeSelector Height="96px"
@@ -141,6 +206,20 @@
                     else
                     {
                         <section>
+                            <h3>Video frame region</h3>
+                            <p class="property-note">A polygon region uses normalized frame coordinates, so every angle and video dimension remains stable in the Mainframe and every PublisherStudio export.</p>
+                            <div class="property-action-row">
+                                <DxButton Text="Edit region" Enabled="@HasSource" Click="BeginFrameRegion" />
+                                <DxButton Text="Apply" Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
+                                <DxButton Text="Clear" Enabled="@HasFrameRegion" Click="ClearFrameRegion" />
+                            </div>
+                            <div class="property-action-row">
+                                <DxButton Text="Copy region" Enabled="@HasFrameRegion" Click="CopyFrameRegion" />
+                                <DxButton Text="Paste region" Enabled="@CanPasteFrameRegion" Click="PasteFrameRegion" />
+                                <DxButton Text="Remove last line" Enabled="@(_frameRegionEditing && _frameDraft.Count > 0)" Click="RemoveLastFramePoint" />
+                            </div>
+                        </section>
+                        <section>
                             <h3>Video</h3>
                             <p class="property-note">Camera and screen recording use the browser’s MediaRecorder. Completed recordings stay in the browser until this studio closes, remain downloadable at their original size, and are embedded only when you insert or apply them.</p>
                             @if (HasRetainedRecording)
@@ -188,6 +267,18 @@
         <DxContextMenuItem Text="Set trim start at playhead" Enabled="@HasSource" BeginGroup="true" Click="SetTrimStartAtPlayhead" />
         <DxContextMenuItem Text="Set trim end at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
         <DxContextMenuItem Text="Reset trim to full clip" Enabled="@HasSource" Click="ResetTrim" />
+        <DxContextMenuItem Text="Add cutline at playhead" Enabled="@CanAddCutLine" BeginGroup="true" Click="AddCutLineAtPlayhead" />
+        <DxContextMenuItem Text="Remove cutline before selected section" Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
+        <DxContextMenuItem Text="Copy selected section" Enabled="@HasSelectedSegment" Click="CopySelectedSection" />
+        <DxContextMenuItem Text="Paste section after selection" Enabled="@CanPasteSection" Click="PasteSection" />
+        <DxContextMenuItem Text="Delete selected section" Enabled="@CanDeleteSection" Click="DeleteSelectedSection" />
+        <DxContextMenuItem Text="Insert media into selected range…" Enabled="@HasSource" Click="OpenInsertMediaPicker" />
+        @if (IsVideo)
+        {
+            <DxContextMenuItem Text="Edit frame region" Enabled="@HasSource" BeginGroup="true" Click="BeginFrameRegion" />
+            <DxContextMenuItem Text="Apply frame region" Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
+            <DxContextMenuItem Text="Clear frame region" Enabled="@HasFrameRegion" Click="ClearFrameRegion" />
+        }
         <DxContextMenuItem Text="@(_muted ? "Unmute" : "Mute")" BeginGroup="true" Click="ToggleMutedFromMenu" />
         <DxContextMenuItem Text="@(_loop ? "Disable loop" : "Loop selected range")" Click="ToggleLoopFromMenu" />
         <DxContextMenuItem Text="Import replacement…" Enabled="@(!_recording)" BeginGroup="true" Click="OpenMediaPicker" />
@@ -195,6 +286,7 @@
 </DxContextMenu>
 
 <InputFile id="media-studio-file-input" class="hidden-file-input" accept="@Accept" OnChange="LoadFile" />
+<InputFile id="media-studio-insert-file-input" class="hidden-file-input" accept="@Accept" OnChange="LoadInsertedFile" />
 
 @code {
     [Parameter] public bool Visible { get; set; }
@@ -244,10 +336,57 @@
     private int _recordingExpectedChunks;
     private int _recordingNextChunk;
     private long _recordingExpectedBytes;
+    private readonly List<PublicationMediaSegment> _segments = [];
+    private Guid? _selectedSegmentId;
+    private PublicationMediaSegment? _clipClipboard;
+    private MediaStudioMouseMode _mouseMode = MediaStudioMouseMode.SelectSection;
+    private double _playhead;
+    private readonly List<MediaFramePoint> _frameClipPolygon = [];
+    private readonly List<MediaFramePoint> _frameDraft = [];
+    private readonly List<MediaFramePoint> _frameClipboard = [];
+    private bool _frameRegionEditing;
 
     private bool IsVideo => Kind == PublicationElementKind.Video;
     private bool HasRetainedRecording => _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
-    private bool HasSource => (!string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording) && _duration > 0;
+    private PublicationMediaSegment? SelectedSegment => _segments.FirstOrDefault(segment => segment.Id == _selectedSegmentId);
+    private int SelectedSegmentIndex => _selectedSegmentId is Guid id ? _segments.FindIndex(segment => segment.Id == id) : -1;
+    private bool HasSelectedSegment => SelectedSegment is not null;
+    private bool HasSource => (_segments.Count > 0 || !string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording) && (_duration > 0 || _segments.Count > 0);
+    private bool CanPasteSection => _clipClipboard is not null;
+    private bool CanDeleteSection => _segments.Count > 0 && HasSelectedSegment;
+    private bool CanAddCutLine => HasSource && _segments.Count > 0;
+    private bool CanRemoveCutLine => SelectedSegmentIndex > 0 && TimelineEdits.CanMergeBoundary(_segments, SelectedSegmentIndex);
+    private double SequenceDuration => Math.Max(.01, TimelineEdits.TimelineLength(_segments, _playbackRate));
+    private IEnumerable<double> CutBoundaryPositions
+    {
+        get
+        {
+            var cursor = 0d;
+            for (var index = 0; index < _segments.Count - 1; index++)
+            {
+                cursor += _segments[index].SourceLengthSeconds / Math.Max(.1, _playbackRate);
+                yield return cursor;
+            }
+        }
+    }
+    private IReadOnlyList<MediaFramePoint> ActiveFramePoints => _frameRegionEditing ? _frameDraft : _frameClipPolygon;
+    private bool HasFrameRegion => _frameClipPolygon.Count >= 3;
+    private bool CanFinishFrameRegion => _frameRegionEditing && _frameDraft.Count >= 3;
+    private bool CanPasteFrameRegion => _frameClipboard.Count >= 3;
+    private string FramePolylinePoints => string.Join(" ", ActiveFramePoints.Select(point => $"{Inv(point.X * 1000)},{Inv(point.Y * 1000)}"));
+    private string FramePolygonPoints => FramePolylinePoints;
+    private string VideoPreviewClipStyle => ActiveFramePoints.Count >= 3 ? $"clip-path:{FrameClipCss(ActiveFramePoints)};" : string.Empty;
+    private string MouseModeLabel => _mouseMode switch
+    {
+        MediaStudioMouseMode.SelectSection => "Select section",
+        MediaStudioMouseMode.PlacePlayhead => "Place playhead",
+        MediaStudioMouseMode.AddCutLine => "Add cutline",
+        MediaStudioMouseMode.FrameRegion => "Frame region",
+        _ => "Select section"
+    };
+    private string SelectedSectionSummary => SelectedSegment is { } segment
+        ? $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
+        : "None";
     private string ImportMenuText => $"Import {(IsVideo ? "video" : "audio")}…";
     private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
     private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? "Video" : "Audio") : _mimeType;
@@ -282,18 +421,19 @@
         _embedding = false;
         _embeddingProgress = 0;
         _hasRetainedRecording = false;
-        _dataUrl = string.Empty;
         _retainedRecordingSizeBytes = 0;
         _retainedRecordingFileName = string.Empty;
         _retainedRecordingObjectUrl = string.Empty;
+        _segments.Clear();
+        _selectedSegmentId = null;
+        _playhead = 0;
+        _mouseMode = MediaStudioMouseMode.SelectSection;
+        _frameClipPolygon.Clear();
+        _frameDraft.Clear();
+        _frameRegionEditing = false;
+
         if (InitialMedia is { } media)
         {
-            _name = media.Name;
-            _dataUrl = NormalizeMediaDataUrl(media.DataUrl, IsVideo ? "video/webm" : "audio/webm");
-            _mimeType = NormalizeMimeType(media.MimeType, IsVideo ? "video/webm" : "audio/webm");
-            _duration = media.DurationSeconds;
-            _trimStart = media.TrimStartSeconds;
-            _trimEnd = media.EffectiveTrimEndSeconds;
             _volume = media.Volume;
             _playbackRate = media.PlaybackRate;
             _fadeIn = media.FadeInSeconds;
@@ -302,25 +442,35 @@
             _loop = media.Loop;
             _autoPlay = media.AutoPlay;
             _playbackTrigger = media.PlaybackTrigger;
-            _waveform = [.. media.WaveformSamples];
-            _posterDataUrl = media is VideoElement video ? video.PosterDataUrl : string.Empty;
+            var sourceSegments = media.Segments is { Count: > 0 }
+                ? media.Segments
+                : [new PublicationMediaSegment
+                {
+                    Name = media.Name,
+                    DataUrl = media.DataUrl,
+                    MimeType = media.MimeType,
+                    PosterDataUrl = media is VideoElement legacyVideo ? legacyVideo.PosterDataUrl : string.Empty,
+                    DurationSeconds = media.DurationSeconds,
+                    TrimStartSeconds = media.TrimStartSeconds,
+                    TrimEndSeconds = media.EffectiveTrimEndSeconds,
+                    WaveformSamples = [.. media.WaveformSamples]
+                }];
+            _segments.AddRange(TimelineEdits.Normalize(sourceSegments, IsVideo));
+            if (media is VideoElement video)
+                _frameClipPolygon.AddRange(CloneFramePoints(video.FrameClipPolygon));
         }
         else
         {
-            _name = IsVideo ? "Untitled Video" : "Untitled Audio";
-            _dataUrl = string.Empty;
-            _mimeType = string.Empty;
-            _posterDataUrl = string.Empty;
-            _duration = _trimStart = _trimEnd = 0;
             _volume = 1;
             _playbackRate = 1;
             _fadeIn = _fadeOut = 0;
             _muted = _loop = false;
             _autoPlay = true;
             _playbackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter;
-            _waveform = [];
         }
-        RefreshPreviewSource();
+
+        if (_segments.Count > 0) SelectSegment(_segments[0].Id, seek: false);
+        else ClearSelectedSegmentFields();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -347,10 +497,345 @@
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty && SessionId != _initializedSession)
         {
-            await _module.InvokeVoidAsync("initializeMediaStudio", "media-studio-preview", _self, SessionId.ToString("N"));
+            await _module.InvokeVoidAsync("initializeMediaStudio", "media-studio-preview", _self, SessionId.ToString("N"), "media-studio-window");
             _initializedSession = SessionId;
         }
         return _module;
+    }
+
+    private void CommitSelectedSegment()
+    {
+        var segment = SelectedSegment;
+        if (segment is null) return;
+        segment.Name = string.IsNullOrWhiteSpace(_name) ? (IsVideo ? "Video clip" : "Audio clip") : _name.Trim();
+        segment.DataUrl = NormalizeMediaDataUrl(_dataUrl, IsVideo ? "video/webm" : "audio/webm");
+        segment.MimeType = NormalizeMimeType(_mimeType, IsVideo ? "video/webm" : "audio/webm");
+        segment.PosterDataUrl = _posterDataUrl;
+        segment.DurationSeconds = Math.Max(.01, _duration);
+        segment.TrimStartSeconds = Math.Clamp(_trimStart, 0, Math.Max(0, segment.DurationSeconds - .01));
+        segment.TrimEndSeconds = Math.Clamp(_trimEnd > segment.TrimStartSeconds ? _trimEnd : segment.DurationSeconds,
+            segment.TrimStartSeconds + .01, segment.DurationSeconds);
+        segment.WaveformSamples = [.. _waveform];
+    }
+
+    private void SelectSegment(Guid id, bool seek = true)
+    {
+        if (_selectedSegmentId == id && SelectedSegment is not null)
+        {
+            if (seek) _ = SeekSelectedAtPlayheadAsync();
+            return;
+        }
+        CommitSelectedSegment();
+        var segment = _segments.FirstOrDefault(item => item.Id == id);
+        if (segment is null) return;
+        _selectedSegmentId = segment.Id;
+        _name = segment.Name;
+        _dataUrl = segment.DataUrl;
+        _mimeType = segment.MimeType;
+        _posterDataUrl = segment.PosterDataUrl;
+        _duration = segment.DurationSeconds;
+        _trimStart = segment.TrimStartSeconds;
+        _trimEnd = segment.EffectiveTrimEndSeconds;
+        _waveform = [.. segment.WaveformSamples];
+        ClampFades();
+        RefreshPreviewSource();
+        if (seek) _ = SeekSelectedAtPlayheadAsync();
+    }
+
+    private void ClearSelectedSegmentFields()
+    {
+        _selectedSegmentId = null;
+        _name = IsVideo ? "Untitled Video" : "Untitled Audio";
+        _dataUrl = string.Empty;
+        _mimeType = string.Empty;
+        _posterDataUrl = string.Empty;
+        _duration = _trimStart = _trimEnd = 0;
+        _waveform = [];
+        RefreshPreviewSource();
+    }
+
+    private PublicationMediaSegment CurrentFieldsAsSegment()
+    {
+        var segment = new PublicationMediaSegment
+        {
+            Name = _name,
+            DataUrl = _dataUrl,
+            MimeType = _mimeType,
+            PosterDataUrl = _posterDataUrl,
+            DurationSeconds = _duration,
+            TrimStartSeconds = _trimStart,
+            TrimEndSeconds = _trimEnd,
+            WaveformSamples = [.. _waveform]
+        };
+        return TimelineEdits.Normalize([segment], IsVideo).First();
+    }
+
+    private void ReplaceOrAddCurrentSegment()
+    {
+        var next = CurrentFieldsAsSegment();
+        var index = SelectedSegmentIndex;
+        if (index >= 0)
+        {
+            next.Id = _segments[index].Id;
+            _segments[index] = next;
+        }
+        else
+        {
+            _segments.Add(next);
+        }
+        SelectSegment(next.Id, seek: false);
+        _playhead = Math.Clamp(_playhead, 0, SequenceDuration);
+    }
+
+    private static double Distance(MediaFramePoint first, MediaFramePoint second)
+    {
+        var x = first.X - second.X;
+        var y = first.Y - second.Y;
+        return Math.Sqrt(x * x + y * y);
+    }
+
+    private static List<MediaFramePoint> CloneFramePoints(IEnumerable<MediaFramePoint>? points) =>
+        (points ?? []).Select(point => new MediaFramePoint
+        {
+            X = Math.Clamp(point.X, 0, 1),
+            Y = Math.Clamp(point.Y, 0, 1)
+        }).ToList();
+
+    private static string FrameClipCss(IReadOnlyList<MediaFramePoint> points) =>
+        $"polygon({string.Join(',', points.Select(point => $"{point.X * 100:0.###}% {point.Y * 100:0.###}%"))})";
+
+    private static string Percent(double value) => $"{Math.Clamp(value, 0, 1) * 100:0.###}%";
+
+    private string SegmentStyle(PublicationMediaSegment segment)
+    {
+        var duration = Math.Max(.01, SequenceDuration);
+        var width = segment.SourceLengthSeconds / Math.Max(.1, _playbackRate) / duration;
+        return $"width:{Percent(width)}";
+    }
+
+    private string MouseModeText(MediaStudioMouseMode mode, string label) => _mouseMode == mode ? $"✓ {label}" : label;
+    private void SelectSectionMode() => SetMouseMode(MediaStudioMouseMode.SelectSection);
+    private void PlacePlayheadMode() => SetMouseMode(MediaStudioMouseMode.PlacePlayhead);
+    private void AddCutLineMode() => SetMouseMode(MediaStudioMouseMode.AddCutLine);
+    private void FrameRegionMode() => BeginFrameRegion();
+    private void SetMouseMode(MediaStudioMouseMode mode)
+    {
+        if (!IsVideo && mode == MediaStudioMouseMode.FrameRegion) mode = MediaStudioMouseMode.SelectSection;
+        if (_frameRegionEditing && mode != MediaStudioMouseMode.FrameRegion) _frameDraft.Clear();
+        _frameRegionEditing = mode == MediaStudioMouseMode.FrameRegion && _frameRegionEditing;
+        _mouseMode = mode;
+    }
+
+    private async Task TimelinePointerDown(PointerEventArgs args)
+    {
+        if (args.Button != 0 || !HasSource) return;
+        var module = await EnsureMediaModuleAsync();
+        var ratio = await module.InvokeAsync<double>("horizontalRatio", "media-studio-sequence-timeline", args.ClientX);
+        await ActivateTimelinePosition(ratio, allowCut: true);
+    }
+
+    private async Task ShowTimelineContextMenu(MouseEventArgs args)
+    {
+        if (HasSource)
+        {
+            var module = await EnsureMediaModuleAsync();
+            var ratio = await module.InvokeAsync<double>("horizontalRatio", "media-studio-sequence-timeline", args.ClientX);
+            await ActivateTimelinePosition(ratio, allowCut: false);
+        }
+        await _mediaContextMenu.ShowAsync(args);
+    }
+
+    private async Task ActivateTimelinePosition(double ratio, bool allowCut)
+    {
+        CommitSelectedSegment();
+        if (_segments.Count == 0) return;
+        _playhead = Math.Clamp(ratio, 0, 1) * SequenceDuration;
+        var index = TimelineEdits.SegmentIndexAt(_segments, _playbackRate, _playhead);
+        if (index >= 0) SelectSegment(_segments[index].Id, seek: false);
+        if (allowCut && _mouseMode == MediaStudioMouseMode.AddCutLine)
+        {
+            var rightId = TimelineEdits.SplitAt(_segments, _playbackRate, _playhead);
+            if (rightId is Guid id) SelectSegment(id, seek: false);
+        }
+        await SeekSelectedAtPlayheadAsync();
+    }
+
+    private async Task SeekSelectedAtPlayheadAsync()
+    {
+        if (_module is null || _segments.Count == 0 || SelectedSegmentIndex < 0) return;
+        try
+        {
+            var sourcePosition = TimelineEdits.SourcePositionAt(_segments, SelectedSegmentIndex, _playbackRate, _playhead);
+            await _module.InvokeVoidAsync("seekMedia", "media-studio-preview", sourcePosition);
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (JSException) { }
+    }
+
+    private void AddCutLineAtPlayhead()
+    {
+        CommitSelectedSegment();
+        var rightId = TimelineEdits.SplitAt(_segments, _playbackRate, _playhead);
+        if (rightId is Guid id) SelectSegment(id, seek: false);
+    }
+
+    private void RemoveCutLine()
+    {
+        CommitSelectedSegment();
+        var index = SelectedSegmentIndex;
+        if (!TimelineEdits.MergeBoundary(_segments, index)) return;
+        SelectSegment(_segments[index - 1].Id, seek: false);
+        _playhead = Math.Clamp(_playhead, 0, SequenceDuration);
+    }
+
+    private void CopySelectedSection()
+    {
+        CommitSelectedSegment();
+        if (SelectedSegment is { } segment) _clipClipboard = TimelineEdits.Clone(segment);
+    }
+
+    private void PasteSection()
+    {
+        if (_clipClipboard is null) return;
+        CommitSelectedSegment();
+        var clone = TimelineEdits.Duplicate(_clipClipboard);
+        var index = SelectedSegmentIndex;
+        _segments.Insert(index >= 0 ? index + 1 : _segments.Count, clone);
+        SelectSegment(clone.Id, seek: false);
+        _playhead = TimelineEdits.SegmentTimelineStart(_segments, _segments.IndexOf(clone), _playbackRate);
+    }
+
+    private void DeleteSelectedSection()
+    {
+        if (!CanDeleteSection) return;
+        CommitSelectedSegment();
+        var index = SelectedSegmentIndex;
+        _segments.RemoveAt(index);
+        if (_segments.Count == 0)
+        {
+            ClearSelectedSegmentFields();
+            _selectedSegmentId = null;
+            _playhead = 0;
+            return;
+        }
+
+        var nextIndex = Math.Clamp(index, 0, _segments.Count - 1);
+        SelectSegment(_segments[nextIndex].Id, seek: false);
+        _playhead = TimelineEdits.SegmentTimelineStart(_segments, nextIndex, _playbackRate);
+    }
+
+    private async Task OpenInsertMediaPicker()
+    {
+        try
+        {
+            var module = await EnsureMediaModuleAsync();
+            await module.InvokeVoidAsync("clickElement", "media-studio-insert-file-input");
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException)
+        {
+            _error = $"The insert picker could not be opened: {ex.Message}";
+        }
+    }
+
+    private void BeginFrameRegion()
+    {
+        if (!IsVideo || !HasSource) return;
+        _frameDraft.Clear();
+        _frameDraft.AddRange(CloneFramePoints(_frameClipPolygon));
+        _frameRegionEditing = true;
+        _mouseMode = MediaStudioMouseMode.FrameRegion;
+    }
+
+    private async Task FrameOverlayClicked(MouseEventArgs args)
+    {
+        if (!IsVideo || _mouseMode != MediaStudioMouseMode.FrameRegion) return;
+        if (!_frameRegionEditing) BeginFrameRegion();
+        var module = await EnsureMediaModuleAsync();
+        var point = await module.InvokeAsync<MediaFramePoint>("normalizedPoint", "media-studio-frame-stage", args.ClientX, args.ClientY);
+        point.X = Math.Clamp(point.X, 0, 1);
+        point.Y = Math.Clamp(point.Y, 0, 1);
+        if (_frameDraft.Count == 0 || Distance(_frameDraft[^1], point) > .003)
+            _frameDraft.Add(point);
+    }
+
+    private Task FinishFrameRegion()
+    {
+        if (!CanFinishFrameRegion) return Task.CompletedTask;
+        if (_frameDraft.Count > 3 && Distance(_frameDraft[0], _frameDraft[^1]) < .015)
+            _frameDraft.RemoveAt(_frameDraft.Count - 1);
+        if (_frameDraft.Count < 3) return Task.CompletedTask;
+        _frameClipPolygon.Clear();
+        _frameClipPolygon.AddRange(CloneFramePoints(_frameDraft));
+        _frameDraft.Clear();
+        _frameRegionEditing = false;
+        _mouseMode = MediaStudioMouseMode.SelectSection;
+        return Task.CompletedTask;
+    }
+
+    private void ClearFrameRegion()
+    {
+        _frameClipPolygon.Clear();
+        _frameDraft.Clear();
+        _frameRegionEditing = false;
+        if (_mouseMode == MediaStudioMouseMode.FrameRegion) _mouseMode = MediaStudioMouseMode.SelectSection;
+    }
+
+    private void RemoveLastFramePoint()
+    {
+        if (_frameDraft.Count > 0) _frameDraft.RemoveAt(_frameDraft.Count - 1);
+    }
+
+    private void CopyFrameRegion()
+    {
+        if (!HasFrameRegion) return;
+        _frameClipboard.Clear();
+        _frameClipboard.AddRange(CloneFramePoints(_frameClipPolygon));
+    }
+
+    private void PasteFrameRegion()
+    {
+        if (!CanPasteFrameRegion) return;
+        _frameClipPolygon.Clear();
+        _frameClipPolygon.AddRange(CloneFramePoints(_frameClipboard));
+        _frameDraft.Clear();
+        _frameRegionEditing = false;
+    }
+
+    [JSInvokable]
+    public Task MediaStudioShortcutRequested(string command)
+    {
+        switch (command)
+        {
+            case "copy":
+                if (_mouseMode == MediaStudioMouseMode.FrameRegion && HasFrameRegion) CopyFrameRegion();
+                else CopySelectedSection();
+                break;
+            case "paste":
+                if (_mouseMode == MediaStudioMouseMode.FrameRegion && CanPasteFrameRegion) PasteFrameRegion();
+                else PasteSection();
+                break;
+            case "delete":
+                if (_mouseMode == MediaStudioMouseMode.FrameRegion)
+                {
+                    if (_frameRegionEditing && _frameDraft.Count > 0) RemoveLastFramePoint();
+                    else ClearFrameRegion();
+                }
+                else DeleteSelectedSection();
+                break;
+            case "commit":
+                if (_frameRegionEditing) return FinishFrameRegion();
+                break;
+            case "cancel":
+                if (_frameRegionEditing)
+                {
+                    _frameDraft.Clear();
+                    _frameRegionEditing = false;
+                }
+                _mouseMode = MediaStudioMouseMode.SelectSection;
+                break;
+        }
+        return InvokeAsync(StateHasChanged);
     }
 
     private async Task ShowMediaContextMenu(MouseEventArgs args)
@@ -363,6 +848,7 @@
         var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
         _trimStart = Math.Clamp(position, 0, Math.Max(0, _trimEnd - .01));
         ClampFades();
+        CommitSelectedSegment();
     }
     private async Task SetTrimEndAtPlayhead()
     {
@@ -370,8 +856,9 @@
         var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
         _trimEnd = Math.Clamp(position, _trimStart + .01, _duration);
         ClampFades();
+        CommitSelectedSegment();
     }
-    private void ResetTrim() { _trimStart = 0; _trimEnd = _duration; ClampFades(); }
+    private void ResetTrim() { _trimStart = 0; _trimEnd = _duration; ClampFades(); CommitSelectedSegment(); }
     private void ToggleMutedFromMenu() => _muted = !_muted;
     private void ToggleLoopFromMenu() => _loop = !_loop;
 
@@ -393,14 +880,68 @@
 
     private async Task LoadFile(InputFileChangeEventArgs args)
     {
-        Guid inspectionAssetId = Guid.Empty;
-        var usedMetadataFallback = false;
         try
         {
-            var file = args.File;
-            _mimeType = ResolveImportedMimeType(file.Name, file.ContentType, IsVideo);
+            var segment = await ReadMediaFileAsync(args.File);
+            var index = SelectedSegmentIndex;
+            if (index >= 0)
+            {
+                segment.Id = _segments[index].Id;
+                _segments[index] = segment;
+            }
+            else
+            {
+                _segments.Add(segment);
+            }
+            SelectSegment(segment.Id, seek: false);
+            _playhead = TimelineEdits.SegmentTimelineStart(_segments, _segments.IndexOf(segment), _playbackRate);
+            var module = await EnsureMediaModuleAsync();
+            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview");
+            ClearRetainedRecordingState();
+        }
+        catch (Exception ex)
+        {
+            _error = $"The media source could not be decoded: {ex.Message}";
+        }
+    }
+
+    private async Task LoadInsertedFile(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            CommitSelectedSegment();
+            var index = SelectedSegmentIndex;
+            var selectedLength = index >= 0 ? _segments[index].SourceLengthSeconds : 0;
+            var segment = await ReadMediaFileAsync(args.File);
+            if (selectedLength > .01)
+                segment.TrimEndSeconds = Math.Min(segment.DurationSeconds, segment.TrimStartSeconds + selectedLength);
+            if (index >= 0)
+            {
+                _segments[index] = segment;
+            }
+            else
+            {
+                _segments.Add(segment);
+                index = _segments.Count - 1;
+            }
+            SelectSegment(segment.Id, seek: false);
+            _playhead = TimelineEdits.SegmentTimelineStart(_segments, index, _playbackRate);
+            _warning = $"Inserted {segment.Name} into the selected timeline range.";
+        }
+        catch (Exception ex)
+        {
+            _error = $"The media could not be inserted into the selected range: {ex.Message}";
+        }
+    }
+
+    private async Task<PublicationMediaSegment> ReadMediaFileAsync(IBrowserFile file)
+    {
+        Guid inspectionAssetId = Guid.Empty;
+        try
+        {
+            var mimeType = ResolveImportedMimeType(file.Name, file.ContentType, IsVideo);
             var expectedPrefix = IsVideo ? "video/" : "audio/";
-            if (!_mimeType.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+            if (!mimeType.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Select a supported {(IsVideo ? "video" : "audio")} file.");
 
             await using var stream = file.OpenReadStream(long.MaxValue);
@@ -411,44 +952,39 @@
 
             var module = await EnsureMediaModuleAsync();
             inspectionAssetId = Guid.NewGuid();
-            var localUrl = MediaAssets.RegisterBytes(inspectionAssetId, bytes, _mimeType);
+            var localUrl = MediaAssets.RegisterBytes(inspectionAssetId, bytes, mimeType);
             MediaSourceInfo info;
             try
             {
                 info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", localUrl, IsVideo ? "video" : "audio");
+                _warning = null;
             }
             catch (Exception metadataError)
             {
                 info = new MediaSourceInfo
                 {
-                    MimeType = _mimeType,
+                    MimeType = mimeType,
                     DurationSeconds = 5,
                     WaveformSamples = []
                 };
-                usedMetadataFallback = true;
                 _warning = $"Imported without browser metadata. Adjust the trim length if needed. {metadataError.Message}";
             }
 
-            _mimeType = NormalizeMimeType(
-                string.IsNullOrWhiteSpace(info.MimeType) ? _mimeType : info.MimeType,
+            mimeType = NormalizeMimeType(string.IsNullOrWhiteSpace(info.MimeType) ? mimeType : info.MimeType,
                 IsVideo ? "video/mp4" : "audio/mpeg");
-            _dataUrl = NormalizeMediaDataUrl($"data:{_mimeType};base64,{Convert.ToBase64String(bytes)}", _mimeType);
-            _name = file.Name;
-            _duration = Math.Max(.01, info.DurationSeconds);
-            _trimStart = 0;
-            _trimEnd = _duration;
-            _posterDataUrl = info.PosterDataUrl ?? string.Empty;
-            _waveform = info.WaveformSamples ?? [];
-            _fadeIn = _fadeOut = 0;
+            var duration = Math.Max(.01, info.DurationSeconds);
             _error = null;
-            if (!usedMetadataFallback) _warning = null;
-            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview");
-            ClearRetainedRecordingState();
-            RefreshPreviewSource();
-        }
-        catch (Exception ex)
-        {
-            _error = $"The media source could not be decoded: {ex.Message}";
+            return new PublicationMediaSegment
+            {
+                Name = file.Name,
+                MimeType = mimeType,
+                DataUrl = NormalizeMediaDataUrl($"data:{mimeType};base64,{Convert.ToBase64String(bytes)}", mimeType),
+                PosterDataUrl = info.PosterDataUrl ?? string.Empty,
+                DurationSeconds = duration,
+                TrimStartSeconds = 0,
+                TrimEndSeconds = duration,
+                WaveformSamples = info.WaveformSamples ?? []
+            };
         }
         finally
         {
@@ -474,6 +1010,7 @@
             _waveform = info.WaveformSamples ?? [];
             _fadeIn = _fadeOut = 0;
             _error = null;
+            ReplaceOrAddCurrentSegment();
         }
         catch (Exception ex)
         {
@@ -631,6 +1168,8 @@
         _embedding = false;
         _embeddingProgress = 100;
         _warning = "Recording embedded. The original browser recording is still available for download until this studio closes.";
+        ReplaceOrAddCurrentSegment();
+        RefreshPreviewSource();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -683,11 +1222,12 @@
         _trimStart = Math.Clamp(Math.Min(values[0], values[1]), 0, _duration);
         _trimEnd = Math.Clamp(Math.Max(values[0], values[1]), _trimStart + .01, _duration);
         ClampFades();
+        CommitSelectedSegment();
     }
 
-    private void ChangeName(ChangeEventArgs args) => _name = string.IsNullOrWhiteSpace(Text(args)) ? (IsVideo ? "Video" : "Audio") : Text(args);
-    private void ChangeTrimStart(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimStart = Math.Clamp(value, 0, Math.Max(0, _trimEnd - .01)); ClampFades(); } }
-    private void ChangeTrimEnd(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimEnd = Math.Clamp(value, _trimStart + .01, _duration); ClampFades(); } }
+    private void ChangeName(ChangeEventArgs args) { _name = string.IsNullOrWhiteSpace(Text(args)) ? (IsVideo ? "Video" : "Audio") : Text(args); CommitSelectedSegment(); }
+    private void ChangeTrimStart(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimStart = Math.Clamp(value, 0, Math.Max(0, _trimEnd - .01)); ClampFades(); CommitSelectedSegment(); } }
+    private void ChangeTrimEnd(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _trimEnd = Math.Clamp(value, _trimStart + .01, _duration); ClampFades(); CommitSelectedSegment(); } }
     private void ChangePlaybackRate(ChangeEventArgs args) { if (TryDouble(args, out var value)) { _playbackRate = Math.Clamp(value, .25, 2); ClampFades(); } }
     private void ChangeVolume(ChangeEventArgs args) { if (TryDouble(args, out var value)) _volume = Math.Clamp(value, 0, 1); }
     private void ChangeFadeIn(ChangeEventArgs args) { if (TryDouble(args, out var value)) _fadeIn = Math.Clamp(value, 0, MaxFade); }
@@ -755,20 +1295,26 @@
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(_dataUrl))
+            if (string.IsNullOrWhiteSpace(_dataUrl) && _segments.Count == 0)
                 throw new InvalidDataException("The completed recording has not been embedded yet.");
+
+            CommitSelectedSegment();
+            var normalizedSegments = TimelineEdits.Normalize(_segments, IsVideo);
+            if (normalizedSegments.Count == 0)
+                throw new InvalidDataException("The media sequence does not contain an insertable section.");
+            var firstSegment = normalizedSegments[0];
 
             await Saved.InvokeAsync(new MediaEditorResult
             {
                 Kind = Kind,
-                Name = _name,
-                DataUrl = NormalizeMediaDataUrl(_dataUrl, IsVideo ? "video/webm" : "audio/webm"),
-                MimeType = NormalizeMimeType(_mimeType, IsVideo ? "video/webm" : "audio/webm"),
-                PosterDataUrl = _posterDataUrl,
+                Name = firstSegment.Name,
+                DataUrl = firstSegment.DataUrl,
+                MimeType = firstSegment.MimeType,
+                PosterDataUrl = firstSegment.PosterDataUrl,
                 PreviewAssetId = _previewAssetId,
-                DurationSeconds = _duration,
-                TrimStartSeconds = _trimStart,
-                TrimEndSeconds = _trimEnd,
+                DurationSeconds = firstSegment.DurationSeconds,
+                TrimStartSeconds = firstSegment.TrimStartSeconds,
+                TrimEndSeconds = firstSegment.EffectiveTrimEndSeconds,
                 Volume = _volume,
                 PlaybackRate = _playbackRate,
                 FadeInSeconds = _fadeIn,
@@ -777,7 +1323,9 @@
                 Loop = _loop,
                 AutoPlay = _autoPlay,
                 PlaybackTrigger = _playbackTrigger,
-                WaveformSamples = [.. _waveform]
+                WaveformSamples = [.. firstSegment.WaveformSamples],
+                Segments = normalizedSegments,
+                FrameClipPolygon = CloneFramePoints(_frameClipPolygon)
             });
             applied = true;
             MediaAssets.Remove(_previewAssetId);

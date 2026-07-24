@@ -4120,57 +4120,129 @@ function publicationMediaElement(elementId) {
     const node = document.getElementById(elementId);
     return node?.querySelector('video,audio') || null;
 }
-function configurePublicationMedia(node, media) {
+function publicationMediaSegments(node, media, number = animationNumber) {
+    const sources = [...(media?.querySelectorAll?.('source[data-media-segment]') || [])]
+        .map(source => {
+            const src = source.getAttribute('src') || '';
+            const start = Math.max(0, number(source.dataset.mediaTrimStart, 0));
+            const end = Math.max(start + .01, number(source.dataset.mediaTrimEnd, start + 1));
+            return { src, start, end, poster: source.dataset.mediaPoster || '', name: source.dataset.mediaName || '' };
+        })
+        .filter(segment => segment.src);
+    if (sources.length) return sources;
+    if (!media) return [];
+    const src = media.getAttribute('src') || media.currentSrc || '';
+    const start = Math.max(0, number(node?.dataset?.mediaTrimStart, 0));
+    const end = Math.max(start + .01, number(node?.dataset?.mediaTrimEnd, media.duration || start + 1));
+    return src ? [{ src, start, end, poster: media.getAttribute('poster') || '', name: '' }] : [];
+}
+function publicationMediaSourceEquals(media, source) {
+    if (!media || !source) return false;
+    try { return new URL(media.currentSrc || media.getAttribute('src') || '', location.href).href === new URL(source, location.href).href; }
+    catch { return (media.currentSrc || media.getAttribute('src') || '') === source; }
+}
+function waitForPublicationMediaMetadata(media) {
+    if (!media || media.readyState >= 1) return Promise.resolve();
+    return new Promise(resolve => {
+        const timer = setTimeout(done, 5000);
+        function done() {
+            clearTimeout(timer);
+            media.removeEventListener('loadedmetadata', done);
+            media.removeEventListener('error', done);
+            resolve();
+        }
+        media.addEventListener('loadedmetadata', done, { once: true });
+        media.addEventListener('error', done, { once: true });
+    });
+}
+function clearPublicationMediaSequence(media) {
+    if (!media) return;
+    const state = media.__publisherSequenceState;
+    if (media.__publisherTimeHandler) media.removeEventListener('timeupdate', media.__publisherTimeHandler);
+    media.__publisherTimeHandler = null;
+    if (state) {
+        state.token = (state.token || 0) + 1;
+        state.advancing = false;
+    }
+}
+function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = false) {
     if (!node || !media) return null;
-    const start = Math.max(0, animationNumber(node.dataset.mediaTrimStart, 0));
-    const end = Math.max(start + .01, animationNumber(node.dataset.mediaTrimEnd, media.duration || start + 1));
-    const baseVolume = Math.max(0, Math.min(1, animationNumber(node.dataset.mediaVolume, 1)));
+    clearPublicationMediaSequence(media);
+    const segments = publicationMediaSegments(node, media);
+    if (!segments.length) return null;
+    const index = Math.max(0, Math.min(segments.length - 1, Number(requestedIndex) || 0));
+    const segment = segments[index];
     const rate = Math.max(.1, animationNumber(node.dataset.mediaRate, 1));
+    const baseVolume = Math.max(0, Math.min(1, animationNumber(node.dataset.mediaVolume, 1)));
     const fadeIn = Math.max(0, animationNumber(node.dataset.mediaFadeIn, 0));
     const fadeOut = Math.max(0, animationNumber(node.dataset.mediaFadeOut, 0));
-    media.volume = fadeIn > 0 ? 0 : baseVolume;
+    const elapsedBefore = segments.slice(0, index).reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
+    const totalDuration = segments.reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
+    const state = media.__publisherSequenceState || { token: 0, index: 0, advancing: false };
+    state.index = index;
+    state.segments = segments;
+    state.token = (state.token || 0) + 1;
+    state.advancing = false;
+    media.__publisherSequenceState = state;
+    const token = state.token;
     media.playbackRate = rate;
     media.muted = node.dataset.mediaMuted === 'true';
     media.loop = false;
-    try { media.currentTime = start; } catch { }
-    const previous = media.__publisherTimeHandler;
-    if (previous) media.removeEventListener('timeupdate', previous);
-    const handler = () => {
-        const presentationPosition = (media.currentTime - start) / rate;
-        const presentationRemaining = (end - media.currentTime) / rate;
-        let gain = baseVolume;
-        if (fadeIn > 0) gain *= Math.max(0, Math.min(1, presentationPosition / fadeIn));
-        if (fadeOut > 0) gain *= Math.max(0, Math.min(1, presentationRemaining / fadeOut));
-        if (!media.muted) media.volume = Math.max(0, Math.min(1, gain));
-        if (media.currentTime < end - .02) return;
-        if (node.dataset.mediaLoop === 'true') {
-            media.currentTime = start;
-            media.play().catch(() => {});
-        } else media.pause();
+    media.volume = fadeIn > 0 && index === 0 ? 0 : baseVolume;
+    if (media instanceof HTMLVideoElement && segment.poster) media.poster = segment.poster;
+
+    const prepare = async () => {
+        if (!publicationMediaSourceEquals(media, segment.src)) {
+            media.pause();
+            media.src = segment.src;
+            media.load();
+            await waitForPublicationMediaMetadata(media);
+        }
+        if (state.token !== token) return;
+        try { media.currentTime = segment.start; } catch { }
+        const handler = () => {
+            if (state.token !== token || state.advancing) return;
+            const presentationPosition = elapsedBefore + Math.max(0, media.currentTime - segment.start) / rate;
+            const presentationRemaining = Math.max(0, totalDuration - presentationPosition);
+            let gain = baseVolume;
+            if (fadeIn > 0) gain *= Math.max(0, Math.min(1, presentationPosition / fadeIn));
+            if (fadeOut > 0) gain *= Math.max(0, Math.min(1, presentationRemaining / fadeOut));
+            if (!media.muted) media.volume = Math.max(0, Math.min(1, gain));
+            if (media.currentTime < segment.end - .02) return;
+            state.advancing = true;
+            if (index + 1 < segments.length) configurePublicationMedia(node, media, index + 1, true);
+            else if (node.dataset.mediaLoop === 'true') configurePublicationMedia(node, media, 0, true);
+            else {
+                media.pause();
+                state.advancing = false;
+            }
+        };
+        media.__publisherTimeHandler = handler;
+        media.addEventListener('timeupdate', handler);
+        if (autoPlay) media.play().catch(() => {});
     };
-    media.__publisherTimeHandler = handler;
-    media.addEventListener('timeupdate', handler);
-    return { start, end };
+    void prepare();
+    return { start: segment.start, end: segment.end, index, segments };
 }
 function playPublicationMediaNode(node) {
     const media = node?.querySelector('video,audio');
     if (!node || !media) return;
-    configurePublicationMedia(node, media);
-    media.play().catch(() => {});
+    configurePublicationMedia(node, media, 0, true);
 }
 function pausePublicationMediaNode(node, rewind = false) {
     const media = node?.querySelector('video,audio');
     if (!media) return;
     media.pause();
-    if (rewind) {
-        const start = Math.max(0, animationNumber(node.dataset.mediaTrimStart, 0));
-        try { media.currentTime = start; } catch { }
-    }
+    if (rewind) configurePublicationMedia(node, media, 0, false);
 }
 function togglePublicationMediaNode(node) {
     const media = node?.querySelector('video,audio');
     if (!media) return;
-    if (media.paused) playPublicationMediaNode(node); else media.pause();
+    if (media.paused) {
+        const state = media.__publisherSequenceState;
+        if (state?.segments?.length) media.play().catch(() => {});
+        else playPublicationMediaNode(node);
+    } else media.pause();
 }
 function schedulePublicationPreviewMedia(state, root, initialOffset = 0) {
     for (const node of root.querySelectorAll('[data-media-kind]')) {
@@ -4893,6 +4965,87 @@ function websitePresentationRuntime() {
         }
     };
     const mediaFromNode = node => node?.querySelector('video,audio') || null;
+    const mediaSegments = (node, media) => {
+        const sources = [...(media?.querySelectorAll?.('source[data-media-segment]') || [])]
+            .map(source => {
+                const src = source.getAttribute('src') || '';
+                const start = Math.max(0, num(source.dataset.mediaTrimStart, 0));
+                const end = Math.max(start + .01, num(source.dataset.mediaTrimEnd, start + 1));
+                return { src, start, end, poster: source.dataset.mediaPoster || '' };
+            }).filter(segment => segment.src);
+        if (sources.length) return sources;
+        const src = media?.getAttribute('src') || media?.currentSrc || '';
+        const start = Math.max(0, num(node?.dataset?.mediaTrimStart, 0));
+        const end = Math.max(start + .01, num(node?.dataset?.mediaTrimEnd, media?.duration || start + 1));
+        return src ? [{ src, start, end, poster: media?.getAttribute('poster') || '' }] : [];
+    };
+    const sameSource = (media, source) => {
+        try { return new URL(media.currentSrc || media.getAttribute('src') || '', location.href).href === new URL(source, location.href).href; }
+        catch { return (media.currentSrc || media.getAttribute('src') || '') === source; }
+    };
+    const waitMetadata = media => media.readyState >= 1 ? Promise.resolve() : new Promise(resolve => {
+        const timer = setTimeout(done, 5000);
+        function done() { clearTimeout(timer); media.removeEventListener('loadedmetadata', done); media.removeEventListener('error', done); resolve(); }
+        media.addEventListener('loadedmetadata', done, { once: true });
+        media.addEventListener('error', done, { once: true });
+    });
+    const clearMediaSequence = media => {
+        if (!media) return;
+        if (media.__psTimeHandler) media.removeEventListener('timeupdate', media.__psTimeHandler);
+        media.__psTimeHandler = null;
+        if (media.__psSequenceState) {
+            media.__psSequenceState.token = (media.__psSequenceState.token || 0) + 1;
+            media.__psSequenceState.advancing = false;
+        }
+    };
+    const configureMediaSegment = (node, media, requestedIndex = 0, autoPlay = false) => {
+        if (!node || !media) return;
+        clearMediaSequence(media);
+        const segments = mediaSegments(node, media);
+        if (!segments.length) return;
+        const index = Math.max(0, Math.min(segments.length - 1, Number(requestedIndex) || 0));
+        const segment = segments[index];
+        const rate = Math.max(.1, num(node.dataset.mediaRate, 1));
+        const baseVolume = Math.max(0, Math.min(1, num(node.dataset.mediaVolume, 1)));
+        const fadeIn = Math.max(0, num(node.dataset.mediaFadeIn, 0));
+        const fadeOut = Math.max(0, num(node.dataset.mediaFadeOut, 0));
+        const elapsedBefore = segments.slice(0, index).reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
+        const totalDuration = segments.reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
+        const state = media.__psSequenceState || { token: 0, index: 0, advancing: false };
+        state.index = index; state.segments = segments; state.token = (state.token || 0) + 1; state.advancing = false;
+        media.__psSequenceState = state;
+        const token = state.token;
+        media.playbackRate = rate;
+        media.muted = bool(node.dataset.mediaMuted);
+        media.loop = false;
+        media.volume = fadeIn > 0 && index === 0 ? 0 : baseVolume;
+        if (media instanceof HTMLVideoElement && segment.poster) media.poster = segment.poster;
+        const prepare = async () => {
+            if (!sameSource(media, segment.src)) {
+                media.pause(); media.src = segment.src; media.load(); await waitMetadata(media);
+            }
+            if (state.token !== token) return;
+            try { media.currentTime = segment.start; } catch { }
+            const onTime = () => {
+                if (state.token !== token || state.advancing) return;
+                const timelinePosition = elapsedBefore + Math.max(0, media.currentTime - segment.start) / rate;
+                const timelineRemaining = Math.max(0, totalDuration - timelinePosition);
+                let volume = baseVolume;
+                if (fadeIn > 0) volume *= Math.max(0, Math.min(1, timelinePosition / fadeIn));
+                if (fadeOut > 0) volume *= Math.max(0, Math.min(1, timelineRemaining / fadeOut));
+                if (!media.muted) media.volume = Math.max(0, Math.min(1, volume));
+                if (media.currentTime < segment.end - .02) return;
+                state.advancing = true;
+                if (index + 1 < segments.length) configureMediaSegment(node, media, index + 1, true);
+                else if (bool(node.dataset.mediaLoop)) configureMediaSegment(node, media, 0, true);
+                else { media.pause(); state.advancing = false; }
+            };
+            media.__psTimeHandler = onTime;
+            media.addEventListener('timeupdate', onTime);
+            if (autoPlay) media.play().catch(() => {});
+        };
+        void prepare();
+    };
     const pauseMediaNode = node => {
         const media = mediaFromNode(node);
         if (media) media.pause();
@@ -4901,52 +5054,22 @@ function websitePresentationRuntime() {
         const media = mediaFromNode(node);
         if (!media) return;
         media.pause();
-        if (media.__psTimeHandler) media.removeEventListener('timeupdate', media.__psTimeHandler);
-        media.__psTimeHandler = null;
-        if (rewind) {
-            const start = Math.max(0, num(node.dataset.mediaTrimStart, 0));
-            try { media.currentTime = start; } catch { }
-        }
+        clearMediaSequence(media);
+        if (rewind) configureMediaSegment(node, media, 0, false);
     };
     const playMediaNode = (node, delay = 0) => {
         const media = mediaFromNode(node);
         if (!media) return;
-        const run = () => {
-            const start = Math.max(0, num(node.dataset.mediaTrimStart, 0));
-            const end = Math.max(start + .01, num(node.dataset.mediaTrimEnd, media.duration || start + 1));
-            const baseVolume = Math.max(0, Math.min(1, num(node.dataset.mediaVolume, 1)));
-            const fadeIn = Math.max(0, num(node.dataset.mediaFadeIn, 0));
-            const fadeOut = Math.max(0, num(node.dataset.mediaFadeOut, 0));
-            media.playbackRate = Math.max(.1, num(node.dataset.mediaRate, 1));
-            media.muted = bool(node.dataset.mediaMuted);
-            media.loop = false;
-            media.volume = fadeIn > 0 ? 0 : baseVolume;
-            try { media.currentTime = start; } catch { }
-            if (media.__psTimeHandler) media.removeEventListener('timeupdate', media.__psTimeHandler);
-            const onTime = () => {
-                const position = media.currentTime;
-                const timelinePosition = (position - start) / Math.max(.1, media.playbackRate);
-                const timelineRemaining = (end - position) / Math.max(.1, media.playbackRate);
-                let volume = baseVolume;
-                if (fadeIn > 0) volume *= Math.max(0, Math.min(1, timelinePosition / fadeIn));
-                if (fadeOut > 0) volume *= Math.max(0, Math.min(1, timelineRemaining / fadeOut));
-                if (!media.muted) media.volume = Math.max(0, Math.min(1, volume));
-                if (position < end - .02) return;
-                if (bool(node.dataset.mediaLoop)) {
-                    media.currentTime = start;
-                    media.play().catch(() => {});
-                } else media.pause();
-            };
-            media.__psTimeHandler = onTime;
-            media.addEventListener('timeupdate', onTime);
-            media.play().catch(() => {});
-        };
+        const run = () => configureMediaSegment(node, media, 0, true);
         if (delay > 0) activeMediaTimers.push(setTimeout(run, delay * 1000)); else run();
     };
     const toggleMediaNode = node => {
         const media = mediaFromNode(node);
         if (!media) return;
-        if (media.paused) playMediaNode(node); else media.pause();
+        if (media.paused) {
+            if (media.__psSequenceState?.segments?.length) media.play().catch(() => {});
+            else playMediaNode(node);
+        } else media.pause();
     };
     const startPageMedia = page => {
         for (const node of page.querySelectorAll('[data-media-kind]')) {

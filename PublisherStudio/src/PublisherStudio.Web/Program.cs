@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http.Features;
 using PublisherStudio.Components;
 using PublisherStudio.Services;
 using PublisherStudio.Services.PictureStudio.Import;
+using PublisherStudio.Services.MediaStudio.UseCases;
 using PublisherStudio.Services.Publication.Import;
 using PublisherStudio.HostedServices.Streaming;
 
@@ -99,6 +100,7 @@ public static class Program
         builder.Services.AddSingleton<PictureDocumentService>();
         builder.Services.AddSingleton<OpenRasterImportService>();
         builder.Services.AddSingleton<OpenDocumentImportService>();
+        builder.Services.AddSingleton<MediaTimelineEditService>();
         builder.Services.AddSingleton<SpreadsheetDocumentService>();
         builder.Services.AddSingleton<SpreadsheetSessionStore>();
         builder.Services.AddSingleton<PublicationDataService>();

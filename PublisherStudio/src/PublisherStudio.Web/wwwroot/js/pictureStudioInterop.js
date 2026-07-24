@@ -9,7 +9,7 @@ const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow",
 const fillKinds = ["solid", "linearGradient", "radialGradient"];
 const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", "lensflare", "grainnoise", "motionblur", "wind", "oceanwaves"];
 const textAlignments = ["left", "center", "right"];
-const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"];
+const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect", "fillsolid", "fillgradient"];
 
 function enumName(value, names, fallback) {
     if (typeof value === "string") return value;
@@ -970,18 +970,36 @@ function drawPaintLayer(ctx, layer) {
     endLayer(ctx);
 }
 
+function applyLayerClip(ctx, layer) {
+    const points = Array.isArray(layer?.clipPolygon) ? layer.clipPolygon : [];
+    if (points.length < 3) return;
+    ctx.beginPath();
+    if (layer.clipInverted === true) ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.moveTo(Number(points[0].x) || 0, Number(points[0].y) || 0);
+    for (let index = 1; index < points.length; index++)
+        ctx.lineTo(Number(points[index].x) || 0, Number(points[index].y) || 0);
+    ctx.closePath();
+    ctx.clip(layer.clipInverted === true ? "evenodd" : "nonzero");
+}
+
 async function drawLayer(ctx, layer) {
     if (!layer || layer.visible === false || clamp(layer.opacity ?? 1, 0, 1) <= 0) return null;
-    switch (layerKind(layer)) {
-        case "raster": return await drawRasterLayer(ctx, layer);
-        case "text": drawTextLayer(ctx, layer); break;
-        case "fill": drawFillLayer(ctx, layer); break;
-        case "render": drawRenderLayer(ctx, layer); break;
-        case "paint": drawPaintLayer(ctx, layer); break;
-        case "svg": return await drawSvgLayer(ctx, layer);
-        default: drawShapeLayer(ctx, layer); break;
+    ctx.save();
+    try {
+        applyLayerClip(ctx, layer);
+        switch (layerKind(layer)) {
+            case "raster": return await drawRasterLayer(ctx, layer);
+            case "text": drawTextLayer(ctx, layer); break;
+            case "fill": drawFillLayer(ctx, layer); break;
+            case "render": drawRenderLayer(ctx, layer); break;
+            case "paint": drawPaintLayer(ctx, layer); break;
+            case "svg": return await drawSvgLayer(ctx, layer);
+            default: drawShapeLayer(ctx, layer); break;
+        }
+        return null;
+    } finally {
+        ctx.restore();
     }
-    return null;
 }
 
 function drawBackground(ctx, document, forceOpaque = false) {
@@ -1093,11 +1111,11 @@ function drawSelection(ctx, layer, zoom) {
     ctx.restore();
 }
 
-function isAreaSelectionTool(tool) { return ["rectangleselect", "ellipseselect", "freeselect", "magneticselect"].includes(String(tool || "").toLowerCase()); }
+function isAreaSelectionTool(tool) { return ["rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect"].includes(String(tool || "").toLowerCase()); }
 function isAreaFillTool(tool) { return ["fillsolid", "fillgradient"].includes(String(tool || "").toLowerCase()); }
 function selectionKindForTool(tool) {
     const name = String(tool || "").toLowerCase();
-    return name === "ellipseselect" ? "ellipse" : name === "freeselect" ? "free" : name === "magneticselect" ? "magnetic" : "rectangle";
+    return name === "ellipseselect" ? "ellipse" : name === "freeselect" ? "free" : name === "magneticselect" ? "magnetic" : name === "polygonselect" ? "polygon" : "rectangle";
 }
 function selectionFromDrawing(drawing) {
     const points = Array.isArray(drawing?.points) ? drawing.points.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 })) : [];
@@ -1304,10 +1322,34 @@ function hitPaintLayer(layer, worldX, worldY) {
     return false;
 }
 
+function pointInPolygon(points, x, y) {
+    let inside = false;
+    for (let index = 0, previous = points.length - 1; index < points.length; previous = index++) {
+        const currentPoint = points[index];
+        const previousPoint = points[previous];
+        const currentX = Number(currentPoint?.x) || 0;
+        const currentY = Number(currentPoint?.y) || 0;
+        const previousX = Number(previousPoint?.x) || 0;
+        const previousY = Number(previousPoint?.y) || 0;
+        const crosses = (currentY > y) !== (previousY > y)
+            && x < (previousX - currentX) * (y - currentY) / ((previousY - currentY) || .0000001) + currentX;
+        if (crosses) inside = !inside;
+    }
+    return inside;
+}
+
+function pointPassesLayerClip(layer, x, y) {
+    const points = Array.isArray(layer?.clipPolygon) ? layer.clipPolygon : [];
+    if (points.length < 3) return true;
+    const inside = pointInPolygon(points, x, y);
+    return layer.clipInverted === true ? !inside : inside;
+}
+
 function hitLayer(document, x, y) {
     for (let index = document.layers.length - 1; index >= 0; index--) {
         const layer = document.layers[index];
         if (!layer.visible) continue;
+        if (!pointPassesLayerClip(layer, x, y)) continue;
         if (layerKind(layer) === "paint") {
             if (hitPaintLayer(layer, x, y)) return layer;
             continue;
@@ -1426,7 +1468,7 @@ function addPathNode(editor, event) {
     }
     if (!editor.pathDraft) {
         editor.pathDraft = {
-            tool: "path",
+            tool: editor.toolSettings?.tool === "polygonselect" ? "polygonselect" : "path",
             color: editor.toolSettings.color,
             widthPx: editor.toolSettings.width,
             opacity: editor.toolSettings.opacity,
@@ -1445,7 +1487,14 @@ function addPathNode(editor, event) {
 function finishPathDraft(editor, closed = false) {
     const draft = editor.pathDraft;
     editor.pathDraft = null;
-    if (!draft || draft.points.length < 2) { scheduleEditorRender(editor); return; }
+    if (!draft) { scheduleEditorRender(editor); return; }
+    if (draft.tool === "polygonselect") {
+        if (draft.points.length >= 3)
+            editor.areaSelection = { kind: "polygon", points: draft.points.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 })) };
+        scheduleEditorRender(editor);
+        return;
+    }
+    if (draft.points.length < 2) { scheduleEditorRender(editor); return; }
     const coordinates = [];
     for (const point of draft.points) coordinates.push(Number(point.x) || 0, Number(point.y) || 0);
     safeInvoke(editor, "PicturePathCommitted", coordinates, closed === true, false);
@@ -1567,13 +1616,13 @@ function beginDrawing(editor, event) {
         commitAreaFill(editor, editor.areaSelection, settings.tool === "fillgradient");
         scheduleEditorRender(editor); event.preventDefault(); return;
     }
-    if (settings.tool === "path") {
+    if (settings.tool === "path" || settings.tool === "polygonselect") {
         // The second pointerdown of a double-click must not create a duplicate terminal node.
         if ((Number(event.detail) || 0) < 2) addPathNode(editor, event);
         else event.preventDefault();
         return;
     }
-    if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"].includes(settings.tool)) return;
+    if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect", "fillsolid", "fillgradient"].includes(settings.tool)) return;
     const adjustedWidth = settings.tool === "pencil"
         ? Math.min(settings.width, 6)
         : settings.tool === "spray"
@@ -1697,7 +1746,7 @@ function bindEditorCanvas(editor, canvas) {
         else beginDrawing(editor, event);
     });
     canvas.addEventListener("pointermove", event => {
-        if (editor.pathDraft && (editor.toolSettings?.tool || "select") === "path") {
+        if (editor.pathDraft && ["path", "polygonselect"].includes(editor.toolSettings?.tool || "select")) {
             editor.pathDraft.hover = canvasPoint(canvas, event);
             scheduleEditorRender(editor);
         } else if (editor.drawing) updateDrawing(editor, event);
@@ -1716,7 +1765,7 @@ function bindEditorCanvas(editor, canvas) {
         else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
     });
     canvas.addEventListener("dblclick", event => {
-        if ((editor.toolSettings?.tool || "select") === "path") {
+        if (["path", "polygonselect"].includes(editor.toolSettings?.tool || "select")) {
             finishPathDraft(editor, event.shiftKey === true);
             event.preventDefault();
             return;
@@ -1786,20 +1835,28 @@ export function initializePictureStudio(canvasId, dotNetRef) {
             renderToken: 0,
             lastRenderError: ""
         };
-        window.addEventListener("pointerdown", event => {
-            if ((editor.drawing || editor.interaction) && event.target !== editor.canvas)
-                resetEditorPointerState(editor, true);
-        }, true);
-        window.addEventListener("pointerup", event => {
-            if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event);
-            else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event);
-        }, true);
-        window.addEventListener("pointercancel", event => {
-            if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event, true);
-            else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
-        }, true);
-        window.addEventListener("blur", () => resetEditorPointerState(editor, true));
-        document.addEventListener("visibilitychange", () => { if (document.hidden) resetEditorPointerState(editor, true); });
+        const globalHandlers = {
+            pointerdown: event => {
+                if ((editor.drawing || editor.interaction) && event.target !== editor.canvas)
+                    resetEditorPointerState(editor, true);
+            },
+            pointerup: event => {
+                if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event);
+                else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event);
+            },
+            pointercancel: event => {
+                if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event, true);
+                else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
+            },
+            blur: () => resetEditorPointerState(editor, true),
+            visibilitychange: () => { if (document.hidden) resetEditorPointerState(editor, true); }
+        };
+        editor.globalHandlers = globalHandlers;
+        window.addEventListener("pointerdown", globalHandlers.pointerdown, true);
+        window.addEventListener("pointerup", globalHandlers.pointerup, true);
+        window.addEventListener("pointercancel", globalHandlers.pointercancel, true);
+        window.addEventListener("blur", globalHandlers.blur);
+        document.addEventListener("visibilitychange", globalHandlers.visibilitychange);
         editors.set(canvasId, editor);
     } else {
         editor.dotNetRef = dotNetRef;
@@ -1812,6 +1869,27 @@ export function cancelPictureStudioInteraction(canvasId) {
     if (editor) resetEditorPointerState(editor, true);
 }
 
+export function disposePictureStudio(canvasId) {
+    const editor = editors.get(canvasId);
+    if (!editor) return;
+    resetEditorPointerState(editor, true);
+    if (editor.animationFrame) cancelAnimationFrame(editor.animationFrame);
+    const handlers = editor.globalHandlers;
+    if (handlers) {
+        window.removeEventListener("pointerdown", handlers.pointerdown, true);
+        window.removeEventListener("pointerup", handlers.pointerup, true);
+        window.removeEventListener("pointercancel", handlers.pointercancel, true);
+        window.removeEventListener("blur", handlers.blur);
+        document.removeEventListener("visibilitychange", handlers.visibilitychange);
+    }
+    if (editor.canvas) delete editor.canvas.dataset.pictureStudioBound;
+    editor.dotNetRef = null;
+    editor.canvas = null;
+    editor.document = null;
+    editor.globalHandlers = null;
+    editors.delete(canvasId);
+}
+
 export async function renderPictureStudio(canvasId, documentModel, selectedLayerId, zoom, toolSettings) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -1821,7 +1899,7 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     editor.selectedLayerId = selectedLayerId || null;
     editor.zoom = clamp(zoom ?? nextDocument.zoom, .05, 4);
     const nextToolSettings = normalizeToolSettings(toolSettings);
-    if (editor.pathDraft && nextToolSettings.tool !== "path") editor.pathDraft = null;
+    if (editor.pathDraft && !["path", "polygonselect"].includes(nextToolSettings.tool)) editor.pathDraft = null;
     editor.toolSettings = nextToolSettings;
     canvas.style.width = `${Math.round(nextDocument.widthPx * editor.zoom)}px`;
     canvas.style.height = `${Math.round(nextDocument.heightPx * editor.zoom)}px`;
@@ -1844,6 +1922,21 @@ export function clearPictureStudioAreaSelection(canvasId) {
     if (!editor) return;
     editor.areaSelection = null;
     scheduleEditorRender(editor);
+}
+
+export function getPictureStudioAreaSelection(canvasId) {
+    const editor = editors.get(canvasId);
+    const selection = editor?.areaSelection;
+    if (!selection || !Array.isArray(selection.points) || selection.points.length < 2) return null;
+    return {
+        kind: String(selection.kind || "polygon"),
+        points: selection.points.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 }))
+    };
+}
+
+export function hasPictureStudioAreaSelection(canvasId) {
+    const selection = getPictureStudioAreaSelection(canvasId);
+    return Boolean(selection && selection.points.length >= 2);
 }
 
 export function fitPictureStudio(hostId, width, height) {
@@ -1979,6 +2072,20 @@ function svgLayerStyle(layer, includeAdjustments = true) {
     return styles.join(";");
 }
 
+function svgLayerClip(definitions, layer, prefix, documentWidth, documentHeight) {
+    const points = Array.isArray(layer?.clipPolygon) ? layer.clipPolygon : [];
+    if (points.length < 3) return "";
+    const polygon = points
+        .map((point, index) => `${index === 0 ? "M" : "L"} ${svgNumber(point?.x)} ${svgNumber(point?.y)}`)
+        .join(" ");
+    const id = `${prefix}-area-clip`;
+    const path = layer.clipInverted === true
+        ? `M 0 0 H ${svgNumber(documentWidth)} V ${svgNumber(documentHeight)} H 0 Z ${polygon} Z`
+        : `${polygon} Z`;
+    definitions.push(`<clipPath id="${id}" clipPathUnits="userSpaceOnUse"><path d="${path}" clip-rule="evenodd" fill-rule="evenodd"/></clipPath>`);
+    return id;
+}
+
 function svgGradient(definitions, layer, width, height, prefix, shape = false) {
     const fillKind = enumName(layer.fillKind, fillKinds, "solid").toLowerCase();
     const first = cssColor(shape ? layer.fillColor : layer.primaryColor, shape ? "#60a5fa" : "#dbeafe");
@@ -2101,7 +2208,9 @@ async function svgRasterizedLayer(layer) {
         height,
         rotation: 0,
         opacity: 1,
-        blendMode: "Normal"
+        blendMode: "Normal",
+        clipPolygon: [],
+        clipInverted: false
     };
     await drawLayer(context, local);
     const dataUrl = canvas.toDataURL("image/png");
@@ -2130,7 +2239,9 @@ export async function createPictureStudioSvg(documentModel) {
             adjustments = false;
         }
         const style = svgLayerStyle(layer, adjustments);
-        layers.push(`<g id="${prefix}" data-picture-layer-id="${xmlEscape(layer.id || "")}" data-picture-layer-kind="${xmlEscape(kind)}" transform="${svgLayerTransform(layer)}"${style ? ` style="${xmlEscape(style)}"` : ""}>${markup}</g>`);
+        const transformed = `<g id="${prefix}" data-picture-layer-id="${xmlEscape(layer.id || "")}" data-picture-layer-kind="${xmlEscape(kind)}" transform="${svgLayerTransform(layer)}"${style ? ` style="${xmlEscape(style)}"` : ""}>${markup}</g>`;
+        const clipId = svgLayerClip(definitions, layer, prefix, document.widthPx, document.heightPx);
+        layers.push(clipId ? `<g clip-path="url(#${clipId})">${transformed}</g>` : transformed);
     }
     const metadata = xmlEscape(JSON.stringify(document));
     const background = document.background && document.background !== "transparent"
@@ -2139,7 +2250,7 @@ export async function createPictureStudioSvg(documentModel) {
     const defs = definitions.length ? `<defs>${definitions.join("")}</defs>` : "";
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${document.widthPx}" height="${document.heightPx}" viewBox="0 0 ${document.widthPx} ${document.heightPx}">
-<title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.3">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
+<title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.4">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
 }
 
 
@@ -2462,7 +2573,7 @@ export async function importPictureStudioSvg(dataUrl, fileName) {
             document: {
                 id: crypto.randomUUID(),
                 name: String(fileName || "SVG").replace(/\.(?:svg|svgz)$/i, ""),
-                formatVersion: "1.3",
+                formatVersion: "1.4",
                 widthPx: viewport.width,
                 heightPx: viewport.height,
                 background: "transparent",

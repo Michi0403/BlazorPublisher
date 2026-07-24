@@ -56,7 +56,7 @@ public sealed class OpenRasterImportService
             Math.Max(16, (int)Math.Round(sourceHeight * scale)),
             true);
         document.Name = string.IsNullOrWhiteSpace(fileName) ? "OpenRaster" : Path.GetFileNameWithoutExtension(fileName);
-        document.FormatVersion = "1.3";
+        document.FormatVersion = "1.4";
         document.GridVisible = false;
 
         var flattened = new List<PictureLayer>();

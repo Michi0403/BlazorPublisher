@@ -1,0 +1,80 @@
+PublisherStudio v1.0.68 source changes
+
+Media Studio timeline and gestures
+- Added explicit Select section, Place playhead, Add cutline and video-only Frame region mouse/touch modes.
+- Added synchronized playhead/section selection, visible section boundaries/cutlines and direct ribbon/context cutline commands.
+- Added scoped Delete, copy, paste, commit and cancel keyboard handling.
+- Added non-destructive section split, merge, copy, paste, delete and media insertion through MediaTimelineEditService.
+- Persisted ordered PublicationMediaSegment sequences in one audio/video publication element.
+
+Video and Picture two-dimensional regions
+- Added normalized arbitrary polygon frame clipping to Video Studio and all established publication projections.
+- Added Picture Studio polygon selection plus rectangle/ellipse/free/magnetic conversion to layer clip polygons.
+- Added keep, inverted cut, copy and copy-as-layer commands and retained clips in raster and SVG export.
+- Audio Studio remains intentionally temporal/one-dimensional.
+
+Mainframe, assets and frontend orchestration
+- Reused the existing Mainframe insert/edit flow and canonical Domain result contracts.
+- Preserved publication Id, geometry, Z-order, groups, connectors, animation and interaction state when applying Studio edits.
+- Removed stale media-segment assets and registered current canonical segments instead of promoting transient preview assets.
+- Kept playheads, cutlines, polygon overlays and nodes editor-local; they never become page elements.
+
+Architecture and documentation
+- Added ADR-009 and docs/architecture/media-gesture-editing.md.
+- Strengthened AGENTS.md rules for one gesture owner, disposable listeners, temporal/spatial separation, canonical segment assets and Mainframe-owned insertion.
+- Added executable media gesture, export, SVG clip and Z-order contract coverage.
+
+Versions and dependencies
+- Application and installer version: 1.0.68.
+- Publication format: 1.49.
+- Picture Studio format: 1.4.
+- No NuGet, npm, native binary or external process dependency was added.
+
+Added files:
+  + CHANGELOG-v1.0.68.md
+  + docs/architecture/media-gesture-editing.md
+  + docs/decisions/ADR-009-editor-gesture-and-z-order-ownership.md
+  + src/PublisherStudio.Web/Services/MediaStudio/UseCases/MediaTimelineEditService.cs
+  + tests/mediaGestureEditing.test.mjs
+
+Modified files:
+  * AGENTS.md
+  * README.md
+  * RELEASE.md
+  * VALIDATION.md
+  * docs/ARCHITECTURE.md
+  * src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+  * src/PublisherStudio.Web/Components/Editor/MediaStudio.razor
+  * src/PublisherStudio.Web/Components/Editor/PageSurface.razor
+  * src/PublisherStudio.Web/Components/Editor/PictureEditor.razor
+  * src/PublisherStudio.Web/Components/Editor/PictureEditor.razor.cs
+  * src/PublisherStudio.Web/Components/Editor/PrintPublication.razor
+  * src/PublisherStudio.Web/Components/Pages/Editor.razor
+  * src/PublisherStudio.Web/Components/_Imports.razor
+  * src/PublisherStudio.Web/Domain/PictureStudioModels.cs
+  * src/PublisherStudio.Web/Domain/PublicationMediaModels.cs
+  * src/PublisherStudio.Web/Domain/PublicationModels.cs
+  * src/PublisherStudio.Web/Program.cs
+  * src/PublisherStudio.Web/PublisherStudio.Web.csproj
+  * src/PublisherStudio.Web/Services/EditorStateService.cs
+  * src/PublisherStudio.Web/Services/PictureDocumentService.cs
+  * src/PublisherStudio.Web/Services/PictureEditorStateService.cs
+  * src/PublisherStudio.Web/Services/PictureStudio/Import/OpenRasterImportService.cs
+  * src/PublisherStudio.Web/Services/Publication/Import/OpenDocumentImportService.cs
+  * src/PublisherStudio.Web/Services/PublicationFileService.cs
+  * src/PublisherStudio.Web/Services/PublicationMediaAssetStore.cs
+  * src/PublisherStudio.Web/Services/Streaming/UseCases/Runtime/StreamingRuntimeUseCases.cs
+  * src/PublisherStudio.Web/package-lock.json
+  * src/PublisherStudio.Web/package.json
+  * src/PublisherStudio.Web/wwwroot/css/site.css
+  * src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js
+  * src/PublisherStudio.Web/wwwroot/js/pictureStudioInterop.js
+  * src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+  * tests/componentRuntime.test.mjs
+  * tests/editorUsabilityRepair.test.mjs
+  * tests/fontIntegration.test.mjs
+  * tests/openInterchange.test.mjs
+  * tests/signalRuntime.test.mjs
+  * tests/streamingRuntime.test.mjs
+
+Summary: 5 added, 38 modified, 0 removed files versus v1.0.67.

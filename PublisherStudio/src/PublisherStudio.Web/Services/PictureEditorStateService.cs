@@ -229,7 +229,7 @@ public sealed class PictureEditorStateService
         var kind = selectionKind?.Trim().ToLowerInvariant() switch
         {
             "ellipse" => PictureShapeKind.Ellipse,
-            "free" or "magnetic" => PictureShapeKind.Freeform,
+            "free" or "magnetic" or "polygon" => PictureShapeKind.Freeform,
             _ => PictureShapeKind.Rectangle
         };
         var layer = new ShapePictureLayer
@@ -351,6 +351,42 @@ public sealed class PictureEditorStateService
         if (layer is null) return;
         _clipboard = CloneLayer(layer);
         Notify(false);
+    }
+
+    public bool CopySelectedRegion(IReadOnlyList<PicturePoint> points, bool inverted = false)
+    {
+        var layer = SelectedLayer;
+        var polygon = NormalizeClipPolygon(points);
+        if (layer is null || polygon.Count < 3) return false;
+        _clipboard = CloneLayer(layer);
+        _clipboard.ClipPolygon = polygon;
+        _clipboard.ClipInverted = inverted;
+        Notify(false);
+        return true;
+    }
+
+    public bool ApplySelectedClip(IReadOnlyList<PicturePoint> points, bool inverted)
+    {
+        var layer = SelectedLayer;
+        var polygon = NormalizeClipPolygon(points);
+        if (layer is null || layer.Locked || polygon.Count < 3) return false;
+        Capture();
+        layer.ClipPolygon = polygon;
+        layer.ClipInverted = inverted;
+        NormalizeLayer(layer);
+        Notify();
+        return true;
+    }
+
+    public bool ClearSelectedClip()
+    {
+        var layer = SelectedLayer;
+        if (layer is null || layer.Locked || layer.ClipPolygon.Count < 3) return false;
+        Capture();
+        layer.ClipPolygon.Clear();
+        layer.ClipInverted = false;
+        Notify();
+        return true;
     }
 
     public void Paste()
@@ -609,6 +645,7 @@ public sealed class PictureEditorStateService
         layer.Grayscale = Math.Clamp(layer.Grayscale, 0, 1);
         layer.Sepia = Math.Clamp(layer.Sepia, 0, 1);
         layer.Invert = Math.Clamp(layer.Invert, 0, 1);
+        layer.ClipPolygon = NormalizeClipPolygon(layer.ClipPolygon);
         if (layer is RasterPictureLayer raster) raster.TintOpacity = Math.Clamp(raster.TintOpacity, 0, 1);
         if (layer is TextPictureLayer text)
         {
@@ -639,6 +676,23 @@ public sealed class PictureEditorStateService
                 stroke.Points ??= [];
             }
         }
+    }
+
+    private static List<PicturePoint> NormalizeClipPolygon(IEnumerable<PicturePoint>? points)
+    {
+        var normalized = (points ?? [])
+            .Where(point => double.IsFinite(point.X) && double.IsFinite(point.Y))
+            .Take(2048)
+            .Select(point => new PicturePoint
+            {
+                X = Math.Clamp(point.X, -16384, 32768),
+                Y = Math.Clamp(point.Y, -16384, 32768)
+            })
+            .ToList();
+
+        while (normalized.Count > 1 && NearlyEqual(normalized[0].X, normalized[^1].X) && NearlyEqual(normalized[0].Y, normalized[^1].Y))
+            normalized.RemoveAt(normalized.Count - 1);
+        return normalized.Count >= 3 ? normalized : [];
     }
 
     private static bool NearlyEqual(double first, double second) => Math.Abs(first - second) < .0001;

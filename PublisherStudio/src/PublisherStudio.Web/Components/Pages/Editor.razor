@@ -1186,10 +1186,12 @@
         try
         {
             PublicationMediaElement media;
+            var previousSegmentIds = new HashSet<Guid>();
             if (targetId is Guid existingId && State.CurrentPage.Elements.OfType<PublicationMediaElement>().Any(item => item.Id == existingId))
             {
                 State.SelectElement(existingId);
                 media = State.CurrentPage.Elements.OfType<PublicationMediaElement>().First(item => item.Id == existingId);
+                previousSegmentIds.UnionWith(media.Segments.Select(segment => segment.Id));
                 State.UpdateMedia(existingId, item => ApplyMediaResult(item, result));
             }
             else if (result.Kind == PublicationElementKind.Video)
@@ -1205,8 +1207,10 @@
                 State.UpdateMedia(media.Id, item => ApplyMediaResult(item, result), capture: false);
             }
 
-            if (!MediaAssets.Copy(result.PreviewAssetId, media.Id))
-                MediaAssets.Register(media.Id, media.DataUrl, media.MimeType);
+            var currentSegmentIds = media.Segments.Select(segment => segment.Id).ToHashSet();
+            foreach (var staleId in previousSegmentIds.Except(currentSegmentIds)) MediaAssets.Remove(staleId);
+            MediaAssets.Remove(media.Id);
+            foreach (var segment in media.EffectiveSegments) MediaAssets.GetOrRegister(segment);
             State.SelectElement(media.Id);
             _mediaStudioVisible = false;
             _mediaStudioTargetId = null;
@@ -1240,10 +1244,27 @@
         item.AutoPlay = result.AutoPlay;
         item.PlaybackTrigger = result.PlaybackTrigger;
         item.WaveformSamples = result.WaveformSamples ?? [];
+        item.Segments = result.Segments?.Select(segment => new PublicationMediaSegment
+        {
+            Id = segment.Id == Guid.Empty ? Guid.NewGuid() : segment.Id,
+            Name = segment.Name,
+            DataUrl = segment.DataUrl,
+            MimeType = segment.MimeType,
+            PosterDataUrl = segment.PosterDataUrl,
+            DurationSeconds = segment.DurationSeconds,
+            TrimStartSeconds = segment.TrimStartSeconds,
+            TrimEndSeconds = segment.TrimEndSeconds,
+            WaveformSamples = [.. segment.WaveformSamples]
+        }).ToList() ?? [];
         if (item is VideoElement video)
         {
             video.PosterDataUrl = result.PosterDataUrl;
             video.AltText = result.Name;
+            video.FrameClipPolygon = result.FrameClipPolygon?.Select(point => new MediaFramePoint
+            {
+                X = Math.Clamp(point.X, 0, 1),
+                Y = Math.Clamp(point.Y, 0, 1)
+            }).ToList() ?? [];
         }
     }
 

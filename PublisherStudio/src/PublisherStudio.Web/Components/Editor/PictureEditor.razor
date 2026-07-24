@@ -100,7 +100,15 @@
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@EllipseSelectToolText" Click="EllipseSelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@FreeSelectToolText" Click="FreeSelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MagneticSelectToolText" Click="MagneticSelectTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@PolygonSelectToolText" Click="PolygonSelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear selection" Click="ClearAreaSelection" />
+                        </DxRibbonItem>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Area edit" Enabled="HasSelection" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Keep selected area" Click="KeepSelectedArea" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Cut selected area" Click="CutSelectedArea" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy selected area" Click="CopySelectedArea" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-duplicate" Text="Copy area as new layer" Click="CopySelectedAreaAsLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear layer cut" Enabled="HasLayerClip" Click="ClearLayerCut" />
                         </DxRibbonItem>
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Area fill" DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-gradient" Text="@FillSolidToolText" Click="FillSolidTool" />
@@ -646,6 +654,24 @@
                             }
 
                             <section class="picture-property-section">
+                                <h3>Area cut</h3>
+                                <p class="property-note">Selections use document coordinates, so rectangular, elliptical, freehand, magnetic, and arbitrary polygon cuts stay aligned at every layer angle and canvas size.</p>
+                                <div class="property-action-row">
+                                    <DxButton Text="Keep selected" Enabled="@(!selected.Locked)" Click="KeepSelectedArea" />
+                                    <DxButton Text="Cut selected" Enabled="@(!selected.Locked)" Click="CutSelectedArea" />
+                                </div>
+                                <div class="property-action-row">
+                                    <DxButton Text="Copy region" Click="CopySelectedArea" />
+                                    <DxButton Text="Copy as layer" Click="CopySelectedAreaAsLayer" />
+                                    <DxButton Text="Clear cut" Enabled="@(selected.ClipPolygon.Count >= 3 && !selected.Locked)" Click="ClearLayerCut" />
+                                </div>
+                                @if (selected.ClipPolygon.Count >= 3)
+                                {
+                                    <p class="property-note"><b>@(selected.ClipInverted ? "Cut-out" : "Keep") polygon:</b> @selected.ClipPolygon.Count vertices.</p>
+                                }
+                            </section>
+
+                            <section class="picture-property-section">
                                 <h3>Adjustments</h3>
                                 <label>Brightness
                                     <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Brightness)" @oninput="ChangeBrightness" @onchange="EndLiveEdit" />
@@ -940,6 +966,18 @@
                         </Items>
                     </DxContextMenuItem>
                 }
+
+                <DxContextMenuItem Text="Area selection" IconCssClass="pub-icon pub-icon-crop" BeginGroup="true">
+                    <Items>
+                        <DxContextMenuItem Text="Polygon selection mode" Click="PolygonSelectTool" />
+                        <DxContextMenuItem Text="Keep selected area" Enabled="@(!selectedLayer.Locked)" Click="KeepSelectedArea" />
+                        <DxContextMenuItem Text="Cut selected area" Enabled="@(!selectedLayer.Locked)" Click="CutSelectedArea" />
+                        <DxContextMenuItem Text="Copy selected area" Click="CopySelectedArea" />
+                        <DxContextMenuItem Text="Copy selected area as layer" Click="CopySelectedAreaAsLayer" />
+                        <DxContextMenuItem Text="Clear layer cut" Enabled="@(selectedLayer.ClipPolygon.Count >= 3 && !selectedLayer.Locked)" Click="ClearLayerCut" />
+                        <DxContextMenuItem Text="Clear area selection overlay" Click="ClearAreaSelection" />
+                    </Items>
+                </DxContextMenuItem>
 
                 <DxContextMenuItem Text="Adjustments" IconCssClass="pub-icon pub-icon-color" BeginGroup="true">
                     <Items>

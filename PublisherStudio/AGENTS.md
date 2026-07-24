@@ -114,3 +114,22 @@ Open specifications do not automatically permit adding an implementation package
 4. Keep public behavior and serialized formats compatible unless the task explicitly changes them.
 5. Add or update architecture and behavior tests.
 6. Do not create a new architectural dialect to mirror a tutorial or library sample.
+
+## Frontend composition, Z-order and gesture modes
+
+Studio editors are modal editing surfaces inside the existing PublisherStudio frontend. They must not silently become alternative page composers.
+
+- Applying a Studio result to an existing publication object must preserve that object's `Id`, `X`, `Y`, `Width`, `Height`, `Rotation`, `ZIndex`, `GroupId`, connector endpoints, animation bindings and interaction bindings unless the user explicitly edits that property.
+- A media sequence, cutline, temporal section or frame/picture region is canonical content inside the owning media or picture element. Do not represent internal clip sections as extra publication siblings and do not consume new page Z-index values for editor overlays.
+- Selection polygons, cutlines, playheads, handles and mode hints are local editor overlays. They must live in an editor-local stacking context, use pointer events only in the explicit mode that owns them, and never mutate Mainframe layer order.
+- Every pointer-intensive Studio must expose mutually exclusive, visible mouse/touch modes. A gesture may have exactly one owner. The active mode must be visible in the ribbon/status/context UI and must reset predictably on Escape, apply, cancel and disposal.
+- Pointer capture and global listeners must be released on `pointerup`, `pointercancel`, `lostpointercapture`, browser blur, modal close and component disposal. Never add an anonymous window/document listener that cannot be removed.
+- Keyboard shortcuts must be scoped to the active Studio root, must ignore inputs, textareas, selects and editable content, and must be removed when the Studio closes.
+- Components coordinate UI state and return canonical Domain result contracts. The Mainframe applies those results to the existing/new publication element through its established orchestration; Studio Components must not directly add sibling publication elements or bypass `EditorStateService`.
+- Frontend code must not call Controllers for an in-process Interactive Server workflow when an existing reusable Service or service use case is the correct boundary.
+- Every persisted visual edit must be covered in Mainframe preview, print/PDF, raster/SVG export, interactive HTML and standalone HTML where that media type is supported. A Studio-only preview is not a completed feature.
+- Temporal and spatial edits are different contracts. Audio owns time only. Video may own time plus normalized frame-space polygons. Picture Studio may own document-space polygons. Never copy a two-dimensional mode into Audio or store pixel coordinates where normalized/source-independent coordinates are required.
+- Studio insertion or replacement returns canonical content to the existing Mainframe command. Do not recreate an existing publication element to apply edited media, and do not bypass its established insertion placement or selection workflow.
+- When a persisted media sequence changes, release removed segment assets and register the surviving/current segments. Never reuse a preview asset under a canonical media identifier unless its source and MIME type are the same canonical segment.
+
+Before changing frontend composition or pointer ownership, inspect page Z-order normalization, selection ownership, connector geometry, preview/export projection and disposal paths. Add executable contract checks for new gesture modes and serialized fields.

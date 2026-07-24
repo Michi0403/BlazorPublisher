@@ -67,6 +67,7 @@ public partial class PictureEditor
 
     private bool HasSelection => State.SelectedLayer is not null;
     private bool CanDelete => State.SelectedLayer is { Locked: false };
+    private bool HasLayerClip => State.SelectedLayer is { ClipPolygon.Count: >= 3 };
     private bool IsRenderSelected => State.SelectedLayer is RenderPictureLayer;
     private bool IsRasterSelected => State.SelectedLayer is RasterPictureLayer;
     private bool IsPaintSelected => State.SelectedLayer is PaintPictureLayer;
@@ -89,6 +90,7 @@ public partial class PictureEditor
     private string EllipseSelectToolText => ToolText(PictureDrawTool.EllipseSelect, "Ellipse select");
     private string FreeSelectToolText => ToolText(PictureDrawTool.FreeSelect, "Freehand select");
     private string MagneticSelectToolText => ToolText(PictureDrawTool.MagneticSelect, "Magnetic select");
+    private string PolygonSelectToolText => ToolText(PictureDrawTool.PolygonSelect, "Polygon select");
     private string FillSolidToolText => ToolText(PictureDrawTool.FillSolid, "Solid fill");
     private string FillGradientToolText => ToolText(PictureDrawTool.FillGradient, "Gradient fill");
     private double BrushWidthSliderValue => WidthToSlider(_drawWidth);
@@ -105,6 +107,7 @@ public partial class PictureEditor
         PictureDrawTool.EllipseSelect => "Drag an elliptical area selection. Use a fill tool to turn it into an editable layer.",
         PictureDrawTool.FreeSelect => "Draw a freehand lasso around the area you want to fill.",
         PictureDrawTool.MagneticSelect => "Draw a lasso that snaps to nearby layer edges and corners.",
+        PictureDrawTool.PolygonSelect => "Click/tap vertices in any angle. Double-click or press Enter to close the polygon, then keep, cut, copy, or fill that region.",
         PictureDrawTool.FillSolid => "Click to fill the current area selection, or drag a new rectangular filled area.",
         PictureDrawTool.FillGradient => "Click to gradient-fill the current area selection, or drag a new rectangular gradient area.",
         PictureDrawTool.Spray => "Spray paint scatters soft droplets around the pointer path for airbrush-like shading.",
@@ -303,16 +306,20 @@ public partial class PictureEditor
     }
 
     [JSInvokable]
-    public void PictureShortcutRequested(string command)
+    public async Task PictureShortcutRequested(string command)
     {
         switch (command?.Trim().ToLowerInvariant())
         {
             case "undo": State.Undo(); break;
             case "redo": State.Redo(); break;
-            case "copy": State.CopySelected(); break;
+            case "copy":
+                if (!await CopyAreaSelectionToClipboardAsync()) State.CopySelected();
+                break;
             case "paste": State.Paste(); break;
             case "duplicate": State.DuplicateSelected(); break;
-            case "delete": State.DeleteSelected(); break;
+            case "delete":
+                if (!await ApplyAreaClipAsync(inverted: true, quietWhenMissing: true)) State.DeleteSelected();
+                break;
             case "front": State.BringSelectedToFront(); break;
             case "back": State.SendSelectedToBack(); break;
             case "select": SetDrawTool(PictureDrawTool.Select); break;
@@ -593,6 +600,7 @@ public partial class PictureEditor
         var sourceDocument = _pictureExportSourceDocument ?? State.CloneDocument();
         var name = string.IsNullOrWhiteSpace(_pictureExportName) ? State.Document.Name : _pictureExportName!;
         ResetPictureExport();
+        await DisposePictureRuntimeAsync();
         await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, sourceDocument, name)));
     }
 
@@ -646,6 +654,7 @@ public partial class PictureEditor
     private async Task Cancel()
     {
         await CancelPictureInteractionAsync();
+        await DisposePictureRuntimeAsync();
         await Cancelled.InvokeAsync();
     }
 
@@ -666,12 +675,138 @@ public partial class PictureEditor
     private void EllipseSelectTool() => SetDrawTool(PictureDrawTool.EllipseSelect);
     private void FreeSelectTool() => SetDrawTool(PictureDrawTool.FreeSelect);
     private void MagneticSelectTool() => SetDrawTool(PictureDrawTool.MagneticSelect);
+    private void PolygonSelectTool() => SetDrawTool(PictureDrawTool.PolygonSelect);
     private void FillSolidTool() => SetDrawTool(PictureDrawTool.FillSolid);
     private void FillGradientTool() => SetDrawTool(PictureDrawTool.FillGradient);
     private async Task ClearAreaSelection()
     {
         if (_module is not null) await _module.InvokeVoidAsync("clearPictureStudioAreaSelection", CanvasId);
         _renderRequested = true;
+    }
+
+    private async Task<PictureAreaSelection?> ReadAreaSelectionAsync()
+    {
+        if (_module is null || State.SelectedLayer is null) return null;
+        try
+        {
+            return await _module.InvokeAsync<PictureAreaSelection?>("getPictureStudioAreaSelection", CanvasId);
+        }
+        catch (JSDisconnectedException) { return null; }
+        catch (TaskCanceledException) { return null; }
+        catch (JSException) { return null; }
+    }
+
+    private static List<PicturePoint> SelectionPolygon(PictureAreaSelection selection)
+    {
+        var points = selection.Points
+            .Where(point => double.IsFinite(point.X) && double.IsFinite(point.Y))
+            .Take(2048)
+            .Select(point => new PicturePoint { X = point.X, Y = point.Y })
+            .ToList();
+        if (points.Count < 2) return [];
+
+        var kind = selection.Kind?.Trim().ToLowerInvariant();
+        if (kind == "rectangle")
+        {
+            var first = points[0];
+            var last = points[^1];
+            var left = Math.Min(first.X, last.X);
+            var top = Math.Min(first.Y, last.Y);
+            var right = Math.Max(first.X, last.X);
+            var bottom = Math.Max(first.Y, last.Y);
+            return
+            [
+                new PicturePoint { X = left, Y = top },
+                new PicturePoint { X = right, Y = top },
+                new PicturePoint { X = right, Y = bottom },
+                new PicturePoint { X = left, Y = bottom }
+            ];
+        }
+
+        if (kind == "ellipse")
+        {
+            var first = points[0];
+            var last = points[^1];
+            var centerX = (first.X + last.X) / 2;
+            var centerY = (first.Y + last.Y) / 2;
+            var radiusX = Math.Abs(last.X - first.X) / 2;
+            var radiusY = Math.Abs(last.Y - first.Y) / 2;
+            if (radiusX < .5 || radiusY < .5) return [];
+            return Enumerable.Range(0, 48)
+                .Select(index => index * Math.PI * 2 / 48)
+                .Select(angle => new PicturePoint
+                {
+                    X = centerX + Math.Cos(angle) * radiusX,
+                    Y = centerY + Math.Sin(angle) * radiusY
+                })
+                .ToList();
+        }
+
+        while (points.Count > 1 && Distance(points[0], points[^1]) < .25) points.RemoveAt(points.Count - 1);
+        return points.Count >= 3 ? points : [];
+    }
+
+    private async Task<bool> ApplyAreaClipAsync(bool inverted, bool quietWhenMissing = false)
+    {
+        var selection = await ReadAreaSelectionAsync();
+        var polygon = selection is null ? [] : SelectionPolygon(selection);
+        if (polygon.Count < 3)
+        {
+            if (!quietWhenMissing) _notice = "Create an area selection first. Polygon select accepts any number of angled lines.";
+            return false;
+        }
+        if (!State.ApplySelectedClip(polygon, inverted))
+        {
+            if (!quietWhenMissing) _notice = "Select an unlocked layer before applying the area cut.";
+            return false;
+        }
+        _notice = inverted ? "The selected area was cut from the layer non-destructively." : "The layer now keeps only the selected area.";
+        await ClearAreaSelection();
+        SetDrawTool(PictureDrawTool.Select);
+        return true;
+    }
+
+    private Task KeepSelectedArea() => ApplyAreaClipAsync(inverted: false);
+    private Task CutSelectedArea() => ApplyAreaClipAsync(inverted: true);
+
+    private async Task<bool> CopyAreaSelectionToClipboardAsync()
+    {
+        var selection = await ReadAreaSelectionAsync();
+        var polygon = selection is null ? [] : SelectionPolygon(selection);
+        if (polygon.Count < 3 || !State.CopySelectedRegion(polygon)) return false;
+        _notice = "Selected picture region copied. Paste inserts it as an independently editable clipped layer.";
+        return true;
+    }
+
+    private async Task CopySelectedArea()
+    {
+        if (!await CopyAreaSelectionToClipboardAsync())
+            _notice = "Create an area selection on a layer before copying a region.";
+    }
+
+    private async Task CopySelectedAreaAsLayer()
+    {
+        if (!await CopyAreaSelectionToClipboardAsync())
+        {
+            _notice = "Create an area selection on a layer before copying a region.";
+            return;
+        }
+        State.Paste();
+        await ClearAreaSelection();
+        SetDrawTool(PictureDrawTool.Select);
+        _notice = "The selected region was inserted as a new clipped layer.";
+    }
+
+    private void ClearLayerCut()
+    {
+        if (State.ClearSelectedClip()) _notice = "The layer cut was cleared.";
+    }
+
+    private static double Distance(PicturePoint first, PicturePoint second)
+    {
+        var x = first.X - second.X;
+        var y = first.Y - second.Y;
+        return Math.Sqrt(x * x + y * y);
     }
     private void SetDrawTool(PictureDrawTool tool)
     {
@@ -691,6 +826,22 @@ public partial class PictureEditor
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
         catch (JSException) { }
+    }
+
+    private async Task DisposePictureRuntimeAsync()
+    {
+        if (_module is null || !_initialized) return;
+        try
+        {
+            await _module.InvokeVoidAsync("disposePictureStudio", CanvasId);
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (JSException) { }
+        finally
+        {
+            _initialized = false;
+        }
     }
     private string ToolText(PictureDrawTool tool, string text) => _drawTool == tool ? $"✓ {text}" : text;
     private bool IsDrawWidth(double value) => Math.Abs(_drawWidth - value) < .001;
@@ -1202,10 +1353,17 @@ public partial class PictureEditor
         _self?.Dispose();
         try
         {
+            await DisposePictureRuntimeAsync();
             if (_module is not null) await _module.DisposeAsync();
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
+    }
+
+    private sealed class PictureAreaSelection
+    {
+        public string Kind { get; set; } = "polygon";
+        public List<PicturePoint> Points { get; set; } = [];
     }
 
     private sealed class PictureImageSize

@@ -1,0 +1,34 @@
+PublisherStudio v1.0.68 validation results
+
+PASS: 17 Node contract suites, including media gesture, SVG clip/export, architecture, shared-contract and compilation-safety contracts.
+PASS: 31 non-vendor JavaScript and module files passed node --check.
+PASS: 9 JSON files parsed successfully.
+PASS: 4 XML/project/fixture files parsed successfully.
+PASS: 81 C# files passed string/comment-aware lexical delimiter checks.
+PASS: 25 Razor @code/@functions blocks across 31 Razor files passed structural checks.
+PASS: No merge-conflict markers were found in source text.
+PASS: Application/installer/npm/runtime versions align at 1.0.68.
+PASS: Publication format aligns at 1.49; Picture Studio format aligns at 1.4.
+PASS: The 4 existing NuGet references and all npm dependency maps are unchanged from v1.0.67.
+PASS: Targeted source assertions cover ribbon cutline commands, video-only spatial mode, empty-sequence safety, SVG normal/inverted clipping, stale-segment release and canonical segment registration.
+PASS: No .vs, .cr, node_modules, bin or obj directory is present in the source tree.
+
+Functional contract highlights
+
+- Timeline pointer/touch input places the playhead, selects the owning segment and seeks the source.
+- Cutline split/merge, section copy/paste/delete and replacement media insertion stay inside one publication media element.
+- Video frame polygons are normalized and Picture Studio clips support arbitrary polygon angles; Audio Studio has no spatial mode.
+- Picture raster and SVG exports use the same layer clipping contract, including inverted even-odd clipping.
+- Mainframe application preserves the existing element and its Z-order/group/connector/animation/interaction orchestration.
+- Keyboard and document/window listeners are scoped and disposed by the owning Studio.
+
+Unavailable validation
+
+A full dotnet/Razor/DevExpress build was not run because this environment has no .NET SDK and no licensed DevExpress package feed. The Node, parser and lexical checks above are static/contract validation and are not represented as a successful .NET compilation.
+
+Archive validation
+
+PASS: The final source archive contains 453 files.
+PASS: unzip CRC validation completed without errors.
+PASS: Extracted archive content matched the source tree byte-for-byte.
+PASS: SHA-256 and SHA-512 checksum verification was generated for the final deliverables.

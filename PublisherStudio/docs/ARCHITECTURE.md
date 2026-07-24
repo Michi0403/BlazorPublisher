@@ -100,7 +100,7 @@ The web project now references `DevExpress.AspNetCore.Spreadsheet` and copies it
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.36`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.49`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
 
 ## Reference and license boundary
 
@@ -162,3 +162,10 @@ Version 1.0.40 extends this contract with `dxMap`/`dxVectorMap`, serialized geog
 The runtime resolves endpoint gestures and action targets locally. Object IDs select publication wrappers, while optional selectors descend into generated HTML, spreadsheet cells, DevExtreme SVG/canvas wrappers, or user-authored component markup. Motion targeting defaults to the inner `[data-content-fit-source]` of content-viewported objects so map and spreadsheet pans/zooms do not move the outer layout box.
 
 Picture Studio format `1.2` adds open/smoothed `Path` layers. SVG export serializes text, fills, shapes, and paths as vector markup. Layers whose canvas rendering is intentionally procedural or pixel-based are rasterized individually and embedded as data URLs, preserving standalone portability and layer order without flattening the entire SVG into one bitmap.
+
+
+## Studio gesture and Z-order ownership (v1.0.68)
+
+Video Studio and Audio Studio store editable temporal sections as `PublicationMediaSegment` values inside one publication media element. Picture Studio stores area clips inside the selected picture layer. Video frame regions use normalized coordinates; picture regions use document coordinates. These internal edits never create publication siblings or participate in page Z-order.
+
+Studio Components own transient mouse/touch modes and overlays, while `MediaTimelineEditService` and the existing Picture Services own deterministic mutations. The Mainframe remains responsible for applying a Studio result to an existing or newly inserted publication element without changing placement, Z-index, groups, connectors, animation or interaction state. See `docs/architecture/media-gesture-editing.md` and ADR-009.

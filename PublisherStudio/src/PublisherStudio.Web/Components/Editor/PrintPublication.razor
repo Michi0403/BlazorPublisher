@@ -83,8 +83,15 @@
                                 break;
                             case VideoElement video:
                                 <div class="publication-video-frame" style="background:@video.Background">
-                                    <video src="@MediaSource(video)" poster="@video.PosterDataUrl" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
-                                           preload="metadata" playsinline data-media-control style="object-fit:@VideoFit(video.FitMode)"></video>
+                                    <video src="@MediaSource(video)" poster="@MediaPoster(video)" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
+                                           preload="metadata" playsinline data-media-control style="@VideoMediaStyle(video)">
+                                        @foreach (var segment in video.EffectiveSegments)
+                                        {
+                                            <source data-media-segment src="@MediaSegmentSource(segment)" type="@segment.MimeType"
+                                                    data-media-name="@segment.Name" data-media-trim-start="@Inv(segment.TrimStartSeconds)"
+                                                    data-media-trim-end="@Inv(segment.EffectiveTrimEndSeconds)" data-media-poster="@segment.PosterDataUrl" />
+                                        }
+                                    </video>
                                     <span class="media-object-badge">▶ @Time(video.TimelineLengthSeconds)</span>
                                 </div>
                                 break;
@@ -103,7 +110,14 @@
                                             </div>
                                         }
                                     }
-                                    <audio src="@MediaSource(audio)" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control></audio>
+                                    <audio src="@MediaSource(audio)" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata" data-media-control>
+                                        @foreach (var segment in audio.EffectiveSegments)
+                                        {
+                                            <source data-media-segment src="@MediaSegmentSource(segment)" type="@segment.MimeType"
+                                                    data-media-name="@segment.Name" data-media-trim-start="@Inv(segment.TrimStartSeconds)"
+                                                    data-media-trim-end="@Inv(segment.EffectiveTrimEndSeconds)" />
+                                        }
+                                    </audio>
                                 </div>
                                 break;
                             case ShapeElement shape:
@@ -329,6 +343,19 @@
     };
     private static string Mm(double value) => $"{Inv(value)}mm";
     private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
+    private string MediaSegmentSource(PublicationMediaSegment segment) => MediaAssets.GetOrRegister(segment);
+    private static string MediaPoster(VideoElement video) => video.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster
+        ? poster
+        : video.PosterDataUrl;
+    private static string VideoMediaStyle(VideoElement video)
+    {
+        var clip = video.FrameClipPolygon is { Count: >= 3 }
+            ? $";clip-path:{FrameClipPath(video.FrameClipPolygon)}"
+            : string.Empty;
+        return $"object-fit:{VideoFit(video.FitMode)}{clip}";
+    }
+    private static string FrameClipPath(IEnumerable<MediaFramePoint> points) =>
+        $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string NullableInv(double? value) => value is { } actual ? Inv(actual) : string.Empty;
 

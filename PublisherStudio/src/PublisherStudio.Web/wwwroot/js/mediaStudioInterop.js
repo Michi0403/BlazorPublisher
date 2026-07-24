@@ -32,7 +32,9 @@ function stateFor(id) {
             retainedRecordingUrl: '',
             retainedRecordingKind: '',
             retainedRecordingMimeType: '',
-            retainedRecordingFileName: ''
+            retainedRecordingFileName: '',
+            keyboardHandler: null,
+            rootId: ''
         };
         studioStates.set(id, state);
     }
@@ -83,13 +85,34 @@ export function clickElement(id) {
     element.click();
 }
 
-export function initializeMediaStudio(id, dotnet, sessionId) {
+export function initializeMediaStudio(id, dotnet, sessionId, rootId = "") {
     const state = stateFor(id);
     const nextSessionId = String(sessionId || '');
     if (state.sessionId && state.sessionId !== nextSessionId) releaseRetainedRecording(state);
     state.sessionId = nextSessionId;
     state.dotnet = dotnet;
     state.discardRecording = false;
+    state.rootId = String(rootId || "");
+    if (state.keyboardHandler) document.removeEventListener("keydown", state.keyboardHandler, true);
+    state.keyboardHandler = event => {
+        const root = document.getElementById(state.rootId);
+        if (!root || !root.contains(event.target)) return;
+        const target = event.target;
+        if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable) return;
+        const modifier = event.ctrlKey || event.metaKey;
+        const key = String(event.key || "").toLowerCase();
+        let command = "";
+        if (modifier && key === "c") command = "copy";
+        else if (modifier && key === "v") command = "paste";
+        else if (event.key === "Delete" || event.key === "Backspace") command = "delete";
+        else if (event.key === "Enter") command = "commit";
+        else if (event.key === "Escape") command = "cancel";
+        if (!command) return;
+        event.preventDefault();
+        event.stopPropagation();
+        state.dotnet?.invokeMethodAsync("MediaStudioShortcutRequested", command).catch(() => {});
+    };
+    document.addEventListener("keydown", state.keyboardHandler, true);
 }
 
 function waitForMetadata(element) {
@@ -466,6 +489,31 @@ export function disposeMediaStudio(id) {
     try { if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop(); } catch { }
     for (const track of state.stream?.getTracks() || []) track.stop();
     if (element && state.rangeHandler) element.removeEventListener('timeupdate', state.rangeHandler);
+    if (state.keyboardHandler) document.removeEventListener("keydown", state.keyboardHandler, true);
+    state.keyboardHandler = null;
     releaseRetainedRecording(state);
     studioStates.delete(id);
+}
+
+export function horizontalRatio(elementId, clientX) {
+    const element = document.getElementById(elementId);
+    if (!element) return 0;
+    const bounds = element.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (Number(clientX) - bounds.left) / Math.max(1, bounds.width)));
+}
+
+export function normalizedPoint(elementId, clientX, clientY) {
+    const element = document.getElementById(elementId);
+    if (!element) return { x: 0, y: 0 };
+    const bounds = element.getBoundingClientRect();
+    return {
+        x: Math.max(0, Math.min(1, (Number(clientX) - bounds.left) / Math.max(1, bounds.width))),
+        y: Math.max(0, Math.min(1, (Number(clientY) - bounds.top) / Math.max(1, bounds.height)))
+    };
+}
+
+export function mediaClipPath(points) {
+    const values = Array.isArray(points) ? points : [];
+    if (values.length < 3) return '';
+    return `polygon(${values.map(point => `${Math.max(0, Math.min(1, Number(point?.x) || 0)) * 100}% ${Math.max(0, Math.min(1, Number(point?.y) || 0)) * 100}%`).join(',')})`;
 }

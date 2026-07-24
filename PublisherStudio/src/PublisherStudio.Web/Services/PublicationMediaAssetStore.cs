@@ -16,7 +16,15 @@ public sealed class PublicationMediaAssetStore
     private readonly ConcurrentDictionary<Guid, MediaAsset> _assets = new();
 
     public string GetOrRegister(PublicationMediaElement media)
-        => Register(media.Id, media.DataUrl, media.MimeType);
+    {
+        var first = media.EffectiveSegments.FirstOrDefault();
+        return first is null
+            ? Register(media.Id, media.DataUrl, media.MimeType)
+            : GetOrRegister(first);
+    }
+
+    public string GetOrRegister(PublicationMediaSegment segment)
+        => Register(segment.Id, segment.DataUrl, segment.MimeType);
 
     public string Register(Guid id, string? source, string? declaredMimeType)
     {
@@ -75,7 +83,10 @@ public sealed class PublicationMediaAssetStore
     public void RegisterDocument(PublicationDocument document)
     {
         foreach (var media in document.Pages.SelectMany(page => page.Elements).OfType<PublicationMediaElement>())
-            Register(media.Id, media.DataUrl, media.MimeType);
+        {
+            foreach (var segment in media.EffectiveSegments)
+                GetOrRegister(segment);
+        }
     }
 
     public void Remove(Guid id) => _assets.TryRemove(id, out _);

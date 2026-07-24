@@ -6,7 +6,7 @@ public sealed class PictureDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Picture";
-    public string FormatVersion { get; set; } = "1.3";
+    public string FormatVersion { get; set; } = "1.4";
     public int WidthPx { get; set; } = 1200;
     public int HeightPx { get; set; } = 800;
     public string Background { get; set; } = "transparent";
@@ -51,7 +51,7 @@ public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line, Arrow
 public enum PictureFillKind { Solid, LinearGradient, RadialGradient }
 public enum PictureRenderKind { Clouds, Noise, Stripes, Vignette, Bloom, Neon, LensFlare, GrainNoise, MotionBlur, Wind, OceanWaves }
 public enum PictureTextAlignment { Left, Center, Right }
-public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Path, Eraser, Eyedropper, RectangleSelect, EllipseSelect, FreeSelect, MagneticSelect, FillSolid, FillGradient }
+public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Path, Eraser, Eyedropper, RectangleSelect, EllipseSelect, FreeSelect, MagneticSelect, PolygonSelect, FillSolid, FillGradient }
 public enum PictureStrokeKind { Brush, Pencil, Spray, Toothbrush, Line, Eraser }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
@@ -77,6 +77,8 @@ public abstract class PictureLayer
     public bool Locked { get; set; }
     public PictureBlendMode BlendMode { get; set; }
     public string GroupPath { get; set; } = string.Empty;
+    public List<PicturePoint> ClipPolygon { get; set; } = [];
+    public bool ClipInverted { get; set; }
 
     // Non-destructive layer adjustments shared by raster, text, shape, fill, render and paint layers.
     public double Brightness { get; set; } = 1;

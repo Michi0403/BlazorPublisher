@@ -658,3 +658,15 @@ Static checks completed for the v1.0.37 source package:
 - Verify both Streaming collision sites use `using TextEncoding = global::System.Text.Encoding;`.
 - Run `tests/csharpCompilationSafety.test.mjs`; it must reject `{global::...}`-style interpolation holes and accept explicit aliases.
 - Run a real `dotnet build` on a licensed developer/build machine. Static tests remain fallback evidence and do not prove full Razor/DevExpress compilation.
+
+## v1.0.68 media-gesture and frontend-composition validation
+
+- Verify Video Studio and Audio Studio expose mutually exclusive Select section, Place playhead and Add cutline modes in the ribbon and status area; Video Studio alone exposes Frame region.
+- Verify mouse and touch timeline presses move the playhead, select the owning section and seek the selected source without creating publication elements.
+- Verify ribbon and context commands add/remove cutlines, copy/paste/delete sections and insert a compatible source into the selected range. Verify Delete, Ctrl/Cmd+C, Ctrl/Cmd+V, Enter and Escape act only while the Studio root is active and ignore editable controls.
+- Verify video frame polygons use normalized coordinates and remain stable for landscape, portrait, square and rotated publication frames. Verify Audio Studio contains no spatial-region mode.
+- Verify Picture Studio rectangle, ellipse, freehand, magnetic and polygon selections can keep, invert/cut, copy and copy-as-layer. Confirm raster rendering and SVG export preserve normal and inverted clips.
+- Edit an existing video, audio or picture element and confirm its Id, X/Y, width/height, rotation, Z-index, group, connectors, animations and interactions do not change.
+- Confirm removed media-section assets are released, every current segment is registered, and Mainframe preview/print/interactive HTML/standalone HTML play the same ordered sequence.
+- Run all Node contract suites, `node --check` for non-vendor JavaScript/test modules, JSON/XML parsing, C#/Razor structural checks, architecture/contract/compilation-safety checks, dependency comparison, ZIP CRC/extracted-content comparison, and SHA-256/SHA-512 verification.
+- Run a real `dotnet build` on a machine with .NET 10 and the licensed DevExpress feed. Static validation must be reported as static validation, not as a successful compiler build.

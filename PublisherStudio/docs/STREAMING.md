@@ -28,6 +28,8 @@ The solution therefore publishes one `PublisherStudio.Web` application executabl
 
 There is no separately launched Media Host process and no fixed secondary loopback port. The former main-host `StreamingRuntimeEndpoints` aggregation and the separate `Backend` root have been removed; application routes are normal MVC controller actions or explicit Hub entry roles, while reusable processing lives in Services and browser-facing routes retain the same application origin and paths. A Blazor circuit reconnect is still not the owner of encoder, recording, or LAN-listener lifetime; the main application process is. See `docs/architecture/streaming.md` for component and sequence diagrams.
 
+The streaming hotkey pipeline uses one shared `Domain/Streaming/MediaHostHotkeyEvent` record from native registration through session draining and editor dispatch. The in-process media-host facade returns that canonical contract directly. Same-named Service copies are prohibited; protocol/provider DTOs must be distinctly named and remain at their actual boundary.
+
 ## One authored page, output-specific Chat
 
 The browser captures one clean base publication frame while authored Chat objects are hidden from that base capture. For every required destination it then:

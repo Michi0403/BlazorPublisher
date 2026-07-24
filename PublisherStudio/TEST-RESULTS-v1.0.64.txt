@@ -1,0 +1,68 @@
+PublisherStudio v1.0.64 validation results
+==========================================
+
+Environment limitation
+----------------------
+A full dotnet restore/build was not run because this packaging environment has no .NET 10 SDK and no licensed DevExpress package feed. No claim of a successful compiled .NET/DevExpress build is made. The reported source ambiguity was traced to two declarations of MediaHostHotkeyEvent; the Service-local declaration and mapping were removed, and executable source-contract checks now enforce the single canonical declaration. Release-machine compilation remains required.
+
+Automated Node contract suites
+------------------------------
+PASS: 14 suites through `npm test`
+
+1. timelineInterop.test.mjs
+2. componentRuntime.test.mjs
+3. signalRuntime.test.mjs
+4. pointerOwnership.test.mjs
+5. mapInteractionModes.test.mjs
+6. fontIntegration.test.mjs
+7. canvasZoomScaling.test.mjs
+8. streamingRuntime.test.mjs
+9. interfaceWorkflow.test.mjs
+10. installerResilience.test.mjs
+11. publicationPersistence.test.mjs
+12. editorUsabilityRepair.test.mjs
+13. architectureContract.test.mjs
+14. csharpContractOwnership.test.mjs
+
+New shared-contract assertions include:
+- MediaHostHotkeyEvent has exactly one public/internal declaration;
+- that declaration is PublisherStudio.Domain.Streaming.MediaHostHotkeyEvent;
+- Services do not shadow a same-named Domain/Models contract;
+- namespaces imported by GlobalUsings*.cs do not expose duplicate simple type names;
+- StreamingMediaHostClient returns the canonical event list directly;
+- no Service-local MediaHostHotkeyEvent declaration or object mapping remains.
+
+Architecture contract assertions include:
+- Controllers are request-driven backend entry points and Hubs are persistent-connection entry points;
+- Services are reusable by Components, Controllers, Hubs and HostedServices;
+- no top-level Backend/Endpoints/Features/Handlers/Commands/Queries/UseCases/Infrastructure/Application root;
+- no PublisherStudio.Backend namespace/import;
+- Services do not depend on Components, Controllers, Hubs, HostedServices or MVC;
+- UseCases remain orchestration subnamespaces beneath Controllers or Services;
+- shared semantic contracts have one authoritative Domain/Models owner;
+- external DTOs are allowed only at real provider/protocol/process/serialization boundaries;
+- ADR-006 canonical shared-contract ownership is present.
+
+Syntax and structural validation
+--------------------------------
+PASS: node --check on 25 non-vendor .js/.mjs files
+PASS: JSON parsing on 6 non-vendor JSON files
+PASS: XML parsing on 15 csproj/pubxml project files
+PASS: raw-string-aware lexical delimiter/structure validation on 76 C# files
+PASS: application, installer, package lock/package JSON and runtime capability version alignment at 1.0.64
+PASS: exactly one MediaHostHotkeyEvent declaration, under Domain/Streaming
+PASS: no bin, obj, .vs, DLL or PDB build artifacts in the source tree
+PASS: publication format unchanged at 1.47
+PASS: Picture Studio format unchanged at 1.2
+
+Upgrade note
+------------
+When applying these source changes over an existing v1.0.63 working copy, run `dotnet clean` or delete the PublisherStudio.Web bin/obj folders before rebuilding. Visual Studio design-time build state can otherwise temporarily retain the removed Service-local type and continue showing a source/assembly identity error until the cache is rebuilt.
+
+Source/archive preparation
+--------------------------
+Baseline source files: 420
+Source files before adding v1.0.64 validation/change reports: 423
+Final source files in the archive: 425
+Git directory in supplied source: absent
+Final ZIP CRC, entry counts and SHA-256/SHA-512 values are recorded in the external validation/checksum files produced with the archive.

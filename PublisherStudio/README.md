@@ -335,6 +335,10 @@ See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now releas
 
 
 
+## v1.0.64 canonical shared contracts
+
+See `CHANGELOG-v1.0.64.md`, `AGENTS.md`, ADR-006 and `docs/architecture/streaming.md`. The duplicate Service-local `MediaHostHotkeyEvent` left by the v1.0.63 streaming move has been removed; all hotkey producers and consumers now use the single `Domain/Streaming` record. Repository rules and a dedicated C# contract-ownership test reject Services shadowing Domain/Models types and reject duplicate simple type names exposed through `GlobalUsings*.cs`. Streaming behavior and publication formats are unchanged. Clean `bin`/`obj` in an existing v1.0.63 checkout before rebuilding so Visual Studio drops the removed design-time type.
+
 ## v1.0.63 shared Services and explicit Hub roots
 
 See `CHANGELOG-v1.0.63.md`, `AGENTS.md`, and `docs/architecture/streaming.md`. The duplicate `Backend` root has been removed. Controllers are the normal request-driven start of the backend, persistent Chat/WebRTC entry roles are under `Hubs`, and reusable FFmpeg, capture, provider, LAN, metadata, hotkey and session work is under `Services/Streaming`. Components, Controllers, Hubs and HostedServices can reuse those Services directly. Global hotkeys are now a reusable Service with a thin HostedService lifecycle adapter, and architecture tests reject a returning `Backend` root or Services depending back on UI/entry/lifecycle roots. All streaming routes and runtime behavior remain compatible.

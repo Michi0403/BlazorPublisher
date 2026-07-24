@@ -1,9 +1,9 @@
-# PublisherStudio v1.0.63 release
+# PublisherStudio v1.0.64 release
 
-See `CHANGELOG-v1.0.63.md`, `AGENTS.md`, `docs/architecture/system-overview.md`, `docs/architecture/streaming.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.64.md`, `AGENTS.md`, `docs/architecture/system-overview.md`, `docs/architecture/streaming.md`, ADR-006 and `VALIDATION.md`.
 
-This release corrects the repository architecture contract and streaming placement without changing the public streaming route or publication formats. Controllers are request-driven backend entry points, `Hubs` owns persistent platform-Chat and WebRTC connection entry roles, and reusable processing/technical I/O is organized beneath `Services`. The separate `Backend` root no longer exists.
+This release removes the duplicate `MediaHostHotkeyEvent` left by the v1.0.63 streaming reorganization. The global-hotkey service, session registry, streaming use cases, in-process media-host facade and editor now share the single canonical record declared under `Domain/Streaming`. The facade no longer creates a same-named Service-local copy, resolving the reported CS0104 ambiguities and the related source/assembly CS1503 conversion failure.
 
-FFmpeg orchestration, native capture, provider Chat adapters, LAN/HLS/RTSP/WebRTC state, metadata parsing, hotkeys and media sessions now live under structured `Services/Streaming` subnamespaces. `GlobalHotkeyService` is reusable from Controllers, Components, Hubs and other services; `GlobalHotkeyHostedService` only owns application startup/shutdown. The repository instructions and architecture tests enforce the same direction for future human and AI changes.
+The repository contract now explicitly requires one authoritative owner for every shared semantic contract. Services may not shadow Domain/Models types. Separate DTOs are reserved for real provider, protocol, serialization or process boundaries and must be distinctly named and mapped once. A new executable Node suite scans C# declarations, Domain/Models-to-Services shadowing and the combined symbol scope created by `GlobalUsings*.cs`.
 
-Application and installer version `1.0.63`; publication format `1.47`; picture format `1.2`. There is no separate Media Host executable or release payload.
+Application and installer version `1.0.64`; publication format `1.47`; picture format `1.2`. Streaming routes and runtime behavior are unchanged. Source archives contain no build output; clean an existing v1.0.63 checkout before rebuilding so Visual Studio discards any design-time assembly containing the removed duplicate type.

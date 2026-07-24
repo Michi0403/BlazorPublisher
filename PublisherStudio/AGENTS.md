@@ -30,6 +30,14 @@ Services must not depend on Components, Controllers, Hubs or HostedServices. Kee
 
 If logic is useful from more than one caller, it belongs in Services rather than being copied into a Controller, Hub, HostedService or Component.
 
+## Contract and type ownership
+
+Every semantic contract has exactly one authoritative declaration. Shared request, event, state and result types used across Components, Controllers, Hubs, Services or HostedServices belong to the existing `Domain` or `Models` owner and must be reused directly. Do not redeclare a same-named Service-local copy of a Domain/Models type.
+
+A separate transport DTO is allowed only at a real serialization, process or provider boundary. Name it according to that boundary (`Request`, `Response`, `Dto`, `Message` or provider-specific name), map it once at the boundary, and do not leak it through the in-process service graph. An in-process facade is not a reason to clone a shared contract.
+
+`GlobalUsings*.cs` creates one project-wide symbol scope. Before adding or moving a public/internal type into a globally imported namespace, search all type declarations for the same simple name. The architecture tests must remain free of Domain/Models-to-Services shadow types and global-using name collisions. When moving a contract, remove the old declaration in the same change and update all consumers; do not leave compatibility duplicates behind.
+
 ## Use-case orchestration
 
 Large controller or service areas may use a `UseCases` subnamespace beneath the existing owning root. This is the approved way to stop controllers and services becoming monolithic.

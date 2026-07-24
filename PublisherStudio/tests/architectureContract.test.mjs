@@ -28,6 +28,9 @@ assert.match(agents, /data processing.*technical I\/O/is);
 assert.match(agents, /UseCases.*subnamespace/s);
 assert.match(agents, /Do not introduce competing top-level application patterns/);
 assert.match(agents, /Monolith first/);
+assert.match(agents, /Every semantic contract has exactly one authoritative declaration/);
+assert.match(agents, /Do not redeclare a same-named Service-local copy/);
+assert.match(agents, /GlobalUsings\*\.cs.*project-wide symbol scope/s);
 assert.doesNotMatch(agents, /`Backend` for/);
 assert.match(overview, /C\[Controllers: backend request entry\]/);
 assert.match(overview, /HB\[Hubs: persistent connection entry\]/);
@@ -43,7 +46,8 @@ for (const decision of [
   'ADR-002-controller-and-hub-entry-points.md',
   'ADR-003-usecase-subnamespaces.md',
   'ADR-004-native-and-interchange-formats.md',
-  'ADR-005-services-own-reusable-processing-and-io.md'
+  'ADR-005-services-own-reusable-processing-and-io.md',
+  'ADR-006-canonical-shared-contract-ownership.md'
 ]) assert.ok(fs.existsSync(path.join(root, 'docs', 'decisions', decision)), `${decision} is missing.`);
 
 for (const directory of ['Components', 'Controllers', 'Hubs', 'HostedServices', 'Services'])

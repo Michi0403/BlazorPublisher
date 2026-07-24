@@ -6,6 +6,8 @@ The enforceable contributor rules are stored at the source root in [`AGENTS.md`]
 
 `UseCases` is allowed only as orchestration beneath an existing Controller or Service area such as `Controllers/Streaming/UseCases` or `Services/Streaming/UseCases`. Controllers are request-driven backend entry points and Hubs are persistent-connection entry points. Reusable processing, persistence and technical I/O—including FFmpeg, providers, devices, networks and operating-system APIs—belongs to `Services`. HostedServices are thin scheduling/lifecycle adapters around Services. There is no separate `Backend` architectural root.
 
+Shared contracts have one owner. Cross-root events, requests, state and results are declared once under the established `Domain` or `Models` area and are consumed directly by Components, Controllers, Hubs, Services and HostedServices. Same-named Service copies are forbidden. A distinct DTO is only justified by a real external serialization/process/provider boundary and must be explicitly named and mapped at that boundary. Global using files are treated as a shared symbol scope and are protected by collision tests.
+
 ## Stable boundaries
 
 - **PublisherStudio.Web** remains the ASP.NET Core loopback host and Interactive Blazor Server application. It owns DevExpress integration, publication state, browser interop, controllers, and exports.

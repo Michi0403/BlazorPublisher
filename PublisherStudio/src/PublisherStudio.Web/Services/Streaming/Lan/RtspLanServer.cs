@@ -110,7 +110,7 @@ public sealed class RtspLanServer : IAsyncDisposable
                         [
                             "Content-Type: application/sdp",
                             $"Content-Base: {RequestBase(request.Uri)}/",
-                            $"Content-Length: {Encoding.ASCII.GetByteCount(sdp)}"
+                            $"Content-Length: {System.Text.Encoding.ASCII.GetByteCount(sdp)}"
                         ], sdp), linked.Token);
                         break;
                     }
@@ -177,8 +177,8 @@ public sealed class RtspLanServer : IAsyncDisposable
         var token = query.Select(part => part.Split('=', 2))
             .FirstOrDefault(part => part.Length > 0 && part[0].Equals("token", StringComparison.OrdinalIgnoreCase));
         var supplied = token is { Length: > 1 } ? Uri.UnescapeDataString(token[1]) : string.Empty;
-        var expectedBytes = Encoding.UTF8.GetBytes(_accessToken);
-        var suppliedBytes = Encoding.UTF8.GetBytes(supplied);
+        var expectedBytes = System.Text.Encoding.UTF8.GetBytes(_accessToken);
+        var suppliedBytes = System.Text.Encoding.UTF8.GetBytes(supplied);
         return suppliedBytes.Length == expectedBytes.Length && CryptographicOperations.FixedTimeEquals(suppliedBytes, expectedBytes);
     }
 
@@ -203,7 +203,7 @@ public sealed class RtspLanServer : IAsyncDisposable
             var count = buffer.Count;
             if (count >= 4 && buffer[count - 4] == 13 && buffer[count - 3] == 10 && buffer[count - 2] == 13 && buffer[count - 1] == 10) break;
         }
-        var text = Encoding.ASCII.GetString(buffer.ToArray());
+        var text = System.Text.Encoding.ASCII.GetString(buffer.ToArray());
         var lines = text.Split("\r\n", StringSplitOptions.None);
         var first = lines[0].Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
         if (first.Length < 2) return null;
@@ -223,7 +223,7 @@ public sealed class RtspLanServer : IAsyncDisposable
         var builder = new StringBuilder($"RTSP/1.0 {status} {reason}\r\nCSeq: {cseq}\r\nServer: PublisherStudio\r\n");
         if (headers is not null) foreach (var header in headers) builder.Append(header).Append("\r\n");
         builder.Append("\r\n").Append(body);
-        return Encoding.ASCII.GetBytes(builder.ToString());
+        return System.Text.Encoding.ASCII.GetBytes(builder.ToString());
     }
 
     public async ValueTask DisposeAsync()

@@ -593,12 +593,12 @@ Static checks completed for the v1.0.37 source package:
 - A real `dotnet restore`/`build` and browser pointer smoke test remain unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
 
 
-## v1.0.62 targeted validation
+## v1.0.62 historical validation (superseded)
 
 - Confirm the source root contains `AGENTS.md`, the system/streaming/interchange architecture documents and ADR-001 through ADR-004.
 - Confirm no `Services/StreamingRuntime` folder, `StreamingRuntimeEndpoints.cs`, main-host `MapGet`/`MapPost`/`MapPut`/`MapDelete` calls or top-level `Endpoints`, `Features`, `Handlers`, `Commands`, `Queries`, `UseCases`, `Infrastructure` or `Application` folder exists.
 - Confirm all established `/api/mediahost`, `/stream`, `/watch`, native-capture, Chat, ingest and WebRTC route fragments are present in MVC controllers under `Controllers/Streaming/UseCases`.
-- Confirm orchestration is registered under `Services/Streaming/UseCases`, technical media/provider code is under `Backend/Streaming`, and global hotkey/Twitch maintenance loops are under `HostedServices/Streaming`.
+- Historical note: v1.0.62 temporarily placed technical media/provider code under `Backend/Streaming`. That placement is invalid from v1.0.63 onward; current code belongs under `Services/Streaming`, persistent entry roles under `Hubs/Streaming`, and lifecycle adapters under `HostedServices/Streaming`.
 - Confirm `StreamingMediaHostClient` delegates device discovery and session lifecycle to use-case services rather than directly depending on `NativeDeviceDiscovery` or `MediaSessionRegistry`.
 - Run all 13 Node contract suites, syntax-check non-vendor JavaScript modules, parse project JSON/XML, verify C# structural balance, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
 - A full .NET/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.
@@ -613,3 +613,15 @@ Static checks completed for the v1.0.37 source package:
 - Confirm all established `/api/mediahost`, `/stream`, `/watch`, Chat, ingest, WebRTC, recording and native-capture route fragments remain present.
 - Run all Node contract suites, syntax-check non-vendor JavaScript/test modules, parse JSON and project XML, verify C# structural balance, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
 - A full .NET/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.
+
+## v1.0.64 targeted validation
+
+- Confirm `MediaHostHotkeyEvent` is declared exactly once under `Domain/Streaming` and is absent from `Services/Streaming/MediaHost`.
+- Confirm `StreamingMediaHostClient.ReadEventsAsync` returns the canonical Domain event list directly and performs no identical in-process DTO mapping.
+- Confirm the global-hotkey service, session registry, session use cases, editor session service and editor resolve the same canonical type.
+- Confirm `AGENTS.md`, system/streaming architecture documents and ADR-006 define one authoritative owner for shared contracts and allow distinct DTOs only at real external boundaries.
+- Run the dedicated C# contract-ownership suite; it must reject Domain/Models-to-Services shadow types and duplicate simple names visible through `GlobalUsings*.cs`.
+- Run all 14 Node contract suites, syntax-check non-vendor JavaScript/test modules, parse JSON and project XML, verify C# structural balance, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
+- In an upgraded local checkout, remove `bin` and `obj` or run `dotnet clean` before rebuilding so Visual Studio cannot retain the removed v1.0.63 type in a design-time assembly.
+- A full .NET/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.
+

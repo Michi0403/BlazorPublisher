@@ -26,4 +26,10 @@ The diagram expresses responsibility and dependency, not a requirement that ever
 
 There is deliberately no separate `Backend` folder or namespace. Technical backend work belongs to the appropriate reusable Service subnamespace.
 
+## Shared contract ownership
+
+A request, event, state or result that crosses architectural roots has one authoritative declaration under the existing `Domain` or `Models` owner. Components, Controllers, Hubs, Services and HostedServices consume that same type. Service facades do not create same-named copies of shared contracts merely to reshape an in-process call.
+
+Provider-, protocol- or process-specific DTOs are boundary types and must have explicit boundary names. They are mapped once to the canonical contract and remain local to the adapter. Project-wide `GlobalUsings*.cs` files are treated as a single symbol scope; automated checks reject collisions between types visible through those imports and reject Services shadowing Domain/Models contracts.
+
 The enforceable repository contract is in [`AGENTS.md`](../../AGENTS.md). Architecture decisions are recorded in `docs/decisions`.

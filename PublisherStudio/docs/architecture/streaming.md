@@ -33,6 +33,8 @@ Controllers and Hubs own transport negotiation and connection lifecycle. Shared 
 
 Hosted services are lifecycle adapters. `GlobalHotkeyHostedService` starts and stops the reusable `GlobalHotkeyService`; `TwitchOAuthMaintenanceService` schedules validation through the reusable OAuth/profile Services. Services do not depend on HostedServices, Controllers, Hubs or Components.
 
+`MediaHostHotkeyEvent` is the single canonical hotkey event contract under `Domain/Streaming`. The global-hotkey service, session registry, use cases, in-process media-host facade and editor consume that same record. The facade must not introduce a second Service-local event type; there is no serialization boundary between those in-process callers. Provider or protocol payloads may use explicitly named DTOs only at their real boundary and must map to the canonical contract once.
+
 ## Start session
 
 ```mermaid

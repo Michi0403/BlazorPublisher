@@ -130,18 +130,8 @@ public sealed class StreamingMediaHostClient(
     public Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sessions.SetRecording(sessionId, enabled));
 
-    public Task<List<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default)
-    {
-        var events = _sessions.DrainEvents(sessionId)
-            .Select(item => new MediaHostHotkeyEvent
-            {
-                Command = item.Command,
-                TargetId = item.TargetId,
-                TriggeredUtc = item.TriggeredUtc
-            })
-            .ToList();
-        return Task.FromResult(events);
-    }
+    public Task<IReadOnlyList<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_sessions.DrainEvents(sessionId));
 }
 
 public sealed class MediaHostStartSessionRequest
@@ -191,10 +181,3 @@ public sealed class MediaHostSessionResponse
     public string Status { get; set; } = string.Empty;
 }
 
-
-public sealed class MediaHostHotkeyEvent
-{
-    public string Command { get; set; } = string.Empty;
-    public Guid? TargetId { get; set; }
-    public DateTimeOffset TriggeredUtc { get; set; }
-}

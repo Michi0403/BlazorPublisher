@@ -602,3 +602,14 @@ Static checks completed for the v1.0.37 source package:
 - Confirm `StreamingMediaHostClient` delegates device discovery and session lifecycle to use-case services rather than directly depending on `NativeDeviceDiscovery` or `MediaSessionRegistry`.
 - Run all 13 Node contract suites, syntax-check non-vendor JavaScript modules, parse project JSON/XML, verify C# structural balance, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
 - A full .NET/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.
+
+## v1.0.63 targeted validation
+
+- Confirm `src/PublisherStudio.Web/Backend` no longer exists and no C# file declares or imports a `PublisherStudio.Backend` namespace.
+- Confirm main HTTP/WebSocket request routes remain under `Controllers/Streaming/UseCases` and persistent platform-Chat/WebRTC entry roles exist under `Hubs/Streaming`.
+- Confirm FFmpeg, capture, provider Chat, LAN/HLS/RTSP/WebRTC state, metadata, hotkey and media-session implementation is under `Services/Streaming`.
+- Confirm `GlobalHotkeyService` is a reusable Service rather than an `IHostedService`, and `GlobalHotkeyHostedService` is the thin application-lifetime adapter.
+- Confirm Services do not depend on Components, Controllers, Hubs, HostedServices or MVC.
+- Confirm all established `/api/mediahost`, `/stream`, `/watch`, Chat, ingest, WebRTC, recording and native-capture route fragments remain present.
+- Run all Node contract suites, syntax-check non-vendor JavaScript/test modules, parse JSON and project XML, verify C# structural balance, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
+- A full .NET/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.

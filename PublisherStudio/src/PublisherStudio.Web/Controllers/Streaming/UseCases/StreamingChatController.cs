@@ -1,3 +1,4 @@
+using PublisherStudio.Hubs.Streaming.Chat;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,14 +6,15 @@ namespace PublisherStudio.Controllers.Streaming.UseCases;
 
 [ApiController]
 [Route("api/mediahost/sessions/{sessionId:guid}/chat")]
-public sealed class StreamingChatController(StreamingChatUseCases useCases) : ControllerBase
+public sealed class StreamingChatController(StreamingChatUseCases useCases, PlatformChatHub hub) : ControllerBase
 {
     private readonly StreamingChatUseCases _useCases = useCases;
+    private readonly PlatformChatHub _hub = hub;
 
     [HttpGet("{outputId:guid}/websocket")]
     public async Task Subscribe(Guid sessionId, Guid outputId)
     {
-        if (!HttpContext.WebSockets.IsWebSocketRequest || !_useCases.CanOpen(sessionId))
+        if (!HttpContext.WebSockets.IsWebSocketRequest || !_hub.CanOpen(sessionId))
         {
             Response.StatusCode = HttpContext.WebSockets.IsWebSocketRequest
                 ? StatusCodes.Status404NotFound
@@ -21,7 +23,7 @@ public sealed class StreamingChatController(StreamingChatUseCases useCases) : Co
         }
 
         using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        await _useCases.RunSubscriberAsync(sessionId, outputId, socket, HttpContext.RequestAborted);
+        await _hub.RunSubscriberAsync(sessionId, outputId, socket, HttpContext.RequestAborted);
         if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
             try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Chat subscription ended", CancellationToken.None); } catch { }
     }

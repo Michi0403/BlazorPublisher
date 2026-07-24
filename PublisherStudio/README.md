@@ -335,9 +335,13 @@ See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now releas
 
 
 
+## v1.0.63 shared Services and explicit Hub roots
+
+See `CHANGELOG-v1.0.63.md`, `AGENTS.md`, and `docs/architecture/streaming.md`. The duplicate `Backend` root has been removed. Controllers are the normal request-driven start of the backend, persistent Chat/WebRTC entry roles are under `Hubs`, and reusable FFmpeg, capture, provider, LAN, metadata, hotkey and session work is under `Services/Streaming`. Components, Controllers, Hubs and HostedServices can reuse those Services directly. Global hotkeys are now a reusable Service with a thin HostedService lifecycle adapter, and architecture tests reject a returning `Backend` root or Services depending back on UI/entry/lifecycle roots. All streaming routes and runtime behavior remain compatible.
+
 ## v1.0.62 architecture contract and streaming restoration
 
-See `CHANGELOG-v1.0.62.md`, `AGENTS.md`, and `docs/architecture/streaming.md`. PublisherStudio now records its accepted monolith architecture directly in the repository for human and AI contributors. `UseCases` is an orchestration subnamespace beneath Controllers or Services, never a competing top-level root. The integrated streaming runtime has been reorganized into MVC controllers, service use cases, backend implementations and hosted services; the former main-host endpoint aggregation is removed while all existing mediahost, ingest, Chat, LAN, recording and WebSocket routes remain compatible. The new interchange capability matrix keeps future OpenRaster, OpenTimelineIO, Broadcast WAV and related formats as Studio-owned adapters around the native project models.
+See `CHANGELOG-v1.0.62.md`, `AGENTS.md`, and `docs/architecture/streaming.md`. This release introduced the first repository architecture contract, `UseCases` subnamespace rule, controller-owned main routes and interchange capability matrix. Its initial separate `Backend` placement was corrected by v1.0.63; current contributors must follow the v1.0.63 `AGENTS.md` rule that reusable implementation belongs to Services and persistent connection entry roles belong to Hubs.
 
 ## v1.0.61 stable exact zoom control
 

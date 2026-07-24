@@ -17,15 +17,16 @@ The interface changes no runtime boundary: publication JSON still stores profile
 ## Runtime layers
 
 1. **PublisherStudio.Web Components** author and render the publication, request browser capture permissions, apply GPU/browser filters, mix browser sources, and create the clean master plus required output canvases.
-2. **Controllers/Streaming/UseCases** own the main-host HTTP and WebSocket transport contract for `/api/mediahost`, `/stream`, and `/watch`.
-3. **Services/Streaming/UseCases** coordinate runtime information, capture, sessions, Chat, ingest, LAN delivery and editor session control without becoming a new top-level architecture.
-4. **Backend/Streaming** owns FFmpeg encoders, native device/process capture, provider Chat, WebRTC/HLS/RTSP/LAN implementation and Now Playing metadata parsing.
-5. **HostedServices/Streaming** owns global hotkey lifetime and periodic Twitch OAuth maintenance.
-6. **Machine profiles** store reusable provider/device identities outside publication files. Stream keys and Chat OAuth tokens are protected with ASP.NET Core Data Protection; on Windows the key ring is protected with DPAPI.
+2. **Controllers/Streaming/UseCases** are the request-driven backend entry points for `/api/mediahost`, `/stream`, and `/watch`.
+3. **Hubs/Streaming** owns persistent platform-Chat and WebRTC signaling connection entry roles.
+4. **Services/Streaming/UseCases** coordinates runtime information, capture, sessions, Chat, ingest, LAN delivery and editor session control without becoming a new top-level architecture.
+5. **Services/Streaming** owns reusable FFmpeg encoding, native device/process capture, provider Chat adapters, WebRTC/HLS/RTSP/LAN processing, metadata parsing, hotkeys, OAuth and protected stores.
+6. **HostedServices/Streaming** contains thin application-lifetime adapters for global hotkey startup/shutdown and periodic Twitch OAuth maintenance; both reuse Services.
+7. **Machine profiles** store reusable provider/device identities outside publication files. Stream keys and Chat OAuth tokens are protected with ASP.NET Core Data Protection; on Windows the key ring is protected with DPAPI.
 
 The solution therefore publishes one `PublisherStudio.Web` application executable. `PublisherStudio.Setup` remains the installation utility, not a required companion runtime. Explicit Company/LAN delivery may open an additional listener inside the same process only when the user enables it.
 
-There is no separately launched Media Host process and no fixed secondary loopback port. The former main-host `StreamingRuntimeEndpoints` aggregation has been removed; application routes are normal MVC controller actions and browser-facing HTTP/WebSocket routes retain the same application origin and paths. A Blazor circuit reconnect is still not the owner of encoder, recording, or LAN-listener lifetime; the main application process is. See `docs/architecture/streaming.md` for component and sequence diagrams.
+There is no separately launched Media Host process and no fixed secondary loopback port. The former main-host `StreamingRuntimeEndpoints` aggregation and the separate `Backend` root have been removed; application routes are normal MVC controller actions or explicit Hub entry roles, while reusable processing lives in Services and browser-facing routes retain the same application origin and paths. A Blazor circuit reconnect is still not the owner of encoder, recording, or LAN-listener lifetime; the main application process is. See `docs/architecture/streaming.md` for component and sequence diagrams.
 
 ## One authored page, output-specific Chat
 

@@ -1,0 +1,130 @@
+PublisherStudio v1.0.63 source changes
+========================================
+
+Scope
+-----
+This release corrects the v1.0.62 architecture interpretation after clarification that Controllers are the request-driven start of the backend, Hubs own persistent connection entry roles, and Services own reusable data processing and technical I/O for Components, Controllers, Hubs and HostedServices.
+
+No publication, Picture Studio or interchange format changed. Existing streaming routes and runtime behavior are preserved.
+
+Removed architectural root
+--------------------------
+Removed:
+- src/PublisherStudio.Web/Backend/
+- all PublisherStudio.Backend.Streaming.* namespaces
+
+The former Backend contents were not deleted functionally. They were reclassified into reusable Services or explicit Hubs according to responsibility.
+
+Streaming Services
+------------------
+Moved/reclassified under Services/Streaming:
+- Capture/NativeCaptureRegistry.cs
+- Capture/NativeDeviceDiscovery.cs
+- Capture/WindowsProcessLoopbackCapture.cs
+- Chat/PlatformChatService.cs
+- Encoding/EncoderOrchestrator.cs
+- Encoding/FfmpegLocator.cs
+- Lan/LanStreamingServer.cs
+- Lan/RtspLanServer.cs
+- Lan/WebRtcSignalingService.cs
+- Metadata/NowPlayingReader.cs
+- Sessions/MediaSession.cs
+
+The former provider Chat hub implementation is now PlatformChatService. Provider adapters, bounded history and reusable Chat processing remain in Services. The former WebRtcSignalingHub implementation is now WebRtcSignalingService so signaling state can be reused by the main controller path and the private LAN listener.
+
+Renamed the non-MVC EncoderSessionController implementation to EncoderSessionService so the Controller name is reserved for request entry classes under Controllers.
+
+Hubs
+----
+Added:
+- src/PublisherStudio.Web/Hubs/Streaming/Chat/PlatformChatHub.cs
+- src/PublisherStudio.Web/Hubs/Streaming/Lan/WebRtcSignalingHub.cs
+
+The MVC Chat and ingest controllers now delegate persistent connection handling through these Hub entry classes while service use cases and reusable processing remain unchanged beneath Services.
+
+HostedService reuse
+-------------------
+Moved reusable global-hotkey processing from HostedServices to:
+- Services/Streaming/Hotkeys/GlobalHotkeyService.cs
+
+Added the thin application-lifecycle adapter:
+- HostedServices/Streaming/GlobalHotkeyHostedService.cs
+
+MediaSessionRegistry, controllers/frontends and future hosted processes can reuse GlobalHotkeyService without depending on a HostedService class. TwitchOAuthMaintenanceService remains a HostedService and continues to reuse StreamingProfileStore and TwitchOAuthService.
+
+Composition and dependency direction
+------------------------------------
+Moved StreamingServiceCollectionExtensions.cs beside Program.cs into the PublisherStudio composition-root namespace. This wiring file may reference Services, Hubs and HostedServices without causing the Services root to depend back on callers.
+
+Updated GlobalUsings.Streaming.cs for the Services namespaces. Hubs and HostedServices are imported only by callers/composition code rather than globally exposing reverse dependencies to Services.
+
+Repository instructions and diagrams
+------------------------------------
+Rewrote AGENTS.md to define:
+- Controllers as normal request-driven backend entry points
+- Hubs as persistent-connection entry points
+- Services as reusable data processing, persistence and technical I/O
+- HostedServices as thin scheduling/lifecycle adapters around Services
+- direct Service reuse by Components, Controllers, Hubs and HostedServices
+- no top-level Backend folder or namespace
+- UseCases only as a Controller/Service subnamespace
+
+Updated:
+- docs/ARCHITECTURE.md
+- docs/STREAMING.md
+- docs/architecture/system-overview.md
+- docs/architecture/streaming.md
+- docs/decisions/ADR-003-usecase-subnamespaces.md
+- README.md
+- RELEASE.md
+- VALIDATION.md
+
+Replaced:
+- ADR-002-controller-entry-points.md
+with:
+- ADR-002-controller-and-hub-entry-points.md
+
+Added:
+- ADR-005-services-own-reusable-processing-and-io.md
+
+Architecture enforcement
+------------------------
+Updated tests/architectureContract.test.mjs to reject:
+- a top-level Backend root
+- PublisherStudio.Backend namespaces/imports
+- Controller-named implementation classes outside Controllers
+- Hub-named implementation classes outside Hubs
+- Services depending on Components, Controllers, Hubs, HostedServices or MVC
+
+The test also verifies PlatformChatHub/WebRtcSignalingHub placement, the reusable GlobalHotkeyService plus thin GlobalHotkeyHostedService split, service placement for FFmpeg/capture/LAN/metadata/session code, route preservation and composition registration.
+
+Updated moved-file paths and version contracts in:
+- tests/streamingRuntime.test.mjs
+- tests/installerResilience.test.mjs
+- tests/fontIntegration.test.mjs
+
+Compatibility
+-------------
+Preserved:
+- /api/mediahost route family
+- /stream and /watch route family
+- renderer ingest and WebRTC publisher WebSockets
+- platform Chat receive/send WebSockets
+- native capture and Windows process loopback
+- FFmpeg provider/recording pipelines
+- separate stop-streaming, stop-recording and stop-session controls
+- HLS/RTSP/LAN playback
+- protected local OAuth/provider/streaming settings
+
+Version/documentation
+---------------------
+- Application and InstallerConsole version: 1.0.63
+- package.json/package-lock.json version: 1.0.63
+- Streaming runtime capabilities version: 1.0.63
+- Publication format remains 1.47
+- Picture Studio format remains 1.2
+- Added CHANGELOG-v1.0.63.md
+
+Git history
+-----------
+The supplied v1.0.62 source archive contains no .git directory. Commit-level history was unavailable; v1.0.62 source and release documentation were used as the baseline.

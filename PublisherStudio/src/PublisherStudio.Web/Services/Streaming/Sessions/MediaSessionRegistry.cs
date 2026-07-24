@@ -16,7 +16,7 @@ public sealed class MediaSessionRegistry(GlobalHotkeyService hotkeys, EncoderOrc
         try
         {
             _hotkeys.Configure(session.Id, session.Hotkeys.Where(item => item.Global));
-            session.Chat = new PlatformChatHub(session);
+            session.Chat = new PlatformChatService(session);
             session.Chat.Start();
             if (session.LanEnabled)
             {

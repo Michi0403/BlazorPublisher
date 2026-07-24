@@ -1,3 +1,4 @@
+using PublisherStudio.Hubs.Streaming.Lan;
 using System.Net.WebSockets;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -6,10 +7,11 @@ namespace PublisherStudio.Controllers.Streaming.UseCases;
 
 [ApiController]
 [Route("api/mediahost/sessions/{sessionId:guid}")]
-public sealed class StreamingIngestController(StreamingIngestUseCases useCases) : ControllerBase
+public sealed class StreamingIngestController(StreamingIngestUseCases useCases, WebRtcSignalingHub webRtcHub) : ControllerBase
 {
     private static readonly JsonSerializerOptions IngestJson = new() { PropertyNameCaseInsensitive = true };
     private readonly StreamingIngestUseCases _useCases = useCases;
+    private readonly WebRtcSignalingHub _webRtcHub = webRtcHub;
 
     [HttpGet("ingest/websocket")]
     public async Task Ingest(Guid sessionId, [FromQuery] Guid? outputId)
@@ -63,7 +65,7 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases) 
     [HttpGet("webrtc/publisher")]
     public async Task PublishWebRtc(Guid sessionId)
     {
-        if (!HttpContext.WebSockets.IsWebSocketRequest || !_useCases.CanPublishWebRtc(sessionId))
+        if (!HttpContext.WebSockets.IsWebSocketRequest || !_webRtcHub.CanPublish(sessionId))
         {
             Response.StatusCode = HttpContext.WebSockets.IsWebSocketRequest
                 ? StatusCodes.Status404NotFound
@@ -72,6 +74,6 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases) 
         }
 
         using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        await _useCases.RunWebRtcPublisherAsync(sessionId, socket, HttpContext.RequestAborted);
+        await _webRtcHub.RunPublisherAsync(sessionId, socket, HttpContext.RequestAborted);
     }
 }

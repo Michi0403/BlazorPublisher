@@ -3,7 +3,7 @@ using System.Net.WebSockets;
 namespace PublisherStudio.Services.Streaming.UseCases.Ingest;
 
 /// <summary>
-/// Coordinates renderer ingest and WebRTC publication while keeping transport details in the backend.
+/// Coordinates renderer ingest and WebRTC publication through reusable streaming services.
 /// </summary>
 public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
 {

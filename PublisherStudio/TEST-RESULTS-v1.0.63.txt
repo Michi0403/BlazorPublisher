@@ -1,0 +1,66 @@
+PublisherStudio v1.0.63 validation results
+==========================================
+
+Environment limitation
+----------------------
+A full dotnet restore/build was not run because this packaging environment has no .NET 10 SDK and no licensed DevExpress package feed. No claim of a successful compiled .NET/DevExpress build is made. Release-machine compilation and live browser/FFmpeg/provider/hardware checks remain required.
+
+Automated Node contract suites
+------------------------------
+PASS: 13 suites through `npm test`
+
+1. timelineInterop.test.mjs
+2. componentRuntime.test.mjs
+3. signalRuntime.test.mjs
+4. pointerOwnership.test.mjs
+5. mapInteractionModes.test.mjs
+6. fontIntegration.test.mjs
+7. canvasZoomScaling.test.mjs
+8. streamingRuntime.test.mjs
+9. interfaceWorkflow.test.mjs
+10. installerResilience.test.mjs
+11. publicationPersistence.test.mjs
+12. editorUsabilityRepair.test.mjs
+13. architectureContract.test.mjs
+
+Architecture contract assertions include:
+- Controllers are request-driven backend entry points and Hubs are persistent-connection entry points;
+- Services are reusable by Components, Controllers, Hubs and HostedServices;
+- no top-level Backend/Endpoints/Features/Handlers/Commands/Queries/UseCases/Infrastructure/Application root;
+- no PublisherStudio.Backend namespace/import;
+- no Controller-named implementation outside Controllers and no Hub-named implementation outside Hubs;
+- Services do not depend on Components, Controllers, Hubs, HostedServices or MVC;
+- PlatformChatHub and WebRtcSignalingHub are under Hubs/Streaming;
+- FFmpeg, capture, provider Chat, LAN, metadata, hotkeys and session implementation is under Services/Streaming;
+- GlobalHotkeyService is reusable and GlobalHotkeyHostedService is the thin lifecycle adapter;
+- no StreamingRuntimeEndpoints.cs, Services/StreamingRuntime folder or main-host app.MapGet/MapPost/MapPut/MapDelete registration;
+- established mediahost, Chat, ingest, WebRTC, stream and watch route contracts remain present.
+
+Streaming behavior contracts include:
+- separate stop-streaming, stop-recording and stop-session controls;
+- final MediaRecorder data drain before ingest close;
+- Twitch Device Code OAuth and visible failure window;
+- Twitch token validation/refresh and ingest selection;
+- per-output Twitch/YouTube Chat isolation and send/receive adapters;
+- native capture and Windows process loopback;
+- FFmpeg output/recording orchestration and clean input shutdown;
+- WebRTC, HLS and RTSP LAN delivery;
+- global hotkeys and Now Playing metadata.
+
+Syntax and structural validation
+--------------------------------
+PASS: node --check on 24 non-vendor .js/.mjs files
+PASS: JSON parsing on 6 non-vendor JSON files
+PASS: XML parsing on 15 csproj/pubxml project files
+PASS: lexical delimiter/structure validation on 76 C# files, including raw string literals
+PASS: namespace placement checks for Services, Controllers, Hubs and HostedServices
+PASS: project, package lock/package JSON and runtime capability version alignment at 1.0.63
+PASS: top-level Backend root absent and PublisherStudio.Backend namespaces absent
+PASS: publication format unchanged at 1.47
+PASS: picture format unchanged at 1.2
+
+Source/archive preparation
+--------------------------
+Source files before adding this report: 419
+Git directory in supplied source: absent
+Final ZIP CRC, entry counts and SHA-256/SHA-512 values are recorded in the external validation/checksum files produced with the archive.

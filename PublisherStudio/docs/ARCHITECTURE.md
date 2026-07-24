@@ -4,7 +4,7 @@
 
 The enforceable contributor rules are stored at the source root in [`AGENTS.md`](../AGENTS.md). The accepted architecture is documented through [`docs/architecture/system-overview.md`](architecture/system-overview.md), [`docs/architecture/streaming.md`](architecture/streaming.md), the interchange capability matrix, and the ADRs under `docs/decisions`.
 
-`UseCases` is allowed only as orchestration beneath an existing root such as `Controllers/Streaming/UseCases` or `Services/Streaming/UseCases`. Main application HTTP and WebSocket entry points belong to MVC controllers. Technical FFmpeg, provider, device and protocol implementation belongs to `Backend`; long-running application loops belong to `HostedServices`.
+`UseCases` is allowed only as orchestration beneath an existing Controller or Service area such as `Controllers/Streaming/UseCases` or `Services/Streaming/UseCases`. Controllers are request-driven backend entry points and Hubs are persistent-connection entry points. Reusable processing, persistence and technical I/O—including FFmpeg, providers, devices, networks and operating-system APIs—belongs to `Services`. HostedServices are thin scheduling/lifecycle adapters around Services. There is no separate `Backend` architectural root.
 
 ## Stable boundaries
 

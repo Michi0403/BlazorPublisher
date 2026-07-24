@@ -1,11 +1,10 @@
-global using PublisherStudio.Backend.Streaming.Capture;
-global using PublisherStudio.Backend.Streaming.Chat;
-global using PublisherStudio.Backend.Streaming.Encoding;
-global using PublisherStudio.Backend.Streaming.Lan;
-global using PublisherStudio.Backend.Streaming.Metadata;
-global using PublisherStudio.Backend.Streaming.Sessions;
-global using PublisherStudio.HostedServices.Streaming;
 global using PublisherStudio.Domain.Streaming;
+global using PublisherStudio.Services.Streaming.Capture;
+global using PublisherStudio.Services.Streaming.Chat;
+global using PublisherStudio.Services.Streaming.Encoding;
+global using PublisherStudio.Services.Streaming.Hotkeys;
+global using PublisherStudio.Services.Streaming.Lan;
+global using PublisherStudio.Services.Streaming.Metadata;
 global using PublisherStudio.Services.Streaming.Sessions;
 global using PublisherStudio.Services.Streaming.UseCases.Chat;
 global using PublisherStudio.Services.Streaming.UseCases.Ingest;

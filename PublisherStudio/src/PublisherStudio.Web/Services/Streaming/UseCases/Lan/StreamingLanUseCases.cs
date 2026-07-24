@@ -3,7 +3,7 @@ using System.Net;
 namespace PublisherStudio.Services.Streaming.UseCases.Lan;
 
 /// <summary>
-/// Resolves LAN status, safe HLS assets and the local watch page without coupling MVC to backend state.
+/// Resolves LAN status, safe HLS assets and the local watch page without coupling controllers to session internals.
 /// </summary>
 public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
 {

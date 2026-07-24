@@ -2,13 +2,13 @@ namespace PublisherStudio.Services.Streaming.UseCases.Runtime;
 
 /// <summary>
 /// Orchestrates read-only runtime information used by the desktop host UI.
-/// Provider, capture and metadata implementation details remain in Backend/Streaming.
+/// Provider, capture and metadata implementation details remain in Services/Streaming.
 /// </summary>
 public sealed class StreamingRuntimeUseCases
 {
     public StreamingRuntimeCapabilities GetCapabilities() => new()
     {
-        Version = "1.0.62",
+        Version = "1.0.63",
         BrowserCapture = true,
         BrowserAudioMix = true,
         NativeDeviceDiscovery = true,

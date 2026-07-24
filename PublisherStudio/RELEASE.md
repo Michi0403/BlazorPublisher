@@ -1,9 +1,9 @@
-# PublisherStudio v1.0.62 release
+# PublisherStudio v1.0.63 release
 
-See `CHANGELOG-v1.0.62.md`, `docs/architecture/system-overview.md`, `docs/architecture/streaming.md`, `docs/architecture/interchange-formats.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.63.md`, `AGENTS.md`, `docs/architecture/system-overview.md`, `docs/architecture/streaming.md`, and `VALIDATION.md`.
 
-This release restores the integrated streaming backend to PublisherStudio's established monolith architecture. Main-host media routes are MVC controllers again; process orchestration lives in `Services/Streaming/UseCases`; FFmpeg, native capture, provider Chat and LAN protocol implementations live in `Backend/Streaming`; and global hotkey/OAuth maintenance loops live in `HostedServices/Streaming`. The former `StreamingRuntimeEndpoints` aggregation and main-host minimal API mapping are removed without changing the browser route contract.
+This release corrects the repository architecture contract and streaming placement without changing the public streaming route or publication formats. Controllers are request-driven backend entry points, `Hubs` owns persistent platform-Chat and WebRTC connection entry roles, and reusable processing/technical I/O is organized beneath `Services`. The separate `Backend` root no longer exists.
 
-The source root now contains an explicit `AGENTS.md` architecture contract for human and AI contributors. It defines the approved roots, monolith-first rule, dependency direction and the accepted `UseCases` subnamespace pattern. Version-controlled Mermaid diagrams and ADRs document the system and streaming flows. A capability matrix defines how future Picture Studio, Video Studio and Audio Studio common formats remain adapters around the native PublisherStudio models rather than replacing them.
+FFmpeg orchestration, native capture, provider Chat adapters, LAN/HLS/RTSP/WebRTC state, metadata parsing, hotkeys and media sessions now live under structured `Services/Streaming` subnamespaces. `GlobalHotkeyService` is reusable from Controllers, Components, Hubs and other services; `GlobalHotkeyHostedService` only owns application startup/shutdown. The repository instructions and architecture tests enforce the same direction for future human and AI changes.
 
-Application and installer version `1.0.62`; publication format `1.47`; picture format `1.2`. There is no separate Media Host executable or release payload.
+Application and installer version `1.0.63`; publication format `1.47`; picture format `1.2`. There is no separate Media Host executable or release payload.

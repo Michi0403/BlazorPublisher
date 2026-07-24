@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.47";
+    public string FormatVersion { get; set; } = "1.48";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -116,6 +116,7 @@ public enum PublicationContentFitMode { Clip, Fit, Fill, Stretch }
 public enum ImageTintMode { Overlay, Recolor }
 public enum ImageBlendMode { Normal, Multiply, Screen, Darken, Lighten }
 public enum WordArtWarp { None, ArchUp, ArchDown, Wave, Custom }
+public enum WordArtFillKind { Solid, Gradient, Picture, Video }
 public enum PublicationAnimationPhase { Entrance, Emphasis, Exit, Motion }
 public enum PublicationAnimationEffect { Fade, Fly, Float, Zoom, Wipe, Bounce, Pulse, Spin, Shake, GrowShrink, Move, PlayMedia, PauseMedia, StopMedia }
 public enum PublicationAnimationTrigger { OnPageEnter, WithPrevious, AfterPrevious, OnClick }
@@ -403,6 +404,15 @@ public sealed class WordArtElement : PublicationElement
     public string FillColor { get; set; } = "#2f75b5";
     public string SecondaryColor { get; set; } = "#8ec5ff";
     public bool GradientFill { get; set; } = true;
+    public WordArtFillKind FillKind { get; set; } = WordArtFillKind.Gradient;
+    public string FillMediaDataUrl { get; set; } = string.Empty;
+    public string FillMediaMimeType { get; set; } = string.Empty;
+    public string FillMediaPosterDataUrl { get; set; } = string.Empty;
+    public PublicationVideoFitMode FillMediaFitMode { get; set; } = PublicationVideoFitMode.Cover;
+    public bool FillMediaLoop { get; set; } = true;
+    public double FillMediaScale { get; set; } = 1;
+    public double FillMediaOffsetXPercent { get; set; }
+    public double FillMediaOffsetYPercent { get; set; }
     public string OutlineColor { get; set; } = "#17365d";
     public double OutlineWidth { get; set; } = 2;
     public bool ShadowEnabled { get; set; } = true;

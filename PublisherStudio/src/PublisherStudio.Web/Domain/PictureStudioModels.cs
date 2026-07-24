@@ -6,7 +6,7 @@ public sealed class PictureDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Picture";
-    public string FormatVersion { get; set; } = "1.2";
+    public string FormatVersion { get; set; } = "1.3";
     public int WidthPx { get; set; } = 1200;
     public int HeightPx { get; set; } = 800;
     public string Background { get; set; } = "transparent";
@@ -44,7 +44,7 @@ public sealed class PictureDocument
     }
 }
 
-public enum PictureLayerKind { Raster, Text, Shape, Fill, Render, Paint }
+public enum PictureLayerKind { Raster, Text, Shape, Fill, Render, Paint, Vector }
 public enum PictureBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighten }
 public enum PictureRasterFitMode { Stretch, Contain, Cover }
 public enum PictureShapeKind { Rectangle, RoundedRectangle, Ellipse, Line, Arrow, Freeform, Path }
@@ -61,6 +61,7 @@ public enum PictureStrokeKind { Brush, Pencil, Spray, Toothbrush, Line, Eraser }
 [JsonDerivedType(typeof(FillPictureLayer), "fill")]
 [JsonDerivedType(typeof(RenderPictureLayer), "render")]
 [JsonDerivedType(typeof(PaintPictureLayer), "paint")]
+[JsonDerivedType(typeof(SvgPictureLayer), "svg")]
 public abstract class PictureLayer
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -75,6 +76,7 @@ public abstract class PictureLayer
     public bool Visible { get; set; } = true;
     public bool Locked { get; set; }
     public PictureBlendMode BlendMode { get; set; }
+    public string GroupPath { get; set; } = string.Empty;
 
     // Non-destructive layer adjustments shared by raster, text, shape, fill, render and paint layers.
     public double Brightness { get; set; } = 1;
@@ -131,6 +133,15 @@ public sealed class ShapePictureLayer : PictureLayer
     public List<PicturePoint> PathPoints { get; set; } = [];
     public bool PathClosed { get; set; } = true;
     public bool PathSmooth { get; set; }
+}
+
+public sealed class SvgPictureLayer : PictureLayer
+{
+    public override PictureLayerKind Kind => PictureLayerKind.Vector;
+    public string SvgMarkup { get; set; } = string.Empty;
+    public string SourceFormat { get; set; } = "SVG";
+    public string SourceElementId { get; set; } = string.Empty;
+    public bool PreserveAspectRatio { get; set; } = true;
 }
 
 public sealed class FillPictureLayer : PictureLayer

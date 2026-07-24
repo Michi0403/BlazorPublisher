@@ -43,6 +43,7 @@
                     <DxRibbonGroup Text="Content">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Add content" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="Image" Click="RequestImage" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-vector" Text="Layered SVG / OpenRaster" Click="RequestLayeredImport" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Text" Click="AddTextLayer" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Paint layer" Click="AddPaintLayer" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Solid fill" Click="AddSolidFill" />
@@ -210,6 +211,7 @@
                     </div>
                     <div class="picture-layer-actions">
                         <button type="button" title="Add image" @onclick="RequestImage">▧</button>
+                        <button type="button" title="Import layered SVG / SVGZ / OpenRaster" @onclick="RequestLayeredImport">⌘</button>
                         <button type="button" title="Add text" @onclick="AddTextLayer">T</button>
                         <button type="button" title="Add shape" @onclick="AddRectangle">◇</button>
                         <button type="button" title="Add gradient" @onclick="AddGradient">◩</button>
@@ -407,6 +409,22 @@
 
                             @switch (selected)
                             {
+                                case SvgPictureLayer svgLayer:
+                                    <section class="picture-property-section">
+                                        <h3>Imported vector</h3>
+                                        <label>Source format<input value="@svgLayer.SourceFormat" readonly /></label>
+                                        @if (!string.IsNullOrWhiteSpace(svgLayer.GroupPath))
+                                        {
+                                            <label>Layer group<input value="@svgLayer.GroupPath" readonly /></label>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(svgLayer.SourceElementId))
+                                        {
+                                            <label>Source element<input value="@svgLayer.SourceElementId" readonly /></label>
+                                        }
+                                        <label class="check-row"><input type="checkbox" checked="@svgLayer.PreserveAspectRatio" @onchange="ToggleSvgPreserveAspectRatio" /> Preserve aspect ratio</label>
+                                        <p class="picture-property-note">This layer keeps its sanitized SVG paths, paint servers, transforms and clipping definitions as vector markup. Position, size, rotation, opacity and layer order remain editable in Picture Studio.</p>
+                                    </section>
+                                    break;
                                 case RasterPictureLayer raster:
                                     <section class="picture-property-section">
                                         <h3>Image</h3>
@@ -976,6 +994,7 @@
             {
                 <DxContextMenuItem Text="Paste layer" IconCssClass="pub-icon pub-icon-paste" BeginGroup="true" Enabled="State.CanPaste" Click="State.Paste" />
                 <DxContextMenuItem Text="Insert image…" IconCssClass="pub-icon pub-icon-picture" Click="RequestImage" />
+                <DxContextMenuItem Text="Import layered SVG / OpenRaster…" IconCssClass="pub-icon pub-icon-vector" Click="RequestLayeredImport" />
                 <DxContextMenuItem Text="Insert text" IconCssClass="pub-icon pub-icon-text" Click="AddTextLayer" />
                 <DxContextMenuItem Text="Insert shape">
                     <Items>
@@ -1031,4 +1050,5 @@
     </DxContextMenu>
 
     <InputFile id="picture-studio-image-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="ImportImage" />
+    <InputFile id="picture-studio-layered-input" class="hidden-file-input" accept=".svg,.svgz,.ora,image/svg+xml,application/gzip,application/x-gzip,application/x-openraster" OnChange="ImportLayeredDocument" />
 }

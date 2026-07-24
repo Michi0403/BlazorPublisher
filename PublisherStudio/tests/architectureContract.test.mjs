@@ -31,6 +31,9 @@ assert.match(agents, /Monolith first/);
 assert.match(agents, /Every semantic contract has exactly one authoritative declaration/);
 assert.match(agents, /Do not redeclare a same-named Service-local copy/);
 assert.match(agents, /GlobalUsings\*\.cs.*project-wide symbol scope/s);
+assert.match(agents, /Adapters belong under the owning `Services\/<Area>\/Import`/);
+assert.match(agents, /DTD processing must be prohibited/);
+assert.match(agents, /Do not add a NuGet, npm package, native binary or separate process/);
 assert.doesNotMatch(agents, /`Backend` for/);
 assert.match(overview, /C\[Controllers: backend request entry\]/);
 assert.match(overview, /HB\[Hubs: persistent connection entry\]/);
@@ -47,7 +50,8 @@ for (const decision of [
   'ADR-003-usecase-subnamespaces.md',
   'ADR-004-native-and-interchange-formats.md',
   'ADR-005-services-own-reusable-processing-and-io.md',
-  'ADR-006-canonical-shared-contract-ownership.md'
+  'ADR-006-canonical-shared-contract-ownership.md',
+  'ADR-007-open-interchange-adapters.md'
 ]) assert.ok(fs.existsSync(path.join(root, 'docs', 'decisions', decision)), `${decision} is missing.`);
 
 for (const directory of ['Components', 'Controllers', 'Hubs', 'HostedServices', 'Services'])

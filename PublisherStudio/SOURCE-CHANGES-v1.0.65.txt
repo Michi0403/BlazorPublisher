@@ -1,0 +1,132 @@
+PublisherStudio v1.0.65 source changes
+========================================
+
+Scope
+-----
+This release adds the first implemented open interchange adapters on the established PublisherStudio architecture, replaces the brush-like Picture Studio Path interaction with node placement, and adds picture/video paint for WordArt across interactive and static export paths.
+
+The native PublisherStudio publication and Picture Studio models remain authoritative. Imports create temporary canonical results plus explicit warnings/loss reports before the active document is replaced. No new NuGet, npm, native-binary or helper-process dependency was added.
+
+Picture Studio SVG/SVGZ interchange
+-----------------------------------
+Added:
+- src/PublisherStudio.Web/Services/PictureStudio/Import/SvgInterchangeSanitizer.cs
+
+Changed:
+- src/PublisherStudio.Web/Domain/PictureStudioModels.cs
+- src/PublisherStudio.Web/Services/PictureDocumentService.cs
+- src/PublisherStudio.Web/Components/Editor/PictureEditor.razor
+- src/PublisherStudio.Web/Components/Editor/PictureEditor.razor.cs
+- src/PublisherStudio.Web/wwwroot/js/pictureStudioInterop.js
+
+Picture Studio format is now 1.3. The canonical model has SVG vector layers and source group paths. SVG/SVGZ import retains common visual leaves as separate vector layers, including paths, shapes, text, embedded raster images and use instances. Named groups and Inkscape layer labels become GroupPath metadata; hidden source content remains hidden; local gradients, patterns, clipping, masks, markers, filters, transforms and inherited styling are retained where representable.
+
+The importer measures transformed bounds in the browser and carries the outer SVG viewBox transform into every standalone retained layer. It rejects DTD/entity processing, executable elements, event attributes, nested uninspected SVG data images and absolute or relative online href/src/CSS dependencies. Local fragment paint references and embedded raster data images remain available offline.
+
+OpenRaster
+----------
+Added:
+- src/PublisherStudio.Web/Services/PictureStudio/Import/OpenRasterImportService.cs
+
+Layered .ora files are read with BCL ZipArchive/XML support. Nested stack names, uppermost-first order, offsets, visibility, opacity, edit locks, common blend modes, PNG/JPEG/WebP layers and SVG/SVGZ layers are mapped into Picture Studio. Unsafe paths, missing entries, malformed SVG, unsupported formats, oversized entries and decompression limits produce explicit issues instead of silently corrupting the document.
+
+Node-based Path tool
+--------------------
+Changed:
+- src/PublisherStudio.Web/wwwroot/js/pictureStudioInterop.js
+- src/PublisherStudio.Web/Components/Editor/PictureEditor.razor.cs
+
+The Path tool now places discrete nodes. Pointer movement previews the next segment; double-click or Enter commits; Shift closes; Escape cancels. The resulting native path continues to use the existing point-list, reverse, close and smoothing controls.
+
+WordArt picture/video fills
+---------------------------
+Changed:
+- src/PublisherStudio.Web/Domain/PublicationModels.cs
+- src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor
+- src/PublisherStudio.Web/Components/Editor/WordArtView.razor
+- src/PublisherStudio.Web/Components/Editor/PrintPublication.razor
+- src/PublisherStudio.Web/Services/PublicationFileService.cs
+
+Publication format is now 1.48. WordArt supports Solid, Gradient, Picture and Video fill kinds. Picture/video content is clipped through the same glyph/path mask used by normal and warped WordArt. The Inspector provides media selection, cover/contain/stretch, scale, offsets, clearing and video looping. SVG picture fills are sanitized before storage.
+
+Interactive HTML keeps video fills live and embeds local media. Print/PDF uses the generated poster. Existing PNG/JPEG/SVG raster export preparation freezes live video to a current or poster frame. Legacy GradientFill publications migrate to the canonical fill kind without changing their intended appearance.
+
+OpenDocument page import
+------------------------
+Added:
+- src/PublisherStudio.Web/Services/Publication/Import/OpenDocumentImportService.cs
+
+Changed:
+- src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor
+- src/PublisherStudio.Web/Components/Pages/Editor.razor
+
+PublisherStudio imports OpenDocument Drawing/Presentation packages and flat variants: .odg, .odp, .fodg and .fodp. draw:page elements become native PublicationPage instances. Master-page dimensions/background, common text frames, embedded package/inline images, rectangles, ellipses, lines, paths, polygons and polylines are mapped where representable. ODF vectors are retained as sanitized SVG-backed Picture Studio content. Unsupported custom shapes, group transforms, missing assets and skipped elements are reported explicitly.
+
+Shared interchange architecture
+-------------------------------
+Added:
+- src/PublisherStudio.Web/Domain/InterchangeModels.cs
+- docs/decisions/ADR-007-open-interchange-adapters.md
+
+Changed:
+- AGENTS.md
+- docs/architecture/interchange-formats.md
+- README.md
+- RELEASE.md
+- VALIDATION.md
+- src/PublisherStudio.Web/Program.cs
+
+InterchangeIssue, PictureImportResult and PublicationImportResult are canonical Domain contracts. Parsers live below their owning reusable Services area. Components select files, present results and commit validated models. Repository instructions now require BCL/open-spec preference, explicit package approval, DTD/executable/online-dependency rejection, archive path/size validation, deterministic fixtures and loss reporting.
+
+Tests and fixtures
+------------------
+Added:
+- tests/openInterchange.test.mjs
+- tests/fixtures/interchange/layered-inkscape.svg
+- tests/fixtures/interchange/unsafe-online.svg
+- tests/fixtures/interchange/openraster-stack.xml
+- tests/fixtures/interchange/opendocument-content.xml
+
+Changed:
+- tests/architectureContract.test.mjs
+- tests/componentRuntime.test.mjs
+- tests/editorUsabilityRepair.test.mjs
+- tests/fontIntegration.test.mjs
+- tests/signalRuntime.test.mjs
+- tests/streamingRuntime.test.mjs
+- src/PublisherStudio.Web/package.json
+- src/PublisherStudio.Web/package-lock.json
+
+The package scripts now run 15 suites. Existing contract tests were aligned with application version 1.0.65, publication format 1.48 and Picture Studio format 1.3. Runtime package dependencies remain unchanged.
+
+Version alignment
+-----------------
+Updated to 1.0.65:
+- src/PublisherStudio.Web/PublisherStudio.Web.csproj
+- src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+- src/PublisherStudio.Web/package.json
+- src/PublisherStudio.Web/package-lock.json
+- src/PublisherStudio.Web/Services/Streaming/UseCases/Runtime/StreamingRuntimeUseCases.cs
+- version assertions in the Node tests
+
+Added:
+- CHANGELOG-v1.0.65.md
+- TEST-RESULTS-v1.0.65.txt
+- SOURCE-CHANGES-v1.0.65.txt
+
+Compatibility
+-------------
+Preserved:
+- controller, Hub, reusable Service and HostedService architecture contracts
+- streaming, recording, OAuth, Chat, LAN playback and provider behavior
+- protected local streaming configuration
+- selectable CSS/transform canvas zoom
+- page settings persistence
+- publication print/PDF/image/SVG/HTML/standalone export entry points
+- existing Picture Studio raster/vector delivery exports
+
+Known fidelity boundaries are reported rather than hidden. Arbitrary SVG path geometry remains retained vector markup at layer level; it is not converted into a lossy approximation of PublisherStudio's simpler native node path model. OpenDocument master/animation/custom-shape semantics beyond the implemented common page objects remain compatibility warnings or losses.
+
+Git history
+-----------
+The supplied v1.0.64 source archive contains no .git directory. Commit-level history was unavailable; the v1.0.64 source tree and release documents were used as the baseline.

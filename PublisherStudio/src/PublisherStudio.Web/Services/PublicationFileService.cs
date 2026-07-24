@@ -215,6 +215,33 @@ public sealed partial class PublicationFileService
             wordArt.CustomPathPoints = WordArtPathGeometry.Normalize(wordArt.CustomPathPoints);
             wordArt.PathStartOffsetPercent = Math.Clamp(wordArt.PathStartOffsetPercent, 0, 100);
             wordArt.PathBaselineOffset = Math.Clamp(wordArt.PathBaselineOffset, -80, 80);
+            if (!Enum.IsDefined(wordArt.FillKind))
+                wordArt.FillKind = wordArt.GradientFill ? WordArtFillKind.Gradient : WordArtFillKind.Solid;
+            // Publications created before the explicit fill enum only persisted GradientFill.
+            if (wordArt.FillKind == WordArtFillKind.Solid && wordArt.GradientFill && string.IsNullOrWhiteSpace(wordArt.FillMediaDataUrl))
+                wordArt.FillKind = WordArtFillKind.Gradient;
+            wordArt.FillMediaScale = Math.Clamp(wordArt.FillMediaScale <= 0 ? 1 : wordArt.FillMediaScale, .1, 10);
+            wordArt.FillMediaOffsetXPercent = Math.Clamp(wordArt.FillMediaOffsetXPercent, -100, 100);
+            wordArt.FillMediaOffsetYPercent = Math.Clamp(wordArt.FillMediaOffsetYPercent, -100, 100);
+            if (!Enum.IsDefined(wordArt.FillMediaFitMode)) wordArt.FillMediaFitMode = PublicationVideoFitMode.Cover;
+
+            var expectedPrefix = wordArt.FillKind == WordArtFillKind.Picture ? "data:image/" :
+                wordArt.FillKind == WordArtFillKind.Video ? "data:video/" : string.Empty;
+            if (!string.IsNullOrEmpty(expectedPrefix) && !wordArt.FillMediaDataUrl.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                wordArt.FillMediaDataUrl = string.Empty;
+                wordArt.FillMediaMimeType = string.Empty;
+                wordArt.FillKind = WordArtFillKind.Solid;
+            }
+            else if (wordArt.FillKind is WordArtFillKind.Picture or WordArtFillKind.Video)
+            {
+                var fallback = wordArt.FillKind == WordArtFillKind.Picture ? "image/png" : "video/webm";
+                wordArt.FillMediaMimeType = PublicationMediaData.NormalizeMimeType(wordArt.FillMediaMimeType, fallback);
+                wordArt.FillMediaDataUrl = PublicationMediaData.NormalizeDataUrl(wordArt.FillMediaDataUrl, wordArt.FillMediaMimeType);
+            }
+            if (!wordArt.FillMediaPosterDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+                wordArt.FillMediaPosterDataUrl = string.Empty;
+            wordArt.GradientFill = wordArt.FillKind == WordArtFillKind.Gradient;
         }
 
 
@@ -402,7 +429,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.47";
+        document.FormatVersion = "1.48";
         return document;
     }
 

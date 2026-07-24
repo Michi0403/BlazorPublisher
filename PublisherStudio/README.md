@@ -335,6 +335,10 @@ See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now releas
 
 
 
+## v1.0.65 open interchange, real paths, and WordArt media fills
+
+See `CHANGELOG-v1.0.65.md`, ADR-007 and `docs/architecture/interchange-formats.md`. Picture Studio now imports structured SVG/SVGZ objects and layered OpenRaster documents into native vector/raster layers while retaining source groups, hidden layers, paint definitions and transforms where representable. The Path tool is node-based rather than a brush alias. WordArt accepts picture or video fills through the same glyph/path mask and keeps those fills across interactive HTML, print/PDF, raster and SVG exports. PublisherStudio can import OpenDocument Drawing/Presentation pages (`.odg`, `.odp`, `.fodg`, `.fodp`) into its native page system with explicit compatibility reporting. All adapters use the existing Domain/Services architecture and BCL APIs; no new package dependency was added. Publication format is `1.48`; Picture Studio format is `1.3`.
+
 ## v1.0.64 canonical shared contracts
 
 See `CHANGELOG-v1.0.64.md`, `AGENTS.md`, ADR-006 and `docs/architecture/streaming.md`. The duplicate Service-local `MediaHostHotkeyEvent` left by the v1.0.63 streaming move has been removed; all hotkey producers and consumers now use the single `Domain/Streaming` record. Repository rules and a dedicated C# contract-ownership test reject Services shadowing Domain/Models types and reject duplicate simple type names exposed through `GlobalUsings*.cs`. Streaming behavior and publication formats are unchanged. Clean `bin`/`obj` in an existing v1.0.63 checkout before rebuilding so Visual Studio drops the removed design-time type.

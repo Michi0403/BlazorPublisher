@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Compression;
 using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -7,6 +8,7 @@ using DevExpress.Blazor;
 using Microsoft.JSInterop;
 using PublisherStudio.Domain;
 using PublisherStudio.Services;
+using PublisherStudio.Services.PictureStudio.Import;
 
 namespace PublisherStudio.Components.Editor;
 
@@ -24,6 +26,7 @@ public partial class PictureEditor
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private SystemFontCatalog SystemFonts { get; set; } = default!;
     [Inject] public PictureEditorStateService State { get; set; } = default!;
+    [Inject] private OpenRasterImportService OpenRasterImporter { get; set; } = default!;
 
     [Parameter] public bool Visible { get; set; }
     [Parameter] public Guid SessionId { get; set; }
@@ -44,6 +47,7 @@ public partial class PictureEditor
     private bool _initialized;
     private bool _pendingRasterInitialization;
     private string? _error;
+    private string? _notice;
     private bool _renderErrorActive;
     private PictureDrawTool _drawTool = PictureDrawTool.Select;
     private string _drawColor = "#111827";
@@ -95,7 +99,7 @@ public partial class PictureEditor
         PictureDrawTool.Select => "Drag layers directly. Corner handles resize; the round handle rotates. Right-click for layer commands.",
         PictureDrawTool.Eyedropper => "Click the rendered canvas to pick a color, then the Brush tool becomes active.",
         PictureDrawTool.Line => "Drag from the line start to its end. Hold the pointer down for a live preview.",
-        PictureDrawTool.Path => "Draw a freehand vector path. It remains an editable shape layer and can be open, closed, straight, or smoothed.",
+        PictureDrawTool.Path => "Click to place straight vector nodes. Double-click or press Enter to finish; hold Shift while finishing to close the path. Nodes remain editable.",
         PictureDrawTool.Eraser => "Draw over strokes on a paint layer to erase them non-destructively.",
         PictureDrawTool.RectangleSelect => "Drag a rectangular area selection. Use a fill tool to turn it into an editable layer.",
         PictureDrawTool.EllipseSelect => "Drag an elliptical area selection. Use a fill tool to turn it into an editable layer.",
@@ -114,7 +118,7 @@ public partial class PictureEditor
     private string CanvasColor => State.Document.Background.StartsWith('#') && State.Document.Background.Length is 4 or 7
         ? State.Document.Background
         : "#ffffff";
-    private string StatusText => _error ?? (IsPictureExporting
+    private string StatusText => _error ?? _notice ?? (IsPictureExporting
         ? "Rendering PNG for the publication…"
         : _drawTool != PictureDrawTool.Select
             ? $"{_drawTool} tool · {_drawWidth:0.#} px · {_drawColor}"
@@ -133,6 +137,7 @@ public partial class PictureEditor
         if (SessionId == Guid.Empty || SessionId == _loadedSession) return;
         _loadedSession = SessionId;
         _error = null;
+        _notice = null;
         _renderErrorActive = false;
         _drawTool = PictureDrawTool.Select;
         if (InitialDocument is not null)
@@ -362,6 +367,12 @@ public partial class PictureEditor
         await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-studio-image-input");
     }
 
+    private async Task RequestLayeredImport()
+    {
+        _replaceRasterLayerId = null;
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-studio-layered-input");
+    }
+
     private async Task RequestRasterReplacement()
     {
         if (State.SelectedLayer is not RasterPictureLayer { Locked: false } raster) return;
@@ -397,6 +408,54 @@ public partial class PictureEditor
         finally
         {
             _replaceRasterLayerId = null;
+        }
+    }
+
+    private async Task ImportLayeredDocument(InputFileChangeEventArgs args)
+    {
+        _error = null;
+        _notice = null;
+        try
+        {
+            var file = args.File;
+            var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+            PictureImportResult result;
+            await using var stream = file.OpenReadStream(512L * 1024 * 1024);
+            if (extension == ".ora")
+            {
+                result = await OpenRasterImporter.ImportAsync(stream, file.Name);
+            }
+            else if (extension is ".svg" or ".svgz" || file.ContentType.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase))
+            {
+                if (_module is null) throw new InvalidOperationException("Picture Studio is not ready yet.");
+                string svgText;
+                if (extension == ".svgz" || file.ContentType.Contains("gzip", StringComparison.OrdinalIgnoreCase))
+                {
+                    using var gzip = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
+                    svgText = await ReadSvgTextWithLimitAsync(gzip, 64L * 1024 * 1024);
+                }
+                else
+                {
+                    svgText = await ReadSvgTextWithLimitAsync(stream, 64L * 1024 * 1024);
+                }
+                var dataUrl = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(svgText))}";
+                result = await _module.InvokeAsync<PictureImportResult>("importPictureStudioSvg", dataUrl, file.Name);
+            }
+            else
+            {
+                throw new InvalidDataException("Use an SVG, compressed SVGZ, or OpenRaster ORA document.");
+            }
+
+            State.StartFromDocument(result.Document);
+            State.SetDocumentName(Path.GetFileNameWithoutExtension(file.Name));
+            var losses = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Loss);
+            var warnings = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Warning);
+            _notice = $"Imported {State.Document.Layers.Count} editable layer{(State.Document.Layers.Count == 1 ? string.Empty : "s")}." +
+                (losses + warnings > 0 ? $" {warnings} warning(s), {losses} compatibility loss(es)." : string.Empty);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
         }
     }
 
@@ -1017,6 +1076,12 @@ public partial class PictureEditor
     {
         if (State.SelectedLayer is RasterPictureLayer layer) State.UpdateSelectedLive(key, _ => update(layer));
     }
+    private void ToggleSvgPreserveAspectRatio(ChangeEventArgs args)
+    {
+        if (State.SelectedLayer is SvgPictureLayer svg)
+            State.UpdateSelected(_ => svg.PreserveAspectRatio = Bool(args));
+    }
+
     private void WithText(Action<TextPictureLayer> update)
     {
         if (State.SelectedLayer is TextPictureLayer layer) State.UpdateSelected(_ => update(layer));
@@ -1043,6 +1108,22 @@ public partial class PictureEditor
     }
 
 
+    private static async Task<string> ReadSvgTextWithLimitAsync(Stream input, long maximumBytes)
+    {
+        using var buffer = new MemoryStream();
+        var block = new byte[81920];
+        long total = 0;
+        while (true)
+        {
+            var read = await input.ReadAsync(block);
+            if (read == 0) break;
+            total += read;
+            if (total > maximumBytes) throw new InvalidDataException("The SVG document exceeds the 64 MB decompressed text limit.");
+            await buffer.WriteAsync(block.AsMemory(0, read));
+        }
+        return new UTF8Encoding(false, true).GetString(buffer.ToArray());
+    }
+
     private static bool IsSupportedImageDataUrl(string value) =>
         value.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) && value.Contains(",", StringComparison.Ordinal);
 
@@ -1065,6 +1146,7 @@ public partial class PictureEditor
         PictureLayerKind.Fill => "◩",
         PictureLayerKind.Render => "☁",
         PictureLayerKind.Paint => "✎",
+        PictureLayerKind.Vector => "⌘",
         _ => "•"
     };
 
@@ -1092,6 +1174,7 @@ public partial class PictureEditor
     private static string LayerDescription(PictureLayer layer) => layer switch
     {
         RasterPictureLayer raster => raster.FitMode.ToString(),
+        SvgPictureLayer svg => string.IsNullOrWhiteSpace(svg.GroupPath) ? svg.SourceFormat : $"{svg.SourceFormat} · {svg.GroupPath}",
         TextPictureLayer text => Truncate(text.Text, 28),
         ShapePictureLayer shape => shape.Shape.ToString(),
         FillPictureLayer fill => fill.FillKind.ToString(),

@@ -110,7 +110,7 @@
                                 <div class="shape shape-@shape.Shape.ToString().ToLowerInvariant()" style="@ShapeStyle(shape)"></div>
                                 break;
                             case WordArtElement wordArt:
-                                <WordArtView Item="wordArt" IdPrefix="print" />
+                                <WordArtView Item="wordArt" IdPrefix="print" StaticMediaFill="true" />
                                 break;
                             case DataVisualElement dataVisual:
                                 <DataVisualView Document="Document" Item="dataVisual" CurrentPageId="publicationPage.Id" />

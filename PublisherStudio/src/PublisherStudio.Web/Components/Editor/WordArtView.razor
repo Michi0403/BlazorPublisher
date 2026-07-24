@@ -1,4 +1,5 @@
 @namespace PublisherStudio.Components.Editor
+@inject PublicationMediaAssetStore MediaAssets
 
 <svg class="wordart-svg"
      viewBox="0 0 1000 300"
@@ -16,6 +17,43 @@
         @if (Item.Warp != WordArtWarp.None)
         {
             <path id="@PathId" d="@WarpPath" fill="none" />
+        }
+
+        @if (UsesMediaFill)
+        {
+            <mask id="@MediaMaskId" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="300">
+                <rect x="0" y="0" width="1000" height="300" fill="black" />
+                @if (Item.Warp == WordArtWarp.None)
+                {
+                    <SvgWordArtText CssClass="wordart-media-mask"
+                                    X="500" Y="150"
+                                    TextAnchor="middle"
+                                    DominantBaseline="middle"
+                                    FontFamily="@FontFamily"
+                                    FontSize="@FontSize"
+                                    FontWeight="@FontWeight"
+                                    FontStyle="@FontStyle"
+                                    LetterSpacing="@LetterSpacing"
+                                    Fill="#ffffff"
+                                    Text="@DisplayText" />
+                }
+                else
+                {
+                    <SvgWordArtText CssClass="wordart-media-mask"
+                                    X="0" Y="0" Dy="@Inv(Item.PathBaselineOffset)"
+                                    TextAnchor="middle"
+                                    FontFamily="@FontFamily"
+                                    FontSize="@FontSize"
+                                    FontWeight="@FontWeight"
+                                    FontStyle="@FontStyle"
+                                    LetterSpacing="@LetterSpacing"
+                                    Fill="#ffffff"
+                                    PathHref="@PathHref"
+                                    PathStartOffset="@PathStartOffset"
+                                    PathTextAnchor="middle"
+                                    Text="@DisplayText" />
+                }
+            </mask>
         }
     </defs>
 
@@ -91,8 +129,8 @@
         }
     }
 
-    @* A solid face is deliberately rendered first. It guarantees readable text if a browser,
-       print engine, or rasterizer rejects the local SVG gradient paint server. *@
+    @* A solid face remains below every advanced fill. It is the deterministic fallback for
+       print engines, rasterizers, or browsers that reject a local paint server/media mask. *@
     @if (Item.Warp == WordArtWarp.None)
     {
         <SvgWordArtText CssClass="wordart-face wordart-face-fallback"
@@ -105,12 +143,28 @@
                         FontStyle="@FontStyle"
                         LetterSpacing="@LetterSpacing"
                         Fill="@FillColor"
-                        Stroke="@OutlineColor"
-                        StrokeWidth="@OutlineWidth"
-                        PaintOrder="stroke fill"
                         Text="@DisplayText" />
+    }
+    else
+    {
+        <SvgWordArtText CssClass="wordart-face wordart-face-fallback"
+                        X="0" Y="0" Dy="@Inv(Item.PathBaselineOffset)"
+                        TextAnchor="middle"
+                        FontFamily="@FontFamily"
+                        FontSize="@FontSize"
+                        FontWeight="@FontWeight"
+                        FontStyle="@FontStyle"
+                        LetterSpacing="@LetterSpacing"
+                        Fill="@FillColor"
+                        PathHref="@PathHref"
+                        PathStartOffset="@PathStartOffset"
+                        PathTextAnchor="middle"
+                        Text="@DisplayText" />
+    }
 
-        @if (Item.GradientFill)
+    @if (EffectiveFillKind == WordArtFillKind.Gradient)
+    {
+        @if (Item.Warp == WordArtWarp.None)
         {
             <SvgWordArtText CssClass="wordart-face wordart-face-gradient"
                             X="500" Y="150"
@@ -124,27 +178,7 @@
                             Fill="@GradientFill"
                             Text="@DisplayText" />
         }
-    }
-    else
-    {
-        <SvgWordArtText CssClass="wordart-face wordart-face-fallback"
-                        X="0" Y="0" Dy="@Inv(Item.PathBaselineOffset)"
-                        TextAnchor="middle"
-                        FontFamily="@FontFamily"
-                        FontSize="@FontSize"
-                        FontWeight="@FontWeight"
-                        FontStyle="@FontStyle"
-                        LetterSpacing="@LetterSpacing"
-                        Fill="@FillColor"
-                        Stroke="@OutlineColor"
-                        StrokeWidth="@OutlineWidth"
-                        PaintOrder="stroke fill"
-                        PathHref="@PathHref"
-                        PathStartOffset="@PathStartOffset"
-                        PathTextAnchor="middle"
-                        Text="@DisplayText" />
-
-        @if (Item.GradientFill)
+        else
         {
             <SvgWordArtText CssClass="wordart-face wordart-face-gradient"
                             X="0" Y="0" Dy="@Inv(Item.PathBaselineOffset)"
@@ -161,15 +195,81 @@
                             Text="@DisplayText" />
         }
     }
+    else if (UsesStaticMediaImage)
+    {
+        <image class="wordart-media-fill wordart-media-image"
+               href="@StaticMediaSource"
+               x="@MediaX" y="@MediaY" width="@MediaWidth" height="@MediaHeight"
+               preserveAspectRatio="@MediaPreserveAspectRatio"
+               mask="@MediaMask" />
+    }
+    else if (UsesLiveVideo)
+    {
+        <foreignObject class="wordart-media-fill wordart-media-video"
+                       x="0" y="0" width="1000" height="300"
+                       mask="@MediaMask">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;overflow:hidden;background:transparent;">
+                <video src="@VideoMediaSource"
+                       poster="@Item.FillMediaPosterDataUrl"
+                       autoplay
+                       muted
+                       loop="@Item.FillMediaLoop"
+                       playsinline
+                       preload="metadata"
+                       style="@VideoStyle"></video>
+            </div>
+        </foreignObject>
+    }
+
+    @* Keep the outline above picture/video content so it is never swallowed by the masked fill. *@
+    @if (Item.Warp == WordArtWarp.None)
+    {
+        <SvgWordArtText CssClass="wordart-face wordart-face-outline"
+                        X="500" Y="150"
+                        TextAnchor="middle"
+                        DominantBaseline="middle"
+                        FontFamily="@FontFamily"
+                        FontSize="@FontSize"
+                        FontWeight="@FontWeight"
+                        FontStyle="@FontStyle"
+                        LetterSpacing="@LetterSpacing"
+                        Fill="transparent"
+                        Stroke="@OutlineColor"
+                        StrokeWidth="@OutlineWidth"
+                        PaintOrder="stroke"
+                        Text="@DisplayText" />
+    }
+    else
+    {
+        <SvgWordArtText CssClass="wordart-face wordart-face-outline"
+                        X="0" Y="0" Dy="@Inv(Item.PathBaselineOffset)"
+                        TextAnchor="middle"
+                        FontFamily="@FontFamily"
+                        FontSize="@FontSize"
+                        FontWeight="@FontWeight"
+                        FontStyle="@FontStyle"
+                        LetterSpacing="@LetterSpacing"
+                        Fill="transparent"
+                        Stroke="@OutlineColor"
+                        StrokeWidth="@OutlineWidth"
+                        PaintOrder="stroke"
+                        PathHref="@PathHref"
+                        PathStartOffset="@PathStartOffset"
+                        PathTextAnchor="middle"
+                        Text="@DisplayText" />
+    }
 </svg>
 
 @code {
     [Parameter, EditorRequired] public WordArtElement Item { get; set; } = default!;
     [Parameter] public string IdPrefix { get; set; } = "canvas";
+    [Parameter] public bool StaticMediaFill { get; set; }
 
     private string GradientId => $"{IdPrefix}-wordart-gradient-{Item.Id:N}";
     private string PathId => $"{IdPrefix}-wordart-path-{Item.Id:N}";
+    private string MediaMaskId => $"{IdPrefix}-wordart-media-mask-{Item.Id:N}";
     private string PathHref => $"#{PathId}";
+    private string MediaMask => $"url(#{MediaMaskId})";
     private string GradientFill => $"url(#{GradientId})";
     private string DisplayText => string.IsNullOrWhiteSpace(Item.Text) ? "WordArt" : Item.Text;
     private string FontFamily => string.IsNullOrWhiteSpace(Item.FontFamily) ? "Arial Black, Arial, sans-serif" : Item.FontFamily;
@@ -184,6 +284,37 @@
     private string ShadowColor => SafeColor(Item.ShadowColor, "#000000");
     private string OutlineWidth => Inv(Math.Clamp(Item.OutlineWidth, 0, 20));
     private IEnumerable<int> ExtrusionLayers => Enumerable.Range(1, Math.Clamp((int)Math.Round(Item.ExtrudeDepth), 0, 18)).Reverse();
+
+    private WordArtFillKind EffectiveFillKind => Item.FillKind == WordArtFillKind.Solid && Item.GradientFill
+        ? WordArtFillKind.Gradient
+        : Item.FillKind;
+    private bool UsesMediaFill => EffectiveFillKind is WordArtFillKind.Picture or WordArtFillKind.Video;
+    private bool HasPictureSource => Item.FillMediaDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+    private bool HasVideoSource => Item.FillMediaDataUrl.StartsWith("data:video/", StringComparison.OrdinalIgnoreCase);
+    private bool HasPosterSource => Item.FillMediaPosterDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+    private bool UsesStaticMediaImage =>
+        (EffectiveFillKind == WordArtFillKind.Picture && HasPictureSource) ||
+        (EffectiveFillKind == WordArtFillKind.Video && (StaticMediaFill || !HasVideoSource) && HasPosterSource);
+    private bool UsesLiveVideo => EffectiveFillKind == WordArtFillKind.Video && !StaticMediaFill && HasVideoSource;
+    private string VideoMediaSource => UsesLiveVideo ? MediaAssets.Register(Item.Id, Item.FillMediaDataUrl, Item.FillMediaMimeType) : string.Empty;
+    private string StaticMediaSource => EffectiveFillKind == WordArtFillKind.Picture ? Item.FillMediaDataUrl : Item.FillMediaPosterDataUrl;
+    private string MediaPreserveAspectRatio => Item.FillMediaFitMode switch
+    {
+        PublicationVideoFitMode.Stretch => "none",
+        PublicationVideoFitMode.Contain => "xMidYMid meet",
+        _ => "xMidYMid slice"
+    };
+    private string MediaX => Inv(-((Math.Clamp(Item.FillMediaScale, .1, 10) - 1) * 500) + Math.Clamp(Item.FillMediaOffsetXPercent, -100, 100) * 5);
+    private string MediaY => Inv(-((Math.Clamp(Item.FillMediaScale, .1, 10) - 1) * 150) + Math.Clamp(Item.FillMediaOffsetYPercent, -100, 100) * 1.5);
+    private string MediaWidth => Inv(1000 * Math.Clamp(Item.FillMediaScale, .1, 10));
+    private string MediaHeight => Inv(300 * Math.Clamp(Item.FillMediaScale, .1, 10));
+    private string VideoStyle => $"width:100%;height:100%;object-fit:{VideoFit};transform:translate({Inv(Item.FillMediaOffsetXPercent)}%,{Inv(Item.FillMediaOffsetYPercent)}%) scale({Inv(Math.Clamp(Item.FillMediaScale, .1, 10))});transform-origin:center center;";
+    private string VideoFit => Item.FillMediaFitMode switch
+    {
+        PublicationVideoFitMode.Contain => "contain",
+        PublicationVideoFitMode.Stretch => "fill",
+        _ => "cover"
+    };
 
     private string WarpPath => WordArtPathGeometry.Build(Item);
     private string PathStartOffset => $"{Math.Clamp(Item.PathStartOffsetPercent, 0, 100).ToString("0.##", CultureInfo.InvariantCulture)}%";

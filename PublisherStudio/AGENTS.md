@@ -90,6 +90,10 @@ canonical model -> capability analysis -> mapping -> external writer
 
 Imports must not mutate the active project before validation succeeds. Exporters must report unsupported, flattened and lossy features. Do not reshape the native model around a third-party format.
 
+Adapters belong under the owning `Services/<Area>/Import` or `Services/<Area>/Export` subnamespace. Interchange parsers and writers belong under the owning reusable Service namespace, for example `Services/PictureStudio/Import` or `Services/Publication/Import`. Their shared result and issue contracts belong in `Domain` or `Models`; Components only choose a file, display the report and commit the validated canonical result.
+
+Open specifications do not automatically permit adding an implementation package. Prefer open specifications and existing BCL capabilities. Do not add a NuGet, npm package, native binary or separate process for a format adapter without explicit approval. DTD processing must be prohibited for SVG/XML imports. They must also reject entity expansion, executable content, event attributes and undeclared online dependencies. Package imports must validate archive paths, entry sizes and required manifest/content files. Add deterministic fixtures and architecture tests for every new adapter.
+
 ## Before adding or moving code
 
 1. Inspect the closest existing implementation.

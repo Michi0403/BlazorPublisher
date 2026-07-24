@@ -2,7 +2,7 @@ const editors = new Map();
 const imageCache = new Map();
 const proceduralCache = new Map();
 
-const layerKinds = ["raster", "text", "shape", "fill", "render", "paint"];
+const layerKinds = ["raster", "text", "shape", "fill", "render", "paint", "vector"];
 const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "lighten"];
 const rasterFits = ["stretch", "contain", "cover"];
 const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow", "freeform", "path"];
@@ -90,6 +90,29 @@ function loadImage(dataUrl) {
     });
     imageCache.set(source, promise);
     return promise;
+}
+
+function svgMarkupDataUrl(markup) {
+    const source = String(markup || "").trim();
+    if (!source.toLowerCase().startsWith("<svg")) return "";
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(source)}`;
+}
+
+async function drawSvgLayer(ctx, layer) {
+    const { width, height } = beginLayer(ctx, layer);
+    try {
+        const source = svgMarkupDataUrl(layer.svgMarkup);
+        if (!source) throw new Error("The vector layer does not contain a standalone SVG document.");
+        const image = await loadImage(source);
+        if (!image) throw new Error("The vector layer could not be decoded.");
+        drawImageWithFit(ctx, image, width, height, layer.preserveAspectRatio === false ? "stretch" : "contain");
+        endLayer(ctx);
+        return null;
+    } catch (error) {
+        endLayer(ctx);
+        drawBrokenLayer(ctx, layer, "SVG");
+        return `${layer.name || "Vector layer"}: ${error?.message || error}`;
+    }
 }
 
 function parseColor(value, fallback = [0, 0, 0, 255]) {
@@ -955,6 +978,7 @@ async function drawLayer(ctx, layer) {
         case "fill": drawFillLayer(ctx, layer); break;
         case "render": drawRenderLayer(ctx, layer); break;
         case "paint": drawPaintLayer(ctx, layer); break;
+        case "svg": return await drawSvgLayer(ctx, layer);
         default: drawShapeLayer(ctx, layer); break;
     }
     return null;
@@ -1335,7 +1359,7 @@ function scheduleEditorRender(editor) {
                 grid: true,
                 selectedLayerId: editor.selectedLayerId,
                 zoom: editor.zoom,
-                previewStroke: editor.drawing,
+                previewStroke: editor.pathDraft ? { ...editor.pathDraft, points: [...editor.pathDraft.points, ...(editor.pathDraft.hover ? [editor.pathDraft.hover] : [])] } : editor.drawing,
                 areaSelection: editor.areaSelection
             });
             if (token === editor.renderToken) {
@@ -1388,6 +1412,44 @@ function resetEditorPointerState(editor, cancel = true) {
     if (!editor) return;
     if (editor.drawing) finishDrawing(editor, null, cancel);
     if (editor.interaction) finishInteraction(editor, null, cancel);
+    if (cancel && editor.pathDraft) {
+        editor.pathDraft = null;
+        scheduleEditorRender(editor);
+    }
+}
+
+function addPathNode(editor, event) {
+    let point = canvasPoint(editor.canvas, event);
+    if (editor.document.snapToGrid) {
+        const spacing = Math.max(2, Number(editor.document.gridSpacingPx) || 25);
+        point = { x: snap(point.x, spacing, true), y: snap(point.y, spacing, true) };
+    }
+    if (!editor.pathDraft) {
+        editor.pathDraft = {
+            tool: "path",
+            color: editor.toolSettings.color,
+            widthPx: editor.toolSettings.width,
+            opacity: editor.toolSettings.opacity,
+            points: [point],
+            hover: point
+        };
+    } else {
+        const last = editor.pathDraft.points[editor.pathDraft.points.length - 1];
+        if (Math.hypot(point.x - last.x, point.y - last.y) > .25) editor.pathDraft.points.push(point);
+        editor.pathDraft.hover = point;
+    }
+    scheduleEditorRender(editor);
+    event.preventDefault();
+}
+
+function finishPathDraft(editor, closed = false) {
+    const draft = editor.pathDraft;
+    editor.pathDraft = null;
+    if (!draft || draft.points.length < 2) { scheduleEditorRender(editor); return; }
+    const coordinates = [];
+    for (const point of draft.points) coordinates.push(Number(point.x) || 0, Number(point.y) || 0);
+    safeInvoke(editor, "PicturePathCommitted", coordinates, closed === true, false);
+    scheduleEditorRender(editor);
 }
 
 function beginInteraction(editor, event) {
@@ -1505,6 +1567,12 @@ function beginDrawing(editor, event) {
         commitAreaFill(editor, editor.areaSelection, settings.tool === "fillgradient");
         scheduleEditorRender(editor); event.preventDefault(); return;
     }
+    if (settings.tool === "path") {
+        // The second pointerdown of a double-click must not create a duplicate terminal node.
+        if ((Number(event.detail) || 0) < 2) addPathNode(editor, event);
+        else event.preventDefault();
+        return;
+    }
     if (!["brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "fillsolid", "fillgradient"].includes(settings.tool)) return;
     const adjustedWidth = settings.tool === "pencil"
         ? Math.min(settings.width, 6)
@@ -1620,6 +1688,7 @@ function bindEditorCanvas(editor, canvas) {
     editor.canvas = canvas;
     editor.interaction = null;
     editor.drawing = null;
+    editor.pathDraft = null;
     canvas.dataset.pictureStudioBound = "true";
     canvas.addEventListener("pointerdown", event => {
         canvas.focus({ preventScroll: true });
@@ -1628,7 +1697,10 @@ function bindEditorCanvas(editor, canvas) {
         else beginDrawing(editor, event);
     });
     canvas.addEventListener("pointermove", event => {
-        if (editor.drawing) updateDrawing(editor, event);
+        if (editor.pathDraft && (editor.toolSettings?.tool || "select") === "path") {
+            editor.pathDraft.hover = canvasPoint(canvas, event);
+            scheduleEditorRender(editor);
+        } else if (editor.drawing) updateDrawing(editor, event);
         else updateInteraction(editor, event);
     });
     canvas.addEventListener("pointerup", event => {
@@ -1644,6 +1716,11 @@ function bindEditorCanvas(editor, canvas) {
         else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
     });
     canvas.addEventListener("dblclick", event => {
+        if ((editor.toolSettings?.tool || "select") === "path") {
+            finishPathDraft(editor, event.shiftKey === true);
+            event.preventDefault();
+            return;
+        }
         if ((editor.toolSettings?.tool || "select") !== "select") return;
         const point = canvasPoint(canvas, event);
         const layer = hitLayer(editor.document, point.x, point.y);
@@ -1668,13 +1745,19 @@ function bindEditorCanvas(editor, canvas) {
         else if (event.key === "Home") command = "front";
         else if (event.key === "End") command = "back";
 
+        if (editor.pathDraft && event.key === "Enter") {
+            finishPathDraft(editor, event.shiftKey === true);
+            event.preventDefault();
+            return;
+        }
         if (command) {
             safeInvoke(editor, "PictureShortcutRequested", command);
             event.preventDefault();
             return;
         }
         if (event.key === "Escape") {
-            if (editor.drawing) finishDrawing(editor, null, true);
+            if (editor.pathDraft) { editor.pathDraft = null; scheduleEditorRender(editor); }
+            else if (editor.drawing) finishDrawing(editor, null, true);
             else if (editor.interaction) finishInteraction(editor, null, true);
             else safeInvoke(editor, "PictureShortcutRequested", "select");
             event.preventDefault();
@@ -1696,6 +1779,7 @@ export function initializePictureStudio(canvasId, dotNetRef) {
             zoom: .65,
             interaction: null,
             drawing: null,
+            pathDraft: null,
             areaSelection: null,
             toolSettings: normalizeToolSettings(null),
             animationFrame: 0,
@@ -1736,10 +1820,12 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     const nextDocument = cloneDocument(documentModel);
     editor.selectedLayerId = selectedLayerId || null;
     editor.zoom = clamp(zoom ?? nextDocument.zoom, .05, 4);
-    editor.toolSettings = normalizeToolSettings(toolSettings);
+    const nextToolSettings = normalizeToolSettings(toolSettings);
+    if (editor.pathDraft && nextToolSettings.tool !== "path") editor.pathDraft = null;
+    editor.toolSettings = nextToolSettings;
     canvas.style.width = `${Math.round(nextDocument.widthPx * editor.zoom)}px`;
     canvas.style.height = `${Math.round(nextDocument.heightPx * editor.zoom)}px`;
-    if (!editor.interaction && !editor.drawing) editor.document = nextDocument;
+    if (!editor.interaction && !editor.drawing && !editor.pathDraft) editor.document = nextDocument;
     updateCanvasCursor(editor);
     scheduleEditorRender(editor);
 }
@@ -2036,7 +2122,10 @@ export async function createPictureStudioSvg(documentModel) {
         if (kind === "shape") markup = svgShapeLayer(layer, definitions, prefix);
         else if (kind === "text") markup = svgTextLayer(layer, definitions, prefix);
         else if (kind === "fill") markup = svgFillLayer(layer, definitions, prefix);
-        else {
+        else if (kind === "svg") {
+            const source = svgMarkupDataUrl(layer.svgMarkup);
+            markup = `<image x="${svgNumber(-Math.max(1, svgNumber(layer.width, 1)) / 2)}" y="${svgNumber(-Math.max(1, svgNumber(layer.height, 1)) / 2)}" width="${svgNumber(Math.max(1, svgNumber(layer.width, 1)))}" height="${svgNumber(Math.max(1, svgNumber(layer.height, 1)))}" href="${xmlEscape(source)}" preserveAspectRatio="${layer.preserveAspectRatio === false ? "none" : "xMidYMid meet"}"/>`;
+        } else {
             markup = await svgRasterizedLayer(layer);
             adjustments = false;
         }
@@ -2050,7 +2139,344 @@ export async function createPictureStudioSvg(documentModel) {
     const defs = definitions.length ? `<defs>${definitions.join("")}</defs>` : "";
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${document.widthPx}" height="${document.heightPx}" viewBox="0 0 ${document.widthPx} ${document.heightPx}">
-<title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.2">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
+<title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.3">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
+}
+
+
+const svgImportRemovedElements = new Set(["script", "foreignobject", "iframe", "object", "embed", "audio", "video", "canvas"]);
+const svgImportNonVisualAncestors = new Set(["defs", "clippath", "mask", "marker", "pattern", "symbol", "lineargradient", "radialgradient", "filter"]);
+const svgImportVisualSelector = "path,rect,circle,ellipse,line,polyline,polygon,text,image,use";
+
+function decodeSvgDataUrl(dataUrl) {
+    const source = String(dataUrl || "");
+    const comma = source.indexOf(",");
+    if (comma < 0 || !source.slice(0, comma).toLowerCase().includes("image/svg+xml"))
+        throw new Error("The selected file is not SVG data.");
+    const header = source.slice(0, comma).toLowerCase();
+    const payload = source.slice(comma + 1);
+    if (header.includes(";base64")) {
+        const binary = atob(payload);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+        return new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+    }
+    return decodeURIComponent(payload);
+}
+
+function safeSvgReference(value) {
+    const text = String(value || "").trim();
+    if (!text || text.startsWith("#") || /^data:image\/(?:png|jpe?g|gif|webp|bmp)(?:;|,)/i.test(text)) return text;
+    return "";
+}
+
+function hasUnsafeSvgCssReference(value) {
+    const text = String(value || "");
+    if (/@import/i.test(text)) return true;
+    const expression = /url\s*\(\s*(["']?)(.*?)\1\s*\)/gi;
+    let match;
+    while ((match = expression.exec(text))) {
+        const target = String(match[2] || "").trim();
+        if (!target.startsWith("#") && !safeSvgReference(target)) return true;
+    }
+    return false;
+}
+
+function sanitizeSvgImportDocument(sourceText) {
+    const parsed = new DOMParser().parseFromString(sourceText, "image/svg+xml");
+    if (parsed.querySelector("parsererror")) throw new Error("The SVG XML is malformed.");
+    const root = parsed.documentElement;
+    if (!root || root.localName.toLowerCase() !== "svg") throw new Error("The selected file has no SVG root element.");
+    for (const element of [root, ...root.querySelectorAll("*")]) {
+        const name = element.localName.toLowerCase();
+        if (svgImportRemovedElements.has(name)) {
+            element.remove();
+            continue;
+        }
+        for (const attribute of [...element.attributes]) {
+            const local = attribute.localName.toLowerCase();
+            const value = String(attribute.value || "").trim();
+            if (local.startsWith("on") || /(?:java|vb)script:/i.test(value) || hasUnsafeSvgCssReference(value)) {
+                element.removeAttributeNode(attribute);
+                continue;
+            }
+            if (local === "href" || local === "src") {
+                const safe = safeSvgReference(value);
+                if (safe) attribute.value = safe;
+                else element.removeAttributeNode(attribute);
+            }
+        }
+        if (name === "style") {
+            const css = element.textContent || "";
+            if (/javascript:/i.test(css) || hasUnsafeSvgCssReference(css)) element.remove();
+        }
+    }
+    root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    root.removeAttribute("onload");
+    return parsed;
+}
+
+function svgNumberValue(value, fallback = 0) {
+    const text = String(value ?? "").trim();
+    const match = text.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*([a-z%]*)$/i);
+    if (!match) return fallback;
+    const parsed = Number.parseFloat(match[1]);
+    if (!Number.isFinite(parsed)) return fallback;
+    const unit = String(match[2] || "").toLowerCase();
+    if (unit === "mm") return parsed * 96 / 25.4;
+    if (unit === "cm") return parsed * 96 / 2.54;
+    if (unit === "in") return parsed * 96;
+    if (unit === "pt") return parsed * 96 / 72;
+    if (unit === "pc") return parsed * 16;
+    if (unit === "q") return parsed * 96 / 101.6;
+    if (unit === "%") return fallback;
+    return parsed;
+}
+
+function svgImportViewport(root) {
+    const viewBox = String(root.getAttribute("viewBox") || "").trim().split(/[\s,]+/).map(Number).filter(Number.isFinite);
+    let width = svgNumberValue(root.getAttribute("width"), viewBox.length === 4 ? viewBox[2] : 1200);
+    let height = svgNumberValue(root.getAttribute("height"), viewBox.length === 4 ? viewBox[3] : 800);
+    width = Math.round(clamp(width, 16, 8192));
+    height = Math.round(clamp(height, 16, 8192));
+    return { width, height, viewBox: viewBox.length === 4 ? viewBox : [0, 0, width, height] };
+}
+
+function svgImportLayerPath(element) {
+    const names = [];
+    const inkscapeNamespace = "http://www.inkscape.org/namespaces/inkscape";
+    let current = element.parentElement;
+    while (current && current.localName.toLowerCase() !== "svg") {
+        if (current.localName.toLowerCase() === "g") {
+            const groupMode = current.getAttributeNS(inkscapeNamespace, "groupmode") || current.getAttribute("inkscape:groupmode");
+            const label = current.getAttributeNS(inkscapeNamespace, "label") || current.getAttribute("inkscape:label") || current.getAttribute("data-name") || current.getAttribute("aria-label");
+            if (String(groupMode || "").toLowerCase() === "layer" || label || current.id)
+                names.unshift(label || current.id || "Layer");
+        }
+        current = current.parentElement;
+    }
+    return names.join(" / ");
+}
+
+function svgImportLayerName(element, index) {
+    const inkscapeNamespace = "http://www.inkscape.org/namespaces/inkscape";
+    const label = element.getAttributeNS(inkscapeNamespace, "label") || element.getAttribute("inkscape:label") || element.getAttribute("data-name") || element.getAttribute("aria-label");
+    const title = element.querySelector(":scope > title")?.textContent?.trim();
+    return label || title || element.id || `${element.localName} ${index + 1}`;
+}
+
+function svgImportElementVisible(element, root) {
+    let current = element;
+    while (current && current !== root.parentElement) {
+        const style = getComputedStyle(current);
+        if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
+        if (current === root) break;
+        current = current.parentElement;
+    }
+    return true;
+}
+
+function revealSvgElementForMeasurement(element, root) {
+    const changed = [];
+    let current = element;
+    while (current && current !== root.parentElement) {
+        const style = getComputedStyle(current);
+        if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") {
+            changed.push([current, current.getAttribute("style")]);
+            current.style.setProperty("display", "inline", "important");
+            current.style.setProperty("visibility", "visible", "important");
+        }
+        if (current === root) break;
+        current = current.parentElement;
+    }
+    return () => {
+        for (const [node, style] of changed.reverse()) {
+            if (style == null) node.removeAttribute("style");
+            else node.setAttribute("style", style);
+        }
+    };
+}
+
+function transformedSvgBounds(element, root) {
+    const restore = revealSvgElementForMeasurement(element, root);
+    try {
+        let box;
+        try { box = element.getBBox({ fill: true, stroke: true, markers: true, clipped: false }); }
+        catch { box = element.getBBox(); }
+        const matrix = element.getCTM();
+        if (!box || !matrix || !Number.isFinite(box.width) || !Number.isFinite(box.height)) return null;
+        const points = [
+            new DOMPoint(box.x, box.y).matrixTransform(matrix),
+            new DOMPoint(box.x + box.width, box.y).matrixTransform(matrix),
+            new DOMPoint(box.x, box.y + box.height).matrixTransform(matrix),
+            new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(matrix)
+        ];
+        const minX = Math.min(...points.map(point => point.x));
+        const minY = Math.min(...points.map(point => point.y));
+        const maxX = Math.max(...points.map(point => point.x));
+        const maxY = Math.max(...points.map(point => point.y));
+        const width = Math.max(.01, maxX - minX);
+        const height = Math.max(.01, maxY - minY);
+        const padding = Math.max(1, Math.min(24, Math.max(width, height) * .0125));
+        return { x: minX - padding, y: minY - padding, width: width + padding * 2, height: height + padding * 2 };
+    } finally {
+        restore();
+    }
+}
+
+function forceSvgLayerVisibility(element) {
+    element.removeAttribute("display");
+    element.removeAttribute("visibility");
+    element.style?.setProperty("display", "inline", "important");
+    element.style?.setProperty("visibility", "visible", "important");
+}
+
+function cloneSvgElementWithAncestors(element, root) {
+    let content = element.cloneNode(true);
+    forceSvgLayerVisibility(content);
+    let current = element.parentElement;
+    while (current && current !== root) {
+        const wrapper = current.cloneNode(false);
+        wrapper.removeAttribute("id");
+        forceSvgLayerVisibility(wrapper);
+        wrapper.appendChild(content);
+        content = wrapper;
+        current = current.parentElement;
+    }
+    return content;
+}
+
+function standaloneSvgForElement(root, element, bounds) {
+    const document = root.ownerDocument;
+    const output = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    output.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    output.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    output.setAttribute("width", String(bounds.width));
+    output.setAttribute("height", String(bounds.height));
+    output.setAttribute("viewBox", `${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}`);
+    output.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    for (const child of [...root.children]) {
+        const name = child.localName.toLowerCase();
+        if (name === "defs" || name === "style") output.appendChild(child.cloneNode(true));
+    }
+    for (const style of [...root.querySelectorAll("defs style")]) {
+        if (!output.querySelector("defs")) output.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "defs"));
+        output.querySelector("defs").appendChild(style.cloneNode(true));
+    }
+    const content = cloneSvgElementWithAncestors(element, root);
+    const rootMatrix = root.getCTM?.();
+    if (rootMatrix && [rootMatrix.a, rootMatrix.b, rootMatrix.c, rootMatrix.d, rootMatrix.e, rootMatrix.f].every(Number.isFinite)) {
+        const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        wrapper.setAttribute("transform", `matrix(${rootMatrix.a} ${rootMatrix.b} ${rootMatrix.c} ${rootMatrix.d} ${rootMatrix.e} ${rootMatrix.f})`);
+        wrapper.appendChild(content);
+        output.appendChild(wrapper);
+    } else {
+        output.appendChild(content);
+    }
+    return new XMLSerializer().serializeToString(output);
+}
+
+function publisherStudioPictureMetadata(root) {
+    const metadata = root.querySelector("metadata[data-publisherstudio-picture]");
+    if (!metadata?.textContent?.trim()) return null;
+    try {
+        const documentModel = JSON.parse(metadata.textContent);
+        return normalizeDocument(documentModel);
+    } catch {
+        return null;
+    }
+}
+
+export async function importPictureStudioSvg(dataUrl, fileName) {
+    const sourceText = decodeSvgDataUrl(dataUrl);
+    const parsed = sanitizeSvgImportDocument(sourceText);
+    const root = parsed.documentElement;
+    const embedded = publisherStudioPictureMetadata(root);
+    if (embedded) {
+        embedded.name = String(fileName || embedded.name || "SVG").replace(/\.(?:svg|svgz)$/i, "");
+        return { document: embedded, issues: [] };
+    }
+
+    const viewport = svgImportViewport(root);
+    root.setAttribute("width", `${viewport.width}px`);
+    root.setAttribute("height", `${viewport.height}px`);
+    if (!root.hasAttribute("viewBox")) root.setAttribute("viewBox", viewport.viewBox.join(" "));
+    root.style.position = "fixed";
+    root.style.left = "-100000px";
+    root.style.top = "-100000px";
+    // Keep authored visibility semantics available to getComputedStyle while making the
+    // measurement tree fully transparent and far outside the viewport.
+    root.style.opacity = "0";
+    root.style.pointerEvents = "none";
+    document.body.appendChild(document.importNode(root, true));
+    const mounted = document.body.lastElementChild;
+    const issues = [];
+    try {
+        await document.fonts?.ready;
+        const visualElements = [...mounted.querySelectorAll(svgImportVisualSelector)].filter(element =>
+            !element.closest("defs,clipPath,mask,marker,pattern,symbol,linearGradient,radialGradient,filter"));
+        const layers = [];
+        for (let index = 0; index < visualElements.length && layers.length < 5000; index++) {
+            const element = visualElements[index];
+            if (element.localName.toLowerCase() === "image" && !safeSvgReference(element.getAttribute("href") || element.getAttributeNS("http://www.w3.org/1999/xlink", "href"))) {
+                issues.push({ severity: 2, code: "SVG_EXTERNAL_IMAGE_SKIPPED", message: "An externally linked SVG image was skipped because PublisherStudio imports remain offline.", source: element.id || null });
+                continue;
+            }
+            const visible = svgImportElementVisible(element, mounted);
+            const bounds = transformedSvgBounds(element, mounted);
+            if (!bounds || bounds.width <= .01 || bounds.height <= .01) continue;
+            const markup = standaloneSvgForElement(mounted, element, bounds);
+            layers.push({
+                $type: "svg",
+                id: crypto.randomUUID(),
+                name: svgImportLayerName(element, index),
+                groupPath: svgImportLayerPath(element),
+                x: bounds.x,
+                y: bounds.y,
+                width: bounds.width,
+                height: bounds.height,
+                rotation: 0,
+                // Authored opacity and ancestor opacity remain inside the retained SVG markup.
+                // Applying them again at the Picture Studio layer would square the opacity.
+                opacity: 1,
+                visible,
+                locked: false,
+                blendMode: "Normal",
+                brightness: 1,
+                contrast: 1,
+                saturation: 1,
+                hueRotation: 0,
+                blur: 0,
+                grayscale: 0,
+                sepia: 0,
+                invert: 0,
+                svgMarkup: markup,
+                sourceFormat: "SVG",
+                sourceElementId: element.id || "",
+                preserveAspectRatio: true
+            });
+        }
+        if (visualElements.length > 5000)
+            issues.push({ severity: 1, code: "SVG_LAYER_LIMIT", message: "The SVG contains more than 5000 visual objects; remaining objects were not imported as separate layers.", source: null });
+        if (!layers.length) throw new Error("The SVG contains no supported visible vector objects.");
+        return {
+            document: {
+                id: crypto.randomUUID(),
+                name: String(fileName || "SVG").replace(/\.(?:svg|svgz)$/i, ""),
+                formatVersion: "1.3",
+                widthPx: viewport.width,
+                heightPx: viewport.height,
+                background: "transparent",
+                zoom: .65,
+                gridVisible: false,
+                snapToGrid: true,
+                gridSpacingPx: 25,
+                layers
+            },
+            issues
+        };
+    } finally {
+        mounted?.remove();
+    }
 }
 
 export async function downloadPictureStudioSvg(documentModel, fileName) {

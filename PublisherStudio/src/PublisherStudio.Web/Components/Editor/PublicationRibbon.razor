@@ -4,6 +4,7 @@
     <DxRibbonApplicationTab Text="File">
         <DxRibbonApplicationTabItem Text="New publication" IconCssClass="pub-icon pub-icon-newpage" Click="RequestNew" />
         <DxRibbonApplicationTabItem Text="Open publication" IconCssClass="pub-icon pub-icon-open" Click="RequestOpen" />
+        <DxRibbonApplicationTabItem Text="Import OpenDocument pages (ODG / ODP)" IconCssClass="pub-icon pub-icon-open" Click="RequestImportOpenDocument" />
         <DxRibbonApplicationTabItem Text="Save publication" IconCssClass="pub-icon pub-icon-save" Click="RequestSave" />
         <DxRibbonApplicationTabItem Text="Export current page as PNG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportPng" />
         <DxRibbonApplicationTabItem Text="Export current page as JPEG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportJpeg" />
@@ -579,6 +580,7 @@
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
     [Parameter] public EventCallback OnOpen { get; set; }
+    [Parameter] public EventCallback OnImportOpenDocument { get; set; }
     [Parameter] public EventCallback OnSave { get; set; }
     [Parameter] public EventCallback OnPrint { get; set; }
     [Parameter] public EventCallback OnExportPng { get; set; }
@@ -648,6 +650,7 @@
 
     private Task RequestNew() => OnNew.InvokeAsync();
     private Task RequestOpen() => OnOpen.InvokeAsync();
+    private Task RequestImportOpenDocument() => OnImportOpenDocument.InvokeAsync();
     private Task RequestSave() => OnSave.InvokeAsync();
     private Task RequestPrint() => OnPrint.InvokeAsync();
     private Task RequestExportPng() => OnExportPng.InvokeAsync();

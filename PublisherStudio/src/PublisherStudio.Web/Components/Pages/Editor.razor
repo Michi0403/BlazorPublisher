@@ -3,6 +3,7 @@
 @implements IDisposable
 @inject EditorStateService State
 @inject PublicationFileService Files
+@inject PublisherStudio.Services.Publication.Import.OpenDocumentImportService OpenDocumentImporter
 @inject PublicationMediaAssetStore MediaAssets
 @inject SpreadsheetDocumentService Spreadsheets
 @inject SpreadsheetSessionStore SpreadsheetSessions
@@ -34,6 +35,7 @@
                        TimelineVisible="_timelineVisible"
                        OnNew="NewDocument"
                        OnOpen="OpenPublicationPicker"
+                       OnImportOpenDocument="OpenOpenDocumentPicker"
                        OnSave="SavePublication"
                        OnPrint="Print"
                        OnExportPng="ExportPng"
@@ -162,6 +164,7 @@
 </div>
 
 <InputFile id="publication-file-input" class="hidden-file-input" accept=".json,.pubstudio.json,application/json" OnChange="OpenPublication" />
+<InputFile id="opendocument-file-input" class="hidden-file-input" accept=".odg,.odp,.fodg,.fodp,application/vnd.oasis.opendocument.graphics,application/vnd.oasis.opendocument.presentation,application/xml,text/xml" OnChange="ImportOpenDocument" />
 <InputFile id="picture-file-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="InsertPicture" />
 <InputFile id="spreadsheet-file-input" class="hidden-file-input" accept=".xlsx,.xlsm,.xls,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/plain" OnChange="InsertSpreadsheet" />
 <InputFile id="video-file-input" class="hidden-file-input" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,video/mp4,video/x-m4v,video/webm,video/ogg,video/quicktime" OnChange="InsertVideo" />
@@ -524,6 +527,12 @@
         await CancelPublisherPointerAsync();
         await OpenHiddenFileInput("publication-file-input");
     }
+
+    private async Task OpenOpenDocumentPicker()
+    {
+        await CancelPublisherPointerAsync();
+        await OpenHiddenFileInput("opendocument-file-input");
+    }
     private async Task OpenPicturePicker()
     {
         _pendingCanvasInsert = null;
@@ -803,6 +812,24 @@
             await using var stream = args.File.OpenReadStream(long.MaxValue);
             using var reader = new StreamReader(stream);
             State.Load(await reader.ReadToEndAsync());
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
+
+    private async Task ImportOpenDocument(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            await using var stream = args.File.OpenReadStream(512L * 1024 * 1024);
+            var result = await OpenDocumentImporter.ImportAsync(stream, args.File.Name);
+            State.Load(Files.Serialize(result.Document));
+            var warningCount = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Warning);
+            var lossCount = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Loss);
+            ShowNotice($"Imported {State.Document.Pages.Count} OpenDocument page(s). {warningCount} warning(s), {lossCount} compatibility loss(es). The publication is now in PublisherStudio's native format.");
+            if (_pageSurface is not null) await _pageSurface.FitPageAsync();
         }
         catch (Exception ex)
         {

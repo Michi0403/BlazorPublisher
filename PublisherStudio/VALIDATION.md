@@ -625,3 +625,17 @@ Static checks completed for the v1.0.37 source package:
 - In an upgraded local checkout, remove `bin` and `obj` or run `dotnet clean` before rebuilding so Visual Studio cannot retain the removed v1.0.63 type in a design-time assembly.
 - A full .NET/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.
 
+
+## v1.0.65 targeted validation
+
+- Import the layered Inkscape fixture and representative SVG/SVGZ files from Inkscape, Krita, LibreOffice Draw and browser/vector tools; confirm paths, visual shapes, named groups/layers, hidden layers, local gradients/masks/clips and transforms remain available as Picture Studio vector layers.
+- Confirm imported SVG cannot retain scripts, event attributes, DTD/entity expansion, external `href`/`src`, CSS `@import` or online `url(...)` paint references.
+- Import representative OpenRaster archives; confirm uppermost-first stack order becomes correct bottom-to-top Picture Studio order and nested names, offsets, opacity, visibility, locks, blend modes, raster layers and SVG/SVGZ layers are retained or explicitly reported.
+- Confirm malformed/oversized SVG layers do not discard otherwise valid OpenRaster layers and that package/path/decompression limits are enforced.
+- Verify the Path tool adds one node per click, previews the next segment, commits on Enter/double-click, closes with Shift and cancels with Escape; then edit points through the native path property controls.
+- Apply picture, sanitized SVG and video fills to straight, warped and custom-path WordArt. Verify live editor/HTML video, picture fill, poster-backed print/PDF output, and raster/SVG export media snapshots.
+- Import `.odg`, `.odp`, `.fodg` and `.fodp` samples; confirm page count/dimensions, text frames, package and inline images, basic shapes, paths/polygons/polylines, and explicit compatibility issue counts.
+- Confirm active publications are replaced only after an import adapter has returned a validated temporary canonical result.
+- Confirm new adapters remain below `Services/PictureStudio/Import` and `Services/Publication/Import`, shared results remain in `Domain`, and no new NuGet/npm/native dependency exists.
+- Run all 15 Node suites, syntax-check every non-vendor JavaScript/test module, parse JSON and project XML, verify C# structural balance and contract ownership, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
+- A full .NET/Razor/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.

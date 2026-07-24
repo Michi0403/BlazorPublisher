@@ -1,6 +1,9 @@
 @namespace PublisherStudio.Components.Editor
+@using PublisherStudio.Services.PictureStudio.Import
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 @inject StreamingProfileStore StreamingProfiles
+@inject PublicationMediaAssetStore MediaAssets
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
@@ -273,8 +276,52 @@
                     </label>
                     @RangeField("Font size", wordArt.FontSizePt, 8, 180, 1, "wordFontSize")
                     @RangeField("Letter spacing", wordArt.LetterSpacing, -5, 30, .5, "wordLetterSpacing")
-                    @ColorField("Fill", wordArt.FillColor, "wordFill")
-                    @ColorField("Second color", wordArt.SecondaryColor, "wordSecondary")
+                    <label>Fill type
+                        <select value="@wordArt.FillKind" @onchange="ChangeWordArtFillKind">
+                            <option value="Solid">Solid color</option>
+                            <option value="Gradient">Gradient</option>
+                            <option value="Picture">Picture</option>
+                            <option value="Video">Video</option>
+                        </select>
+                    </label>
+                    @ColorField("Fallback / solid fill", wordArt.FillColor, "wordFill")
+                    @if (wordArt.FillKind == WordArtFillKind.Gradient)
+                    {
+                        @ColorField("Second color", wordArt.SecondaryColor, "wordSecondary")
+                    }
+                    @if (wordArt.FillKind is WordArtFillKind.Picture or WordArtFillKind.Video)
+                    {
+                        <div class="property-button-row">
+                            @if (wordArt.FillKind == WordArtFillKind.Picture)
+                            {
+                                <DxButton Text="Choose picture…" Click="RequestWordArtPicture" />
+                            }
+                            else
+                            {
+                                <DxButton Text="Choose video…" Click="RequestWordArtVideo" />
+                            }
+                            <DxButton Text="Clear media" Enabled="@(!string.IsNullOrWhiteSpace(wordArt.FillMediaDataUrl))" Click="ClearWordArtMedia" />
+                        </div>
+                        <label>Media fit
+                            <select value="@wordArt.FillMediaFitMode" @onchange="ChangeWordArtMediaFit">
+                                <option value="Cover">Cover letters</option>
+                                <option value="Contain">Contain in letters</option>
+                                <option value="Stretch">Stretch</option>
+                            </select>
+                        </label>
+                        @RangeField("Media scale", wordArt.FillMediaScale, .1, 10, .01, "wordMediaScale")
+                        @RangeField("Horizontal offset", wordArt.FillMediaOffsetXPercent, -100, 100, 1, "wordMediaOffsetX")
+                        @RangeField("Vertical offset", wordArt.FillMediaOffsetYPercent, -100, 100, 1, "wordMediaOffsetY")
+                        @if (wordArt.FillKind == WordArtFillKind.Video)
+                        {
+                            <label class="check-row"><input type="checkbox" checked="@wordArt.FillMediaLoop" @onchange="ToggleWordArtMediaLoop" /> Loop video fill</label>
+                            <p class="property-note">Interactive HTML keeps the video live. Static exports use the generated poster frame so PDF, print, PNG, JPEG and SVG remain deterministic.</p>
+                        }
+                        else
+                        {
+                            <p class="property-note">The original picture remains embedded in the publication and is clipped through the WordArt glyphs in every export.</p>
+                        }
+                    }
                     @ColorField("Outline", wordArt.OutlineColor, "wordOutline")
                     @RangeField("Outline width", wordArt.OutlineWidth, 0, 12, .25, "wordOutlineWidth")
                     @ColorField("3D color", wordArt.ExtrudeColor, "wordExtrude")
@@ -299,7 +346,6 @@
                     }
                     <label class="check-row"><input type="checkbox" checked="@wordArt.Bold" @onchange="ToggleWordArtBold" /> Bold</label>
                     <label class="check-row"><input type="checkbox" checked="@wordArt.Italic" @onchange="ToggleWordArtItalic" /> Italic</label>
-                    <label class="check-row"><input type="checkbox" checked="@wordArt.GradientFill" @onchange="ToggleWordArtGradient" /> Gradient fill</label>
                     <label class="check-row"><input type="checkbox" checked="@wordArt.ShadowEnabled" @onchange="ToggleWordArtShadow" /> Shadow</label>
                 </section>
             }
@@ -762,6 +808,9 @@
     </DxContextMenu>
 </aside>
 
+<InputFile id="wordart-picture-fill-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="ImportWordArtPicture" />
+<InputFile id="wordart-video-fill-input" class="hidden-file-input" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,video/mp4,video/x-m4v,video/webm,video/ogg,video/quicktime" OnChange="ImportWordArtVideo" />
+
 @code {
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public EventCallback OnEditStory { get; set; }
@@ -790,6 +839,7 @@
 
     private List<StreamingDeviceProfile> _streamingDeviceProfiles = [];
     private bool _streamingProfilesLoaded;
+    private IJSObjectReference? _mediaModule;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -1225,8 +1275,97 @@
     });
     private void ToggleWordArtBold(ChangeEventArgs args) => SetWordArt(item => item.Bold = ReadBool(args));
     private void ToggleWordArtItalic(ChangeEventArgs args) => SetWordArt(item => item.Italic = ReadBool(args));
-    private void ToggleWordArtGradient(ChangeEventArgs args) => SetWordArt(item => item.GradientFill = ReadBool(args));
     private void ToggleWordArtShadow(ChangeEventArgs args) => SetWordArt(item => item.ShadowEnabled = ReadBool(args));
+    private void ToggleWordArtMediaLoop(ChangeEventArgs args) => SetWordArt(item => item.FillMediaLoop = ReadBool(args));
+    private void ChangeWordArtFillKind(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<WordArtFillKind>(args.Value?.ToString(), out var fillKind)) return;
+        SetWordArt(item =>
+        {
+            item.FillKind = fillKind;
+            item.GradientFill = fillKind == WordArtFillKind.Gradient;
+        });
+    }
+    private void ChangeWordArtMediaFit(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<PublicationVideoFitMode>(args.Value?.ToString(), out var value))
+            SetWordArt(item => item.FillMediaFitMode = value);
+    }
+    private Task RequestWordArtPicture() => JS.InvokeVoidAsync("publisherStudio.clickElement", "wordart-picture-fill-input").AsTask();
+    private Task RequestWordArtVideo() => JS.InvokeVoidAsync("publisherStudio.clickElement", "wordart-video-fill-input").AsTask();
+    private void ClearWordArtMedia() => SetWordArt(item =>
+    {
+        item.FillMediaDataUrl = string.Empty;
+        item.FillMediaMimeType = string.Empty;
+        item.FillMediaPosterDataUrl = string.Empty;
+    });
+
+    private async Task ImportWordArtPicture(InputFileChangeEventArgs args)
+    {
+        var file = args.File;
+        var mimeType = PictureMimeType(file.Name, file.ContentType);
+        if (string.IsNullOrWhiteSpace(mimeType)) return;
+        await using var input = file.OpenReadStream(256L * 1024 * 1024);
+        using var buffer = new MemoryStream();
+        await input.CopyToAsync(buffer);
+        var bytes = buffer.ToArray();
+        if (mimeType == "image/svg+xml")
+        {
+            var sourceSvg = new UTF8Encoding(false, true).GetString(bytes);
+            bytes = Encoding.UTF8.GetBytes(SvgInterchangeSanitizer.Sanitize(sourceSvg));
+        }
+        var dataUrl = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
+        SetWordArt(item =>
+        {
+            item.FillKind = WordArtFillKind.Picture;
+            item.GradientFill = false;
+            item.FillMediaDataUrl = dataUrl;
+            item.FillMediaMimeType = mimeType;
+            item.FillMediaPosterDataUrl = string.Empty;
+        });
+    }
+
+    private async Task ImportWordArtVideo(InputFileChangeEventArgs args)
+    {
+        var file = args.File;
+        var mimeType = VideoMimeType(file.Name, file.ContentType);
+        if (string.IsNullOrWhiteSpace(mimeType)) return;
+        await using var input = file.OpenReadStream(512L * 1024 * 1024);
+        using var buffer = new MemoryStream();
+        await input.CopyToAsync(buffer);
+        var bytes = buffer.ToArray();
+        var dataUrl = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
+        var inspectionId = Guid.NewGuid();
+        var poster = string.Empty;
+        try
+        {
+            _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+            var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
+            try
+            {
+                var info = await _mediaModule.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", localUrl, "video");
+                poster = info.PosterDataUrl ?? string.Empty;
+            }
+            catch (JSException)
+            {
+                // Keep the playable fill even when this browser cannot decode a representative poster frame.
+                poster = string.Empty;
+            }
+        }
+        finally
+        {
+            MediaAssets.Remove(inspectionId);
+        }
+        SetWordArt(item =>
+        {
+            item.FillKind = WordArtFillKind.Video;
+            item.GradientFill = false;
+            item.FillMediaDataUrl = dataUrl;
+            item.FillMediaMimeType = mimeType;
+            item.FillMediaPosterDataUrl = poster;
+            item.FillMediaLoop = true;
+        });
+    }
 
     private void ChangeColor(string field, ChangeEventArgs args)
     {
@@ -1376,6 +1515,9 @@
             if (field == "wordExtrudeDepth") word.ExtrudeDepth = value;
             if (field == "wordPathStart") word.PathStartOffsetPercent = Math.Clamp(value, 0, 100);
             if (field == "wordPathOffset") word.PathBaselineOffset = Math.Clamp(value, -80, 80);
+            if (field == "wordMediaScale") word.FillMediaScale = Math.Clamp(value, .1, 10);
+            if (field == "wordMediaOffsetX") word.FillMediaOffsetXPercent = Math.Clamp(value, -100, 100);
+            if (field == "wordMediaOffsetY") word.FillMediaOffsetYPercent = Math.Clamp(value, -100, 100);
         }
     }
 
@@ -1394,10 +1536,40 @@
         });
     }
 
+    private static string PictureMimeType(string fileName, string? declared) => Path.GetExtension(fileName).ToLowerInvariant() switch
+    {
+        ".png" => "image/png",
+        ".jpg" or ".jpeg" => "image/jpeg",
+        ".gif" => "image/gif",
+        ".webp" => "image/webp",
+        ".svg" => "image/svg+xml",
+        _ when declared?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true => PublicationMediaData.NormalizeMimeType(declared, "image/png"),
+        _ => string.Empty
+    };
+
+    private static string VideoMimeType(string fileName, string? declared) => Path.GetExtension(fileName).ToLowerInvariant() switch
+    {
+        ".mp4" or ".m4v" => "video/mp4",
+        ".webm" => "video/webm",
+        ".ogv" or ".ogg" => "video/ogg",
+        ".mov" => "video/quicktime",
+        _ when declared?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true => PublicationMediaData.NormalizeMimeType(declared, "video/webm"),
+        _ => string.Empty
+    };
+
     private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
     private static bool ReadBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
     private static bool Nearly(double left, double right) => Math.Abs(left - right) < .05;
     private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
     private static string Inv(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
     private static string UsableColor(string value) => value.StartsWith('#') && value.Length >= 7 ? value[..7] : "#ffffff";
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_mediaModule is not null)
+        {
+            try { await _mediaModule.DisposeAsync(); }
+            catch (JSDisconnectedException) { }
+        }
+    }
 }

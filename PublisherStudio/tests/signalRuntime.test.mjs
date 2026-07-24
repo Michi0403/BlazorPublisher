@@ -73,7 +73,7 @@ assert.match(pictureModel, /PictureShapeKind \{[^}]*Path/s);
 assert.match(pictureModel, /PictureDrawTool \{[^}]*Path/s);
 assert.match(pictureModel, /PathClosed/);
 assert.match(pictureModel, /PathSmooth/);
-assert.match(pictureService, /document\.FormatVersion = "1\.2"/);
+assert.match(pictureService, /document\.FormatVersion = "1\.3"/);
 assert.match(pictureEditor, /Download SVG/);
 assert.match(pictureEditor, /Add point/);
 assert.match(pictureEditor, /Reverse/);

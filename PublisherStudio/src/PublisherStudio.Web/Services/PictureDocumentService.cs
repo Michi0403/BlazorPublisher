@@ -28,7 +28,7 @@ public sealed class PictureDocumentService
 
     public void Normalize(PictureDocument document)
     {
-        document.FormatVersion = "1.2";
+        document.FormatVersion = "1.3";
         document.WidthPx = Math.Clamp(document.WidthPx, 16, 8192);
         document.HeightPx = Math.Clamp(document.HeightPx, 16, 8192);
         document.Zoom = Math.Clamp(document.Zoom <= 0 ? .65 : document.Zoom, .05, 4);
@@ -39,6 +39,7 @@ public sealed class PictureDocumentService
         foreach (var layer in document.Layers)
         {
             layer.Name = string.IsNullOrWhiteSpace(layer.Name) ? layer.Kind.ToString() : layer.Name;
+            layer.GroupPath = layer.GroupPath?.Trim() ?? string.Empty;
             layer.Width = Math.Clamp(layer.Width <= 0 ? 1 : layer.Width, 1, 16384);
             layer.Height = Math.Clamp(layer.Height <= 0 ? 1 : layer.Height, 1, 16384);
             layer.Rotation = NormalizeAngle(layer.Rotation);
@@ -75,6 +76,11 @@ public sealed class PictureDocumentService
                     if (shape.Shape == PictureShapeKind.Path && shape.PathPoints.Count < 2)
                         shape.Shape = PictureShapeKind.Freeform;
                     break;
+                case SvgPictureLayer vector:
+                    vector.SvgMarkup = NormalizeSvgMarkup(vector.SvgMarkup);
+                    vector.SourceFormat = string.IsNullOrWhiteSpace(vector.SourceFormat) ? "SVG" : vector.SourceFormat.Trim();
+                    vector.SourceElementId = vector.SourceElementId?.Trim() ?? string.Empty;
+                    break;
                 case RenderPictureLayer render:
                     render.Detail = Math.Clamp(render.Detail, 1, 8);
                     render.Scale = Math.Clamp(render.Scale <= 0 ? 90 : render.Scale, 4, 2000);
@@ -101,6 +107,18 @@ public sealed class PictureDocumentService
                     break;
             }
         }
+    }
+
+    private static string NormalizeSvgMarkup(string? markup)
+    {
+        if (string.IsNullOrWhiteSpace(markup)) return string.Empty;
+        var trimmed = markup.Trim();
+        if (!trimmed.StartsWith("<svg", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("A vector picture layer must contain a standalone SVG document.");
+        if (trimmed.Contains("<script", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.Contains("javascript:", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("A vector picture layer contains active SVG content.");
+        return trimmed;
     }
 
     private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;

@@ -1,0 +1,95 @@
+PublisherStudio v1.0.62 source changes
+========================================
+
+Scope
+-----
+This release applies the agreed repository architecture before future Studio interchange work and rebuilds the integrated streaming backend inside the existing PublisherStudio.Web monolith.
+
+No Picture Studio, Video Studio or Audio Studio interchange adapter is activated in the UI in this release. The format capability matrix and adapter/loss-report contract are now version-controlled so the first format can be implemented as a deliberate Studio-owned vertical slice rather than a Mainframe-wide importer.
+
+Repository architecture contract
+--------------------------------
+Added:
+- AGENTS.md
+- docs/architecture/system-overview.md
+- docs/architecture/streaming.md
+- docs/architecture/interchange-formats.md
+- docs/decisions/ADR-001-monolith-first.md
+- docs/decisions/ADR-002-controller-entry-points.md
+- docs/decisions/ADR-003-usecase-subnamespaces.md
+- docs/decisions/ADR-004-native-and-interchange-formats.md
+- tests/architectureContract.test.mjs
+
+The contract defines Components, Controllers, Services, HostedServices, Backend, Domain and Models as the stable roots. UseCases is allowed only beneath an owning root for orchestration. Main-host application routes use MVC controllers. Backend code may not depend on MVC/controllers. Provider credentials and machine settings remain outside publication/interchange files.
+
+Streaming transport and orchestration
+-------------------------------------
+Removed:
+- src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs
+- the obsolete Services/StreamingRuntime aggregation/folder
+- Program.cs calls to AddPublisherStreamingRuntime/MapPublisherStreamingRuntime
+
+Added MVC controller entry points under:
+- src/PublisherStudio.Web/Controllers/Streaming/UseCases/NativeCaptureController.cs
+- src/PublisherStudio.Web/Controllers/Streaming/UseCases/StreamingChatController.cs
+- src/PublisherStudio.Web/Controllers/Streaming/UseCases/StreamingIngestController.cs
+- src/PublisherStudio.Web/Controllers/Streaming/UseCases/StreamingLanController.cs
+- src/PublisherStudio.Web/Controllers/Streaming/UseCases/StreamingRuntimeController.cs
+- src/PublisherStudio.Web/Controllers/Streaming/UseCases/StreamingSessionController.cs
+
+The established /api/mediahost, /stream and /watch routes, HTTP status behavior and WebSocket flows are preserved.
+
+Added service use-case orchestration under:
+- Services/Streaming/UseCases/Runtime
+- Services/Streaming/UseCases/NativeCapture
+- Services/Streaming/UseCases/Sessions
+- Services/Streaming/UseCases/Chat
+- Services/Streaming/UseCases/Ingest
+- Services/Streaming/UseCases/Lan
+- Services/Streaming/UseCases/Editor
+
+Streaming implementation ownership
+----------------------------------
+Moved low-level implementations into Backend/Streaming:
+- Capture: native registry, device discovery and Windows process loopback
+- Chat: provider Chat hub and Twitch/YouTube adapters
+- Encoding: encoder orchestration and FFmpeg discovery
+- LAN: LAN server, RTSP and WebRTC signaling
+- Metadata: Now Playing/ID3 reader
+- Sessions: runtime MediaSession state
+
+Moved long-running work into HostedServices/Streaming:
+- GlobalHotkeyService
+- TwitchOAuthMaintenanceService
+
+Moved application services into structured Services/Streaming subnamespaces:
+- MediaHost/StreamingMediaHostClient.cs
+- OAuth/TwitchOAuthService.cs
+- Profiles/StreamingProfileStore.cs
+- Settings/PublicationStreamingSettingsStore.cs
+- Sessions/MediaSessionRegistry.cs
+- StreamingServiceCollectionExtensions.cs
+
+Shared streaming request/event contracts now live in Domain/Streaming/StreamingRuntimeContracts.cs.
+
+StreamingMediaHostClient now delegates device discovery and session lifecycle through StreamingRuntimeUseCases and StreamingSessionUseCases instead of directly reaching into NativeDeviceDiscovery or MediaSessionRegistry.
+
+Compatibility and security
+--------------------------
+- The integrated runtime remains in PublisherStudio.Web; no Media Host executable or microservice was added.
+- Existing Twitch OAuth, provider Chat, native capture, FFmpeg, recording, separate stop controls, WebRTC/HLS/RTSP/LAN, hotkey and Now Playing behavior is retained.
+- Protected provider profiles, OAuth sessions, stream keys, LAN secrets and recording paths remain local and outside publication/template/interchange JSON.
+- Publication format remains 1.47 and Picture Studio format remains 1.2.
+
+Version/documentation/test updates
+----------------------------------
+- Application and InstallerConsole version: 1.0.62
+- package.json/package-lock.json version: 1.0.62
+- Streaming capabilities version: 1.0.62
+- Added CHANGELOG-v1.0.62.md
+- Updated README.md, RELEASE.md, VALIDATION.md, docs/ARCHITECTURE.md and docs/STREAMING.md
+- Updated moved-file test paths and added the architecture suite to npm test
+
+Git history
+-----------
+The supplied v1.0.61 source archive contains no .git directory. Commit-level history was therefore unavailable; release/changelog history and the v1.0.61 source tree were used as the baseline.

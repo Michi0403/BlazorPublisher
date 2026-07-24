@@ -7,7 +7,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const installer = readFileSync(resolve(root, 'src/PublisherStudio.InstallerConsole/Program.cs'), 'utf8');
 const provisioner = readFileSync(resolve(root, 'src/PublisherStudio.InstallerConsole/FfmpegProvisioner.cs'), 'utf8');
-const locator = readFileSync(resolve(root, 'src/PublisherStudio.Web/Services/StreamingRuntime/FfmpegLocator.cs'), 'utf8');
+const locator = readFileSync(resolve(root, 'src/PublisherStudio.Web/Backend/Streaming/Encoding/FfmpegLocator.cs'), 'utf8');
 
 assert.match(provisioner, /"--source", "winget"/);
 assert.match(provisioner, /"--disable-interactivity"/);

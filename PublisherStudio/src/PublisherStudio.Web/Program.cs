@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Http.Features;
 using PublisherStudio.Components;
 using PublisherStudio.Services;
+using PublisherStudio.Services.Streaming;
 
 namespace PublisherStudio;
 
@@ -108,7 +109,7 @@ public static class Program
         builder.Services.AddSingleton<PublicationStreamingSettingsStore>();
         builder.Services.AddSingleton<TwitchOAuthService>();
         builder.Services.AddHostedService<TwitchOAuthMaintenanceService>();
-        PublisherStreamingRuntimeExtensions.AddPublisherStreamingRuntime(builder.Services);
+        builder.Services.AddPublisherStreaming();
         builder.Services.AddSingleton<StreamingMediaHostClient>();
         builder.Services.AddSingleton<StreamingSessionService>();
         builder.Services.AddScoped<EditorStateService>();
@@ -127,7 +128,6 @@ public static class Program
         app.UseAntiforgery();
         app.MapStaticAssets();
         app.MapControllers();
-        PublisherStreamingRuntimeExtensions.MapPublisherStreamingRuntime(app);
         app.MapHealthChecks("/health");
         app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
         return app;

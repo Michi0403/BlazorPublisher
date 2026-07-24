@@ -1,5 +1,11 @@
 # PublisherStudio architecture
 
+## Repository contract and diagrams
+
+The enforceable contributor rules are stored at the source root in [`AGENTS.md`](../AGENTS.md). The accepted architecture is documented through [`docs/architecture/system-overview.md`](architecture/system-overview.md), [`docs/architecture/streaming.md`](architecture/streaming.md), the interchange capability matrix, and the ADRs under `docs/decisions`.
+
+`UseCases` is allowed only as orchestration beneath an existing root such as `Controllers/Streaming/UseCases` or `Services/Streaming/UseCases`. Main application HTTP and WebSocket entry points belong to MVC controllers. Technical FFmpeg, provider, device and protocol implementation belongs to `Backend`; long-running application loops belong to `HostedServices`.
+
 ## Stable boundaries
 
 - **PublisherStudio.Web** remains the ASP.NET Core loopback host and Interactive Blazor Server application. It owns DevExpress integration, publication state, browser interop, controllers, and exports.

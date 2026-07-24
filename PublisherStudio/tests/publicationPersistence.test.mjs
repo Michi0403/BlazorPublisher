@@ -8,7 +8,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
 const files = read('src/PublisherStudio.Web/Services/PublicationFileService.cs');
 const state = read('src/PublisherStudio.Web/Services/EditorStateService.cs');
-const streamStore = read('src/PublisherStudio.Web/Services/PublicationStreamingSettingsStore.cs');
+const streamStore = read('src/PublisherStudio.Web/Services/Streaming/Settings/PublicationStreamingSettingsStore.cs');
 const program = read('src/PublisherStudio.Web/Program.cs');
 const preview = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
 const timeline = read('src/PublisherStudio.Web/wwwroot/js/timelineInterop.js');

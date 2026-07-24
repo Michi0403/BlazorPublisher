@@ -1,5 +1,3 @@
-Link to WinX64 Installer in the release Section https://github.com/Michi0403/BlazorPublisher/releases/download/v161/PublisherStudio.Setup.exe
-Check Releases for anything else, I won't publish linux and mac installer because I can't confirm them working (also Linux users hate installers so)
 # PublisherStudio
 
 **The offline Publisher workbench that puts documents, spreadsheets, presentations, graphics, audio, and video on one canvas.**
@@ -336,6 +334,10 @@ See `CHANGELOG-v1.0.50.md` and `docs/STREAMING.md`. The former standalone Media 
 See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now release stale hover/tooltips when the pointer moves onto another overlapping publication object, while non-interactive decorative shapes, WordArt, and barcodes no longer consume presentation pointer events. Interactive media, components, data visuals, publication actions, and Signal Arrow click/hover sources remain pointer owners. In the main Publisher frame, explanatory tooltips keep one stable owner while the pointer moves through nested SVG or component children and render through the browser top layer so publication objects and DevExpress stacking contexts cannot cover them. Publication and Signal Arrow coordinate data is unchanged.
 
 
+
+## v1.0.62 architecture contract and streaming restoration
+
+See `CHANGELOG-v1.0.62.md`, `AGENTS.md`, and `docs/architecture/streaming.md`. PublisherStudio now records its accepted monolith architecture directly in the repository for human and AI contributors. `UseCases` is an orchestration subnamespace beneath Controllers or Services, never a competing top-level root. The integrated streaming runtime has been reorganized into MVC controllers, service use cases, backend implementations and hosted services; the former main-host endpoint aggregation is removed while all existing mediahost, ingest, Chat, LAN, recording and WebSocket routes remain compatible. The new interchange capability matrix keeps future OpenRaster, OpenTimelineIO, Broadcast WAV and related formats as Studio-owned adapters around the native project models.
 
 ## v1.0.61 stable exact zoom control
 

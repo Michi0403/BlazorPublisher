@@ -452,7 +452,7 @@ Static checks completed for the v1.0.37 source package:
 
 ## v1.0.50 single-process streaming, popup, and FFmpeg validation
 
-- The solution and release script contain no standalone `PublisherStudio.MediaHost` or `PublisherStudio.StreamingRuntime` executable/project. Streaming implementation files compile as part of `PublisherStudio.Web` under `Services/StreamingRuntime`.
+- The solution and release script contain no standalone `PublisherStudio.MediaHost` or `PublisherStudio.StreamingRuntime` executable/project. Streaming implementation files compile as part of `PublisherStudio.Web`; current controller, service/use-case, backend and hosted-service locations are validated in the v1.0.62 section.
 - Main application startup registers and maps the integrated runtime in-process, enables same-origin WebSockets, and retains application-singleton ownership of sessions, native captures, encoders, Chat, LAN delivery, and Windows global hotkeys.
 - The streaming client performs direct registry/device-discovery calls and contains no `HttpClient` dependency or fixed loopback port.
 - Browser capture, native-capture, ingest, Chat, WebRTC, and Now Playing URLs fall back to `window.location.origin`; the legacy machine-profile port is not used by the interface or runtime.
@@ -591,3 +591,14 @@ Static checks completed for the v1.0.37 source package:
 - The CSS-layout and transform rendering contracts remain unchanged, as do print and export paths.
 - JavaScript syntax, Node contract suites, project JSON/XML parsing, archive integrity, and checksums are checked.
 - A real `dotnet restore`/`build` and browser pointer smoke test remain unavailable in this environment because the .NET SDK and licensed DevExpress feed are not installed.
+
+
+## v1.0.62 targeted validation
+
+- Confirm the source root contains `AGENTS.md`, the system/streaming/interchange architecture documents and ADR-001 through ADR-004.
+- Confirm no `Services/StreamingRuntime` folder, `StreamingRuntimeEndpoints.cs`, main-host `MapGet`/`MapPost`/`MapPut`/`MapDelete` calls or top-level `Endpoints`, `Features`, `Handlers`, `Commands`, `Queries`, `UseCases`, `Infrastructure` or `Application` folder exists.
+- Confirm all established `/api/mediahost`, `/stream`, `/watch`, native-capture, Chat, ingest and WebRTC route fragments are present in MVC controllers under `Controllers/Streaming/UseCases`.
+- Confirm orchestration is registered under `Services/Streaming/UseCases`, technical media/provider code is under `Backend/Streaming`, and global hotkey/Twitch maintenance loops are under `HostedServices/Streaming`.
+- Confirm `StreamingMediaHostClient` delegates device discovery and session lifecycle to use-case services rather than directly depending on `NativeDeviceDiscovery` or `MediaSessionRegistry`.
+- Run all 13 Node contract suites, syntax-check non-vendor JavaScript modules, parse project JSON/XML, verify C# structural balance, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
+- A full .NET/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.

@@ -335,6 +335,10 @@ See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now releas
 
 
 
+## v1.0.62 architecture contract and streaming restoration
+
+See `CHANGELOG-v1.0.62.md`, `AGENTS.md`, and `docs/architecture/streaming.md`. PublisherStudio now records its accepted monolith architecture directly in the repository for human and AI contributors. `UseCases` is an orchestration subnamespace beneath Controllers or Services, never a competing top-level root. The integrated streaming runtime has been reorganized into MVC controllers, service use cases, backend implementations and hosted services; the former main-host endpoint aggregation is removed while all existing mediahost, ingest, Chat, LAN, recording and WebSocket routes remain compatible. The new interchange capability matrix keeps future OpenRaster, OpenTimelineIO, Broadcast WAV and related formats as Studio-owned adapters around the native project models.
+
 ## v1.0.61 stable exact zoom control
 
 See `CHANGELOG-v1.0.61.md`. The mainframe zoom slider now uses deterministic percentage values and commits only when a drag finishes, so a Blazor canvas rerender cannot pull the native thumb away from the pointer. Plus/minus use exact 5% steps, an editable percentage field accepts exact values, and a dedicated 100% reset is available. Both canvas renderers continue to use live text/vector content rather than bitmap snapshots, which is why Chromium/Edge can keep both modes sharp on UHD displays. Publication format remains `1.47`.

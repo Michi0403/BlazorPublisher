@@ -16,13 +16,16 @@ The interface changes no runtime boundary: publication JSON still stores profile
 
 ## Runtime layers
 
-1. **PublisherStudio.Web** authors and renders the publication, requests browser capture permissions, applies GPU/browser filters, mixes browser sources, and creates the clean master plus required output canvases.
-2. **PublisherStudio.Web integrated streaming runtime** owns the long-running session, native capture, FFmpeg encoders, recordings, provider delivery, LAN endpoints, provider Chat connections, Now Playing metadata, and Windows global hotkeys. Its services live under `Services/StreamingRuntime` and compile into the main application executable.
-3. **Machine profiles** store reusable provider/device identities outside publication files. Stream keys and Chat OAuth tokens are protected with ASP.NET Core Data Protection; on Windows the key ring is protected with DPAPI.
+1. **PublisherStudio.Web Components** author and render the publication, request browser capture permissions, apply GPU/browser filters, mix browser sources, and create the clean master plus required output canvases.
+2. **Controllers/Streaming/UseCases** own the main-host HTTP and WebSocket transport contract for `/api/mediahost`, `/stream`, and `/watch`.
+3. **Services/Streaming/UseCases** coordinate runtime information, capture, sessions, Chat, ingest, LAN delivery and editor session control without becoming a new top-level architecture.
+4. **Backend/Streaming** owns FFmpeg encoders, native device/process capture, provider Chat, WebRTC/HLS/RTSP/LAN implementation and Now Playing metadata parsing.
+5. **HostedServices/Streaming** owns global hotkey lifetime and periodic Twitch OAuth maintenance.
+6. **Machine profiles** store reusable provider/device identities outside publication files. Stream keys and Chat OAuth tokens are protected with ASP.NET Core Data Protection; on Windows the key ring is protected with DPAPI.
 
 The solution therefore publishes one `PublisherStudio.Web` application executable. `PublisherStudio.Setup` remains the installation utility, not a required companion runtime. Explicit Company/LAN delivery may open an additional listener inside the same process only when the user enables it.
 
-There is no separately launched Media Host process and no fixed secondary loopback port. Runtime services are application singletons/hosted services inside `PublisherStudio.Web`, while browser-facing HTTP and WebSocket routes use the application origin. A Blazor circuit reconnect is still not the owner of encoder, recording, or LAN-listener lifetime; the main application process is.
+There is no separately launched Media Host process and no fixed secondary loopback port. The former main-host `StreamingRuntimeEndpoints` aggregation has been removed; application routes are normal MVC controller actions and browser-facing HTTP/WebSocket routes retain the same application origin and paths. A Blazor circuit reconnect is still not the owner of encoder, recording, or LAN-listener lifetime; the main application process is. See `docs/architecture/streaming.md` for component and sequence diagrams.
 
 ## One authored page, output-specific Chat
 

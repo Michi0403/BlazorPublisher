@@ -1,0 +1,63 @@
+PublisherStudio v1.0.62 validation results
+==========================================
+
+Environment limitation
+----------------------
+A full dotnet restore/build was not run because this packaging environment has no .NET 10 SDK and no licensed DevExpress package feed. No claim of a successful compiled .NET/DevExpress build is made. Release-machine compilation and live browser/FFmpeg/provider/hardware checks remain required.
+
+Automated Node contract suites
+------------------------------
+PASS: 13 suites through `npm test`
+
+1. timelineInterop.test.mjs
+2. componentRuntime.test.mjs
+3. signalRuntime.test.mjs
+4. pointerOwnership.test.mjs
+5. mapInteractionModes.test.mjs
+6. fontIntegration.test.mjs
+7. canvasZoomScaling.test.mjs
+8. streamingRuntime.test.mjs
+9. interfaceWorkflow.test.mjs
+10. installerResilience.test.mjs
+11. publicationPersistence.test.mjs
+12. editorUsabilityRepair.test.mjs
+13. architectureContract.test.mjs
+
+Architecture contract assertions include:
+- stable root AGENTS.md instructions and ADR/diagram presence;
+- no top-level Endpoints/Features/Handlers/Commands/Queries/UseCases/Infrastructure/Application architecture;
+- no StreamingRuntimeEndpoints.cs or Services/StreamingRuntime folder;
+- no main-host app.MapGet/MapPost/MapPut/MapDelete registration;
+- MVC controller ownership of the established mediahost, Chat, ingest, WebRTC, stream and watch routes;
+- service UseCases registration beneath Services/Streaming;
+- Backend/Streaming code does not depend on MVC or Controllers;
+- StreamingMediaHostClient delegates to runtime/session use cases rather than direct backend discovery/registry access.
+
+Streaming behavior contracts include:
+- separate stop-streaming, stop-recording and stop-session controls;
+- final MediaRecorder data drain before ingest close;
+- Twitch Device Code OAuth and visible failure window;
+- Twitch token validation/refresh and ingest selection;
+- per-output Twitch/YouTube Chat isolation and send/receive adapters;
+- native capture and Windows process loopback;
+- FFmpeg output/recording orchestration and clean input shutdown;
+- WebRTC, HLS and RTSP LAN delivery;
+- global hotkeys and Now Playing metadata.
+
+Syntax and structural validation
+--------------------------------
+PASS: node --check on 24 non-vendor .js/.mjs files
+PASS: JSON parsing on 6 non-vendor JSON files
+PASS: XML parsing on 15 csproj/pubxml project files
+PASS: lexical delimiter/structure validation on 73 C# files
+PASS: project and package version alignment at 1.0.62
+PASS: publication format unchanged at 1.47
+PASS: picture format unchanged at 1.2
+
+Source/archive validation
+-------------------------
+Source files before packaging reports/checksums: 411
+Git directory in supplied source: absent
+PASS: source ZIP contains 484 entries / 413 files
+PASS: unzip -t reported no compressed-data errors
+SHA-256/SHA-512 values are recorded in the external checksum files.

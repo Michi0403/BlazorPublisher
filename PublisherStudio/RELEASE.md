@@ -1,9 +1,9 @@
-# PublisherStudio v1.0.61 release
+# PublisherStudio v1.0.62 release
 
-See `CHANGELOG-v1.0.61.md`, `CHANGELOG-v1.0.60.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.62.md`, `docs/architecture/system-overview.md`, `docs/architecture/streaming.md`, `docs/architecture/interchange-formats.md`, and `VALIDATION.md`.
 
-The mainframe canvas zoom control now uses deterministic percentages. Range dragging updates the native control locally and commits the publication zoom only when the gesture finishes, avoiding the previous feedback loop where a Blazor canvas rerender changed scroll geometry while the pointer was still down. Plus/minus use exact 5% steps, an editable percentage field supports direct values, and a dedicated 100% reset is available.
+This release restores the integrated streaming backend to PublisherStudio's established monolith architecture. Main-host media routes are MVC controllers again; process orchestration lives in `Services/Streaming/UseCases`; FFmpeg, native capture, provider Chat and LAN protocol implementations live in `Backend/Streaming`; and global hotkey/OAuth maintenance loops live in `HostedServices/Streaming`. The former `StreamingRuntimeEndpoints` aggregation and main-host minimal API mapping are removed without changing the browser route contract.
 
-Both **Sharp CSS layout** and **Compact transform** continue to render live DOM/SVG/text from the stable authored-content wrapper. CSS layout zoom participates in layout and rasterization; transform mode composites after layout, but Chromium/Edge can rerasterize live vector glyphs at the current device pixel ratio. This explains why both can appear crystal sharp on UHD hardware while retaining a small quality difference.
+The source root now contains an explicit `AGENTS.md` architecture contract for human and AI contributors. It defines the approved roots, monolith-first rule, dependency direction and the accepted `UseCases` subnamespace pattern. Version-controlled Mermaid diagrams and ADRs document the system and streaming flows. A capability matrix defines how future Picture Studio, Video Studio and Audio Studio common formats remain adapters around the native PublisherStudio models rather than replacing them.
 
-Application and installer version `1.0.61`; publication format `1.47`; picture format `1.2`. There is no separate Media Host executable or release payload.
+Application and installer version `1.0.62`; publication format `1.47`; picture format `1.2`. There is no separate Media Host executable or release payload.

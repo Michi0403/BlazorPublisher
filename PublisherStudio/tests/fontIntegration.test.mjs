@@ -18,12 +18,12 @@ const spreadsheet = read('src/PublisherStudio.Web/Views/Spreadsheet/Editor.cshtm
 const webProject = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
 const installerProject = read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj');
 const packageJson = JSON.parse(read('src/PublisherStudio.Web/package.json'));
-const runtimeEndpoints = read('src/PublisherStudio.Web/Services/StreamingRuntime/StreamingRuntimeEndpoints.cs');
+const runtimeCapabilities = read('src/PublisherStudio.Web/Services/Streaming/UseCases/Runtime/StreamingRuntimeUseCases.cs');
 
-assert.match(webProject, /<Version>1\.0\.61<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.61<\/Version>/);
-assert.equal(packageJson.version, '1.0.61');
-assert.match(runtimeEndpoints, /version = "1\.0\.61"/);
+assert.match(webProject, /<Version>1\.0\.62<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.62<\/Version>/);
+assert.equal(packageJson.version, '1.0.62');
+assert.match(runtimeCapabilities, /Version = "1\.0\.62"/);
 
 assert.match(program, /AddSingleton<SystemFontCatalog>\(\)/);
 assert.match(catalog, /fc-list/);

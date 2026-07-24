@@ -639,3 +639,13 @@ Static checks completed for the v1.0.37 source package:
 - Confirm new adapters remain below `Services/PictureStudio/Import` and `Services/Publication/Import`, shared results remain in `Domain`, and no new NuGet/npm/native dependency exists.
 - Run all 15 Node suites, syntax-check every non-vendor JavaScript/test module, parse JSON and project XML, verify C# structural balance and contract ownership, and validate ZIP CRC plus SHA-256/SHA-512 checksums.
 - A full .NET/Razor/DevExpress compile remains a release-machine requirement because this packaging environment does not contain the .NET 10 SDK or licensed DevExpress package feed.
+
+## v1.0.66 compiler-fix reintegration and namespace-safety validation
+
+- Compare Michael's uploaded working tree with the clean v1.0.65 source. The only application-source differences to reintegrate must be the Streaming HostedServices import in `Program.cs` and the `System.Text.Encoding` qualifications in Platform Chat and RTSP. IDE metadata, `.git`, `.vs`, `.cr`, `node_modules`, `bin`, and `obj` must not enter the release archive.
+- Verify `Program.cs` explicitly imports `PublisherStudio.HostedServices.Streaming` and the `TwitchOAuthMaintenanceService` DI registration remains present.
+- Verify `PlatformChatService` and `RtspLanServer` contain no unqualified `Encoding.` references and use `global::System.Text.Encoding`.
+- Run `npm test`; the aggregate suite must include `csharpCompilationSafety.test.mjs`. That test checks project-type visibility in `Program.cs`/service-collection composition files and rejects unqualified common framework types when a sibling project namespace shadows their simple name.
+- Run the architecture and canonical-contract tests, `node --check` for every non-vendor JavaScript/test module, JSON/XML parsing, conflict-marker and C# lexical-structure checks, version alignment, dependency invariants, ZIP CRC, extracted-content comparison, and SHA-256/SHA-512 verification.
+- Run `dotnet build` on a machine with .NET 10 and the licensed DevExpress feed. In environments without those prerequisites, record the build as unavailable rather than describing static checks as compilation.
+

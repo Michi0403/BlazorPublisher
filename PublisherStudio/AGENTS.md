@@ -38,6 +38,16 @@ A separate transport DTO is allowed only at a real serialization, process or pro
 
 `GlobalUsings*.cs` creates one project-wide symbol scope. Before adding or moving a public/internal type into a globally imported namespace, search all type declarations for the same simple name. The architecture tests must remain free of Domain/Models-to-Services shadow types and global-using name collisions. When moving a contract, remove the old declaration in the same change and update all consumers; do not leave compatibility duplicates behind.
 
+## Compiler-visible namespace safety
+
+C# namespace lookup is part of the architecture. A subnamespace name can shadow a framework type used by sibling namespaces—for example, `PublisherStudio.Services.Streaming.Encoding` can shadow `System.Text.Encoding` inside `PublisherStudio.Services.Streaming.Chat` or `.Lan`. Do not create new namespace leaves whose simple names collide with framework or project types visible from the same enclosing namespace. Prefer a more precise capability name when introducing a new area.
+
+When an existing namespace collision must remain for compatibility, every affected framework reference must use `global::` qualification or an explicit alias. Do not rely on `using System.*` to win name resolution. In particular, the existing Streaming `Encoding` area requires `global::System.Text.Encoding` (or a deliberate alias) in sibling Streaming namespaces.
+
+Moving a Service, HostedService, Hub, Controller or shared contract must update the composition root and its namespace imports in the same change. `Program.cs` and `*ServiceCollectionExtensions.cs` are compile-time wiring and must not depend on accidental global-usings or stale IDE state. A DI registration of a project type must be visible through the current namespace, an explicit `using`, a global using, or a fully qualified name.
+
+Before delivery, run a real `dotnet build` whenever the required SDK and licensed package feed are available. When they are unavailable, say so and run the repository's C# compilation-safety, architecture and contract tests; lexical delimiter checks alone are not a substitute for compilation. Never claim a compiler-clean result without a compiler run.
+
 ## Use-case orchestration
 
 Large controller or service areas may use a `UseCases` subnamespace beneath the existing owning root. This is the approved way to stop controllers and services becoming monolithic.

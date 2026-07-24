@@ -335,6 +335,10 @@ See `CHANGELOG-v1.0.51.md`. Exported DevExtreme charts and components now releas
 
 
 
+## v1.0.66 compiler-safe reintegration
+
+See `CHANGELOG-v1.0.66.md`, `AGENTS.md`, ADR-008 and `docs/architecture/system-overview.md`. The compiler fixes from Michael's working tree are reintegrated without IDE state, build output, `.cr`, `.vs`, `node_modules`, or Git metadata. `Program.cs` explicitly imports the Streaming HostedServices namespace for `TwitchOAuthMaintenanceService`. Streaming Chat and RTSP code use `global::System.Text.Encoding` because the sibling `Services.Streaming.Encoding` namespace otherwise shadows the BCL type. A new executable compilation-safety contract checks composition-root namespace visibility and sibling-namespace/framework-type collisions. Runtime behavior, publication format `1.48`, Picture Studio format `1.3`, and package dependencies are unchanged.
+
 ## v1.0.65 open interchange, real paths, and WordArt media fills
 
 See `CHANGELOG-v1.0.65.md`, ADR-007 and `docs/architecture/interchange-formats.md`. Picture Studio now imports structured SVG/SVGZ objects and layered OpenRaster documents into native vector/raster layers while retaining source groups, hidden layers, paint definitions and transforms where representable. The Path tool is node-based rather than a brush alias. WordArt accepts picture or video fills through the same glyph/path mask and keeps those fills across interactive HTML, print/PDF, raster and SVG exports. PublisherStudio can import OpenDocument Drawing/Presentation pages (`.odg`, `.odp`, `.fodg`, `.fodp`) into its native page system with explicit compatibility reporting. All adapters use the existing Domain/Services architecture and BCL APIs; no new package dependency was added. Publication format is `1.48`; Picture Studio format is `1.3`.

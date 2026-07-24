@@ -1,17 +1,11 @@
-# PublisherStudio v1.0.45 release
+# PublisherStudio v1.0.66 release
 
-See `CHANGELOG-v1.0.45.md`, `docs/COMPONENT_RUNTIME.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.66.md`, `AGENTS.md`, ADR-008, `docs/ARCHITECTURE.md`, `docs/architecture/system-overview.md`, and `VALIDATION.md`.
 
-This release fixes the vertical Menu clipping issue and hardens every Component Studio runtime against stale or hidden container dimensions.
+This release reintegrates the compiler fixes found in Michael's uncommitted working tree on top of the complete v1.0.65 source. The clean source package excludes `.git`, `.vs`, `.cr`, `node_modules`, `bin`, and `obj`.
 
-Key changes:
+`Program.cs` now imports `PublisherStudio.HostedServices.Streaming` explicitly so the moved `TwitchOAuthMaintenanceService` registration is compiler-visible. `PlatformChatService` and `RtspLanServer` use `global::System.Text.Encoding` because the existing sibling namespace `PublisherStudio.Services.Streaming.Encoding` can shadow the BCL type during C# name lookup.
 
-- Vertical Menu rows use natural heights, so all configured items display instead of only the first.
-- The fix is shared by the editor, canvas, presentation HTML, and offline website HTML.
-- Menu, Tile View, Splitter, and Scroll View orientation values are normalized consistently.
-- A shared resize observer calls the supported DevExtreme dimension/repaint APIs after component-object resizing and visibility changes.
-- Tab Panel, Multi View, and Splitter explicitly refresh nested controls when their active/available space changes.
+The repository contract now treats namespace names and composition-root imports as compiler-visible architecture. `csharpCompilationSafety.test.mjs` checks DI registration visibility and common framework-type shadowing. This supplements a real .NET build; it does not replace one.
 
-Versions: application/package/installer `1.0.45`, publication format `1.42`, picture format `1.2`.
-
-JavaScript syntax, Node runtime contracts, JSON/project XML parsing, CSS delimiter checks, and ZIP integrity are validated in the packaging environment. A complete `dotnet restore`/`dotnet build` and licensed DevExpress application run still require the release machine because this environment does not contain the .NET SDK or licensed DevExpress NuGet feed.
+Application and installer version is `1.0.66`. Publication format remains `1.48`, Picture Studio format remains `1.3`, and no NuGet/npm/native dependency changed.

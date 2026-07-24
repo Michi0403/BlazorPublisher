@@ -1,0 +1,90 @@
+PublisherStudio v1.0.66 source changes
+======================================
+
+Purpose
+-------
+Reintegrate the compiler repairs from Michael's uncommitted working tree into the clean
+v1.0.65 source, then encode the discovered failure modes in repository/AI rules and
+executable checks.
+
+Working-tree comparison
+-----------------------
+The uploaded PublisherStudio(15).zip contained Git metadata, Visual Studio state, IDE
+personalization and restored node_modules. Its PublisherStudio source directory was
+compared recursively with PublisherStudio-v1.0.65-open-interchange-wordart-media-source.zip.
+
+Ignoring .git, .vs, .cr and node_modules, exactly three application-source files differed:
+
+1. src/PublisherStudio.Web/Program.cs
+   - Added the missing PublisherStudio.HostedServices.Streaming namespace import.
+   - This makes TwitchOAuthMaintenanceService visible at its DI registration after the
+     architecture move.
+
+2. src/PublisherStudio.Web/Services/Streaming/Chat/PlatformChatService.cs
+   - Qualified System.Text.Encoding for Twitch IRC and YouTube JSON encoding.
+   - The reintegrated release uses the stronger global::System.Text.Encoding form.
+
+3. src/PublisherStudio.Web/Services/Streaming/Lan/RtspLanServer.cs
+   - Qualified System.Text.Encoding for SDP length, access-token comparison, RTSP request
+     parsing and response serialization.
+   - The reintegrated release uses the stronger global::System.Text.Encoding form.
+
+No IDE metadata, Git metadata, build output or dependency directory from the uploaded
+working tree was copied into the release source.
+
+Why the Encoding fix is required
+--------------------------------
+PublisherStudio already contains the namespace PublisherStudio.Services.Streaming.Encoding.
+Inside sibling namespaces such as PublisherStudio.Services.Streaming.Chat and .Lan, C#
+name lookup can resolve the simple identifier Encoding to that namespace instead of the
+System.Text.Encoding type imported through using System.Text.
+
+The release keeps the existing namespace for compatibility and explicitly uses
+`global::System.Text.Encoding` at affected call sites.
+
+Architecture and AI contract
+----------------------------
+Updated:
+- AGENTS.md
+- docs/ARCHITECTURE.md
+- docs/architecture/system-overview.md
+- VALIDATION.md
+- README.md
+- RELEASE.md
+
+Added:
+- docs/decisions/ADR-008-compiler-visible-namespace-and-composition-safety.md
+
+The rules now require:
+- Namespace leaves are treated as compiler-visible architecture.
+- New namespace leaves avoid visible framework/project type-name collisions.
+- Existing collisions use global:: qualification or an explicit alias.
+- Moving a Service, Hub, HostedService, Controller or shared contract updates composition-
+  root imports/qualifications in the same change.
+- A real dotnet build is required when the SDK and licensed DevExpress feed are available.
+  Static checks must not be described as compilation.
+
+Executable prevention
+---------------------
+Added tests/csharpCompilationSafety.test.mjs and package script test:compilation-safety.
+The aggregate npm test now runs 16 suites.
+
+The new suite:
+- Resolves project types used by DI registrations in Program.cs and
+  *ServiceCollectionExtensions.cs and checks namespace visibility.
+- Detects common framework identifiers used unqualified when a sibling project namespace
+  shadows the same simple name.
+- Locks the HostedServices.Streaming import and System.Text.Encoding qualification repairs.
+
+Version alignment
+-----------------
+Updated to 1.0.66:
+- PublisherStudio.Web project
+- PublisherStudio.InstallerConsole project
+- npm package and package-lock root package
+- streaming runtime capability response
+- version contract assertions
+
+Publication format remains 1.48.
+Picture Studio format remains 1.3.
+No NuGet, npm, native-binary or helper-process dependency changed.

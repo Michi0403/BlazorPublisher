@@ -33,3 +33,9 @@ A request, event, state or result that crosses architectural roots has one autho
 Provider-, protocol- or process-specific DTOs are boundary types and must have explicit boundary names. They are mapped once to the canonical contract and remain local to the adapter. Project-wide `GlobalUsings*.cs` files are treated as a single symbol scope; automated checks reject collisions between types visible through those imports and reject Services shadowing Domain/Models contracts.
 
 The enforceable repository contract is in [`AGENTS.md`](../../AGENTS.md). Architecture decisions are recorded in `docs/decisions`.
+
+## Compiler-visible boundaries
+
+Folder and namespace names participate in C# name resolution. New subnamespace leaves must avoid simple names that collide with framework or project types visible from the same enclosing namespace. Existing compatibility collisions use explicit `global::` qualification or a deliberate alias. Composition-root files (`Program.cs` and service-collection extensions) explicitly import or qualify moved Services, Hubs and HostedServices; they do not rely on IDE caches or accidental global usings.
+
+The `csharpCompilationSafety` contract scans DI registrations and namespace/type collisions. It supplements—but does not replace—a real compiler build.

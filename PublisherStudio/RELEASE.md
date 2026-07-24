@@ -1,11 +1,11 @@
-# PublisherStudio v1.0.65 release
+# PublisherStudio v1.0.66 release
 
-See `CHANGELOG-v1.0.65.md`, `AGENTS.md`, `docs/architecture/interchange-formats.md`, ADR-007 and `VALIDATION.md`.
+See `CHANGELOG-v1.0.66.md`, `AGENTS.md`, ADR-008, `docs/ARCHITECTURE.md`, `docs/architecture/system-overview.md`, and `VALIDATION.md`.
 
-This release establishes the first implemented open interchange adapters on PublisherStudio's canonical architecture. Picture Studio imports SVG/SVGZ as structured vector layers and OpenRaster as an ordered layered document. Source paths, visual leaves, named groups/layers, hidden state, local definitions, transforms and common OpenRaster stack properties are retained where the native model can represent them. Unsafe executable SVG content, DTD/entity expansion, online dependencies, unsafe archive paths and oversized/decompression-bomb input are rejected or reported.
+This release reintegrates the compiler fixes found in Michael's uncommitted working tree on top of the complete v1.0.65 source. The clean source package excludes `.git`, `.vs`, `.cr`, `node_modules`, `bin`, and `obj`.
 
-The Path tool now places editable vector nodes instead of behaving like a freehand brush. WordArt supports picture and video fills through its glyph/path mask, with live video in the editor and interactive HTML plus deterministic poster/media snapshots for static export paths.
+`Program.cs` now imports `PublisherStudio.HostedServices.Streaming` explicitly so the moved `TwitchOAuthMaintenanceService` registration is compiler-visible. `PlatformChatService` and `RtspLanServer` use `global::System.Text.Encoding` because the existing sibling namespace `PublisherStudio.Services.Streaming.Encoding` can shadow the BCL type during C# name lookup.
 
-PublisherStudio additionally imports OpenDocument Drawing/Presentation packages and flat XML (`.odg`, `.odp`, `.fodg`, `.fodp`) into the native page system. Pages, common shapes, text frames, embedded images and retained SVG vector objects are mapped through a temporary model and compatibility report before commit.
+The repository contract now treats namespace names and composition-root imports as compiler-visible architecture. `csharpCompilationSafety.test.mjs` checks DI registration visibility and common framework-type shadowing. This supplements a real .NET build; it does not replace one.
 
-The adapters remain under the owning reusable Services, shared results remain in Domain, and no new NuGet/npm/native dependency was introduced. Application and installer version is `1.0.65`; publication format is `1.48`; Picture Studio format is `1.3`.
+Application and installer version is `1.0.66`. Publication format remains `1.48`, Picture Studio format remains `1.3`, and no NuGet/npm/native dependency changed.

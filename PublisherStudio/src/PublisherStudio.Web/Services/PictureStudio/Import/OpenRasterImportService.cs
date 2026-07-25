@@ -139,7 +139,7 @@ public sealed class OpenRasterImportService
                 {
                     var svgText = extension == ".svgz" ? DecompressSvg(bytes) : DecodeSvg(bytes);
                     var sanitized = SvgInterchangeSanitizer.Sanitize(svgText);
-                    var viewport = SvgInterchangeSanitizer.ReadViewport(sanitized);
+                    var (viewportWidth, viewportHeight, _, _) = SvgInterchangeSanitizer.ReadViewport(sanitized);
                     layers.Add(new SvgPictureLayer
                     {
                         Name = name,
@@ -149,8 +149,8 @@ public sealed class OpenRasterImportService
                         SourceElementId = source,
                         X = x,
                         Y = y,
-                        Width = Math.Max(1, viewport.Width * scale),
-                        Height = Math.Max(1, viewport.Height * scale),
+                        Width = Math.Max(1, viewportWidth * scale),
+                        Height = Math.Max(1, viewportHeight * scale),
                         Opacity = Math.Clamp(layerOpacity, 0, 1),
                         Visible = layerVisible,
                         Locked = locked,
@@ -177,7 +177,7 @@ public sealed class OpenRasterImportService
                 continue;
             }
 
-            var size = ReadImageSize(bytes, extension);
+            var (imageWidth, imageHeight) = ReadImageSize(bytes, extension);
             layers.Add(new RasterPictureLayer
             {
                 Name = name,
@@ -185,8 +185,8 @@ public sealed class OpenRasterImportService
                 DataUrl = $"data:{mime};base64,{Convert.ToBase64String(bytes)}",
                 X = x,
                 Y = y,
-                Width = Math.Max(1, (size.Width > 0 ? size.Width : 1) * scale),
-                Height = Math.Max(1, (size.Height > 0 ? size.Height : 1) * scale),
+                Width = Math.Max(1, (imageWidth > 0 ? imageWidth : 1) * scale),
+                Height = Math.Max(1, (imageHeight > 0 ? imageHeight : 1) * scale),
                 Opacity = Math.Clamp(layerOpacity, 0, 1),
                 Visible = layerVisible,
                 Locked = locked,
@@ -203,6 +203,69 @@ public sealed class OpenRasterImportService
             return (ReadBigEndianInt(bytes, 16), ReadBigEndianInt(bytes, 20));
         }
         return (0, 0);
+    }
+
+
+    private static int ReadInt(string? value, int fallback) =>
+        int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
+
+    private static double ReadDouble(string? value, double fallback) =>
+        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) && double.IsFinite(parsed)
+            ? parsed
+            : fallback;
+
+    private static PictureBlendMode MapBlendMode(string? value)
+    {
+        var operation = value?.Trim();
+        if (string.IsNullOrWhiteSpace(operation)) return PictureBlendMode.Normal;
+        var separator = operation.LastIndexOf(':');
+        if (separator >= 0 && separator < operation.Length - 1) operation = operation[(separator + 1)..];
+        return operation.ToLowerInvariant() switch
+        {
+            "multiply" => PictureBlendMode.Multiply,
+            "screen" => PictureBlendMode.Screen,
+            "overlay" => PictureBlendMode.Overlay,
+            "darken" => PictureBlendMode.Darken,
+            "lighten" => PictureBlendMode.Lighten,
+            _ => PictureBlendMode.Normal
+        };
+    }
+
+    private static string DecodeSvg(byte[] bytes)
+    {
+        using var input = new MemoryStream(bytes, writable: false);
+        using var reader = new StreamReader(input, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
+        return reader.ReadToEnd();
+    }
+
+    private static string DecompressSvg(byte[] bytes)
+    {
+        try
+        {
+            using var input = new MemoryStream(bytes, writable: false);
+            using var gzip = new GZipStream(input, CompressionMode.Decompress, leaveOpen: false);
+            using var output = new MemoryStream();
+            gzip.CopyTo(output);
+            return DecodeSvg(output.ToArray());
+        }
+        catch (InvalidDataException)
+        {
+            throw;
+        }
+        catch (IOException exception)
+        {
+            throw new InvalidDataException("The SVGZ layer could not be decompressed.", exception);
+        }
+    }
+
+    private static int ReadBigEndianInt(byte[] bytes, int offset)
+    {
+        if (offset < 0 || offset > bytes.Length - 4) return 0;
+        var value = ((uint)bytes[offset] << 24)
+            | ((uint)bytes[offset + 1] << 16)
+            | ((uint)bytes[offset + 2] << 8)
+            | bytes[offset + 3];
+        return value <= int.MaxValue ? (int)value : 0;
     }
 
 

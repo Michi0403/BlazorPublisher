@@ -14,14 +14,14 @@
                     <strong>Media Converter Studio</strong>
                     <span>Reusable FFmpeg pipeline for Mainframe exports, VideoStudio, PictureStudio, audio, streaming and controller clients.</span>
                 </div>
-                <button type="button" class="window-close" @onclick="Close">×</button>
+                <button type="button" class="window-close" title="Close Media Converter Studio" aria-label="Close Media Converter Studio" @onclick="Close">×</button>
             </header>
 
             <DxRibbon CssClass="media-converter-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text="Home">
                     <DxRibbonGroup Text="Source" IconCssClass="pub-icon pub-icon-open">
                         <DxRibbonItem Text="Open media…" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Click="OpenSourcePicker" />
-                        <DxRibbonItem Text="Edit source in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSourceInVideoStudio" Click="OpenSourceInVideoStudio" />
+                        <DxRibbonItem Text="@SourceStudioCommand" IconCssClass="pub-icon pub-icon-media" Enabled="@CanOpenSourceInStudio" Click="OpenSourceInStudio" />
                         <DxRibbonItem Text="Clear source" IconCssClass="pub-icon pub-icon-delete" Enabled="@HasSource" Click="ClearSource" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Convert" IconCssClass="pub-icon pub-icon-media">
@@ -32,7 +32,7 @@
                     <DxRibbonGroup Text="Result" IconCssClass="pub-icon pub-icon-download">
                         <DxRibbonItem Text="Download" IconCssClass="pub-icon pub-icon-download" Enabled="@SelectedJobCompleted" Click="DownloadSelected" />
                         <DxRibbonItem Text="Insert Mainframe" IconCssClass="pub-icon pub-icon-insert" Enabled="@SelectedJobCompleted" Click="InsertSelected" />
-                        <DxRibbonItem Text="Open in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSelectedInVideoStudio" Click="OpenSelectedInVideoStudio" />
+                        <DxRibbonItem Text="@SelectedStudioCommand" IconCssClass="pub-icon pub-icon-media" Enabled="@CanOpenSelectedInStudio" Click="OpenSelectedInStudio" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Profiles" IconCssClass="pub-icon pub-icon-save">
                         <DxRibbonItem Text="Save profile" IconCssClass="pub-icon pub-icon-save" Click="SaveProfile" />
@@ -104,17 +104,17 @@
                         <span class="pub-icon pub-icon-media"></span>
                         @if (HasSource)
                         {
-                            <div><strong>@SourceName</strong><small>@SourceMimeType · @FormatBytes(SourceSize)</small><small>@SourceOrigin</small></div>
+                            <div><strong>@SourceName</strong><small>@EffectiveSourceMimeType · @FormatBytes(SourceSize)</small><small>@SourceOrigin</small></div>
                         }
                         else
                         {
                             <div><strong>Drop/open a media source</strong><small>No application-defined file-size ceiling.</small></div>
                         }
                         <div class="converter-source-actions">
-                            <button type="button" @onclick="OpenSourcePicker">Browse…</button>
-                            @if (CanOpenSourceInVideoStudio)
+                            <button type="button" title="Choose a local image, audio, or video source" @onclick="OpenSourcePicker">Browse…</button>
+                            @if (CanOpenSourceInStudio)
                             {
-                                <button type="button" @onclick="OpenSourceInVideoStudio">Edit in VideoStudio</button>
+                                <button type="button" title="@SourceStudioTooltip" @onclick="OpenSourceInStudio">@SourceStudioButtonText</button>
                             }
                         </div>
                     </section>
@@ -233,7 +233,7 @@
                     </datalist>
 
                     <section class="media-converter-jobs">
-                        <header><div><strong>Conversion jobs</strong><span>Click to select; double-click a completed video to open it in VideoStudio.</span></div></header>
+                        <header><div><strong>Conversion jobs</strong><span>Click to select; right-click for job actions; double-click completed image, audio, or video output to open its Studio.</span></div></header>
                         @if (_jobs.Count == 0)
                         {
                             <div class="data-visual-empty"><strong>No conversions yet</strong><span>Choose a source, profile or preset, then use Convert in the ribbon.</span></div>
@@ -241,27 +241,28 @@
                         @foreach (var job in _jobs)
                         {
                             <article class="media-converter-job @(job.Id == _selectedJobId ? "selected" : null)"
-                                     role="button" tabindex="0" @onclick="() => SelectJob(job.Id)" @ondblclick="() => DefaultJobAction(job)">
+                                     role="button" tabindex="0" title="Select job; right-click for available actions" @onclick="() => SelectJob(job.Id)" @ondblclick="() => DefaultJobAction(job)"
+                                     @oncontextmenu="args => ShowJobContextMenu(job, args)" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
                                 <div><strong>@job.SourceFileName</strong><br /><small>@PresetName(job.PresetId) · @job.Message</small></div>
                                 <span class="converter-status @job.Status.ToString().ToLowerInvariant()">@job.Status</span>
                                 <progress max="1" value="@job.Progress"></progress>
                                 <div class="panel-inline-actions">
                                     @if (job.Status == MediaConversionJobStatus.Completed)
                                     {
-                                        <button type="button" @onclick:stopPropagation @onclick="() => Download(job)">Download</button>
-                                        <button type="button" @onclick:stopPropagation @onclick="() => Insert(job)">Insert</button>
-                                        @if (job.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+                                        <button type="button" title="Download converted output" @onclick:stopPropagation @onclick="() => Download(job)">Download</button>
+                                        <button type="button" title="Insert converted output into the Mainframe" @onclick:stopPropagation @onclick="() => Insert(job)">Insert</button>
+                                        @if (CanOpenInStudio(job.OutputMimeType))
                                         {
-                                            <button type="button" class="primary" @onclick:stopPropagation @onclick="() => OpenInVideoStudio(job)">VideoStudio</button>
+                                            <button type="button" class="primary" title="@StudioTooltip(job.OutputMimeType)" @onclick:stopPropagation @onclick="() => OpenInStudio(job)">@StudioName(job.OutputMimeType)</button>
                                         }
                                     }
                                     else if (job.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running)
                                     {
-                                        <button type="button" @onclick:stopPropagation @onclick="() => Cancel(job.Id)">Cancel</button>
+                                        <button type="button" title="Cancel this conversion job" @onclick:stopPropagation @onclick="() => Cancel(job.Id)">Cancel</button>
                                     }
                                     else
                                     {
-                                        <button type="button" @onclick:stopPropagation @onclick="() => Remove(job.Id)">Remove</button>
+                                        <button type="button" title="Remove this job from the list" @onclick:stopPropagation @onclick="() => Remove(job.Id)">Remove</button>
                                     }
                                 </div>
                                 @if (job.OutputSize > 0) { <small>@job.OutputFileName · @FormatBytes(job.OutputSize)</small> }
@@ -272,19 +273,19 @@
             </div>
             <footer>
                 <span>@(HasSource ? $"Ready: {SourceName}" : "Select a source or send a Mainframe export into the converter.")</span>
-                <button type="button" @onclick="Close">Close</button>
-                <button type="button" class="primary" @onclick="Start" disabled="@(!CanStart)">Convert</button>
+                <button type="button" title="Close Media Converter Studio" @onclick="Close">Close</button>
+                <button type="button" class="primary" title="Start conversion with the current preset and options" @onclick="Start" disabled="@(!CanStart)">Convert</button>
             </footer>
         </section>
         <DxContextMenu @ref="_contextMenu">
             <Items>
                 <DxContextMenuItem Text="Open media…" IconCssClass="pub-icon pub-icon-open" Click="OpenSourcePicker" />
-                <DxContextMenuItem Text="Edit source in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSourceInVideoStudio" Click="OpenSourceInVideoStudio" />
+                <DxContextMenuItem Text="@SourceStudioContextCommand" IconCssClass="pub-icon pub-icon-media" Enabled="@CanOpenSourceInStudio" Click="OpenSourceInStudio" />
                 <DxContextMenuItem Text="Convert with current settings" IconCssClass="pub-icon pub-icon-play" BeginGroup="true" Enabled="@CanStart" Click="Start" />
                 <DxContextMenuItem Text="Save current settings as profile" IconCssClass="pub-icon pub-icon-save" Click="SaveProfile" />
                 <DxContextMenuItem Text="Download selected result" IconCssClass="pub-icon pub-icon-download" BeginGroup="true" Enabled="@SelectedJobCompleted" Click="DownloadSelected" />
                 <DxContextMenuItem Text="Insert selected result into Mainframe" IconCssClass="pub-icon pub-icon-insert" Enabled="@SelectedJobCompleted" Click="InsertSelected" />
-                <DxContextMenuItem Text="Open selected result in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSelectedInVideoStudio" Click="OpenSelectedInVideoStudio" />
+                <DxContextMenuItem Text="@SelectedStudioContextCommand" IconCssClass="pub-icon pub-icon-media" Enabled="@CanOpenSelectedInStudio" Click="OpenSelectedInStudio" />
                 <DxContextMenuItem Text="Cancel selected job" IconCssClass="pub-icon pub-icon-stop" BeginGroup="true" Enabled="@SelectedJobRunning" Click="CancelSelected" />
                 <DxContextMenuItem Text="Remove selected job" IconCssClass="pub-icon pub-icon-delete" Enabled="@(SelectedJob is not null && !SelectedJobRunning)" Click="RemoveSelected" />
             </Items>
@@ -297,7 +298,7 @@
     [Parameter] public MediaConversionInsertRequest? InitialSource { get; set; }
     [Parameter] public EventCallback Closed { get; set; }
     [Parameter] public EventCallback<MediaConversionInsertRequest> Inserted { get; set; }
-    [Parameter] public EventCallback<MediaConversionInsertRequest> OpenedInVideoStudio { get; set; }
+    [Parameter] public EventCallback<MediaConversionInsertRequest> OpenedInStudio { get; set; }
 
     private MediaConversionCapabilities? _capabilities;
     private IBrowserFile? _file;
@@ -328,22 +329,30 @@
             return string.IsNullOrWhiteSpace(kind) ? presets : presets.Where(preset => preset.InputKind == kind);
         }
     }
-    private string SourceKind => SourceMimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image"
-        : SourceMimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ? "audio"
-        : HasSource ? "video" : string.Empty;
+    private string SourceKind => EffectiveSourceMimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image"
+        : EffectiveSourceMimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ? "audio"
+        : EffectiveSourceMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ? "video"
+        : string.Empty;
     private string SourceName => _file?.Name ?? _memorySource?.FileName ?? string.Empty;
     private string SourceMimeType => _file?.ContentType ?? _memorySource?.MimeType ?? string.Empty;
+    private string EffectiveSourceMimeType => ResolveMimeType(SourceMimeType, SourceName);
     private long SourceSize => _file?.Size ?? _memorySource?.Content.LongLength ?? 0;
     private string SourceOrigin => _file is not null ? "Local file" : _memorySource?.Origin ?? string.Empty;
     private bool HasSource => _file is not null || _memorySource is not null;
     private MediaConversionPreset? SelectedPreset => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == _presetId);
     private MediaConversionJobInfo? SelectedJob => _selectedJobId is { } id ? _jobs.FirstOrDefault(job => job.Id == id) : null;
     private bool SelectedJobCompleted => SelectedJob?.Status == MediaConversionJobStatus.Completed;
-    private bool CanOpenSourceInVideoStudio => HasSource && IsVideoMime(SourceMimeType, SourceName);
+    private bool CanOpenSourceInStudio => HasSource && CanOpenInStudio(EffectiveSourceMimeType);
     private bool SelectedJobRunning => SelectedJob?.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running;
-    private bool CanOpenSelectedInVideoStudio => SelectedJobCompleted && SelectedJob?.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true;
+    private bool CanOpenSelectedInStudio => SelectedJobCompleted && CanOpenInStudio(SelectedJob?.OutputMimeType);
     private bool CanDeleteProfile => _selectedProfileId != Guid.Empty && _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId)?.BuiltIn == false;
     private bool CanStart => HasSource && _capabilities?.Available == true && SelectedPreset?.Available == true;
+    private string SourceStudioCommand => HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+    private string SourceStudioContextCommand => HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+    private string SourceStudioButtonText => HasSource ? $"Edit in {StudioName(EffectiveSourceMimeType)}" : "Edit in Studio";
+    private string SourceStudioTooltip => HasSource ? $"Open the current source in {StudioName(EffectiveSourceMimeType)}" : "Open the current source in its Studio";
+    private string SelectedStudioCommand => SelectedJob is { } job ? $"Open in {StudioName(job.OutputMimeType)}" : "Open in Studio";
+    private string SelectedStudioContextCommand => SelectedJob is { } job ? $"Open selected result in {StudioName(job.OutputMimeType)}" : "Open selected result in Studio";
     private string MetadataText => string.Join(Environment.NewLine, _options.Metadata.Select(pair => $"{pair.Key}={pair.Value}"));
 
     protected override async Task OnParametersSetAsync()
@@ -498,30 +507,30 @@
     private void SelectJob(Guid id) => _selectedJobId = id;
 
 
-    private async Task OpenSourceInVideoStudio()
+    private async Task OpenSourceInStudio()
     {
         try
         {
             _error = string.Empty;
-            if (!CanOpenSourceInVideoStudio) throw new InvalidOperationException("Only video sources can be opened in VideoStudio.");
+            if (!CanOpenSourceInStudio) throw new InvalidOperationException("Only image, audio, or video sources can be opened in a Studio.");
             MediaConversionInsertRequest request;
             if (_memorySource is not null)
             {
-                request = new MediaConversionInsertRequest(_memorySource.FileName, _memorySource.MimeType, _memorySource.Content.ToArray(), _memorySource.Origin);
+                request = new MediaConversionInsertRequest(_memorySource.FileName, ResolveMimeType(_memorySource.MimeType, _memorySource.FileName), _memorySource.Content.ToArray(), _memorySource.Origin);
             }
             else if (_file is not null)
             {
                 await using var source = _file.OpenReadStream(long.MaxValue);
                 using var memory = new MemoryStream();
                 await source.CopyToAsync(memory);
-                var mime = string.IsNullOrWhiteSpace(_file.ContentType) ? MimeFromName(_file.Name) : _file.ContentType;
+                var mime = ResolveMimeType(_file.ContentType, _file.Name);
                 request = new MediaConversionInsertRequest(_file.Name, mime, memory.ToArray(), "Media Converter source");
             }
             else
             {
                 return;
             }
-            await OpenedInVideoStudio.InvokeAsync(request);
+            await OpenedInStudio.InvokeAsync(request);
         }
         catch (Exception exception)
         {
@@ -556,29 +565,30 @@
         try { await Inserted.InvokeAsync(await ReadOutput(job)); }
         catch (Exception exception) { _error = exception.Message; }
     }
-    private async Task OpenInVideoStudio(MediaConversionJobInfo job)
+    private async Task OpenInStudio(MediaConversionJobInfo job)
     {
         try
         {
-            if (!job.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Only video output can be opened in VideoStudio.");
-            await OpenedInVideoStudio.InvokeAsync(await ReadOutput(job));
+            if (!CanOpenInStudio(job.OutputMimeType)) throw new InvalidOperationException("Only image, audio, or video output can be opened in a Studio.");
+            await OpenedInStudio.InvokeAsync(await ReadOutput(job));
         }
         catch (Exception exception) { _error = exception.Message; }
     }
     private Task DownloadSelected() => SelectedJob is { } job ? Download(job) : Task.CompletedTask;
     private Task InsertSelected() => SelectedJob is { } job ? Insert(job) : Task.CompletedTask;
-    private Task OpenSelectedInVideoStudio() => SelectedJob is { } job ? OpenInVideoStudio(job) : Task.CompletedTask;
+    private Task OpenSelectedInStudio() => SelectedJob is { } job ? OpenInStudio(job) : Task.CompletedTask;
     private void CancelSelected() { if (_selectedJobId is { } id) Cancel(id); }
     private void RemoveSelected() { if (_selectedJobId is { } id) Remove(id); }
     private Task ShowConverterContextMenu(MouseEventArgs args) => _contextMenu.ShowAsync(args);
     private async Task ShowJobContextMenu(MediaConversionJobInfo job, MouseEventArgs args)
     {
         _selectedJobId = job.Id;
+        await InvokeAsync(StateHasChanged);
         await _contextMenu.ShowAsync(args);
     }
     private void Cancel(Guid id) { Conversions.Cancel(id); RefreshJobs(); }
     private void Remove(Guid id) { Conversions.Remove(id); _jobs.RemoveAll(job => job.Id == id); if (_selectedJobId == id) _selectedJobId = _jobs.FirstOrDefault()?.Id; }
-    private Task DefaultJobAction(MediaConversionJobInfo job) => job.Status == MediaConversionJobStatus.Completed && job.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ? OpenInVideoStudio(job) : Task.CompletedTask;
+    private Task DefaultJobAction(MediaConversionJobInfo job) => job.Status == MediaConversionJobStatus.Completed && CanOpenInStudio(job.OutputMimeType) ? OpenInStudio(job) : Task.CompletedTask;
 
     private void SelectProfile(ChangeEventArgs args)
     {
@@ -662,10 +672,23 @@
         }
     }
 
-    private static bool IsVideoMime(string mimeType, string fileName) =>
-        mimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase)
-        || (string.IsNullOrWhiteSpace(mimeType) || mimeType.Equals("application/octet-stream", StringComparison.OrdinalIgnoreCase))
-            && Path.GetExtension(fileName).ToLowerInvariant() is ".mp4" or ".webm" or ".mov" or ".m4v";
+    private static string ResolveMimeType(string? mimeType, string fileName) =>
+        string.IsNullOrWhiteSpace(mimeType) || string.Equals(mimeType, "application/octet-stream", StringComparison.OrdinalIgnoreCase)
+            ? MimeFromName(fileName)
+            : mimeType;
+
+    private static bool CanOpenInStudio(string? mimeType) =>
+        mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true
+        || mimeType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true
+        || mimeType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true;
+
+    private static string StudioName(string? mimeType) =>
+        mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true ? "Picture Studio"
+        : mimeType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true ? "Audio Studio"
+        : mimeType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true ? "Video Studio"
+        : "Studio";
+
+    private static string StudioTooltip(string? mimeType) => $"Open the converted output in {StudioName(mimeType)}";
 
     private static string MimeFromName(string fileName) => Path.GetExtension(fileName).ToLowerInvariant() switch
     {
@@ -674,7 +697,16 @@
         ".mkv" => "video/x-matroska",
         ".avi" => "video/x-msvideo",
         ".mxf" => "application/mxf",
-        _ => "video/mp4"
+        ".mp3" => "audio/mpeg",
+        ".wav" => "audio/wav",
+        ".flac" => "audio/flac",
+        ".ogg" => "audio/ogg",
+        ".png" => "image/png",
+        ".jpg" or ".jpeg" => "image/jpeg",
+        ".gif" => "image/gif",
+        ".webp" => "image/webp",
+        ".bmp" => "image/bmp",
+        _ => "application/octet-stream"
     };
 
     private string PresetName(string id) => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == id)?.Name ?? id;

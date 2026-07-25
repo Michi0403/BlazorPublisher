@@ -92,6 +92,13 @@ assert.match(openRaster, /ORA_LAYER_SOURCE_INVALID/);
 assert.match(openRaster, /CopyToAsync/);
 assert.doesNotMatch(openRaster, /CopyWithLimitAsync|64 MB decompression limit/, 'Local-first imports must not impose an application-defined media byte ceiling.');
 assert.match(openRaster, /ORA_SVG_LAYER_INVALID/);
+assert.match(openRaster, /private static int ReadInt/);
+assert.match(openRaster, /private static double ReadDouble/);
+assert.match(openRaster, /private static PictureBlendMode MapBlendMode/);
+assert.match(openRaster, /new GZipStream/);
+assert.match(openRaster, /private static int ReadBigEndianInt/);
+assert.doesNotMatch(openRaster, /var viewport =/);
+assert.doesNotMatch(openRaster, /var size = ReadImageSize/);
 
 // OpenDocument Drawing/Presentation imports map pages and common objects into the native page system.
 assert.match(openDocument, /\.fodg" or "\.fodp/);

@@ -59,9 +59,13 @@ assert.match(siteCss, /\.panel-studio-canvas-shell\.arrange-preview \.panel-stud
 // Media Converter Studio exposes the reusable service through a complete local UI.
 assert.match(converterStudio, /<DxRibbon[\s\S]*<DxRibbonTab Text="Video">[\s\S]*<DxRibbonTab Text="Audio & filters">/);
 assert.match(converterStudio, /<DxContextMenu/);
+assert.match(converterStudio, /ShowJobContextMenu\(job, args\)/);
+assert.match(converterStudio, /Picture Studio/);
+assert.match(converterStudio, /Audio Studio/);
+assert.match(converterStudio, /title="Close Media Converter Studio"/);
 assert.match(converterStudio, /bindMediaConverterDrop/);
-assert.match(converterStudio, /Edit source in VideoStudio/);
-assert.match(converterStudio, /Open in VideoStudio/);
+assert.match(converterStudio, /SourceStudioCommand/);
+assert.match(converterStudio, /SelectedStudioCommand/);
 assert.match(converterStudio, /PublisherStudio HTML/);
 assert.match(converterStudio, /Advanced FFmpeg arguments/);
 assert.match(converterStudio, /<label>Width<input type=\"number\"/);
@@ -93,11 +97,14 @@ assert.match(publisherInterop, /ReceiveMediaDropError/);
 // Mainframe, VideoStudio and converter hand-offs use the shared contract.
 assert.match(editor, /InitialSource="_mediaConverterInitialSource"/);
 assert.match(editor, /OpenMediaConverterFromStudio/);
-assert.match(editor, /OpenConvertedInVideoStudio/);
+assert.match(editor, /OpenConvertedInStudio/);
 assert.match(editor, /Mainframe video export/);
 assert.match(mediaStudio, /Send selection to converter/);
-assert.match(mediaStudio, /SendSelectedVideoToConverter/);
-assert.match(mediaStudio, /SuggestedOptions = new MediaConversionOptions/);
+assert.match(mediaStudio, /SendSelectedMediaToConverter/);
+assert.match(mediaStudio, /SuggestedOptions = IsVideo/);
+assert.match(mediaStudio, /SuggestedPresetId = IsVideo \? "webm-vp9" : "audio-webm-opus"/);
+assert.match(editor, /mime.StartsWith\("image\/"/);
+assert.match(editor, /new AudioElement/);
 
 // Visible selection geometry and drop insertion use the selected clip trim window.
 assert.match(mediaStudio, /visibleStart = Math\.Max\(0, Math\.Min\(_duration, _trimStart\)\)/);

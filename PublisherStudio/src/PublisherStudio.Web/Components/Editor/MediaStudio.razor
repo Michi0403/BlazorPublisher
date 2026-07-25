@@ -35,10 +35,7 @@
                         }
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-stop" Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
-                        @if (IsVideo)
-                        {
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-media" Text="Send selection to converter" Enabled="@HasSelectedSegment" Click="SendSelectedVideoToConverter" />
-                        }
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-media" Text="Send selection to converter" Enabled="@HasSelectedSegment" Click="SendSelectedMediaToConverter" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Pointer mode" IconCssClass="pub-icon pub-icon-select">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Select time")" Click="SelectSectionMode" />
@@ -712,10 +709,7 @@
         }
         <DxContextMenuItem Text="@(_muted ? "Unmute" : "Mute")" BeginGroup="true" Click="ToggleMutedFromMenu" />
         <DxContextMenuItem Text="@(_loop ? "Disable loop" : "Loop selected range")" Click="ToggleLoopFromMenu" />
-        @if (IsVideo)
-        {
-            <DxContextMenuItem Text="Send selected clip/range to Media Converter" Enabled="@HasSelectedSegment" BeginGroup="true" Click="SendSelectedVideoToConverter" />
-        }
+        <DxContextMenuItem Text="@SendToConverterMenuText" Enabled="@HasSelectedSegment" BeginGroup="true" Click="SendSelectedMediaToConverter" />
         <DxContextMenuItem Text="Import replacement…" Enabled="@(!_recording)" BeginGroup="true" Click="OpenMediaPicker" />
     </Items>
 </DxContextMenu>
@@ -886,6 +880,7 @@
             ? $"{SelectedClipName} · {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} / {Time(_duration)}"
             : $"{Time(_trimStart)} — {Time(_trimEnd)} / {Time(_duration)}";
     private string SelectedClipName => SelectedSegment?.Name ?? (IsVideo ? "No selected video clip" : "No selected audio clip");
+    private string SendToConverterMenuText => IsVideo ? "Send selected clip/range to Media Converter" : "Send selected audio clip to Media Converter";
     private double SelectedSegmentTimelineStart => SelectedSegmentIndex >= 0
         ? TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate)
         : 0;
@@ -3090,9 +3085,9 @@
     private void ChangePlaybackTrigger(ChangeEventArgs args) { if (Enum.TryParse<PublicationMediaPlaybackTrigger>(Text(args), out var value)) _playbackTrigger = value; }
     private void ClampFades() { _fadeIn = Math.Min(_fadeIn, MaxFade); _fadeOut = Math.Min(_fadeOut, MaxFade); }
 
-    private async Task SendSelectedVideoToConverter()
+    private async Task SendSelectedMediaToConverter()
     {
-        if (!IsVideo || SelectedSegment is not { } segment) return;
+        if (SelectedSegment is not { } segment) return;
         try
         {
             CommitSelectedSegment();
@@ -3101,28 +3096,38 @@
             if (!MediaAssets.TryGet(segment.Id, out var bytes, out var storedMime, out _))
                 throw new InvalidOperationException("The selected clip is not retained as local media and cannot be handed to the converter.");
 
-            var start = _videoSelectionUserCommitted ? VideoSelectionStart : segment.TrimStartSeconds;
-            var end = _videoSelectionUserCommitted && !_videoSelectionIsPoint
+            var selectedVideoRange = IsVideo && _videoSelectionUserCommitted;
+            var start = selectedVideoRange ? VideoSelectionStart : segment.TrimStartSeconds;
+            var end = selectedVideoRange && !_videoSelectionIsPoint
                 ? VideoSelectionEnd
                 : segment.EffectiveTrimEndSeconds;
             var duration = Math.Max(.001, end - start);
+            var studioName = IsVideo ? "Video Studio" : "Audio Studio";
             var request = new MediaConversionInsertRequest(
-                string.IsNullOrWhiteSpace(segment.Name) ? "video-clip" : segment.Name,
+                string.IsNullOrWhiteSpace(segment.Name) ? (IsVideo ? "video-clip" : "audio-clip") : segment.Name,
                 PublicationMediaData.NormalizeMimeType(segment.MimeType, storedMime),
                 bytes,
-                _videoSelectionUserCommitted ? "VideoStudio selected range" : "VideoStudio selected clip")
+                selectedVideoRange ? "Video Studio selected range" : $"{studioName} selected clip")
             {
-                SuggestedPresetId = "webm-vp9",
-                SuggestedOptions = new MediaConversionOptions
-                {
-                    Target = MediaConversionTarget.PublisherStudioWeb,
-                    StartSeconds = Math.Max(0, start),
-                    DurationSeconds = duration,
-                    ScaleMode = MediaConversionScaleMode.Preserve,
-                    PreserveAspectRatio = true,
-                    PixelFormat = "yuv420p",
-                    FastStart = true
-                }
+                SuggestedPresetId = IsVideo ? "webm-vp9" : "audio-webm-opus",
+                SuggestedOptions = IsVideo
+                    ? new MediaConversionOptions
+                    {
+                        Target = MediaConversionTarget.PublisherStudioWeb,
+                        StartSeconds = Math.Max(0, start),
+                        DurationSeconds = duration,
+                        ScaleMode = MediaConversionScaleMode.Preserve,
+                        PreserveAspectRatio = true,
+                        PixelFormat = "yuv420p",
+                        FastStart = true
+                    }
+                    : new MediaConversionOptions
+                    {
+                        Target = MediaConversionTarget.PublisherStudioWeb,
+                        StartSeconds = Math.Max(0, start),
+                        DurationSeconds = duration,
+                        DisableVideo = true
+                    }
             };
             await SendToMediaConverter.InvokeAsync(request);
         }

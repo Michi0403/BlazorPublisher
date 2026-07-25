@@ -1,0 +1,18 @@
+PublisherStudio v1.0.82 validation
+
+PASS: `npm test` completed every configured regression script.
+PASS: all 27 Node regression suites completed through `node --test tests/*.test.mjs`.
+PASS: OpenRaster contract checks cover the restored numeric parsers, blend-mode mapper, strict SVG/SVGZ decoder, PNG big-endian reader and IDE0042 tuple deconstruction.
+PASS: media workflow contracts cover image/audio/video Studio routing, Audio Studio converter handoff, selected-job context-menu wiring and native Media Converter tooltips.
+PASS: C# architecture, shared-contract ownership, enum-reference, namespace, interpolation, Razor control-flow and local-scope safety suites.
+PASS: 39 non-vendor JavaScript/test modules validated with `node --check`.
+PASS: package JSON, package lock, global.json and application/installer project XML parsing.
+PASS: application, installer, npm, lock-file, streaming runtime and browser runtime version alignment at 1.0.82.
+PASS: publication format remains aligned at 1.55.
+PASS: NuGet and npm dependency names and versions are unchanged from v1.0.81.
+PASS: package ES-module metadata removes the previous Node module-type warnings for imported browser modules.
+PASS: local FFmpeg 7.1.3 smoke conversion generated and probed VP9/Opus WebM and Opus Ogg derivatives; ffprobe confirmed VP9 128x72 and Opus 48 kHz mono output.
+
+Not executed: real .NET/Razor/DevExpress compilation. This environment has no dotnet SDK or licensed DevExpress restore feed. The reported missing helper methods were restored and the repository's compiler-safety/contract tests pass, but the final binary acceptance build must be run on the licensed developer machine.
+
+Recommended manual smoke checks: build the solution in Visual Studio; import an ORA containing PNG and SVG/SVGZ layers; send a trimmed audio clip to Media Converter Studio; right-click different conversion jobs; and open completed image, audio and video results in their matching Studio.

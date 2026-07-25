@@ -230,7 +230,7 @@
 <BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
 <StreamingStudio Visible="_streamingStudioVisible" Document="State.Document" Saved="SaveStreamingStudio" Cancelled="CloseStreamingStudio" />
 <PanelStudio Visible="_panelStudioVisible" Document="State.Document" CurrentPageId="State.SelectedPageId" InitialPanel="_panelStudioInitial" Saved="SavePanelStudio" Cancelled="ClosePanelStudio" />
-<MediaConverterStudio Visible="_mediaConverterVisible" InitialSource="_mediaConverterInitialSource" Closed="CloseMediaConverter" Inserted="InsertConvertedMedia" OpenedInVideoStudio="OpenConvertedInVideoStudio" />
+<MediaConverterStudio Visible="_mediaConverterVisible" InitialSource="_mediaConverterInitialSource" Closed="CloseMediaConverter" Inserted="InsertConvertedMedia" OpenedInStudio="OpenConvertedInStudio" />
 
 @if (_structuredWebsiteExportVisible)
 {
@@ -497,39 +497,63 @@
     {
         _mediaConverterInitialSource = source;
         _mediaConverterVisible = true;
-        ShowNotice("The selected VideoStudio clip/range is loaded in Media Converter Studio.");
+        ShowNotice("The selected Studio media source is loaded in Media Converter Studio.");
         return Task.CompletedTask;
     }
 
     private void CloseMediaConverter() => _mediaConverterVisible = false;
 
-    private async Task OpenConvertedInVideoStudio(MediaConversionInsertRequest converted)
+    private async Task OpenConvertedInStudio(MediaConversionInsertRequest converted)
     {
-        var mime = PublicationMediaData.NormalizeMimeType(converted.MimeType, "video/webm");
-        if (!mime.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
-        {
-            ShowError(new InvalidDataException($"The converted output type '{mime}' is not a video."));
-            return;
-        }
+        var mime = PublicationMediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
         var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(converted.Content)}";
         await CancelPublisherPointerAsync();
         _mediaConverterVisible = false;
-        _mediaStudioTargetId = null;
-        _mediaStudioKind = PublicationElementKind.Video;
-        _mediaStudioInitial = new VideoElement
+
+        if (mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
         {
-            Name = Path.GetFileNameWithoutExtension(converted.FileName),
-            DataUrl = dataUrl,
-            MimeType = mime,
-            DurationSeconds = .01,
-            TrimStartSeconds = 0,
-            TrimEndSeconds = .01,
-            FitMode = PublicationVideoFitMode.Stretch,
-            FitModeExplicit = true
-        };
-        _mediaStudioInitialInsertedSegment = null;
-        _mediaStudioSessionId = Guid.NewGuid();
-        _mediaStudioVisible = true;
+            _pictureEditorTargetId = null;
+            _pictureEditorInitialDocument = null;
+            _pictureEditorInitialRaster = dataUrl;
+            _pictureEditorInitialName = Path.GetFileNameWithoutExtension(converted.FileName);
+            _pictureEditorSessionId = Guid.NewGuid();
+            _pictureEditorVisible = true;
+            return;
+        }
+
+        if (mime.StartsWith("video/", StringComparison.OrdinalIgnoreCase) || mime.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
+        {
+            var isVideo = mime.StartsWith("video/", StringComparison.OrdinalIgnoreCase);
+            _mediaStudioTargetId = null;
+            _mediaStudioKind = isVideo ? PublicationElementKind.Video : PublicationElementKind.Audio;
+            _mediaStudioInitial = isVideo
+                ? new VideoElement
+                {
+                    Name = Path.GetFileNameWithoutExtension(converted.FileName),
+                    DataUrl = dataUrl,
+                    MimeType = mime,
+                    DurationSeconds = .01,
+                    TrimStartSeconds = 0,
+                    TrimEndSeconds = .01,
+                    FitMode = PublicationVideoFitMode.Stretch,
+                    FitModeExplicit = true
+                }
+                : new AudioElement
+                {
+                    Name = Path.GetFileNameWithoutExtension(converted.FileName),
+                    DataUrl = dataUrl,
+                    MimeType = mime,
+                    DurationSeconds = .01,
+                    TrimStartSeconds = 0,
+                    TrimEndSeconds = .01
+                };
+            _mediaStudioInitialInsertedSegment = null;
+            _mediaStudioSessionId = Guid.NewGuid();
+            _mediaStudioVisible = true;
+            return;
+        }
+
+        ShowError(new InvalidDataException($"The converted output type '{mime}' cannot be opened in a PublisherStudio media editor."));
     }
     private void InsertConvertedMedia(MediaConversionInsertRequest converted)
     {

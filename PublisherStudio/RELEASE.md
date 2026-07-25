@@ -1,7 +1,7 @@
-# PublisherStudio v1.0.81 release
+# PublisherStudio v1.0.82 release
 
-See `CHANGELOG-v1.0.81.md`, `SOURCE-CHANGES-v1.0.81.txt`, `TEST-RESULTS-v1.0.81.txt`, and `docs/architecture/panel-composer-media-workflow.md`.
+See `CHANGELOG-v1.0.82.md`, `SOURCE-CHANGES-v1.0.82.txt`, `TEST-RESULTS-v1.0.82.txt`, and `docs/architecture/media-component-frontend-review-v1.0.82.md`.
 
-v1.0.81 completes the Panel / Div Studio visual composer and reusable module workflow, rebuilds Media Converter Studio around the shared FFmpeg service/controller contracts, and connects Mainframe export, Mainframe insertion and VideoStudio clip/range editing into that conversion workflow. It also removes PublisherStudio-defined byte ceilings from affected local import paths while retaining structural validation.
+v1.0.82 completes the missing OpenRaster importer helpers that blocked compilation, removes the reported tuple-style suggestions, connects conversion-job context actions, and closes the media-editor parity gap between Video Studio, Audio Studio, Picture Studio, and Media Converter Studio.
 
-Application and installer version is `1.0.81`. Publication format is `1.55` because documents can now persist reusable component templates. Package dependency names and versions are unchanged.
+Application and installer version is `1.0.82`. Publication format remains `1.55`; package dependency names and versions are unchanged.

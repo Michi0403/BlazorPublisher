@@ -8,7 +8,9 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 - **Word-class stories:** embedded DevExpress RichEdit documents with DOCX storage, fields, page settings, and backgrounds.
 - **Excel-class workbooks:** embedded DevExpress Spreadsheet editing, import/download, and scalable worksheet frames.
 - **Picture Studio:** a built-in mini image workshop for crop, filters, masks, tinting, transparency, drawing, gradients, layered picture documents, and visible rectangle/ellipse/freehand/magnetic/polygon selection overlays.
-- **Audio and video studio:** import, record, trim, arrange, preview, and export media directly inside publications, with explicit timeline modes and a source-frame-aligned video region overlay.
+- **Audio and video studio:** import, record, trim, arrange, preview, and export media directly inside publications, with explicit timeline modes, source-frame-aligned regions, layered filters, open-project import and direct hand-off to the reusable FFmpeg converter.
+- **Panel / Div Studio:** visually compose reusable, nested, interactive panels and KPI dashboards from the same publication components, data bindings, web sources and export runtime used by the Mainframe.
+- **Media Converter Studio:** locally convert browser-limited media through a reusable FFmpeg service/controller workflow with profiles, arbitrary dimensions, codecs, filters, metadata and Mainframe/VideoStudio hand-offs.
 - **Live data publishing:** every DevExtreme Cartesian series type plus pie/doughnut, PolarChart, sparkline, bar/circular/linear gauges, range selector, Sankey, funnel, pyramid, tree map, data grid, KPI visuals, barcodes, QR codes, WordArt, connectors, and data-bound fields.
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
@@ -402,8 +404,14 @@ See `CHANGELOG-v1.0.52.md`. Self-contained presentation and site exports now kee
 
 See `CHANGELOG-v1.0.67.md`, `AGENTS.md`, ADR-008 and `VALIDATION.md`. The v1.0.66 namespace-collision repair is corrected so `global::` is no longer placed directly in an interpolated-string hole. Streaming Chat and RTSP use the explicit `TextEncoding` alias, and RTSP calculates SDP content length before formatting the header. The compilation-safety contract now rejects the exact parser trap that produced `CS0103`. Runtime behavior, publication format `1.48`, Picture Studio format `1.3`, and package dependencies remain unchanged.
 
+## v1.0.82 OpenRaster and media frontend completion
+
+The missing OpenRaster parsing/decoding helpers are restored, including strict SVG/SVGZ handling and PNG dimension reads. Media Converter Studio now routes image, audio, and video sources/results to their matching Studio; Audio Studio can send its selected trimmed clip to the converter; and conversion-job right-click actions are wired to the selected job. See `CHANGELOG-v1.0.82.md`.
+
 ## Panel/Div Studio and optional FFmpeg conversion
 
-PublisherStudio includes reusable authored panels and dashboards built from the same components used on publication pages. Panels can contain multiple navigable views, nested panels, live KPI/data components, streaming inputs, media, and sandboxed HTML/CSS/optional JavaScript. They remain interactive in Mainframe preview and HTML exports.
+PublisherStudio includes reusable authored panels and dashboards built from the same components used on publication pages. v1.0.81 adds a visual composer with a DevExpress Ribbon, draggable pre-rendered component palette, live arrange/test modes, move/resize handles and reusable document-local modules that preserve complete component, data-source, chart and web configuration. Panels can contain multiple navigable views, nested panels, live KPI/data components, streaming inputs, media, and sandboxed HTML/CSS/optional JavaScript. They remain interactive in Mainframe preview and HTML exports.
 
-Media Converter Studio can use a separately installed FFmpeg executable to create browser-oriented derivatives for media the browser cannot decode directly. Configure `PublisherStudio:FFmpegPath`, set `PUBLISHERSTUDIO_FFMPEG`, or place FFmpeg on `PATH`. PublisherStudio does not bundle FFmpeg.
+Media Converter Studio can use a separately installed FFmpeg executable to create browser-oriented derivatives for media the browser cannot decode directly. Its shared service/controller API supports profiles, trim ranges, arbitrary dimensions, scaling, frame rate, codecs, quality/bitrate, pixel format, audio layout/loudness, metadata, filter graphs and protected advanced arguments. Mainframe exports can open directly in the converter; completed output can return to Mainframe or open in Picture Studio, Audio Studio, or Video Studio. Configure `PublisherStudio:FFmpegPath`, set `PUBLISHERSTUDIO_FFMPEG`, or place FFmpeg on `PATH`. PublisherStudio does not bundle FFmpeg.
+
+PublisherStudio intentionally defines no product-level file-size quota for local imports and conversion uploads. The real ceiling is the user's available memory, temporary storage, browser/OS behavior and installed FFmpeg build; structural archive, XML and sandbox validation remains enforced. See `CHANGELOG-v1.0.81.md`, `CHANGELOG-v1.0.82.md`, `docs/architecture/panel-composer-media-workflow.md`, and `docs/architecture/media-component-frontend-review-v1.0.82.md`.

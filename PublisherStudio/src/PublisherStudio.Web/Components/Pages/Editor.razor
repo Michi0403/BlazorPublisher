@@ -5,6 +5,7 @@
 @inject PublicationFileService Files
 @inject PublisherStudio.Services.Publication.Import.OpenDocumentImportService OpenDocumentImporter
 @inject PublicationMediaAssetStore MediaAssets
+@inject PictureDocumentService PictureDocuments
 @inject SpreadsheetDocumentService Spreadsheets
 @inject SpreadsheetSessionStore SpreadsheetSessions
 @inject PublicationRecoveryService Recovery
@@ -201,6 +202,7 @@
              SessionId="_mediaStudioSessionId"
              Kind="_mediaStudioKind"
              InitialMedia="_mediaStudioInitial"
+             InitialInsertedSegment="_mediaStudioInitialInsertedSegment"
              EditingExisting="@(_mediaStudioTargetId is not null)"
              Saved="SaveMediaStudio"
              Cancelled="CloseMediaStudio" />
@@ -243,6 +245,7 @@
     private Guid? _mediaStudioTargetId;
     private PublicationElementKind _mediaStudioKind = PublicationElementKind.Audio;
     private PublicationMediaElement? _mediaStudioInitial;
+    private PublicationMediaSegment? _mediaStudioInitialInsertedSegment;
     private Guid? _pendingNewDataVisualId;
     private Guid? _pendingNewComponentId;
     private bool _resumeDataVisualAfterManager;
@@ -357,23 +360,53 @@
             State.SetInsertionPoint(request.X, request.Y);
             var kind = request.Kind.Trim().ToLowerInvariant();
             var mimeType = ResolveDroppedMimeType(request.Name, request.MimeType, storedMimeType, kind);
+            var target = request.TargetElementId is Guid targetId
+                ? State.CurrentPage.Elements.FirstOrDefault(element => element.Id == targetId)
+                : null;
             if (kind == "picture")
             {
                 var dataUrl = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
+                if (target is ImageFrameElement image)
+                {
+                    await OpenPictureStudioWithInsertedRaster(image, dataUrl, request.Name,
+                        request.PixelWidth, request.PixelHeight, request.TargetX, request.TargetY);
+                    ShowNotice($"Added {request.Name} as a new Picture Studio layer. Apply the Studio project to update the picture.");
+                    return;
+                }
+
                 State.AddImage(dataUrl, request.Name, centerX: request.X, centerY: request.Y,
                     pixelWidth: request.PixelWidth, pixelHeight: request.PixelHeight);
                 ShowNotice($"Inserted {request.Name} at the drop position.");
                 return;
             }
 
-            if (kind == "video")
+            if (kind is "video" or "audio")
             {
-                mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "video/webm");
+                var videoKind = kind == "video";
+                mimeType = PublicationMediaData.NormalizeMimeType(mimeType, videoKind ? "video/webm" : "audio/webm");
                 var dataUrl = PublicationMediaData.NormalizeDataUrl($"data:{mimeType};base64,{Convert.ToBase64String(bytes)}", mimeType);
-                var video = State.AddVideo(dataUrl, mimeType, request.Name,
-                    request.DurationSeconds > 0 ? request.DurationSeconds : 5,
-                    centerX: request.X, centerY: request.Y);
-                MediaAssets.Copy(request.AssetId, video.Id);
+                var duration = request.DurationSeconds > 0 ? request.DurationSeconds : 5;
+                if (target is PublicationMediaElement media &&
+                    media.Kind == (videoKind ? PublicationElementKind.Video : PublicationElementKind.Audio))
+                {
+                    var segment = new PublicationMediaSegment
+                    {
+                        Name = string.IsNullOrWhiteSpace(request.Name) ? (videoKind ? "Video clip" : "Audio clip") : request.Name,
+                        DataUrl = dataUrl,
+                        MimeType = mimeType,
+                        DurationSeconds = duration,
+                        TrimStartSeconds = 0,
+                        TrimEndSeconds = duration
+                    };
+                    await OpenMediaStudio(media.Kind, media, segment);
+                    ShowNotice($"Added {request.Name} to the {(videoKind ? "Video" : "Audio")} Studio sequence. Apply the Studio project to update the media object.");
+                    return;
+                }
+
+                PublicationMediaElement inserted = videoKind
+                    ? State.AddVideo(dataUrl, mimeType, request.Name, duration, centerX: request.X, centerY: request.Y)
+                    : State.AddAudio(dataUrl, mimeType, request.Name, duration, centerX: request.X, centerY: request.Y);
+                MediaAssets.Copy(request.AssetId, inserted.Id);
                 _timelineVisible = true;
                 ShowNotice($"Inserted {request.Name} at the drop position. The timeline is open for timing and trimming.");
                 return;
@@ -427,7 +460,7 @@
                 return;
             }
 
-            throw new InvalidDataException("Drop a picture, spreadsheet, video, DOCX, text, or Markdown file.");
+            throw new InvalidDataException("Drop a picture, spreadsheet, video, audio, DOCX, text, or Markdown file.");
         }
         catch (Exception ex)
         {
@@ -437,6 +470,43 @@
         {
             MediaAssets.Remove(request.AssetId);
         }
+    }
+
+    private async Task OpenPictureStudioWithInsertedRaster(
+        ImageFrameElement image,
+        string dataUrl,
+        string name,
+        int naturalWidth,
+        int naturalHeight,
+        double targetX,
+        double targetY)
+    {
+        await CancelPublisherPointerAsync();
+        var document = image.PictureSource is not null
+            ? PictureDocuments.Clone(image.PictureSource)
+            : CreateManagedPictureDocument(image);
+        PictureDocuments.AddRasterLayer(
+            document,
+            dataUrl,
+            name,
+            naturalWidth,
+            naturalHeight,
+            Math.Clamp(targetX, 0, 1) * document.WidthPx,
+            Math.Clamp(targetY, 0, 1) * document.HeightPx);
+        _pictureEditorTargetId = image.Id;
+        _pictureEditorInitialDocument = document;
+        _pictureEditorInitialRaster = null;
+        _pictureEditorInitialName = string.IsNullOrWhiteSpace(image.Name) ? "Picture" : image.Name;
+        _pictureEditorSessionId = Guid.NewGuid();
+        _pictureEditorVisible = true;
+    }
+
+    private static PictureDocument CreateManagedPictureDocument(ImageFrameElement image)
+    {
+        const int width = 1200;
+        var frameAspect = image.Width > .01 ? image.Height / image.Width : 2d / 3d;
+        var height = Math.Clamp((int)Math.Round(width * frameAspect), 16, 8192);
+        return PictureDocument.FromRaster(image.DataUrl, image.Name, width, height);
     }
 
     private Task HandleExternalDropError(string message)
@@ -461,6 +531,7 @@
         var declared = PublicationMediaData.NormalizeMimeType(requested, stored);
         if ((kind == "picture" && declared.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) ||
             (kind == "video" && declared.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) ||
+            (kind == "audio" && declared.StartsWith("audio/", StringComparison.OrdinalIgnoreCase)) ||
             kind is "spreadsheet" or "text" or "markdown" or "docx")
             return declared;
         return Path.GetExtension(name).ToLowerInvariant() switch
@@ -473,15 +544,24 @@
             ".mp4" => "video/mp4",
             ".m4v" => "video/x-m4v",
             ".webm" => "video/webm",
-            ".ogv" or ".ogg" => "video/ogg",
+            ".ogv" => "video/ogg",
+            ".ogg" or ".oga" => kind == "audio" ? "audio/ogg" : "video/ogg",
             ".mov" => "video/quicktime",
+            ".mp3" => "audio/mpeg",
+            ".m4a" or ".aac" => "audio/mp4",
+            ".wav" => "audio/wav",
+            ".flac" => "audio/flac",
             ".md" or ".markdown" => "text/markdown",
             ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             ".xlsm" or ".xls" => "application/vnd.ms-excel",
             ".csv" => "text/csv",
             ".tsv" or ".txt" => "text/plain",
-            _ => kind == "picture" ? "image/png" : kind == "video" ? "video/mp4" : kind == "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "text/plain"
+            _ => kind == "picture" ? "image/png"
+                : kind == "video" ? "video/mp4"
+                : kind == "audio" ? "audio/mpeg"
+                : kind == "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                : "text/plain"
         };
     }
 
@@ -1169,12 +1249,16 @@
             : Task.CompletedTask;
     }
 
-    private async Task OpenMediaStudio(PublicationElementKind kind, PublicationMediaElement? media)
+    private async Task OpenMediaStudio(
+        PublicationElementKind kind,
+        PublicationMediaElement? media,
+        PublicationMediaSegment? insertedSegment = null)
     {
         await CancelPublisherPointerAsync();
         _mediaStudioTargetId = media?.Id;
         _mediaStudioKind = kind;
         _mediaStudioInitial = media;
+        _mediaStudioInitialInsertedSegment = insertedSegment;
         _mediaStudioSessionId = Guid.NewGuid();
         _mediaStudioVisible = true;
     }
@@ -1215,6 +1299,7 @@
             _mediaStudioVisible = false;
             _mediaStudioTargetId = null;
             _mediaStudioInitial = null;
+            _mediaStudioInitialInsertedSegment = null;
             _pendingCanvasInsert = null;
             _timelineVisible = true;
             ShowNotice($"{(result.Kind == PublicationElementKind.Video ? "Video" : "Audio")} applied to the publication timeline.");
@@ -1273,6 +1358,7 @@
         _mediaStudioVisible = false;
         _mediaStudioTargetId = null;
         _mediaStudioInitial = null;
+        _mediaStudioInitialInsertedSegment = null;
         _pendingCanvasInsert = null;
         return Task.CompletedTask;
     }

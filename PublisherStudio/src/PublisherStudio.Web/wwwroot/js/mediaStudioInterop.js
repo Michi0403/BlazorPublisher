@@ -15,6 +15,113 @@ function normalizeMediaDataUrl(dataUrl, fallbackMimeType = 'application/octet-st
     return `data:${mimeType};base64,${value.slice(marker + 8)}`;
 }
 
+function mediaDropKind(file) {
+    const name = String(file?.name || '').toLowerCase();
+    const mime = baseMimeType(file?.type || '', '');
+    if (mime.startsWith('video/') || /\.(mp4|m4v|webm|ogv|mov)$/.test(name)) return 'video';
+    if (mime.startsWith('audio/') || /\.(mp3|wav|oga|ogg|m4a|aac|flac)$/.test(name)) return 'audio';
+    return '';
+}
+
+function assignMediaDrop(inputId, file) {
+    const input = document.getElementById(inputId);
+    if (!(input instanceof HTMLInputElement) || input.type !== 'file' || !(file instanceof File)) return false;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.value = '';
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+}
+
+function releaseMediaDropBindings(state) {
+    const root = state?.dropRoot;
+    const handlers = state?.dropHandlers;
+    if (root && handlers) {
+        root.removeEventListener('dragenter', handlers.dragenter);
+        root.removeEventListener('dragover', handlers.dragover);
+        root.removeEventListener('dragleave', handlers.dragleave);
+        root.removeEventListener('drop', handlers.drop);
+        root.classList.remove('media-file-drag-active');
+        root.removeAttribute('data-media-drop-mode');
+    }
+    if (state) {
+        state.dropRoot = null;
+        state.dropHandlers = null;
+        state.dropDepth = 0;
+    }
+}
+
+function bindMediaDrop(state, rootId, sourceInputId, insertInputId, expectedKind) {
+    releaseMediaDropBindings(state);
+    const root = document.getElementById(rootId);
+    if (!root) return;
+    const descriptor = event => {
+        const file = event.dataTransfer?.files?.[0];
+        if (file) return file;
+        const item = [...(event.dataTransfer?.items || [])].find(candidate => candidate.kind === 'file');
+        return item ? { name: '', type: item.type || '' } : null;
+    };
+    const modeAt = target => target?.closest?.('.media-sequence-editor,.media-range-selector') ? 'insert' : 'replace';
+    const show = mode => {
+        root.classList.add('media-file-drag-active');
+        root.dataset.mediaDropMode = mode;
+    };
+    const clear = () => {
+        state.dropDepth = 0;
+        root.classList.remove('media-file-drag-active');
+        root.removeAttribute('data-media-drop-mode');
+    };
+    const handlers = {
+        dragenter: event => {
+            const file = descriptor(event);
+            if (!file) return;
+            event.preventDefault();
+            state.dropDepth++;
+            show(modeAt(event.target));
+        },
+        dragover: event => {
+            const file = descriptor(event);
+            if (!file) return;
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = mediaDropKind(file) === expectedKind ? 'copy' : 'none';
+            show(modeAt(event.target));
+        },
+        dragleave: event => {
+            if (event.relatedTarget && root.contains(event.relatedTarget)) return;
+            state.dropDepth = Math.max(0, state.dropDepth - 1);
+            if (state.dropDepth === 0) clear();
+        },
+        drop: event => {
+            const file = event.dataTransfer?.files?.[0]
+                || [...(event.dataTransfer?.items || [])].find(candidate => candidate.kind === 'file')?.getAsFile?.();
+            if (!file) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const actualKind = mediaDropKind(file);
+            const mode = modeAt(event.target);
+            clear();
+            if (actualKind !== expectedKind) {
+                state.dotnet?.invokeMethodAsync(
+                    'MediaStudioFileDropRejected',
+                    `The dropped file '${file.name || 'file'}' is ${actualKind || 'not recognized as media'}; this Studio accepts ${expectedKind} files.`).catch(() => {});
+                return;
+            }
+            const inputId = mode === 'insert' ? insertInputId : sourceInputId;
+            if (!assignMediaDrop(inputId, file))
+                state.dotnet?.invokeMethodAsync('MediaStudioFileDropRejected', 'The dropped media file could not be forwarded to the Studio importer.').catch(() => {});
+        }
+    };
+    state.dropRoot = root;
+    state.dropHandlers = handlers;
+    state.dropDepth = 0;
+    root.addEventListener('dragenter', handlers.dragenter);
+    root.addEventListener('dragover', handlers.dragover);
+    root.addEventListener('dragleave', handlers.dragleave);
+    root.addEventListener('drop', handlers.drop);
+}
+
 function stateFor(id) {
     let state = studioStates.get(id);
     if (!state) {
@@ -40,7 +147,10 @@ function stateFor(id) {
             frameResizeObserver: null,
             frameMetadataHandler: null,
             frameOverlayMoveHandler: null,
-            frameOverlayLeaveHandler: null
+            frameOverlayLeaveHandler: null,
+            dropRoot: null,
+            dropHandlers: null,
+            dropDepth: 0
         };
         studioStates.set(id, state);
     }
@@ -170,7 +280,16 @@ export function clickElement(id) {
     element.click();
 }
 
-export function initializeMediaStudio(id, dotnet, sessionId, rootId = "", frameStageId = "", frameOverlayId = "") {
+export function initializeMediaStudio(
+    id,
+    dotnet,
+    sessionId,
+    rootId = "",
+    frameStageId = "",
+    frameOverlayId = "",
+    sourceInputId = "",
+    insertInputId = "",
+    expectedKind = "video") {
     const state = stateFor(id);
     const nextSessionId = String(sessionId || '');
     if (state.sessionId && state.sessionId !== nextSessionId) releaseRetainedRecording(state);
@@ -199,6 +318,7 @@ export function initializeMediaStudio(id, dotnet, sessionId, rootId = "", frameS
     };
     document.addEventListener("keydown", state.keyboardHandler, true);
     bindFrameOverlay(state, frameStageId, frameOverlayId);
+    bindMediaDrop(state, state.rootId, sourceInputId, insertInputId, String(expectedKind || 'video').toLowerCase());
 }
 
 function waitForMetadata(element) {
@@ -577,6 +697,7 @@ export function disposeMediaStudio(id) {
     if (element && state.rangeHandler) element.removeEventListener('timeupdate', state.rangeHandler);
     if (state.keyboardHandler) document.removeEventListener("keydown", state.keyboardHandler, true);
     state.keyboardHandler = null;
+    releaseMediaDropBindings(state);
     releaseFrameOverlayBindings(state);
     releaseRetainedRecording(state);
     studioStates.delete(id);

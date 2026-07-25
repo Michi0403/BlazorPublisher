@@ -461,7 +461,8 @@ function externalDropKind(file) {
     const name = String(file?.name || '').toLowerCase();
     const mime = String(file?.type || '').toLowerCase();
     if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/.test(name)) return 'picture';
-    if (mime.startsWith('video/') || /\.(mp4|m4v|webm|ogv|ogg|mov)$/.test(name)) return 'video';
+    if (mime.startsWith('video/') || /\.(mp4|m4v|webm|ogv|mov)$/.test(name)) return 'video';
+    if (mime.startsWith('audio/') || /\.(mp3|wav|oga|ogg|m4a|aac|flac)$/.test(name)) return 'audio';
     if (mime === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         mime === 'application/vnd.ms-excel' || /\.(xlsx|xlsm|xls|csv|tsv)$/.test(name)) return 'spreadsheet';
     if (mime === 'text/markdown' || /\.(md|markdown)$/.test(name)) return 'markdown';
@@ -474,10 +475,68 @@ function clearExternalDropPreview(state) {
     const preview = state?.externalDropPreview;
     if (!preview) return;
     if (preview.url) URL.revokeObjectURL(preview.url);
+    preview.target?.element?.classList?.remove('external-file-component-drop-target');
     preview.ghost?.remove?.();
     preview.overlay?.remove?.();
     state.page?.classList?.remove('external-file-drop-target');
     state.externalDropPreview = null;
+}
+
+function externalDropTargetMessage(kind, target) {
+    if (target?.kind === 'image' && kind === 'picture') return 'Add picture as a new Picture Studio layer';
+    if (target?.kind === 'video' && kind === 'video') return 'Add video as a new Video Studio sequence segment';
+    if (target?.kind === 'audio' && kind === 'audio') return 'Add audio as a new Audio Studio sequence segment';
+    return kind === 'picture' ? 'Drop picture at this position'
+        : kind === 'video' ? 'Drop video at this position'
+        : kind === 'audio' ? 'Drop audio at this position'
+        : kind === 'spreadsheet' ? 'Drop workbook as an editable spreadsheet frame'
+        : kind === 'markdown' ? 'Drop Markdown as a text frame'
+        : kind === 'text' ? 'Drop text as a text frame'
+        : kind === 'docx' ? 'Drop Word document as an editable text frame'
+        : 'This file type is not supported yet';
+}
+
+function compatibleExternalDropTarget(kind, targetKind) {
+    return (kind === 'picture' && targetKind === 'image')
+        || (kind === 'video' && targetKind === 'video')
+        || (kind === 'audio' && targetKind === 'audio');
+}
+
+function externalDropTargetAt(state, event, kind, placement) {
+    const element = event?.target?.closest?.('[data-publication-element]');
+    if (!element || !state.page?.contains(element) || element.classList.contains('locked')) return null;
+    const targetKind = String(element.dataset.elementKind || '').toLowerCase();
+    const targetId = String(element.dataset.elementId || '');
+    if (!targetId || !compatibleExternalDropTarget(kind, targetKind)) return null;
+
+    const x = number(element.dataset.elementX);
+    const y = number(element.dataset.elementY);
+    const width = Math.max(.001, number(element.dataset.elementWidth, 1));
+    const height = Math.max(.001, number(element.dataset.elementHeight, 1));
+    const radians = number(element.dataset.elementRotation) * Math.PI / 180;
+    const dx = number(placement?.x) - (x + width / 2);
+    const dy = number(placement?.y) - (y + height / 2);
+    const cos = Math.cos(radians);
+    const sin = Math.sin(radians);
+    const localX = cos * dx + sin * dy + width / 2;
+    const localY = -sin * dx + cos * dy + height / 2;
+    return {
+        element,
+        id: targetId,
+        kind: targetKind,
+        x: clamp(localX / width, 0, 1),
+        y: clamp(localY / height, 0, 1)
+    };
+}
+
+function setExternalDropTarget(preview, target) {
+    if (!preview) return;
+    if (preview.target?.element !== target?.element)
+        preview.target?.element?.classList?.remove('external-file-component-drop-target');
+    preview.target = target || null;
+    preview.target?.element?.classList?.add('external-file-component-drop-target');
+    const message = preview.overlay?.querySelector?.('.publisher-external-drop-message');
+    if (message) message.textContent = externalDropTargetMessage(preview.kind, preview.target);
 }
 
 function createExternalDropPreview(state, file, kind) {
@@ -486,13 +545,7 @@ function createExternalDropPreview(state, file, kind) {
     overlay.className = 'publisher-external-drop-overlay';
     const message = document.createElement('span');
     message.className = 'publisher-external-drop-message';
-    message.textContent = kind === 'picture' ? 'Drop picture at this position'
-        : kind === 'video' ? 'Drop video at this position'
-        : kind === 'spreadsheet' ? 'Drop workbook as an editable spreadsheet frame'
-        : kind === 'markdown' ? 'Drop Markdown as a text frame'
-        : kind === 'text' ? 'Drop text as a text frame'
-        : kind === 'docx' ? 'Drop Word document as an editable text frame'
-        : 'This file type is not supported yet';
+    message.textContent = externalDropTargetMessage(kind, null);
     overlay.appendChild(message);
     state.page.appendChild(overlay);
 
@@ -501,7 +554,7 @@ function createExternalDropPreview(state, file, kind) {
     ghost.setAttribute('aria-hidden', 'true');
     let url = '';
     const fileKey = `${file?.name || ''}|${file?.size || 0}|${file?.lastModified || 0}|${file?.type || ''}`;
-    const preview = { file, fileKey, kind, overlay, ghost, url, widthPx: 190, heightPx: kind === 'video' ? 108 : 120, pixelWidth: 0, pixelHeight: 0, durationSeconds: 0 };
+    const preview = { file, fileKey, kind, overlay, ghost, url, target: null, widthPx: 190, heightPx: kind === 'video' ? 108 : 120, pixelWidth: 0, pixelHeight: 0, durationSeconds: 0 };
 
     if (kind === 'picture' && file instanceof Blob) {
         url = URL.createObjectURL(file);
@@ -518,27 +571,38 @@ function createExternalDropPreview(state, file, kind) {
             }
         }, { once: true });
         ghost.appendChild(image);
-    } else if (kind === 'video' && file instanceof Blob) {
+    } else if ((kind === 'video' || kind === 'audio') && file instanceof Blob) {
         url = URL.createObjectURL(file);
         preview.url = url;
-        const video = document.createElement('video');
-        video.src = url;
-        video.muted = true;
-        video.playsInline = true;
-        video.autoplay = true;
-        video.loop = true;
-        video.preload = 'metadata';
-        video.play().catch(() => { });
-        video.addEventListener('loadedmetadata', () => {
-            preview.pixelWidth = video.videoWidth || 0;
-            preview.pixelHeight = video.videoHeight || 0;
-            preview.durationSeconds = Number.isFinite(video.duration) ? Math.max(0, video.duration) : 0;
+        const media = document.createElement(kind === 'video' ? 'video' : 'audio');
+        media.src = url;
+        media.muted = true;
+        media.preload = 'metadata';
+        if (kind === 'video') {
+            media.playsInline = true;
+            media.autoplay = true;
+            media.loop = true;
+            media.play().catch(() => { });
+        }
+        media.addEventListener('loadedmetadata', () => {
+            preview.durationSeconds = Number.isFinite(media.duration) ? Math.max(0, media.duration) : 0;
+            if (kind === 'video') {
+                preview.pixelWidth = media.videoWidth || 0;
+                preview.pixelHeight = media.videoHeight || 0;
+            }
             if (preview.pixelWidth > 0 && preview.pixelHeight > 0) {
                 preview.heightPx = clamp(preview.widthPx * preview.pixelHeight / preview.pixelWidth, 54, 220);
                 ghost.style.height = `${preview.heightPx}px`;
             }
         }, { once: true });
-        ghost.appendChild(video);
+        if (kind === 'video') ghost.appendChild(media);
+        else {
+            const icon = document.createElement('b');
+            icon.textContent = 'AUDIO';
+            const label = document.createElement('small');
+            label.textContent = file?.name || 'Dropped audio';
+            ghost.append(icon, label, media);
+        }
     } else {
         const icon = document.createElement('b');
         icon.textContent = kind === 'spreadsheet' ? 'XLSX' : kind === 'markdown' ? 'MD' : kind === 'text' ? 'TXT' : kind === 'docx' ? 'DOCX' : '?';
@@ -593,18 +657,20 @@ function externalFileDragOver(state, event) {
     const fileKey = `${descriptor.name}|${descriptor.size}|${descriptor.lastModified}|${descriptor.type}`;
     if (!current || current.fileKey !== fileKey || current.kind !== kind)
         createExternalDropPreview(state, descriptor.file || descriptor, kind);
-    positionExternalDropPreview(state, event);
+    const placement = positionExternalDropPreview(state, event);
+    setExternalDropTarget(state.externalDropPreview, externalDropTargetAt(state, event, kind, placement));
     return true;
 }
 
-async function importExternalFileAt(state, file, placement, existingPreview = null) {
+async function importExternalFileAt(state, file, placement, existingPreview = null, target = null) {
     const kind = externalDropKind(file);
     const preview = existingPreview || createExternalDropPreview(state, file, kind);
     positionExternalDropPreviewAt(state, placement);
+    setExternalDropTarget(preview, target);
     if (!kind) {
         clearExternalDropPreview(state);
         await safeDotNet(state, 'ExternalFileDropFailed',
-            `The file '${file?.name || 'file'}' is not a supported picture, spreadsheet, video, DOCX, text, or Markdown file.`);
+            `The file '${file?.name || 'file'}' is not a supported picture, spreadsheet, video, audio, DOCX, text, or Markdown file.`);
         return false;
     }
 
@@ -625,7 +691,8 @@ async function importExternalFileAt(state, file, placement, existingPreview = nu
         await safeDotNet(state, 'CompleteExternalFileDrop', assetId, kind, file?.name || kind,
             file?.type || 'application/octet-stream', file?.size || 0,
             preview?.durationSeconds || 0, preview?.pixelWidth || 0, preview?.pixelHeight || 0,
-            placement.x, placement.y);
+            placement.x, placement.y,
+            target?.id || '', target?.kind || '', target?.x ?? .5, target?.y ?? .5);
         return true;
     } catch (error) {
         await safeDotNet(state, 'ExternalFileDropFailed', error?.message || String(error));
@@ -642,7 +709,8 @@ async function externalFileDrop(state, event) {
     event.stopPropagation();
     const preview = state.externalDropPreview || createExternalDropPreview(state, file, externalDropKind(file));
     const placement = positionExternalDropPreview(state, event) || { x: 0, y: 0 };
-    await importExternalFileAt(state, file, placement, preview);
+    const target = externalDropTargetAt(state, event, preview.kind, placement) || preview.target || null;
+    await importExternalFileAt(state, file, placement, preview, target);
     return true;
 }
 

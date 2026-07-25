@@ -16,6 +16,11 @@ public partial class PictureEditor
 {
     private const string CanvasId = "picture-studio-canvas";
     private const string CanvasHostId = "picture-studio-canvas-host";
+    private const string StudioRootId = "picture-studio-window";
+    private const string ImageInputId = "picture-studio-image-input";
+    private const string ImageDropInputId = "picture-studio-image-drop-input";
+    private const string LayeredInputId = "picture-studio-layered-input";
+    private const string LayerDropInputId = "picture-studio-layer-drop-input";
     private const double MinDrawWidth = .25;
     private const double MaxDrawWidth = 512;
     private static readonly string[] PictureColors =
@@ -64,6 +69,8 @@ public partial class PictureEditor
     private int _pictureExportNextChunk;
     private int _pictureExportExpectedLength;
     private Guid? _replaceRasterLayerId;
+    private double? _pendingDropX;
+    private double? _pendingDropY;
 
     private bool HasSelection => State.SelectedLayer is not null;
     private bool CanDelete => State.SelectedLayer is { Locked: false };
@@ -143,6 +150,7 @@ public partial class PictureEditor
         _notice = null;
         _renderErrorActive = false;
         _drawTool = PictureDrawTool.Select;
+        ClearPendingDropPosition();
         if (InitialDocument is not null)
         {
             _pendingRasterInitialization = false;
@@ -195,7 +203,13 @@ public partial class PictureEditor
         }
         if (!_initialized)
         {
-            await _module.InvokeVoidAsync("initializePictureStudio", CanvasId, _self);
+            await _module.InvokeVoidAsync(
+                "initializePictureStudio",
+                CanvasId,
+                _self,
+                StudioRootId,
+                ImageDropInputId,
+                LayerDropInputId);
             _initialized = true;
             _renderRequested = true;
         }
@@ -371,23 +385,27 @@ public partial class PictureEditor
     private async Task RequestImage()
     {
         _replaceRasterLayerId = null;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-studio-image-input");
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", ImageInputId);
     }
 
     private async Task RequestLayeredImport()
     {
         _replaceRasterLayerId = null;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-studio-layered-input");
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", LayeredInputId);
     }
 
     private async Task RequestRasterReplacement()
     {
         if (State.SelectedLayer is not RasterPictureLayer { Locked: false } raster) return;
         _replaceRasterLayerId = raster.Id;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", "picture-studio-image-input");
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", ImageInputId);
     }
 
-    private async Task ImportImage(InputFileChangeEventArgs args)
+    private Task ImportImage(InputFileChangeEventArgs args) => ImportImageCore(args, forceAdd: false);
+
+    private Task ImportDroppedImage(InputFileChangeEventArgs args) => ImportImageCore(args, forceAdd: true);
+
+    private async Task ImportImageCore(InputFileChangeEventArgs args, bool forceAdd)
     {
         try
         {
@@ -403,10 +421,11 @@ public partial class PictureEditor
             var size = _module is null
                 ? new PictureImageSize()
                 : await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", dataUrl);
-            if (_replaceRasterLayerId is Guid targetId && State.ReplaceRaster(targetId, dataUrl))
+            if (!forceAdd && _replaceRasterLayerId is Guid targetId && State.ReplaceRaster(targetId, dataUrl))
                 State.SelectLayer(targetId);
             else
-                State.AddRaster(dataUrl, file.Name, size.Width, size.Height);
+                State.AddRaster(dataUrl, file.Name, size.Width, size.Height,
+                    forceAdd ? _pendingDropX : null, forceAdd ? _pendingDropY : null);
         }
         catch (Exception ex)
         {
@@ -415,10 +434,15 @@ public partial class PictureEditor
         finally
         {
             _replaceRasterLayerId = null;
+            if (forceAdd) ClearPendingDropPosition();
         }
     }
 
-    private async Task ImportLayeredDocument(InputFileChangeEventArgs args)
+    private Task ImportLayeredDocument(InputFileChangeEventArgs args) => ImportLayeredDocumentCore(args, append: false);
+
+    private Task ImportDroppedLayeredDocument(InputFileChangeEventArgs args) => ImportLayeredDocumentCore(args, append: true);
+
+    private async Task ImportLayeredDocumentCore(InputFileChangeEventArgs args, bool append)
     {
         _error = null;
         _notice = null;
@@ -453,17 +477,54 @@ public partial class PictureEditor
                 throw new InvalidDataException("Use an SVG, compressed SVGZ, or OpenRaster ORA document.");
             }
 
-            State.StartFromDocument(result.Document);
-            State.SetDocumentName(Path.GetFileNameWithoutExtension(file.Name));
+            if (append)
+            {
+                var added = State.AddImportedLayers(result.Document, Path.GetFileNameWithoutExtension(file.Name),
+                    _pendingDropX, _pendingDropY);
+                if (added == 0) throw new InvalidDataException("The dropped picture document does not contain importable layers.");
+            }
+            else
+            {
+                State.StartFromDocument(result.Document);
+                State.SetDocumentName(Path.GetFileNameWithoutExtension(file.Name));
+            }
             var losses = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Loss);
             var warnings = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Warning);
-            _notice = $"Imported {State.Document.Layers.Count} editable layer{(State.Document.Layers.Count == 1 ? string.Empty : "s")}." +
+            var importedCount = append ? result.Document.Layers.Count : State.Document.Layers.Count;
+            _notice = $"{(append ? "Added" : "Imported")} {importedCount} editable layer{(importedCount == 1 ? string.Empty : "s")}." +
                 (losses + warnings > 0 ? $" {warnings} warning(s), {losses} compatibility loss(es)." : string.Empty);
         }
         catch (Exception ex)
         {
             _error = ex.Message;
         }
+        finally
+        {
+            if (append) ClearPendingDropPosition();
+        }
+    }
+
+    [JSInvokable]
+    public void PictureStudioFileDropPositioned(double? x, double? y)
+    {
+        _pendingDropX = x is double px && double.IsFinite(px) ? Math.Clamp(px, 0, State.Document.WidthPx) : null;
+        _pendingDropY = y is double py && double.IsFinite(py) ? Math.Clamp(py, 0, State.Document.HeightPx) : null;
+    }
+
+    private void ClearPendingDropPosition()
+    {
+        _pendingDropX = null;
+        _pendingDropY = null;
+    }
+
+    [JSInvokable]
+    public void PictureStudioFileDropRejected(string? message)
+    {
+        ClearPendingDropPosition();
+        _error = string.IsNullOrWhiteSpace(message)
+            ? "Drop a PNG, JPEG, GIF, WebP, SVG, SVGZ, or OpenRaster picture into Picture Studio."
+            : message;
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private void AddTextLayer() => State.AddText();

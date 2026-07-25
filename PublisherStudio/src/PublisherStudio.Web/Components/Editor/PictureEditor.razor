@@ -5,7 +5,7 @@
 @if (Visible)
 {
     <div class="modal-backdrop picture-studio-backdrop">
-        <section class="picture-studio-dialog" role="dialog" aria-modal="true" aria-label="Picture Studio">
+        <section id="picture-studio-window" class="picture-studio-dialog" role="dialog" aria-modal="true" aria-label="Picture Studio">
             <header class="picture-studio-titlebar">
                 <div>
                     <strong>Picture Studio</strong>
@@ -1094,5 +1094,7 @@
     </DxContextMenu>
 
     <InputFile id="picture-studio-image-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="ImportImage" />
+    <InputFile id="picture-studio-image-drop-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="ImportDroppedImage" />
     <InputFile id="picture-studio-layered-input" class="hidden-file-input" accept=".svg,.svgz,.ora,image/svg+xml,application/gzip,application/x-gzip,application/x-openraster" OnChange="ImportLayeredDocument" />
+    <InputFile id="picture-studio-layer-drop-input" class="hidden-file-input" accept=".svg,.svgz,.ora,image/svg+xml,application/gzip,application/x-gzip,application/x-openraster" OnChange="ImportDroppedLayeredDocument" />
 }

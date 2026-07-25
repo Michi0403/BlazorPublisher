@@ -53,6 +53,123 @@ function cloneDocument(document) {
     return JSON.parse(JSON.stringify(normalizeDocument(document)));
 }
 
+function pictureDropRoute(file) {
+    const name = String(file?.name || "").toLowerCase();
+    const mime = String(file?.type || "").toLowerCase();
+    if (/\.(ora|svgz|svg)$/.test(name)
+        || mime === "image/svg+xml"
+        || mime.includes("openraster")
+        || mime.includes("gzip")) return "layers";
+    if (mime.startsWith("image/") || /\.(png|jpe?g|gif|webp)$/.test(name)) return "image";
+    return "";
+}
+
+function assignDroppedFile(inputId, file) {
+    const input = document.getElementById(inputId);
+    if (!(input instanceof HTMLInputElement) || input.type !== "file" || !(file instanceof File)) return false;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.value = "";
+    input.files = transfer.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+}
+
+function releasePictureDropBindings(editor) {
+    const root = editor?.dropRoot;
+    const handlers = editor?.dropHandlers;
+    if (root && handlers) {
+        root.removeEventListener("dragenter", handlers.dragenter);
+        root.removeEventListener("dragover", handlers.dragover);
+        root.removeEventListener("dragleave", handlers.dragleave);
+        root.removeEventListener("drop", handlers.drop);
+        root.classList.remove("picture-file-drag-active");
+        root.removeAttribute("data-picture-drop-mode");
+    }
+    if (editor) {
+        editor.dropRoot = null;
+        editor.dropHandlers = null;
+        editor.dropDepth = 0;
+    }
+}
+
+function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) {
+    releasePictureDropBindings(editor);
+    const root = document.getElementById(rootId);
+    if (!root) return;
+    const show = route => {
+        root.classList.add("picture-file-drag-active");
+        root.dataset.pictureDropMode = route || "picture";
+    };
+    const clear = () => {
+        editor.dropDepth = 0;
+        root.classList.remove("picture-file-drag-active");
+        root.removeAttribute("data-picture-drop-mode");
+    };
+    const descriptor = event => {
+        const file = event.dataTransfer?.files?.[0];
+        if (file) return file;
+        const item = [...(event.dataTransfer?.items || [])].find(candidate => candidate.kind === "file");
+        return item ? { name: "", type: item.type || "" } : null;
+    };
+    const dropPoint = event => {
+        const canvas = editor.canvas;
+        if (!canvas) return null;
+        const bounds = canvas.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)
+            return null;
+        return canvasPoint(canvas, event);
+    };
+    const handlers = {
+        dragenter: event => {
+            const file = descriptor(event);
+            if (!file) return;
+            event.preventDefault();
+            editor.dropDepth++;
+            show(pictureDropRoute(file));
+        },
+        dragover: event => {
+            const file = descriptor(event);
+            if (!file) return;
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = "copy";
+            show(pictureDropRoute(file));
+        },
+        dragleave: event => {
+            if (event.relatedTarget && root.contains(event.relatedTarget)) return;
+            editor.dropDepth = Math.max(0, editor.dropDepth - 1);
+            if (editor.dropDepth === 0) clear();
+        },
+        drop: async event => {
+            const file = event.dataTransfer?.files?.[0]
+                || [...(event.dataTransfer?.items || [])].find(candidate => candidate.kind === "file")?.getAsFile?.();
+            if (!file) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const route = pictureDropRoute(file);
+            clear();
+            const inputId = route === "layers" ? layeredInputId : route === "image" ? imageInputId : "";
+            const point = dropPoint(event);
+            try {
+                await editor.dotNetRef?.invokeMethodAsync("PictureStudioFileDropPositioned", point?.x ?? null, point?.y ?? null);
+            } catch { }
+            if (!inputId || !assignDroppedFile(inputId, file)) {
+                editor.dotNetRef?.invokeMethodAsync(
+                    "PictureStudioFileDropRejected",
+                    `The dropped file '${file.name || "file"}' is not a supported Picture Studio image or layered document.`).catch(() => { });
+            }
+        }
+    };
+    editor.dropRoot = root;
+    editor.dropHandlers = handlers;
+    editor.dropDepth = 0;
+    root.addEventListener("dragenter", handlers.dragenter);
+    root.addEventListener("dragover", handlers.dragover);
+    root.addEventListener("dragleave", handlers.dragleave);
+    root.addEventListener("drop", handlers.drop);
+}
+
 function normalizeToolSettings(settings) {
     const rawTool = typeof settings?.tool === "string" ? settings.tool.toLowerCase() : "select";
     return {
@@ -1912,7 +2029,7 @@ function bindEditorCanvas(editor, canvas) {
     updateCanvasCursor(editor);
 }
 
-export function initializePictureStudio(canvasId, dotNetRef) {
+export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageInputId = "", layeredInputId = "") {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     let editor = editors.get(canvasId);
@@ -1930,7 +2047,10 @@ export function initializePictureStudio(canvasId, dotNetRef) {
             toolSettings: normalizeToolSettings(null),
             animationFrame: 0,
             renderToken: 0,
-            lastRenderError: ""
+            lastRenderError: "",
+            dropRoot: null,
+            dropHandlers: null,
+            dropDepth: 0
         };
         const globalHandlers = {
             pointerdown: event => {
@@ -1959,6 +2079,7 @@ export function initializePictureStudio(canvasId, dotNetRef) {
         editor.dotNetRef = dotNetRef;
     }
     bindEditorCanvas(editor, canvas);
+    bindPictureDrop(editor, rootId, imageInputId, layeredInputId);
 }
 
 export function cancelPictureStudioInteraction(canvasId) {
@@ -1971,6 +2092,7 @@ export function disposePictureStudio(canvasId) {
     if (!editor) return;
     resetEditorPointerState(editor, true);
     if (editor.animationFrame) cancelAnimationFrame(editor.animationFrame);
+    releasePictureDropBindings(editor);
     const handlers = editor.globalHandlers;
     if (handlers) {
         window.removeEventListener("pointerdown", handlers.pointerdown, true);

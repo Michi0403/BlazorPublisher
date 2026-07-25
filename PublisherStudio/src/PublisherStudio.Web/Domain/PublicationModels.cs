@@ -142,7 +142,11 @@ public sealed record ExternalFileDropRequest(
     int PixelWidth,
     int PixelHeight,
     double X,
-    double Y);
+    double Y,
+    Guid? TargetElementId = null,
+    string TargetElementKind = "",
+    double TargetX = .5,
+    double TargetY = .5);
 
 public sealed class PublicationConnectorPort
 {

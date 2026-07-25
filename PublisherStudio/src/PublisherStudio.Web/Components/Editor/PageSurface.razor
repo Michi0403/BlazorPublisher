@@ -119,6 +119,11 @@
             {
                 <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
                      data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
+                     data-element-x="@Inv(element.X)"
+                     data-element-y="@Inv(element.Y)"
+                     data-element-width="@Inv(element.Width)"
+                     data-element-height="@Inv(element.Height)"
+                     data-element-rotation="@Inv(element.Rotation)"
                      data-animations="@PublicationAnimationData.Animations(element)"
                      data-interaction="@PublicationAnimationData.Interaction(element)"
                      data-interaction-action="@element.Interaction.Action"
@@ -991,12 +996,15 @@
     [JSInvokable] public void SetInsertionPoint(double x, double y) => State.SetInsertionPoint(x, y);
     [JSInvokable]
     public Task CompleteExternalFileDrop(string assetId, string kind, string name, string mimeType, long size,
-        double durationSeconds, int pixelWidth, int pixelHeight, double x, double y)
+        double durationSeconds, int pixelWidth, int pixelHeight, double x, double y,
+        string? targetElementId, string? targetElementKind, double targetX, double targetY)
     {
         if (!Guid.TryParse(assetId, out var parsed))
             return RequestExternalDropError.InvokeAsync("The dropped file could not be registered.");
+        Guid? parsedTargetId = Guid.TryParse(targetElementId, out var targetId) ? targetId : null;
         return RequestExternalFileDrop.InvokeAsync(new ExternalFileDropRequest(
-            parsed, kind, name, mimeType, size, durationSeconds, pixelWidth, pixelHeight, x, y));
+            parsed, kind, name, mimeType, size, durationSeconds, pixelWidth, pixelHeight, x, y,
+            parsedTargetId, targetElementKind ?? string.Empty, targetX, targetY));
     }
     [JSInvokable] public Task ExternalFileDropFailed(string message) => RequestExternalDropError.InvokeAsync(message);
     [JSInvokable] public void KeyboardCopy() => State.CopySelected();

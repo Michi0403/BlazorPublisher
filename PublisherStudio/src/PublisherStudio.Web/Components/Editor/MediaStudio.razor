@@ -313,6 +313,7 @@
     [Parameter] public Guid SessionId { get; set; }
     [Parameter] public PublicationElementKind Kind { get; set; } = PublicationElementKind.Audio;
     [Parameter] public PublicationMediaElement? InitialMedia { get; set; }
+    [Parameter] public PublicationMediaSegment? InitialInsertedSegment { get; set; }
     [Parameter] public bool EditingExisting { get; set; }
     [Parameter] public EventCallback<MediaEditorResult> Saved { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
@@ -496,7 +497,18 @@
             _playbackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter;
         }
 
-        if (_segments.Count > 0) SelectSegment(_segments[0].Id, seek: false);
+        if (InitialInsertedSegment is { } inserted)
+        {
+            var normalizedInsert = TimelineEdits.Normalize([inserted], IsVideo).FirstOrDefault();
+            if (normalizedInsert is not null)
+            {
+                normalizedInsert.Id = Guid.NewGuid();
+                _segments.Add(normalizedInsert);
+                _warning = $"Added {normalizedInsert.Name} to the {(IsVideo ? "video" : "audio")} sequence.";
+            }
+        }
+
+        if (_segments.Count > 0) SelectSegment(_segments[^1].Id, seek: false);
         else ClearSelectedSegmentFields();
     }
 
@@ -531,7 +543,10 @@
                 SessionId.ToString("N"),
                 "media-studio-window",
                 IsVideo ? "media-studio-frame-stage" : string.Empty,
-                IsVideo ? "media-studio-frame-overlay-host" : string.Empty);
+                IsVideo ? "media-studio-frame-overlay-host" : string.Empty,
+                "media-studio-file-input",
+                "media-studio-insert-file-input",
+                IsVideo ? "video" : "audio");
             _initializedSession = SessionId;
         }
         return _module;
@@ -966,6 +981,15 @@
         {
             _error = $"The media could not be inserted into the selected range: {ex.Message}";
         }
+    }
+
+    [JSInvokable]
+    public void MediaStudioFileDropRejected(string? message)
+    {
+        _error = string.IsNullOrWhiteSpace(message)
+            ? $"Drop a supported {(IsVideo ? "video" : "audio")} file into this Studio."
+            : message;
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private async Task<PublicationMediaSegment> ReadMediaFileAsync(IBrowserFile file)

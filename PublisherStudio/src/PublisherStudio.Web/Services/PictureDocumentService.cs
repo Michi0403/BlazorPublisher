@@ -26,6 +26,36 @@ public sealed class PictureDocumentService
 
     public PictureDocument Clone(PictureDocument document) => Deserialize(Serialize(document));
 
+    public RasterPictureLayer AddRasterLayer(
+        PictureDocument document,
+        string dataUrl,
+        string name,
+        int naturalWidth = 0,
+        int naturalHeight = 0,
+        double? centerX = null,
+        double? centerY = null)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        if (string.IsNullOrWhiteSpace(dataUrl))
+            throw new InvalidDataException("The picture layer does not contain image data.");
+
+        Normalize(document);
+        var sourceWidth = naturalWidth > 0 ? naturalWidth : document.WidthPx;
+        var sourceHeight = naturalHeight > 0 ? naturalHeight : document.HeightPx;
+        var size = FitSize(sourceWidth, sourceHeight, document.WidthPx * .72, document.HeightPx * .72);
+        var layer = new RasterPictureLayer
+        {
+            Name = NextLayerName(document, string.IsNullOrWhiteSpace(name) ? "Picture" : Path.GetFileNameWithoutExtension(name)),
+            DataUrl = dataUrl,
+            Width = size.Width,
+            Height = size.Height,
+            X = Math.Clamp((centerX ?? document.WidthPx / 2d) - size.Width / 2d, -size.Width + 1, document.WidthPx - 1),
+            Y = Math.Clamp((centerY ?? document.HeightPx / 2d) - size.Height / 2d, -size.Height + 1, document.HeightPx - 1)
+        };
+        document.Layers.Add(layer);
+        return layer;
+    }
+
     public void Normalize(PictureDocument document)
     {
         document.FormatVersion = "1.4";
@@ -127,6 +157,29 @@ public sealed class PictureDocumentService
             trimmed.Contains("javascript:", StringComparison.OrdinalIgnoreCase))
             throw new InvalidDataException("A vector picture layer contains active SVG content.");
         return trimmed;
+    }
+
+    private static (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
+    {
+        width = Math.Max(1, width);
+        height = Math.Max(1, height);
+        var scale = Math.Min(maxWidth / width, maxHeight / height);
+        if (!double.IsFinite(scale) || scale <= 0) scale = 1;
+        return (Math.Max(1, width * scale), Math.Max(1, height * scale));
+    }
+
+    private static string NextLayerName(PictureDocument document, string requested)
+    {
+        requested = string.IsNullOrWhiteSpace(requested) ? "Layer" : requested.Trim();
+        if (document.Layers.All(layer => !string.Equals(layer.Name, requested, StringComparison.OrdinalIgnoreCase)))
+            return requested;
+        for (var suffix = 2; suffix < 100_000; suffix++)
+        {
+            var candidate = $"{requested} {suffix}";
+            if (document.Layers.All(layer => !string.Equals(layer.Name, candidate, StringComparison.OrdinalIgnoreCase)))
+                return candidate;
+        }
+        return $"{requested} {Guid.NewGuid():N}";
     }
 
     private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;

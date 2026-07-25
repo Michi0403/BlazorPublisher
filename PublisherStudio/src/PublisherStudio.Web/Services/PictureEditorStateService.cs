@@ -108,23 +108,57 @@ public sealed class PictureEditorStateService
         Notify(false);
     }
 
-    public RasterPictureLayer AddRaster(string dataUrl, string name, int naturalWidth = 0, int naturalHeight = 0)
+    public RasterPictureLayer AddRaster(
+        string dataUrl,
+        string name,
+        int naturalWidth = 0,
+        int naturalHeight = 0,
+        double? centerX = null,
+        double? centerY = null)
     {
         Capture();
-        var size = FitSize(naturalWidth > 0 ? naturalWidth : Document.WidthPx, naturalHeight > 0 ? naturalHeight : Document.HeightPx, Document.WidthPx * .72, Document.HeightPx * .72);
-        var layer = new RasterPictureLayer
-        {
-            Name = NextName(string.IsNullOrWhiteSpace(name) ? "Picture" : Path.GetFileNameWithoutExtension(name)),
-            DataUrl = dataUrl,
-            Width = size.Width,
-            Height = size.Height,
-            X = (Document.WidthPx - size.Width) / 2,
-            Y = (Document.HeightPx - size.Height) / 2
-        };
-        Document.Layers.Add(layer);
+        var layer = _documents.AddRasterLayer(Document, dataUrl, name, naturalWidth, naturalHeight, centerX, centerY);
         SelectedLayerId = layer.Id;
         Notify();
         return layer;
+    }
+
+    public int AddImportedLayers(
+        PictureDocument importedDocument,
+        string? groupName = null,
+        double? centerX = null,
+        double? centerY = null)
+    {
+        ArgumentNullException.ThrowIfNull(importedDocument);
+        var imported = _documents.Clone(importedDocument);
+        if (imported.Layers.Count == 0) return 0;
+
+        Capture();
+        var scale = Math.Min(
+            Document.WidthPx * .84 / Math.Max(1, imported.WidthPx),
+            Document.HeightPx * .84 / Math.Max(1, imported.HeightPx));
+        if (!double.IsFinite(scale) || scale <= 0) scale = 1;
+        var offsetX = (centerX ?? Document.WidthPx / 2d) - imported.WidthPx * scale / 2d;
+        var offsetY = (centerY ?? Document.HeightPx / 2d) - imported.HeightPx * scale / 2d;
+        var group = string.IsNullOrWhiteSpace(groupName)
+            ? string.IsNullOrWhiteSpace(imported.Name) ? "Imported" : imported.Name.Trim()
+            : groupName.Trim();
+
+        foreach (var layer in imported.Layers)
+        {
+            layer.Id = Guid.NewGuid();
+            layer.Name = NextName(layer.Name);
+            layer.GroupPath = string.IsNullOrWhiteSpace(layer.GroupPath) ? group : $"{group}/{layer.GroupPath}";
+            layer.X = offsetX + layer.X * scale;
+            layer.Y = offsetY + layer.Y * scale;
+            layer.Width = Math.Max(1, layer.Width * scale);
+            layer.Height = Math.Max(1, layer.Height * scale);
+            Document.Layers.Add(layer);
+            SelectedLayerId = layer.Id;
+        }
+
+        Notify();
+        return imported.Layers.Count;
     }
 
     public bool ReplaceRaster(Guid id, string dataUrl)

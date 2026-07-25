@@ -8,7 +8,7 @@ public sealed class StreamingRuntimeUseCases
 {
     public StreamingRuntimeCapabilities GetCapabilities() => new()
     {
-        Version = "1.0.78",
+        Version = "1.0.79",
         BrowserCapture = true,
         BrowserAudioMix = true,
         NativeDeviceDiscovery = true,

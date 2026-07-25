@@ -1,7 +1,7 @@
-# PublisherStudio v1.0.78 release
+# PublisherStudio v1.0.79 release
 
-See `CHANGELOG-v1.0.78.md`, `SOURCE-CHANGES-v1.0.78.txt`, `TEST-RESULTS-v1.0.78.txt`, `VALIDATION.md`, and `docs/architecture/media-conversion-and-panel-studio.md`.
+See `CHANGELOG-v1.0.79.md`, `SOURCE-CHANGES-v1.0.79.txt`, `TEST-RESULTS-v1.0.79.txt`, and `VALIDATION.md`.
 
-v1.0.78 adds a reusable optional FFmpeg conversion service/controller/frontend and a first-class Panel/Div Studio with nested shared components, live KPI dashboard presets, sandboxed HTML experiences and complete Mainframe/HTML export integration.
+v1.0.79 fixes the Creator / Gamer Hub compile failure without deleting the intended chat feature. The preset now embeds PublisherStudio's existing shared platform-chat component instead of referencing a nonexistent media-capture enum value, and recursive panels normalize all shared components consistently.
 
-Application and installer version is `1.0.78`. Publication format is `1.54`; Picture Studio format remains unchanged. FFmpeg is not bundled, and package dependency names and versions are unchanged.
+Application and installer version is `1.0.79`. Publication format remains `1.54`; package dependency names and versions are unchanged.

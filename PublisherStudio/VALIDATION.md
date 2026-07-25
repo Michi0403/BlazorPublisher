@@ -817,3 +817,11 @@ Static checks completed for the v1.0.37 source package:
 - Run all 25 Node regression suites, syntax-check all 35 non-vendor JavaScript/test modules, parse package JSON and project XML, verify version `1.0.78`, publication format `1.54`, and unchanged NuGet/npm dependencies.
 - Replay the release patch on untouched v1.0.77 and compare the result with the packaged v1.0.78 source. Validate ZIP CRC, clean extraction parity, SHA-256 and SHA-512 checksums.
 - A real .NET/Razor/DevExpress build and end-to-end FFmpeg acceptance remain release-machine requirements because this packaging environment does not contain the .NET SDK, licensed DevExpress restore feed or an FFmpeg executable.
+
+## v1.0.79 Creator Hub platform-chat validation
+
+- Verify the Creator Hub preset creates `PublicationComponentKind.Chat` with `PublicationChatPlatform.OutputContext` instead of a nonexistent `PublicationLiveSourceKind.PlatformChat` value.
+- Verify recursive panel normalization delegates nested `DevExtremeComponentElement` instances to `PublicationComponentService`.
+- Lexically validate every qualified `PublicationLiveSourceKind` reference in C# and Razor sources against the declared enum members to catch future CS0117 regressions.
+- Run all 25 Node regression suites, syntax-check non-vendor JavaScript/test modules, parse package JSON and project XML, verify version `1.0.79`, publication format `1.54`, and unchanged NuGet/npm dependencies.
+- Replay the release patch on untouched v1.0.78 and compare the result with the packaged v1.0.79 source. Validate ZIP CRC, clean extraction parity, SHA-256 and SHA-512 checksums.

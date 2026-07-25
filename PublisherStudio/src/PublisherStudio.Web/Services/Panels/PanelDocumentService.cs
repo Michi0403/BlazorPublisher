@@ -3,9 +3,10 @@ using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services.Panels;
 
-public sealed class PanelDocumentService(PublicationDataService data)
+public sealed class PanelDocumentService(PublicationDataService data, PublicationComponentService components)
 {
     private readonly PublicationDataService _data = data;
+    private readonly PublicationComponentService _components = components;
 
     private static readonly PublicationPanelPresetDescriptor[] Presets =
     [
@@ -126,6 +127,8 @@ public sealed class PanelDocumentService(PublicationDataService data)
                 if (visual.DataObjectId == Guid.Empty && document.DataObjects.Count > 0) visual.DataObjectId = document.DataObjects[0].Id;
                 visual.ValueFields ??= [];
             }
+            if (element is DevExtremeComponentElement component)
+                _components.Normalize(document, component);
         }
 
         elements.Sort((left, right) => left.ZIndex.CompareTo(right.ZIndex));
@@ -195,11 +198,21 @@ public sealed class PanelDocumentService(PublicationDataService data)
             Name = "Camera", SourceKind = PublicationLiveSourceKind.Camera, X = 3, Y = 3, Width = 104, Height = 58, ZIndex = 1,
             CaptureWidth = 1920, CaptureHeight = 1080, CaptureFrameRate = 30, Muted = true
         });
-        live.Elements.Add(new LiveSourceElement
-        {
-            Name = "Chat", SourceKind = PublicationLiveSourceKind.PlatformChat, X = 110, Y = 3, Width = 47, Height = 84, ZIndex = 2,
-            CaptureWidth = 640, CaptureHeight = 1080, CaptureFrameRate = 30
-        });
+        var chat = _components.Create(document, PublicationComponentKind.Chat);
+        chat.Name = "Platform Chat";
+        chat.Title = "Live chat";
+        chat.ChatPlatform = PublicationChatPlatform.OutputContext;
+        chat.ChatAllowSending = true;
+        chat.ChatShowAvatar = true;
+        chat.ChatShowTimestamp = true;
+        chat.X = 110;
+        chat.Y = 3;
+        chat.Width = 47;
+        chat.Height = 84;
+        chat.ZIndex = 2;
+        chat.Background = "#0f172a";
+        chat.BorderColor = "#334155";
+        live.Elements.Add(chat);
         live.Elements.Add(new TextFrameElement
         {
             Name = "Now playing", X = 3, Y = 64, Width = 104, Height = 23, ZIndex = 3,

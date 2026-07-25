@@ -226,4 +226,34 @@ assert.doesNotMatch(
   'Do not redeclare end in NormalizeTemporalSelection; the method declares end later in the enclosing local-variable declaration space.'
 );
 
-console.log('PublisherStudio C# composition-root, namespace, interpolation, Razor control-flow and local-scope safety checks passed.');
+// Every qualified PublicationLiveSourceKind reference must resolve to an actual
+// enum member. This catches stale preset names such as PlatformChat before C#
+// compilation reaches CS0117. Platform chat itself is modeled by the shared
+// PublicationComponentKind.Chat control, not as a media-capture source.
+const streamingModels = fs.readFileSync(path.join(web, 'Domain', 'PublicationStreamingModels.cs'), 'utf8');
+const sourceKindBody = streamingModels.match(/public enum PublicationLiveSourceKind\s*\{([\s\S]*?)\}/)?.[1] ?? '';
+const sourceKindMembers = new Set(
+  sourceKindBody
+    .split(',')
+    .map(value => value.replace(/=.*/, '').trim())
+    .filter(Boolean)
+);
+const razorFiles = [];
+(function walkRazor(directory) {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (entry.name === 'bin' || entry.name === 'obj') continue;
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) walkRazor(full);
+    else if (entry.isFile() && entry.name.endsWith('.razor')) razorFiles.push(full);
+  }
+})(web);
+for (const file of [...csharpFiles, ...razorFiles]) {
+  const text = stripLiterals(stripComments(fs.readFileSync(file, 'utf8')));
+  for (const match of text.matchAll(/\bPublicationLiveSourceKind\.([A-Za-z_][A-Za-z0-9_]*)/g))
+    assert.ok(
+      sourceKindMembers.has(match[1]),
+      `${path.relative(root, file)} references missing PublicationLiveSourceKind member ${match[1]}.`
+    );
+}
+
+console.log('PublisherStudio C# composition-root, enum-reference, namespace, interpolation, Razor control-flow and local-scope safety checks passed.');

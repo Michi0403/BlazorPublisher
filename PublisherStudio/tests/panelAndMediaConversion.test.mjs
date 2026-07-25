@@ -40,6 +40,11 @@ assert.match(panelModels, /sealed class HtmlEmbedElement : PublicationElement/);
 assert.match(traversal, /if \(element is not PanelElement panel\) continue/);
 assert.match(panels, /kpi-dashboard/);
 assert.match(panels, /creator-hub/);
+assert.match(panels, /PanelDocumentService\(PublicationDataService data, PublicationComponentService components\)/);
+assert.match(panels, /_components\.Create\(document, PublicationComponentKind\.Chat\)/);
+assert.match(panels, /PublicationChatPlatform\.OutputContext/);
+assert.match(panels, /_components\.Normalize\(document, component\)/);
+assert.doesNotMatch(panels, /PublicationLiveSourceKind\.PlatformChat/, 'Platform chat is a shared interactive component, not a browser capture source.');
 assert.match(panels, /web-experience/);
 assert.match(panelView, /case DataVisualElement/);
 assert.match(panelView, /case DevExtremeComponentElement/);
@@ -80,10 +85,10 @@ assert.match(program, /AddSingleton<IMediaConversionService, MediaConversionServ
 assert.match(program, /AddSingleton<PanelDocumentService>/);
 assert.equal(appsettings.PublisherStudio.FFmpegPath, '');
 
-assert.equal(packageJson.version, '1.0.78');
-assert.equal(lockJson.version, '1.0.78');
-assert.equal(lockJson.packages[''].version, '1.0.78');
-assert.match(webProject, /<Version>1\.0\.78<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.78<\/Version>/);
+assert.equal(packageJson.version, '1.0.79');
+assert.equal(lockJson.version, '1.0.79');
+assert.equal(lockJson.packages[''].version, '1.0.79');
+assert.match(webProject, /<Version>1\.0\.79<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.79<\/Version>/);
 
 console.log('Panel/Div Studio, recursive shared-component rendering, dashboard library, FFmpeg service/controller/UI, and version contracts passed.');

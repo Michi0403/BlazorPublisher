@@ -1,0 +1,23 @@
+PublisherStudio v1.0.79 source changes
+
+Modified:
+- src/PublisherStudio.Web/Services/Panels/PanelDocumentService.cs
+  - Inject PublicationComponentService.
+  - Replace invalid PublicationLiveSourceKind.PlatformChat preset element with the real shared Chat component.
+  - Normalize nested DevExtreme components through PublicationComponentService.
+- tests/panelAndMediaConversion.test.mjs
+  - Verify Creator Hub shared-chat architecture and reject the invalid live-source enum reference.
+- tests/csharpCompilationSafety.test.mjs
+  - Validate every qualified PublicationLiveSourceKind reference against the actual enum members in C# and Razor files.
+- Version-bearing project, npm, runtime and structured-export files advanced to 1.0.79.
+- Version contract tests advanced to 1.0.79.
+
+Added:
+- CHANGELOG-v1.0.79.md
+- SOURCE-CHANGES-v1.0.79.txt
+- TEST-RESULTS-v1.0.79.txt
+
+Unchanged:
+- Publication format 1.54.
+- NuGet and npm dependency names and versions.
+- Existing media converter, Panel/Div document, chat service/hub and HTML-export formats.

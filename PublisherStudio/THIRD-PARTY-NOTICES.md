@@ -18,3 +18,7 @@ A valid DevExpress license and configured licensed NuGet/npm feeds are required 
 - **qrcode-generator 1.4.4** — MIT License. Used for QR Code generation.
 
 The license or notice files for directly vendored open-source scripts are stored beside those scripts where applicable. The surrounding PublisherStudio source retains its own project license.
+
+## Optional external FFmpeg executable
+
+PublisherStudio can invoke a separately installed FFmpeg executable for local media conversion. FFmpeg is **not bundled or redistributed** with PublisherStudio. FFmpeg is normally licensed under LGPL 2.1-or-later, while optional GPL components can make a particular build GPL; codec and patent obligations also depend on the selected build and distribution. The user or distributor is responsible for installing and licensing an appropriate FFmpeg build. See the official FFmpeg legal and download pages.

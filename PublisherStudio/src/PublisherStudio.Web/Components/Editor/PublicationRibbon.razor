@@ -18,6 +18,7 @@
         <DxRibbonApplicationTabItem Text="Export single-file website" IconCssClass="pub-icon pub-icon-web" Click="RequestExportSite" />
         <DxRibbonApplicationTabItem Text="Export structured website (ZIP)" IconCssClass="pub-icon pub-icon-web" Click="RequestExportStructuredSite" />
         <DxRibbonApplicationTabItem Text="Export presentation as video" IconCssClass="pub-icon pub-icon-video" Click="RequestExportVideo" />
+        <DxRibbonApplicationTabItem Text="Media Converter Studio" IconCssClass="pub-icon pub-icon-media" Click="RequestMediaConverter" />
         <DxRibbonApplicationTabItem Text="Print / Save as PDF" IconCssClass="pub-icon pub-icon-print" Click="RequestPrint" />
     </DxRibbonApplicationTab>
 
@@ -57,6 +58,8 @@
     <DxRibbonTab Text="Insert">
         <DxRibbonGroup Text="Content" IconCssClass="pub-icon pub-icon-insert">
             <DxRibbonItem Text="Objects" IconCssClass="pub-icon pub-icon-insert" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text="Panel / dashboard" IconCssClass="pub-icon pub-icon-panel" Click="RequestPanel" />
+                <DxRibbonItem Text="Web content" IconCssClass="pub-icon pub-icon-web" Click="RequestHtmlEmbed" />
                 <DxRibbonItem Text="Text box" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
                 <DxRibbonItem Text="WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
                 <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
@@ -90,6 +93,11 @@
                 <DxRibbonItem Text="Manage data" IconCssClass="pub-icon pub-icon-chart" Click="RequestManageData" />
             </DxRibbonItem>
             <DxRibbonItem Text="Barcode / QR" IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" Click="RequestBarcode" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Panels" IconCssClass="pub-icon pub-icon-panel">
+            <DxRibbonItem Text="Insert blank panel" IconCssClass="pub-icon pub-icon-panel" IsPrimary="true" Click="RequestPanel" />
+            <DxRibbonItem Text="Panel library" IconCssClass="pub-icon pub-icon-chart" Click="RequestPanelLibrary" />
+            <DxRibbonItem Text="Media converter" IconCssClass="pub-icon pub-icon-media" Click="RequestMediaConverter" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Interactive" IconCssClass="pub-icon pub-icon-web">
             <DxRibbonItem Text="Professional components" IconCssClass="pub-icon pub-icon-command" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
@@ -617,6 +625,10 @@
     [Parameter] public EventCallback OnManageData { get; set; }
     [Parameter] public EventCallback<PublicationComponentKind> OnInsertComponent { get; set; }
     [Parameter] public EventCallback OnEditComponent { get; set; }
+    [Parameter] public EventCallback OnInsertPanel { get; set; }
+    [Parameter] public EventCallback OnInsertHtmlEmbed { get; set; }
+    [Parameter] public EventCallback OnTogglePanelLibrary { get; set; }
+    [Parameter] public EventCallback OnOpenMediaConverter { get; set; }
     [Parameter] public EventCallback OnPreviewPageAnimations { get; set; }
     [Parameter] public EventCallback OnPreviewObjectAnimations { get; set; }
     [Parameter] public EventCallback OnStopAnimations { get; set; }
@@ -716,6 +728,10 @@
     private Task RequestEditDataVisual() => OnEditDataVisual.InvokeAsync();
     private Task RequestManageData() => OnManageData.InvokeAsync();
     private Task RequestEditComponent() => OnEditComponent.InvokeAsync();
+    private Task RequestPanel() => OnInsertPanel.InvokeAsync();
+    private Task RequestHtmlEmbed() => OnInsertHtmlEmbed.InvokeAsync();
+    private Task RequestPanelLibrary() => OnTogglePanelLibrary.InvokeAsync();
+    private Task RequestMediaConverter() => OnOpenMediaConverter.InvokeAsync();
     private void ToggleContentPan() => State.ToggleContentPanMode();
     private void ResetContentViewport() => State.ResetContentViewport();
     private Task RequestPreviewPageAnimations() => OnPreviewPageAnimations.InvokeAsync();

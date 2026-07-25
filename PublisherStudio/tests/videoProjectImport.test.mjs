@@ -32,7 +32,7 @@ assert.match(models, /SourceRate/);
 assert.match(models, /Speed/);
 assert.match(models, /ImportMetadata/);
 assert.match(publicationModels, /VideoProjectDocument\? VideoProject/);
-assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.53"/);
+assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.54"/);
 
 assert.match(importer, /SupportedExtensions[\s\S]*\.otio[\s\S]*\.otioz[\s\S]*\.mlt[\s\S]*\.kdenlive[\s\S]*\.xges[\s\S]*\.osp[\s\S]*\.edl/);
 assert.match(importer, /ImportOtioBundleAsync/);
@@ -69,16 +69,16 @@ assert.match(studio, /CommitProjectTrack/);
 assert.match(studio, /VideoProject = IsVideo/);
 assert.match(editor, /video\.VideoProject = result\.VideoProject/);
 assert.match(persistence, /video\.VideoProject is \{ Tracks\.Count: > 0 \}/);
-assert.match(persistence, /document\.FormatVersion = "1\.53"/);
+assert.match(persistence, /document\.FormatVersion = "1\.54"/);
 assert.match(program, /AddSingleton<VideoProjectImportService>/);
 assert.match(interop, /\(otio\|otioz\|mlt\|kdenlive\|xges\|osp\|edl\)/);
 assert.match(interop, /actualKind === 'project'/);
 
-assert.equal(packageJson.version, '1.0.77');
-assert.equal(lockJson.version, '1.0.77');
-assert.equal(lockJson.packages[''].version, '1.0.77');
-assert.match(webProject, /<Version>1\.0\.77<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.77<\/Version>/);
+assert.equal(packageJson.version, '1.0.78');
+assert.equal(lockJson.version, '1.0.78');
+assert.equal(lockJson.packages[''].version, '1.0.78');
+assert.match(webProject, /<Version>1\.0\.78<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.78<\/Version>/);
 
 assert.match(doctrine, /OpenTimelineIO/);
 assert.match(doctrine, /MLT XML/);

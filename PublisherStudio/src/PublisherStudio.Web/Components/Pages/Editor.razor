@@ -73,6 +73,10 @@
                        OnManageData="OpenDataManager"
                        OnInsertComponent="InsertComponent"
                        OnEditComponent="OpenComponentEditor"
+                       OnInsertPanel="InsertPanel"
+                       OnInsertHtmlEmbed="InsertHtmlEmbed"
+                       OnTogglePanelLibrary="TogglePanelLibrary"
+                       OnOpenMediaConverter="OpenMediaConverter"
                        OnPreviewPageAnimations="PreviewPageAnimations"
                        OnPreviewObjectAnimations="PreviewObjectAnimations"
                        OnStopAnimations="StopAnimations"
@@ -91,6 +95,7 @@
 
     <div class="publisher-quick-insert" aria-label="Drag objects onto the publication page">
         <span>Drag to canvas</span>
+        <button type="button" draggable="true" data-publisher-insert="panel" title="Drag a reusable panel or dashboard to the canvas" @onclick="InsertPanel"><i class="pub-icon pub-icon-panel"></i>Panel</button>
         <button type="button" draggable="true" data-publisher-insert="text" title="Drag a text box to an exact position, or click to insert" @onclick="AddTextQuick"><i class="pub-icon pub-icon-text"></i>Text</button>
         <button type="button" draggable="true" data-publisher-insert="picture" title="Drag to choose and place a picture, or click to insert" @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>Picture</button>
         <button type="button" draggable="true" data-publisher-insert="spreadsheet" title="Drag to create and place a spreadsheet, or click to open a workbook" @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>Sheet</button>
@@ -107,6 +112,7 @@
                      RequestInsertComponent="InsertComponent" RequestEditComponent="OpenComponentEditor"
                      RequestInsertVideo="OpenVideoPicker" RequestInsertAudio="OpenAudioPicker" RequestCreateVideo="CreateVideo" RequestCreateAudio="CreateAudio" RequestEditMedia="EditSelectedMedia"
                      RequestInsertBarcode="InsertBarcode" RequestEditBarcode="EditBarcode"
+                     RequestInsertPanel="InsertPanel" RequestInsertHtmlEmbed="InsertHtmlEmbed" RequestEditPanel="OpenPanelStudio"
                      TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" RequestCanvasInsert="HandleCanvasInsert"
                      RequestExternalFileDrop="HandleExternalFileDrop" RequestExternalDropError="HandleExternalDropError" />
         <button type="button" class="workspace-splitter splitter-right" data-workspace-splitter="right" title="Drag to resize properties pane; double-click to collapse" aria-label="Resize properties pane"></button>
@@ -133,7 +139,10 @@
                         OnCreateAudio="CreateAudio"
                         OnEditMedia="EditSelectedMedia"
                         OnInsertBarcode="InsertBarcode"
-                        OnEditBarcode="EditBarcode" />
+                        OnEditBarcode="EditBarcode"
+                        OnInsertPanel="InsertPanel"
+                        OnEditPanel="OpenPanelStudio"
+                        OnOpenMediaConverter="OpenMediaConverter" />
 
         @if (_timelineVisible)
         {
@@ -146,6 +155,11 @@
                                  RequestEditMedia="EditSelectedMedia" />
         }
     </div>
+
+    @if (State.Document.View.PanelLibraryVisible)
+    {
+        <PanelLibrary Insert="InsertPanelPreset" Close="ClosePanelLibrary" />
+    }
 
     <footer class="status-bar">
         <span>Page @(State.Document.Pages.FindIndex(p => p.Id == State.SelectedPageId) + 1) of @State.Document.Pages.Count</span>
@@ -214,6 +228,8 @@
 <DataManager Visible="_dataManagerVisible" State="State" Closed="CloseDataManager" DataChanged="DataManagerChanged" />
 <BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
 <StreamingStudio Visible="_streamingStudioVisible" Document="State.Document" Saved="SaveStreamingStudio" Cancelled="CloseStreamingStudio" />
+<PanelStudio Visible="_panelStudioVisible" Document="State.Document" CurrentPageId="State.SelectedPageId" InitialPanel="_panelStudioInitial" Saved="SavePanelStudio" Cancelled="ClosePanelStudio" />
+<MediaConverterStudio Visible="_mediaConverterVisible" Closed="CloseMediaConverter" Inserted="InsertConvertedMedia" />
 
 @if (_structuredWebsiteExportVisible)
 {
@@ -324,6 +340,11 @@
     private bool _timelineVisible;
     private bool _barcodeEditorVisible;
     private bool _streamingStudioVisible;
+    private bool _panelStudioVisible;
+    private bool _mediaConverterVisible;
+    private PanelElement? _panelStudioInitial;
+    private Guid? _panelStudioTargetId;
+    private bool _panelStudioTargetsHtml;
     private bool _videoExporting;
     private bool _structuredWebsiteExportVisible;
     private bool _structuredWebsiteExporting;
@@ -405,6 +426,89 @@
     }
     private void NewDocument() => State.NewDocument();
     private void AddTextQuick() => State.AddText();
+    private void InsertPanel()
+    {
+        State.AddPanel();
+        OpenPanelStudio();
+    }
+    private void InsertHtmlEmbed()
+    {
+        State.AddHtmlEmbed();
+        OpenPanelStudio();
+    }
+    private void InsertPanelPreset(string presetId)
+    {
+        State.AddPanel(presetId);
+        ShowNotice($"Inserted {State.SelectedElement?.Name ?? "panel"} from the Panel Library.");
+    }
+    private void TogglePanelLibrary() => State.SetPanelLibraryVisible(!State.Document.View.PanelLibraryVisible);
+    private void ClosePanelLibrary() => State.SetPanelLibraryVisible(false);
+    private void OpenPanelStudio()
+    {
+        if (State.SelectedElement is PanelElement panel)
+        {
+            _panelStudioTargetId = panel.Id;
+            _panelStudioTargetsHtml = false;
+            _panelStudioInitial = (PanelElement)Files.CloneElement(panel);
+        }
+        else if (State.SelectedElement is HtmlEmbedElement html)
+        {
+            var view = new PublicationPanelView { Name = "Web content", Slug = "web-content", Elements = [Files.CloneElement(html)] };
+            _panelStudioTargetId = html.Id;
+            _panelStudioTargetsHtml = true;
+            _panelStudioInitial = new PanelElement
+            {
+                Id = html.Id,
+                Name = html.Name,
+                Width = html.Width,
+                Height = html.Height,
+                NavigationMode = PublicationPanelNavigationMode.Hidden,
+                ActiveViewId = view.Id,
+                Views = [view]
+            };
+        }
+        else return;
+        _panelStudioVisible = true;
+    }
+    private void SavePanelStudio(PanelElement draft)
+    {
+        if (_panelStudioTargetId is not { } targetId) return;
+        State.SelectElement(targetId);
+        if (_panelStudioTargetsHtml)
+        {
+            var html = PublicationElementTraversal.Descendants(draft.Views.SelectMany(view => view.Elements)).OfType<HtmlEmbedElement>().FirstOrDefault();
+            if (html is not null) State.ApplySelectedHtmlEmbed(html);
+        }
+        else State.ApplySelectedPanel(draft);
+        ClosePanelStudio();
+        ShowNotice("Panel changes applied to the Mainframe and export model.");
+    }
+    private void ClosePanelStudio()
+    {
+        _panelStudioVisible = false;
+        _panelStudioInitial = null;
+        _panelStudioTargetId = null;
+        _panelStudioTargetsHtml = false;
+    }
+    private void OpenMediaConverter() => _mediaConverterVisible = true;
+    private void CloseMediaConverter() => _mediaConverterVisible = false;
+    private void InsertConvertedMedia(MediaConversionInsertRequest converted)
+    {
+        var mime = PublicationMediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
+        var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(converted.Content)}";
+        if (mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            State.AddImage(dataUrl, converted.FileName);
+        else if (mime.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+            State.AddVideo(dataUrl, mime, converted.FileName, 0);
+        else if (mime.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
+            State.AddAudio(dataUrl, mime, converted.FileName, 0);
+        else
+        {
+            ShowError(new InvalidDataException($"The converted output type '{mime}' cannot be inserted as a publication media object."));
+            return;
+        }
+        ShowNotice($"Inserted converted media: {converted.FileName}");
+    }
 
     private async Task HandleCanvasInsert(CanvasInsertRequest request)
     {
@@ -412,6 +516,12 @@
         if (kind == "text")
         {
             State.AddText(request.X, request.Y);
+            return;
+        }
+        if (kind == "panel")
+        {
+            State.AddPanel("blank", request.X, request.Y);
+            OpenPanelStudio();
             return;
         }
 

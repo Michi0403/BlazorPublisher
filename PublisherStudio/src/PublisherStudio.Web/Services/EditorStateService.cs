@@ -1,4 +1,5 @@
 using PublisherStudio.Domain;
+using PublisherStudio.Services.Panels;
 
 namespace PublisherStudio.Services;
 
@@ -12,6 +13,7 @@ public sealed class EditorStateService : IDisposable
     private readonly PublicationLiveDataRegistry _liveData;
     private readonly PublicationWebDataService _webData;
     private readonly PublicationStreamingSettingsStore _streamingSettings;
+    private readonly PanelDocumentService _panels;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private readonly List<PublicationElement> _clipboard = [];
@@ -28,7 +30,8 @@ public sealed class EditorStateService : IDisposable
         SpreadsheetDocumentService spreadsheets,
         PublicationLiveDataRegistry liveData,
         PublicationWebDataService webData,
-        PublicationStreamingSettingsStore streamingSettings)
+        PublicationStreamingSettingsStore streamingSettings,
+        PanelDocumentService panels)
     {
         _files = files;
         _data = data;
@@ -38,6 +41,7 @@ public sealed class EditorStateService : IDisposable
         _liveData = liveData;
         _webData = webData;
         _streamingSettings = streamingSettings;
+        _panels = panels;
         Document = PublicationDocument.CreateDefault();
         Document.Streaming = _streamingSettings.LoadOrDefault(Document.Id);
         _files.NormalizeStreamingSettings(Document);
@@ -321,6 +325,92 @@ public sealed class EditorStateService : IDisposable
         SetSelectionCore([element.Id], element.Id);
         Notify();
         return element;
+    }
+
+    public PanelElement AddPanel(string presetId = "blank", double? centerX = null, double? centerY = null)
+    {
+        Capture();
+        var element = _panels.CreatePreset(Document, presetId);
+        element.Name = NextName(element.Name);
+        element.ZIndex = NextZ();
+        PlaceAt(element, centerX, centerY);
+        CurrentPage.Elements.Add(element);
+        SetSelectionCore([element.Id], element.Id);
+        Notify();
+        return element;
+    }
+
+    public HtmlEmbedElement AddHtmlEmbed(double? centerX = null, double? centerY = null)
+    {
+        Capture();
+        var element = new HtmlEmbedElement
+        {
+            Name = NextName("Web Content"),
+            X = 30,
+            Y = 35,
+            Width = 120,
+            Height = 72,
+            ZIndex = NextZ()
+        };
+        PlaceAt(element, centerX, centerY);
+        CurrentPage.Elements.Add(element);
+        SetSelectionCore([element.Id], element.Id);
+        Notify();
+        return element;
+    }
+
+    public bool ApplySelectedPanel(PanelElement draft)
+    {
+        if (SelectedElement is not PanelElement selected || selected.Locked) return false;
+        Capture();
+        var replacement = (PanelElement)_files.CloneElement(draft);
+        replacement.Id = selected.Id;
+        replacement.X = selected.X;
+        replacement.Y = selected.Y;
+        replacement.Width = selected.Width;
+        replacement.Height = selected.Height;
+        replacement.Rotation = selected.Rotation;
+        replacement.ZIndex = selected.ZIndex;
+        replacement.Visible = selected.Visible;
+        replacement.Locked = selected.Locked;
+        replacement.HiddenAtPresentationStart = selected.HiddenAtPresentationStart;
+        replacement.GroupId = selected.GroupId;
+        replacement.Animations = selected.Animations;
+        replacement.Interaction = selected.Interaction;
+        replacement.ConnectorPorts = selected.ConnectorPorts;
+        _panels.Normalize(Document, replacement);
+        var index = CurrentPage.Elements.IndexOf(selected);
+        if (index < 0) return false;
+        CurrentPage.Elements[index] = replacement;
+        SetSelectionCore([replacement.Id], replacement.Id);
+        Notify();
+        return true;
+    }
+
+    public void SetPanelLibraryVisible(bool visible)
+    {
+        if (Document.View.PanelLibraryVisible == visible) return;
+        Capture();
+        Document.View.PanelLibraryVisible = visible;
+        Notify();
+    }
+
+    public bool ApplySelectedHtmlEmbed(HtmlEmbedElement draft)
+    {
+        if (SelectedElement is not HtmlEmbedElement selected || selected.Locked) return false;
+        Capture();
+        selected.Name = draft.Name;
+        selected.Html = draft.Html;
+        selected.Css = draft.Css;
+        selected.JavaScript = draft.JavaScript;
+        selected.AllowScripts = draft.AllowScripts;
+        selected.AllowForms = draft.AllowForms;
+        selected.AllowPopups = draft.AllowPopups;
+        selected.AllowSameOrigin = draft.AllowSameOrigin;
+        selected.AllowTopNavigation = draft.AllowTopNavigation;
+        selected.Background = draft.Background;
+        Notify();
+        return true;
     }
 
     public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null, double? centerX = null, double? centerY = null, int pixelWidth = 0, int pixelHeight = 0)
@@ -2200,7 +2290,7 @@ public sealed class EditorStateService : IDisposable
 
     private void RemoveMediaAssets(PublicationDocument document)
     {
-        foreach (var media in document.Pages.SelectMany(page => page.Elements).OfType<PublicationMediaElement>())
+        foreach (var media in PublicationElementTraversal.Descendants(document).OfType<PublicationMediaElement>())
         {
             _mediaAssets.Remove(media.Id);
             foreach (var segment in media.Segments) _mediaAssets.Remove(segment.Id);

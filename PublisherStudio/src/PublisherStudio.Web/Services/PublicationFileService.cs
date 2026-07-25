@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using PublisherStudio.Domain;
 using PublisherStudio.Services.MediaStudio.UseCases;
+using PublisherStudio.Services.Panels;
 
 namespace PublisherStudio.Services;
 
@@ -63,6 +64,7 @@ public sealed partial class PublicationFileService
     private readonly SpreadsheetDocumentService _spreadsheets;
     private readonly PublicationComponentService _components;
     private readonly MediaTimelineEditService _mediaTimeline;
+    private readonly PanelDocumentService _panels;
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -76,13 +78,15 @@ public sealed partial class PublicationFileService
         PublicationDataService data,
         SpreadsheetDocumentService spreadsheets,
         PublicationComponentService components,
-        MediaTimelineEditService mediaTimeline)
+        MediaTimelineEditService mediaTimeline,
+        PanelDocumentService panels)
     {
         _pictures = pictures;
         _data = data;
         _spreadsheets = spreadsheets;
         _components = components;
         _mediaTimeline = mediaTimeline;
+        _panels = panels;
     }
 
     public string Serialize(PublicationDocument document)
@@ -129,15 +133,22 @@ public sealed partial class PublicationFileService
         document.View ??= new PublicationViewSettings();
         document.Playback ??= new PublicationPlaybackSettings();
         document.Streaming ??= new PublicationStreamingSettings();
-        NormalizeStreaming(document);
+        document.Pages ??= [];
+        document.DataObjects ??= [];
+        if (document.Pages.Count == 0)
+            document.Pages.Add(PublicationPage.CreateA4());
+        foreach (var publicationPage in document.Pages)
+            publicationPage.Elements ??= [];
         _data.Normalize(document);
+        foreach (var panel in document.Pages.SelectMany(page => page.Elements).OfType<PanelElement>())
+            _panels.Normalize(document, panel);
+        NormalizeStreaming(document);
+        var allElements = PublicationElementTraversal.Descendants(document).ToArray();
         document.Zoom = Math.Clamp(Math.Round((document.Zoom <= 0 ? .8 : document.Zoom) * 100d, MidpointRounding.AwayFromZero) / 100d, .2, 4);
         document.View.GridSpacingMm = Math.Clamp(document.View.GridSpacingMm <= 0 ? 5 : document.View.GridSpacingMm, .5, 100);
         document.View.ExportDpi = Math.Clamp(document.View.ExportDpi <= 0 ? 150 : document.View.ExportDpi, 72, 600);
         if (!Enum.IsDefined(document.View.CanvasZoomMode)) document.View.CanvasZoomMode = PublicationCanvasZoomMode.CssLayout;
-        if (document.Pages.Count == 0)
-            document.Pages.Add(PublicationPage.CreateA4());
-        foreach (var text in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<TextFrameElement>())
+        foreach (var text in allElements.OfType<TextFrameElement>())
         {
             text.PreviewHtml = SanitizePreviewHtml(text.PreviewHtml);
             text.DocumentBackground = NormalizeCssBackground(text.DocumentBackground);
@@ -164,7 +175,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        foreach (var image in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<ImageFrameElement>())
+        foreach (var image in allElements.OfType<ImageFrameElement>())
         {
             if (string.IsNullOrWhiteSpace(image.OriginalDataUrl)) image.OriginalDataUrl = image.DataUrl;
             image.Opacity = Math.Clamp(image.Opacity, 0, 1);
@@ -174,7 +185,7 @@ public sealed partial class PublicationFileService
                 _pictures.Normalize(image.PictureSource);
         }
 
-        foreach (var media in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<PublicationMediaElement>())
+        foreach (var media in allElements.OfType<PublicationMediaElement>())
         {
             media.DurationSeconds = Math.Clamp(media.DurationSeconds, 0, 24 * 60 * 60);
             media.TrimStartSeconds = Math.Clamp(media.TrimStartSeconds, 0, Math.Max(0, media.DurationSeconds));
@@ -237,7 +248,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        foreach (var spreadsheet in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<SpreadsheetElement>())
+        foreach (var spreadsheet in allElements.OfType<SpreadsheetElement>())
         {
             spreadsheet.WorkbookContent ??= [];
             if (spreadsheet.WorkbookContent.Length == 0)
@@ -258,7 +269,7 @@ public sealed partial class PublicationFileService
             spreadsheet.Height = Math.Max(24, spreadsheet.Height);
         }
 
-        foreach (var wordArt in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<WordArtElement>())
+        foreach (var wordArt in allElements.OfType<WordArtElement>())
         {
             wordArt.FontSizePt = Math.Clamp(wordArt.FontSizePt, 6, 300);
             wordArt.OutlineWidth = Math.Clamp(wordArt.OutlineWidth, 0, 20);
@@ -296,10 +307,21 @@ public sealed partial class PublicationFileService
         }
 
 
-        foreach (var component in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<DevExtremeComponentElement>())
+        foreach (var html in allElements.OfType<HtmlEmbedElement>())
+        {
+            html.Html ??= string.Empty;
+            html.Css ??= string.Empty;
+            html.JavaScript ??= string.Empty;
+            html.Background = NormalizeCssBackground(html.Background);
+            if (html.Html.Length > 8_000_000) html.Html = html.Html[..8_000_000];
+            if (html.Css.Length > 2_000_000) html.Css = html.Css[..2_000_000];
+            if (html.JavaScript.Length > 2_000_000) html.JavaScript = html.JavaScript[..2_000_000];
+        }
+
+        foreach (var component in allElements.OfType<DevExtremeComponentElement>())
             _components.Normalize(document, component);
 
-        foreach (var visual in document.Pages.SelectMany(publicationPage => publicationPage.Elements).OfType<DataVisualElement>())
+        foreach (var visual in allElements.OfType<DataVisualElement>())
         {
             visual.ValueFields ??= [];
             if (!Enum.IsDefined(visual.ArgumentMode)) visual.ArgumentMode = DataVisualArgumentMode.Auto;
@@ -480,7 +502,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.53";
+        document.FormatVersion = "1.54";
         return document;
     }
 
@@ -911,7 +933,7 @@ public sealed partial class PublicationFileService
             if (hotkey.Command == "SelectPage" && hotkey.TargetId is { } targetPage && document.Pages.All(page => page.Id != targetPage)) hotkey.TargetId = null;
             if (hotkey.Command == "ToggleOutput" && hotkey.TargetId is { } targetOutput && streaming.Outputs.All(output => output.Id != targetOutput)) hotkey.TargetId = null;
         }
-        foreach (var source in document.Pages.SelectMany(page => page.Elements).OfType<LiveSourceElement>())
+        foreach (var source in PublicationElementTraversal.Descendants(document).OfType<LiveSourceElement>())
         {
             source.CaptureWidth = Math.Clamp(source.CaptureWidth <= 0 ? 1920 : source.CaptureWidth, 320, 7680);
             source.CaptureHeight = Math.Clamp(source.CaptureHeight <= 0 ? 1080 : source.CaptureHeight, 180, 4320);

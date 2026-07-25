@@ -14,6 +14,8 @@ using PublisherStudio.Services.PictureStudio.Import;
 using PublisherStudio.Services.MediaStudio.UseCases;
 using PublisherStudio.Services.Publication.Import;
 using PublisherStudio.Services.VideoStudio.Import;
+using PublisherStudio.Services.Panels;
+using PublisherStudio.Services.MediaConversion;
 using PublisherStudio.HostedServices.Streaming;
 
 namespace PublisherStudio;
@@ -107,6 +109,8 @@ public static class Program
         builder.Services.AddSingleton<SpreadsheetSessionStore>();
         builder.Services.AddSingleton<PublicationDataService>();
         builder.Services.AddSingleton<PublicationComponentService>();
+        builder.Services.AddSingleton<PanelDocumentService>();
+        builder.Services.AddSingleton<IMediaConversionService, MediaConversionService>();
         builder.Services.AddSingleton<PublicationWebhookStore>();
         builder.Services.AddSingleton<PublicationLiveDataRegistry>();
         builder.Services.AddSingleton<PublicationWebDataService>();

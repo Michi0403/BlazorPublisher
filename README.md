@@ -401,3 +401,9 @@ See `CHANGELOG-v1.0.52.md`. Self-contained presentation and site exports now kee
 ## v1.0.67 interpolation-safe compiler correction
 
 See `CHANGELOG-v1.0.67.md`, `AGENTS.md`, ADR-008 and `VALIDATION.md`. The v1.0.66 namespace-collision repair is corrected so `global::` is no longer placed directly in an interpolated-string hole. Streaming Chat and RTSP use the explicit `TextEncoding` alias, and RTSP calculates SDP content length before formatting the header. The compilation-safety contract now rejects the exact parser trap that produced `CS0103`. Runtime behavior, publication format `1.48`, Picture Studio format `1.3`, and package dependencies remain unchanged.
+
+## Panel/Div Studio and optional FFmpeg conversion
+
+PublisherStudio includes reusable authored panels and dashboards built from the same components used on publication pages. Panels can contain multiple navigable views, nested panels, live KPI/data components, streaming inputs, media, and sandboxed HTML/CSS/optional JavaScript. They remain interactive in Mainframe preview and HTML exports.
+
+Media Converter Studio can use a separately installed FFmpeg executable to create browser-oriented derivatives for media the browser cannot decode directly. Configure `PublisherStudio:FFmpegPath`, set `PUBLISHERSTUDIO_FFMPEG`, or place FFmpeg on `PATH`. PublisherStudio does not bundle FFmpeg.

@@ -132,6 +132,15 @@
                             case DevExtremeComponentElement component:
                                 <DevExtremeComponentView Document="Document" Item="component" CurrentPageId="publicationPage.Id" IdPrefix="print" />
                                 break;
+                            case LiveSourceElement liveSource:
+                                <LiveSourceView Item="liveSource" DesignerMode="false" />
+                                break;
+                            case PanelElement panel:
+                                <PanelView Document="Document" Item="panel" CurrentPageId="publicationPage.Id" DesignerMode="false" />
+                                break;
+                            case HtmlEmbedElement htmlEmbed:
+                                <HtmlEmbedView Item="htmlEmbed" />
+                                break;
                             case SpreadsheetElement spreadsheet:
                                 <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
                                 <div class="publication-content-source" data-content-fit-source>

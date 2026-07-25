@@ -225,6 +225,12 @@
                         case LiveSourceElement liveSource:
                             <LiveSourceView @key="(liveSource.Id, liveSource.SourceKind)" Item="liveSource" DesignerMode="true" />
                             break;
+                        case PanelElement panel:
+                            <PanelView @key="panel.Id" Document="State.Document" Item="panel" CurrentPageId="State.SelectedPageId" DesignerMode="true" />
+                            break;
+                        case HtmlEmbedElement htmlEmbed:
+                            <HtmlEmbedView @key="htmlEmbed.Id" Item="htmlEmbed" />
+                            break;
                         case SpreadsheetElement spreadsheet:
                             <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@ContentMm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
                                 <div class="publication-content-source" data-content-fit-source>
@@ -457,6 +463,14 @@
                 </DxContextMenuItem>
             }
         }
+        @if (State.SelectedElement is PanelElement)
+        {
+            <DxContextMenuItem Text="Edit in Panel Studio" IconCssClass="pub-icon pub-icon-panel" BeginGroup="true" Click="EditSelectedPanel" />
+        }
+        @if (State.SelectedElement is HtmlEmbedElement)
+        {
+            <DxContextMenuItem Text="Edit web content in Panel Studio" IconCssClass="pub-icon pub-icon-web" BeginGroup="true" Click="EditSelectedPanel" />
+        }
         @if (State.SelectedElement is ShapeElement shape)
         {
             <DxContextMenuItem Text="Shape type" BeginGroup="true">
@@ -565,6 +579,8 @@
         else
         {
             <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="@State.CanPaste" BeginGroup="true" Click="Paste" />
+            <DxContextMenuItem Text="Insert panel / dashboard" IconCssClass="pub-icon pub-icon-panel" Click="InsertPanel" />
+            <DxContextMenuItem Text="Insert web content" IconCssClass="pub-icon pub-icon-web" Click="InsertHtmlEmbed" />
             <DxContextMenuItem Text="Insert text box" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
             <DxContextMenuItem Text="Insert WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
             <DxContextMenuItem Text="Insert picture…" IconCssClass="pub-icon pub-icon-picture" Click="InsertPicture" />
@@ -652,6 +668,9 @@
     [Parameter] public EventCallback RequestEditMedia { get; set; }
     [Parameter] public EventCallback RequestInsertBarcode { get; set; }
     [Parameter] public EventCallback RequestEditBarcode { get; set; }
+    [Parameter] public EventCallback RequestInsertPanel { get; set; }
+    [Parameter] public EventCallback RequestInsertHtmlEmbed { get; set; }
+    [Parameter] public EventCallback RequestEditPanel { get; set; }
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback RequestToggleTimeline { get; set; }
     [Parameter] public EventCallback<CanvasInsertRequest> RequestCanvasInsert { get; set; }
@@ -1020,6 +1039,8 @@
         BarcodeElement => "Double-click to open Barcode Studio. Right-click for barcode and QR editing commands.",
         WordArtElement => "Right-click for WordArt path commands. Drag to move and use the handles to resize or rotate.",
         LiveSourceElement => "Double-click to activate the live source. Right-click to activate it, change camera/screen/window/device type, and adjust audio or frame fitting.",
+        PanelElement => "Double-click to open Panel Studio. Panel views reuse the same publication components and remain interactive in preview and HTML export.",
+        HtmlEmbedElement => "Double-click to edit isolated HTML, CSS and opt-in JavaScript in Panel Studio.",
         ShapeElement => "Right-click to change the shape type. Drag to move and use the handles to resize or rotate.",
         _ => "Right-click for object commands. Drag to move and use the handles to resize or rotate."
     };
@@ -1033,6 +1054,7 @@
         if (element is SpreadsheetElement) return RequestEditSpreadsheet.InvokeAsync();
         if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
         if (element is BarcodeElement) return RequestEditBarcode.InvokeAsync();
+        if (element is PanelElement or HtmlEmbedElement) return RequestEditPanel.InvokeAsync();
         if (element is LiveSourceElement liveSource) return ActivateLiveSource(liveSource);
         return Task.CompletedTask;
     }
@@ -1167,6 +1189,9 @@
     private Task EditSelectedMedia() => RequestEditMedia.InvokeAsync();
     private Task InsertBarcode() => RequestInsertBarcode.InvokeAsync();
     private Task EditSelectedBarcode() => RequestEditBarcode.InvokeAsync();
+    private Task InsertPanel() => RequestInsertPanel.InvokeAsync();
+    private Task InsertHtmlEmbed() => RequestInsertHtmlEmbed.InvokeAsync();
+    private Task EditSelectedPanel() => RequestEditPanel.InvokeAsync();
     private Task ToggleTimeline() => RequestToggleTimeline.InvokeAsync();
     private Task PlaySelectedMedia() => State.SelectedElement is PublicationMediaElement media
         ? JS.InvokeVoidAsync("publisherStudio.playPublicationMedia", $"element-{media.Id}").AsTask()

@@ -803,3 +803,17 @@ Static checks completed for the v1.0.37 source package:
 - Parse project XML and package JSON, verify all current-release versions are `1.0.77` and publication format remains `1.53`.
 - Replay the release patch against untouched v1.0.76 and validate archive CRC, extraction parity, SHA-256, and SHA-512 checksums.
 - A real .NET/Razor/DevExpress compile remains mandatory on the normal release machine because this packaging environment has no .NET SDK or licensed DevExpress restore feed.
+
+## v1.0.78 Panel/Div Studio and reusable FFmpeg conversion validation
+
+- Insert a blank panel from the Mainframe ribbon, quick-insert surface, context menu and optional Panel Library. Open it in Panel Studio, add multiple views, switch Top tabs/Side menu/Overlay menu/Hidden navigation and verify the active view remains local to the panel.
+- Add Text, KPI, Chart, Table/DataGrid, Button/Menu, live camera, imported HTML and another panel. Verify nested content uses the normal PublisherStudio publication-element types rather than a parallel dashboard-only component set.
+- Nest panels to several levels, save/reopen and export both standalone HTML and structured website ZIP. Verify recursive media registration, data refresh, component startup, local panel navigation and interactions remain functional. Deliberately exceed the supported nesting depth and verify normalization stops recursion safely.
+- Enable and disable the Panel Library. Insert the KPI dashboard, operations board, creator hub and web-experience presets, edit their shared components in Panel Studio, and confirm live data continues to refresh in Mainframe and exported HTML.
+- Import a standalone `.html` or `.htm` file into Panel Studio. Verify it opens in a sandboxed iframe, scripts remain disabled by default, and enabling forms/scripts/popups/same-origin/top-navigation changes only the selected HTML component's sandbox policy.
+- Open Media Converter Studio with FFmpeg absent. Verify capability guidance is shown and the rest of PublisherStudio remains usable. Install a separate FFmpeg executable via PATH, `PublisherStudio/tools/ffmpeg`, `PublisherStudio:FFmpegPath` or `PUBLISHERSTUDIO_FFMPEG`; restart and verify version/encoder discovery.
+- Convert representative image, video and audio inputs using every available preset. Verify progress, cancellation, output download and insertion back into Mainframe. Presets whose required encoder is absent must remain disabled with a precise explanation.
+- Exercise `/api/media-conversion/capabilities`, `/jobs`, `/jobs/{id}`, `/jobs/{id}/file` and DELETE from another frontend component. Verify the controller delegates to `IMediaConversionService`, generated paths stay inside the local conversion root, process arguments are not shell-expanded, and completed/cancelled jobs are cleaned safely.
+- Run all 25 Node regression suites, syntax-check all 35 non-vendor JavaScript/test modules, parse package JSON and project XML, verify version `1.0.78`, publication format `1.54`, and unchanged NuGet/npm dependencies.
+- Replay the release patch on untouched v1.0.77 and compare the result with the packaged v1.0.78 source. Validate ZIP CRC, clean extraction parity, SHA-256 and SHA-512 checksums.
+- A real .NET/Razor/DevExpress build and end-to-end FFmpeg acceptance remain release-machine requirements because this packaging environment does not contain the .NET SDK, licensed DevExpress restore feed or an FFmpeg executable.

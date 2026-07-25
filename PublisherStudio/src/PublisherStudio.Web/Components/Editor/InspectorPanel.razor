@@ -36,6 +36,8 @@
                 <button title="Add rectangle" @onclick="AddRectangle">◇</button>
                 <button title="Insert chart" @onclick="AddChart">▥</button>
                 <button title="Insert professional Data Grid" @onclick="AddComponentDataGrid">▦</button>
+                <button title="Insert reusable panel or dashboard" @onclick="RequestInsertPanel">▣+</button>
+                <button title="Open Media Converter Studio" @onclick="RequestMediaConverter">⇄</button>
                 <button title="Draw connector: click, then drag between object ports" @onclick="StartConnector">↝</button>
                 <button title="Delete selected layer" disabled="@(State.SelectedElement is null || State.SelectedElement.Locked)" @onclick="State.DeleteSelected">⌫</button>
             </div>
@@ -147,6 +149,22 @@
     else if (State.SelectedElement is { } element)
     {
         <div class="property-scroll">
+            @if (element is PanelElement panelElement)
+            {
+                <section class="property-section">
+                    <h3>Panel / dashboard</h3>
+                    <p class="property-note">@panelElement.Views.Count authored view(s), rendered with the same components in Mainframe, Panel Studio and HTML exports.</p>
+                    <DxButton Text="Edit in Panel Studio" Click="RequestEditPanel" CssClass="wide-button" />
+                </section>
+            }
+            @if (element is HtmlEmbedElement)
+            {
+                <section class="property-section">
+                    <h3>Web content</h3>
+                    <p class="property-note">Edit isolated HTML, CSS and optional JavaScript inside Panel Studio.</p>
+                    <DxButton Text="Edit in Panel Studio" Click="RequestEditPanel" CssClass="wide-button" />
+                </section>
+            }
             <section class="property-section">
                 <h3>Object</h3>
                 <label>Name<input value="@element.Name" @onchange="ChangeName" /></label>
@@ -937,6 +955,9 @@
     [Parameter] public EventCallback OnEditMedia { get; set; }
     [Parameter] public EventCallback OnInsertBarcode { get; set; }
     [Parameter] public EventCallback OnEditBarcode { get; set; }
+    [Parameter] public EventCallback OnInsertPanel { get; set; }
+    [Parameter] public EventCallback OnEditPanel { get; set; }
+    [Parameter] public EventCallback OnOpenMediaConverter { get; set; }
 
     private List<StreamingDeviceProfile> _streamingDeviceProfiles = [];
     private bool _streamingProfilesLoaded;
@@ -988,6 +1009,9 @@
     private Task RequestEditMedia() => OnEditMedia.InvokeAsync();
     private Task RequestInsertBarcode() => OnInsertBarcode.InvokeAsync();
     private Task RequestEditBarcode() => OnEditBarcode.InvokeAsync();
+    private Task RequestInsertPanel() => OnInsertPanel.InvokeAsync();
+    private Task RequestEditPanel() => OnEditPanel.InvokeAsync();
+    private Task RequestMediaConverter() => OnOpenMediaConverter.InvokeAsync();
     private void ShowProperties() => _tab = "properties";
     private void ShowPage() => _tab = "page";
     private void ShowLayers() => _tab = "layers";
@@ -1048,6 +1072,8 @@
         PublicationElementKind.Spreadsheet => "▦",
         PublicationElementKind.Barcode => "▦",
         PublicationElementKind.LiveSource => "●",
+        PublicationElementKind.Panel => "▣",
+        PublicationElementKind.HtmlEmbed => "⌘",
         _ => "◇"
     };
 

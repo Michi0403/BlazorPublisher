@@ -82,7 +82,7 @@ public sealed class PublicationMediaAssetStore
 
     public void RegisterDocument(PublicationDocument document)
     {
-        foreach (var media in document.Pages.SelectMany(page => page.Elements).OfType<PublicationMediaElement>())
+        foreach (var media in PublicationElementTraversal.Descendants(document).OfType<PublicationMediaElement>())
         {
             foreach (var segment in media.EffectiveSegments)
                 GetOrRegister(segment);

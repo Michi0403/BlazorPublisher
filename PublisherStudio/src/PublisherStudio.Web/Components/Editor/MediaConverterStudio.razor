@@ -1,0 +1,227 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject IMediaConversionService Conversions
+@inject IJSRuntime JS
+
+@if (Visible)
+{
+    <div class="modal-backdrop data-modal-backdrop">
+        <section class="data-visual-editor-dialog" role="dialog" aria-modal="true" aria-label="Media Converter Studio">
+            <header>
+                <div><strong>Media Converter Studio</strong><span>Reusable FFmpeg conversion for Mainframe, PictureStudio, VideoStudio, streaming inputs and controller clients.</span></div>
+                <button type="button" class="window-close" @onclick="Close">×</button>
+            </header>
+            <div class="media-converter-grid" style="padding:12px;min-height:520px">
+                <aside class="visual-settings">
+                    @if (!string.IsNullOrWhiteSpace(_error))
+                    {
+                        <div class="inline-error"><strong>Media conversion error</strong><p>@_error</p></div>
+                    }
+                    @if (_capabilities is null)
+                    {
+                        <p>Checking FFmpeg…</p>
+                    }
+                    else if (!_capabilities.Available)
+                    {
+                        <div class="inline-error"><strong>FFmpeg is not available</strong><p>@_capabilities.InstallationHint</p></div>
+                    }
+                    else
+                    {
+                        <div class="inline-success"><strong>@_capabilities.Version</strong><small>@_capabilities.Executable</small></div>
+                    }
+                    <label>Source media<InputFile OnChange="SelectFile" accept="image/*,video/*,audio/*,.mkv,.mxf,.avi,.tif,.tiff,.heic,.heif,.flac,.wav,.mov,.mp4,.webm,.ogg" /></label>
+                    @if (_file is not null) { <p><strong>@_file.Name</strong><br /><small>@_file.ContentType · @FormatBytes(_file.Size)</small></p> }
+                    <label>Conversion preset
+                        <select value="@_presetId" @onchange="ChangePreset">
+                            @foreach (var preset in MatchingPresets)
+                            {
+                                <option value="@preset.Id" disabled="@(!preset.Available)">@preset.Name@(!preset.Available ? " · unavailable" : null)</option>
+                            }
+                        </select>
+                    </label>
+                    @if (SelectedPreset is { } selected)
+                    {
+                        <p>@selected.Description</p>
+                        <small>@(selected.Lossless ? "Lossless output" : "Re-encoded output") · @selected.OutputMimeType</small>
+                        @if (!selected.Available) { <div class="inline-error">@selected.UnavailableReason</div> }
+                    }
+                    <button type="button" class="primary" @onclick="Start" disabled="@(!CanStart)">Convert with FFmpeg</button>
+                    @if (_capabilities is not null)
+                    {
+                        <p class="field-help">@_capabilities.LicenseNotice</p>
+                    }
+                </aside>
+                <main class="visual-settings">
+                    <h3>Conversion jobs</h3>
+                    @if (_jobs.Count == 0)
+                    {
+                        <div class="data-visual-empty"><strong>No conversions yet</strong><span>Select media and a browser-oriented output preset.</span></div>
+                    }
+                    @foreach (var job in _jobs)
+                    {
+                        <article class="media-converter-job">
+                            <div><strong>@job.SourceFileName</strong><br /><small>@PresetName(job.PresetId) · @job.Message</small></div>
+                            <span>@job.Status</span>
+                            <progress max="1" value="@job.Progress"></progress>
+                            <div>
+                                @if (job.Status == MediaConversionJobStatus.Completed)
+                                {
+                                    <button type="button" @onclick="() => Download(job)">Download</button>
+                                    <button type="button" @onclick="() => Insert(job)">Insert into Mainframe</button>
+                                }
+                                else if (job.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running)
+                                {
+                                    <button type="button" @onclick="() => Cancel(job.Id)">Cancel</button>
+                                }
+                                else
+                                {
+                                    <button type="button" @onclick="() => Remove(job.Id)">Remove</button>
+                                }
+                            </div>
+                            @if (job.OutputSize > 0) { <small>@job.OutputFileName · @FormatBytes(job.OutputSize)</small> }
+                        </article>
+                    }
+                </main>
+            </div>
+            <footer><button type="button" @onclick="Close">Close</button></footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback Closed { get; set; }
+    [Parameter] public EventCallback<MediaConversionInsertRequest> Inserted { get; set; }
+
+    private MediaConversionCapabilities? _capabilities;
+    private IBrowserFile? _file;
+    private string _presetId = string.Empty;
+    private readonly List<MediaConversionJobInfo> _jobs = [];
+    private CancellationTokenSource? _polling;
+    private bool _wasVisible;
+    private string _error = string.Empty;
+
+    private IEnumerable<MediaConversionPreset> MatchingPresets
+    {
+        get
+        {
+            var presets = _capabilities?.Presets ?? Array.Empty<MediaConversionPreset>();
+            var kind = SourceKind;
+            return string.IsNullOrWhiteSpace(kind) ? presets : presets.Where(preset => preset.InputKind == kind);
+        }
+    }
+    private string SourceKind => _file?.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true ? "image"
+        : _file?.ContentType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true ? "audio"
+        : _file is null ? string.Empty : "video";
+    private MediaConversionPreset? SelectedPreset => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == _presetId);
+    private bool CanStart => _file is not null && _capabilities?.Available == true && SelectedPreset?.Available == true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!Visible) { _wasVisible = false; return; }
+        if (_wasVisible) return;
+        _wasVisible = true;
+        try
+        {
+            _error = string.Empty;
+            _capabilities = await Conversions.GetCapabilitiesAsync();
+            RefreshJobs();
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+    }
+
+    private void SelectFile(InputFileChangeEventArgs args)
+    {
+        _file = args.File;
+        var first = MatchingPresets.FirstOrDefault(preset => preset.Available) ?? MatchingPresets.FirstOrDefault();
+        _presetId = first?.Id ?? string.Empty;
+    }
+    private void ChangePreset(ChangeEventArgs args) => _presetId = args.Value?.ToString() ?? string.Empty;
+    private async Task Start()
+    {
+        if (!CanStart || _file is null) return;
+        try
+        {
+            _error = string.Empty;
+            await using var source = _file.OpenReadStream(long.MaxValue);
+            var job = await Conversions.QueueAsync(source, _file.Name, _file.ContentType, _presetId);
+            _jobs.Insert(0, job);
+            StartPolling();
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+    }
+    private void StartPolling()
+    {
+        if (_polling is not null) return;
+        _polling = new CancellationTokenSource();
+        _ = PollAsync(_polling.Token);
+    }
+    private async Task PollAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await Task.Delay(500, cancellationToken);
+                RefreshJobs();
+                await InvokeAsync(StateHasChanged);
+                if (_jobs.All(job => job.Status is not (MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running))) break;
+            }
+        }
+        catch (OperationCanceledException) { }
+        finally
+        {
+            _polling?.Dispose();
+            _polling = null;
+        }
+    }
+    private void RefreshJobs()
+    {
+        var latest = Conversions.GetJobs().ToDictionary(job => job.Id);
+        for (var index = 0; index < _jobs.Count; index++) if (latest.TryGetValue(_jobs[index].Id, out var job)) _jobs[index] = job;
+        foreach (var job in latest.Values.OrderByDescending(job => job.CreatedUtc)) if (_jobs.All(existing => existing.Id != job.Id)) _jobs.Add(job);
+    }
+    private async Task Download(MediaConversionJobInfo job)
+    {
+        try
+        {
+            _error = string.Empty;
+            await using var stream = await Conversions.OpenOutputAsync(job.Id);
+            if (stream is null) throw new InvalidOperationException("The converted file is no longer available.");
+            using var reference = new DotNetStreamReference(stream, leaveOpen: false);
+            await JS.InvokeVoidAsync("publisherStudio.downloadStream", job.OutputFileName, reference, job.OutputMimeType);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+    }
+    private async Task Insert(MediaConversionJobInfo job)
+    {
+        try
+        {
+            _error = string.Empty;
+            await using var stream = await Conversions.OpenOutputAsync(job.Id);
+            if (stream is null) throw new InvalidOperationException("The converted file is no longer available.");
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            await Inserted.InvokeAsync(new MediaConversionInsertRequest(job.OutputFileName, job.OutputMimeType, memory.ToArray()));
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+    }
+    private void Cancel(Guid id) { Conversions.Cancel(id); RefreshJobs(); }
+    private void Remove(Guid id) { Conversions.Remove(id); _jobs.RemoveAll(job => job.Id == id); }
+    private string PresetName(string id) => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == id)?.Name ?? id;
+    private Task Close() => Closed.InvokeAsync();
+    private static string FormatBytes(long bytes) => bytes switch { >= 1024L * 1024 * 1024 => $"{bytes / (1024d * 1024 * 1024):0.##} GB", >= 1024L * 1024 => $"{bytes / (1024d * 1024):0.##} MB", >= 1024 => $"{bytes / 1024d:0.##} KB", _ => $"{bytes} B" };
+    public ValueTask DisposeAsync() { _polling?.Cancel(); _polling?.Dispose(); return ValueTask.CompletedTask; }
+}

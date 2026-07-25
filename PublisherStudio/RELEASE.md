@@ -1,7 +1,7 @@
-# PublisherStudio v1.0.77 release
+# PublisherStudio v1.0.78 release
 
-See `CHANGELOG-v1.0.77.md`, `SOURCE-CHANGES-v1.0.77.txt`, `TEST-RESULTS-v1.0.77.txt`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.78.md`, `SOURCE-CHANGES-v1.0.78.txt`, `TEST-RESULTS-v1.0.78.txt`, `VALIDATION.md`, and `docs/architecture/media-conversion-and-panel-studio.md`.
 
-v1.0.77 is a C# compilation hotfix for the VideoStudio temporal-selection normalizer. The provisional selection-end local now uses a distinct name, removing the reported `CS0136` collision while preserving the v1.0.76 selection, layer, chroma-key, and playback behavior.
+v1.0.78 adds a reusable optional FFmpeg conversion service/controller/frontend and a first-class Panel/Div Studio with nested shared components, live KPI dashboard presets, sandboxed HTML experiences and complete Mainframe/HTML export integration.
 
-Application and installer version is `1.0.77`. Publication format remains `1.53`; Picture Studio format remains `1.4`. Dependency names and versions are unchanged.
+Application and installer version is `1.0.78`. Publication format is `1.54`; Picture Studio format remains unchanged. FFmpeg is not bundled, and package dependency names and versions are unchanged.

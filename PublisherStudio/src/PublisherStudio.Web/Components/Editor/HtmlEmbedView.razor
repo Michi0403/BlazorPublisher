@@ -1,0 +1,26 @@
+@namespace PublisherStudio.Components.Editor
+
+<iframe class="publication-html-embed"
+        title="@Item.Name"
+        sandbox="@Item.Sandbox"
+        srcdoc="@SourceDocument"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        style="background:@Item.Background"></iframe>
+
+@code {
+    [Parameter, EditorRequired] public HtmlEmbedElement Item { get; set; } = default!;
+
+    private string SourceDocument
+    {
+        get
+        {
+            var script = Item.AllowScripts && !string.IsNullOrWhiteSpace(Item.JavaScript)
+                ? $"<script>{SafeScript(Item.JavaScript)}</script>"
+                : string.Empty;
+            return $"<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>{Item.Css}</style></head><body>{Item.Html}{script}</body></html>";
+        }
+    }
+
+    private static string SafeScript(string value) => value.Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
+}

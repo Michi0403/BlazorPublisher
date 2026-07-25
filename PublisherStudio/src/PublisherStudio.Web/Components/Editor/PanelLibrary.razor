@@ -1,0 +1,22 @@
+@namespace PublisherStudio.Components.Editor
+@inject PanelDocumentService Panels
+
+<section class="panel-library-dock" aria-label="Panel and dashboard library">
+    <header><div><strong>Panel library</strong><small>Reusable live views built from PublisherStudio components.</small></div><button type="button" class="window-close" @onclick="Close">×</button></header>
+    <div class="panel-library-grid">
+        @foreach (var preset in Panels.GetPresets())
+        {
+            <button type="button" class="panel-library-card" @onclick="() => Insert.InvokeAsync(preset.Id)">
+                <i class="@preset.IconCssClass"></i>
+                <strong>@preset.Name</strong>
+                <small>@preset.Description</small>
+                <span>@preset.Category@(preset.LiveData ? " · live data" : null)</span>
+            </button>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public EventCallback<string> Insert { get; set; }
+    [Parameter] public EventCallback Close { get; set; }
+}

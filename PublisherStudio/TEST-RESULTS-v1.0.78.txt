@@ -1,0 +1,37 @@
+PublisherStudio v1.0.78 validation results
+===========================================
+
+Feature contracts
+-----------------
+PASS  First-class PanelElement and sandboxed HtmlEmbedElement contracts.
+PASS  Multiple panel views, local navigation and recursive nested panels.
+PASS  Shared PublisherStudio components inside pages, panels and dashboard presets.
+PASS  Optional Panel Library and live KPI/creator/operations/web presets.
+PASS  Mainframe, print, standalone HTML and structured website panel rendering.
+PASS  Reusable IMediaConversionService and thin MediaConversionController boundary.
+PASS  Optional separately installed FFmpeg capability/encoder discovery.
+PASS  Queue, progress, cancellation, download and Mainframe insertion workflows.
+PASS  Browser-oriented WebM, MP4, Ogg Opus, WAV, PNG, WebP and AVIF preset contracts.
+PASS  Shell-disabled ProcessStartInfo.ArgumentList invocation and local job storage.
+
+Automated validation
+--------------------
+PASS  npm test: all 25 Node regression suites.
+PASS  node --check: all 35 non-vendor JavaScript/test modules.
+PASS  JSON parsing: package.json, package-lock.json and appsettings.json.
+PASS  XML parsing: PublisherStudio.Web and InstallerConsole project files.
+PASS  C# architecture, shared-contract ownership, Razor and local-scope safety contracts.
+PASS  Version alignment: application, installer, npm, lock and runtime 1.0.78.
+PASS  Publication format alignment: 1.54.
+PASS  Dependency parity: no NuGet or npm dependency was added or changed.
+PASS  Release patch applies to the untouched v1.0.77 source with source parity.
+PASS  Release ZIP CRC/integrity and clean extraction parity.
+PASS  SHA-256 and SHA-512 checksum generation and verification.
+
+Environment limitation
+----------------------
+NOT RUN  dotnet restore/build and licensed DevExpress Razor compilation.
+Reason: this packaging environment has no dotnet executable or licensed DevExpress feed.
+
+NOT RUN  Real FFmpeg conversion acceptance.
+Reason: v1.0.78 intentionally does not bundle FFmpeg; release-machine acceptance must use the separately installed build intended for distribution.

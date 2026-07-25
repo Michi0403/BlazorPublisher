@@ -1,0 +1,117 @@
+@namespace PublisherStudio.Components.Editor
+@inject PublicationMediaAssetStore MediaAssets
+
+<div class="publication-panel panel-nav-@Item.NavigationMode.ToString().ToLowerInvariant() panel-layout-@Item.LayoutMode.ToString().ToLowerInvariant() @(DesignerMode ? "panel-designer-preview" : null)"
+     data-panel-root
+     data-panel-id="@Item.Id"
+     data-panel-active-view="@ActiveViewId"
+     data-panel-navigation="@Item.NavigationMode.ToString().ToLowerInvariant()"
+     style="@PanelStyle">
+    @if (Item.NavigationMode != PublicationPanelNavigationMode.Hidden && EnabledViews.Count > 1)
+    {
+        <nav class="publication-panel-navigation" aria-label="@Item.Name views">
+            @foreach (var view in EnabledViews)
+            {
+                <button type="button" class="@(view.Id == ActiveViewId ? "active" : null)" data-panel-target="@view.Id" aria-current="@(view.Id == ActiveViewId ? "page" : null)">@view.Name</button>
+            }
+        </nav>
+    }
+    <div class="publication-panel-viewport">
+        @foreach (var view in EnabledViews)
+        {
+            <section class="publication-panel-view" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
+                @foreach (var element in view.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
+                {
+                    <div class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant()"
+                         data-panel-element
+                         data-element-id="@element.Id"
+                         data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
+                         data-interaction="@PublicationAnimationData.Interaction(element)"
+                         data-interaction-action="@element.Interaction.Action"
+                         data-media-kind="@(element is PublicationMediaElement ? element.Kind.ToString().ToLowerInvariant() : null)"
+                         data-media-start="@(element is PublicationMediaElement media ? Inv(media.TimelineStartSeconds) : null)"
+                         data-media-trim-start="@(element is PublicationMediaElement trimStart ? Inv(trimStart.TrimStartSeconds) : null)"
+                         data-media-trim-end="@(element is PublicationMediaElement trimEnd ? Inv(trimEnd.EffectiveTrimEndSeconds) : null)"
+                         style="@ElementStyle(element)">
+                        @switch (element)
+                        {
+                            case TextFrameElement text:
+                                <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@text.Background;border:@Mm(text.BorderWidth) solid @text.BorderColor">@((MarkupString)text.PreviewHtml)</div>
+                                break;
+                            case ImageFrameElement image:
+                                <div class="image-frame" style="@ImageFrameStyle(image)"><img src="@image.DataUrl" alt="@image.AltText" style="@ImageStyle(image)" /></div>
+                                break;
+                            case VideoElement video:
+                                <VideoMediaView Item="video" />
+                                break;
+                            case AudioElement audio:
+                                <div class="audio-object compact"><audio src="@MediaAssets.GetOrRegister(audio)" controls="@audio.ShowControls" muted="@audio.Muted" loop="@audio.Loop" preload="metadata"></audio><span>@audio.Name</span></div>
+                                break;
+                            case ShapeElement shape:
+                                <div class="shape" style="@ShapeStyle(shape)"></div>
+                                break;
+                            case WordArtElement wordArt:
+                                <div class="panel-wordart" style="color:@wordArt.FillColor;font-family:@wordArt.FontFamily;font-size:@(Inv(wordArt.FontSizePt / 2.8))px;font-weight:@(wordArt.Bold ? 700 : 400);font-style:@(wordArt.Italic ? "italic" : "normal")">@wordArt.Text</div>
+                                break;
+                            case DataVisualElement dataVisual:
+                                <DataVisualView Document="Document" Item="dataVisual" CurrentPageId="CurrentPageId" />
+                                break;
+                            case DevExtremeComponentElement component:
+                                <DevExtremeComponentView Document="Document" Item="component" CurrentPageId="CurrentPageId" DesignerMode="@DesignerMode" IdPrefix="panel" />
+                                break;
+                            case LiveSourceElement liveSource:
+                                <LiveSourceView Item="liveSource" DesignerMode="@DesignerMode" />
+                                break;
+                            case SpreadsheetElement spreadsheet:
+                                <div class="spreadsheet-object publication-content-frame" style="background:@spreadsheet.Background;border:@Mm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
+                                    @if (spreadsheet.ShowSheetName) { <strong>@spreadsheet.ActiveSheetName</strong> }
+                                    <div class="spreadsheet-preview-html">@((MarkupString)spreadsheet.PreviewHtml)</div>
+                                </div>
+                                break;
+                            case BarcodeElement barcode:
+                                <BarcodeView Item="barcode" />
+                                break;
+                            case PanelElement nestedPanel:
+                                <PanelView Document="Document" Item="nestedPanel" CurrentPageId="CurrentPageId" DesignerMode="@DesignerMode" />
+                                break;
+                            case HtmlEmbedElement html:
+                                <HtmlEmbedView Item="html" />
+                                break;
+                        }
+                    </div>
+                }
+            </section>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    [Parameter, EditorRequired] public PanelElement Item { get; set; } = default!;
+    [Parameter] public Guid CurrentPageId { get; set; }
+    [Parameter] public bool DesignerMode { get; set; }
+
+    private IReadOnlyList<PublicationPanelView> EnabledViews => Item.Views.Where(view => view.Enabled).ToArray();
+    private Guid ActiveViewId => Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;
+    private string PanelStyle => $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)}";
+    private string ElementStyle(PublicationElement element)
+    {
+        var left = element.X / Math.Max(1, Item.CanvasWidth) * 100;
+        var top = element.Y / Math.Max(1, Item.CanvasHeight) * 100;
+        var width = element.Width / Math.Max(1, Item.CanvasWidth) * 100;
+        var height = element.Height / Math.Max(1, Item.CanvasHeight) * 100;
+        return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
+    }
+    private static string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
+        ? $"background:{shape.Stroke};height:{Mm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
+        : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";
+    private static string ImageFrameStyle(ImageFrameElement image) => $"border-radius:{(image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(image.CornerRadiusMm) : "0")};border:{Mm(image.BorderWidthMm)} solid {image.BorderColor};overflow:hidden";
+    private static string ImageStyle(ImageFrameElement image)
+    {
+        var sx = image.FlipHorizontal ? -image.CropScale : image.CropScale;
+        var sy = image.FlipVertical ? -image.CropScale : image.CropScale;
+        return $"width:100%;height:100%;object-fit:{(image.FitInsideFrame ? "contain" : "cover")};transform:translate({Inv(image.CropX)}%,{Inv(image.CropY)}%) rotate({Inv(image.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(image.Opacity)};filter:brightness({Inv(image.Brightness)}) contrast({Inv(image.Contrast)}) saturate({Inv(image.Saturation)}) hue-rotate({Inv(image.HueRotation)}deg) invert({Inv(image.Invert)}) grayscale({Inv(image.Grayscale)}) sepia({Inv(image.Sepia)}) blur({Inv(image.Blur)}px)";
+    }
+    private static string Mm(double value) => $"{Inv(value)}mm";
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+}

@@ -1,0 +1,410 @@
+@namespace PublisherStudio.Components.Editor
+@inject PanelDocumentService Panels
+@inject PublicationFileService Files
+@inject PublicationDataService Data
+@inject PublicationComponentService Components
+
+@if (Visible && _draft is not null)
+{
+    <div class="modal-backdrop data-modal-backdrop">
+        <section class="data-visual-editor-dialog panel-studio-dialog" role="dialog" aria-modal="true" aria-label="Panel Studio">
+            <header>
+                <div>
+                    <strong>Panel / Div Studio</strong>
+                    <span>Compose reusable views, dashboards, nested panels and isolated interactive HTML from the same publication components.</span>
+                </div>
+                <button type="button" class="window-close" @onclick="Cancel">×</button>
+            </header>
+            <DxRibbon CssClass="data-visual-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Panel">
+                    <DxRibbonGroup Text="Views">
+                        <DxRibbonItem Text="Add view" IconCssClass="pub-icon pub-icon-page" Click="AddView" />
+                        <DxRibbonItem Text="Duplicate view" Click="DuplicateView" Enabled="@(CurrentView is not null)" />
+                        <DxRibbonItem Text="Delete view" Click="DeleteView" Enabled="@(_draft.Views.Count > 1)" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Publisher components">
+                        <DxRibbonItem Text="Text" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
+                        <DxRibbonItem Text="KPI" IconCssClass="pub-icon pub-icon-chart" Click="AddKpi" />
+                        <DxRibbonItem Text="Chart" IconCssClass="pub-icon pub-icon-chart" Click="AddChart" />
+                        <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-data" Click="AddTable" />
+                        <DxRibbonItem Text="Data Grid" IconCssClass="pub-icon pub-icon-data" Click="AddDataGrid" />
+                        <DxRibbonItem Text="Button" IconCssClass="pub-icon pub-icon-button" Click="AddButton" />
+                        <DxRibbonItem Text="Menu" IconCssClass="pub-icon pub-icon-menu" Click="AddMenu" />
+                        <DxRibbonItem Text="Live camera" IconCssClass="pub-icon pub-icon-video" Click="AddCamera" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Web composition">
+                        <DxRibbonItem Text="HTML experience" IconCssClass="pub-icon pub-icon-web" Click="AddHtml" />
+                        <DxRibbonItem Text="Nested panel" IconCssClass="pub-icon pub-icon-panel" Click="AddNestedPanel" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Layer">
+                        <DxRibbonItem Text="Duplicate" Click="DuplicateElement" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Up" Click="MoveElementUp" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Down" Click="MoveElementDown" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Delete" Click="DeleteElement" Enabled="@(SelectedElement is not null)" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
+            <div class="data-visual-editor-body panel-studio-grid">
+                <aside class="visual-type-list">
+                    <strong>Views</strong>
+                    @foreach (var view in _draft.Views)
+                    {
+                        <button type="button" class="@(view.Id == _selectedViewId ? "selected" : null)" @onclick="() => SelectView(view.Id)">
+                            <strong>@view.Name</strong>
+                            <small>@view.Slug · @(view.Enabled ? "enabled" : "disabled")</small>
+                        </button>
+                    }
+                    <label class="check-row">
+                        <input type="checkbox" checked="@(CurrentView?.Enabled == true)" @onchange="ToggleViewEnabled" /> View enabled
+                    </label>
+                    <label>Navigation
+                        <select value="@_draft.NavigationMode" @onchange="ChangeNavigation">
+                            @foreach (var mode in Enum.GetValues<PublicationPanelNavigationMode>())
+                            {
+                                <option value="@mode">@mode</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Panel name<input value="@_draft.Name" @onchange="ChangePanelName" /></label>
+                    <label>View name<input value="@CurrentView?.Name" @onchange="ChangeViewName" /></label>
+                    <label class="panel-html-import">Import standalone HTML into this view
+                        <InputFile accept=".html,.htm,text/html" OnChange="ImportHtml" />
+                    </label>
+                    @if (!string.IsNullOrWhiteSpace(_error))
+                    {
+                        <div class="inline-error">@_error</div>
+                    }
+                </aside>
+                <main class="visual-settings">
+                    <div class="panel-studio-canvas">
+                        <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="true" />
+                    </div>
+                    <p class="field-help">The preview uses the same DataVisual, DevExtreme, media, live-source, HTML and nested-panel renderers used by the Mainframe and HTML exports.</p>
+                </main>
+                <aside class="visual-settings">
+                    <strong>Components in @CurrentView?.Name</strong>
+                    <div class="panel-studio-element-list">
+                        @foreach (var element in CurrentView?.Elements.OrderByDescending(element => element.ZIndex) ?? Enumerable.Empty<PublicationElement>())
+                        {
+                            <button type="button" class="@(element.Id == _selectedElementId ? "selected" : null)" @onclick="() => _selectedElementId = element.Id">
+                                <strong>@element.Name</strong>
+                                <small>@element.Kind · @element.X.ToString("0.#")/@element.Y.ToString("0.#")</small>
+                            </button>
+                        }
+                    </div>
+                    @if (SelectedElement is { } selected)
+                    {
+                        <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
+                            <label style="grid-column:1/-1">Name<input value="@selected.Name" @onchange="ChangeElementName" /></label>
+                            <label>X<input type="number" step="1" value="@selected.X" @onchange="args => ChangeNumber(args, value => selected.X = value)" /></label>
+                            <label>Y<input type="number" step="1" value="@selected.Y" @onchange="args => ChangeNumber(args, value => selected.Y = value)" /></label>
+                            <label>Width<input type="number" min="1" step="1" value="@selected.Width" @onchange="args => ChangeNumber(args, value => selected.Width = value)" /></label>
+                            <label>Height<input type="number" min="1" step="1" value="@selected.Height" @onchange="args => ChangeNumber(args, value => selected.Height = value)" /></label>
+                        </div>
+                        @if (selected is HtmlEmbedElement html)
+                        {
+                            <label>HTML<textarea rows="7" value="@html.Html" @onchange="args => html.Html = args.Value?.ToString() ?? string.Empty"></textarea></label>
+                            <label>CSS<textarea rows="5" value="@html.Css" @onchange="args => html.Css = args.Value?.ToString() ?? string.Empty"></textarea></label>
+                            <label>JavaScript<textarea rows="5" value="@html.JavaScript" @onchange="args => html.JavaScript = args.Value?.ToString() ?? string.Empty"></textarea></label>
+                            <label class="check-row"><input type="checkbox" checked="@html.AllowScripts" @onchange="args => html.AllowScripts = AsBool(args)" /> Enable JavaScript inside sandbox</label>
+                            <label class="check-row"><input type="checkbox" checked="@html.AllowForms" @onchange="args => html.AllowForms = AsBool(args)" /> Allow forms</label>
+                            <label class="check-row"><input type="checkbox" checked="@html.AllowPopups" @onchange="args => html.AllowPopups = AsBool(args)" /> Allow popups</label>
+                            <p class="field-help">Imported scripts stay disabled until you opt in. Each HTML experience runs in its own iframe sandbox.</p>
+                        }
+                        @if (selected is PanelElement nested)
+                        {
+                            <label>Nested navigation
+                                <select value="@nested.NavigationMode" @onchange="ChangeNestedNavigation">
+                                    @foreach (var mode in Enum.GetValues<PublicationPanelNavigationMode>())
+                                    {
+                                        <option value="@mode">@mode</option>
+                                    }
+                                </select>
+                            </label>
+                        }
+                    }
+                </aside>
+            </div>
+            <footer>
+                <button type="button" @onclick="Cancel">Cancel</button>
+                <button type="button" class="primary" @onclick="Save">Save panel</button>
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    [Parameter] public Guid CurrentPageId { get; set; }
+    [Parameter] public PanelElement? InitialPanel { get; set; }
+    [Parameter] public EventCallback<PanelElement> Saved { get; set; }
+    [Parameter] public EventCallback Cancelled { get; set; }
+
+    private PanelElement? _draft;
+    private Guid _selectedViewId;
+    private Guid? _selectedElementId;
+    private Guid? _loadedId;
+    private string _error = string.Empty;
+    private PublicationPanelView? CurrentView => _draft?.Views.FirstOrDefault(view => view.Id == _selectedViewId) ?? _draft?.ActiveView;
+    private PublicationElement? SelectedElement => CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
+
+    protected override void OnParametersSet()
+    {
+        if (!Visible)
+        {
+            _loadedId = null;
+            return;
+        }
+
+        var id = InitialPanel?.Id;
+        if (_draft is not null && _loadedId == id) return;
+        _draft = InitialPanel is null ? Panels.CreateBlank() : (PanelElement)Files.CloneElement(InitialPanel);
+        Panels.Normalize(Document, _draft);
+        _selectedViewId = _draft.ActiveViewId;
+        _selectedElementId = CurrentView?.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id;
+        _loadedId = id;
+        _error = string.Empty;
+    }
+
+    private void SelectView(Guid id)
+    {
+        _selectedViewId = id;
+        if (_draft is not null) _draft.ActiveViewId = id;
+        _selectedElementId = CurrentView?.Elements.LastOrDefault()?.Id;
+    }
+
+    private void AddView()
+    {
+        if (_draft is null) return;
+        var view = new PublicationPanelView
+        {
+            Name = $"View {_draft.Views.Count + 1}",
+            Slug = $"view-{_draft.Views.Count + 1}"
+        };
+        _draft.Views.Add(view);
+        SelectView(view.Id);
+    }
+
+    private void DuplicateView()
+    {
+        if (_draft is null || CurrentView is null) return;
+        var clone = new PublicationPanelView
+        {
+            Name = CurrentView.Name + " copy",
+            Slug = CurrentView.Slug + "-copy",
+            Background = CurrentView.Background,
+            Elements = CurrentView.Elements.Select(Files.CloneElement).ToList()
+        };
+        _draft.Views.Add(clone);
+        SelectView(clone.Id);
+    }
+
+    private void DeleteView()
+    {
+        if (_draft is null || CurrentView is null || _draft.Views.Count <= 1) return;
+        _draft.Views.Remove(CurrentView);
+        SelectView(_draft.Views[0].Id);
+    }
+
+    private void AddText() => AddElement(new TextFrameElement
+    {
+        Name = "Text",
+        PreviewHtml = "<h2 style=\"margin:0\">Panel text</h2><p>Shared authored content.</p>",
+        X = 8,
+        Y = 8,
+        Width = 60,
+        Height = 22,
+        Background = "#ffffffcc",
+        BorderColor = "#cbd5e1",
+        BorderWidth = .2
+    });
+
+    private void AddKpi() => AddVisual(DataVisualKind.KpiProgress, "KPI");
+    private void AddChart() => AddVisual(DataVisualKind.CartesianChart, "Chart");
+    private void AddTable() => AddVisual(DataVisualKind.DataTable, "Data table");
+    private void AddDataGrid() => AddComponent(PublicationComponentKind.DataGrid);
+    private void AddButton() => AddComponent(PublicationComponentKind.Button);
+    private void AddMenu() => AddComponent(PublicationComponentKind.Menu);
+
+    private void AddComponent(PublicationComponentKind kind)
+    {
+        var element = Components.Create(Document, kind);
+        element.X = 8;
+        element.Y = 8;
+        AddElement(element);
+    }
+
+    private void AddCamera() => AddElement(new LiveSourceElement
+    {
+        Name = "Live camera",
+        SourceKind = PublicationLiveSourceKind.Camera,
+        X = 8,
+        Y = 8,
+        Width = 72,
+        Height = 42,
+        CaptureWidth = 1920,
+        CaptureHeight = 1080,
+        CaptureFrameRate = 30,
+        Muted = true
+    });
+
+    private void AddHtml() => AddElement(new HtmlEmbedElement { Name = "HTML experience", X = 8, Y = 8, Width = 100, Height = 58 });
+    private void AddNestedPanel() => AddElement(Panels.CreateBlank("Nested panel"));
+
+    private async Task ImportHtml(InputFileChangeEventArgs args)
+    {
+        _error = string.Empty;
+        try
+        {
+            var file = args.File;
+            await using var source = file.OpenReadStream(16L * 1024 * 1024);
+            using var reader = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            var markup = await reader.ReadToEndAsync();
+            AddElement(new HtmlEmbedElement
+            {
+                Name = Path.GetFileNameWithoutExtension(file.Name),
+                Html = markup,
+                Css = "html,body{margin:0;min-height:100%}",
+                JavaScript = string.Empty,
+                AllowScripts = false,
+                X = 0,
+                Y = 0,
+                Width = _draft?.CanvasWidth ?? 160,
+                Height = _draft?.CanvasHeight ?? 90
+            });
+        }
+        catch (Exception exception)
+        {
+            _error = $"HTML import failed: {exception.Message}";
+        }
+    }
+
+    private void AddVisual(DataVisualKind kind, string name)
+    {
+        var data = Document.DataObjects.FirstOrDefault();
+        if (data is null)
+        {
+            data = Data.CreateSample();
+            Document.DataObjects.Add(data);
+        }
+
+        var columns = Data.ResolveColumns(data).ToArray();
+        var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
+        var value = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name
+            ?? columns.Skip(1).FirstOrDefault()?.Name
+            ?? argument;
+        AddElement(new DataVisualElement
+        {
+            Name = name,
+            Title = name,
+            VisualKind = kind,
+            DataObjectId = data.Id,
+            ArgumentField = argument,
+            ValueFields = string.IsNullOrWhiteSpace(value) ? [] : [value],
+            TargetField = value,
+            X = 8,
+            Y = 8,
+            Width = 70,
+            Height = kind == DataVisualKind.KpiProgress ? 24 : 48
+        });
+    }
+
+    private void AddElement(PublicationElement element)
+    {
+        if (CurrentView is null) return;
+        element.ZIndex = CurrentView.Elements.Count + 1;
+        CurrentView.Elements.Add(element);
+        _selectedElementId = element.Id;
+        if (_draft is not null) Panels.Normalize(Document, _draft);
+    }
+
+    private void DuplicateElement()
+    {
+        if (CurrentView is null || SelectedElement is null) return;
+        var clone = Files.CloneElement(SelectedElement);
+        clone.Id = Guid.NewGuid();
+        clone.Name += " copy";
+        clone.X += 4;
+        clone.Y += 4;
+        clone.ZIndex = CurrentView.Elements.Count + 1;
+        CurrentView.Elements.Add(clone);
+        _selectedElementId = clone.Id;
+    }
+
+    private void DeleteElement()
+    {
+        if (CurrentView is null || SelectedElement is null) return;
+        CurrentView.Elements.Remove(SelectedElement);
+        _selectedElementId = CurrentView.Elements.LastOrDefault()?.Id;
+    }
+
+    private void MoveElementUp() => MoveElement(1);
+    private void MoveElementDown() => MoveElement(-1);
+
+    private void MoveElement(int delta)
+    {
+        if (CurrentView is null || SelectedElement is null) return;
+        var ordered = CurrentView.Elements.OrderBy(element => element.ZIndex).ToList();
+        var index = ordered.IndexOf(SelectedElement);
+        var target = Math.Clamp(index + delta, 0, ordered.Count - 1);
+        if (target == index) return;
+        (ordered[index], ordered[target]) = (ordered[target], ordered[index]);
+        for (var i = 0; i < ordered.Count; i++) ordered[i].ZIndex = i + 1;
+        CurrentView.Elements = ordered;
+    }
+
+    private void ChangePanelName(ChangeEventArgs args)
+    {
+        if (_draft is not null) _draft.Name = args.Value?.ToString() ?? "Panel";
+    }
+
+    private void ChangeViewName(ChangeEventArgs args)
+    {
+        if (CurrentView is not null) CurrentView.Name = args.Value?.ToString() ?? "View";
+    }
+
+    private void ChangeElementName(ChangeEventArgs args)
+    {
+        if (SelectedElement is not null) SelectedElement.Name = args.Value?.ToString() ?? SelectedElement.Kind.ToString();
+    }
+
+    private void ChangeNavigation(ChangeEventArgs args)
+    {
+        if (_draft is not null && Enum.TryParse<PublicationPanelNavigationMode>(args.Value?.ToString(), out var mode))
+            _draft.NavigationMode = mode;
+    }
+
+    private void ChangeNestedNavigation(ChangeEventArgs args)
+    {
+        if (SelectedElement is PanelElement nested
+            && Enum.TryParse<PublicationPanelNavigationMode>(args.Value?.ToString(), out var mode))
+        {
+            nested.NavigationMode = mode;
+        }
+    }
+
+    private void ToggleViewEnabled(ChangeEventArgs args)
+    {
+        if (CurrentView is not null) CurrentView.Enabled = AsBool(args);
+    }
+
+    private static bool AsBool(ChangeEventArgs args) => args.Value is bool value
+        ? value
+        : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
+
+    private static void ChangeNumber(ChangeEventArgs args, Action<double> update)
+    {
+        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            update(value);
+    }
+
+    private async Task Save()
+    {
+        if (_draft is null) return;
+        Panels.Normalize(Document, _draft);
+        await Saved.InvokeAsync(_draft);
+    }
+
+    private Task Cancel() => Cancelled.InvokeAsync();
+}

@@ -1916,14 +1916,131 @@
         return JSON.stringify(result.rows || []);
     }
 
+
+    const panelBindings = new WeakMap();
+
+    function panelMedia(element) {
+        return element?.querySelector?.("video,audio") || null;
+    }
+
+    function setPanelView(panel, viewId) {
+        const requested = String(viewId || "");
+        let activated = false;
+        for (const view of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-view]")) {
+            const active = String(view.dataset.panelView || "") === requested;
+            view.hidden = !active;
+            view.setAttribute("aria-hidden", active ? "false" : "true");
+            activated ||= active;
+        }
+        if (!activated) return false;
+        panel.dataset.panelActiveView = requested;
+        for (const button of panel.querySelectorAll(":scope > .publication-panel-navigation [data-panel-target]")) {
+            const active = String(button.dataset.panelTarget || "") === requested;
+            button.classList.toggle("active", active);
+            if (active) button.setAttribute("aria-current", "page");
+            else button.removeAttribute("aria-current");
+        }
+        panel.dispatchEvent(new CustomEvent("publisherstudio:panel-view-changed", {
+            bubbles: true,
+            detail: { panelId: panel.dataset.panelId || "", viewId: requested }
+        }));
+        refreshAll(panel, { polling: false, fetchNow: false });
+        return true;
+    }
+
+    function runPanelInteraction(panel, node, interaction) {
+        const action = lower(interaction?.action || node?.dataset?.interactionAction);
+        if (!action || action === "none") return false;
+        if (action === "nextpage") return Boolean(window.PublisherStudioNavigation?.next?.());
+        if (action === "previouspage") return Boolean(window.PublisherStudioNavigation?.previous?.());
+        if (action === "gotopage") return Boolean(window.PublisherStudioNavigation?.goToPage?.(interaction.targetPageId));
+        if (action === "openurl") {
+            const url = String(interaction.url || "").trim();
+            if (!/^(https?:|mailto:)/i.test(url)) return false;
+            window.open(url, interaction.openInNewWindow === false ? "_self" : "_blank", "noopener");
+            return true;
+        }
+        const targetId = String(interaction.targetElementId || node.dataset.elementId || "");
+        const target = panel.querySelector(`[data-panel-element][data-element-id="${CSS.escape(targetId)}"]`);
+        if (!target) return false;
+        if (action === "togglevisibility") target.classList.toggle("ps-action-hidden");
+        else if (action === "show") target.classList.remove("ps-action-hidden");
+        else if (action === "hide") target.classList.add("ps-action-hidden");
+        else if (action === "playmedia") panelMedia(target)?.play?.().catch?.(() => {});
+        else if (action === "pausemedia") panelMedia(target)?.pause?.();
+        else if (action === "togglemediaplayback") {
+            const media = panelMedia(target);
+            if (media?.paused) media.play?.().catch?.(() => {}); else media?.pause?.();
+        } else return false;
+        return true;
+    }
+
+    function bindPanel(panel) {
+        if (!panel || panelBindings.has(panel)) return;
+        const controller = new AbortController();
+        const options = { signal: controller.signal };
+        panelBindings.set(panel, controller);
+        for (const button of panel.querySelectorAll(":scope > .publication-panel-navigation [data-panel-target]")) {
+            button.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                setPanelView(panel, button.dataset.panelTarget);
+            }, options);
+        }
+        for (const node of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-view] > [data-panel-element]")) {
+            let interaction = {};
+            try { interaction = JSON.parse(node.dataset.interaction || "{}"); } catch { }
+            const action = lower(interaction.action || node.dataset.interactionAction);
+            const media = panelMedia(node);
+            if (media || (action && action !== "none")) node.classList.add("ps-pointer-owner");
+            if (media && lower(node.dataset.mediaTrigger) === "onclick" && (!action || action === "none")) {
+                node.addEventListener("click", event => {
+                    if (event.target?.closest?.("video,audio,button,a,input,select,textarea")) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (media.paused) media.play?.().catch?.(() => {}); else media.pause?.();
+                }, options);
+            }
+            if (action && action !== "none") {
+                node.classList.add("ps-interactive");
+                node.addEventListener("click", event => {
+                    if (event.target?.closest?.("button,a,input,select,textarea,[contenteditable=true]") && event.target !== node) return;
+                    if (!runPanelInteraction(panel, node, interaction)) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                }, options);
+            }
+        }
+        for (const nested of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-view] > [data-panel-element] > [data-panel-root]")) bindPanel(nested);
+        const active = panel.dataset.panelActiveView || panel.querySelector("[data-panel-view]:not([hidden])")?.dataset.panelView;
+        if (active) setPanelView(panel, active);
+    }
+
+    function startPanels(root) {
+        const scope = root || document;
+        const panels = scope.matches?.("[data-panel-root]") ? [scope] : [...scope.querySelectorAll?.("[data-panel-root]") || []];
+        panels.forEach(bindPanel);
+    }
+
+    function disposePanels(root) {
+        if (!root) return;
+        const panels = root.matches?.("[data-panel-root]") ? [root] : [...root.querySelectorAll?.("[data-panel-root]") || []];
+        panels.forEach(panel => {
+            panelBindings.get(panel)?.abort?.();
+            panelBindings.delete(panel);
+        });
+    }
+
     async function refreshAll(root, options = {}) {
         const scope = root || document;
+        startPanels(scope);
         const elements = scope.matches?.("[data-ps-component-config]") ? [scope] : [...scope.querySelectorAll?.("[data-ps-component-config]") || []];
         await Promise.all(elements.map(element => render(element, element.dataset.psComponentConfig, { polling: options.polling, fetchNow: options.fetchNow !== false })));
     }
 
     function start(root, options = {}) {
         const scope = root || document;
+        startPanels(scope);
         const elements = scope.matches?.("[data-ps-component-config]") ? [scope] : [...scope.querySelectorAll?.("[data-ps-component-config]") || []];
         elements.forEach(element => render(element, element.dataset.psComponentConfig, { polling: options.polling !== false, fetchNow: options.fetchNow !== false }));
     }
@@ -1967,6 +2084,8 @@
             if (!root) return;
             const elements = root.matches?.("[data-ps-component-config]") ? [root] : [...root.querySelectorAll?.("[data-ps-component-config]") || []];
             elements.forEach(dispose);
-        }
+            disposePanels(root);
+        },
+        refreshPanels(root) { startPanels(root || document); }
     };
 })();

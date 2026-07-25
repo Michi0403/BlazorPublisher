@@ -70,6 +70,6 @@ assert.match(streaming, /updateSourceEffects/);
 assert.match(files, /_mediaTimeline\.Normalize\(media\.Segments, media is VideoElement\)/);
 assert.match(files, /Migrate it into/);
 assert.match(files, /SynchronizeLiveSourceLayer\(source\)/);
-assert.match(files, /document\.FormatVersion = "1\.52"/);
+assert.match(files, /document\.FormatVersion = "1\.53"/);
 
 console.log('PublisherStudio persistent selections, multiple cut sections, layered video filters, chroma key, editable regions, Mainframe preview, and streaming input filter contracts passed.');

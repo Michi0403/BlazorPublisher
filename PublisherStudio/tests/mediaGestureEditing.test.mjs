@@ -50,7 +50,7 @@ assert.match(mediaModels, /enum MediaStudioMouseMode \{ SelectSection, PlacePlay
 assert.match(mediaModels, /sealed class PublicationMediaSegment/);
 assert.match(mediaModels, /List<PublicationMediaSegment> Segments/);
 assert.match(mediaModels, /List<MediaFramePoint> FrameClipPolygon/);
-assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.52"/);
+assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.53"/);
 assert.match(publicationModels, /public List<PublicationMediaSegment> Segments/);
 assert.match(publicationModels, /public List<MediaFramePoint> FrameClipPolygon/);
 assert.match(editor, /item\.Segments = result\.Segments\?\.Select/);

@@ -783,3 +783,13 @@ Static checks completed for the v1.0.37 source package:
 - Run the aggregate Node suite. The compilation-safety contract must confirm that the three live-layer locals are ordinary declarations at the start of the existing `liveSource.IsVisual` body and that no nested explicit `@{ ... }` block wraps them.
 - Parse project XML and package JSON, verify all current-release versions are `1.0.75`, replay the patch against untouched v1.0.74, and validate ZIP CRC/extraction parity plus SHA-256/SHA-512 checksums.
 - A real .NET/Razor/DevExpress compile remains mandatory on the normal release machine because this packaging environment has no .NET SDK or licensed DevExpress restore feed.
+
+## v1.0.76 VideoStudio selection/playback validation
+
+- Run all npm regression suites, including executable browser-media cancellation coverage.
+- Verify pointer-up, pointer-cancel, and lost-pointer-capture all commit the visible selection with browser-resolved source duration.
+- Verify committed selection ownership is persisted, cloned, normalized, and migrated.
+- Verify selected ranges can be applied to the selected video layer and that layer/filter changes refresh the shared renderer.
+- Verify local play-canvas controls and C# ribbon playback use non-throwing cancellation semantics for interrupted `HTMLMediaElement.play()` requests.
+- Parse project XML and package JSON, verify current-release versions are `1.0.76` and publication format is `1.53`.
+- Replay the release patch against untouched v1.0.75 and validate archive CRC, extraction parity, SHA-256, and SHA-512 checksums.

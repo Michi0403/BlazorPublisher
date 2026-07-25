@@ -100,7 +100,7 @@ The web project now references `DevExpress.AspNetCore.Spreadsheet` and copies it
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.52`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.53`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
 
 ## Reference and license boundary
 
@@ -200,7 +200,7 @@ New videos default to `Stretch`. `FitModeExplicit` distinguishes later user choi
 
 ## Open video-project interchange (v1.0.73)
 
-Video Studio now stores imported editorial projects in a canonical `VideoProjectDocument` rather than flattening a foreign project directly into the legacy one-list sequence. The canonical document owns source format/version, canvas and frame rate, ordered typed tracks, explicit segment placements and durations, source ranges and rates, speed, missing/relinkable media references, markers, transitions, and adapter metadata. `VideoElement.VideoProject` is persisted in publication format `1.52` while `VideoElement.Segments` remains the editable/render-compatible projection of the active video track.
+Video Studio now stores imported editorial projects in a canonical `VideoProjectDocument` rather than flattening a foreign project directly into the legacy one-list sequence. The canonical document owns source format/version, canvas and frame rate, ordered typed tracks, explicit segment placements and durations, source ranges and rates, speed, missing/relinkable media references, markers, transitions, and adapter metadata. `VideoElement.VideoProject` is persisted in publication format `1.53` while `VideoElement.Segments` remains the editable/render-compatible projection of the active video track.
 
 `VideoProjectImportService` is the adapter boundary. v1.0.73 imports OpenTimelineIO (`.otio`), OTIO bundles (`.otioz`), MLT XML and Kdenlive/Shotcut projects (`.mlt`, `.kdenlive`), GStreamer Editing Services projects (`.xges`), OpenShot projects (`.osp`), and CMX 3600 EDL (`.edl`). Adapters create temporary canonical state, retain original source identifiers and format metadata, and emit explicit `InterchangeIssue` records for approximations, unsupported effects, assumed rates, and missing media. They never silently claim a foreign effect as a native PublisherStudio filter.
 

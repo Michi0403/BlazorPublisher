@@ -63,13 +63,14 @@
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy selection" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
                         </DxRibbonGroup>
                         <DxRibbonGroup Text="Cut sections" IconCssClass="pub-icon pub-icon-line">
-                            <DxRibbonItem Text="Save selected range" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+                            <DxRibbonItem Text="Save as cut section" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
                             <DxRibbonItem Text="Use saved section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove saved section" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
                         </DxRibbonGroup>
                         <DxRibbonGroup Text="Video layers" IconCssClass="pub-icon pub-icon-layers">
                             <DxRibbonItem Text="Add layer" Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
                             <DxRibbonItem Text="Duplicate layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+                            <DxRibbonItem Text="Selection → layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
                             <DxRibbonItem Text="Layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
                             <DxRibbonItem Text="Layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
@@ -131,6 +132,9 @@
                                      data-segment-timeline-start="@Inv(SelectedSegmentTimelineStart)"
                                      data-segment-source-start="@Inv(SelectedSegmentSourceStart)"
                                      data-playback-rate="@Inv(_playbackRate)"
+                                     data-volume="@Inv(_volume)"
+                                     data-muted="@(_muted ? "true" : "false")"
+                                     data-loop="@(_loop ? "true" : "false")"
                                      data-mouse-mode="@_mouseMode"
                                      style="@VideoTimeOverlayStyle"
                                      role="application"
@@ -155,8 +159,8 @@
                                     }
                                     <div class="media-video-time-toolbar media-video-transport-dock" data-video-time-control>
                                         <div class="media-video-transport-buttons">
-                                            <button type="button" title="Play selected range" @onclick="PlaySelection" @onclick:stopPropagation>▶</button>
-                                            <button type="button" title="Pause video" @onclick="PausePreview" @onclick:stopPropagation>Ⅱ</button>
+                                            <button type="button" title="Play selected range" data-video-command="play">▶</button>
+                                            <button type="button" title="Pause video" data-video-command="pause">Ⅱ</button>
                                         </div>
                                         <label class="media-video-pointer-mode">
                                             <span>Pointer</span>
@@ -417,6 +421,7 @@
                                 <DxButton Text="Cut selection" Enabled="@CanCutVideoSelection" Click="CutVideoSelection" />
                                 <DxButton Text="Use as trim" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
                                 <DxButton Text="Copy area" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
+                                <DxButton Text="Apply to layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
                             </div>
                             <p class="property-note">A point creates one cutline. A range creates cutlines at both boundaries and selects the resulting middle clip. Dropped video is inserted only inside this selection.</p>
                         </section>
@@ -438,7 +443,7 @@
                                 }
                             </div>
                             <div class="property-action-row">
-                                <DxButton Text="Save selection" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+                                <DxButton Text="Save as cut section" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
                                 <DxButton Text="Use section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
                                 <DxButton Text="Remove" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
                             </div>
@@ -454,7 +459,7 @@
                                     <div class="media-video-layer-row @(layer.Id == _selectedVideoLayerId ? "selected" : null)">
                                         <button type="button" class="media-video-layer-select" @onclick="() => SelectVideoLayer(layer.Id)">
                                             <span>@layer.Name</span>
-                                            <small>@(layer.Region.IsFullFrame ? "Full frame" : $"{layer.Region.Points.Count} region points") · @layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s")</small>
+                                            <small>@(layer.Region.IsFullFrame ? "Full frame" : $"{layer.Region.Points.Count} region points") · @layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s")@(layer.HasTemporalRange ? $" · {Time(layer.TemporalStartSeconds)}—{Time(layer.TemporalEndSeconds)}" : " · full clip")</small>
                                         </button>
                                         <button type="button" class="media-video-layer-visibility" title="Toggle layer visibility" @onclick="() => ToggleVideoLayerVisibility(layer.Id)">@(layer.Visible ? "●" : "○")</button>
                                     </div>
@@ -488,7 +493,7 @@
                                         <label>Layer start<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalStartSeconds)" @onchange="ChangeVideoLayerTemporalStart" /></label>
                                         <label>Layer end<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalEndSeconds)" @onchange="ChangeVideoLayerTemporalEnd" /></label>
                                     </div>
-                                    <DxButton Text="Use current selection" Enabled="@(!_videoSelectionIsPoint)" Click="UseSelectionForVideoLayerTime" CssClass="wide-button" />
+                                    <DxButton Text="Apply selected range" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" CssClass="wide-button" />
                                 }
                             }
                         </section>
@@ -681,6 +686,7 @@
             <DxContextMenuItem Text="Remove selected saved section" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
             <DxContextMenuItem Text="Add video layer" Enabled="@HasSelectedSegment" BeginGroup="true" Click="AddVideoLayer" />
             <DxContextMenuItem Text="Duplicate selected layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+            <DxContextMenuItem Text="Apply selected range to layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
             <DxContextMenuItem Text="Move layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
             <DxContextMenuItem Text="Move layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
             <DxContextMenuItem Text="Delete selected layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
@@ -778,6 +784,7 @@
     private double _videoSelectionPointSeconds;
     private double _videoSelectionStartSeconds;
     private double _videoSelectionEndSeconds;
+    private bool _videoSelectionUserCommitted;
     private PublicationMediaSegment? _pendingInsertSegment;
     private double _pendingInsertSourceSeconds;
     private double _pendingInsertMinimumSourceSeconds;
@@ -831,6 +838,7 @@
     private bool CanUseVideoSelectionAsTrim => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
     private bool CanCopyVideoSelection => CanUseVideoSelectionAsTrim;
     private bool CanSaveCutSection => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+    private bool CanApplySelectionToLayer => CanSaveCutSection && SelectedVideoLayer is not null;
     private int SelectedVideoLayerIndex => SelectedSegment?.VideoLayers.FindIndex(layer => layer.Id == _selectedVideoLayerId) ?? -1;
     private bool CanMoveVideoLayerUp => SelectedVideoLayerIndex >= 0 && SelectedVideoLayerIndex < (SelectedSegment?.VideoLayers.Count ?? 0) - 1;
     private bool CanMoveVideoLayerDown => SelectedVideoLayerIndex > 0;
@@ -1177,7 +1185,7 @@
         })
         .ToArray();
 
-    private void CommitSelectedSegment()
+    private void CommitSelectedSegment(bool refreshVideoEffects = false)
     {
         var segment = SelectedSegment;
         if (segment is null) return;
@@ -1193,6 +1201,7 @@
             segment.TrimEndSeconds = gapDuration;
             segment.TimelineDurationSeconds = gapDuration;
             segment.HasTemporalSelection = false;
+            segment.TemporalSelectionCommitted = false;
             segment.VideoLayers.Clear();
             return;
         }
@@ -1205,12 +1214,14 @@
         segment.TrimStartSeconds = trim.Start;
         segment.TrimEndSeconds = trim.End;
         segment.HasTemporalSelection = IsVideo;
+        segment.TemporalSelectionCommitted = IsVideo && _videoSelectionUserCommitted;
         segment.TemporalSelectionIsPoint = _videoSelectionIsPoint;
         segment.TemporalSelectionStartSeconds = VideoSelectionStart;
         segment.TemporalSelectionEndSeconds = VideoSelectionEnd;
         if (IsVideo)
             segment.VideoLayers = TimelineEdits.NormalizeVideoLayers(segment.VideoLayers, segment.TrimStartSeconds, segment.EffectiveTrimEndSeconds, segment.Name);
         segment.WaveformSamples = [.. _waveform];
+        if (refreshVideoEffects) QueueVideoEffectsRefresh();
     }
 
     private void SelectSegment(Guid id, bool seek = true, bool forceReload = false)
@@ -1234,6 +1245,7 @@
         _trimStart = segment.TrimStartSeconds;
         _trimEnd = segment.EffectiveTrimEndSeconds;
         var hasSelection = IsVideo && segment.HasTemporalSelection;
+        _videoSelectionUserCommitted = hasSelection && (segment.TemporalSelectionCommitted || SegmentHasExplicitTemporalSelection(segment));
         _videoSelectionIsPoint = hasSelection && segment.TemporalSelectionIsPoint;
         _videoSelectionPointSeconds = hasSelection ? segment.TemporalSelectionStartSeconds : _trimStart;
         _videoSelectionStartSeconds = hasSelection ? segment.TemporalSelectionStartSeconds : _trimStart;
@@ -1259,6 +1271,7 @@
         _videoSelectionPointSeconds = 0;
         _videoSelectionStartSeconds = 0;
         _videoSelectionEndSeconds = 0;
+        _videoSelectionUserCommitted = false;
         _selectedVideoLayerId = null;
         _selectedVideoFilterId = null;
         _selectedCutSectionId = null;
@@ -1281,6 +1294,7 @@
             TrimStartSeconds = _trimStart,
             TrimEndSeconds = _trimEnd,
             HasTemporalSelection = IsVideo,
+            TemporalSelectionCommitted = IsVideo && _videoSelectionUserCommitted,
             TemporalSelectionIsPoint = _videoSelectionIsPoint,
             TemporalSelectionStartSeconds = VideoSelectionStart,
             TemporalSelectionEndSeconds = VideoSelectionEnd,
@@ -1464,6 +1478,8 @@
         var end = VideoSelectionEnd;
         ApplyTrimRange(start, end);
         SetVideoSelectionRange(_trimStart, _trimEnd, pointSelection: false);
+        _videoSelectionUserCommitted = true;
+        CommitSelectedSegment();
         _playhead = SourcePositionToTimeline(_trimStart);
         _warning = $"Trimmed {SelectedClipName} to {Time(_trimStart)} — {Time(_trimEnd)}.";
     }
@@ -1541,51 +1557,27 @@
     }
 
     [JSInvokable]
-    public async Task VideoTimeSelectionCommitted(double startSeconds, double endSeconds, bool pointSelection)
+    public Task VideoTimeSelectionCommitted(double startSeconds, double endSeconds, bool pointSelection, double sourceDurationSeconds)
     {
-        if (!IsVideo || !HasSource) return;
+        if (!IsVideo || !HasSource) return Task.CompletedTask;
         if (_pendingInsertSegment is not null) ClearPendingInsert();
+        ReconcileVideoDuration(sourceDurationSeconds, preserveCurrentSelection: true);
         SetVideoSelectionRange(startSeconds, endSeconds, pointSelection);
+        _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         _playhead = SourcePositionToTimeline(VideoSelectionStart);
-        var module = await EnsureMediaModuleAsync();
-        await module.InvokeVoidAsync("seekMedia", "media-studio-preview", VideoSelectionStart);
-        await InvokeAsync(StateHasChanged);
+        return InvokeAsync(StateHasChanged);
     }
 
     [JSInvokable]
     public async Task VideoSourceDurationResolved(double durationSeconds)
     {
-        if (!IsVideo || SelectedSegment is not { } segment || !double.IsFinite(durationSeconds) || durationSeconds <= .01) return;
-
-        var previousDuration = Math.Max(.01, _duration);
-        var tolerance = Math.Max(.02, durationSeconds / 10_000);
-        if (Math.Abs(durationSeconds - previousDuration) <= tolerance) return;
-
-        var previousTrimStart = _trimStart;
-        var previousTrimEnd = _trimEnd;
-        var selectionWasWholeTrim = !_videoSelectionIsPoint
-            && Math.Abs(VideoSelectionStart - previousTrimStart) <= .02
-            && Math.Abs(VideoSelectionEnd - previousTrimEnd) <= .02;
-        var placeholderDuration = previousDuration <= .05 || segment.DurationSeconds <= .05;
-        var trimReachedOldEnd = Math.Abs(previousTrimEnd - previousDuration) <= .02;
-
-        _duration = durationSeconds;
-        var requestedTrimEnd = placeholderDuration || trimReachedOldEnd
-            ? durationSeconds
-            : Math.Min(previousTrimEnd, durationSeconds);
-        var trim = NormalizeTrimRange(previousTrimStart, requestedTrimEnd, durationSeconds);
-        _trimStart = trim.Start;
-        _trimEnd = trim.End;
-
-        if (selectionWasWholeTrim || placeholderDuration)
-            SetVideoSelectionRange(_trimStart, _trimEnd, pointSelection: false);
-        else
-            SetVideoSelectionRange(VideoSelectionStart, VideoSelectionEnd, _videoSelectionIsPoint);
-
+        if (!IsVideo || SelectedSegment is null) return;
+        var placeholderDuration = _duration <= .05 || SelectedSegment.DurationSeconds <= .05;
+        if (!ReconcileVideoDuration(durationSeconds, preserveCurrentSelection: false)) return;
         CommitSelectedSegment();
         _warning = placeholderDuration
-            ? $"Recovered the browser video duration ({Time(durationSeconds)}) and restored the full selectable range."
+            ? $"Recovered the browser video duration ({Time(durationSeconds)}) without replacing the committed selection."
             : $"Updated the selected clip duration to {Time(durationSeconds)} from browser metadata.";
         await InvokeAsync(StateHasChanged);
     }
@@ -1743,7 +1735,7 @@
         _frameRegionEditing = false;
         _mouseMode = MediaStudioMouseMode.SelectSection;
         CommitFrameRegionToSelectedLayer();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
         _warning = $"Applied the frame region to {SelectedVideoLayer?.Name}.";
         return Task.CompletedTask;
     }
@@ -1760,7 +1752,7 @@
         _frameClipPolygon.Clear();
         CancelFrameRegion();
         CommitFrameRegionToSelectedLayer();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
         _warning = $"Cleared the frame region on {SelectedVideoLayer?.Name}.";
     }
 
@@ -1784,7 +1776,7 @@
         _frameDraft.Clear();
         _frameRegionEditing = false;
         CommitFrameRegionToSelectedLayer();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private static MediaTemporalSection CloneTemporalSection(MediaTemporalSection section) => new()
@@ -1807,6 +1799,7 @@
     private void SaveSelectedRangeAsCutSection()
     {
         if (!CanSaveCutSection || SelectedSegment is not { } segment) return;
+        _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         segment = SelectedSegment!;
         var section = new MediaTemporalSection
@@ -1817,7 +1810,7 @@
         };
         segment.CutSections.Add(section);
         _selectedCutSectionId = section.Id;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
         _warning = $"Saved {section.Name}: {Time(section.StartSeconds)} — {Time(section.EndSeconds)}.";
     }
 
@@ -1831,7 +1824,8 @@
     {
         if (SelectedCutSection is not { } section) return;
         SetVideoSelectionRange(section.StartSeconds, section.EndSeconds, pointSelection: false);
-        CommitSelectedSegment();
+        _videoSelectionUserCommitted = true;
+        CommitSelectedSegment(refreshVideoEffects: true);
         _playhead = SourcePositionToTimeline(VideoSelectionStart);
         _ = SeekVideoSelectionStartAsync();
         _warning = $"Loaded {section.Name} into the current selection.";
@@ -1847,7 +1841,7 @@
         _selectedCutSectionId = segment.CutSections.Count == 0
             ? null
             : segment.CutSections[Math.Clamp(index, 0, segment.CutSections.Count - 1)].Id;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
         _warning = $"Removed {removed}. The current selection was not changed.";
     }
 
@@ -1917,7 +1911,7 @@
         _selectedVideoLayerId = layer.Id;
         _selectedVideoFilterId = null;
         LoadFrameRegionFromSelectedLayer();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
         _warning = $"Added {layer.Name}. Its region and filters are independent from the other layers.";
     }
 
@@ -1936,7 +1930,7 @@
         _selectedVideoLayerId = clone.Id;
         _selectedVideoFilterId = clone.Filters.FirstOrDefault()?.Id;
         LoadFrameRegionFromSelectedLayer();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void MoveVideoLayerUp() => MoveSelectedVideoLayer(1);
@@ -1951,7 +1945,7 @@
         var layer = segment.VideoLayers[index];
         segment.VideoLayers.RemoveAt(index);
         segment.VideoLayers.Insert(target, layer);
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void DeleteVideoLayer()
@@ -1965,7 +1959,7 @@
         _selectedVideoLayerId = next.Id;
         _selectedVideoFilterId = next.Filters.FirstOrDefault()?.Id;
         LoadFrameRegionFromSelectedLayer();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
         _warning = $"Deleted {removed}.";
     }
 
@@ -1974,28 +1968,28 @@
         var layer = SelectedSegment?.VideoLayers.FirstOrDefault(candidate => candidate.Id == id);
         if (layer is null) return;
         layer.Visible = !layer.Visible;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoLayerName(ChangeEventArgs args)
     {
         if (SelectedVideoLayer is not { } layer) return;
         layer.Name = string.IsNullOrWhiteSpace(Text(args)) ? "Video layer" : Text(args).Trim();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoLayerOpacity(ChangeEventArgs args)
     {
         if (SelectedVideoLayer is not { } layer || !TryDouble(args, out var value)) return;
         layer.Opacity = Math.Clamp(value, 0, 1);
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoLayerBlendMode(ChangeEventArgs args)
     {
         if (SelectedVideoLayer is not { } layer || !Enum.TryParse<VideoEffectBlendMode>(Text(args), out var blend)) return;
         layer.BlendMode = blend;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ToggleVideoLayerTemporalRange(ChangeEventArgs args)
@@ -2007,7 +2001,7 @@
             layer.TemporalStartSeconds = _videoSelectionIsPoint ? _trimStart : VideoSelectionStart;
             layer.TemporalEndSeconds = _videoSelectionIsPoint ? _trimEnd : VideoSelectionEnd;
         }
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoLayerTemporalStart(ChangeEventArgs args)
@@ -2015,7 +2009,7 @@
         if (SelectedVideoLayer is not { } layer || !TryDouble(args, out var value)) return;
         layer.TemporalStartSeconds = Math.Clamp(value, _trimStart, Math.Max(_trimStart, layer.TemporalEndSeconds - .01));
         layer.HasTemporalRange = true;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoLayerTemporalEnd(ChangeEventArgs args)
@@ -2023,16 +2017,23 @@
         if (SelectedVideoLayer is not { } layer || !TryDouble(args, out var value)) return;
         layer.TemporalEndSeconds = Math.Clamp(value, Math.Min(_trimEnd, layer.TemporalStartSeconds + .01), _trimEnd);
         layer.HasTemporalRange = true;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
-    private void UseSelectionForVideoLayerTime()
+    private void UseSelectionForVideoLayerTime() => ApplySelectionToSelectedVideoLayer();
+
+    private void ApplySelectionToSelectedVideoLayer()
     {
-        if (SelectedVideoLayer is not { } layer || _videoSelectionIsPoint) return;
+        if (!CanApplySelectionToLayer || _selectedVideoLayerId is not Guid layerId) return;
+        _videoSelectionUserCommitted = true;
+        CommitSelectedSegment();
+        var layer = SelectedSegment?.VideoLayers.FirstOrDefault(candidate => candidate.Id == layerId);
+        if (layer is null) return;
         layer.HasTemporalRange = true;
         layer.TemporalStartSeconds = VideoSelectionStart;
         layer.TemporalEndSeconds = VideoSelectionEnd;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
+        _warning = $"Applied {Time(layer.TemporalStartSeconds)} — {Time(layer.TemporalEndSeconds)} to {layer.Name}.";
     }
 
     private void ChangeNewVideoFilterKind(ChangeEventArgs args)
@@ -2052,7 +2053,7 @@
             if (existing is null) layer.Filters.Add(TimelineEdits.CreateFilter(kind));
         }
         _selectedVideoFilterId = layer.Filters.LastOrDefault()?.Id;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void AddVideoFilter(VideoEffectFilterKind kind)
@@ -2061,7 +2062,7 @@
         var filter = TimelineEdits.CreateFilter(kind);
         layer.Filters.Add(filter);
         _selectedVideoFilterId = filter.Id;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
         _warning = $"Added {filter.Name} to {layer.Name}.";
     }
 
@@ -2075,14 +2076,14 @@
         var filter = SelectedVideoLayer?.Filters.FirstOrDefault(candidate => candidate.Id == id);
         if (filter is null) return;
         filter.Enabled = !filter.Enabled;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoFilterName(ChangeEventArgs args)
     {
         if (SelectedVideoFilter is not { } filter) return;
         filter.Name = string.IsNullOrWhiteSpace(Text(args)) ? VideoFilterKindName(filter.Kind) : Text(args).Trim();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoFilterColor(ChangeEventArgs args)
@@ -2090,7 +2091,7 @@
         if (SelectedVideoFilter is not { } filter) return;
         var value = Text(args).Trim();
         if (value.Length == 7 && value[0] == '#' && value.Skip(1).All(Uri.IsHexDigit)) filter.Color = value.ToLowerInvariant();
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void ChangeVideoFilterAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.Amount = value);
@@ -2102,7 +2103,7 @@
     {
         if (SelectedVideoFilter is not { } filter || !TryDouble(args, out var value)) return;
         assign(filter, value);
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void MoveVideoFilterUp() => MoveSelectedVideoFilter(1);
@@ -2116,7 +2117,7 @@
         var filter = layer.Filters[index];
         layer.Filters.RemoveAt(index);
         layer.Filters.Insert(target, filter);
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private void RemoveSelectedVideoFilter()
@@ -2128,7 +2129,7 @@
         _selectedVideoFilterId = layer.Filters.Count == 0
             ? null
             : layer.Filters[Math.Clamp(index, 0, layer.Filters.Count - 1)].Id;
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     private static string VideoFilterKindName(VideoEffectFilterKind kind) => kind switch
@@ -2177,7 +2178,7 @@
         if (SelectedVideoLayer is not { } layer) return;
         layer.Region ??= new VideoFrameRegion();
         layer.Region.Inverted = Bool(args);
-        CommitSelectedSegment();
+        CommitSelectedSegment(refreshVideoEffects: true);
     }
 
     [JSInvokable]
@@ -2241,7 +2242,12 @@
     private void ResetTrim()
     {
         ApplyTrimRange(0, _duration);
-        if (IsVideo) SetVideoSelectionRange(_trimStart, _trimEnd, pointSelection: false);
+        if (IsVideo)
+        {
+            SetVideoSelectionRange(_trimStart, _trimEnd, pointSelection: false);
+            _videoSelectionUserCommitted = true;
+            CommitSelectedSegment();
+        }
     }
     private void ToggleMutedFromMenu() => _muted = !_muted;
     private void ToggleLoopFromMenu() => _loop = !_loop;
@@ -2804,15 +2810,29 @@
 
     private async Task PlaySelection()
     {
-        var module = await EnsureMediaModuleAsync();
-        var start = IsVideo ? VideoSelectionStart : _trimStart;
-        var end = IsVideo && !_videoSelectionIsPoint ? VideoSelectionEnd : _trimEnd;
-        await module.InvokeVoidAsync("playMediaRange", "media-studio-preview", start, end, _volume, _playbackRate, _muted, _loop);
+        try
+        {
+            var module = await EnsureMediaModuleAsync();
+            var start = IsVideo ? VideoSelectionStart : _trimStart;
+            var end = IsVideo && !_videoSelectionIsPoint ? VideoSelectionEnd : _trimEnd;
+            await module.InvokeAsync<bool>("playMediaRange", "media-studio-preview", start, end, _volume, _playbackRate, _muted, _loop);
+            _error = null;
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException) { }
+        catch (JSException ex) when (IsInterruptedPlaybackException(ex)) { }
+        catch (JSException ex)
+        {
+            _error = $"Video playback could not start: {ex.Message}";
+        }
     }
     private async Task PausePreview()
     {
-        var module = await EnsureMediaModuleAsync();
-        await module.InvokeVoidAsync("pauseMedia", "media-studio-preview");
+        try
+        {
+            var module = await EnsureMediaModuleAsync();
+            await module.InvokeAsync<bool>("pauseMedia", "media-studio-preview");
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException) { }
     }
     private async Task SeekStart()
     {
@@ -2858,6 +2878,71 @@
         var minimumEnd = Math.Min(safeDuration, safeStart + minimumSpan);
         var safeEnd = Math.Clamp(requestedEnd, minimumEnd, safeDuration);
         return (safeStart, safeEnd);
+    }
+
+    private static bool SegmentHasExplicitTemporalSelection(PublicationMediaSegment segment)
+    {
+        if (!segment.HasTemporalSelection) return false;
+        if (segment.TemporalSelectionIsPoint) return true;
+        return Math.Abs(segment.TemporalSelectionStartSeconds - segment.TrimStartSeconds) > .02
+            || Math.Abs(segment.TemporalSelectionEndSeconds - segment.EffectiveTrimEndSeconds) > .02;
+    }
+
+    private bool ReconcileVideoDuration(double durationSeconds, bool preserveCurrentSelection)
+    {
+        if (!IsVideo || SelectedSegment is null || !double.IsFinite(durationSeconds) || durationSeconds <= .01) return false;
+        var previousDuration = Math.Max(.01, _duration);
+        var tolerance = Math.Max(.02, durationSeconds / 10_000);
+        if (Math.Abs(durationSeconds - previousDuration) <= tolerance) return false;
+
+        var previousTrimStart = _trimStart;
+        var previousTrimEnd = _trimEnd;
+        var previousSelectionStart = VideoSelectionStart;
+        var previousSelectionEnd = VideoSelectionEnd;
+        var previousSelectionPoint = _videoSelectionIsPoint;
+        var selectionWasWholeTrim = !previousSelectionPoint
+            && Math.Abs(previousSelectionStart - previousTrimStart) <= .02
+            && Math.Abs(previousSelectionEnd - previousTrimEnd) <= .02;
+        var placeholderDuration = previousDuration <= .05 || SelectedSegment.DurationSeconds <= .05;
+        var trimReachedOldEnd = Math.Abs(previousTrimEnd - previousDuration) <= .02;
+
+        _duration = durationSeconds;
+        var requestedTrimEnd = placeholderDuration || trimReachedOldEnd
+            ? durationSeconds
+            : Math.Min(previousTrimEnd, durationSeconds);
+        var trim = NormalizeTrimRange(previousTrimStart, requestedTrimEnd, durationSeconds);
+        _trimStart = trim.Start;
+        _trimEnd = trim.End;
+
+        var preserve = preserveCurrentSelection || _videoSelectionUserCommitted;
+        if (!preserve && (selectionWasWholeTrim || placeholderDuration))
+            SetVideoSelectionRange(_trimStart, _trimEnd, pointSelection: false);
+        else
+            SetVideoSelectionRange(previousSelectionStart, previousSelectionEnd, previousSelectionPoint);
+        return true;
+    }
+
+    private static bool IsInterruptedPlaybackException(JSException exception)
+    {
+        var message = exception.Message ?? string.Empty;
+        return message.Contains("play() request was interrupted", StringComparison.OrdinalIgnoreCase)
+            || message.Contains("interrupted by a call to pause", StringComparison.OrdinalIgnoreCase)
+            || message.Contains("AbortError", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void QueueVideoEffectsRefresh()
+    {
+        if (!IsVideo || _disposed) return;
+        _ = InvokeAsync(async () =>
+        {
+            try
+            {
+                StateHasChanged();
+                await Task.Yield();
+                if (HasSource) await SyncVideoEffectsAsync();
+            }
+            catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException) { }
+        });
     }
 
     private void SetVideoSelectionRange(double start, double end, bool pointSelection)
@@ -2916,6 +3001,7 @@
             }
             SetVideoSelectionRange(start, end, pointSelection: false);
         }
+        _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         await SeekVideoSelectionStartAsync();
     }
@@ -2924,6 +3010,7 @@
     {
         if (!TryDouble(args, out var value)) return;
         SetVideoSelectionRange(value, _videoSelectionIsPoint ? value : VideoSelectionEnd, _videoSelectionIsPoint);
+        _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         await SeekVideoSelectionStartAsync();
     }
@@ -2932,6 +3019,7 @@
     {
         if (!TryDouble(args, out var value) || _videoSelectionIsPoint) return;
         SetVideoSelectionRange(VideoSelectionStart, value, pointSelection: false);
+        _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         await SeekVideoSelectionStartAsync();
     }

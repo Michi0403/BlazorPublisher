@@ -1,0 +1,63 @@
+PublisherStudio v1.0.76 validation results
+
+Scope
+-----
+VideoStudio temporal-selection persistence, selected-layer timing, live video-filter refresh, browser-local transport controls, and interruption-safe C# <-> JavaScript playback.
+
+Automated regression suite
+--------------------------
+Command:
+  cd src/PublisherStudio.Web && npm test
+
+Result:
+- All 24 npm/Node regression suites passed.
+- Existing timeline, component, signal, pointer, map, font, zoom, streaming,
+  interface, installer, persistence, usability, architecture, C# ownership,
+  compilation-safety, interchange, media-gesture, Studio-overlay,
+  component-drop, temporal-overlay, video-layer, project-import, and
+  structured-site contracts remain green.
+- New videoInteractionPersistence.test.mjs passed.
+
+Executable playback cancellation test
+-------------------------------------
+- A fake HTMLMediaElement starts a pending play() request.
+- pauseMedia() interrupts it with an AbortError carrying the browser message
+  "The play() request was interrupted by a call to pause()."
+- playMediaRange() resolves false instead of rejecting.
+- This verifies the expected cancellation cannot escape into JSInterop or
+  Blazor Server RemoteRenderer.
+
+Static and format validation
+----------------------------
+- 36 non-vendor JavaScript/test/tool modules passed `node --check`.
+- package.json and package-lock.json parse as JSON.
+- All project files parse as XML.
+- Application, installer, npm, lock-file, streaming runtime, and structured
+  export manifest versions align at 1.0.76.
+- Publication default/write/import format aligns at 1.53.
+- Picture Studio format remains 1.4.
+- npm dependency and devDependency sets exactly match v1.0.75.
+- The VideoStudio layer payload contains no duplicate inferred anonymous
+  property for Opacity.
+- Existing Razor control-flow safety tests pass.
+
+Patch validation
+----------------
+- The final Git-compatible v1.0.76 patch applies cleanly to an untouched
+  v1.0.75 source tree.
+- A replayed patch tree matches the v1.0.76 work tree byte-for-byte when Git
+  metadata is excluded.
+
+Archive validation
+------------------
+- BlazorPublisher_v1.0.76_video-interaction-persistence.zip passes ZIP CRC.
+- A clean extraction matches the packaged v1.0.76 work tree byte-for-byte.
+- SHA-256 and SHA-512 checksum files are supplied beside the archive.
+
+Unavailable validation
+----------------------
+A real .NET/Razor/DevExpress compilation was not run in this environment
+because the dotnet SDK and licensed DevExpress restore feed are unavailable.
+The prior reported RZ1010 is retained as fixed, and this release additionally
+removes a duplicate anonymous payload property that would otherwise be a C#
+compile error after Razor compilation progressed farther.

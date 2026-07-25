@@ -1,0 +1,31 @@
+PublisherStudio v1.0.76 source changes
+
+src/PublisherStudio.Web/Components/Editor/MediaStudio.razor
+- Persists user-owned video selections and reconciles real browser duration before commit.
+- Adds explicit selection-to-layer commands and clarifies cut-section naming.
+- Refreshes live video effects after layer, region, and filter mutations.
+- Makes playback interop interruption-safe and removes a duplicate anonymous payload property.
+- Adds browser-local play-canvas transport metadata and commands.
+
+src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js
+- Commits pointer-up, pointer-cancel, and lost-pointer-capture selection state.
+- Repairs placeholder duration locally before mapping/committing a gesture.
+- Adds cancellable command versions for play/pause/seek/scrub and absorbs expected AbortError races.
+- Adds direct play-canvas transport handlers for Blazor Server-safe playback.
+
+src/PublisherStudio.Web/Domain/PublicationMediaModels.cs
+src/PublisherStudio.Web/Services/MediaStudio/UseCases/MediaTimelineEditService.cs
+- Adds, clones, normalizes, and migrates TemporalSelectionCommitted.
+
+src/PublisherStudio.Web/Domain/PublicationModels.cs
+src/PublisherStudio.Web/Services/PublicationFileService.cs
+src/PublisherStudio.Web/Services/Publication/Import/OpenDocumentImportService.cs
+- Advances publication format to 1.53.
+
+Versioned runtime/project files
+- Advances application, installer, npm/lock, streaming capability, and structured-export manifest versions to 1.0.76.
+
+Tests
+- Adds videoInteractionPersistence.test.mjs, including an executable fake-media AbortError test.
+- Advances current release and publication-format expectations.
+- Keeps all previous regression suites enabled.

@@ -144,6 +144,7 @@ public sealed class PublicationMediaSegment
     public double TrimStartSeconds { get; set; }
     public double TrimEndSeconds { get; set; }
     public bool HasTemporalSelection { get; set; }
+    public bool TemporalSelectionCommitted { get; set; }
     public bool TemporalSelectionIsPoint { get; set; }
     public double TemporalSelectionStartSeconds { get; set; }
     public double TemporalSelectionEndSeconds { get; set; }

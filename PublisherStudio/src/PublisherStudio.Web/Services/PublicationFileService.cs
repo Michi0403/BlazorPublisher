@@ -480,7 +480,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.52";
+        document.FormatVersion = "1.53";
         return document;
     }
 

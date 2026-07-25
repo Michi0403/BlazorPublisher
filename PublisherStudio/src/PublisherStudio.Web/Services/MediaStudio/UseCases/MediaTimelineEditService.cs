@@ -33,6 +33,7 @@ public sealed class MediaTimelineEditService
                 TrimStartSeconds = Math.Max(0, segment.TrimStartSeconds),
                 TrimEndSeconds = Math.Max(0, segment.TrimEndSeconds),
                 HasTemporalSelection = segment.HasTemporalSelection,
+                TemporalSelectionCommitted = segment.TemporalSelectionCommitted,
                 TemporalSelectionIsPoint = segment.TemporalSelectionIsPoint,
                 TemporalSelectionStartSeconds = Math.Max(0, segment.TemporalSelectionStartSeconds),
                 TemporalSelectionEndSeconds = Math.Max(0, segment.TemporalSelectionEndSeconds),
@@ -351,6 +352,7 @@ public sealed class MediaTimelineEditService
         TrimStartSeconds = segment.TrimStartSeconds,
         TrimEndSeconds = segment.TrimEndSeconds,
         HasTemporalSelection = segment.HasTemporalSelection,
+        TemporalSelectionCommitted = segment.TemporalSelectionCommitted,
         TemporalSelectionIsPoint = segment.TemporalSelectionIsPoint,
         TemporalSelectionStartSeconds = segment.TemporalSelectionStartSeconds,
         TemporalSelectionEndSeconds = segment.TemporalSelectionEndSeconds,
@@ -651,6 +653,7 @@ public sealed class MediaTimelineEditService
         var maximum = segment.EffectiveTrimEndSeconds;
         if (!segment.HasTemporalSelection)
         {
+            segment.TemporalSelectionCommitted = false;
             segment.TemporalSelectionIsPoint = false;
             segment.TemporalSelectionStartSeconds = minimum;
             segment.TemporalSelectionEndSeconds = maximum;
@@ -660,6 +663,15 @@ public sealed class MediaTimelineEditService
         var start = double.IsFinite(segment.TemporalSelectionStartSeconds)
             ? Math.Clamp(segment.TemporalSelectionStartSeconds, minimum, maximum)
             : minimum;
+        if (!segment.TemporalSelectionCommitted)
+        {
+            var end = double.IsFinite(segment.TemporalSelectionEndSeconds)
+                ? Math.Clamp(segment.TemporalSelectionEndSeconds, start, maximum)
+                : maximum;
+            segment.TemporalSelectionCommitted = segment.TemporalSelectionIsPoint
+                || Math.Abs(start - minimum) > .02
+                || Math.Abs(end - maximum) > .02;
+        }
         if (segment.TemporalSelectionIsPoint || maximum - minimum < MinimumSourceLength)
         {
             segment.TemporalSelectionIsPoint = true;

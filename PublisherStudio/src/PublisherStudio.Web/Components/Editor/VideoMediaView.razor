@@ -1,0 +1,104 @@
+@namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject PublicationMediaAssetStore MediaAssets
+
+<div class="publication-video-renderer" style="background:@Item.Background">
+    <video id="@VideoId"
+           class="publication-video-source"
+           src="@MediaAssets.GetOrRegister(Item)"
+           poster="@Poster"
+           controls="@Item.ShowControls"
+           muted="@Item.Muted"
+           loop="@Item.Loop"
+           preload="metadata"
+           playsinline
+           data-media-control
+           draggable="false"
+           style="object-fit:@FitMode">
+        @foreach (var segment in Item.EffectiveSegments)
+        {
+            <source data-media-segment
+                    src="@MediaAssets.GetOrRegister(segment)"
+                    type="@segment.MimeType"
+                    data-media-name="@segment.Name"
+                    data-media-trim-start="@Inv(segment.TrimStartSeconds)"
+                    data-media-trim-end="@Inv(segment.EffectiveTrimEndSeconds)"
+                    data-media-poster="@segment.PosterDataUrl" />
+        }
+    </video>
+    <canvas id="@CanvasId" class="publication-video-effect-canvas" aria-hidden="true"></canvas>
+    <span class="media-object-badge">▶ @Time(Item.TimelineLengthSeconds)</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public VideoElement Item { get; set; } = default!;
+
+    private string RuntimeKey => $"publication-video-{Item.Id:N}";
+    private string VideoId => $"publication-video-source-{Item.Id:N}";
+    private string CanvasId => $"publication-video-effects-{Item.Id:N}";
+    private string Poster => Item.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster ? poster : Item.PosterDataUrl;
+    private string FitMode => Item.FitMode switch
+    {
+        PublicationVideoFitMode.Contain => "contain",
+        PublicationVideoFitMode.Stretch => "fill",
+        _ => "cover"
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var segment = Item.EffectiveSegments.FirstOrDefault();
+        if (segment is null) return;
+        try
+        {
+            await JS.InvokeVoidAsync("publisherVideoEffects.installById", RuntimeKey, VideoId, CanvasId, new
+            {
+                fitMode = FitMode,
+                forceCanvas = segment.VideoLayers.Any(LayerNeedsCanvas),
+                layers = segment.VideoLayers.Select(LayerPayload).ToArray()
+            });
+        }
+        catch { }
+    }
+
+    private static bool LayerNeedsCanvas(VideoEffectLayer layer) =>
+        !layer.Visible || layer.Opacity < .999 || layer.BlendMode != VideoEffectBlendMode.Normal ||
+        layer.HasTemporalRange || layer.Region.Points.Count >= 3 || layer.Filters.Any(filter => filter.Enabled);
+
+    private static object LayerPayload(VideoEffectLayer layer) => new
+    {
+        id = layer.Id.ToString("D"),
+        layer.Name,
+        layer.Visible,
+        layer.Opacity,
+        blendMode = layer.BlendMode.ToString(),
+        layer.HasTemporalRange,
+        layer.TemporalStartSeconds,
+        layer.TemporalEndSeconds,
+        region = new
+        {
+            layer.Region.Inverted,
+            points = layer.Region.Points.Select(point => new { point.X, point.Y }).ToArray()
+        },
+        filters = layer.Filters.Select(filter => new
+        {
+            id = filter.Id.ToString("D"),
+            kind = filter.Kind.ToString(),
+            filter.Enabled,
+            filter.Amount,
+            filter.SecondaryAmount,
+            filter.TertiaryAmount,
+            filter.ResidualOpacity,
+            filter.Color
+        }).ToArray()
+    };
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("publisherVideoEffects.dispose", RuntimeKey); }
+        catch { }
+    }
+
+    private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+    private static string Inv(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+}

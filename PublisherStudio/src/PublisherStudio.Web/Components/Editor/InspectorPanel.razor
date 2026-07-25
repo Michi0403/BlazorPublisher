@@ -4,6 +4,7 @@
 @inject IJSRuntime JS
 @inject StreamingProfileStore StreamingProfiles
 @inject PublicationMediaAssetStore MediaAssets
+@inject PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService TimelineEdits
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
@@ -479,6 +480,107 @@
                             @RangeField("Spill reduction", liveSource.ChromaSpill, 0, 1, .01, "liveChromaSpill")
                             @RangeField("Keyed residual opacity", liveSource.ChromaResidualOpacity, 0, 1, .01, "liveChromaResidual")
                         }
+
+                        @{
+                            var authoredLiveLayers = LiveEffectLayers(liveSource);
+                            var selectedLiveLayer = SelectedLiveEffectLayer(liveSource);
+                            var selectedLiveFilter = SelectedLiveEffectFilter(liveSource);
+                        }
+                        <div class="live-video-effect-editor">
+                            <h4>Layered streaming effects</h4>
+                            <p class="property-note">These authored layers render live on camera, screen, window, browser-tab, capture-device, and network-video inputs. The compatibility controls above remain in their own protected layer.</p>
+                            <div class="media-video-layer-stack compact">
+                                @foreach (var layer in authoredLiveLayers)
+                                {
+                                    <div class="media-video-layer-row @(selectedLiveLayer?.Id == layer.Id ? "selected" : null)">
+                                        <button type="button" class="media-video-layer-select" @onclick="() => SelectLiveEffectLayer(layer.Id)">
+                                            <span>@layer.Name</span>
+                                            <small>@layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s") · @Math.Round(layer.Opacity * 100)%</small>
+                                        </button>
+                                        <button type="button" class="media-video-layer-visibility" title="Toggle live layer visibility" @onclick="() => ToggleLiveEffectLayer(layer.Id)">@(layer.Visible ? "●" : "○")</button>
+                                    </div>
+                                }
+                                @if (authoredLiveLayers.Count == 0)
+                                {
+                                    <p class="property-note">No authored streaming-effect layer yet.</p>
+                                }
+                            </div>
+                            <div class="property-button-row">
+                                <DxButton Text="Add layer" Click="AddLiveEffectLayer" />
+                                <DxButton Text="Duplicate" Enabled="@(selectedLiveLayer is not null)" Click="DuplicateLiveEffectLayer" />
+                                <DxButton Text="Up" Enabled="@(CanMoveLiveEffectLayer(liveSource, 1))" Click="MoveLiveEffectLayerUp" />
+                                <DxButton Text="Down" Enabled="@(CanMoveLiveEffectLayer(liveSource, -1))" Click="MoveLiveEffectLayerDown" />
+                                <DxButton Text="Remove" Enabled="@(selectedLiveLayer is not null)" Click="RemoveLiveEffectLayer" />
+                            </div>
+                            @if (selectedLiveLayer is not null)
+                            {
+                                <label>Layer name<input value="@selectedLiveLayer.Name" @onchange="ChangeLiveEffectLayerName" /></label>
+                                <label>Layer opacity <b>@Math.Round(selectedLiveLayer.Opacity * 100)%</b>
+                                    <input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveLayer.Opacity)" @onchange="ChangeLiveEffectLayerOpacity" />
+                                </label>
+                                <label>Blend mode
+                                    <select value="@selectedLiveLayer.BlendMode" @onchange="ChangeLiveEffectLayerBlendMode">
+                                        @foreach (var blend in Enum.GetValues<VideoEffectBlendMode>())
+                                        {
+                                            <option value="@blend">@blend</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div class="property-inline-actions">
+                                    <select value="@_newLiveFilterKind" @onchange="ChangeNewLiveFilterKind">
+                                        @foreach (var kind in Enum.GetValues<VideoEffectFilterKind>())
+                                        {
+                                            <option value="@kind">@LiveFilterKindName(kind)</option>
+                                        }
+                                    </select>
+                                    <DxButton Text="Add filter" Click="AddLiveEffectFilter" />
+                                </div>
+                                <div class="media-video-filter-stack compact">
+                                    @foreach (var filter in selectedLiveLayer.Filters)
+                                    {
+                                        <div class="media-video-filter-row @(selectedLiveFilter?.Id == filter.Id ? "selected" : null)">
+                                            <button type="button" @onclick="() => SelectLiveEffectFilter(filter.Id)"><span>@filter.Name</span><small>@LiveFilterSummary(filter)</small></button>
+                                            <button type="button" title="Enable or disable live filter" @onclick="() => ToggleLiveEffectFilter(filter.Id)">@(filter.Enabled ? "●" : "○")</button>
+                                        </div>
+                                    }
+                                    @if (selectedLiveLayer.Filters.Count == 0)
+                                    {
+                                        <p class="property-note">This layer has no filters.</p>
+                                    }
+                                </div>
+                                @if (selectedLiveFilter is not null)
+                                {
+                                    <label>Filter name<input value="@selectedLiveFilter.Name" @onchange="ChangeLiveEffectFilterName" /></label>
+                                    @if (selectedLiveFilter.Kind == VideoEffectFilterKind.ChromaKey)
+                                    {
+                                        <label>Key color<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
+                                        <label>Similarity<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.Amount)" @onchange="ChangeLiveEffectFilterAmount" /></label>
+                                        <label>Smoothness<input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedLiveFilter.SecondaryAmount)" @onchange="ChangeLiveEffectFilterSecondaryAmount" /></label>
+                                        <label>Spill reduction<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.TertiaryAmount)" @onchange="ChangeLiveEffectFilterTertiaryAmount" /></label>
+                                        <label>Residual opacity<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.ResidualOpacity)" @onchange="ChangeLiveEffectFilterResidualOpacity" /></label>
+                                    }
+                                    else
+                                    {
+                                        <label>@LiveFilterAmountLabel(selectedLiveFilter.Kind)
+                                            <input type="range" min="@Inv(LiveFilterMinimum(selectedLiveFilter.Kind))" max="@Inv(LiveFilterMaximum(selectedLiveFilter.Kind))" step="@Inv(LiveFilterStep(selectedLiveFilter.Kind))" value="@Inv(selectedLiveFilter.Amount)" @onchange="ChangeLiveEffectFilterAmount" />
+                                        </label>
+                                        @if (selectedLiveFilter.Kind == VideoEffectFilterKind.Vignette)
+                                        {
+                                            <label>Softness<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.SecondaryAmount)" @onchange="ChangeLiveEffectFilterSecondaryAmount" /></label>
+                                        }
+                                        @if (selectedLiveFilter.Kind == VideoEffectFilterKind.ColorWash)
+                                        {
+                                            <label>Wash color<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
+                                        }
+                                    }
+                                    <div class="property-button-row">
+                                        <DxButton Text="Filter up" Enabled="@(CanMoveLiveEffectFilter(liveSource, 1))" Click="MoveLiveEffectFilterUp" />
+                                        <DxButton Text="Filter down" Enabled="@(CanMoveLiveEffectFilter(liveSource, -1))" Click="MoveLiveEffectFilterDown" />
+                                        <DxButton Text="Remove filter" Click="RemoveLiveEffectFilter" />
+                                    </div>
+                                }
+                            }
+                        </div>
                     }
                     @RangeField("Volume", liveSource.Volume, 0, 1, .01, "liveVolume")
                     <label>Audio delay (ms)<input type="number" min="-10000" max="10000" step="1" value="@Inv(liveSource.AudioDelayMilliseconds)" @onchange="ChangeLiveAudioDelay" /></label>
@@ -840,6 +942,9 @@
     private List<StreamingDeviceProfile> _streamingDeviceProfiles = [];
     private bool _streamingProfilesLoaded;
     private IJSObjectReference? _mediaModule;
+    private Guid? _selectedLiveEffectLayerId;
+    private Guid? _selectedLiveEffectFilterId;
+    private VideoEffectFilterKind _newLiveFilterKind = VideoEffectFilterKind.Grayscale;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -1011,7 +1116,12 @@
 
     private void UpdateLiveSource(Action<LiveSourceElement> update)
     {
-        if (State.SelectedElement is LiveSourceElement source) State.UpdateLiveSource(source.Id, update);
+        if (State.SelectedElement is not LiveSourceElement source) return;
+        State.UpdateLiveSource(source.Id, item =>
+        {
+            update(item);
+            TimelineEdits.SynchronizeLiveSourceLayer(item);
+        });
     }
     private void ChangeLiveSourceKind(ChangeEventArgs args)
     {
@@ -1035,6 +1145,288 @@
     private void ToggleLiveMuted(ChangeEventArgs _) => UpdateLiveSource(source => source.Muted = !source.Muted);
     private void ToggleLiveDeviceTimestamp(ChangeEventArgs _) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.UseDeviceTimestamp = !source.UseDeviceTimestamp; });
     private void ToggleLiveChroma(ChangeEventArgs _) => UpdateLiveSource(source => source.ChromaKeyEnabled = !source.ChromaKeyEnabled);
+
+    private static List<VideoEffectLayer> LiveEffectLayers(LiveSourceElement source) => (source.VideoLayers ?? [])
+        .Where(layer => !string.Equals(layer.Name, "Live input controls", StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private VideoEffectLayer? SelectedLiveEffectLayer(LiveSourceElement source)
+    {
+        var layers = LiveEffectLayers(source);
+        return layers.FirstOrDefault(layer => layer.Id == _selectedLiveEffectLayerId) ?? layers.FirstOrDefault();
+    }
+
+    private VideoEffectFilter? SelectedLiveEffectFilter(LiveSourceElement source)
+    {
+        var layer = SelectedLiveEffectLayer(source);
+        return layer?.Filters.FirstOrDefault(filter => filter.Id == _selectedLiveEffectFilterId)
+            ?? layer?.Filters.FirstOrDefault();
+    }
+
+    private void SelectLiveEffectLayer(Guid id)
+    {
+        if (State.SelectedElement is not LiveSourceElement source || LiveEffectLayers(source).All(layer => layer.Id != id)) return;
+        _selectedLiveEffectLayerId = id;
+        _selectedLiveEffectFilterId = SelectedLiveEffectLayer(source)?.Filters.FirstOrDefault()?.Id;
+    }
+
+    private void AddLiveEffectLayer()
+    {
+        UpdateLiveSource(source =>
+        {
+            var layer = TimelineEdits.CreateDefaultVideoLayer();
+            layer.Name = $"Live effect layer {LiveEffectLayers(source).Count + 1}";
+            source.VideoLayers ??= [];
+            source.VideoLayers.Add(layer);
+            _selectedLiveEffectLayerId = layer.Id;
+            _selectedLiveEffectFilterId = null;
+        });
+    }
+
+    private void DuplicateLiveEffectLayer()
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selected) return;
+        var selectedId = selected.Id;
+        UpdateLiveSource(item =>
+        {
+            var layers = LiveEffectLayers(item);
+            var original = layers.FirstOrDefault(layer => layer.Id == selectedId);
+            if (original is null) return;
+            var clone = TimelineEdits.CloneVideoLayer(original);
+            clone.Id = Guid.NewGuid();
+            clone.Region.Id = Guid.NewGuid();
+            clone.Name = $"{original.Name} copy";
+            foreach (var filter in clone.Filters) filter.Id = Guid.NewGuid();
+            var sourceIndex = item.VideoLayers.FindIndex(layer => layer.Id == original.Id);
+            item.VideoLayers.Insert(Math.Max(0, sourceIndex) + 1, clone);
+            _selectedLiveEffectLayerId = clone.Id;
+            _selectedLiveEffectFilterId = clone.Filters.FirstOrDefault()?.Id;
+        });
+    }
+
+    private bool CanMoveLiveEffectLayer(LiveSourceElement source, int offset)
+    {
+        var layers = LiveEffectLayers(source);
+        var selected = SelectedLiveEffectLayer(source);
+        var index = selected is null ? -1 : layers.FindIndex(layer => layer.Id == selected.Id);
+        var target = index - offset;
+        return index >= 0 && target >= 0 && target < layers.Count;
+    }
+
+    private void MoveLiveEffectLayerUp() => MoveLiveEffectLayer(1);
+    private void MoveLiveEffectLayerDown() => MoveLiveEffectLayer(-1);
+    private void MoveLiveEffectLayer(int offset)
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selected) return;
+        var selectedId = selected.Id;
+        UpdateLiveSource(item =>
+        {
+            var authored = LiveEffectLayers(item);
+            var index = authored.FindIndex(layer => layer.Id == selectedId);
+            var target = index - offset;
+            if (index < 0 || target < 0 || target >= authored.Count) return;
+            var targetId = authored[target].Id;
+            var sourceIndex = item.VideoLayers.FindIndex(layer => layer.Id == selectedId);
+            var targetIndex = item.VideoLayers.FindIndex(layer => layer.Id == targetId);
+            if (sourceIndex < 0 || targetIndex < 0) return;
+            (item.VideoLayers[sourceIndex], item.VideoLayers[targetIndex]) = (item.VideoLayers[targetIndex], item.VideoLayers[sourceIndex]);
+        });
+    }
+
+    private void RemoveLiveEffectLayer()
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selected) return;
+        var selectedId = selected.Id;
+        UpdateLiveSource(item => item.VideoLayers.RemoveAll(layer => layer.Id == selectedId));
+        if (State.SelectedElement is LiveSourceElement updated)
+        {
+            var next = LiveEffectLayers(updated).FirstOrDefault();
+            _selectedLiveEffectLayerId = next?.Id;
+            _selectedLiveEffectFilterId = next?.Filters.FirstOrDefault()?.Id;
+        }
+    }
+
+    private void ToggleLiveEffectLayer(Guid id) => UpdateLiveSource(source =>
+    {
+        var layer = LiveEffectLayers(source).FirstOrDefault(candidate => candidate.Id == id);
+        if (layer is not null) layer.Visible = !layer.Visible;
+    });
+
+    private void ChangeLiveEffectLayerName(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString()?.Trim();
+        UpdateSelectedLiveEffectLayer(layer => layer.Name = string.IsNullOrWhiteSpace(value) ? "Live effect layer" : value);
+    }
+
+    private void ChangeLiveEffectLayerOpacity(ChangeEventArgs args)
+    {
+        if (TryDouble(args, out var value)) UpdateSelectedLiveEffectLayer(layer => layer.Opacity = value);
+    }
+
+    private void ChangeLiveEffectLayerBlendMode(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<VideoEffectBlendMode>(args.Value?.ToString(), out var value)) UpdateSelectedLiveEffectLayer(layer => layer.BlendMode = value);
+    }
+
+    private void UpdateSelectedLiveEffectLayer(Action<VideoEffectLayer> update)
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selected) return;
+        var selectedId = selected.Id;
+        UpdateLiveSource(item =>
+        {
+            var layer = LiveEffectLayers(item).FirstOrDefault(candidate => candidate.Id == selectedId);
+            if (layer is not null) update(layer);
+        });
+    }
+
+    private void ChangeNewLiveFilterKind(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<VideoEffectFilterKind>(args.Value?.ToString(), out var kind)) _newLiveFilterKind = kind;
+    }
+
+    private void AddLiveEffectFilter()
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selected) return;
+        var selectedId = selected.Id;
+        UpdateLiveSource(item =>
+        {
+            var layer = LiveEffectLayers(item).FirstOrDefault(candidate => candidate.Id == selectedId);
+            if (layer is null) return;
+            var filter = TimelineEdits.CreateFilter(_newLiveFilterKind);
+            layer.Filters.Add(filter);
+            _selectedLiveEffectFilterId = filter.Id;
+        });
+    }
+
+    private void SelectLiveEffectFilter(Guid id)
+    {
+        if (State.SelectedElement is LiveSourceElement source && SelectedLiveEffectLayer(source)?.Filters.Any(filter => filter.Id == id) == true)
+            _selectedLiveEffectFilterId = id;
+    }
+
+    private void ToggleLiveEffectFilter(Guid id) => UpdateSelectedLiveEffectFilter(id, filter => filter.Enabled = !filter.Enabled);
+
+    private void ChangeLiveEffectFilterName(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString()?.Trim();
+        UpdateSelectedLiveEffectFilter(filter => filter.Name = string.IsNullOrWhiteSpace(value) ? LiveFilterKindName(filter.Kind) : value);
+    }
+
+    private void ChangeLiveEffectFilterColor(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString() ?? string.Empty;
+        UpdateSelectedLiveEffectFilter(filter => filter.Color = value);
+    }
+
+    private void ChangeLiveEffectFilterAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.Amount = value);
+    private void ChangeLiveEffectFilterSecondaryAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.SecondaryAmount = value);
+    private void ChangeLiveEffectFilterTertiaryAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.TertiaryAmount = value);
+    private void ChangeLiveEffectFilterResidualOpacity(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.ResidualOpacity = value);
+
+    private void ChangeLiveEffectFilterNumber(ChangeEventArgs args, Action<VideoEffectFilter, double> update)
+    {
+        if (TryDouble(args, out var value)) UpdateSelectedLiveEffectFilter(filter => update(filter, value));
+    }
+
+    private void UpdateSelectedLiveEffectFilter(Action<VideoEffectFilter> update)
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectFilter(source) is not { } selected) return;
+        UpdateSelectedLiveEffectFilter(selected.Id, update);
+    }
+
+    private void UpdateSelectedLiveEffectFilter(Guid filterId, Action<VideoEffectFilter> update)
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selectedLayer) return;
+        var layerId = selectedLayer.Id;
+        UpdateLiveSource(item =>
+        {
+            var filter = LiveEffectLayers(item).FirstOrDefault(layer => layer.Id == layerId)?.Filters.FirstOrDefault(candidate => candidate.Id == filterId);
+            if (filter is not null) update(filter);
+        });
+    }
+
+    private bool CanMoveLiveEffectFilter(LiveSourceElement source, int offset)
+    {
+        var layer = SelectedLiveEffectLayer(source);
+        var selected = SelectedLiveEffectFilter(source);
+        var index = layer is null || selected is null ? -1 : layer.Filters.FindIndex(filter => filter.Id == selected.Id);
+        var target = index - offset;
+        return index >= 0 && target >= 0 && target < (layer?.Filters.Count ?? 0);
+    }
+
+    private void MoveLiveEffectFilterUp() => MoveLiveEffectFilter(1);
+    private void MoveLiveEffectFilterDown() => MoveLiveEffectFilter(-1);
+    private void MoveLiveEffectFilter(int offset)
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selectedLayer || SelectedLiveEffectFilter(source) is not { } selectedFilter) return;
+        var layerId = selectedLayer.Id;
+        var filterId = selectedFilter.Id;
+        UpdateLiveSource(item =>
+        {
+            var layer = LiveEffectLayers(item).FirstOrDefault(candidate => candidate.Id == layerId);
+            if (layer is null) return;
+            var index = layer.Filters.FindIndex(filter => filter.Id == filterId);
+            var target = index - offset;
+            if (index < 0 || target < 0 || target >= layer.Filters.Count) return;
+            (layer.Filters[index], layer.Filters[target]) = (layer.Filters[target], layer.Filters[index]);
+        });
+    }
+
+    private void RemoveLiveEffectFilter()
+    {
+        if (State.SelectedElement is not LiveSourceElement source || SelectedLiveEffectLayer(source) is not { } selectedLayer || SelectedLiveEffectFilter(source) is not { } selectedFilter) return;
+        var layerId = selectedLayer.Id;
+        var filterId = selectedFilter.Id;
+        UpdateLiveSource(item =>
+        {
+            var layer = LiveEffectLayers(item).FirstOrDefault(candidate => candidate.Id == layerId);
+            if (layer is null) return;
+            var index = layer.Filters.FindIndex(filter => filter.Id == filterId);
+            if (index < 0) return;
+            layer.Filters.RemoveAt(index);
+            _selectedLiveEffectFilterId = layer.Filters.Count == 0 ? null : layer.Filters[Math.Clamp(index, 0, layer.Filters.Count - 1)].Id;
+        });
+    }
+
+    private static string LiveFilterKindName(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.HueRotation => "Hue rotation",
+        VideoEffectFilterKind.ChromaKey => "Chroma key",
+        VideoEffectFilterKind.ColorWash => "Color wash",
+        _ => kind.ToString()
+    };
+
+    private static string LiveFilterSummary(VideoEffectFilter filter) => filter.Kind switch
+    {
+        VideoEffectFilterKind.ChromaKey => $"{filter.Color} · similarity {filter.Amount:0.##}",
+        VideoEffectFilterKind.ColorWash => $"{filter.Color} · {filter.Amount:P0}",
+        VideoEffectFilterKind.HueRotation => $"{filter.Amount:0.#}°",
+        VideoEffectFilterKind.Blur => $"{filter.Amount:0.#} px",
+        _ => $"{filter.Amount:0.##}"
+    };
+
+    private static string LiveFilterAmountLabel(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.HueRotation => "Rotation",
+        VideoEffectFilterKind.Blur => "Radius",
+        VideoEffectFilterKind.ColorWash => "Opacity",
+        _ => "Amount"
+    };
+
+    private static double LiveFilterMinimum(VideoEffectFilterKind kind) => kind == VideoEffectFilterKind.HueRotation ? -360 : 0;
+    private static double LiveFilterMaximum(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.Brightness or VideoEffectFilterKind.Contrast or VideoEffectFilterKind.Saturation => 4,
+        VideoEffectFilterKind.HueRotation => 360,
+        VideoEffectFilterKind.Blur => 64,
+        _ => 1
+    };
+    private static double LiveFilterStep(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.HueRotation => 1,
+        VideoEffectFilterKind.Blur => .1,
+        _ => .01
+    };
 
     private string EndpointName(ConnectorEndpoint endpoint)
     {
@@ -1399,7 +1791,11 @@
             if (element is DevExtremeComponentElement component && field == "componentBackground") component.Background = value;
             if (element is DevExtremeComponentElement componentBorder && field == "componentBorder") componentBorder.BorderColor = value;
             if (element is AudioElement audio && field == "audioAccent") audio.AccentColor = value;
-            if (element is LiveSourceElement live && field == "liveChromaColor") live.ChromaKeyColor = value;
+            if (element is LiveSourceElement live)
+            {
+                if (field == "liveChromaColor") live.ChromaKeyColor = value;
+                TimelineEdits.SynchronizeLiveSourceLayer(live);
+            }
         });
     }
 
@@ -1416,7 +1812,11 @@
             State.UpdateMedia(media.Id, item => ApplyNumber(item, field, value));
             return;
         }
-        State.UpdateSelected(element => ApplyNumber(element, field, value));
+        State.UpdateSelected(element =>
+        {
+            ApplyNumber(element, field, value);
+            if (element is LiveSourceElement live) TimelineEdits.SynchronizeLiveSourceLayer(live);
+        });
     }
 
     private void ChangeNumberLive(string field, ChangeEventArgs args)
@@ -1432,7 +1832,11 @@
             State.UpdateMediaLive(media.Id, field, item => ApplyNumber(item, field, value));
             return;
         }
-        State.UpdateSelectedLive(field, element => ApplyNumber(element, field, value));
+        State.UpdateSelectedLive(field, element =>
+        {
+            ApplyNumber(element, field, value);
+            if (element is LiveSourceElement live) TimelineEdits.SynchronizeLiveSourceLayer(live);
+        });
     }
 
     private static bool IsMediaNumberField(string field) => field is "mediaVolume" or "mediaFadeIn" or "mediaFadeOut";

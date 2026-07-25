@@ -19,3 +19,9 @@ public sealed class PublicationImportResult
     public PublicationDocument Document { get; init; } = PublicationDocument.CreateDefault();
     public List<InterchangeIssue> Issues { get; init; } = [];
 }
+
+public sealed class VideoProjectImportResult
+{
+    public VideoProjectDocument Project { get; init; } = new();
+    public List<InterchangeIssue> Issues { get; init; } = [];
+}

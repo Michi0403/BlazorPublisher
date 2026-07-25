@@ -9,7 +9,7 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.49";
+    public string FormatVersion { get; set; } = "1.52";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
@@ -302,7 +302,10 @@ public abstract class PublicationMediaElement : PublicationElement
         }];
 
     [JsonIgnore]
-    public double TimelineLengthSeconds => Math.Max(.05, EffectiveSegments.Sum(segment => segment.SourceLengthSeconds) / Math.Max(.1, PlaybackRate));
+    public double TimelineLengthSeconds => Math.Max(.05, EffectiveSegments.Sum(segment =>
+        segment.TimelineDurationSeconds > 0
+            ? segment.TimelineDurationSeconds
+            : segment.SourceLengthSeconds / Math.Max(.0001, Math.Abs(segment.Speed))) / Math.Max(.1, PlaybackRate));
 }
 
 public sealed class VideoElement : PublicationMediaElement
@@ -314,6 +317,7 @@ public sealed class VideoElement : PublicationMediaElement
     public PublicationVideoFitMode FitMode { get; set; } = PublicationVideoFitMode.Stretch;
     public bool FitModeExplicit { get; set; }
     public string Background { get; set; } = "#111827";
+    public VideoProjectDocument? VideoProject { get; set; }
     public List<MediaFramePoint> FrameClipPolygon { get; set; } = [];
 }
 

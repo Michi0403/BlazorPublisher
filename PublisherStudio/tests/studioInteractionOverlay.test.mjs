@@ -24,7 +24,7 @@ assert.match(mediaStudio, /normalizedPoint",\s*"media-studio-frame-overlay-host"
 assert.match(mediaStudio, /Apply region/);
 assert.match(mediaStudio, /Undo point/);
 assert.match(mediaStudio, /Exit mode/);
-assert.match(mediaStudio, /!_frameRegionEditing && _frameClipPolygon\.Count >= 3/);
+assert.match(mediaStudio, /ActiveFramePoints\.Count >= 3/);
 assert.match(css, /\.media-studio-frame-overlay-host\s*\{[\s\S]*pointer-events:\s*none/);
 assert.match(css, /\.media-studio-frame-overlay-host\.active\s*\{[\s\S]*pointer-events:\s*auto/);
 assert.match(css, /cursor:\s*none/);

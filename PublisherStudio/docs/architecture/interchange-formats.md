@@ -33,14 +33,22 @@ The Path tool is independent from SVG import: it is a node-placement vector tool
 
 ## Video Studio
 
-| Format | Role | Initial direction | Expected loss behavior |
+The complete decision matrix, media doctrine, and source review are in [`video-project-import-doctrine.md`](video-project-import-doctrine.md).
+
+| Format | Role | Status | Mapping and loss behavior |
 |---|---|---:|---|
-| PublisherStudio video project | Native | Planned import + export | Authoritative timeline/session state |
-| OpenTimelineIO | Interchange | Planned first editable timeline adapter | Effects unsupported by OTIO reported; media references/package policy explicit |
-| CMX 3600 EDL | Interchange | Planned import + export | Cuts and simple dissolves only |
-| FCPXML | Interchange | Later | Capability report required |
-| AAF | Interchange | Later, after dependency/licence review | Complex media/effect mappings; explicit compatibility report |
-| MP4/WebM/MKV/image sequence | Delivery | Existing or planned render targets | Flattened render |
+| PublisherStudio `VideoProjectDocument` | Native | **Persisted** | Canonical tracks, gaps, explicit placements, source ranges/rates, source references, markers, transitions, cut sections, and native layered live effects. |
+| OpenTimelineIO (`.otio`) | Interchange | **Import** | Tracks, clips, gaps, transitions, markers, source ranges, references and supported time effects; nested stacks and unsupported metadata receive a report. |
+| OpenTimelineIO bundle (`.otioz`) | Interchange/package | **Import** | Safely reads top-level `content.otio` and matches bounded bundled media. |
+| MLT XML / Kdenlive / Shotcut (`.mlt`, `.kdenlive`) | Open-source editor interchange | **Import** | Producers/chains, playlists, multitracks, blanks, source ranges, timewarp hints and transition metadata. Unsupported MLT services are retained/reported. |
+| GES/XGES (`.xges`) | Open-source editor interchange | **Import** | Assets, layers, clips, source/timeline timing and audio/video track identity. |
+| OpenShot (`.osp`) | Open-source editor interchange | **Import** | JSON files, clips, layers and transitions with explicit compatibility reporting. |
+| CMX 3600 (`.edl`) | Cuts-only fallback | **Import** | Event timing, reel/source names and basic transition codes. Frame rate must be verified; richer state is outside EDL capability. |
+| FCPXML | Interchange | Later | Dedicated resources/roles/compound-clip mapping and loss matrix required. |
+| AAF | Professional interchange | Later after dependency/licence review | Binary essence and effect mapping require an approved adapter. |
+| OBS Scene Collection | Streaming-scene interchange | Planned for Mainframe, not Video Studio | Maps OBS scenes/sources/filters/transforms to streaming inputs and compositions, not to an editorial track timeline. |
+
+v1.0.73 preserves all imported tracks but edits and previews one active video-track projection. Full multitrack compositing and audio mixing are deliberately not claimed yet.
 
 ## Audio Studio
 

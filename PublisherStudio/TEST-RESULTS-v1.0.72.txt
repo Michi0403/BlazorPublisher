@@ -1,0 +1,84 @@
+PublisherStudio v1.0.72 validation results
+==========================================
+
+Scope
+-----
+This release validates persistent per-clip temporal selections, multiple cut sections,
+layer-owned editable video regions, layered live video filters including chroma key,
+Mainframe publication-video rendering, and authored filter layers for visual streaming inputs.
+
+Automated Node contract suite
+-----------------------------
+Command: npm test
+Location: src/PublisherStudio.Web
+Result: PASS
+
+All 21 suites passed:
+- timeline lifecycle/backpressure/trim normalization
+- component runtime
+- signal runtime
+- pointer ownership
+- map interaction modes
+- font integration
+- canvas zoom
+- streaming runtime
+- interface workflow
+- installer resilience
+- publication persistence
+- editor usability
+- architecture contract
+- C# contract ownership
+- C# compilation-safety contract
+- open interchange
+- media gesture editing
+- Studio overlay ownership
+- managed component drop
+- video temporal overlay/orchestration
+- persistent selection, cut sections, layered video effects, chroma key, Mainframe preview,
+  and streaming-input layer/filter contracts
+
+The Node run emitted the existing MODULE_TYPELESS_PACKAGE_JSON warning for
+pictureStudioInterop.js. It did not fail a suite and no package-mode/dependency change was
+introduced in this release.
+
+Static validation
+-----------------
+- 34 non-vendor JavaScript/test modules passed `node --check`.
+- 9 JSON files parsed successfully.
+- 2 project XML files parsed successfully.
+- No merge-conflict markers were found.
+- Web, installer, npm package, and lock-file versions align at 1.0.72.
+- Publication format writes/defaults align at 1.51.
+- NuGet PackageReference, npm dependency, and npm devDependency sets are unchanged from v1.0.71.
+- Repository architecture, shared-contract ownership, and C# compilation-safety tests passed.
+
+Behavior contracts added or strengthened
+-----------------------------------------
+- A committed point/range is owned by its selected clip and is not overwritten by playhead,
+  metadata, renderer, layer, or clip-switch synchronization.
+- Saved cut sections are a separate many-item collection and do not replace the current
+  selection unless explicitly restored.
+- Frame regions are normalized source-coordinate objects owned by the selected video layer.
+- Video layers and filters deep-clone and persist through load/save, split, duplicate, merge,
+  Media Studio result application, and old single-polygon migration.
+- The shared canvas renderer is used by Video Studio, publication/Mainframe video preview,
+  and visual live-source inputs.
+- Mainframe live-source sliders/color edits refresh the canonical Live input controls layer in
+  the same edit.
+- Visual streaming inputs expose authored effect layers and the complete shared filter set,
+  including independently editable chroma key, vignette, grain, and color wash.
+
+Patch and archive validation
+----------------------------
+- The v1.0.72 patch applies cleanly to an untouched v1.0.71 source tree.
+- Patched-tree source parity matches the packaged v1.0.72 source tree for all included files.
+- The release ZIP passes CRC/integrity testing.
+- Extracted ZIP content matches the packaged source tree after documented build/cache exclusions.
+- SHA-256 and SHA-512 checksum files are generated from the final ZIP.
+
+Compiler/build limitation
+-------------------------
+A real .NET/Razor/DevExpress build was not run because this environment has no `dotnet`
+executable and no licensed DevExpress package feed. The C# architecture, ownership, and
+compilation-safety tests are fallback evidence only and are not described as a compiler-clean
+build. A release-machine `dotnet build` and real-browser GPU/capture smoke test remain required.

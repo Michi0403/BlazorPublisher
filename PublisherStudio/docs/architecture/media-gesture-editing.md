@@ -61,3 +61,14 @@ Video Studio separates two coordinate systems. Temporal selection, playback scru
 Spatial frame-region editing still follows the rendered source-pixel rectangle. It is the only overlay allowed to cover temporal input, and only while `FrameRegion` mode is active. Outside that mode the frame overlay is visually hidden and pointer-transparent. This prevents its dim veil, help panel, and actions from leaking into normal playback.
 
 The local layer order is: video surface, temporal overlay, mode HUD, active spatial overlay, pending insertion panel, then framework context menus. Drag/drop feedback is transient and projected through the temporal overlay. No layer changes publication Z-order or creates a canonical element.
+
+
+## Persistent selections, cut sections and effect layers (v1.0.72)
+
+The selected source timestamp/range is committed to the selected `PublicationMediaSegment` after a completed gesture or numeric edit. It is restored when the clip is reselected and must not be overwritten by playhead polling, renderer refreshes or late metadata unless clamping to the resolved source duration is required.
+
+Saved cut sections are a separate collection. They are persistent named source ranges and do not replace the active selection until the user explicitly chooses **Use saved section**. A clip may own many sections.
+
+Spatial frame regions are owned by `VideoEffectLayer`. Frame-region mode edits only the selected layer's normalized source coordinates. Layer/filter rendering uses a canvas below the temporal and frame gesture overlays, preserving one pointer owner and a local stacking context.
+
+Visual Mainframe live inputs share the same canonical effect model. Their compatibility adjustments live in a protected **Live input controls** layer, while authored streaming-effect layers can be created, ordered, blended, toggled and filtered independently in the Inspector. Both paths feed the same renderer and persistence model.

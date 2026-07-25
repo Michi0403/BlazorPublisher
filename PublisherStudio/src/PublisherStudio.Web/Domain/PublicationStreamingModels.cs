@@ -325,6 +325,7 @@ public sealed class LiveSourceElement : PublicationElement
     public double ChromaSmoothness { get; set; } = .12;
     public double ChromaSpill { get; set; } = .3;
     public double ChromaResidualOpacity { get; set; } = 1;
+    public List<VideoEffectLayer> VideoLayers { get; set; } = [];
     public string NowPlayingDirectory { get; set; } = string.Empty;
     public string Background { get; set; } = "#111827";
 

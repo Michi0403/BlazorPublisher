@@ -3,6 +3,7 @@
 @inject IJSRuntime JS
 @inject PublicationMediaAssetStore MediaAssets
 @inject MediaTimelineEditService TimelineEdits
+@inject VideoProjectImportService VideoProjectImporter
 
 @if (Visible)
 {
@@ -22,6 +23,8 @@
                         <DxRibbonItem Text="@ImportMenuText" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Enabled="@(!_recording)" Click="OpenMediaPicker" />
                         @if (IsVideo)
                         {
+                            <DxRibbonItem Text="Import open project…" IconCssClass="pub-icon pub-icon-open" Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
+                            <DxRibbonItem Text="Relink project media…" IconCssClass="pub-icon pub-icon-refresh" Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
                             <DxRibbonItem Text="Record camera" IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordCamera" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-video" Text="Record screen" Enabled="@(!_recording)" Click="RecordScreen" />
                         }
@@ -59,6 +62,23 @@
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Trim to selection" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy selection" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
                         </DxRibbonGroup>
+                        <DxRibbonGroup Text="Cut sections" IconCssClass="pub-icon pub-icon-line">
+                            <DxRibbonItem Text="Save selected range" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+                            <DxRibbonItem Text="Use saved section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove saved section" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
+                        </DxRibbonGroup>
+                        <DxRibbonGroup Text="Video layers" IconCssClass="pub-icon pub-icon-layers">
+                            <DxRibbonItem Text="Add layer" Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
+                            <DxRibbonItem Text="Duplicate layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+                            <DxRibbonItem Text="Layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
+                            <DxRibbonItem Text="Layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
+                        </DxRibbonGroup>
+                        <DxRibbonGroup Text="Live filters" IconCssClass="pub-icon pub-icon-effects">
+                            <DxRibbonItem Text="Chroma key" Enabled="@(SelectedVideoLayer is not null)" Click="AddChromaKeyFilter" />
+                            <DxRibbonItem Text="Color adjustment" Enabled="@(SelectedVideoLayer is not null)" Click="AddColorAdjustmentFilters" />
+                            <DxRibbonItem Text="Vignette" Enabled="@(SelectedVideoLayer is not null)" Click="AddVignetteFilter" />
+                        </DxRibbonGroup>
                         <DxRibbonGroup Text="Video canvas" IconCssClass="pub-icon pub-icon-video">
                             <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Stretch, "Stretch")" Enabled="@HasSource" Click="VideoFitStretch" />
                             <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Cover, "Fill canvas")" Enabled="@HasSource" Click="VideoFitCover" />
@@ -93,6 +113,7 @@
                                        controlslist="nofullscreen nodownload noremoteplayback"
                                        class="media-studio-video-surface"
                                        style="@VideoPreviewStyle"></video>
+                                <canvas id="media-studio-video-effects" class="media-studio-video-effects" aria-hidden="true"></canvas>
                                 <div class="media-video-mode-hud" aria-live="polite">
                                     <b>@MouseModeLabel</b>
                                     <span>@VideoCanvasModeHelp</span>
@@ -122,6 +143,16 @@
                                         <span class="media-video-time-playhead" aria-hidden="true"></span>
                                         <span class="media-video-time-drop-marker" aria-hidden="true"></span>
                                     </div>
+                                    @foreach (var cutSection in SelectedCutSections)
+                                    {
+                                        <button type="button"
+                                                class="media-video-cut-section @(cutSection.Id == _selectedCutSectionId ? "selected" : null)"
+                                                style="@VideoCutSectionStyle(cutSection)"
+                                                title="@($"{cutSection.Name}: {Time(cutSection.StartSeconds)} — {Time(cutSection.EndSeconds)}")"
+                                                data-video-time-control
+                                                @onclick="() => SelectCutSection(cutSection.Id)"
+                                                @onclick:stopPropagation></button>
+                                    }
                                     <div class="media-video-time-toolbar media-video-transport-dock" data-video-time-control>
                                         <div class="media-video-transport-buttons">
                                             <button type="button" title="Play selected range" @onclick="PlaySelection" @onclick:stopPropagation>▶</button>
@@ -201,7 +232,7 @@
                                         @for (var pointIndex = 0; pointIndex < ActiveFramePoints.Count; pointIndex++)
                                         {
                                             var point = ActiveFramePoints[pointIndex];
-                                            <circle class="media-frame-node" cx="@Inv(point.X * 1000)" cy="@Inv(point.Y * 1000)" r="9" />
+                                            <circle class="media-frame-node" data-frame-node-index="@pointIndex" cx="@Inv(point.X * 1000)" cy="@Inv(point.Y * 1000)" r="9" />
                                         }
                                     </svg>
                                     <span class="media-frame-cursor-ring" aria-hidden="true"></span>
@@ -245,8 +276,8 @@
                                  @oncontextmenu="ShowTimelineContextMenu" @oncontextmenu:preventDefault>
                                 @foreach (var segment in _segments)
                                 {
-                                    <button type="button" class="media-sequence-segment @(segment.Id == _selectedSegmentId ? "selected" : null)"
-                                            style="@SegmentStyle(segment)" title="@segment.Name · @Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))">
+                                    <button type="button" class="media-sequence-segment @(segment.Id == _selectedSegmentId ? "selected" : null) @(segment.IsGap ? "gap" : string.IsNullOrWhiteSpace(segment.DataUrl) ? "offline" : null)"
+                                            style="@SegmentStyle(segment)" title="@SegmentTitle(segment)">
                                         <span>@segment.Name</span>
                                     </button>
                                 }
@@ -316,6 +347,41 @@
 
                     @if (IsVideo)
                     {
+                        @if (HasVideoProject)
+                        {
+                            <section class="media-video-project-properties">
+                                <h3>Imported video project</h3>
+                                <p class="property-note"><b>@VideoProjectTitle</b> · @VideoProjectFormatSummary</p>
+                                <div class="media-video-project-summary">
+                                    <span>@VideoProjectCanvasSummary</span>
+                                    <span>@VideoProjectTrackSummary</span>
+                                    <span>@VideoProjectMissingSummary</span>
+                                </div>
+                                <label>Editable video track
+                                    <select value="@_activeProjectTrackId" @onchange="ChangeProjectTrack">
+                                        @foreach (var track in ProjectVideoTracks)
+                                        {
+                                            <option value="@track.Id">@track.Name (@track.Segments.Count clips)</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div class="property-action-row">
+                                    <DxButton Text="Import another project" Click="OpenVideoProjectPicker" />
+                                    <DxButton Text="Relink media" Enabled="@(VideoProjectMissingMediaCount > 0)" Click="OpenVideoProjectMediaPicker" />
+                                </div>
+                                @if (_videoProjectIssues.Count > 0)
+                                {
+                                    <details class="media-video-project-report">
+                                        <summary>Compatibility report · @_videoProjectIssues.Count item@(_videoProjectIssues.Count == 1 ? string.Empty : "s")</summary>
+                                        @foreach (var issue in _videoProjectIssues.Take(12))
+                                        {
+                                            <p class="issue-@issue.Severity.ToString().ToLowerInvariant()"><b>@issue.Code</b> · @issue.Message</p>
+                                        }
+                                    </details>
+                                }
+                                <p class="property-note">All imported tracks, gaps, source references, markers and transitions stay in the canonical project. This editor displays and edits the selected video-track projection; preserved audio and additional video tracks remain available for later orchestration.</p>
+                            </section>
+                        }
                         <section class="media-video-selection-properties">
                             <h3>Selected clip time</h3>
                             <p class="property-note"><b>@SelectedClipName</b> · source timestamps stay linked to the highlighted clip in the project sequence.</p>
@@ -353,6 +419,138 @@
                                 <DxButton Text="Copy area" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
                             </div>
                             <p class="property-note">A point creates one cutline. A range creates cutlines at both boundaries and selects the resulting middle clip. Dropped video is inserted only inside this selection.</p>
+                        </section>
+
+                        <section class="media-cut-sections-properties">
+                            <h3>Saved cut sections</h3>
+                            <p class="property-note">The current selection stays editable. Save any number of independent ranges as cut sections without replacing the active selection.</p>
+                            <div class="media-cut-section-list">
+                                @foreach (var section in SelectedCutSections)
+                                {
+                                    <button type="button" class="@(section.Id == _selectedCutSectionId ? "selected" : null)" @onclick="() => SelectCutSection(section.Id)">
+                                        <span>@section.Name</span>
+                                        <small>@Time(section.StartSeconds) — @Time(section.EndSeconds)</small>
+                                    </button>
+                                }
+                                @if (SelectedCutSections.Count == 0)
+                                {
+                                    <span class="media-empty-list">No saved cut sections yet.</span>
+                                }
+                            </div>
+                            <div class="property-action-row">
+                                <DxButton Text="Save selection" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+                                <DxButton Text="Use section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
+                                <DxButton Text="Remove" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
+                            </div>
+                        </section>
+
+                        <section class="media-video-layer-properties">
+                            <h3>Video layers</h3>
+                            <p class="property-note">Each layer owns its frame region, temporal range and live filter stack. Layers are rendered from bottom to top.</p>
+                            <div class="media-video-layer-list">
+                                @for (var layerIndex = 0; layerIndex < SelectedVideoLayers.Count; layerIndex++)
+                                {
+                                    var layer = SelectedVideoLayers[layerIndex];
+                                    <div class="media-video-layer-row @(layer.Id == _selectedVideoLayerId ? "selected" : null)">
+                                        <button type="button" class="media-video-layer-select" @onclick="() => SelectVideoLayer(layer.Id)">
+                                            <span>@layer.Name</span>
+                                            <small>@(layer.Region.IsFullFrame ? "Full frame" : $"{layer.Region.Points.Count} region points") · @layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s")</small>
+                                        </button>
+                                        <button type="button" class="media-video-layer-visibility" title="Toggle layer visibility" @onclick="() => ToggleVideoLayerVisibility(layer.Id)">@(layer.Visible ? "●" : "○")</button>
+                                    </div>
+                                }
+                            </div>
+                            <div class="property-action-row">
+                                <DxButton Text="Add" Click="AddVideoLayer" />
+                                <DxButton Text="Duplicate" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+                                <DxButton Text="Up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
+                                <DxButton Text="Down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
+                                <DxButton Text="Delete" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
+                            </div>
+                            @if (SelectedVideoLayer is { } selectedLayer)
+                            {
+                                <label>Layer name<input value="@selectedLayer.Name" @onchange="ChangeVideoLayerName" /></label>
+                                <label>Opacity <b>@Math.Round(selectedLayer.Opacity * 100)%</b>
+                                    <input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLayer.Opacity)" @oninput="ChangeVideoLayerOpacity" />
+                                </label>
+                                <label>Blend mode
+                                    <select value="@selectedLayer.BlendMode" @onchange="ChangeVideoLayerBlendMode">
+                                        @foreach (var blend in Enum.GetValues<VideoEffectBlendMode>())
+                                        {
+                                            <option value="@blend">@blend</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label class="check-row"><input type="checkbox" checked="@selectedLayer.HasTemporalRange" @onchange="ToggleVideoLayerTemporalRange" /> Apply only in a time range</label>
+                                @if (selectedLayer.HasTemporalRange)
+                                {
+                                    <div class="property-grid two">
+                                        <label>Layer start<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalStartSeconds)" @onchange="ChangeVideoLayerTemporalStart" /></label>
+                                        <label>Layer end<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalEndSeconds)" @onchange="ChangeVideoLayerTemporalEnd" /></label>
+                                    </div>
+                                    <DxButton Text="Use current selection" Enabled="@(!_videoSelectionIsPoint)" Click="UseSelectionForVideoLayerTime" CssClass="wide-button" />
+                                }
+                            }
+                        </section>
+
+                        <section class="media-video-filter-properties">
+                            <h3>Layer filters</h3>
+                            <div class="media-video-filter-add">
+                                <select value="@_newVideoFilterKind" @onchange="ChangeNewVideoFilterKind">
+                                    @foreach (var filterKind in Enum.GetValues<VideoEffectFilterKind>())
+                                    {
+                                        <option value="@filterKind">@VideoFilterKindName(filterKind)</option>
+                                    }
+                                </select>
+                                <DxButton Text="Add filter" Enabled="@(SelectedVideoLayer is not null)" Click="AddSelectedVideoFilter" />
+                            </div>
+                            <div class="media-video-filter-list">
+                                @foreach (var filter in SelectedVideoFilters)
+                                {
+                                    <div class="media-video-filter-row @(filter.Id == _selectedVideoFilterId ? "selected" : null)">
+                                        <button type="button" @onclick="() => SelectVideoFilter(filter.Id)">
+                                            <span>@filter.Name</span><small>@VideoFilterSummary(filter)</small>
+                                        </button>
+                                        <button type="button" title="Enable or disable filter" @onclick="() => ToggleVideoFilter(filter.Id)">@(filter.Enabled ? "●" : "○")</button>
+                                    </div>
+                                }
+                                @if (SelectedVideoFilters.Count == 0)
+                                {
+                                    <span class="media-empty-list">The selected layer has no filters.</span>
+                                }
+                            </div>
+                            @if (SelectedVideoFilter is { } selectedFilter)
+                            {
+                                <label>Filter name<input value="@selectedFilter.Name" @onchange="ChangeVideoFilterName" /></label>
+                                @if (selectedFilter.Kind == VideoEffectFilterKind.ChromaKey)
+                                {
+                                    <label>Key color<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
+                                    <label>Similarity <b>@Inv(selectedFilter.Amount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /></label>
+                                    <label>Smoothness <b>@Inv(selectedFilter.SecondaryAmount)</b><input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedFilter.SecondaryAmount)" @oninput="ChangeVideoFilterSecondaryAmount" /></label>
+                                    <label>Spill reduction <b>@Inv(selectedFilter.TertiaryAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.TertiaryAmount)" @oninput="ChangeVideoFilterTertiaryAmount" /></label>
+                                    <label>Residual opacity <b>@Inv(selectedFilter.ResidualOpacity)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.ResidualOpacity)" @oninput="ChangeVideoFilterResidualOpacity" /></label>
+                                }
+                                else if (selectedFilter.Kind == VideoEffectFilterKind.Vignette)
+                                {
+                                    <label>Strength <b>@Inv(selectedFilter.Amount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /></label>
+                                    <label>Softness <b>@Inv(selectedFilter.SecondaryAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.SecondaryAmount)" @oninput="ChangeVideoFilterSecondaryAmount" /></label>
+                                }
+                                else
+                                {
+                                    <label>@VideoFilterAmountLabel(selectedFilter.Kind) <b>@Inv(selectedFilter.Amount)</b>
+                                        <input type="range" min="@Inv(VideoFilterMinimum(selectedFilter.Kind))" max="@Inv(VideoFilterMaximum(selectedFilter.Kind))" step="@Inv(VideoFilterStep(selectedFilter.Kind))" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" />
+                                    </label>
+                                    @if (selectedFilter.Kind == VideoEffectFilterKind.ColorWash)
+                                    {
+                                        <label>Wash color<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
+                                    }
+                                }
+                                <div class="property-action-row">
+                                    <DxButton Text="Filter up" Enabled="@CanMoveVideoFilterUp" Click="MoveVideoFilterUp" />
+                                    <DxButton Text="Filter down" Enabled="@CanMoveVideoFilterDown" Click="MoveVideoFilterDown" />
+                                    <DxButton Text="Remove filter" Click="RemoveSelectedVideoFilter" />
+                                </div>
+                            }
                         </section>
 
                         <section>
@@ -400,7 +598,11 @@
                     {
                         <section>
                             <h3>Video frame region</h3>
-                            <p class="property-note">A polygon region uses normalized frame coordinates, so every angle and video dimension remains stable in the Mainframe and every PublisherStudio export.</p>
+                            <p class="property-note">This polygon belongs to <b>@(SelectedVideoLayer?.Name ?? "the selected video layer")</b>. Drag its nodes directly on the frame. Normalized source coordinates keep every angle stable across canvas sizes.</p>
+                            @if (SelectedVideoLayer is { } frameLayer)
+                            {
+                                <label class="check-row"><input type="checkbox" checked="@frameLayer.Region.Inverted" @onchange="ToggleFrameRegionInverted" /> Invert this layer region</label>
+                            }
                             <div class="property-action-row">
                                 <DxButton Text="Edit region" Enabled="@HasSource" Click="BeginFrameRegion" />
                                 <DxButton Text="Apply" Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
@@ -444,6 +646,8 @@
         <DxContextMenuItem Text="@ImportMenuText" Enabled="@(!_recording)" Click="OpenMediaPicker" />
         @if (IsVideo)
         {
+            <DxContextMenuItem Text="Import open video project…" Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
+            <DxContextMenuItem Text="Relink project media…" Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
             <DxContextMenuItem Text="Record camera…" Enabled="@(!_recording)" Click="RecordCamera" />
             <DxContextMenuItem Text="Record screen…" Enabled="@(!_recording)" Click="RecordScreen" />
         }
@@ -472,6 +676,17 @@
             <DxContextMenuItem Text="Cut selected timestamp/range" Enabled="@CanCutVideoSelection" BeginGroup="true" Click="CutVideoSelection" />
             <DxContextMenuItem Text="Use selected range as trim" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
             <DxContextMenuItem Text="Copy selected range" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
+            <DxContextMenuItem Text="Save selection as cut section" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+            <DxContextMenuItem Text="Use selected saved section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
+            <DxContextMenuItem Text="Remove selected saved section" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
+            <DxContextMenuItem Text="Add video layer" Enabled="@HasSelectedSegment" BeginGroup="true" Click="AddVideoLayer" />
+            <DxContextMenuItem Text="Duplicate selected layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+            <DxContextMenuItem Text="Move layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
+            <DxContextMenuItem Text="Move layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
+            <DxContextMenuItem Text="Delete selected layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
+            <DxContextMenuItem Text="Add chroma key filter" Enabled="@(SelectedVideoLayer is not null)" BeginGroup="true" Click="AddChromaKeyFilter" />
+            <DxContextMenuItem Text="Add color adjustment filters" Enabled="@(SelectedVideoLayer is not null)" Click="AddColorAdjustmentFilters" />
+            <DxContextMenuItem Text="Add vignette filter" Enabled="@(SelectedVideoLayer is not null)" Click="AddVignetteFilter" />
         }
         <DxContextMenuItem Text="Add cutline at playhead" Enabled="@CanAddCutLine" BeginGroup="true" Click="AddCutLineAtPlayhead" />
         <DxContextMenuItem Text="Remove cutline before selected section" Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
@@ -493,6 +708,8 @@
 
 <InputFile id="media-studio-file-input" class="hidden-file-input" accept="@Accept" OnChange="LoadFile" />
 <InputFile id="media-studio-insert-file-input" class="hidden-file-input" accept="@Accept" OnChange="LoadInsertedFile" />
+<InputFile id="media-studio-project-input" class="hidden-file-input" accept=".otio,.otioz,.mlt,.kdenlive,.xges,.osp,.edl" OnChange="LoadVideoProject" />
+<InputFile id="media-studio-project-media-input" class="hidden-file-input" accept="video/*,audio/*,image/*" multiple OnChange="RelinkVideoProjectMedia" />
 
 @code {
     [Parameter] public bool Visible { get; set; }
@@ -553,6 +770,10 @@
     private readonly List<MediaFramePoint> _frameDraft = [];
     private readonly List<MediaFramePoint> _frameClipboard = [];
     private bool _frameRegionEditing;
+    private Guid? _selectedVideoLayerId;
+    private Guid? _selectedVideoFilterId;
+    private Guid? _selectedCutSectionId;
+    private VideoEffectFilterKind _newVideoFilterKind = VideoEffectFilterKind.ChromaKey;
     private bool _videoSelectionIsPoint;
     private double _videoSelectionPointSeconds;
     private double _videoSelectionStartSeconds;
@@ -563,13 +784,45 @@
     private double _pendingInsertMaximumSourceSeconds;
     private double? _pendingDropSourceSeconds;
     private bool _pendingDropIsPoint;
+    private VideoProjectDocument? _videoProject;
+    private Guid _activeProjectTrackId;
+    private List<InterchangeIssue> _videoProjectIssues = [];
 
     private bool IsVideo => Kind == PublicationElementKind.Video;
     private bool HasRetainedRecording => _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
+    private bool HasVideoProject => IsVideo && _videoProject is { Tracks.Count: > 0 };
+    private IReadOnlyList<MediaTimelineTrack> ProjectVideoTracks => _videoProject?.Tracks
+        .Where(track => track.Kind == MediaTimelineTrackKind.Video)
+        .OrderBy(track => track.Order)
+        .ToList() ?? [];
+    private int VideoProjectMissingMediaCount => _videoProject?.Tracks
+        .SelectMany(track => track.Segments)
+        .Count(segment => !segment.IsGap && string.IsNullOrWhiteSpace(segment.DataUrl) && segment.SourceReference.Missing) ?? 0;
+    private string VideoProjectTitle => _videoProject?.Name ?? "Video project";
+    private string VideoProjectFormatSummary => _videoProject is null
+        ? string.Empty
+        : string.IsNullOrWhiteSpace(_videoProject.SourceFormatVersion)
+            ? _videoProject.SourceFormat
+            : $"{_videoProject.SourceFormat} {_videoProject.SourceFormatVersion}";
+    private string VideoProjectCanvasSummary => _videoProject is null
+        ? string.Empty
+        : $"{_videoProject.Width} × {_videoProject.Height} · {_videoProject.FrameRate:0.###} fps";
+    private string VideoProjectTrackSummary => _videoProject is null
+        ? string.Empty
+        : $"{_videoProject.Tracks.Count} track{(_videoProject.Tracks.Count == 1 ? string.Empty : "s")} · {_videoProject.Transitions.Count} transition{(_videoProject.Transitions.Count == 1 ? string.Empty : "s")}";
+    private string VideoProjectMissingSummary => VideoProjectMissingMediaCount == 0
+        ? "All referenced media linked"
+        : $"{VideoProjectMissingMediaCount} missing media reference{(VideoProjectMissingMediaCount == 1 ? string.Empty : "s")}";
     private PublicationMediaSegment? SelectedSegment => _segments.FirstOrDefault(segment => segment.Id == _selectedSegmentId);
+    private IReadOnlyList<VideoEffectLayer> SelectedVideoLayers => SelectedSegment?.VideoLayers ?? [];
+    private VideoEffectLayer? SelectedVideoLayer => SelectedSegment?.VideoLayers.FirstOrDefault(layer => layer.Id == _selectedVideoLayerId);
+    private IReadOnlyList<VideoEffectFilter> SelectedVideoFilters => SelectedVideoLayer?.Filters ?? [];
+    private VideoEffectFilter? SelectedVideoFilter => SelectedVideoLayer?.Filters.FirstOrDefault(filter => filter.Id == _selectedVideoFilterId);
+    private IReadOnlyList<MediaTemporalSection> SelectedCutSections => SelectedSegment?.CutSections ?? [];
+    private MediaTemporalSection? SelectedCutSection => SelectedSegment?.CutSections.FirstOrDefault(section => section.Id == _selectedCutSectionId);
     private int SelectedSegmentIndex => _selectedSegmentId is Guid id ? _segments.FindIndex(segment => segment.Id == id) : -1;
     private bool HasSelectedSegment => SelectedSegment is not null;
-    private bool HasSource => (_segments.Count > 0 || !string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording) && (_duration > 0 || _segments.Count > 0);
+    private bool HasSource => (_segments.Count > 0 || !string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording || HasVideoProject) && (_duration > 0 || _segments.Count > 0 || HasVideoProject);
     private bool CanPasteSection => _clipClipboard is not null;
     private bool CanDeleteSection => _segments.Count > 0 && HasSelectedSegment;
     private bool CanAddCutLine => HasSource && _segments.Count > 0;
@@ -577,17 +830,21 @@
     private bool CanCutVideoSelection => IsVideo && HasSelectedSegment && (_videoSelectionIsPoint || VideoSelectionEnd - VideoSelectionStart >= .01);
     private bool CanUseVideoSelectionAsTrim => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
     private bool CanCopyVideoSelection => CanUseVideoSelectionAsTrim;
+    private bool CanSaveCutSection => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+    private int SelectedVideoLayerIndex => SelectedSegment?.VideoLayers.FindIndex(layer => layer.Id == _selectedVideoLayerId) ?? -1;
+    private bool CanMoveVideoLayerUp => SelectedVideoLayerIndex >= 0 && SelectedVideoLayerIndex < (SelectedSegment?.VideoLayers.Count ?? 0) - 1;
+    private bool CanMoveVideoLayerDown => SelectedVideoLayerIndex > 0;
+    private bool CanDeleteVideoLayer => SelectedVideoLayer is not null && (SelectedSegment?.VideoLayers.Count ?? 0) > 1;
+    private int SelectedVideoFilterIndex => SelectedVideoLayer?.Filters.FindIndex(filter => filter.Id == _selectedVideoFilterId) ?? -1;
+    private bool CanMoveVideoFilterUp => SelectedVideoFilterIndex >= 0 && SelectedVideoFilterIndex < (SelectedVideoLayer?.Filters.Count ?? 0) - 1;
+    private bool CanMoveVideoFilterDown => SelectedVideoFilterIndex > 0;
     private double SequenceDuration => Math.Max(.01, TimelineEdits.TimelineLength(_segments, _playbackRate));
     private IEnumerable<double> CutBoundaryPositions
     {
         get
         {
-            var cursor = 0d;
-            for (var index = 0; index < _segments.Count - 1; index++)
-            {
-                cursor += _segments[index].SourceLengthSeconds / Math.Max(.1, _playbackRate);
-                yield return cursor;
-            }
+            for (var index = 1; index < _segments.Count; index++)
+                yield return TimelineEdits.SegmentTimelineStart(_segments, index, _playbackRate);
         }
     }
     private IReadOnlyList<MediaFramePoint> ActiveFramePoints => _frameRegionEditing ? _frameDraft : _frameClipPolygon;
@@ -637,7 +894,7 @@
             var sequenceDuration = Math.Max(.01, SequenceDuration);
             var segment = _segments[index];
             var segmentStart = TimelineEdits.SegmentTimelineStart(_segments, index, _playbackRate);
-            var rate = Math.Max(.1, _playbackRate);
+            var rate = Math.Max(.1, _playbackRate) * Math.Max(.0001, Math.Abs(segment.Speed));
             var start = segmentStart + (Math.Clamp(VideoSelectionStart, segment.TrimStartSeconds, segment.EffectiveTrimEndSeconds) - segment.TrimStartSeconds) / rate;
             var end = segmentStart + (Math.Clamp(VideoSelectionEnd, segment.TrimStartSeconds, segment.EffectiveTrimEndSeconds) - segment.TrimStartSeconds) / rate;
             if (_videoSelectionIsPoint) return $"left:{Percent(start / sequenceDuration)};width:2px";
@@ -662,10 +919,7 @@
                 PublicationVideoFitMode.Stretch => "fill",
                 _ => "contain"
             };
-            var clip = !_frameRegionEditing && _frameClipPolygon.Count >= 3
-                ? $"clip-path:{FrameClipCss(_frameClipPolygon)};"
-                : string.Empty;
-            return $"object-fit:{fit};{clip}";
+            return $"object-fit:{fit};";
         }
     }
     private string MouseModeLabel => _mouseMode switch
@@ -732,11 +986,18 @@
         _frameClipPolygon.Clear();
         _frameDraft.Clear();
         _frameRegionEditing = false;
+        _selectedVideoLayerId = null;
+        _selectedVideoFilterId = null;
+        _selectedCutSectionId = null;
+        _newVideoFilterKind = VideoEffectFilterKind.ChromaKey;
         _videoSelectionIsPoint = false;
         _videoSelectionPointSeconds = 0;
         _videoSelectionStartSeconds = 0;
         _videoSelectionEndSeconds = 0;
         _videoFitMode = PublicationVideoFitMode.Stretch;
+        _videoProject = null;
+        _activeProjectTrackId = Guid.Empty;
+        _videoProjectIssues = [];
         ClearPendingInsert();
 
         if (InitialMedia is { } media)
@@ -749,26 +1010,42 @@
             _loop = media.Loop;
             _autoPlay = media.AutoPlay;
             _playbackTrigger = media.PlaybackTrigger;
-            var sourceSegments = media.Segments is { Count: > 0 }
-                ? media.Segments
-                : [new PublicationMediaSegment
-                {
-                    Name = media.Name,
-                    DataUrl = media.DataUrl,
-                    MimeType = media.MimeType,
-                    PosterDataUrl = media is VideoElement legacyVideo ? legacyVideo.PosterDataUrl : string.Empty,
-                    DurationSeconds = media.DurationSeconds,
-                    TrimStartSeconds = media.TrimStartSeconds,
-                    TrimEndSeconds = media.EffectiveTrimEndSeconds,
-                    WaveformSamples = [.. media.WaveformSamples]
-                }];
+            IEnumerable<PublicationMediaSegment> sourceSegments;
+            if (media is VideoElement projectVideo && projectVideo.VideoProject is { Tracks.Count: > 0 } project)
+            {
+                _videoProject = TimelineEdits.CloneVideoProject(project);
+                _activeProjectTrackId = ResolveActiveProjectTrackId(_videoProject);
+                sourceSegments = TimelineEdits.CreateTrackProjection(_videoProject, _activeProjectTrackId);
+            }
+            else
+            {
+                sourceSegments = media.Segments is { Count: > 0 }
+                    ? media.Segments
+                    : [new PublicationMediaSegment
+                    {
+                        Name = media.Name,
+                        DataUrl = media.DataUrl,
+                        MimeType = media.MimeType,
+                        PosterDataUrl = media is VideoElement legacyVideo ? legacyVideo.PosterDataUrl : string.Empty,
+                        DurationSeconds = media.DurationSeconds,
+                        TrimStartSeconds = media.TrimStartSeconds,
+                        TrimEndSeconds = media.EffectiveTrimEndSeconds,
+                        WaveformSamples = [.. media.WaveformSamples]
+                    }];
+            }
             _segments.AddRange(TimelineEdits.Normalize(sourceSegments, IsVideo));
             if (media is VideoElement video)
             {
                 _videoFitMode = video.FitModeExplicit || video.FitMode != PublicationVideoFitMode.Contain
                     ? video.FitMode
                     : PublicationVideoFitMode.Stretch;
-                _frameClipPolygon.AddRange(CloneFramePoints(video.FrameClipPolygon));
+                var legacyRegion = CloneFramePoints(video.FrameClipPolygon);
+                var firstVideoLayer = _segments.FirstOrDefault()?.VideoLayers.FirstOrDefault();
+                if (legacyRegion.Count >= 3 && firstVideoLayer is not null && firstVideoLayer.Region.IsFullFrame)
+                {
+                    firstVideoLayer.Region.Name = "Legacy frame region";
+                    firstVideoLayer.Region.Points = legacyRegion;
+                }
             }
         }
         else
@@ -792,16 +1069,23 @@
             }
         }
 
-        if (_segments.Count > 0) SelectSegment(_segments[^1].Id, seek: false);
+        if (_segments.Count > 0)
+        {
+            var initial = _segments.FirstOrDefault(IsPlayableSegment)
+                ?? _segments.FirstOrDefault(segment => !segment.IsGap)
+                ?? _segments[0];
+            SelectSegment(initial.Id, seek: false);
+        }
         else ClearSelectedSegmentFields();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!Visible || _disposed || SessionId == Guid.Empty || SessionId == _initializedSession) return;
+        if (!Visible || _disposed || SessionId == Guid.Empty) return;
         try
         {
-            await EnsureMediaModuleAsync();
+            var module = await EnsureMediaModuleAsync();
+            if (IsVideo && HasSource) await SyncVideoEffectsAsync(module);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -831,16 +1115,87 @@
                 IsVideo ? "media-studio-video-time-overlay" : string.Empty,
                 "media-studio-file-input",
                 "media-studio-insert-file-input",
+                IsVideo ? "media-studio-project-input" : string.Empty,
                 IsVideo ? "video" : "audio");
             _initializedSession = SessionId;
         }
         return _module;
     }
 
+    private async Task SyncVideoEffectsAsync(IJSObjectReference? module = null)
+    {
+        if (!IsVideo || !HasSource || SelectedSegment is null || !IsPlayableSegment(SelectedSegment)) return;
+        module ??= await EnsureMediaModuleAsync();
+        await module.InvokeVoidAsync("configureVideoEffects", "media-studio-preview", "media-studio-video-effects", new
+        {
+            fitMode = _videoFitMode switch
+            {
+                PublicationVideoFitMode.Cover => "cover",
+                PublicationVideoFitMode.Stretch => "stretch",
+                _ => "contain"
+            },
+            forceCanvas = true,
+            layers = VideoLayerPayload(SelectedSegment.VideoLayers)
+        });
+    }
+
+    private object[] VideoLayerPayload(IEnumerable<VideoEffectLayer> layers) => layers
+        .Where(layer => layer is not null)
+        .Select(layer =>
+        {
+            var region = layer.Region ?? new VideoFrameRegion();
+            var points = layer.Id == _selectedVideoLayerId && _frameRegionEditing
+                ? ActiveFramePoints
+                : region.Points;
+            return (object)new
+            {
+                id = layer.Id.ToString("D"),
+                layer.Name,
+                layer.Visible,
+                layer.Opacity,
+                blendMode = layer.BlendMode.ToString(),
+                layer.HasTemporalRange,
+                layer.TemporalStartSeconds,
+                layer.TemporalEndSeconds,
+                region = new
+                {
+                    region.Inverted,
+                    points = (points ?? []).Select(point => new { point.X, point.Y }).ToArray()
+                },
+                filters = (layer.Filters ?? []).Select(filter => new
+                {
+                    id = filter.Id.ToString("D"),
+                    kind = filter.Kind.ToString(),
+                    filter.Enabled,
+                    filter.Amount,
+                    filter.SecondaryAmount,
+                    filter.TertiaryAmount,
+                    filter.ResidualOpacity,
+                    filter.Color
+                }).ToArray()
+            };
+        })
+        .ToArray();
+
     private void CommitSelectedSegment()
     {
         var segment = SelectedSegment;
         if (segment is null) return;
+        CommitFrameRegionToSelectedLayer();
+        if (segment.IsGap)
+        {
+            var gapDuration = Math.Max(.01, double.IsFinite(_duration) ? _duration : segment.TimelineDurationSeconds);
+            segment.Name = "Gap";
+            segment.DataUrl = string.Empty;
+            segment.MimeType = string.Empty;
+            segment.DurationSeconds = gapDuration;
+            segment.TrimStartSeconds = 0;
+            segment.TrimEndSeconds = gapDuration;
+            segment.TimelineDurationSeconds = gapDuration;
+            segment.HasTemporalSelection = false;
+            segment.VideoLayers.Clear();
+            return;
+        }
         segment.Name = string.IsNullOrWhiteSpace(_name) ? (IsVideo ? "Video clip" : "Audio clip") : _name.Trim();
         segment.DataUrl = NormalizeMediaDataUrl(_dataUrl, IsVideo ? "video/webm" : "audio/webm");
         segment.MimeType = NormalizeMimeType(_mimeType, IsVideo ? "video/webm" : "audio/webm");
@@ -849,18 +1204,25 @@
         var trim = NormalizeTrimRange(_trimStart, _trimEnd, segment.DurationSeconds);
         segment.TrimStartSeconds = trim.Start;
         segment.TrimEndSeconds = trim.End;
+        segment.HasTemporalSelection = IsVideo;
+        segment.TemporalSelectionIsPoint = _videoSelectionIsPoint;
+        segment.TemporalSelectionStartSeconds = VideoSelectionStart;
+        segment.TemporalSelectionEndSeconds = VideoSelectionEnd;
+        if (IsVideo)
+            segment.VideoLayers = TimelineEdits.NormalizeVideoLayers(segment.VideoLayers, segment.TrimStartSeconds, segment.EffectiveTrimEndSeconds, segment.Name);
         segment.WaveformSamples = [.. _waveform];
     }
 
-    private void SelectSegment(Guid id, bool seek = true)
+    private void SelectSegment(Guid id, bool seek = true, bool forceReload = false)
     {
-        if (_selectedSegmentId == id && SelectedSegment is not null)
+        var reloadingCurrent = _selectedSegmentId == id && SelectedSegment is not null;
+        if (reloadingCurrent && !forceReload)
         {
             if (seek) _ = SeekSelectedAtPlayheadAsync();
             return;
         }
         if (_pendingInsertSegment is not null) ClearPendingInsert();
-        CommitSelectedSegment();
+        if (!reloadingCurrent) CommitSelectedSegment();
         var segment = _segments.FirstOrDefault(item => item.Id == id);
         if (segment is null) return;
         _selectedSegmentId = segment.Id;
@@ -871,13 +1233,16 @@
         _duration = Math.Max(.01, segment.DurationSeconds);
         _trimStart = segment.TrimStartSeconds;
         _trimEnd = segment.EffectiveTrimEndSeconds;
-        _videoSelectionIsPoint = false;
-        _videoSelectionPointSeconds = _trimStart;
-        _videoSelectionStartSeconds = _trimStart;
-        _videoSelectionEndSeconds = _trimEnd;
+        var hasSelection = IsVideo && segment.HasTemporalSelection;
+        _videoSelectionIsPoint = hasSelection && segment.TemporalSelectionIsPoint;
+        _videoSelectionPointSeconds = hasSelection ? segment.TemporalSelectionStartSeconds : _trimStart;
+        _videoSelectionStartSeconds = hasSelection ? segment.TemporalSelectionStartSeconds : _trimStart;
+        _videoSelectionEndSeconds = hasSelection ? segment.TemporalSelectionEndSeconds : _trimEnd;
         _waveform = [.. segment.WaveformSamples];
         ApplyTrimRange(_trimStart, _trimEnd, commit: false);
-        SetVideoSelectionRange(_trimStart, _trimEnd, pointSelection: false);
+        SetVideoSelectionRange(_videoSelectionStartSeconds, _videoSelectionEndSeconds, _videoSelectionIsPoint);
+        _selectedCutSectionId = null;
+        SelectInitialVideoLayer(segment);
         RefreshPreviewSource();
         if (seek) _ = SeekSelectedAtPlayheadAsync();
     }
@@ -894,6 +1259,11 @@
         _videoSelectionPointSeconds = 0;
         _videoSelectionStartSeconds = 0;
         _videoSelectionEndSeconds = 0;
+        _selectedVideoLayerId = null;
+        _selectedVideoFilterId = null;
+        _selectedCutSectionId = null;
+        _frameClipPolygon.Clear();
+        _frameDraft.Clear();
         ClearPendingInsert();
         _waveform = [];
         RefreshPreviewSource();
@@ -910,6 +1280,14 @@
             DurationSeconds = _duration,
             TrimStartSeconds = _trimStart,
             TrimEndSeconds = _trimEnd,
+            HasTemporalSelection = IsVideo,
+            TemporalSelectionIsPoint = _videoSelectionIsPoint,
+            TemporalSelectionStartSeconds = VideoSelectionStart,
+            TemporalSelectionEndSeconds = VideoSelectionEnd,
+            CutSections = SelectedSegment?.CutSections.Select(CloneTemporalSection).ToList() ?? [],
+            VideoLayers = IsVideo
+                ? (SelectedSegment?.VideoLayers.Select(TimelineEdits.CloneVideoLayer).ToList() ?? [TimelineEdits.CreateDefaultVideoLayer(_name)])
+                : [],
             WaveformSamples = [.. _waveform]
         };
         return TimelineEdits.Normalize([segment], IsVideo).First();
@@ -954,9 +1332,30 @@
     private string SegmentStyle(PublicationMediaSegment segment)
     {
         var duration = Math.Max(.01, SequenceDuration);
-        var width = segment.SourceLengthSeconds / Math.Max(.1, _playbackRate) / duration;
-        return $"width:{Percent(width)}";
+        var segmentDuration = segment.TimelineDurationSeconds > 0
+            ? segment.TimelineDurationSeconds
+            : segment.SourceLengthSeconds / Math.Max(.1, Math.Abs(segment.Speed) * _playbackRate);
+        return $"width:{Percent(segmentDuration / duration)}";
     }
+
+    private string SegmentTitle(PublicationMediaSegment segment)
+    {
+        var length = segment.TimelineDurationSeconds > 0
+            ? segment.TimelineDurationSeconds
+            : segment.SourceLengthSeconds / Math.Max(.1, Math.Abs(segment.Speed) * _playbackRate);
+        if (segment.IsGap) return $"Gap · {Time(length)}";
+        if (!IsPlayableSegment(segment))
+        {
+            var reference = string.IsNullOrWhiteSpace(segment.SourceReference.OriginalPath)
+                ? segment.SourceReference.Uri
+                : segment.SourceReference.OriginalPath;
+            return $"{segment.Name} · missing media · {Time(length)} · {reference}";
+        }
+        return $"{segment.Name} · {Time(length)}";
+    }
+
+    private static bool IsPlayableSegment(PublicationMediaSegment segment) =>
+        !segment.IsGap && !string.IsNullOrWhiteSpace(segment.DataUrl);
 
     private string MouseModeText(MediaStudioMouseMode mode, string label) => _mouseMode == mode ? $"✓ {label}" : label;
     private void SelectSectionMode() => SetMouseMode(MediaStudioMouseMode.SelectSection);
@@ -1147,9 +1546,47 @@
         if (!IsVideo || !HasSource) return;
         if (_pendingInsertSegment is not null) ClearPendingInsert();
         SetVideoSelectionRange(startSeconds, endSeconds, pointSelection);
+        CommitSelectedSegment();
         _playhead = SourcePositionToTimeline(VideoSelectionStart);
         var module = await EnsureMediaModuleAsync();
         await module.InvokeVoidAsync("seekMedia", "media-studio-preview", VideoSelectionStart);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task VideoSourceDurationResolved(double durationSeconds)
+    {
+        if (!IsVideo || SelectedSegment is not { } segment || !double.IsFinite(durationSeconds) || durationSeconds <= .01) return;
+
+        var previousDuration = Math.Max(.01, _duration);
+        var tolerance = Math.Max(.02, durationSeconds / 10_000);
+        if (Math.Abs(durationSeconds - previousDuration) <= tolerance) return;
+
+        var previousTrimStart = _trimStart;
+        var previousTrimEnd = _trimEnd;
+        var selectionWasWholeTrim = !_videoSelectionIsPoint
+            && Math.Abs(VideoSelectionStart - previousTrimStart) <= .02
+            && Math.Abs(VideoSelectionEnd - previousTrimEnd) <= .02;
+        var placeholderDuration = previousDuration <= .05 || segment.DurationSeconds <= .05;
+        var trimReachedOldEnd = Math.Abs(previousTrimEnd - previousDuration) <= .02;
+
+        _duration = durationSeconds;
+        var requestedTrimEnd = placeholderDuration || trimReachedOldEnd
+            ? durationSeconds
+            : Math.Min(previousTrimEnd, durationSeconds);
+        var trim = NormalizeTrimRange(previousTrimStart, requestedTrimEnd, durationSeconds);
+        _trimStart = trim.Start;
+        _trimEnd = trim.End;
+
+        if (selectionWasWholeTrim || placeholderDuration)
+            SetVideoSelectionRange(_trimStart, _trimEnd, pointSelection: false);
+        else
+            SetVideoSelectionRange(VideoSelectionStart, VideoSelectionEnd, _videoSelectionIsPoint);
+
+        CommitSelectedSegment();
+        _warning = placeholderDuration
+            ? $"Recovered the browser video duration ({Time(durationSeconds)}) and restored the full selectable range."
+            : $"Updated the selected clip duration to {Time(durationSeconds)} from browser metadata.";
         await InvokeAsync(StateHasChanged);
     }
 
@@ -1200,7 +1637,7 @@
             segment.TrimStartSeconds,
             segment.EffectiveTrimEndSeconds);
         return TimelineEdits.SegmentTimelineStart(_segments, index, _playbackRate)
-            + (source - segment.TrimStartSeconds) / Math.Max(.1, _playbackRate);
+            + (source - segment.TrimStartSeconds) / (Math.Max(.1, _playbackRate) * Math.Max(.0001, Math.Abs(segment.Speed)));
     }
 
     private void PreparePendingInsert(PublicationMediaSegment segment)
@@ -1269,11 +1706,13 @@
 
     private void BeginFrameRegion()
     {
-        if (!IsVideo || !HasSource) return;
+        if (!IsVideo || !HasSource || SelectedVideoLayer is null) return;
+        LoadFrameRegionFromSelectedLayer();
         _frameDraft.Clear();
         _frameDraft.AddRange(CloneFramePoints(_frameClipPolygon));
         _frameRegionEditing = true;
         _mouseMode = MediaStudioMouseMode.FrameRegion;
+        _warning = $"Editing the frame region owned by {SelectedVideoLayer.Name}. Drag existing nodes or click to add vertices.";
     }
 
     private async Task FrameOverlayPointerDown(PointerEventArgs args)
@@ -1303,6 +1742,9 @@
         _frameDraft.Clear();
         _frameRegionEditing = false;
         _mouseMode = MediaStudioMouseMode.SelectSection;
+        CommitFrameRegionToSelectedLayer();
+        CommitSelectedSegment();
+        _warning = $"Applied the frame region to {SelectedVideoLayer?.Name}.";
         return Task.CompletedTask;
     }
 
@@ -1317,6 +1759,9 @@
     {
         _frameClipPolygon.Clear();
         CancelFrameRegion();
+        CommitFrameRegionToSelectedLayer();
+        CommitSelectedSegment();
+        _warning = $"Cleared the frame region on {SelectedVideoLayer?.Name}.";
     }
 
     private void RemoveLastFramePoint()
@@ -1333,11 +1778,417 @@
 
     private void PasteFrameRegion()
     {
-        if (!CanPasteFrameRegion) return;
+        if (!CanPasteFrameRegion || SelectedVideoLayer is null) return;
         _frameClipPolygon.Clear();
         _frameClipPolygon.AddRange(CloneFramePoints(_frameClipboard));
         _frameDraft.Clear();
         _frameRegionEditing = false;
+        CommitFrameRegionToSelectedLayer();
+        CommitSelectedSegment();
+    }
+
+    private static MediaTemporalSection CloneTemporalSection(MediaTemporalSection section) => new()
+    {
+        Id = section.Id == Guid.Empty ? Guid.NewGuid() : section.Id,
+        Name = string.IsNullOrWhiteSpace(section.Name) ? "Cut section" : section.Name.Trim(),
+        Enabled = section.Enabled,
+        StartSeconds = section.StartSeconds,
+        EndSeconds = section.EndSeconds
+    };
+
+    private string VideoCutSectionStyle(MediaTemporalSection section)
+    {
+        var duration = Math.Max(.01, _duration);
+        var start = Math.Clamp(section.StartSeconds / duration, 0, 1);
+        var end = Math.Clamp(section.EndSeconds / duration, start, 1);
+        return $"left:{Percent(start)};width:{Percent(Math.Max(.001, end - start))}";
+    }
+
+    private void SaveSelectedRangeAsCutSection()
+    {
+        if (!CanSaveCutSection || SelectedSegment is not { } segment) return;
+        CommitSelectedSegment();
+        segment = SelectedSegment!;
+        var section = new MediaTemporalSection
+        {
+            Name = $"Cut section {segment.CutSections.Count + 1}",
+            StartSeconds = VideoSelectionStart,
+            EndSeconds = VideoSelectionEnd
+        };
+        segment.CutSections.Add(section);
+        _selectedCutSectionId = section.Id;
+        CommitSelectedSegment();
+        _warning = $"Saved {section.Name}: {Time(section.StartSeconds)} — {Time(section.EndSeconds)}.";
+    }
+
+    private void SelectCutSection(Guid id)
+    {
+        if (SelectedSegment?.CutSections.Any(section => section.Id == id) != true) return;
+        _selectedCutSectionId = id;
+    }
+
+    private void UseSelectedCutSection()
+    {
+        if (SelectedCutSection is not { } section) return;
+        SetVideoSelectionRange(section.StartSeconds, section.EndSeconds, pointSelection: false);
+        CommitSelectedSegment();
+        _playhead = SourcePositionToTimeline(VideoSelectionStart);
+        _ = SeekVideoSelectionStartAsync();
+        _warning = $"Loaded {section.Name} into the current selection.";
+    }
+
+    private void RemoveSelectedCutSection()
+    {
+        if (SelectedSegment is not { } segment || _selectedCutSectionId is not Guid id) return;
+        var index = segment.CutSections.FindIndex(section => section.Id == id);
+        if (index < 0) return;
+        var removed = segment.CutSections[index].Name;
+        segment.CutSections.RemoveAt(index);
+        _selectedCutSectionId = segment.CutSections.Count == 0
+            ? null
+            : segment.CutSections[Math.Clamp(index, 0, segment.CutSections.Count - 1)].Id;
+        CommitSelectedSegment();
+        _warning = $"Removed {removed}. The current selection was not changed.";
+    }
+
+    private void SelectInitialVideoLayer(PublicationMediaSegment segment)
+    {
+        if (!IsVideo)
+        {
+            _selectedVideoLayerId = null;
+            _selectedVideoFilterId = null;
+            _frameClipPolygon.Clear();
+            _frameDraft.Clear();
+            return;
+        }
+
+        segment.VideoLayers = TimelineEdits.NormalizeVideoLayers(
+            segment.VideoLayers,
+            segment.TrimStartSeconds,
+            segment.EffectiveTrimEndSeconds,
+            segment.Name);
+        var selected = segment.VideoLayers.FirstOrDefault(layer => layer.Id == _selectedVideoLayerId)
+            ?? segment.VideoLayers.FirstOrDefault();
+        _selectedVideoLayerId = selected?.Id;
+        _selectedVideoFilterId = selected?.Filters.FirstOrDefault(filter => filter.Id == _selectedVideoFilterId)?.Id
+            ?? selected?.Filters.FirstOrDefault()?.Id;
+        LoadFrameRegionFromSelectedLayer();
+    }
+
+    private void LoadFrameRegionFromSelectedLayer()
+    {
+        _frameClipPolygon.Clear();
+        _frameDraft.Clear();
+        _frameRegionEditing = false;
+        if (SelectedVideoLayer?.Region?.Points is { } points)
+            _frameClipPolygon.AddRange(CloneFramePoints(points));
+    }
+
+    private void CommitFrameRegionToSelectedLayer()
+    {
+        if (!IsVideo || SelectedVideoLayer is not { } layer) return;
+        layer.Region ??= new VideoFrameRegion();
+        layer.Region.Points = CloneFramePoints(_frameClipPolygon);
+    }
+
+    private void SelectVideoLayer(Guid id)
+    {
+        if (SelectedSegment?.VideoLayers.Any(layer => layer.Id == id) != true) return;
+        CommitFrameRegionToSelectedLayer();
+        _selectedVideoLayerId = id;
+        _selectedVideoFilterId = SelectedVideoLayer?.Filters.FirstOrDefault()?.Id;
+        LoadFrameRegionFromSelectedLayer();
+        _warning = $"Selected video layer {SelectedVideoLayer?.Name}.";
+    }
+
+    private void AddVideoLayer()
+    {
+        if (SelectedSegment is not { } segment) return;
+        CommitFrameRegionToSelectedLayer();
+        var layer = TimelineEdits.CreateDefaultVideoLayer($"Layer {segment.VideoLayers.Count + 1}");
+        layer.Name = $"Video layer {segment.VideoLayers.Count + 1}";
+        if (!_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01)
+        {
+            layer.HasTemporalRange = true;
+            layer.TemporalStartSeconds = VideoSelectionStart;
+            layer.TemporalEndSeconds = VideoSelectionEnd;
+        }
+        segment.VideoLayers.Add(layer);
+        _selectedVideoLayerId = layer.Id;
+        _selectedVideoFilterId = null;
+        LoadFrameRegionFromSelectedLayer();
+        CommitSelectedSegment();
+        _warning = $"Added {layer.Name}. Its region and filters are independent from the other layers.";
+    }
+
+    private void DuplicateVideoLayer()
+    {
+        if (SelectedSegment is not { } segment || SelectedVideoLayer is not { } selected) return;
+        CommitFrameRegionToSelectedLayer();
+        var index = segment.VideoLayers.FindIndex(layer => layer.Id == selected.Id);
+        if (index < 0) return;
+        var clone = TimelineEdits.CloneVideoLayer(selected);
+        clone.Id = Guid.NewGuid();
+        clone.Name = $"{selected.Name} (copy)";
+        clone.Region.Id = Guid.NewGuid();
+        foreach (var filter in clone.Filters) filter.Id = Guid.NewGuid();
+        segment.VideoLayers.Insert(index + 1, clone);
+        _selectedVideoLayerId = clone.Id;
+        _selectedVideoFilterId = clone.Filters.FirstOrDefault()?.Id;
+        LoadFrameRegionFromSelectedLayer();
+        CommitSelectedSegment();
+    }
+
+    private void MoveVideoLayerUp() => MoveSelectedVideoLayer(1);
+    private void MoveVideoLayerDown() => MoveSelectedVideoLayer(-1);
+    private void MoveSelectedVideoLayer(int offset)
+    {
+        if (SelectedSegment is not { } segment) return;
+        CommitFrameRegionToSelectedLayer();
+        var index = SelectedVideoLayerIndex;
+        var target = index + offset;
+        if (index < 0 || target < 0 || target >= segment.VideoLayers.Count) return;
+        var layer = segment.VideoLayers[index];
+        segment.VideoLayers.RemoveAt(index);
+        segment.VideoLayers.Insert(target, layer);
+        CommitSelectedSegment();
+    }
+
+    private void DeleteVideoLayer()
+    {
+        if (!CanDeleteVideoLayer || SelectedSegment is not { } segment) return;
+        var index = SelectedVideoLayerIndex;
+        if (index < 0) return;
+        var removed = segment.VideoLayers[index].Name;
+        segment.VideoLayers.RemoveAt(index);
+        var next = segment.VideoLayers[Math.Clamp(index, 0, segment.VideoLayers.Count - 1)];
+        _selectedVideoLayerId = next.Id;
+        _selectedVideoFilterId = next.Filters.FirstOrDefault()?.Id;
+        LoadFrameRegionFromSelectedLayer();
+        CommitSelectedSegment();
+        _warning = $"Deleted {removed}.";
+    }
+
+    private void ToggleVideoLayerVisibility(Guid id)
+    {
+        var layer = SelectedSegment?.VideoLayers.FirstOrDefault(candidate => candidate.Id == id);
+        if (layer is null) return;
+        layer.Visible = !layer.Visible;
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoLayerName(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        layer.Name = string.IsNullOrWhiteSpace(Text(args)) ? "Video layer" : Text(args).Trim();
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoLayerOpacity(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer || !TryDouble(args, out var value)) return;
+        layer.Opacity = Math.Clamp(value, 0, 1);
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoLayerBlendMode(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer || !Enum.TryParse<VideoEffectBlendMode>(Text(args), out var blend)) return;
+        layer.BlendMode = blend;
+        CommitSelectedSegment();
+    }
+
+    private void ToggleVideoLayerTemporalRange(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        layer.HasTemporalRange = Bool(args);
+        if (layer.HasTemporalRange)
+        {
+            layer.TemporalStartSeconds = _videoSelectionIsPoint ? _trimStart : VideoSelectionStart;
+            layer.TemporalEndSeconds = _videoSelectionIsPoint ? _trimEnd : VideoSelectionEnd;
+        }
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoLayerTemporalStart(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer || !TryDouble(args, out var value)) return;
+        layer.TemporalStartSeconds = Math.Clamp(value, _trimStart, Math.Max(_trimStart, layer.TemporalEndSeconds - .01));
+        layer.HasTemporalRange = true;
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoLayerTemporalEnd(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer || !TryDouble(args, out var value)) return;
+        layer.TemporalEndSeconds = Math.Clamp(value, Math.Min(_trimEnd, layer.TemporalStartSeconds + .01), _trimEnd);
+        layer.HasTemporalRange = true;
+        CommitSelectedSegment();
+    }
+
+    private void UseSelectionForVideoLayerTime()
+    {
+        if (SelectedVideoLayer is not { } layer || _videoSelectionIsPoint) return;
+        layer.HasTemporalRange = true;
+        layer.TemporalStartSeconds = VideoSelectionStart;
+        layer.TemporalEndSeconds = VideoSelectionEnd;
+        CommitSelectedSegment();
+    }
+
+    private void ChangeNewVideoFilterKind(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<VideoEffectFilterKind>(Text(args), out var kind)) _newVideoFilterKind = kind;
+    }
+
+    private void AddSelectedVideoFilter() => AddVideoFilter(_newVideoFilterKind);
+    private void AddChromaKeyFilter() => AddVideoFilter(VideoEffectFilterKind.ChromaKey);
+    private void AddVignetteFilter() => AddVideoFilter(VideoEffectFilterKind.Vignette);
+    private void AddColorAdjustmentFilters()
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        foreach (var kind in new[] { VideoEffectFilterKind.Brightness, VideoEffectFilterKind.Contrast, VideoEffectFilterKind.Saturation })
+        {
+            var existing = layer.Filters.FirstOrDefault(filter => filter.Kind == kind);
+            if (existing is null) layer.Filters.Add(TimelineEdits.CreateFilter(kind));
+        }
+        _selectedVideoFilterId = layer.Filters.LastOrDefault()?.Id;
+        CommitSelectedSegment();
+    }
+
+    private void AddVideoFilter(VideoEffectFilterKind kind)
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        var filter = TimelineEdits.CreateFilter(kind);
+        layer.Filters.Add(filter);
+        _selectedVideoFilterId = filter.Id;
+        CommitSelectedSegment();
+        _warning = $"Added {filter.Name} to {layer.Name}.";
+    }
+
+    private void SelectVideoFilter(Guid id)
+    {
+        if (SelectedVideoLayer?.Filters.Any(filter => filter.Id == id) == true) _selectedVideoFilterId = id;
+    }
+
+    private void ToggleVideoFilter(Guid id)
+    {
+        var filter = SelectedVideoLayer?.Filters.FirstOrDefault(candidate => candidate.Id == id);
+        if (filter is null) return;
+        filter.Enabled = !filter.Enabled;
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoFilterName(ChangeEventArgs args)
+    {
+        if (SelectedVideoFilter is not { } filter) return;
+        filter.Name = string.IsNullOrWhiteSpace(Text(args)) ? VideoFilterKindName(filter.Kind) : Text(args).Trim();
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoFilterColor(ChangeEventArgs args)
+    {
+        if (SelectedVideoFilter is not { } filter) return;
+        var value = Text(args).Trim();
+        if (value.Length == 7 && value[0] == '#' && value.Skip(1).All(Uri.IsHexDigit)) filter.Color = value.ToLowerInvariant();
+        CommitSelectedSegment();
+    }
+
+    private void ChangeVideoFilterAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.Amount = value);
+    private void ChangeVideoFilterSecondaryAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.SecondaryAmount = value);
+    private void ChangeVideoFilterTertiaryAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.TertiaryAmount = value);
+    private void ChangeVideoFilterResidualOpacity(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.ResidualOpacity = value);
+
+    private void ChangeSelectedVideoFilterNumber(ChangeEventArgs args, Action<VideoEffectFilter, double> assign)
+    {
+        if (SelectedVideoFilter is not { } filter || !TryDouble(args, out var value)) return;
+        assign(filter, value);
+        CommitSelectedSegment();
+    }
+
+    private void MoveVideoFilterUp() => MoveSelectedVideoFilter(1);
+    private void MoveVideoFilterDown() => MoveSelectedVideoFilter(-1);
+    private void MoveSelectedVideoFilter(int offset)
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        var index = SelectedVideoFilterIndex;
+        var target = index + offset;
+        if (index < 0 || target < 0 || target >= layer.Filters.Count) return;
+        var filter = layer.Filters[index];
+        layer.Filters.RemoveAt(index);
+        layer.Filters.Insert(target, filter);
+        CommitSelectedSegment();
+    }
+
+    private void RemoveSelectedVideoFilter()
+    {
+        if (SelectedVideoLayer is not { } layer || _selectedVideoFilterId is not Guid id) return;
+        var index = layer.Filters.FindIndex(filter => filter.Id == id);
+        if (index < 0) return;
+        layer.Filters.RemoveAt(index);
+        _selectedVideoFilterId = layer.Filters.Count == 0
+            ? null
+            : layer.Filters[Math.Clamp(index, 0, layer.Filters.Count - 1)].Id;
+        CommitSelectedSegment();
+    }
+
+    private static string VideoFilterKindName(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.HueRotation => "Hue rotation",
+        VideoEffectFilterKind.ChromaKey => "Chroma key",
+        VideoEffectFilterKind.ColorWash => "Color wash",
+        _ => kind.ToString()
+    };
+
+    private static string VideoFilterSummary(VideoEffectFilter filter) => filter.Kind switch
+    {
+        VideoEffectFilterKind.ChromaKey => $"{filter.Color} · similarity {filter.Amount:0.##}",
+        VideoEffectFilterKind.ColorWash => $"{filter.Color} · {filter.Amount:P0}",
+        VideoEffectFilterKind.HueRotation => $"{filter.Amount:0.#}°",
+        VideoEffectFilterKind.Blur => $"{filter.Amount:0.#} px",
+        _ => $"{filter.Amount:0.##}"
+    };
+
+    private static string VideoFilterAmountLabel(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.HueRotation => "Rotation",
+        VideoEffectFilterKind.Blur => "Radius",
+        VideoEffectFilterKind.Grain => "Amount",
+        VideoEffectFilterKind.ColorWash => "Opacity",
+        _ => "Amount"
+    };
+
+    private static double VideoFilterMinimum(VideoEffectFilterKind kind) => kind == VideoEffectFilterKind.HueRotation ? -360 : 0;
+    private static double VideoFilterMaximum(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.Brightness or VideoEffectFilterKind.Contrast or VideoEffectFilterKind.Saturation => 4,
+        VideoEffectFilterKind.HueRotation => 360,
+        VideoEffectFilterKind.Blur => 64,
+        _ => 1
+    };
+    private static double VideoFilterStep(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.HueRotation => 1,
+        VideoEffectFilterKind.Blur => .1,
+        _ => .01
+    };
+
+    private void ToggleFrameRegionInverted(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        layer.Region ??= new VideoFrameRegion();
+        layer.Region.Inverted = Bool(args);
+        CommitSelectedSegment();
+    }
+
+    [JSInvokable]
+    public Task VideoFramePointCommitted(int pointIndex, double x, double y)
+    {
+        if (!IsVideo || _mouseMode != MediaStudioMouseMode.FrameRegion || pointIndex < 0) return Task.CompletedTask;
+        var points = _frameRegionEditing ? _frameDraft : _frameClipPolygon;
+        if (pointIndex >= points.Count) return Task.CompletedTask;
+        points[pointIndex].X = Math.Clamp(double.IsFinite(x) ? x : points[pointIndex].X, 0, 1);
+        points[pointIndex].Y = Math.Clamp(double.IsFinite(y) ? y : points[pointIndex].Y, 0, 1);
+        return InvokeAsync(StateHasChanged);
     }
 
     [JSInvokable]
@@ -1395,6 +2246,217 @@
     private void ToggleMutedFromMenu() => _muted = !_muted;
     private void ToggleLoopFromMenu() => _loop = !_loop;
 
+    private async Task OpenVideoProjectPicker()
+    {
+        if (!IsVideo) return;
+        try
+        {
+            var module = await EnsureMediaModuleAsync();
+            await module.InvokeVoidAsync("clickElement", "media-studio-project-input");
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (ObjectDisposedException) { }
+        catch (Exception ex)
+        {
+            _error = $"The video-project picker could not be opened: {ex.Message}";
+        }
+    }
+
+    private async Task OpenVideoProjectMediaPicker()
+    {
+        if (!HasVideoProject) return;
+        try
+        {
+            var module = await EnsureMediaModuleAsync();
+            await module.InvokeVoidAsync("clickElement", "media-studio-project-media-input");
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (ObjectDisposedException) { }
+        catch (Exception ex)
+        {
+            _error = $"The project-media picker could not be opened: {ex.Message}";
+        }
+    }
+
+    private async Task LoadVideoProject(InputFileChangeEventArgs args)
+    {
+        if (!IsVideo) return;
+        try
+        {
+            CommitProjectTrack();
+            await using var stream = args.File.OpenReadStream(512L * 1024 * 1024);
+            var imported = await VideoProjectImporter.ImportAsync(stream, args.File.Name);
+            _videoProject = TimelineEdits.CloneVideoProject(imported.Project);
+            _videoProjectIssues = [.. imported.Issues];
+            _activeProjectTrackId = ResolveActiveProjectTrackId(_videoProject);
+            LoadProjectTrack(_activeProjectTrackId);
+            var missing = VideoProjectMissingMediaCount;
+            var report = _videoProjectIssues.Count == 0
+                ? "without compatibility warnings"
+                : $"with {_videoProjectIssues.Count} compatibility report item{(_videoProjectIssues.Count == 1 ? string.Empty : "s")}";
+            _warning = $"Imported {_videoProject.SourceFormat} project '{_videoProject.Name}' {report}. "
+                + (missing == 0 ? "All referenced media is linked." : $"Relink {missing} missing media reference{(missing == 1 ? string.Empty : "s")} to preview it.");
+            _error = null;
+        }
+        catch (Exception ex)
+        {
+            _error = $"The open video project could not be imported: {ex.Message}";
+        }
+    }
+
+    private async Task RelinkVideoProjectMedia(InputFileChangeEventArgs args)
+    {
+        if (_videoProject is null) return;
+        try
+        {
+            CommitProjectTrack();
+            var files = args.GetMultipleFiles(512);
+            var linked = 0;
+            var unmatched = new List<string>();
+            foreach (var file in files)
+            {
+                await using var stream = file.OpenReadStream(512L * 1024 * 1024);
+                using var buffer = new MemoryStream();
+                await stream.CopyToAsync(buffer);
+                if (buffer.Length == 0) continue;
+                var mime = ResolveProjectMediaMimeType(file.Name, file.ContentType);
+                var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(buffer.ToArray())}";
+                var matches = _videoProject.Tracks
+                    .SelectMany(track => track.Segments)
+                    .Where(segment => !segment.IsGap && MatchesProjectMedia(segment, file.Name))
+                    .ToList();
+                if (matches.Count == 0)
+                {
+                    unmatched.Add(file.Name);
+                    continue;
+                }
+                foreach (var segment in matches)
+                {
+                    segment.DataUrl = dataUrl;
+                    segment.MimeType = mime;
+                    segment.SourceReference.MimeType = mime;
+                    segment.SourceReference.Missing = false;
+                    segment.SourceReference.Metadata["relinked_name"] = file.Name;
+                    linked++;
+                }
+            }
+            LoadProjectTrack(_activeProjectTrackId);
+            _warning = linked == 0
+                ? "No selected file matched an imported source name, path, reel, or identifier."
+                : $"Relinked {linked} project clip reference{(linked == 1 ? string.Empty : "s")}."
+                    + (unmatched.Count == 0 ? string.Empty : $" Unmatched: {string.Join(", ", unmatched.Take(8))}.");
+            _error = null;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Project media could not be relinked: {ex.Message}";
+        }
+    }
+
+    private async Task ChangeProjectTrack(ChangeEventArgs args)
+    {
+        if (!Guid.TryParse(Text(args), out var trackId) || _videoProject is null || trackId == _activeProjectTrackId) return;
+        CommitProjectTrack();
+        LoadProjectTrack(trackId);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void LoadProjectTrack(Guid trackId)
+    {
+        if (_videoProject is null) return;
+        var track = _videoProject.Tracks.FirstOrDefault(candidate => candidate.Id == trackId && candidate.Kind == MediaTimelineTrackKind.Video)
+            ?? _videoProject.Tracks.OrderBy(candidate => candidate.Order).FirstOrDefault(candidate => candidate.Kind == MediaTimelineTrackKind.Video)
+            ?? _videoProject.Tracks.OrderBy(candidate => candidate.Order).FirstOrDefault();
+        if (track is null)
+        {
+            _segments.Clear();
+            _activeProjectTrackId = Guid.Empty;
+            ClearSelectedSegmentFields();
+            return;
+        }
+
+        _activeProjectTrackId = track.Id;
+        _videoProject.ActiveTrackId = track.Id;
+        _segments.Clear();
+        _segments.AddRange(TimelineEdits.Normalize(TimelineEdits.CreateTrackProjection(_videoProject, track.Id), video: true));
+        var selected = _segments.FirstOrDefault(IsPlayableSegment)
+            ?? _segments.FirstOrDefault(segment => !segment.IsGap)
+            ?? _segments.FirstOrDefault();
+        if (selected is null) ClearSelectedSegmentFields();
+        else SelectSegment(selected.Id, seek: false, forceReload: true);
+        _playhead = 0;
+    }
+
+    private void CommitProjectTrack()
+    {
+        CommitSelectedSegment();
+        if (_videoProject is null || _activeProjectTrackId == Guid.Empty) return;
+        TimelineEdits.ReplaceTrackProjection(_videoProject, _activeProjectTrackId, _segments);
+    }
+
+    private static Guid ResolveActiveProjectTrackId(VideoProjectDocument project)
+    {
+        var active = project.Tracks.FirstOrDefault(track => track.Id == project.ActiveTrackId && track.Kind == MediaTimelineTrackKind.Video);
+        return active?.Id
+            ?? project.Tracks.OrderBy(track => track.Order).FirstOrDefault(track => track.Kind == MediaTimelineTrackKind.Video)?.Id
+            ?? project.Tracks.OrderBy(track => track.Order).FirstOrDefault()?.Id
+            ?? Guid.Empty;
+    }
+
+    private static bool MatchesProjectMedia(PublicationMediaSegment segment, string selectedFileName)
+    {
+        var targetName = Path.GetFileName(selectedFileName);
+        var targetStem = Path.GetFileNameWithoutExtension(targetName);
+        var candidates = new[]
+        {
+            segment.Name,
+            segment.SourceReference.Id,
+            segment.SourceReference.ReelName,
+            segment.SourceReference.OriginalPath,
+            segment.SourceReference.Uri,
+            segment.SourceReference.Metadata.TryGetValue("target_url", out var target) ? target : string.Empty
+        };
+        return candidates
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .SelectMany(value => new[] { ProjectReferenceFileName(value), Path.GetFileNameWithoutExtension(ProjectReferenceFileName(value)) })
+            .Any(value => string.Equals(value, targetName, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(value, targetStem, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string ProjectReferenceFileName(string value)
+    {
+        var clean = value.Trim().Replace('\\', '/');
+        if (Uri.TryCreate(clean, UriKind.Absolute, out var uri) && uri.IsFile)
+            clean = uri.LocalPath.Replace('\\', '/');
+        var query = clean.IndexOfAny(['?', '#']);
+        if (query >= 0) clean = clean[..query];
+        return Path.GetFileName(clean);
+    }
+
+    private static string ResolveProjectMediaMimeType(string fileName, string? declaredMimeType)
+    {
+        var declared = NormalizeMimeType(declaredMimeType, string.Empty);
+        if (!string.IsNullOrWhiteSpace(declared)) return declared;
+        return Path.GetExtension(fileName).ToLowerInvariant() switch
+        {
+            ".mp4" or ".m4v" => "video/mp4",
+            ".webm" => "video/webm",
+            ".ogv" or ".ogg" => "video/ogg",
+            ".mov" => "video/quicktime",
+            ".wav" => "audio/wav",
+            ".mp3" => "audio/mpeg",
+            ".m4a" or ".aac" => "audio/mp4",
+            ".flac" => "audio/flac",
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".webp" => "image/webp",
+            ".svg" => "image/svg+xml",
+            _ => "application/octet-stream"
+        };
+    }
+
     private async Task OpenMediaPicker()
     {
         try
@@ -1426,7 +2488,7 @@
             {
                 _segments.Add(segment);
             }
-            SelectSegment(segment.Id, seek: false);
+            SelectSegment(segment.Id, seek: false, forceReload: true);
             _playhead = TimelineEdits.SegmentTimelineStart(_segments, _segments.IndexOf(segment), _playbackRate);
             var module = await EnsureMediaModuleAsync();
             await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview");
@@ -1854,6 +2916,7 @@
             }
             SetVideoSelectionRange(start, end, pointSelection: false);
         }
+        CommitSelectedSegment();
         await SeekVideoSelectionStartAsync();
     }
 
@@ -1861,6 +2924,7 @@
     {
         if (!TryDouble(args, out var value)) return;
         SetVideoSelectionRange(value, _videoSelectionIsPoint ? value : VideoSelectionEnd, _videoSelectionIsPoint);
+        CommitSelectedSegment();
         await SeekVideoSelectionStartAsync();
     }
 
@@ -1868,6 +2932,7 @@
     {
         if (!TryDouble(args, out var value) || _videoSelectionIsPoint) return;
         SetVideoSelectionRange(VideoSelectionStart, value, pointSelection: false);
+        CommitSelectedSegment();
         await SeekVideoSelectionStartAsync();
     }
 
@@ -1984,11 +3049,13 @@
             if (string.IsNullOrWhiteSpace(_dataUrl) && _segments.Count == 0)
                 throw new InvalidDataException("The completed recording has not been embedded yet.");
 
-            CommitSelectedSegment();
+            CommitProjectTrack();
             var normalizedSegments = TimelineEdits.Normalize(_segments, IsVideo);
             if (normalizedSegments.Count == 0)
                 throw new InvalidDataException("The media sequence does not contain an insertable section.");
-            var firstSegment = normalizedSegments[0];
+            var firstSegment = normalizedSegments.FirstOrDefault(IsPlayableSegment)
+                ?? normalizedSegments.FirstOrDefault(segment => !segment.IsGap)
+                ?? normalizedSegments[0];
 
             await Saved.InvokeAsync(new MediaEditorResult
             {
@@ -2012,7 +3079,10 @@
                 VideoFitMode = _videoFitMode,
                 WaveformSamples = [.. firstSegment.WaveformSamples],
                 Segments = normalizedSegments,
-                FrameClipPolygon = CloneFramePoints(_frameClipPolygon)
+                VideoProject = IsVideo && _videoProject is not null
+                    ? TimelineEdits.CloneVideoProject(_videoProject)
+                    : null,
+                FrameClipPolygon = CloneFramePoints(normalizedSegments.FirstOrDefault(segment => !segment.IsGap)?.VideoLayers.FirstOrDefault()?.Region?.Points)
             });
             applied = true;
             MediaAssets.Remove(_previewAssetId);

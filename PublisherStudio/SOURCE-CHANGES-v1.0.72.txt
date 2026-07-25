@@ -1,0 +1,65 @@
+PublisherStudio v1.0.72 source changes
+=====================================
+
+Canonical media model and orchestration
+---------------------------------------
+- Domain/PublicationMediaModels.cs
+  Added persistent per-clip temporal selection, multiple MediaTemporalSection cut sections, VideoFrameRegion, VideoEffectLayer, VideoEffectFilter, filter/blend enums, and nested video-layer state on media segments.
+- Services/MediaStudio/UseCases/MediaTimelineEditService.cs
+  Added deep clone/normalization for selections, cut sections, regions, layers and filters; preserved nested state through split/duplicate/merge operations; added default layer/filter factories; and projected Mainframe live-source controls into a reusable canonical Live input controls layer.
+- Components/Pages/Editor.razor
+  Applies Media Studio segments through the shared deep-clone service so nested selections, cut sections, regions, layers and filters survive publication insertion/update.
+
+Video Studio workflow
+---------------------
+- Components/Editor/MediaStudio.razor
+  Persists selected point/range state on the selected clip, reconciles late source duration, provides multiple saved cut sections, provides ordered video layers and filter stacks, binds frame regions to the selected layer, exposes chroma key and other live filters, and keeps the legacy frame polygon as a compatibility projection.
+- wwwroot/js/mediaStudioInterop.js
+  Commits bounded temporal selections, supports draggable frame-region vertices, keeps browser-local high-frequency pointer movement, and configures the shared video-effect renderer.
+- wwwroot/css/site.css
+  Added local styles for saved cut sections, layer/filter property lists, effect canvas, draggable frame nodes, and publication video effect canvases.
+
+Shared browser rendering
+------------------------
+- wwwroot/js/videoEffectRuntime.js
+  Added the shared layered canvas compositor used by Video Studio, publication video preview and streaming live sources. Supports fit modes, regions/inversion, temporal ranges, opacity, blend modes, color adjustments, chroma key, color wash, vignette and grain.
+- Components/App.razor
+  Loads the shared renderer before streaming runtime initialization.
+- Components/Editor/VideoMediaView.razor
+  Added a lifecycle-safe Mainframe publication-video renderer backed by canonical clip layers.
+- Components/Editor/PageSurface.razor
+  Replaced the raw publication video block with VideoMediaView.
+
+Streaming inputs
+----------------
+- Domain/PublicationStreamingModels.cs
+  Added canonical VideoLayers to visual live sources.
+- Components/Editor/LiveSourceView.razor
+  Sends canonical layer/filter payloads to the streaming renderer and refreshes effects without restarting source capture.
+- Components/Editor/InspectorPanel.razor
+  Synchronizes existing live-source adjustment/chroma controls into the canonical Live input controls layer, refreshes that layer during live slider/color edits, and adds direct authored streaming-layer/filter management for all shared video filter kinds.
+- wwwroot/js/streamingInterop.js
+  Uses the shared video-effect runtime for live sources and retains a legacy-control fallback for older transient state.
+
+Persistence and migration
+-------------------------
+- Services/PublicationFileService.cs
+  Injects MediaTimelineEditService, normalizes nested media state, migrates the old global frame polygon into the first layer, projects the first layer back for compatibility, normalizes live-source layers, and writes publication format 1.51.
+- Services/Publication/Import/OpenDocumentImportService.cs
+  Creates imported publications at format 1.51.
+- Domain/PublicationModels.cs
+  Sets the current publication format to 1.51.
+
+Tests and release metadata
+--------------------------
+- tests/videoLayerEffects.test.mjs
+  Added contracts for persistent selection, multiple cut sections, layer-owned regions, filter/chroma rendering, Mainframe preview, live-source filters, migration and format normalization.
+- Existing publication/version and Studio overlay tests were updated for format 1.51 and selected-layer frame-region ownership.
+- Application, installer, runtime capability, npm package and lock-file versions are 1.0.72.
+- Added CHANGELOG-v1.0.72.md, SOURCE-CHANGES-v1.0.72.txt, TEST-RESULTS-v1.0.72.txt, and updated release, architecture and validation notes.
+
+Compatibility
+-------------
+- Publication format is 1.51.
+- Picture Studio format remains 1.4.
+- Dependency versions are unchanged.

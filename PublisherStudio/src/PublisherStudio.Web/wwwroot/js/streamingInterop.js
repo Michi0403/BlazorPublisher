@@ -262,60 +262,48 @@
         return () => { cancelAnimationFrame(frame); source.disconnect(); analyser.disconnect(); context.close().catch(() => undefined); };
     }
 
-    function compileShader(gl, type, source) {
-        const shader = gl.createShader(type);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader) || "Shader compilation failed");
-        return shader;
+    function legacyVideoLayers(config) {
+        const filters = [];
+        const add = (kind, amount, extra = {}) => filters.push({ kind, enabled: true, amount, ...extra });
+        if (Math.abs(Number(config.brightness ?? 1) - 1) > .001) add('Brightness', Number(config.brightness));
+        if (Math.abs(Number(config.contrast ?? 1) - 1) > .001) add('Contrast', Number(config.contrast));
+        if (Math.abs(Number(config.saturation ?? 1) - 1) > .001) add('Saturation', Number(config.saturation));
+        if (Math.abs(Number(config.hueRotation || 0)) > .001) add('HueRotation', Number(config.hueRotation));
+        if (Number(config.blur || 0) > .001) add('Blur', Number(config.blur));
+        if (config.chromaKeyEnabled) add('ChromaKey', Number(config.chromaSimilarity || .35), {
+            secondaryAmount: Number(config.chromaSmoothness || .12),
+            tertiaryAmount: Number(config.chromaSpill || .3),
+            residualOpacity: Number(config.chromaResidualOpacity ?? 0),
+            color: config.chromaKeyColor || '#00ff00'
+        });
+        return [{
+            id: 'legacy-live-layer',
+            name: 'Live input filters',
+            visible: true,
+            opacity: 1,
+            blendMode: 'Normal',
+            region: { points: [], inverted: false },
+            filters
+        }];
     }
 
-    function installChroma(video, canvas, config) {
-        if (!video || !canvas || !config.chromaKeyEnabled) {
-            canvas?.classList.remove("active");
+    function installVideoEffects(video, canvas, config) {
+        if (!video || !canvas || !window.publisherVideoEffects) {
+            canvas?.classList.remove('active');
             return null;
         }
-        const gl = canvas.getContext("webgl", { premultipliedAlpha: false, alpha: true });
-        if (!gl) return null;
-        const program = gl.createProgram();
-        gl.attachShader(program, compileShader(gl, gl.VERTEX_SHADER, `attribute vec2 p;varying vec2 uv;void main(){uv=(p+1.0)*0.5;uv.y=1.0-uv.y;gl_Position=vec4(p,0,1);}`));
-        gl.attachShader(program, compileShader(gl, gl.FRAGMENT_SHADER, `precision mediump float;varying vec2 uv;uniform sampler2D tex;uniform vec3 key;uniform float similarity;uniform float smoothness;uniform float spill;uniform float residual;void main(){vec4 c=texture2D(tex,uv);float d=distance(c.rgb,key);float keep=smoothstep(similarity,similarity+max(0.001,smoothness),d);float nearKey=1.0-keep;float gray=dot(c.rgb,vec3(0.299,0.587,0.114));c.rgb=mix(c.rgb,vec3(gray),nearKey*spill);c.a*=mix(residual,1.0,keep);gl_FragColor=c;}`));
-        gl.linkProgram(program);
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) || "Shader link failed");
-        gl.useProgram(program);
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
-        const position = gl.getAttribLocation(program, "p");
-        gl.enableVertexAttribArray(position);
-        gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        const key = hexColor(config.chromaKeyColor);
-        gl.uniform3f(gl.getUniformLocation(program, "key"), key[0], key[1], key[2]);
-        gl.uniform1f(gl.getUniformLocation(program, "similarity"), Number(config.chromaSimilarity || .35));
-        gl.uniform1f(gl.getUniformLocation(program, "smoothness"), Number(config.chromaSmoothness || .12));
-        gl.uniform1f(gl.getUniformLocation(program, "spill"), Number(config.chromaSpill || .3));
-        gl.uniform1f(gl.getUniformLocation(program, "residual"), Number(config.chromaResidualOpacity ?? 1));
-        canvas.classList.add("active");
-        let frame = 0;
-        const render = () => {
-            const width = Math.max(2, video.videoWidth || canvas.clientWidth || 640);
-            const height = Math.max(2, video.videoHeight || canvas.clientHeight || 360);
-            if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; gl.viewport(0, 0, width, height); }
-            if (video.readyState >= 2) {
-                gl.bindTexture(gl.TEXTURE_2D, texture);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-                gl.drawArrays(gl.TRIANGLES, 0, 6);
-            }
-            frame = requestAnimationFrame(render);
-        };
-        render();
-        return () => { cancelAnimationFrame(frame); canvas.classList.remove("active"); try { gl.deleteTexture(texture); gl.deleteProgram(program); } catch { } };
+        const layers = Array.isArray(config.videoLayers) && config.videoLayers.length
+            ? config.videoLayers
+            : legacyVideoLayers(config);
+        const key = `live-source-${String(config.id || canvas.id || video.id)}`;
+        window.publisherVideoEffects.install(key, video, canvas, {
+            layers,
+            fitMode: config.fitMode || 'cover',
+            forceCanvas: layers.some(layer => Array.isArray(layer?.filters) && layer.filters.length > 0)
+        });
+        return () => window.publisherVideoEffects?.dispose(key);
     }
+
 
 
     function installNowPlaying(config) {
@@ -379,12 +367,12 @@
                 else if (String(config.kind).toLowerCase() === "networkmedia" && config.networkUrl) video.src = config.networkUrl;
                 await video.play().catch(() => undefined);
             }
-            const stopChroma = installChroma(video, canvas, config);
+            const stopVideoEffects = installVideoEffects(video, canvas, config);
             const stopMeter = installMeter(stream, meter);
             const tracks = stream ? stream.getTracks() : [];
             const ended = () => detachSource(config.id);
             tracks.forEach(track => track.addEventListener("ended", ended, { once: true }));
-            const state = { stream, video, stopChroma, stopMeter, ended, config };
+            const state = { stream, video, stopVideoEffects, stopMeter, ended, config };
             sources.set(String(config.id), state);
             connectProgramAudio(state);
             return !!stream || !!(video && video.src);
@@ -395,11 +383,23 @@
         }
     }
 
+    function updateSourceEffects(config) {
+        const state = sources.get(String(config?.id || ''));
+        if (!state) return false;
+        const video = state.video || document.getElementById(config.videoId);
+        const canvas = document.getElementById(config.canvasId);
+        state.stopVideoEffects?.();
+        if (video) video.style.objectFit = config.fitMode || state.config?.fitMode || 'cover';
+        state.stopVideoEffects = installVideoEffects(video, canvas, { ...state.config, ...config });
+        state.config = { ...state.config, ...config };
+        return true;
+    }
+
     function detachSource(id) {
         const state = sources.get(String(id));
         if (!state) return;
         disconnectProgramAudio(state);
-        state.stopChroma?.();
+        state.stopVideoEffects?.();
         state.stopMeter?.();
         state.stopMetadata?.();
         try { state.stream?.__publisherNativeCleanup?.(); } catch { }
@@ -1140,6 +1140,7 @@
 
     window.publisherStreaming = {
         attachSource,
+        updateSourceEffects,
         detachSource,
         activateSource,
         enumerateDevices,

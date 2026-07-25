@@ -5,6 +5,7 @@
 @inject PublicationFileService Files
 @inject PublisherStudio.Services.Publication.Import.OpenDocumentImportService OpenDocumentImporter
 @inject PublicationMediaAssetStore MediaAssets
+@inject PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService TimelineEdits
 @inject PictureDocumentService PictureDocuments
 @inject SpreadsheetDocumentService Spreadsheets
 @inject SpreadsheetSessionStore SpreadsheetSessions
@@ -1312,7 +1313,7 @@
         return Task.CompletedTask;
     }
 
-    private static void ApplyMediaResult(PublicationMediaElement item, MediaEditorResult result)
+    private void ApplyMediaResult(PublicationMediaElement item, MediaEditorResult result)
     {
         item.Name = result.Name;
         item.DataUrl = result.DataUrl;
@@ -1329,24 +1330,16 @@
         item.AutoPlay = result.AutoPlay;
         item.PlaybackTrigger = result.PlaybackTrigger;
         item.WaveformSamples = result.WaveformSamples ?? [];
-        item.Segments = result.Segments?.Select(segment => new PublicationMediaSegment
-        {
-            Id = segment.Id == Guid.Empty ? Guid.NewGuid() : segment.Id,
-            Name = segment.Name,
-            DataUrl = segment.DataUrl,
-            MimeType = segment.MimeType,
-            PosterDataUrl = segment.PosterDataUrl,
-            DurationSeconds = segment.DurationSeconds,
-            TrimStartSeconds = segment.TrimStartSeconds,
-            TrimEndSeconds = segment.TrimEndSeconds,
-            WaveformSamples = [.. segment.WaveformSamples]
-        }).ToList() ?? [];
+        item.Segments = result.Segments?.Select(TimelineEdits.Clone).ToList() ?? [];
         if (item is VideoElement video)
         {
             video.PosterDataUrl = result.PosterDataUrl;
             video.AltText = result.Name;
             video.FitMode = result.VideoFitMode;
             video.FitModeExplicit = true;
+            video.VideoProject = result.VideoProject is null
+                ? null
+                : TimelineEdits.CloneVideoProject(result.VideoProject);
             video.FrameClipPolygon = result.FrameClipPolygon?.Select(point => new MediaFramePoint
             {
                 X = Math.Clamp(point.X, 0, 1),

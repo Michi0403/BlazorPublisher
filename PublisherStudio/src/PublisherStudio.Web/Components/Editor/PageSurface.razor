@@ -178,18 +178,7 @@
                             </div>
                             break;
                         case VideoElement video:
-                            <div class="publication-video-frame" style="background:@video.Background">
-                                <video src="@MediaSource(video)" poster="@MediaPoster(video)" controls="@video.ShowControls" muted="@video.Muted" loop="@video.Loop"
-                                       preload="metadata" playsinline data-media-control draggable="false" style="@VideoMediaStyle(video)">
-                                    @foreach (var segment in video.EffectiveSegments)
-                                    {
-                                        <source data-media-segment src="@MediaSegmentSource(segment)" type="@segment.MimeType"
-                                                data-media-name="@segment.Name" data-media-trim-start="@Inv(segment.TrimStartSeconds)"
-                                                data-media-trim-end="@Inv(segment.EffectiveTrimEndSeconds)" data-media-poster="@segment.PosterDataUrl" />
-                                    }
-                                </video>
-                                <span class="media-object-badge">▶ @Time(video.TimelineLengthSeconds)</span>
-                            </div>
+                            <VideoMediaView @key="video.Id" Item="video" />
                             break;
                         case AudioElement audio:
                             <div class="publication-audio-frame display-@audio.DisplayKind.ToString().ToLowerInvariant()" style="--media-accent:@audio.AccentColor">

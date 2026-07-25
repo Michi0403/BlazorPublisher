@@ -100,7 +100,7 @@ The web project now references `DevExpress.AspNetCore.Spreadsheet` and copies it
 
 ## File model
 
-A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.49`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
+A `.pubstudio.json` file contains document/view metadata, pages, guides, polymorphic elements, DOCX story bytes plus sanitized previews, embedded spreadsheet workbook bytes plus regenerated static previews, embedded image/media data, and optional editable Picture Studio layer documents. Current format version is `1.52`; the loader supplies defaults and migrates older story, spreadsheet, image, media, WordArt path, data-object, data-visual, animation, transition, interaction, and playback fields.
 
 ## Reference and license boundary
 
@@ -187,3 +187,23 @@ Video Studio uses a local play-canvas stacking context with independent owners. 
 Pointer modes are explicit command state rather than inferred browser behavior. `SelectSection` commits a timestamp/range, `PlacePlayhead` changes source/project playback position without replacing the range, `AddCutLine` splits at the projected sequence timestamp, and `FrameRegion` transfers ownership to the polygon overlay. Browser-native controls and fullscreen are disabled inside the Studio preview.
 
 New videos default to `Stretch`. `FitModeExplicit` distinguishes later user choices from the legacy v1.0.70 implicit `Contain` default, allowing upgraded videos with that old implicit value to open full-canvas while preserving explicit choices from v1.0.71 onward.
+
+
+## Layered video effects and live-input parity (v1.0.72)
+
+`PublicationMediaSegment` is the owner of committed temporal selection, saved cut sections and ordered `VideoEffectLayer` state. A video layer owns visibility, opacity, blend mode, optional source-time bounds, one normalized source-frame region and an ordered filter stack. The active selection is not a cut section: it is one editable clip selection until the user explicitly saves it or invokes a cut/trim/copy command.
+
+`MediaTimelineEditService` is the reusable mutation/normalization owner for this nested state. Splits, duplicates, merges, publication loads and Media Studio results must use its deep-clone and normalization paths so no nested region/filter state is accidentally shared or flattened.
+
+`videoEffectRuntime.js` is the single browser compositor for Video Studio, Mainframe publication-video preview and visual live-source inputs. It stays below each owning surface's interaction overlays, accepts normalized source-frame regions, and does not become a publication Z-order object. Streaming Inspector adjustments are projected into a named canonical layer while additional authored live-input layers remain intact. The Mainframe Inspector can edit those additional layer/filter stacks directly; live slider/color edits synchronize the protected control layer in the same state transaction so preview and streaming output cannot drift.
+
+
+## Open video-project interchange (v1.0.73)
+
+Video Studio now stores imported editorial projects in a canonical `VideoProjectDocument` rather than flattening a foreign project directly into the legacy one-list sequence. The canonical document owns source format/version, canvas and frame rate, ordered typed tracks, explicit segment placements and durations, source ranges and rates, speed, missing/relinkable media references, markers, transitions, and adapter metadata. `VideoElement.VideoProject` is persisted in publication format `1.52` while `VideoElement.Segments` remains the editable/render-compatible projection of the active video track.
+
+`VideoProjectImportService` is the adapter boundary. v1.0.73 imports OpenTimelineIO (`.otio`), OTIO bundles (`.otioz`), MLT XML and Kdenlive/Shotcut projects (`.mlt`, `.kdenlive`), GStreamer Editing Services projects (`.xges`), OpenShot projects (`.osp`), and CMX 3600 EDL (`.edl`). Adapters create temporary canonical state, retain original source identifiers and format metadata, and emit explicit `InterchangeIssue` records for approximations, unsupported effects, assumed rates, and missing media. They never silently claim a foreign effect as a native PublisherStudio filter.
+
+The current Video Studio UI edits and previews one selected video-track projection. Switching tracks commits the current projection back to its canonical track before loading the next one. Other imported video/audio/data/subtitle tracks remain serialized and relinkable, but v1.0.73 does not claim simultaneous multitrack compositing or audio mixing. Future orchestration must operate on the canonical tracks rather than expanding the legacy sequence into a second project model.
+
+Project import is deliberately separate from media decoding. A project file usually references media instead of embedding it, so unresolved sources remain visible as offline clips and can be relinked by filename, path, reel, or imported identifier. OTIOZ is the initial portable bundle path: the importer validates the archive, reads top-level `content.otio`, and embeds only safely matched bundled media. JSON/XML/archive inputs are bounded; XML DTD and external resolution are disabled; archive traversal, excessive entries, excessive expanded size, and network fetching are rejected. No new NuGet or npm dependency was introduced.

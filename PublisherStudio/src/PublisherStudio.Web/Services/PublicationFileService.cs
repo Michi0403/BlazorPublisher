@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using PublisherStudio.Domain;
+using PublisherStudio.Services.MediaStudio.UseCases;
 
 namespace PublisherStudio.Services;
 
@@ -61,6 +62,7 @@ public sealed partial class PublicationFileService
     private readonly PublicationDataService _data;
     private readonly SpreadsheetDocumentService _spreadsheets;
     private readonly PublicationComponentService _components;
+    private readonly MediaTimelineEditService _mediaTimeline;
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -69,12 +71,18 @@ public sealed partial class PublicationFileService
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public PublicationFileService(PictureDocumentService pictures, PublicationDataService data, SpreadsheetDocumentService spreadsheets, PublicationComponentService components)
+    public PublicationFileService(
+        PictureDocumentService pictures,
+        PublicationDataService data,
+        SpreadsheetDocumentService spreadsheets,
+        PublicationComponentService components,
+        MediaTimelineEditService mediaTimeline)
     {
         _pictures = pictures;
         _data = data;
         _spreadsheets = spreadsheets;
         _components = components;
+        _mediaTimeline = mediaTimeline;
     }
 
     public string Serialize(PublicationDocument document)
@@ -182,21 +190,27 @@ public sealed partial class PublicationFileService
             var fallbackMimeType = media is VideoElement ? "video/webm" : "audio/webm";
             media.MimeType = PublicationMediaData.NormalizeMimeType(media.MimeType, fallbackMimeType);
             media.DataUrl = PublicationMediaData.NormalizeDataUrl(media.DataUrl, media.MimeType);
-            media.Segments ??= [];
-            foreach (var segment in media.Segments)
-            {
-                segment.Id = segment.Id == Guid.Empty ? Guid.NewGuid() : segment.Id;
-                segment.Name = string.IsNullOrWhiteSpace(segment.Name) ? media.Name : segment.Name.Trim();
-                segment.DurationSeconds = Math.Clamp(segment.DurationSeconds, .01, 24 * 60 * 60);
-                segment.TrimStartSeconds = Math.Clamp(segment.TrimStartSeconds, 0, Math.Max(0, segment.DurationSeconds - .01));
-                segment.TrimEndSeconds = Math.Clamp(segment.TrimEndSeconds > segment.TrimStartSeconds ? segment.TrimEndSeconds : segment.DurationSeconds, segment.TrimStartSeconds + .01, segment.DurationSeconds);
-                segment.MimeType = PublicationMediaData.NormalizeMimeType(segment.MimeType, fallbackMimeType);
-                segment.DataUrl = PublicationMediaData.NormalizeDataUrl(segment.DataUrl, segment.MimeType);
-                segment.WaveformSamples ??= [];
-                if (segment.WaveformSamples.Count > 256) segment.WaveformSamples = segment.WaveformSamples.Take(256).ToList();
-            }
+            media.Segments = _mediaTimeline.Normalize(media.Segments, media is VideoElement);
             if (media is VideoElement video)
             {
+                if (video.VideoProject is { Tracks.Count: > 0 } project)
+                {
+                    video.VideoProject = _mediaTimeline.CloneVideoProject(project);
+                    video.VideoProject.FrameRate = Math.Clamp(video.VideoProject.FrameRate <= 0 ? 30 : video.VideoProject.FrameRate, 1, 240);
+                    video.VideoProject.Width = Math.Clamp(video.VideoProject.Width <= 0 ? 1920 : video.VideoProject.Width, 16, 16384);
+                    video.VideoProject.Height = Math.Clamp(video.VideoProject.Height <= 0 ? 1080 : video.VideoProject.Height, 16, 16384);
+                    foreach (var track in video.VideoProject.Tracks)
+                    {
+                        track.Name = string.IsNullOrWhiteSpace(track.Name) ? $"{track.Kind} track" : track.Name.Trim();
+                        track.Segments = _mediaTimeline.Normalize(track.Segments, track.Kind == MediaTimelineTrackKind.Video);
+                    }
+                    var activeTrack = video.VideoProject.Tracks.FirstOrDefault(track => track.Id == video.VideoProject.ActiveTrackId && track.Kind == MediaTimelineTrackKind.Video)
+                        ?? video.VideoProject.Tracks.OrderBy(track => track.Order).FirstOrDefault(track => track.Kind == MediaTimelineTrackKind.Video)
+                        ?? video.VideoProject.Tracks.OrderBy(track => track.Order).FirstOrDefault();
+                    video.VideoProject.ActiveTrackId = activeTrack?.Id ?? Guid.Empty;
+                    if (media.Segments.Count == 0 && activeTrack is not null)
+                        media.Segments = _mediaTimeline.Normalize(_mediaTimeline.CreateTrackProjection(video.VideoProject, activeTrack.Id), video: true);
+                }
                 if (string.IsNullOrWhiteSpace(video.AltText)) video.AltText = video.Name;
                 video.FrameClipPolygon ??= [];
                 if (video.FrameClipPolygon.Count > 256) video.FrameClipPolygon = video.FrameClipPolygon.Take(256).ToList();
@@ -206,6 +220,20 @@ public sealed partial class PublicationFileService
                     point.Y = Math.Clamp(point.Y, 0, 1);
                 }
                 if (video.FrameClipPolygon.Count is > 0 and < 3) video.FrameClipPolygon.Clear();
+
+                // v1.0.71 and older stored one legacy frame polygon on the element. Migrate it into
+                // the canonical selected clip/layer model, then keep the legacy field as a projection
+                // for older render/export paths that have not yet moved to the live layer renderer.
+                var firstLayer = media.Segments.FirstOrDefault()?.VideoLayers.FirstOrDefault();
+                if (firstLayer is not null && firstLayer.Region.Points.Count < 3 && video.FrameClipPolygon.Count >= 3)
+                {
+                    firstLayer.Region.Points = video.FrameClipPolygon
+                        .Select(point => new MediaFramePoint { X = point.X, Y = point.Y })
+                        .ToList();
+                }
+                video.FrameClipPolygon = firstLayer?.Region.Points is { Count: >= 3 } points
+                    ? points.Select(point => new MediaFramePoint { X = point.X, Y = point.Y }).ToList()
+                    : [];
             }
         }
 
@@ -452,7 +480,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.49";
+        document.FormatVersion = "1.52";
         return document;
     }
 
@@ -840,7 +868,7 @@ public sealed partial class PublicationFileService
     private static partial Regex EventAttributeRegex();
     [GeneratedRegex("(href|src)\\s*=\\s*[\\\"']?\\s*javascript:[^\\s>\\\"']*", RegexOptions.IgnoreCase)]
     private static partial Regex JavascriptUrlRegex();
-    private static void NormalizeStreaming(PublicationDocument document)
+    private void NormalizeStreaming(PublicationDocument document)
     {
         var streaming = document.Streaming;
         streaming.Outputs ??= [];
@@ -899,6 +927,8 @@ public sealed partial class PublicationFileService
             source.ChromaSmoothness = Math.Clamp(source.ChromaSmoothness, 0, 1);
             source.ChromaSpill = Math.Clamp(source.ChromaSpill, 0, 1);
             source.ChromaResidualOpacity = Math.Clamp(source.ChromaResidualOpacity, 0, 1);
+            source.VideoLayers ??= [];
+            _mediaTimeline.SynchronizeLiveSourceLayer(source);
             source.Width = Math.Max(source.IsVisual ? 30 : 35, source.Width);
             source.Height = Math.Max(source.IsVisual ? 20 : 12, source.Height);
         }

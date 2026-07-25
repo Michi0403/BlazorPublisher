@@ -3,8 +3,8 @@ using PublisherStudio.Domain;
 namespace PublisherStudio.Services.MediaStudio.UseCases;
 
 /// <summary>
-/// Reusable, non-destructive clip orchestration shared by Video Studio and Audio Studio.
-/// Components own pointer state; this service owns deterministic timeline mutations.
+/// Reusable, non-destructive clip orchestration shared by Video Studio, Audio Studio and live video inputs.
+/// Components own pointer state; this service owns deterministic timeline, cut-section and video-layer mutations.
 /// </summary>
 public sealed class MediaTimelineEditService
 {
@@ -14,7 +14,7 @@ public sealed class MediaTimelineEditService
     {
         var fallbackMime = video ? "video/webm" : "audio/webm";
         return (source ?? [])
-            .Where(segment => segment is not null && !string.IsNullOrWhiteSpace(segment.DataUrl))
+            .Where(segment => segment is not null && (segment.IsGap || !string.IsNullOrWhiteSpace(segment.DataUrl) || !string.IsNullOrWhiteSpace(segment.SourceReference?.Uri) || !string.IsNullOrWhiteSpace(segment.SourceReference?.Id) || !string.IsNullOrWhiteSpace(segment.SourceReference?.ReelName)))
             .Select(segment => new PublicationMediaSegment
             {
                 Id = segment.Id == Guid.Empty ? Guid.NewGuid() : segment.Id,
@@ -22,10 +22,24 @@ public sealed class MediaTimelineEditService
                 DataUrl = PublicationMediaData.NormalizeDataUrl(segment.DataUrl, fallbackMime),
                 MimeType = PublicationMediaData.NormalizeMimeType(segment.MimeType, fallbackMime),
                 PosterDataUrl = segment.PosterDataUrl ?? string.Empty,
+                SourceReference = CloneSourceReference(segment.SourceReference),
+                Enabled = segment.Enabled,
+                IsGap = segment.IsGap,
+                TimelineStartSeconds = Math.Max(0, segment.TimelineStartSeconds),
+                TimelineDurationSeconds = Math.Max(0, segment.TimelineDurationSeconds),
+                SourceRate = Math.Max(0, segment.SourceRate),
+                Speed = Math.Abs(segment.Speed) < .0001 ? 1 : segment.Speed,
                 DurationSeconds = Math.Max(MinimumSourceLength, segment.DurationSeconds),
                 TrimStartSeconds = Math.Max(0, segment.TrimStartSeconds),
                 TrimEndSeconds = Math.Max(0, segment.TrimEndSeconds),
-                WaveformSamples = segment.WaveformSamples?.Select(value => Math.Clamp(value, 0, 1)).Take(256).ToList() ?? []
+                HasTemporalSelection = segment.HasTemporalSelection,
+                TemporalSelectionIsPoint = segment.TemporalSelectionIsPoint,
+                TemporalSelectionStartSeconds = Math.Max(0, segment.TemporalSelectionStartSeconds),
+                TemporalSelectionEndSeconds = Math.Max(0, segment.TemporalSelectionEndSeconds),
+                CutSections = CloneTemporalSections(segment.CutSections),
+                VideoLayers = video ? CloneVideoLayers(segment.VideoLayers) : [],
+                WaveformSamples = segment.WaveformSamples?.Select(value => Math.Clamp(value, 0, 1)).Take(256).ToList() ?? [],
+                ImportMetadata = new Dictionary<string, string>(segment.ImportMetadata ?? [])
             })
             .Select(segment =>
             {
@@ -33,13 +47,152 @@ public sealed class MediaTimelineEditService
                 segment.TrimEndSeconds = segment.TrimEndSeconds > segment.TrimStartSeconds
                     ? Math.Clamp(segment.TrimEndSeconds, segment.TrimStartSeconds + MinimumSourceLength, segment.DurationSeconds)
                     : segment.DurationSeconds;
+                NormalizeTemporalSelection(segment);
+                NormalizeCutSections(segment);
+                if (video && !segment.IsGap) segment.VideoLayers = NormalizeVideoLayers(segment.VideoLayers, segment.TrimStartSeconds, segment.EffectiveTrimEndSeconds, segment.Name);
+                else if (segment.IsGap) segment.VideoLayers.Clear();
                 return segment;
             })
             .ToList();
     }
 
+    public VideoProjectDocument CloneVideoProject(VideoProjectDocument? source)
+    {
+        if (source is null) return new VideoProjectDocument();
+        return new VideoProjectDocument
+        {
+            FormatVersion = source.FormatVersion,
+            Name = source.Name,
+            SourceFormat = source.SourceFormat,
+            SourceFormatVersion = source.SourceFormatVersion,
+            FrameRate = source.FrameRate,
+            Width = source.Width,
+            Height = source.Height,
+            ActiveTrackId = source.ActiveTrackId,
+            Tracks = (source.Tracks ?? []).Select(track => new MediaTimelineTrack
+            {
+                Id = track.Id,
+                Name = track.Name,
+                Kind = track.Kind,
+                Order = track.Order,
+                Enabled = track.Enabled,
+                Muted = track.Muted,
+                Locked = track.Locked,
+                Segments = (track.Segments ?? []).Select(Clone).ToList()
+            }).ToList(),
+            Transitions = (source.Transitions ?? []).Select(transition => new MediaTimelineTransition
+            {
+                Id = transition.Id,
+                Name = transition.Name,
+                Kind = transition.Kind,
+                TrackId = transition.TrackId,
+                FromSegmentId = transition.FromSegmentId,
+                ToSegmentId = transition.ToSegmentId,
+                TimelineStartSeconds = transition.TimelineStartSeconds,
+                DurationSeconds = transition.DurationSeconds,
+                Metadata = new Dictionary<string, string>(transition.Metadata ?? [])
+            }).ToList(),
+            Markers = (source.Markers ?? []).Select(marker => new MediaProjectMarker
+            {
+                Id = marker.Id,
+                Name = marker.Name,
+                Color = marker.Color,
+                StartSeconds = marker.StartSeconds,
+                DurationSeconds = marker.DurationSeconds,
+                Comment = marker.Comment
+            }).ToList(),
+            Metadata = new Dictionary<string, string>(source.Metadata ?? [])
+        };
+    }
+
+    public List<PublicationMediaSegment> CreateTrackProjection(VideoProjectDocument project, Guid trackId)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+        var track = (project.Tracks ?? []).FirstOrDefault(candidate => candidate.Id == trackId)
+            ?? project.Tracks?.FirstOrDefault();
+        if (track is null) return [];
+
+        var result = new List<PublicationMediaSegment>();
+        var cursor = 0d;
+        foreach (var source in (track.Segments ?? []).OrderBy(segment => segment.TimelineStartSeconds).ThenBy(segment => segment.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var start = Math.Max(0, source.TimelineStartSeconds);
+            if (start > cursor + .001)
+            {
+                var gapLength = start - cursor;
+                result.Add(new PublicationMediaSegment
+                {
+                    Name = "Gap",
+                    IsGap = true,
+                    TimelineStartSeconds = cursor,
+                    TimelineDurationSeconds = gapLength,
+                    DurationSeconds = gapLength,
+                    TrimEndSeconds = gapLength,
+                    SourceRate = project.FrameRate,
+                    ImportMetadata = { ["projection_gap"] = "true" }
+                });
+                cursor = start;
+            }
+
+            var clone = Clone(source);
+            if (start < cursor - .001)
+            {
+                clone.ImportMetadata["original_timeline_start"] = start.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+                clone.ImportMetadata["overlap_flattened_for_editor"] = "true";
+            }
+            clone.TimelineStartSeconds = cursor;
+            clone.TimelineDurationSeconds = clone.TimelineDurationSeconds > 0
+                ? clone.TimelineDurationSeconds
+                : clone.SourceLengthSeconds / Math.Max(.0001, Math.Abs(clone.Speed));
+            result.Add(clone);
+            cursor += Math.Max(MinimumSourceLength, clone.TimelineDurationSeconds);
+        }
+        return result;
+    }
+
+    public void ReplaceTrackProjection(VideoProjectDocument project, Guid trackId, IEnumerable<PublicationMediaSegment> projection)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+        var track = (project.Tracks ?? []).FirstOrDefault(candidate => candidate.Id == trackId);
+        if (track is null) return;
+        var cursor = 0d;
+        track.Segments = (projection ?? []).Select(Clone).Select(segment =>
+        {
+            segment.TimelineStartSeconds = cursor;
+            segment.TimelineDurationSeconds = segment.TimelineDurationSeconds > 0
+                ? segment.TimelineDurationSeconds
+                : segment.SourceLengthSeconds / Math.Max(.0001, Math.Abs(segment.Speed));
+            cursor += Math.Max(MinimumSourceLength, segment.TimelineDurationSeconds);
+            return segment;
+        }).ToList();
+        project.ActiveTrackId = track.Id;
+    }
+
+    public VideoEffectLayer CreateDefaultVideoLayer(string? name = null) => new()
+    {
+        Name = string.IsNullOrWhiteSpace(name) ? "Base video" : $"{name.Trim()} · base",
+        Region = new VideoFrameRegion { Name = "Full frame" }
+    };
+
+    public List<VideoEffectLayer> NormalizeVideoLayers(
+        IEnumerable<VideoEffectLayer>? source,
+        double minimumSeconds,
+        double maximumSeconds,
+        string? defaultName = null)
+    {
+        var minimum = Math.Max(0, double.IsFinite(minimumSeconds) ? minimumSeconds : 0);
+        var maximum = Math.Max(minimum, double.IsFinite(maximumSeconds) ? maximumSeconds : minimum);
+        var normalized = (source ?? [])
+            .Where(layer => layer is not null)
+            .Take(64)
+            .Select((layer, index) => NormalizeVideoLayer(CloneVideoLayer(layer), minimum, maximum, index))
+            .ToList();
+        if (normalized.Count == 0) normalized.Add(CreateDefaultVideoLayer(defaultName));
+        return normalized;
+    }
+
     public double TimelineLength(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate)
-        => segments.Sum(segment => segment.SourceLengthSeconds) / Math.Max(.1, playbackRate);
+        => segments.Sum(segment => SegmentTimelineLength(segment, playbackRate));
 
     public int SegmentIndexAt(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds)
     {
@@ -48,7 +201,7 @@ public sealed class MediaTimelineEditService
         var rate = Math.Max(.1, playbackRate);
         for (var index = 0; index < segments.Count; index++)
         {
-            var length = segments[index].SourceLengthSeconds / rate;
+            var length = SegmentTimelineLength(segments[index], rate);
             if (timelineSeconds <= cursor + length || index == segments.Count - 1) return index;
             cursor += length;
         }
@@ -56,14 +209,15 @@ public sealed class MediaTimelineEditService
     }
 
     public double SegmentTimelineStart(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate)
-        => segments.Take(Math.Clamp(index, 0, segments.Count)).Sum(segment => segment.SourceLengthSeconds) / Math.Max(.1, playbackRate);
+        => segments.Take(Math.Clamp(index, 0, segments.Count)).Sum(segment => SegmentTimelineLength(segment, playbackRate));
 
     public double SourcePositionAt(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate, double timelineSeconds)
     {
         if (index < 0 || index >= segments.Count) return 0;
         var start = SegmentTimelineStart(segments, index, playbackRate);
         var segment = segments[index];
-        return Math.Clamp(segment.TrimStartSeconds + Math.Max(0, timelineSeconds - start) * Math.Max(.1, playbackRate),
+        var localRate = Math.Max(.0001, Math.Abs(segment.Speed));
+        return Math.Clamp(segment.TrimStartSeconds + Math.Max(0, timelineSeconds - start) * Math.Max(.1, playbackRate) * localRate,
             segment.TrimStartSeconds, segment.EffectiveTrimEndSeconds);
     }
 
@@ -82,6 +236,12 @@ public sealed class MediaTimelineEditService
         right.TrimStartSeconds = sourcePosition;
         segment.TrimEndSeconds = sourcePosition;
         segment.Name = Suffix(segment.Name, "left");
+        NormalizeTemporalSelection(segment);
+        NormalizeTemporalSelection(right);
+        NormalizeCutSections(segment);
+        NormalizeCutSections(right);
+        segment.VideoLayers = NormalizeVideoLayers(segment.VideoLayers, segment.TrimStartSeconds, segment.EffectiveTrimEndSeconds, segment.Name);
+        right.VideoLayers = NormalizeVideoLayers(right.VideoLayers, right.TrimStartSeconds, right.EffectiveTrimEndSeconds, right.Name);
         segments.Insert(index + 1, right);
         return right.Id;
     }
@@ -127,7 +287,7 @@ public sealed class MediaTimelineEditService
         }
 
         var segmentStart = SegmentTimelineStart(segments, index, playbackRate);
-        var segmentLength = segments[index].SourceLengthSeconds / Math.Max(.1, playbackRate);
+        var segmentLength = SegmentTimelineLength(segments[index], playbackRate);
         if (position <= segmentStart + tolerance)
         {
             segments.Insert(index, inserted);
@@ -151,7 +311,9 @@ public sealed class MediaTimelineEditService
         if (rightIndex <= 0 || rightIndex >= segments.Count) return false;
         var left = segments[rightIndex - 1];
         var right = segments[rightIndex];
-        return string.Equals(left.DataUrl, right.DataUrl, StringComparison.Ordinal)
+        return !left.IsGap && !right.IsGap
+            && string.Equals(left.DataUrl, right.DataUrl, StringComparison.Ordinal)
+            && string.Equals(left.SourceReference?.Uri, right.SourceReference?.Uri, StringComparison.OrdinalIgnoreCase)
             && string.Equals(left.MimeType, right.MimeType, StringComparison.OrdinalIgnoreCase)
             && Math.Abs(left.EffectiveTrimEndSeconds - right.TrimStartSeconds) <= .02;
     }
@@ -163,6 +325,10 @@ public sealed class MediaTimelineEditService
         var right = segments[rightIndex];
         left.TrimEndSeconds = right.EffectiveTrimEndSeconds;
         left.Name = MergeName(left.Name, right.Name);
+        left.CutSections.AddRange(CloneTemporalSections(right.CutSections));
+        NormalizeTemporalSelection(left);
+        NormalizeCutSections(left);
+        left.VideoLayers = NormalizeVideoLayers(left.VideoLayers, left.TrimStartSeconds, left.EffectiveTrimEndSeconds, left.Name);
         segments.RemoveAt(rightIndex);
         return true;
     }
@@ -174,10 +340,43 @@ public sealed class MediaTimelineEditService
         DataUrl = segment.DataUrl,
         MimeType = segment.MimeType,
         PosterDataUrl = segment.PosterDataUrl,
+        SourceReference = CloneSourceReference(segment.SourceReference),
+        Enabled = segment.Enabled,
+        IsGap = segment.IsGap,
+        TimelineStartSeconds = segment.TimelineStartSeconds,
+        TimelineDurationSeconds = segment.TimelineDurationSeconds,
+        SourceRate = segment.SourceRate,
+        Speed = segment.Speed,
         DurationSeconds = segment.DurationSeconds,
         TrimStartSeconds = segment.TrimStartSeconds,
         TrimEndSeconds = segment.TrimEndSeconds,
-        WaveformSamples = [.. segment.WaveformSamples]
+        HasTemporalSelection = segment.HasTemporalSelection,
+        TemporalSelectionIsPoint = segment.TemporalSelectionIsPoint,
+        TemporalSelectionStartSeconds = segment.TemporalSelectionStartSeconds,
+        TemporalSelectionEndSeconds = segment.TemporalSelectionEndSeconds,
+        CutSections = CloneTemporalSections(segment.CutSections),
+        VideoLayers = CloneVideoLayers(segment.VideoLayers),
+        WaveformSamples = [.. segment.WaveformSamples],
+        ImportMetadata = new Dictionary<string, string>(segment.ImportMetadata ?? [])
+    };
+
+    private static double SegmentTimelineLength(PublicationMediaSegment segment, double playbackRate)
+    {
+        var sourceLength = segment.TimelineDurationSeconds > 0
+            ? segment.TimelineDurationSeconds
+            : segment.SourceLengthSeconds / Math.Max(.0001, Math.Abs(segment.Speed));
+        return Math.Max(MinimumSourceLength, sourceLength) / Math.Max(.1, playbackRate);
+    }
+
+    private static MediaSourceReference CloneSourceReference(MediaSourceReference? source) => new()
+    {
+        Id = source?.Id ?? string.Empty,
+        Uri = source?.Uri ?? string.Empty,
+        OriginalPath = source?.OriginalPath ?? string.Empty,
+        MimeType = source?.MimeType ?? string.Empty,
+        ReelName = source?.ReelName ?? string.Empty,
+        Missing = source?.Missing ?? false,
+        Metadata = new Dictionary<string, string>(source?.Metadata ?? [])
     };
 
     public PublicationMediaSegment Duplicate(PublicationMediaSegment segment)
@@ -185,13 +384,317 @@ public sealed class MediaTimelineEditService
         var clone = Clone(segment);
         clone.Id = Guid.NewGuid();
         clone.Name = Suffix(segment.Name, "copy");
+        foreach (var section in clone.CutSections) section.Id = Guid.NewGuid();
+        foreach (var layer in clone.VideoLayers)
+        {
+            layer.Id = Guid.NewGuid();
+            layer.Region.Id = Guid.NewGuid();
+            foreach (var filter in layer.Filters) filter.Id = Guid.NewGuid();
+        }
         return clone;
+    }
+
+    public VideoEffectLayer CloneVideoLayer(VideoEffectLayer layer) => new()
+    {
+        Id = layer.Id,
+        Name = layer.Name,
+        Visible = layer.Visible,
+        Locked = layer.Locked,
+        Opacity = layer.Opacity,
+        BlendMode = layer.BlendMode,
+        HasTemporalRange = layer.HasTemporalRange,
+        TemporalStartSeconds = layer.TemporalStartSeconds,
+        TemporalEndSeconds = layer.TemporalEndSeconds,
+        Region = CloneVideoRegion(layer.Region),
+        Filters = CloneVideoFilters(layer.Filters)
+    };
+
+    public VideoEffectFilter CreateFilter(VideoEffectFilterKind kind) => kind switch
+    {
+        VideoEffectFilterKind.Brightness => new() { Kind = kind, Name = "Brightness", Amount = 1 },
+        VideoEffectFilterKind.Contrast => new() { Kind = kind, Name = "Contrast", Amount = 1 },
+        VideoEffectFilterKind.Saturation => new() { Kind = kind, Name = "Saturation", Amount = 1 },
+        VideoEffectFilterKind.HueRotation => new() { Kind = kind, Name = "Hue rotation", Amount = 0 },
+        VideoEffectFilterKind.Blur => new() { Kind = kind, Name = "Blur", Amount = 0 },
+        VideoEffectFilterKind.Grayscale => new() { Kind = kind, Name = "Grayscale", Amount = 1 },
+        VideoEffectFilterKind.Sepia => new() { Kind = kind, Name = "Sepia", Amount = 1 },
+        VideoEffectFilterKind.Invert => new() { Kind = kind, Name = "Invert", Amount = 1 },
+        VideoEffectFilterKind.ChromaKey => new() { Kind = kind, Name = "Chroma key", Amount = .35, SecondaryAmount = .12, TertiaryAmount = .3, ResidualOpacity = 0, Color = "#00ff00" },
+        VideoEffectFilterKind.Vignette => new() { Kind = kind, Name = "Vignette", Amount = .45, SecondaryAmount = .55 },
+        VideoEffectFilterKind.Grain => new() { Kind = kind, Name = "Film grain", Amount = .12, SecondaryAmount = 17 },
+        VideoEffectFilterKind.ColorWash => new() { Kind = kind, Name = "Color wash", Amount = .25, Color = "#3b82f6" },
+        _ => new() { Kind = kind, Name = kind.ToString(), Amount = 1 }
+    };
+
+    /// <summary>
+    /// Projects the Mainframe live-input adjustment controls into one canonical layer while preserving
+    /// any additional user-authored layers. Streaming preview and program output therefore use the same
+    /// layer/filter renderer as Video Studio instead of a separate chroma/filter implementation.
+    /// </summary>
+    public void SynchronizeLiveSourceLayer(LiveSourceElement source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        source.VideoLayers ??= [];
+        if (!source.IsVisual)
+        {
+            source.VideoLayers.Clear();
+            return;
+        }
+
+        source.VideoLayers = source.VideoLayers.Count > 0
+            ? NormalizeVideoLayers(source.VideoLayers, 0, 24 * 60 * 60, source.Name)
+            : [];
+        var controls = source.VideoLayers.FirstOrDefault(layer =>
+            string.Equals(layer.Name, "Live input controls", StringComparison.OrdinalIgnoreCase));
+        if (controls is null)
+        {
+            controls = CreateDefaultVideoLayer();
+            controls.Name = "Live input controls";
+            source.VideoLayers.Insert(0, controls);
+        }
+
+        controls.Visible = true;
+        controls.Locked = false;
+        controls.Opacity = 1;
+        controls.BlendMode = VideoEffectBlendMode.Normal;
+        controls.HasTemporalRange = false;
+        var regionId = controls.Region?.Id is Guid existingRegionId && existingRegionId != Guid.Empty
+            ? existingRegionId
+            : Guid.NewGuid();
+        controls.Region = new VideoFrameRegion { Id = regionId, Name = "Full frame" };
+
+        UpsertLiveFilter(controls, VideoEffectFilterKind.Brightness, source.Brightness, 1);
+        UpsertLiveFilter(controls, VideoEffectFilterKind.Contrast, source.Contrast, 1);
+        UpsertLiveFilter(controls, VideoEffectFilterKind.Saturation, source.Saturation, 1);
+        UpsertLiveFilter(controls, VideoEffectFilterKind.HueRotation, source.HueRotation, 0);
+        UpsertLiveFilter(controls, VideoEffectFilterKind.Blur, source.Blur, 0);
+
+        var chroma = controls.Filters.FirstOrDefault(filter => filter.Kind == VideoEffectFilterKind.ChromaKey);
+        if (!source.ChromaKeyEnabled)
+        {
+            if (chroma is not null) controls.Filters.Remove(chroma);
+        }
+        else
+        {
+            chroma ??= CreateFilter(VideoEffectFilterKind.ChromaKey);
+            if (!controls.Filters.Contains(chroma)) controls.Filters.Add(chroma);
+            chroma.Enabled = true;
+            chroma.Color = source.ChromaKeyColor;
+            chroma.Amount = source.ChromaSimilarity;
+            chroma.SecondaryAmount = source.ChromaSmoothness;
+            chroma.TertiaryAmount = source.ChromaSpill;
+            chroma.ResidualOpacity = source.ChromaResidualOpacity;
+            NormalizeFilter(chroma);
+        }
+    }
+
+    private void UpsertLiveFilter(VideoEffectLayer layer, VideoEffectFilterKind kind, double value, double neutral)
+    {
+        var filter = layer.Filters.FirstOrDefault(candidate => candidate.Kind == kind);
+        if (Math.Abs(value - neutral) <= .0001)
+        {
+            if (filter is not null) layer.Filters.Remove(filter);
+            return;
+        }
+
+        filter ??= CreateFilter(kind);
+        if (!layer.Filters.Contains(filter)) layer.Filters.Add(filter);
+        filter.Enabled = true;
+        filter.Amount = value;
+        NormalizeFilter(filter);
+    }
+
+    private static List<MediaTemporalSection> CloneTemporalSections(IEnumerable<MediaTemporalSection>? sections) => (sections ?? [])
+        .Where(section => section is not null)
+        .Take(128)
+        .Select(section => new MediaTemporalSection
+        {
+            Id = section.Id == Guid.Empty ? Guid.NewGuid() : section.Id,
+            Name = string.IsNullOrWhiteSpace(section.Name) ? "Cut section" : section.Name.Trim(),
+            Enabled = section.Enabled,
+            StartSeconds = section.StartSeconds,
+            EndSeconds = section.EndSeconds
+        })
+        .ToList();
+
+    private List<VideoEffectLayer> CloneVideoLayers(IEnumerable<VideoEffectLayer>? layers) => (layers ?? [])
+        .Where(layer => layer is not null)
+        .Take(64)
+        .Select(CloneVideoLayer)
+        .ToList();
+
+    private static VideoFrameRegion CloneVideoRegion(VideoFrameRegion? region) => new()
+    {
+        Id = region?.Id is Guid id && id != Guid.Empty ? id : Guid.NewGuid(),
+        Name = string.IsNullOrWhiteSpace(region?.Name) ? "Full frame" : region.Name.Trim(),
+        Inverted = region?.Inverted == true,
+        Points = (region?.Points ?? [])
+            .Where(point => point is not null)
+            .Take(256)
+            .Select(point => new MediaFramePoint { X = point.X, Y = point.Y })
+            .ToList()
+    };
+
+    private static List<VideoEffectFilter> CloneVideoFilters(IEnumerable<VideoEffectFilter>? filters) => (filters ?? [])
+        .Where(filter => filter is not null)
+        .Take(64)
+        .Select(filter => new VideoEffectFilter
+        {
+            Id = filter.Id == Guid.Empty ? Guid.NewGuid() : filter.Id,
+            Name = string.IsNullOrWhiteSpace(filter.Name) ? filter.Kind.ToString() : filter.Name.Trim(),
+            Kind = filter.Kind,
+            Enabled = filter.Enabled,
+            Amount = filter.Amount,
+            SecondaryAmount = filter.SecondaryAmount,
+            TertiaryAmount = filter.TertiaryAmount,
+            ResidualOpacity = filter.ResidualOpacity,
+            Color = string.IsNullOrWhiteSpace(filter.Color) ? "#00ff00" : filter.Color
+        })
+        .ToList();
+
+    private static VideoEffectLayer NormalizeVideoLayer(VideoEffectLayer layer, double minimum, double maximum, int index)
+    {
+        layer.Id = layer.Id == Guid.Empty ? Guid.NewGuid() : layer.Id;
+        layer.Name = string.IsNullOrWhiteSpace(layer.Name) ? $"Video layer {index + 1}" : layer.Name.Trim();
+        layer.Opacity = Math.Clamp(double.IsFinite(layer.Opacity) ? layer.Opacity : 1, 0, 1);
+        if (!Enum.IsDefined(layer.BlendMode)) layer.BlendMode = VideoEffectBlendMode.Normal;
+        layer.Region ??= new VideoFrameRegion();
+        layer.Region.Id = layer.Region.Id == Guid.Empty ? Guid.NewGuid() : layer.Region.Id;
+        layer.Region.Name = string.IsNullOrWhiteSpace(layer.Region.Name) ? "Full frame" : layer.Region.Name.Trim();
+        layer.Region.Points = layer.Region.Points
+            .Where(point => point is not null)
+            .Take(256)
+            .Select(point => new MediaFramePoint
+            {
+                X = Math.Clamp(double.IsFinite(point.X) ? point.X : 0, 0, 1),
+                Y = Math.Clamp(double.IsFinite(point.Y) ? point.Y : 0, 0, 1)
+            })
+            .ToList();
+        if (layer.Region.Points.Count is > 0 and < 3) layer.Region.Points.Clear();
+
+        if (layer.HasTemporalRange)
+        {
+            var start = Math.Clamp(double.IsFinite(layer.TemporalStartSeconds) ? layer.TemporalStartSeconds : minimum, minimum, maximum);
+            var end = Math.Clamp(double.IsFinite(layer.TemporalEndSeconds) ? layer.TemporalEndSeconds : maximum, start, maximum);
+            if (end - start < MinimumSourceLength) layer.HasTemporalRange = false;
+            else
+            {
+                layer.TemporalStartSeconds = start;
+                layer.TemporalEndSeconds = end;
+            }
+        }
+        if (!layer.HasTemporalRange)
+        {
+            layer.TemporalStartSeconds = minimum;
+            layer.TemporalEndSeconds = maximum;
+        }
+
+        layer.Filters = CloneVideoFilters(layer.Filters);
+        foreach (var filter in layer.Filters) NormalizeFilter(filter);
+        return layer;
+    }
+
+    private static void NormalizeFilter(VideoEffectFilter filter)
+    {
+        filter.Id = filter.Id == Guid.Empty ? Guid.NewGuid() : filter.Id;
+        filter.Name = string.IsNullOrWhiteSpace(filter.Name) ? filter.Kind.ToString() : filter.Name.Trim();
+        filter.Color = NormalizeColor(filter.Color, filter.Kind == VideoEffectFilterKind.ChromaKey ? "#00ff00" : "#3b82f6");
+        filter.ResidualOpacity = Math.Clamp(double.IsFinite(filter.ResidualOpacity) ? filter.ResidualOpacity : 0, 0, 1);
+        switch (filter.Kind)
+        {
+            case VideoEffectFilterKind.Brightness:
+            case VideoEffectFilterKind.Contrast:
+            case VideoEffectFilterKind.Saturation:
+                filter.Amount = Math.Clamp(double.IsFinite(filter.Amount) ? filter.Amount : 1, 0, 4);
+                break;
+            case VideoEffectFilterKind.HueRotation:
+                filter.Amount = Math.Clamp(double.IsFinite(filter.Amount) ? filter.Amount : 0, -360, 360);
+                break;
+            case VideoEffectFilterKind.Blur:
+                filter.Amount = Math.Clamp(double.IsFinite(filter.Amount) ? filter.Amount : 0, 0, 64);
+                break;
+            case VideoEffectFilterKind.Grayscale:
+            case VideoEffectFilterKind.Sepia:
+            case VideoEffectFilterKind.Invert:
+            case VideoEffectFilterKind.ColorWash:
+            case VideoEffectFilterKind.Grain:
+                filter.Amount = Math.Clamp(double.IsFinite(filter.Amount) ? filter.Amount : 0, 0, 1);
+                break;
+            case VideoEffectFilterKind.ChromaKey:
+                filter.Amount = Math.Clamp(double.IsFinite(filter.Amount) ? filter.Amount : .35, 0, 1);
+                filter.SecondaryAmount = Math.Clamp(double.IsFinite(filter.SecondaryAmount) ? filter.SecondaryAmount : .12, .001, 1);
+                filter.TertiaryAmount = Math.Clamp(double.IsFinite(filter.TertiaryAmount) ? filter.TertiaryAmount : .3, 0, 1);
+                break;
+            case VideoEffectFilterKind.Vignette:
+                filter.Amount = Math.Clamp(double.IsFinite(filter.Amount) ? filter.Amount : .45, 0, 1);
+                filter.SecondaryAmount = Math.Clamp(double.IsFinite(filter.SecondaryAmount) ? filter.SecondaryAmount : .55, 0, 1);
+                break;
+        }
+    }
+
+    private static string NormalizeColor(string? value, string fallback)
+    {
+        var color = value?.Trim() ?? string.Empty;
+        if (color.Length == 7 && color[0] == '#' && color.Skip(1).All(Uri.IsHexDigit)) return color.ToLowerInvariant();
+        return fallback;
     }
 
     private static string Suffix(string name, string suffix)
     {
         var value = string.IsNullOrWhiteSpace(name) ? "Clip" : name.Trim();
         return value.EndsWith($" ({suffix})", StringComparison.OrdinalIgnoreCase) ? value : $"{value} ({suffix})";
+    }
+
+    private static void NormalizeTemporalSelection(PublicationMediaSegment segment)
+    {
+        var minimum = segment.TrimStartSeconds;
+        var maximum = segment.EffectiveTrimEndSeconds;
+        if (!segment.HasTemporalSelection)
+        {
+            segment.TemporalSelectionIsPoint = false;
+            segment.TemporalSelectionStartSeconds = minimum;
+            segment.TemporalSelectionEndSeconds = maximum;
+            return;
+        }
+
+        var start = double.IsFinite(segment.TemporalSelectionStartSeconds)
+            ? Math.Clamp(segment.TemporalSelectionStartSeconds, minimum, maximum)
+            : minimum;
+        if (segment.TemporalSelectionIsPoint || maximum - minimum < MinimumSourceLength)
+        {
+            segment.TemporalSelectionIsPoint = true;
+            segment.TemporalSelectionStartSeconds = start;
+            segment.TemporalSelectionEndSeconds = start;
+            return;
+        }
+
+        var maximumStart = Math.Max(minimum, maximum - MinimumSourceLength);
+        start = Math.Clamp(start, minimum, maximumStart);
+        var end = double.IsFinite(segment.TemporalSelectionEndSeconds)
+            ? Math.Clamp(segment.TemporalSelectionEndSeconds, start + MinimumSourceLength, maximum)
+            : maximum;
+        segment.TemporalSelectionStartSeconds = start;
+        segment.TemporalSelectionEndSeconds = end;
+    }
+
+    private static void NormalizeCutSections(PublicationMediaSegment segment)
+    {
+        var minimum = segment.TrimStartSeconds;
+        var maximum = segment.EffectiveTrimEndSeconds;
+        segment.CutSections = CloneTemporalSections(segment.CutSections)
+            .Select(section =>
+            {
+                var start = Math.Clamp(double.IsFinite(section.StartSeconds) ? section.StartSeconds : minimum, minimum, maximum);
+                var end = Math.Clamp(double.IsFinite(section.EndSeconds) ? section.EndSeconds : start, start, maximum);
+                section.StartSeconds = start;
+                section.EndSeconds = end;
+                return section;
+            })
+            .Where(section => section.EndSeconds - section.StartSeconds >= MinimumSourceLength)
+            .OrderBy(section => section.StartSeconds)
+            .ThenBy(section => section.EndSeconds)
+            .Take(128)
+            .ToList();
     }
 
     private static string MergeName(string left, string right)

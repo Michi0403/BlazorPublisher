@@ -1,0 +1,101 @@
+PublisherStudio v1.0.73 validation results
+==========================================
+
+Validation date
+---------------
+2026-07-25
+
+Scope
+-----
+This validation covers the canonical open video-project model, bounded project
+import adapters, Video Studio import/relink workflow, publication persistence,
+version alignment, dependency stability, reproducible patching, and release
+archive integrity.
+
+Automated Node contract suite
+-----------------------------
+Command:
+  cd src/PublisherStudio.Web && npm test
+
+Result: PASS
+
+All 22 suites passed:
+  1. timeline editing
+  2. component runtime
+  3. signal routing
+  4. pointer interaction
+  5. map modes
+  6. font integration
+  7. canvas zoom
+  8. streaming runtime
+  9. interface workflow
+ 10. installer resilience
+ 11. publication persistence
+ 12. editor usability
+ 13. architecture contracts
+ 14. C# contract ownership
+ 15. C# composition/interpolation safety
+ 16. open interchange
+ 17. media gesture editing
+ 18. Studio interaction overlays
+ 19. managed component drop
+ 20. video temporal overlay
+ 21. layered video effects
+ 22. open video-project import
+
+The v1.0.73 project-import suite verifies:
+- the canonical VideoProjectDocument, typed track, transition, marker, source
+  reference, explicit placement/rate/speed, gap, and adapter-metadata model;
+- OTIO, OTIOZ, MLT/Kdenlive/Shotcut, XGES, OpenShot OSP, and CMX 3600 EDL
+  adapter entry points;
+- bounded JSON/XML/archive processing, prohibited XML DTD/external resolution,
+  path normalization, entry and total-expanded archive limits, and absence of
+  network-fetch APIs;
+- Video Studio ribbon/context import and relink commands, active-track
+  projection, compatibility reporting, drag/drop routing, publication storage,
+  and version/format alignment;
+- the documented distinction between project interchange, media decoding, and
+  Mainframe-oriented OBS scene import.
+
+One existing Node warning remains: pictureStudioInterop.js is reparsed as an ES
+module because package.json does not declare "type": "module". It does not fail
+or alter the test result.
+
+Static validation
+-----------------
+Result: PASS
+
+- 9 JSON files parsed successfully.
+- 2 project files parsed as XML successfully.
+- Web application, installer, npm package, lock file, and streaming runtime
+  versions align at 1.0.73.
+- Publication default/write format aligns at 1.52.
+- NuGet PackageReference, npm dependency, and npm devDependency sets are
+  unchanged from v1.0.72.
+- No merge-conflict markers were found in source or documentation files.
+- 35 non-vendor JavaScript and test modules passed `node --check`.
+
+Patch reproducibility
+---------------------
+Result: PASS
+
+The final v1.0.73 unified source patch applies cleanly to the v1.0.72 source
+baseline with `patch -p1`. The patched result matches the v1.0.73 source tree
+when excluding only build/cache metadata directories.
+
+Release archive
+---------------
+Result: PASS
+
+- ZIP structural integrity passed with `unzip -t`.
+- A clean extraction matches the packaged v1.0.73 work tree.
+- SHA-256 and SHA-512 checksum files are supplied beside the archive.
+
+Compilation limitation
+----------------------
+A real .NET/Razor/DevExpress compile was not run in this environment because
+`dotnet`, `csc`, and `mcs` are unavailable and the licensed DevExpress restore
+feed is not available. The Node architecture/contract/compilation-safety suites,
+project XML parsing, and static source checks passed, but the release should
+still be compiled on the normal licensed release machine before production
+shipping.

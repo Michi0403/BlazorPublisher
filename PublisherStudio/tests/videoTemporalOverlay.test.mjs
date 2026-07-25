@@ -40,6 +40,12 @@ assert.match(mediaStudio, /id="media-studio-video-selection-start"/);
 assert.match(mediaStudio, /id="media-studio-video-selection-end"/);
 assert.match(mediaStudio, /ChangeVideoSelectionMode/);
 assert.match(mediaStudio, /SetVideoSelectionRange/);
+assert.match(mediaStudio, /segment\.HasTemporalSelection = IsVideo/);
+assert.match(mediaStudio, /segment\.TemporalSelectionStartSeconds = VideoSelectionStart/);
+assert.match(mediaStudio, /segment\.TemporalSelectionEndSeconds = VideoSelectionEnd/);
+assert.match(mediaStudio, /segment\.HasTemporalSelection/);
+assert.match(mediaStudio, /segment\.TemporalSelectionIsPoint/);
+assert.match(mediaStudio, /VideoTimeSelectionCommitted[\s\S]*CommitSelectedSegment\(\)/);
 assert.match(mediaStudio, /id="media-studio-sequence-selection"/);
 assert.match(mediaStudio, /private void CutVideoSelection\(\)/);
 assert.match(mediaStudio, /TimelineEdits\.SplitAt\(_segments, _playbackRate, endTimeline\)/);
@@ -47,6 +53,13 @@ assert.match(mediaStudio, /TimelineEdits\.SplitAt\(_segments, _playbackRate, sta
 assert.match(mediaStudio, /private void UseVideoSelectionAsTrim\(\)/);
 assert.match(mediaStudio, /private void CopyVideoSelection\(\)/);
 assert.match(mediaStudio, /Dropped video is inserted only inside this selection/);
+assert.match(mediaModels, /bool HasTemporalSelection/);
+assert.match(mediaModels, /bool TemporalSelectionIsPoint/);
+assert.match(mediaModels, /double TemporalSelectionStartSeconds/);
+assert.match(mediaModels, /double TemporalSelectionEndSeconds/);
+assert.match(timelineService, /NormalizeTemporalSelection\(segment\)/);
+assert.match(timelineService, /TemporalSelectionStartSeconds = segment\.TemporalSelectionStartSeconds/);
+assert.match(editor, /result\.Segments\?\.Select\(TimelineEdits\.Clone\)/);
 
 // The play canvas exposes all persisted video fit modes, including non-proportional stretch.
 assert.match(mediaStudio, /Video inside play canvas/);
@@ -94,6 +107,17 @@ assert.match(interop, /releaseVideoTimeOverlayBindings/);
 assert.match(interop, /media-video-time-overlay/);
 assert.match(interop, /MediaStudioDropInsertionPointSelected/);
 assert.match(interop, /--video-drop-position/);
+
+// Late browser metadata repairs placeholder clip durations without throwing away a committed selection.
+assert.match(interop, /function resolvedVideoDuration/);
+assert.match(interop, /function reportResolvedVideoDuration/);
+assert.match(interop, /VideoSourceDurationResolved/);
+assert.match(interop, /addEventListener\('durationchange'/);
+assert.match(mediaStudio, /public async Task VideoSourceDurationResolved/);
+assert.match(mediaStudio, /selectionWasWholeTrim/);
+assert.match(mediaStudio, /Recovered the browser video duration/);
+assert.match(mediaStudio, /forceReload = false/);
+assert.match(mediaStudio, /SelectSegment\(segment\.Id, seek: false, forceReload: true\)/);
 
 // The visual handles, selected shade, playhead and drop marker remain local to the video frame.
 assert.match(css, /\.media-video-time-overlay\s*\{/);

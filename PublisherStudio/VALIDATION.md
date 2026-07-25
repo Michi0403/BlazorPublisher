@@ -696,3 +696,31 @@ Static checks completed for the v1.0.37 source package:
 - Drag a compatible video over the play canvas. The green drop marker must follow the full-canvas timestamp mapping; insertion must remain bounded to the selected timestamp/range.
 - Run all 20 Node contract suites, syntax-check every non-vendor JavaScript/test module, parse JSON and project XML, verify C# structural/contract safety, and validate ZIP CRC plus SHA-256/SHA-512 checksums. Results are recorded in `TEST-RESULTS-v1.0.71.txt`.
 - A full .NET/Razor/DevExpress compile and real-browser pointer acceptance remain release-machine requirements because this packaging environment does not contain the .NET SDK or licensed DevExpress package feed.
+
+
+## v1.0.72 persistent selection, video layers and streaming-filter validation
+
+- Select a point and a range on several sequence clips. Switch clips, scrub/play, edit a layer, resize the Studio and wait for metadata updates. Each clip must restore its own committed selection without snapping to trim start/end.
+- Save at least three selected ranges as cut sections. Verify the current selection remains independent, each saved section can be restored and removed, and cut/trim/copy commands use the currently selected range rather than an unrelated saved section.
+- Add, duplicate, reorder and hide video layers. Change opacity/blend mode and temporal bounds. Save/reopen and verify layer order and values remain stable.
+- Enter Frame region mode on two different layers. Draw and drag polygon nodes, invert/clear/copy/paste regions, switch layers, and verify each layer retains its own normalized region.
+- Add brightness/contrast/saturation/hue/blur, grayscale/sepia/invert, chroma key, vignette, grain and color wash filters. Reorder/toggle/edit filters and verify live rendering updates without replacing clip timing state.
+- For chroma key, test key color, similarity, smoothness, spill reduction and residual opacity on both a video clip and a camera/screen live source.
+- Confirm Mainframe publication-video preview uses the same canonical layers and filters as Video Studio. Confirm visual live inputs map Inspector adjustments into the Live input controls layer and update without restarting capture.
+- On a camera or screen input, change the compatibility sliders and key color while active; verify the canonical control layer and rendered output update together. Then create two authored streaming-effect layers, reorder/hide/blend them, and add chroma key plus at least one non-legacy filter such as vignette, grain or color wash.
+- Load a v1.0.71 publication containing only `FrameClipPolygon`. Verify it migrates into the first video layer and remains visible through the compatibility projection.
+- Run all 21 Node contract suites, syntax-check all non-vendor JavaScript/test modules, parse JSON and project XML, run C# compilation-safety/architecture/contract tests, and validate patch/ZIP extraction parity plus SHA-256/SHA-512 checksums. Results are recorded in `TEST-RESULTS-v1.0.72.txt`.
+- A full .NET/Razor/DevExpress compile and real-browser GPU/capture acceptance remain release-machine requirements because this packaging environment does not contain the .NET SDK or licensed DevExpress package feed.
+
+
+## v1.0.73 open video-project import validation
+
+- Import representative `.otio` and `.otioz` projects. Verify tracks, explicit gaps, source ranges, speeds, transitions and markers are preserved; bundled media matched under `media/` must preview without a separate relink step.
+- Import Kdenlive and Shotcut/MLT XML projects. Verify producer/playlist references, blank gaps, track order, source in/out values and transition timing are retained. Unsupported MLT services must appear in the compatibility report rather than being presented as native filters.
+- Import `.xges`, OpenShot `.osp`, and CMX 3600 `.edl` projects. Verify track/layer placement and missing-media references are visible. EDL import must report the assumed frame rate and require user verification.
+- Switch between imported video tracks, edit a clip selection/layer/filter, switch away and back, save, reopen, and confirm the edited active-track projection and every untouched imported track remain in the canonical `VideoProjectDocument`.
+- Relink multiple missing files whose names or stems match imported URI/path/reel/identifier values. Verify all matching clips update, unmatched files are reported, and no network access is attempted.
+- Drop each supported project extension onto an open Video Studio. Verify the drop routes to the project importer rather than creating a page-level media object or inserting the project file as a video clip.
+- Feed malformed/deep JSON, XML with a DTD/external entity, OTIOZ path traversal, excessive archive entries, excessive expanded archive size, and oversized inputs. Every case must fail before publication state is mutated.
+- Run all 22 Node contract suites, syntax-check all non-vendor JavaScript/test modules, parse repository JSON and project XML, verify version/format alignment and unchanged dependency sets, replay the release patch on untouched v1.0.72, and validate ZIP CRC, extraction parity, SHA-256 and SHA-512. Results are recorded in `TEST-RESULTS-v1.0.73.txt`.
+- A release-machine `dotnet restore`/`dotnet build` and real-browser imports with fixture projects remain required because this container has no .NET SDK or licensed DevExpress feed.

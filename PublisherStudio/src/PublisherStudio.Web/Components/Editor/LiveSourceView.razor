@@ -130,6 +130,12 @@
                 captureHeight = Item.CaptureHeight,
                 captureFrameRate = Item.CaptureFrameRate,
                 useDeviceTimestamp,
+                brightness = Item.Brightness,
+                contrast = Item.Contrast,
+                saturation = Item.Saturation,
+                hueRotation = Item.HueRotation,
+                blur = Item.Blur,
+                videoLayers = VideoLayerPayload(),
                 chromaKeyEnabled = Item.ChromaKeyEnabled,
                 chromaKeyColor = Item.ChromaKeyColor,
                 chromaSimilarity = Item.ChromaSimilarity,
@@ -140,6 +146,65 @@
         }
         catch { _active = false; }
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_active || !Item.IsVisual) return;
+        try
+        {
+            await JS.InvokeVoidAsync("publisherStreaming.updateSourceEffects", new
+            {
+                id = Item.Id.ToString("D"),
+                videoId = VideoId,
+                canvasId = CanvasId,
+                fitMode = Item.FitMode.ToString().ToLowerInvariant(),
+                brightness = Item.Brightness,
+                contrast = Item.Contrast,
+                saturation = Item.Saturation,
+                hueRotation = Item.HueRotation,
+                blur = Item.Blur,
+                videoLayers = VideoLayerPayload(),
+                chromaKeyEnabled = Item.ChromaKeyEnabled,
+                chromaKeyColor = Item.ChromaKeyColor,
+                chromaSimilarity = Item.ChromaSimilarity,
+                chromaSmoothness = Item.ChromaSmoothness,
+                chromaSpill = Item.ChromaSpill,
+                chromaResidualOpacity = Item.ChromaResidualOpacity
+            });
+        }
+        catch { }
+    }
+
+    private object[] VideoLayerPayload() => (Item.VideoLayers ?? [])
+        .Where(layer => layer is not null)
+        .Select(layer => (object)new
+        {
+            id = layer.Id.ToString("D"),
+            layer.Name,
+            layer.Visible,
+            layer.Opacity,
+            blendMode = layer.BlendMode.ToString(),
+            layer.HasTemporalRange,
+            layer.TemporalStartSeconds,
+            layer.TemporalEndSeconds,
+            region = new
+            {
+                layer.Region.Inverted,
+                points = (layer.Region.Points ?? []).Select(point => new { point.X, point.Y }).ToArray()
+            },
+            filters = (layer.Filters ?? []).Select(filter => new
+            {
+                id = filter.Id.ToString("D"),
+                kind = filter.Kind.ToString(),
+                filter.Enabled,
+                filter.Amount,
+                filter.SecondaryAmount,
+                filter.TertiaryAmount,
+                filter.ResidualOpacity,
+                filter.Color
+            }).ToArray()
+        })
+        .ToArray();
 
     public async ValueTask DisposeAsync()
     {

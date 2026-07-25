@@ -18,6 +18,7 @@ function normalizeMediaDataUrl(dataUrl, fallbackMimeType = 'application/octet-st
 function mediaDropKind(file) {
     const name = String(file?.name || '').toLowerCase();
     const mime = baseMimeType(file?.type || '', '');
+    if (/\.(otio|otioz|mlt|kdenlive|xges|osp|edl)$/.test(name)) return 'project';
     if (mime.startsWith('video/') || /\.(mp4|m4v|webm|ogv|mov)$/.test(name)) return 'video';
     if (mime.startsWith('audio/') || /\.(mp3|wav|oga|ogg|m4a|aac|flac)$/.test(name)) return 'audio';
     return '';
@@ -55,7 +56,7 @@ function releaseMediaDropBindings(state) {
     }
 }
 
-function bindMediaDrop(state, rootId, sourceInputId, insertInputId, expectedKind) {
+function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInputId, expectedKind) {
     releaseMediaDropBindings(state);
     const root = document.getElementById(rootId);
     if (!root) return;
@@ -108,8 +109,9 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, expectedKind
             if (!file) return;
             event.preventDefault();
             event.stopPropagation();
-            event.dataTransfer.dropEffect = mediaDropKind(file) === expectedKind ? 'copy' : 'none';
-            show(modeAt(event.target));
+            const kind = mediaDropKind(file);
+            event.dataTransfer.dropEffect = kind === expectedKind || (expectedKind === 'video' && kind === 'project') ? 'copy' : 'none';
+            show(kind === 'project' ? 'project' : modeAt(event.target));
             if (!videoInsertionAt(event.target, event.clientX)) clearVideoInsertion();
         },
         dragleave: event => {
@@ -124,9 +126,14 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, expectedKind
             event.preventDefault();
             event.stopPropagation();
             const actualKind = mediaDropKind(file);
-            const mode = modeAt(event.target);
+            const mode = actualKind === 'project' ? 'project' : modeAt(event.target);
             const videoInsertion = mode === 'insert' ? videoInsertionAt(event.target, event.clientX) : null;
             clear();
+            if (actualKind === 'project' && expectedKind === 'video') {
+                if (!assignMediaDrop(projectInputId, file))
+                    state.dotnet?.invokeMethodAsync('MediaStudioFileDropRejected', 'The dropped project file could not be forwarded to the open-project importer.').catch(() => {});
+                return;
+            }
             if (actualKind !== expectedKind) {
                 state.dotnet?.invokeMethodAsync(
                     'MediaStudioFileDropRejected',
@@ -182,14 +189,22 @@ function stateFor(id) {
             frameMetadataHandler: null,
             frameOverlayMoveHandler: null,
             frameOverlayLeaveHandler: null,
+            frameNodePointerDownHandler: null,
+            frameNodePointerMoveHandler: null,
+            frameNodePointerUpHandler: null,
+            frameNodeGesture: null,
+            effectRuntimeKey: '',
             timeOverlayPointerDownHandler: null,
             timeOverlayPointerMoveHandler: null,
             timeOverlayPointerUpHandler: null,
             timeOverlayPointerCancelHandler: null,
             timeOverlayDoubleClickHandler: null,
             timeOverlayMetadataHandler: null,
+            timeOverlayDurationHandler: null,
             timeOverlayUpdateHandler: null,
             timeOverlayGesture: null,
+            lastReportedDuration: 0,
+            durationReportPending: false,
             dropRoot: null,
             dropHandlers: null,
             dropDepth: 0
@@ -244,6 +259,12 @@ function releaseFrameOverlayBindings(state) {
         video.removeEventListener('loadeddata', state.frameMetadataHandler);
     }
     if (overlay && state.frameOverlayMoveHandler) overlay.removeEventListener('pointermove', state.frameOverlayMoveHandler);
+    if (overlay && state.frameNodePointerDownHandler) overlay.removeEventListener('pointerdown', state.frameNodePointerDownHandler, true);
+    if (overlay && state.frameNodePointerMoveHandler) overlay.removeEventListener('pointermove', state.frameNodePointerMoveHandler, true);
+    if (overlay && state.frameNodePointerUpHandler) {
+        overlay.removeEventListener('pointerup', state.frameNodePointerUpHandler, true);
+        overlay.removeEventListener('pointercancel', state.frameNodePointerUpHandler, true);
+    }
     if (overlay && state.frameOverlayLeaveHandler) {
         overlay.removeEventListener('pointerleave', state.frameOverlayLeaveHandler);
         overlay.removeEventListener('pointercancel', state.frameOverlayLeaveHandler);
@@ -253,6 +274,10 @@ function releaseFrameOverlayBindings(state) {
     state.frameMetadataHandler = null;
     state.frameOverlayMoveHandler = null;
     state.frameOverlayLeaveHandler = null;
+    state.frameNodePointerDownHandler = null;
+    state.frameNodePointerMoveHandler = null;
+    state.frameNodePointerUpHandler = null;
+    state.frameNodeGesture = null;
 }
 
 function releaseVideoTimeOverlayBindings(state) {
@@ -267,6 +292,8 @@ function releaseVideoTimeOverlayBindings(state) {
         video.removeEventListener('loadedmetadata', state.timeOverlayMetadataHandler);
         video.removeEventListener('loadeddata', state.timeOverlayMetadataHandler);
     }
+    if (video && state.timeOverlayDurationHandler)
+        video.removeEventListener('durationchange', state.timeOverlayDurationHandler);
     if (video && state.timeOverlayUpdateHandler) {
         video.removeEventListener('timeupdate', state.timeOverlayUpdateHandler);
         video.removeEventListener('seeked', state.timeOverlayUpdateHandler);
@@ -277,8 +304,10 @@ function releaseVideoTimeOverlayBindings(state) {
     state.timeOverlayPointerCancelHandler = null;
     state.timeOverlayDoubleClickHandler = null;
     state.timeOverlayMetadataHandler = null;
+    state.timeOverlayDurationHandler = null;
     state.timeOverlayUpdateHandler = null;
     state.timeOverlayGesture = null;
+    state.durationReportPending = false;
 }
 
 function syncFrameOverlay(state) {
@@ -347,6 +376,67 @@ function bindFrameOverlay(state, frameStageId, frameOverlayId) {
     overlay.addEventListener('pointermove', state.frameOverlayMoveHandler);
     overlay.addEventListener('pointerleave', state.frameOverlayLeaveHandler);
     overlay.addEventListener('pointercancel', state.frameOverlayLeaveHandler);
+
+    const updateFrameNodeVisual = (node, x, y) => {
+        node.setAttribute('cx', String(x * 1000));
+        node.setAttribute('cy', String(y * 1000));
+        const nodes = [...overlay.querySelectorAll('[data-frame-node-index]')]
+            .sort((left, right) => Number(left.dataset.frameNodeIndex) - Number(right.dataset.frameNodeIndex));
+        const points = nodes.map(candidate => `${candidate.getAttribute('cx') || '0'},${candidate.getAttribute('cy') || '0'}`).join(' ');
+        const polyline = overlay.querySelector('.media-frame-cutline');
+        const polygon = overlay.querySelector('.media-frame-selection');
+        if (polyline) polyline.setAttribute('points', points);
+        if (polygon) polygon.setAttribute('points', points);
+        const dim = overlay.querySelector('.media-frame-dim');
+        if (dim && nodes.length >= 3) {
+            const pathPoints = nodes.map(candidate => `${candidate.getAttribute('cx') || '0'} ${candidate.getAttribute('cy') || '0'}`).join(' L ');
+            dim.setAttribute('d', `M 0 0 H 1000 V 1000 H 0 Z M ${pathPoints} Z`);
+        }
+    };
+    const normalizedFramePoint = event => {
+        const bounds = overlay.getBoundingClientRect();
+        return {
+            x: Math.max(0, Math.min(1, (Number(event.clientX) - bounds.left) / Math.max(1, bounds.width))),
+            y: Math.max(0, Math.min(1, (Number(event.clientY) - bounds.top) / Math.max(1, bounds.height)))
+        };
+    };
+    state.frameNodePointerDownHandler = event => {
+        const node = event.target?.closest?.('[data-frame-node-index]');
+        if (!(node instanceof SVGCircleElement) || !overlay.classList.contains('active') || event.button !== 0) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const pointIndex = Number(node.dataset.frameNodeIndex);
+        if (!Number.isInteger(pointIndex) || pointIndex < 0) return;
+        state.frameNodeGesture = { pointerId: event.pointerId, pointIndex, node };
+        try { overlay.setPointerCapture(event.pointerId); } catch { }
+        node.classList.add('dragging');
+    };
+    state.frameNodePointerMoveHandler = event => {
+        const gesture = state.frameNodeGesture;
+        if (!gesture || gesture.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const point = normalizedFramePoint(event);
+        updateFrameNodeVisual(gesture.node, point.x, point.y);
+        gesture.x = point.x;
+        gesture.y = point.y;
+    };
+    state.frameNodePointerUpHandler = event => {
+        const gesture = state.frameNodeGesture;
+        if (!gesture || gesture.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const point = gesture.x == null ? normalizedFramePoint(event) : { x: gesture.x, y: gesture.y };
+        updateFrameNodeVisual(gesture.node, point.x, point.y);
+        gesture.node.classList.remove('dragging');
+        try { overlay.releasePointerCapture(event.pointerId); } catch { }
+        state.frameNodeGesture = null;
+        state.dotnet?.invokeMethodAsync('VideoFramePointCommitted', gesture.pointIndex, point.x, point.y).catch(() => {});
+    };
+    overlay.addEventListener('pointerdown', state.frameNodePointerDownHandler, true);
+    overlay.addEventListener('pointermove', state.frameNodePointerMoveHandler, true);
+    overlay.addEventListener('pointerup', state.frameNodePointerUpHandler, true);
+    overlay.addEventListener('pointercancel', state.frameNodePointerUpHandler, true);
 
     if (typeof ResizeObserver !== 'undefined') {
         state.frameResizeObserver = new ResizeObserver(() => syncFrameOverlay(state));
@@ -499,6 +589,32 @@ function updateVideoTimeReadout(state) {
     setVideoPlayheadVisual(overlay, Number(video.currentTime) || 0);
 }
 
+function resolvedVideoDuration(video) {
+    const direct = Number(video?.duration);
+    if (Number.isFinite(direct) && direct > .01) return direct;
+    try {
+        const seekable = video?.seekable;
+        if (seekable?.length) {
+            const end = Number(seekable.end(seekable.length - 1));
+            if (Number.isFinite(end) && end > .01) return end;
+        }
+    } catch { }
+    return 0;
+}
+
+function reportResolvedVideoDuration(state, video, overlay) {
+    const duration = resolvedVideoDuration(video);
+    if (!(duration > .01) || state.durationReportPending) return;
+    const modeled = Math.max(.01, Number(overlay?.dataset?.duration) || 0);
+    const tolerance = Math.max(.02, duration / 10000);
+    if (Math.abs(duration - modeled) <= tolerance || Math.abs(duration - state.lastReportedDuration) <= tolerance) return;
+    state.lastReportedDuration = duration;
+    state.durationReportPending = true;
+    Promise.resolve(state.dotnet?.invokeMethodAsync('VideoSourceDurationResolved', duration))
+        .catch(() => { state.lastReportedDuration = 0; })
+        .finally(() => { state.durationReportPending = false; });
+}
+
 function bindVideoTimeOverlay(state, timeOverlayId) {
     releaseVideoTimeOverlayBindings(state);
     state.timeOverlayId = String(timeOverlayId || '');
@@ -646,10 +762,15 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
         event.stopPropagation();
     };
     state.timeOverlayMetadataHandler = () => {
+        reportResolvedVideoDuration(state, video, overlay);
         syncFrameOverlay(state);
         updateVideoTimeReadout(state);
     };
-    state.timeOverlayUpdateHandler = () => updateVideoTimeReadout(state);
+    state.timeOverlayDurationHandler = () => reportResolvedVideoDuration(state, video, overlay);
+    state.timeOverlayUpdateHandler = () => {
+        reportResolvedVideoDuration(state, video, overlay);
+        updateVideoTimeReadout(state);
+    };
 
     overlay.addEventListener('pointerdown', state.timeOverlayPointerDownHandler);
     overlay.addEventListener('pointermove', state.timeOverlayPointerMoveHandler);
@@ -658,14 +779,27 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
     overlay.addEventListener('dblclick', state.timeOverlayDoubleClickHandler);
     video.addEventListener('loadedmetadata', state.timeOverlayMetadataHandler);
     video.addEventListener('loadeddata', state.timeOverlayMetadataHandler);
+    video.addEventListener('durationchange', state.timeOverlayDurationHandler);
     video.addEventListener('timeupdate', state.timeOverlayUpdateHandler);
     video.addEventListener('seeked', state.timeOverlayUpdateHandler);
     requestAnimationFrame(() => {
+        reportResolvedVideoDuration(state, video, overlay);
         syncFrameOverlay(state);
         const data = videoTimeData(overlay);
         setVideoTimeVisual(overlay, data.start, data.end, data.pointSelection);
         updateVideoTimeReadout(state);
     });
+}
+
+export function configureVideoEffects(videoId, canvasId, config) {
+    const video = document.getElementById(videoId);
+    const canvas = document.getElementById(canvasId);
+    if (!(video instanceof HTMLVideoElement) || !(canvas instanceof HTMLCanvasElement) || !window.publisherVideoEffects) return false;
+    const state = stateFor(videoId);
+    const key = `media-studio-${videoId}`;
+    state.effectRuntimeKey = key;
+    window.publisherVideoEffects.install(key, video, canvas, config || {});
+    return true;
 }
 
 export function refreshMediaStudioOverlay(id) {
@@ -699,6 +833,7 @@ export function initializeMediaStudio(
     timeOverlayId = "",
     sourceInputId = "",
     insertInputId = "",
+    projectInputId = "",
     expectedKind = "video") {
     const state = stateFor(id);
     const nextSessionId = String(sessionId || '');
@@ -729,7 +864,7 @@ export function initializeMediaStudio(
     document.addEventListener("keydown", state.keyboardHandler, true);
     bindFrameOverlay(state, frameStageId, frameOverlayId);
     bindVideoTimeOverlay(state, timeOverlayId);
-    bindMediaDrop(state, state.rootId, sourceInputId, insertInputId, String(expectedKind || 'video').toLowerCase());
+    bindMediaDrop(state, state.rootId, sourceInputId, insertInputId, projectInputId, String(expectedKind || 'video').toLowerCase());
 }
 
 function waitForMetadata(element) {
@@ -1111,6 +1246,8 @@ export function disposeMediaStudio(id) {
     releaseMediaDropBindings(state);
     releaseVideoTimeOverlayBindings(state);
     releaseFrameOverlayBindings(state);
+    if (state.effectRuntimeKey) window.publisherVideoEffects?.dispose(state.effectRuntimeKey);
+    state.effectRuntimeKey = '';
     releaseRetainedRecording(state);
     studioStates.delete(id);
 }

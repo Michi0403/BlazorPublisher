@@ -56,7 +56,7 @@ assert.match(pictureModels, /sealed class SvgPictureLayer/);
 assert.match(interchangeModels, /enum InterchangeIssueSeverity \{ Information, Warning, Loss \}/);
 assert.match(interchangeModels, /sealed class PictureImportResult/);
 assert.match(interchangeModels, /sealed class PublicationImportResult/);
-assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.49"/);
+assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.52"/);
 
 // SVG is retained as vector markup and sanitized before it enters the canonical model.
 assert.match(sanitizer, /DtdProcessing = DtdProcessing\.Prohibit/);

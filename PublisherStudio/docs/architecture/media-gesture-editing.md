@@ -45,3 +45,11 @@ Every editor overlay lives in a local positioned stacking context. Inactive over
 Temporal positions are seconds in the canonical media sequence. Video frame points are normalized source coordinates, independent of source width/height and publication rotation. Picture clip points are document coordinates and may describe any polygon angle. Audio never receives a two-dimensional region contract.
 
 When the Mainframe applies an edited sequence, it removes asset-cache entries for sections no longer present and registers each surviving section by its canonical segment identifier. A transient Studio preview URL is not promoted to a canonical media asset unless it represents the same source.
+
+## Selected-clip temporal orchestration (v1.0.70)
+
+Video Studio owns a source-time timestamp/range selector over the rendered video frame. Its bounds are the selected sequence segment's trim start/end. Browser JavaScript owns pointer movement and updates the handles, readouts, editable field projection and sequence highlight locally; Blazor receives a committed timestamp or range at gesture completion.
+
+The temporal selection is intentionally separate from clip trim. It becomes canonical only through an explicit operation: a point adds a cutline, a range may add both boundaries, replace the selected clip trim, create a copied section, control range playback, or bound the insertion position for a dropped video. Source-to-sequence projection uses the selected segment's sequence start, source start and playback rate.
+
+Video fit changes (`Contain`, `Cover`, `Stretch`) affect the rendered frame rectangle. Both temporal and spatial overlays must follow that rectangle after metadata, resize and fit changes. Native video controls are disabled inside Video Studio so fullscreen/player gestures cannot compete with Studio selection ownership.

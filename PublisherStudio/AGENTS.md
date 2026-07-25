@@ -118,6 +118,8 @@ Video region overlays must align to the actual rendered source-frame rectangle a
 
 A media sequence, cutline, temporal section or frame/picture region is canonical content inside the owning media or picture element. Editing that content must never mutate Mainframe layer order, element identity, position, dimensions, rotation, grouping, connectors, animations or interactions. The Mainframe remains the only owner of publication insertion/update orchestration. Every persisted visual edit must be covered in Mainframe preview, print/PDF, raster/SVG export, interactive HTML and standalone HTML.
 
+Video source-time selection belongs to the currently selected media segment and is transient until an explicit command commits it. Keep timestamp/range fields, preview overlay and sequence projection synchronized, but do not silently rewrite segment trim while the user is only selecting. A dropped compatible video may use the selection as an insertion boundary; a point means one exact source timestamp and a range means a bounded choice projected into the canonical sequence.
+
 Range controls must tolerate zero-length and sub-step media during recording finalization. Never call `Math.Clamp(value, min, max)` unless `min <= max` is guaranteed after duration normalization. Range-selector minimum spans must be derived from the actual finite duration rather than a fixed value that can exceed a short clip.
 
 ## Before adding or moving code

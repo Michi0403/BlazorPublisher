@@ -171,3 +171,11 @@ Video Studio and Audio Studio store editable temporal sections as `PublicationMe
 Studio Components own transient mouse/touch modes and overlays, while `MediaTimelineEditService` and the existing Picture Services own deterministic mutations. In v1.0.69, spatial workflows use local interaction overlays: the video overlay follows the contained source-frame rectangle and owns input above the native player only while frame-region mode is active; Picture Studio renders a pointer-transparent guide plus a canvas-local selection veil. High-frequency cursor movement remains browser-local.
 
 The Mainframe remains responsible for applying a Studio result to an existing or newly inserted publication element without changing placement, Z-index, groups, connectors, animation or interaction state. See `docs/architecture/media-gesture-editing.md`, ADR-009 and ADR-010.
+
+## Managed media composition and temporal clip orchestration (v1.0.70)
+
+A compatible Mainframe file drop may identify an existing publication target, but the Mainframe still owns only routing and application of the final result. A picture target transfers the source into Picture Studio as a managed layer. A video or audio target transfers the source into the corresponding Studio as a sequence insert. Target identity and target-local coordinates are transient request data; they do not create a second page-level content model.
+
+Video temporal selection is Studio state tied to the currently selected `PublicationMediaSegment`. Source timestamps are projected into the canonical sequence using the selected segment's timeline start, source trim start and playback rate. Selecting another segment reloads that segment's source and bounds. A selection does not mutate the segment until an explicit cut, trim, copy or insert command commits through the existing media timeline service.
+
+The video preview's fit mode belongs to the publication `VideoElement`, not to the transient overlay. `Contain`, `Cover` and `Stretch` change only how the source is rendered inside the play canvas. Browser-local overlay geometry must be recalculated from the actual rendered source rectangle after fit, resize or metadata changes. Temporal and frame-region overlays remain local UI and never enter publication Z-order or serialized segment collections.

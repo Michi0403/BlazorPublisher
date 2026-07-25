@@ -1,11 +1,9 @@
-# PublisherStudio v1.0.66 release
+# PublisherStudio v1.0.70 release
 
-See `CHANGELOG-v1.0.66.md`, `AGENTS.md`, ADR-008, `docs/ARCHITECTURE.md`, `docs/architecture/system-overview.md`, and `VALIDATION.md`.
+The complete source release is in `PublisherStudio/`.
 
-This release reintegrates the compiler fixes found in Michael's uncommitted working tree on top of the complete v1.0.65 source. The clean source package excludes `.git`, `.vs`, `.cr`, `node_modules`, `bin`, and `obj`.
+See `PublisherStudio/CHANGELOG-v1.0.70.md`, `PublisherStudio/SOURCE-CHANGES-v1.0.70.txt`, `PublisherStudio/TEST-RESULTS-v1.0.70.txt`, `PublisherStudio/RELEASE.md`, and `PublisherStudio/VALIDATION.md`.
 
-`Program.cs` now imports `PublisherStudio.HostedServices.Streaming` explicitly so the moved `TwitchOAuthMaintenanceService` registration is compiler-visible. `PlatformChatService` and `RtspLanServer` use `global::System.Text.Encoding` because the existing sibling namespace `PublisherStudio.Services.Streaming.Encoding` can shadow the BCL type during C# name lookup.
+v1.0.70 adds managed picture/media component drops, a Video Studio timestamp/range overlay tied to the selected sequence clip, live editable selection values for cutting/trim/copy/insertion workflows, and persisted Fit whole, Fill canvas and Stretch behavior inside the play canvas.
 
-The repository contract now treats namespace names and composition-root imports as compiler-visible architecture. `csharpCompilationSafety.test.mjs` checks DI registration visibility and common framework-type shadowing. This supplements a real .NET build; it does not replace one.
-
-Application and installer version is `1.0.66`. Publication format remains `1.48`, Picture Studio format remains `1.3`, and no NuGet/npm/native dependency changed.
+Application and installer version is `1.0.70`. Publication format remains `1.49`; Picture Studio format remains `1.4`; dependency versions are unchanged.

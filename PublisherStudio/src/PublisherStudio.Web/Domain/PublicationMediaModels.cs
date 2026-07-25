@@ -48,6 +48,7 @@ public sealed class MediaEditorResult
     public bool Loop { get; set; }
     public bool AutoPlay { get; set; } = true;
     public PublicationMediaPlaybackTrigger PlaybackTrigger { get; set; } = PublicationMediaPlaybackTrigger.OnPageEnter;
+    public PublicationVideoFitMode VideoFitMode { get; set; } = PublicationVideoFitMode.Contain;
     public List<double> WaveformSamples { get; set; } = [];
     public List<PublicationMediaSegment> Segments { get; set; } = [];
     public List<MediaFramePoint> FrameClipPolygon { get; set; } = [];

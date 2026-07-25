@@ -669,3 +669,16 @@ Static checks completed for the v1.0.37 source package:
 - Trim range normalization guarantees `min <= max` before every affected clamp, including recordings whose duration is shorter than `0.01` seconds or temporarily zero.
 - The DevExpress range-selector minimum span is bounded by the actual finite duration.
 - Run the manual smoke test on a licensed build machine: record a very short screen clip, stop it, download it, activate Frame region, draw/apply/cancel a polygon, then repeat with a letterboxed portrait/landscape source and Picture Studio rectangle/polygon selections.
+
+## v1.0.70 managed component-drop and video-orchestration validation
+
+- Drop a raster image onto an existing publication picture. The target picture must open as a managed Picture Studio document and the dropped image must appear as a new editable layer at the target-local drop point; no unrelated page object may be created.
+- Drop raster, SVG/SVGZ and OpenRaster sources inside Picture Studio. Imported layers must retain Studio ownership, normal layer order and positioned placement.
+- Drop compatible video onto an existing video and audio onto an existing audio. The owning Studio must open with the source staged as a sequence insert. Incompatible targets must continue through normal page insertion.
+- In Video Studio, click the video frame to select one timestamp and drag to select a range. Native player controls/fullscreen must not take ownership of the gesture. Start/end handles, selected shade, current readout, right-side numeric values and the project-sequence marker must update together.
+- Select each sequence clip in turn. The preview source, trim bounds, timestamp/range selector, numeric values and timeline projection must all switch to the selected clip without changing Mainframe Z-order or publication geometry.
+- Enter valid source times directly in Selection start/end. Verify the overlay and sequence marker reflect the committed values, Play range uses them, Cut selection creates one or two boundaries as appropriate, Use as trim changes only the active clip, and Copy area produces a reusable trimmed section.
+- Drop a video over a selected range. The compact placement slider must be bounded to that range and insert at the chosen projected sequence timestamp. A point selection must use the exact selected timestamp without presenting a false range.
+- Switch the play canvas between Fit whole, Fill canvas and Stretch. The source frame, timestamp overlay and frame-region overlay must stay aligned; save/reopen must preserve the chosen video fit mode.
+- Run all 20 Node contract suites, syntax-check every non-vendor JavaScript/test module, parse JSON and project XML, verify C# structural/contract safety, and validate ZIP CRC plus SHA-256/SHA-512 checksums. Results are recorded in `TEST-RESULTS-v1.0.70.txt`.
+- A full .NET/Razor/DevExpress compile and real browser pointer acceptance remain release-machine requirements because this packaging environment does not contain the .NET SDK or licensed DevExpress package feed.

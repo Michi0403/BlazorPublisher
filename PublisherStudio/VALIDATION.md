@@ -793,3 +793,13 @@ Static checks completed for the v1.0.37 source package:
 - Verify local play-canvas controls and C# ribbon playback use non-throwing cancellation semantics for interrupted `HTMLMediaElement.play()` requests.
 - Parse project XML and package JSON, verify current-release versions are `1.0.76` and publication format is `1.53`.
 - Replay the release patch against untouched v1.0.75 and validate archive CRC, extraction parity, SHA-256, and SHA-512 checksums.
+
+## v1.0.77 C# local-scope compilation hotfix validation
+
+- Compile `PublisherStudio.Web` on the licensed release machine and verify `MediaTimelineEditService.cs` no longer reports `CS0136` at the temporal-selection normalizer.
+- Verify the provisional value inside `if (!segment.TemporalSelectionCommitted)` is named `candidateEnd`, while the final normalized value later in the method remains `end`.
+- Exercise point and range selections on clips with placeholder and resolved media durations; behavior must remain identical to v1.0.76.
+- Run the aggregate Node suite. The compilation-safety contract must reject reintroducing `var end` in the earlier nested block.
+- Parse project XML and package JSON, verify all current-release versions are `1.0.77` and publication format remains `1.53`.
+- Replay the release patch against untouched v1.0.76 and validate archive CRC, extraction parity, SHA-256, and SHA-512 checksums.
+- A real .NET/Razor/DevExpress compile remains mandatory on the normal release machine because this packaging environment has no .NET SDK or licensed DevExpress restore feed.

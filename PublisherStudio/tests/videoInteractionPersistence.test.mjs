@@ -88,7 +88,7 @@ globalThis.HTMLVideoElement = class extends FakeMediaElement {};
 globalThis.HTMLCanvasElement = class {};
 const fakeMedia = new FakeMediaElement();
 globalThis.document = { getElementById: id => id === 'interaction-test-video' ? fakeMedia : null };
-const interopModule = await import(`${new URL('../src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js', import.meta.url).href}?v=1076`);
+const interopModule = await import(`${new URL('../src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js', import.meta.url).href}?v=1077`);
 assert.equal(await interopModule.playMediaRange('interaction-test-video', 1, 3, 1, 1, false, false), true);
 fakeMedia.mode = 'pending';
 const pendingPlay = interopModule.playMediaRange('interaction-test-video', 2, 4, 1, 1, false, false);

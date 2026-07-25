@@ -1,0 +1,17 @@
+PublisherStudio v1.0.77 source changes
+
+src/PublisherStudio.Web/Services/MediaStudio/UseCases/MediaTimelineEditService.cs
+- Renames the provisional temporal-selection end local to candidateEnd.
+- Removes the CS0136 collision with the final end local in NormalizeTemporalSelection.
+- Leaves temporal-selection normalization behavior unchanged.
+
+tests/csharpCompilationSafety.test.mjs
+- Adds a targeted lexical contract for the NormalizeTemporalSelection local-variable scope.
+- Rejects reintroducing a nested `var end` declaration before the method's final normalized end value.
+
+Versioned runtime/project files
+- Advances application, installer, npm/lock, streaming capability, and structured-export manifest versions to 1.0.77.
+
+Release documentation
+- Adds CHANGELOG-v1.0.77.md, SOURCE-CHANGES-v1.0.77.txt, and TEST-RESULTS-v1.0.77.txt.
+- Updates RELEASE.md and VALIDATION.md.

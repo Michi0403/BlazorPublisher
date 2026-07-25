@@ -208,4 +208,22 @@ assert.doesNotMatch(
   'Do not nest an explicit Razor code block inside the existing liveSource.IsVisual control-flow body.'
 );
 
-console.log('PublisherStudio C# composition-root, namespace, interpolation and Razor control-flow safety checks passed.');
+
+// CS0136: NormalizeTemporalSelection already declares `end` later in the same
+// local-variable declaration space. The provisional value must use a distinct
+// name even though it appears in a nested if block.
+const mediaTimelineEditService = fs.readFileSync(
+  path.join(web, 'Services', 'MediaStudio', 'UseCases', 'MediaTimelineEditService.cs'),
+  'utf8'
+);
+assert.match(
+  mediaTimelineEditService,
+  /if \(!segment\.TemporalSelectionCommitted\)\s*\{\s*var candidateEnd = double\.IsFinite\(segment\.TemporalSelectionEndSeconds\)/
+);
+assert.doesNotMatch(
+  mediaTimelineEditService,
+  /if \(!segment\.TemporalSelectionCommitted\)\s*\{\s*var end =/,
+  'Do not redeclare end in NormalizeTemporalSelection; the method declares end later in the enclosing local-variable declaration space.'
+);
+
+console.log('PublisherStudio C# composition-root, namespace, interpolation, Razor control-flow and local-scope safety checks passed.');

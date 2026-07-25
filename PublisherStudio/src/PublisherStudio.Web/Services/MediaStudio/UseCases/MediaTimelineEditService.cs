@@ -665,12 +665,12 @@ public sealed class MediaTimelineEditService
             : minimum;
         if (!segment.TemporalSelectionCommitted)
         {
-            var end = double.IsFinite(segment.TemporalSelectionEndSeconds)
+            var candidateEnd = double.IsFinite(segment.TemporalSelectionEndSeconds)
                 ? Math.Clamp(segment.TemporalSelectionEndSeconds, start, maximum)
                 : maximum;
             segment.TemporalSelectionCommitted = segment.TemporalSelectionIsPoint
                 || Math.Abs(start - minimum) > .02
-                || Math.Abs(end - maximum) > .02;
+                || Math.Abs(candidateEnd - maximum) > .02;
         }
         if (segment.TemporalSelectionIsPoint || maximum - minimum < MinimumSourceLength)
         {

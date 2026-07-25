@@ -311,7 +311,8 @@ public sealed class VideoElement : PublicationMediaElement
     public string PosterDataUrl { get; set; } = string.Empty;
     public string AltText { get; set; } = "Video";
     public bool ShowControls { get; set; } = true;
-    public PublicationVideoFitMode FitMode { get; set; } = PublicationVideoFitMode.Contain;
+    public PublicationVideoFitMode FitMode { get; set; } = PublicationVideoFitMode.Stretch;
+    public bool FitModeExplicit { get; set; }
     public string Background { get; set; } = "#111827";
     public List<MediaFramePoint> FrameClipPolygon { get; set; } = [];
 }

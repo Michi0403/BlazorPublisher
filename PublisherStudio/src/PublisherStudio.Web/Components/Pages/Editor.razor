@@ -1346,6 +1346,7 @@
             video.PosterDataUrl = result.PosterDataUrl;
             video.AltText = result.Name;
             video.FitMode = result.VideoFitMode;
+            video.FitModeExplicit = true;
             video.FrameClipPolygon = result.FrameClipPolygon?.Select(point => new MediaFramePoint
             {
                 X = Math.Clamp(point.X, 0, 1),

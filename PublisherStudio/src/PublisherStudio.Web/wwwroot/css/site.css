@@ -4096,3 +4096,160 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     .media-sequence-status { display: grid; gap: 2px; }
     .media-sequence-segment { font-size: 9px; }
 }
+
+/* v1.0.71 video play-canvas overlay orchestration */
+.media-studio-preview-shell.video {
+    place-items: stretch;
+    min-height: 300px;
+}
+.media-studio-preview-shell.video .media-studio-frame-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    display: block;
+    overflow: hidden;
+    isolation: isolate;
+}
+.media-studio-preview-shell.video .media-studio-video-surface {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    background: #020617;
+    user-select: none;
+}
+.media-video-time-overlay {
+    position: absolute;
+    z-index: 10;
+    inset: 0;
+    width: auto;
+    height: auto;
+    overflow: hidden;
+}
+.media-video-time-overlay.disabled {
+    pointer-events: none;
+    opacity: 1;
+}
+.media-video-time-overlay.disabled::before { opacity: .38; }
+.media-video-time-overlay.disabled .media-video-time-track,
+.media-video-time-overlay.disabled .media-video-transport-dock { opacity: .72; }
+.media-video-time-overlay::before {
+    inset: 0 0 70px;
+}
+.media-video-time-track {
+    z-index: 14;
+    left: 16px;
+    right: 16px;
+    bottom: 48px;
+    height: 12px;
+    pointer-events: none;
+}
+.media-video-time-handle { height: 32px; }
+.media-video-time-toolbar.media-video-transport-dock {
+    position: absolute;
+    z-index: 15;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 9px;
+    border: 0;
+    border-top: 1px solid #ffffff66;
+    border-radius: 0;
+    background: linear-gradient(180deg, #0f172acc, #020617f2);
+    box-shadow: 0 -4px 14px #0007;
+    cursor: default;
+}
+.media-video-transport-buttons { display: flex; gap: 4px; flex: 0 0 auto; }
+.media-video-pointer-mode {
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #cbd5e1;
+    font-size: 9px;
+    white-space: nowrap;
+}
+.media-video-pointer-mode select {
+    min-width: 0;
+    height: 26px;
+    padding: 2px 22px 2px 6px;
+    border: 1px solid #64748b;
+    border-radius: 3px;
+    background: #0f172a;
+    color: #f8fafc;
+    font: inherit;
+}
+.media-video-time-readout { flex: 0 0 auto; }
+.media-video-time-help {
+    position: static;
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    color: #cbd5e1;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.media-video-mode-hud {
+    position: absolute;
+    z-index: 18;
+    left: 10px;
+    top: 10px;
+    max-width: calc(100% - 20px);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 8px;
+    border: 1px solid #ffffff55;
+    border-radius: 4px;
+    background: #020617c7;
+    color: #e2e8f0;
+    box-shadow: 0 3px 12px #0008;
+    font-size: 10px;
+    pointer-events: none;
+}
+.media-video-mode-hud b { color: #7dd3fc; }
+.media-video-mode-hud span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.media-video-time-overlay[data-mouse-mode="PlacePlayhead"] { cursor: col-resize; }
+.media-video-time-overlay[data-mouse-mode="AddCutLine"] { cursor: crosshair; }
+.media-video-time-overlay[data-mouse-mode="PlacePlayhead"] .media-video-time-handle,
+.media-video-time-overlay[data-mouse-mode="AddCutLine"] .media-video-time-handle {
+    pointer-events: none;
+    opacity: .45;
+}
+.media-studio-frame-overlay-host { z-index: 20; }
+.media-studio-frame-overlay-host.active .media-frame-mode-help { bottom: 56px; }
+.media-studio-frame-overlay-host.active .media-frame-overlay-actions { z-index: 24; }
+.media-video-insert-placement { z-index: 30; }
+.media-video-time-overlay.media-video-drop-target::after { bottom: 74px; }
+.media-studio-window.media-file-drag-active[data-media-drop-mode="insert"]::after {
+    content: "Insert into the selected clip at the highlighted timestamp";
+}
+@media (max-width: 900px) {
+    .media-video-pointer-mode span,
+    .media-video-time-help { display: none; }
+    .media-video-pointer-mode { min-width: 112px; }
+}
+.media-studio-frame-overlay-host:not(.active) {
+    visibility: hidden;
+}
+.media-studio-frame-overlay-host.active {
+    visibility: visible;
+}

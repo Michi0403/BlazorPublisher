@@ -8,6 +8,7 @@ const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
 const mediaStudio = read('src', 'PublisherStudio.Web', 'Components', 'Editor', 'MediaStudio.razor');
 const mediaModels = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationMediaModels.cs');
+const publicationModels = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationModels.cs');
 const editor = read('src', 'PublisherStudio.Web', 'Components', 'Pages', 'Editor.razor');
 const timelineService = read('src', 'PublisherStudio.Web', 'Services', 'MediaStudio', 'UseCases', 'MediaTimelineEditService.cs');
 const interop = read('src', 'PublisherStudio.Web', 'wwwroot', 'js', 'mediaStudioInterop.js');
@@ -21,9 +22,16 @@ assert.match(mediaStudio, /data-trim-start="@Inv\(_trimStart\)"/);
 assert.match(mediaStudio, /data-selection-point="@\(_videoSelectionIsPoint/);
 assert.match(mediaStudio, /data-clip-name="@SelectedClipName"/);
 assert.match(mediaStudio, /data-segment-timeline-start="@Inv\(SelectedSegmentTimelineStart\)"/);
+assert.match(mediaStudio, /data-mouse-mode="@_mouseMode"/);
+assert.match(mediaStudio, /class="media-video-time-toolbar media-video-transport-dock"/);
+assert.match(mediaStudio, /id="media-studio-sequence-playhead"/);
+assert.match(mediaStudio, /<DxRibbonGroup Text="Pointer mode"/);
+assert.match(mediaStudio, /<DxRibbonGroup Text="Video canvas"/);
+assert.match(mediaStudio, /Pointer: select timestamp\/range/);
+assert.match(mediaStudio, /Canvas: stretch/);
 assert.match(mediaStudio, /data-video-time-handle="start"/);
 assert.match(mediaStudio, /data-video-time-handle="end"/);
-assert.match(mediaStudio, /Click for one timestamp · drag for a range/);
+assert.match(mediaStudio, /Click for one timestamp; drag for a selected range/);
 assert.match(mediaStudio, /@if \(!IsVideo\)[\s\S]*<DxRangeSelector/);
 
 // Selection values are editable, stay tied to the active sequence clip, and drive real clip operations.
@@ -47,6 +55,10 @@ assert.match(mediaStudio, /PublicationVideoFitMode\.Stretch => "fill"/);
 assert.match(mediaStudio, /VideoFitMode = _videoFitMode/);
 assert.match(mediaModels, /PublicationVideoFitMode VideoFitMode/);
 assert.match(editor, /video\.FitMode = result\.VideoFitMode/);
+assert.match(publicationModels, /FitMode \{ get; set; \} = PublicationVideoFitMode\.Stretch/);
+assert.match(publicationModels, /bool FitModeExplicit/);
+assert.match(mediaStudio, /video\.FitModeExplicit \|\| video\.FitMode != PublicationVideoFitMode\.Contain/);
+assert.match(editor, /video\.FitModeExplicit = true/);
 
 // A dropped video is staged, then positioned with a small slider inside the selected source range.
 assert.match(mediaStudio, /class="media-video-insert-placement"/);
@@ -63,6 +75,12 @@ assert.match(timelineService, /var rightId = SplitAt/);
 assert.match(interop, /function bindVideoTimeOverlay/);
 assert.match(interop, /setPointerCapture/);
 assert.match(interop, /VideoTimeSelectionCommitted/);
+assert.match(interop, /VideoPlayheadCommitted/);
+assert.match(interop, /VideoCutlineCommitted/);
+assert.match(interop, /function videoCanvasMode/);
+assert.match(interop, /function setVideoPlayheadVisual/);
+assert.match(interop, /media-studio-sequence-playhead/);
+assert.match(interop, /timeOverlay\.style\.width = `\$\{Math\.max\(1, stageBounds\.width\)\}px`/);
 assert.match(interop, /normalizeVideoTimeRange/);
 assert.match(interop, /syncVideoSelectionControls/);
 assert.match(interop, /media-studio-video-selection-mode/);
@@ -87,5 +105,12 @@ assert.match(css, /\.media-video-insert-placement/);
 assert.match(css, /\.media-sequence-selection/);
 assert.match(css, /\.media-video-selection-value/);
 assert.match(css, /touch-action:\s*none/);
+assert.match(css, /v1\.0\.71 video play-canvas overlay orchestration/);
+assert.match(css, /\.media-studio-preview-shell\.video \.media-studio-video-surface[\s\S]*max-height:\s*none/);
+assert.match(css, /\.media-video-time-overlay \{[\s\S]*inset:\s*0/);
+assert.match(css, /\.media-video-time-toolbar\.media-video-transport-dock[\s\S]*bottom:\s*0/);
+assert.match(css, /\.media-studio-frame-overlay-host \{ z-index:\s*20/);
+assert.match(css, /\.media-studio-frame-overlay-host:not\(\.active\) \{[\s\S]*visibility:\s*hidden/);
+assert.match(css, /Insert into the selected clip at the highlighted timestamp/);
 
-console.log('PublisherStudio video temporal overlay, timestamp selection, and positioned drop insertion contracts passed.');
+console.log('PublisherStudio full-canvas video overlay, bottom transport, pointer modes, clip orchestration, and positioned drop contracts passed.');

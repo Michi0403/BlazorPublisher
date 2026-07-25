@@ -959,7 +959,15 @@
     private void ToggleMediaMuted(ChangeEventArgs _) => UpdateMedia(media => media.Muted = !media.Muted);
     private void ToggleMediaLoop(ChangeEventArgs _) => UpdateMedia(media => media.Loop = !media.Loop);
     private void ToggleMediaAutoPlay(ChangeEventArgs _) => UpdateMedia(media => media.AutoPlay = !media.AutoPlay);
-    private void ChangeVideoFit(ChangeEventArgs args) { if (Enum.TryParse<PublicationVideoFitMode>(args.Value?.ToString(), out var value) && State.SelectedElement is VideoElement video) State.UpdateMedia(video.Id, _ => video.FitMode = value); }
+    private void ChangeVideoFit(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<PublicationVideoFitMode>(args.Value?.ToString(), out var value) || State.SelectedElement is not VideoElement video) return;
+        State.UpdateMedia(video.Id, _ =>
+        {
+            video.FitMode = value;
+            video.FitModeExplicit = true;
+        });
+    }
     private void ChangeTextContentFit(ChangeEventArgs args) { if (Enum.TryParse<PublicationContentFitMode>(args.Value?.ToString(), out var value) && State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => text.ContentFit = value); }
     private void ChangeSpreadsheetContentFit(ChangeEventArgs args) { if (Enum.TryParse<PublicationContentFitMode>(args.Value?.ToString(), out var value) && State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ContentFit = value); }
     private void ToggleVideoControls(ChangeEventArgs _) { if (State.SelectedElement is VideoElement video) State.UpdateMedia(video.Id, _ => video.ShowControls = !video.ShowControls); }

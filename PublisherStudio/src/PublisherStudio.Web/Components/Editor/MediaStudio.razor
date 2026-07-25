@@ -33,6 +33,15 @@
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-stop" Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
                     </DxRibbonGroup>
+                    <DxRibbonGroup Text="Pointer mode" IconCssClass="pub-icon pub-icon-select">
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Select time")" Click="SelectSectionMode" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@MouseModeText(MediaStudioMouseMode.PlacePlayhead, "Place playhead")" Enabled="@HasSource" Click="PlacePlayheadMode" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="@MouseModeText(MediaStudioMouseMode.AddCutLine, "Add cutline")" Enabled="@HasSource" Click="AddCutLineMode" />
+                        @if (IsVideo)
+                        {
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.FrameRegion, "Frame region")" Enabled="@HasSource" Click="FrameRegionMode" />
+                        }
+                    </DxRibbonGroup>
                     <DxRibbonGroup Text="Playback">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="Play range" Enabled="@HasSource" Click="PlaySelection" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-pause" Text="Pause" Enabled="@HasSource" Click="PausePreview" />
@@ -50,16 +59,12 @@
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Trim to selection" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy selection" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
                         </DxRibbonGroup>
+                        <DxRibbonGroup Text="Video canvas" IconCssClass="pub-icon pub-icon-video">
+                            <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Stretch, "Stretch")" Enabled="@HasSource" Click="VideoFitStretch" />
+                            <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Cover, "Fill canvas")" Enabled="@HasSource" Click="VideoFitCover" />
+                            <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Contain, "Fit whole")" Enabled="@HasSource" Click="VideoFitContain" />
+                        </DxRibbonGroup>
                     }
-                    <DxRibbonGroup Text="Gestures">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Select section")" Click="SelectSectionMode" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@MouseModeText(MediaStudioMouseMode.PlacePlayhead, "Place playhead")" Click="PlacePlayheadMode" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="@MouseModeText(MediaStudioMouseMode.AddCutLine, "Add cutline")" Enabled="@HasSource" Click="AddCutLineMode" />
-                        @if (IsVideo)
-                        {
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.FrameRegion, "Frame region")" Enabled="@HasSource" Click="FrameRegionMode" />
-                        }
-                    </DxRibbonGroup>
                     <DxRibbonGroup Text="Sections">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Cut at playhead" Enabled="@CanAddCutLine" Click="AddCutLineAtPlayhead" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove cutline" Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
@@ -86,7 +91,12 @@
                                        preload="metadata"
                                        disablepictureinpicture
                                        controlslist="nofullscreen nodownload noremoteplayback"
+                                       class="media-studio-video-surface"
                                        style="@VideoPreviewStyle"></video>
+                                <div class="media-video-mode-hud" aria-live="polite">
+                                    <b>@MouseModeLabel</b>
+                                    <span>@VideoCanvasModeHelp</span>
+                                </div>
                                 <div id="media-studio-video-time-overlay"
                                      class="media-video-time-overlay @(_videoSelectionIsPoint ? "point-selection" : "range-selection") @(_mouseMode == MediaStudioMouseMode.FrameRegion ? "disabled" : null)"
                                      data-duration="@Inv(_duration)"
@@ -100,19 +110,11 @@
                                      data-segment-timeline-start="@Inv(SelectedSegmentTimelineStart)"
                                      data-segment-source-start="@Inv(SelectedSegmentSourceStart)"
                                      data-playback-rate="@Inv(_playbackRate)"
+                                     data-mouse-mode="@_mouseMode"
                                      style="@VideoTimeOverlayStyle"
                                      role="application"
                                      aria-label="Video timestamp and range selector">
-                                    <div class="media-video-time-toolbar" data-video-time-control>
-                                        <button type="button" title="Play selected range" @onclick="PlaySelection" @onclick:stopPropagation>▶</button>
-                                        <button type="button" title="Pause video" @onclick="PausePreview" @onclick:stopPropagation>Ⅱ</button>
-                                        <span class="media-video-time-readout">
-                                            <b id="media-studio-video-selection-label">@VideoSelectionLabel</b>
-                                            <span id="media-studio-video-current-time">@Time(VideoSelectionStart)</span>
-                                            <span id="media-studio-video-selection-readout">@VideoSelectionReadout</span>
-                                        </span>
-                                    </div>
-                                    <div class="media-video-time-track" data-video-time-track>
+                                    <div class="media-video-time-track" data-video-time-track aria-label="Selected video timestamp or range">
                                         <span class="media-video-time-selected" aria-hidden="true"></span>
                                         <span class="media-video-time-handle start" data-video-time-handle="start" title="Drag selection start"></span>
                                         <span class="media-video-time-handle end" data-video-time-handle="end" title="Drag selection end"></span>
@@ -120,7 +122,27 @@
                                         <span class="media-video-time-playhead" aria-hidden="true"></span>
                                         <span class="media-video-time-drop-marker" aria-hidden="true"></span>
                                     </div>
-                                    <div class="media-video-time-help">Click for one timestamp · drag for a range · the selection follows the active sequence clip</div>
+                                    <div class="media-video-time-toolbar media-video-transport-dock" data-video-time-control>
+                                        <div class="media-video-transport-buttons">
+                                            <button type="button" title="Play selected range" @onclick="PlaySelection" @onclick:stopPropagation>▶</button>
+                                            <button type="button" title="Pause video" @onclick="PausePreview" @onclick:stopPropagation>Ⅱ</button>
+                                        </div>
+                                        <label class="media-video-pointer-mode">
+                                            <span>Pointer</span>
+                                            <select value="@_mouseMode" @onchange="ChangeVideoCanvasMouseMode">
+                                                <option value="@MediaStudioMouseMode.SelectSection">Select time</option>
+                                                <option value="@MediaStudioMouseMode.PlacePlayhead">Place playhead</option>
+                                                <option value="@MediaStudioMouseMode.AddCutLine">Add cutline</option>
+                                                <option value="@MediaStudioMouseMode.FrameRegion">Frame region</option>
+                                            </select>
+                                        </label>
+                                        <span class="media-video-time-readout">
+                                            <b id="media-studio-video-selection-label">@VideoSelectionLabel</b>
+                                            <span id="media-studio-video-current-time">@Time(VideoSelectionStart)</span>
+                                            <span id="media-studio-video-selection-readout">@VideoSelectionReadout</span>
+                                        </span>
+                                        <span class="media-video-time-help">@SelectedClipName · @VideoCanvasModeHelp</span>
+                                    </div>
 
                                     @if (_pendingInsertSegment is not null)
                                     {
@@ -239,7 +261,7 @@
                                        style="@VideoSequenceSelectionStyle"
                                        title="@VideoSequenceSelectionTitle"></i>
                                 }
-                                <i class="media-playhead" style="left:@Percent(_playhead / Math.Max(.01, SequenceDuration))"></i>
+                                <i id="media-studio-sequence-playhead" class="media-playhead" style="left:@Percent(_playhead / Math.Max(.01, SequenceDuration))"></i>
                             </div>
                             <div class="media-sequence-status">
                                 <span><b>Mode:</b> @MouseModeLabel</span>
@@ -438,8 +460,15 @@
         <DxContextMenuItem Text="Set trim start at playhead" Enabled="@HasSource" BeginGroup="true" Click="SetTrimStartAtPlayhead" />
         <DxContextMenuItem Text="Set trim end at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
         <DxContextMenuItem Text="Reset trim to full clip" Enabled="@HasSource" Click="ResetTrim" />
+        <DxContextMenuItem Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Pointer: select timestamp/range")" BeginGroup="true" Click="SelectSectionMode" />
+        <DxContextMenuItem Text="@MouseModeText(MediaStudioMouseMode.PlacePlayhead, "Pointer: place playhead")" Enabled="@HasSource" Click="PlacePlayheadMode" />
+        <DxContextMenuItem Text="@MouseModeText(MediaStudioMouseMode.AddCutLine, "Pointer: add cutline")" Enabled="@HasSource" Click="AddCutLineMode" />
         @if (IsVideo)
         {
+            <DxContextMenuItem Text="@MouseModeText(MediaStudioMouseMode.FrameRegion, "Pointer: frame region")" Enabled="@HasSource" Click="FrameRegionMode" />
+            <DxContextMenuItem Text="@VideoFitModeText(PublicationVideoFitMode.Stretch, "Canvas: stretch")" Enabled="@HasSource" BeginGroup="true" Click="VideoFitStretch" />
+            <DxContextMenuItem Text="@VideoFitModeText(PublicationVideoFitMode.Cover, "Canvas: fill and crop")" Enabled="@HasSource" Click="VideoFitCover" />
+            <DxContextMenuItem Text="@VideoFitModeText(PublicationVideoFitMode.Contain, "Canvas: fit whole")" Enabled="@HasSource" Click="VideoFitContain" />
             <DxContextMenuItem Text="Cut selected timestamp/range" Enabled="@CanCutVideoSelection" BeginGroup="true" Click="CutVideoSelection" />
             <DxContextMenuItem Text="Use selected range as trim" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
             <DxContextMenuItem Text="Copy selected range" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
@@ -493,7 +522,7 @@
     private double _playbackRate = 1;
     private double _fadeIn;
     private double _fadeOut;
-    private PublicationVideoFitMode _videoFitMode = PublicationVideoFitMode.Contain;
+    private PublicationVideoFitMode _videoFitMode = PublicationVideoFitMode.Stretch;
     private bool _muted;
     private bool _loop;
     private bool _autoPlay = true;
@@ -641,11 +670,18 @@
     }
     private string MouseModeLabel => _mouseMode switch
     {
-        MediaStudioMouseMode.SelectSection => "Select section",
+        MediaStudioMouseMode.SelectSection => "Select time",
         MediaStudioMouseMode.PlacePlayhead => "Place playhead",
         MediaStudioMouseMode.AddCutLine => "Add cutline",
         MediaStudioMouseMode.FrameRegion => "Frame region",
-        _ => "Select section"
+        _ => "Select time"
+    };
+    private string VideoCanvasModeHelp => _mouseMode switch
+    {
+        MediaStudioMouseMode.PlacePlayhead => "Click or drag to scrub the selected clip",
+        MediaStudioMouseMode.AddCutLine => "Click the selected clip where the cutline belongs",
+        MediaStudioMouseMode.FrameRegion => "Click frame vertices; Enter or double-click applies",
+        _ => "Click for one timestamp; drag for a selected range"
     };
     private string SelectedSectionSummary => SelectedSegment is { } segment
         ? $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
@@ -700,7 +736,7 @@
         _videoSelectionPointSeconds = 0;
         _videoSelectionStartSeconds = 0;
         _videoSelectionEndSeconds = 0;
-        _videoFitMode = PublicationVideoFitMode.Contain;
+        _videoFitMode = PublicationVideoFitMode.Stretch;
         ClearPendingInsert();
 
         if (InitialMedia is { } media)
@@ -729,7 +765,9 @@
             _segments.AddRange(TimelineEdits.Normalize(sourceSegments, IsVideo));
             if (media is VideoElement video)
             {
-                _videoFitMode = video.FitMode;
+                _videoFitMode = video.FitModeExplicit || video.FitMode != PublicationVideoFitMode.Contain
+                    ? video.FitMode
+                    : PublicationVideoFitMode.Stretch;
                 _frameClipPolygon.AddRange(CloneFramePoints(video.FrameClipPolygon));
             }
         }
@@ -925,6 +963,12 @@
     private void PlacePlayheadMode() => SetMouseMode(MediaStudioMouseMode.PlacePlayhead);
     private void AddCutLineMode() => SetMouseMode(MediaStudioMouseMode.AddCutLine);
     private void FrameRegionMode() => BeginFrameRegion();
+    private void ChangeVideoCanvasMouseMode(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<MediaStudioMouseMode>(Text(args), out var mode)) return;
+        if (mode == MediaStudioMouseMode.FrameRegion) BeginFrameRegion();
+        else SetMouseMode(mode);
+    }
     private void SetMouseMode(MediaStudioMouseMode mode)
     {
         if (!IsVideo && mode == MediaStudioMouseMode.FrameRegion) mode = MediaStudioMouseMode.SelectSection;
@@ -1106,6 +1150,28 @@
         _playhead = SourcePositionToTimeline(VideoSelectionStart);
         var module = await EnsureMediaModuleAsync();
         await module.InvokeVoidAsync("seekMedia", "media-studio-preview", VideoSelectionStart);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task VideoPlayheadCommitted(double sourceSeconds)
+    {
+        if (!IsVideo || !HasSource) return;
+        var source = Math.Clamp(double.IsFinite(sourceSeconds) ? sourceSeconds : _trimStart, _trimStart, _trimEnd);
+        _playhead = SourcePositionToTimeline(source);
+        var module = await EnsureMediaModuleAsync();
+        await module.InvokeVoidAsync("seekMedia", "media-studio-preview", source);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task VideoCutlineCommitted(double sourceSeconds)
+    {
+        if (!IsVideo || !HasSource) return;
+        var source = Math.Clamp(double.IsFinite(sourceSeconds) ? sourceSeconds : _trimStart, _trimStart, _trimEnd);
+        _playhead = SourcePositionToTimeline(source);
+        AddCutLineAtPlayhead();
+        await SeekSelectedAtPlayheadAsync();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -1826,6 +1892,7 @@
         if (Enum.TryParse<PublicationVideoFitMode>(Text(args), out var mode)) await SetVideoFitModeAsync(mode);
     }
 
+    private string VideoFitModeText(PublicationVideoFitMode mode, string label) => _videoFitMode == mode ? $"✓ {label}" : label;
     private static string VideoFitModeName(PublicationVideoFitMode mode) => mode switch
     {
         PublicationVideoFitMode.Cover => "Fill canvas (crop)",

@@ -179,3 +179,11 @@ A compatible Mainframe file drop may identify an existing publication target, bu
 Video temporal selection is Studio state tied to the currently selected `PublicationMediaSegment`. Source timestamps are projected into the canonical sequence using the selected segment's timeline start, source trim start and playback rate. Selecting another segment reloads that segment's source and bounds. A selection does not mutate the segment until an explicit cut, trim, copy or insert command commits through the existing media timeline service.
 
 The video preview's fit mode belongs to the publication `VideoElement`, not to the transient overlay. `Contain`, `Cover` and `Stretch` change only how the source is rendered inside the play canvas. Browser-local overlay geometry must be recalculated from the actual rendered source rectangle after fit, resize or metadata changes. Temporal and frame-region overlays remain local UI and never enter publication Z-order or serialized segment collections.
+
+## Video play-canvas interaction layering (v1.0.71)
+
+Video Studio uses a local play-canvas stacking context with independent owners. The video surface fills the available canvas. The temporal layer covers the full canvas and owns selected-clip timestamp/range gestures, playhead scrubbing, cut placement, and drop insertion. The spatial layer is aligned to rendered source pixels and becomes visible/interactable only during frame-region mode. The bottom transport belongs to the temporal layer and cannot be repositioned by source aspect ratio or `object-fit` geometry.
+
+Pointer modes are explicit command state rather than inferred browser behavior. `SelectSection` commits a timestamp/range, `PlacePlayhead` changes source/project playback position without replacing the range, `AddCutLine` splits at the projected sequence timestamp, and `FrameRegion` transfers ownership to the polygon overlay. Browser-native controls and fullscreen are disabled inside the Studio preview.
+
+New videos default to `Stretch`. `FitModeExplicit` distinguishes later user choices from the legacy v1.0.70 implicit `Contain` default, allowing upgraded videos with that old implicit value to open full-canvas while preserving explicit choices from v1.0.71 onward.

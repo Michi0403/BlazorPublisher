@@ -311,14 +311,12 @@ function syncFrameOverlay(state) {
     }
 
     if (timeOverlay) {
-        const visibleLeft = Math.max(0, left);
-        const visibleTop = Math.max(0, top);
-        const visibleRight = Math.min(stageBounds.width, left + contentWidth);
-        const visibleBottom = Math.min(stageBounds.height, top + contentHeight);
-        timeOverlay.style.left = `${visibleLeft}px`;
-        timeOverlay.style.top = `${visibleTop}px`;
-        timeOverlay.style.width = `${Math.max(1, visibleRight - visibleLeft)}px`;
-        timeOverlay.style.height = `${Math.max(1, visibleBottom - visibleTop)}px`;
+        // Temporal interaction belongs to the entire play canvas. It must not collapse
+        // to the contained source image when the video uses Fit whole.
+        timeOverlay.style.left = '0px';
+        timeOverlay.style.top = '0px';
+        timeOverlay.style.width = `${Math.max(1, stageBounds.width)}px`;
+        timeOverlay.style.height = `${Math.max(1, stageBounds.height)}px`;
     }
 }
 
@@ -467,19 +465,38 @@ function normalizeVideoTimeRange(start, end, duration, minimum = 0, maximum = du
     return { start: safeStart, end: safeEnd };
 }
 
+function videoCanvasMode(overlay) {
+    const value = String(overlay?.dataset?.mouseMode || 'SelectSection');
+    return value === 'PlacePlayhead' || value === 'AddCutLine' || value === 'FrameRegion'
+        ? value
+        : 'SelectSection';
+}
+
+function setVideoPlayheadVisual(overlay, sourceSeconds) {
+    const data = videoTimeData(overlay);
+    const current = Math.max(data.trimStart, Math.min(data.trimEnd, Number(sourceSeconds) || data.trimStart));
+    overlay.style.setProperty('--video-time-playhead', `${current / data.duration * 100}%`);
+    const readout = document.getElementById('media-studio-video-current-time');
+    if (readout) readout.textContent = formatMediaTime(current);
+
+    const sequenceDuration = Math.max(.01, Number(overlay?.dataset?.sequenceDuration) || 0);
+    const segmentTimelineStart = Math.max(0, Number(overlay?.dataset?.segmentTimelineStart) || 0);
+    const segmentSourceStart = Math.max(0, Number(overlay?.dataset?.segmentSourceStart) || 0);
+    const playbackRate = Math.max(.1, Number(overlay?.dataset?.playbackRate) || 1);
+    const timelineSeconds = segmentTimelineStart + Math.max(0, current - segmentSourceStart) / playbackRate;
+    const sequencePlayhead = document.getElementById('media-studio-sequence-playhead');
+    if (sequencePlayhead instanceof HTMLElement) {
+        sequencePlayhead.style.left = `${Math.max(0, Math.min(100, timelineSeconds / sequenceDuration * 100))}%`;
+        sequencePlayhead.title = `Source ${formatMediaTime(current)} · project ${formatMediaTime(timelineSeconds)}`;
+    }
+    return current;
+}
+
 function updateVideoTimeReadout(state) {
     const video = mediaElement(state.id);
     const overlay = document.getElementById(state.timeOverlayId);
     if (!(video instanceof HTMLVideoElement) || !overlay) return;
-    const duration = Math.max(.01, Number(video.duration) || Number(overlay.dataset.duration) || 0);
-    const current = Math.max(0, Math.min(duration, Number(video.currentTime) || 0));
-    overlay.style.setProperty('--video-time-playhead', `${current / duration * 100}%`);
-    const readout = document.getElementById('media-studio-video-current-time');
-    if (readout) {
-        const minutes = Math.floor(current / 60);
-        const seconds = current - minutes * 60;
-        readout.textContent = `${minutes}:${seconds.toFixed(1).padStart(4, '0')}`;
-    }
+    setVideoPlayheadVisual(overlay, Number(video.currentTime) || 0);
 }
 
 function bindVideoTimeOverlay(state, timeOverlayId) {
@@ -499,6 +516,14 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
         const value = videoTimeAt(overlay, clientX, false);
         return Math.max(data.trimStart, Math.min(data.trimEnd, value));
     };
+    const locallyScrub = sourceSeconds => {
+        const current = setVideoPlayheadVisual(overlay, sourceSeconds);
+        try {
+            video.pause();
+            if (Number.isFinite(video.duration)) video.currentTime = current;
+        } catch { }
+        return current;
+    };
 
     const finishGesture = async event => {
         const gesture = state.timeOverlayGesture;
@@ -506,8 +531,20 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
         event.preventDefault();
         event.stopPropagation();
         try { overlay.releasePointerCapture(event.pointerId); } catch { }
-        const moved = gesture.moved || Math.abs(Number(event.clientX) - gesture.clientX) >= 4;
         const current = clipTimeAt(event.clientX);
+
+        if (gesture.mode === 'playhead' || gesture.mode === 'cutline') {
+            const sourceSeconds = locallyScrub(current);
+            state.timeOverlayGesture = null;
+            try {
+                await state.dotnet?.invokeMethodAsync(
+                    gesture.mode === 'cutline' ? 'VideoCutlineCommitted' : 'VideoPlayheadCommitted',
+                    sourceSeconds);
+            } catch { }
+            return;
+        }
+
+        const moved = gesture.moved || Math.abs(Number(event.clientX) - gesture.clientX) >= 4;
         let start;
         let end;
         let pointSelection = false;
@@ -540,6 +577,7 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
             end = range.end;
         }
         setVideoTimeVisual(overlay, start, end, pointSelection);
+        locallyScrub(start);
         state.timeOverlayGesture = null;
         try {
             await state.dotnet?.invokeMethodAsync('VideoTimeSelectionCommitted', start, end, pointSelection);
@@ -548,12 +586,20 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
 
     state.timeOverlayPointerDownHandler = event => {
         if (event.button !== 0 || overlay.classList.contains('disabled')) return;
-        if (event.target?.closest?.('[data-video-time-control],button,input,label')) return;
+        if (event.target?.closest?.('[data-video-time-control],button,input,label,select')) return;
         event.preventDefault();
         event.stopPropagation();
         const data = videoTimeData(overlay);
+        const pointerMode = videoCanvasMode(overlay);
         const handle = event.target?.closest?.('[data-video-time-handle]')?.dataset?.videoTimeHandle || '';
         const anchor = clipTimeAt(event.clientX);
+        const gestureMode = pointerMode === 'PlacePlayhead'
+            ? 'playhead'
+            : pointerMode === 'AddCutLine'
+                ? 'cutline'
+                : handle === 'start' || handle === 'end'
+                    ? handle
+                    : 'select';
         state.timeOverlayGesture = {
             pointerId: event.pointerId,
             clientX: Number(event.clientX),
@@ -561,11 +607,12 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
             start: data.start,
             end: data.end,
             pointSelection: data.pointSelection,
-            mode: handle === 'start' || handle === 'end' ? handle : 'select',
+            mode: gestureMode,
             moved: false
         };
         try { overlay.setPointerCapture(event.pointerId); } catch { }
-        if (!handle) setVideoTimeVisual(overlay, anchor, anchor, true);
+        if (gestureMode === 'playhead' || gestureMode === 'cutline') locallyScrub(anchor);
+        else if (!handle) setVideoTimeVisual(overlay, anchor, anchor, true);
     };
 
     state.timeOverlayPointerMoveHandler = event => {
@@ -575,7 +622,9 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
         event.stopPropagation();
         if (Math.abs(Number(event.clientX) - gesture.clientX) >= 4) gesture.moved = true;
         const current = clipTimeAt(event.clientX);
-        if (gesture.mode === 'start') {
+        if (gesture.mode === 'playhead' || gesture.mode === 'cutline') {
+            locallyScrub(current);
+        } else if (gesture.mode === 'start') {
             setVideoTimeVisual(overlay, Math.min(current, gesture.end - .01), gesture.end, false);
         } else if (gesture.mode === 'end') {
             setVideoTimeVisual(overlay, gesture.start, Math.max(current, gesture.start + .01), false);
@@ -588,7 +637,8 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
     state.timeOverlayPointerCancelHandler = event => {
         const gesture = state.timeOverlayGesture;
         if (!gesture || gesture.pointerId !== event.pointerId) return;
-        setVideoTimeVisual(overlay, gesture.start, gesture.end, gesture.pointSelection);
+        if (gesture.mode !== 'playhead' && gesture.mode !== 'cutline')
+            setVideoTimeVisual(overlay, gesture.start, gesture.end, gesture.pointSelection);
         state.timeOverlayGesture = null;
     };
     state.timeOverlayDoubleClickHandler = event => {

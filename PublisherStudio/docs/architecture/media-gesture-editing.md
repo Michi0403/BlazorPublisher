@@ -53,3 +53,11 @@ Video Studio owns a source-time timestamp/range selector over the rendered video
 The temporal selection is intentionally separate from clip trim. It becomes canonical only through an explicit operation: a point adds a cutline, a range may add both boundaries, replace the selected clip trim, create a copied section, control range playback, or bound the insertion position for a dropped video. Source-to-sequence projection uses the selected segment's sequence start, source start and playback rate.
 
 Video fit changes (`Contain`, `Cover`, `Stretch`) affect the rendered frame rectangle. Both temporal and spatial overlays must follow that rectangle after metadata, resize and fit changes. Native video controls are disabled inside Video Studio so fullscreen/player gestures cannot compete with Studio selection ownership.
+
+## Full-canvas temporal and source-frame spatial ownership (v1.0.71)
+
+Video Studio separates two coordinate systems. Temporal selection, playback scrubbing, cut placement, and media-drop insertion use the entire play canvas because time has no source-pixel X/Y boundary. The timestamp overlay therefore remains canvas-wide for `Stretch`, `Cover`, and `Contain`, including letterboxed regions. Its transport dock is fixed to the canvas bottom and its sequence projection uses the active segment's source start, timeline start, and playback rate.
+
+Spatial frame-region editing still follows the rendered source-pixel rectangle. It is the only overlay allowed to cover temporal input, and only while `FrameRegion` mode is active. Outside that mode the frame overlay is visually hidden and pointer-transparent. This prevents its dim veil, help panel, and actions from leaking into normal playback.
+
+The local layer order is: video surface, temporal overlay, mode HUD, active spatial overlay, pending insertion panel, then framework context menus. Drag/drop feedback is transient and projected through the temporal overlay. No layer changes publication Z-order or creates a canonical element.

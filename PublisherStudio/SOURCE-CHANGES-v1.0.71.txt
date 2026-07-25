@@ -1,0 +1,36 @@
+PublisherStudio v1.0.71 source changes
+=====================================
+
+Video Studio canvas and command surface
+---------------------------------------
+- Components/Editor/MediaStudio.razor
+  Moved pointer modes ahead of playback in the ribbon, added persisted video-canvas sizing commands to the ribbon and context menu, added a bottom-docked transport/mode selector, exposed selected-clip mode help, added source/project playhead synchronization hooks, and added direct playhead/cutline callbacks.
+
+Local overlay orchestration
+---------------------------
+- wwwroot/js/mediaStudioInterop.js
+  Decoupled the temporal overlay from the rendered source rectangle, sized it to the complete play canvas, added mode-aware select/scrub/cut gestures, synchronized the sequence playhead during playback, preserved full-canvas drop timestamp mapping, and retained source-frame alignment only for spatial region editing.
+- wwwroot/css/site.css
+  Removed the effective video height ceiling, stretched the preview surface to the Studio canvas, docked playback controls at the canvas bottom, kept the temporal track visible, established explicit local Z-order, hid the inactive frame overlay, and retained drag/drop feedback above the temporal track.
+
+Video fit migration and persistence
+-----------------------------------
+- Domain/PublicationModels.cs
+  Changed the new-video fit default to Stretch and added `FitModeExplicit` so legacy implicit Contain values can be migrated without overriding future explicit choices.
+- Components/Pages/Editor.razor
+  Marks the Video Studio fit result as explicit when applying it to the publication video.
+- Components/Editor/InspectorPanel.razor
+  Marks Inspector fit changes as explicit.
+
+Tests and release metadata
+--------------------------
+- tests/videoTemporalOverlay.test.mjs
+  Added full-canvas temporal ownership, bottom transport, pointer-mode, fit migration, local Z-order, sequence-playhead, and positioned-drop contracts.
+- Application, installer, runtime capability, npm package, lock file, and version contract updated to 1.0.71.
+- Added CHANGELOG-v1.0.71.md, SOURCE-CHANGES-v1.0.71.txt, TEST-RESULTS-v1.0.71.txt, and updated release/architecture/validation notes.
+
+Compatibility
+-------------
+- Publication format remains 1.49.
+- Picture Studio format remains 1.4.
+- Dependency versions are unchanged.

@@ -682,3 +682,17 @@ Static checks completed for the v1.0.37 source package:
 - Switch the play canvas between Fit whole, Fill canvas and Stretch. The source frame, timestamp overlay and frame-region overlay must stay aligned; save/reopen must preserve the chosen video fit mode.
 - Run all 20 Node contract suites, syntax-check every non-vendor JavaScript/test module, parse JSON and project XML, verify C# structural/contract safety, and validate ZIP CRC plus SHA-256/SHA-512 checksums. Results are recorded in `TEST-RESULTS-v1.0.70.txt`.
 - A full .NET/Razor/DevExpress compile and real browser pointer acceptance remain release-machine requirements because this packaging environment does not contain the .NET SDK or licensed DevExpress package feed.
+
+## v1.0.71 video play-canvas regression validation
+
+- Open a newly imported or recorded video. The source must fill the complete Video Studio play canvas by default, with no inherited `max-height` picture-in-picture presentation.
+- Open a v1.0.70 video whose fit mode was never explicitly chosen. It must migrate from the old implicit Contain default to Stretch. After choosing Fit whole, Fill canvas, or Stretch in v1.0.71, save/reopen must preserve that explicit choice.
+- Confirm the playback/timestamp dock stays attached to the bottom edge of the play canvas at every source aspect ratio, window size, and fit mode.
+- Confirm the timestamp/range track remains visible above the dock. Click selects one timestamp; drag selects a range; handles edit the range; the orange playhead and sequence playhead move together during playback and scrubbing.
+- Switch among Select time, Place playhead, Add cutline, and Frame region from the ribbon, bottom dock, and context menu. Each command surface must show the active mode.
+- In Place playhead mode, click/drag the canvas and verify the selected range is not replaced. In Add cutline mode, click the source and verify the selected sequence clip splits at the projected project timestamp.
+- Enter and leave Frame region mode. Its dim veil, help text, cursor, and actions must exist only while active and must not cover or intercept normal temporal gestures afterward.
+- Switch Fit whole, Fill canvas, and Stretch from the ribbon and context menu. The video changes size, but the temporal overlay/drop target remains full-canvas and the frame-region overlay remains source-pixel aligned.
+- Drag a compatible video over the play canvas. The green drop marker must follow the full-canvas timestamp mapping; insertion must remain bounded to the selected timestamp/range.
+- Run all 20 Node contract suites, syntax-check every non-vendor JavaScript/test module, parse JSON and project XML, verify C# structural/contract safety, and validate ZIP CRC plus SHA-256/SHA-512 checksums. Results are recorded in `TEST-RESULTS-v1.0.71.txt`.
+- A full .NET/Razor/DevExpress compile and real-browser pointer acceptance remain release-machine requirements because this packaging environment does not contain the .NET SDK or licensed DevExpress package feed.

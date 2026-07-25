@@ -1,9 +1,9 @@
-# PublisherStudio v1.0.70 release
+# PublisherStudio v1.0.71 release
 
-See `CHANGELOG-v1.0.70.md`, `SOURCE-CHANGES-v1.0.70.txt`, `AGENTS.md`, ADR-009, ADR-010, `docs/architecture/media-gesture-editing.md`, `docs/ARCHITECTURE.md`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.71.md`, `SOURCE-CHANGES-v1.0.71.txt`, `TEST-RESULTS-v1.0.71.txt`, `AGENTS.md`, ADR-010, `docs/architecture/media-gesture-editing.md`, `docs/ARCHITECTURE.md`, and `VALIDATION.md`.
 
-This release completes managed media composition and Video Studio temporal orchestration. Compatible files dropped onto existing page media are routed into the owning Studio instead of becoming unrelated publication objects. Picture-on-picture drops become managed Picture Studio layers; compatible video/audio drops become sequence inserts.
+This release repairs the Video Studio play-canvas regression from v1.0.70. The video fills the Studio canvas by default, the temporal selection/playback control is docked to the bottom, the selected clip remains synchronized with the source and project playheads, and the inactive frame-region layer can no longer veil or intercept normal playback.
 
-Video Studio now owns a timestamp/range selector over the rendered video frame. Its live, editable values stay tied to the selected project clip and can create cut boundaries, become the clip trim, copy a selected area, control playback, or constrain a dropped video's insertion timestamp. The play canvas also supports persisted Fit whole, Fill canvas and Stretch modes, with overlays recalculated against the resulting rendered frame.
+Select time, Place playhead, Add cutline, and Frame region are explicit pointer modes in the ribbon, canvas dock, and context menu. Stretch, Fill canvas, and Fit whole are also available in both command surfaces. Video drops continue to target the selected clip and use the full-canvas timestamp marker and bounded insertion workflow.
 
-Application and installer version is `1.0.70`. Publication format remains `1.49`, Picture Studio format remains `1.4`, and dependencies are unchanged.
+Application and installer version is `1.0.71`. Publication format remains `1.49`, Picture Studio format remains `1.4`, and dependencies are unchanged.

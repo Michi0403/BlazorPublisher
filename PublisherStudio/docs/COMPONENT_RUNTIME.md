@@ -183,3 +183,9 @@ window.PublisherStudioChatBridge = {
 ```
 
 The runtime also accepts `publisherstudio:chat-message` events and emits `publisherstudio:chat-send`. `PublisherStudioChatRuntime.setPlatform(...)` and `.setChannel(...)` rerender all chat components, while the `publisherChatPlatform` and `publisherChatChannel` query parameters select a stream-specific output without changing the publication. The adapter is intentionally not bundled with credentials or platform OAuth secrets.
+
+## Structured website packaging (v1.0.74)
+
+The structured website export uses the same generated component markup and the same `componentRuntimeSource` as the standalone HTML export. The only difference is packaging: the component runtime is written to `js/component-runtime.js`, CSS is written to `css/site.css`, and embedded publication media is rewritten to relative content-addressed files below `assets/`.
+
+Publication-media Gallery and Tile View sources therefore remain functional without a second upload/store path. Duplicate data URLs resolve to one asset. External HTTP(S) sources and REST/OData bindings are intentionally not downloaded or rewritten; they continue to follow normal browser network and CORS rules.

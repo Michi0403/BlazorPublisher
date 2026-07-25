@@ -16,6 +16,7 @@
         }
         <DxRibbonApplicationTabItem Text="Export interactive presentation as HTML" IconCssClass="pub-icon pub-icon-web" Click="RequestExportWebsite" />
         <DxRibbonApplicationTabItem Text="Export single-file website" IconCssClass="pub-icon pub-icon-web" Click="RequestExportSite" />
+        <DxRibbonApplicationTabItem Text="Export structured website (ZIP)" IconCssClass="pub-icon pub-icon-web" Click="RequestExportStructuredSite" />
         <DxRibbonApplicationTabItem Text="Export presentation as video" IconCssClass="pub-icon pub-icon-video" Click="RequestExportVideo" />
         <DxRibbonApplicationTabItem Text="Print / Save as PDF" IconCssClass="pub-icon pub-icon-print" Click="RequestPrint" />
     </DxRibbonApplicationTab>
@@ -590,6 +591,7 @@
     [Parameter] public EventCallback OnExportSelectedSvg { get; set; }
     [Parameter] public EventCallback OnExportWebsite { get; set; }
     [Parameter] public EventCallback OnExportSite { get; set; }
+    [Parameter] public EventCallback OnExportStructuredSite { get; set; }
     [Parameter] public EventCallback OnExportVideo { get; set; }
     [Parameter] public EventCallback OnInsertPicture { get; set; }
     [Parameter] public EventCallback OnCreatePicture { get; set; }
@@ -660,6 +662,7 @@
     private Task RequestExportSelectedSvg() => OnExportSelectedSvg.InvokeAsync();
     private Task RequestExportWebsite() => OnExportWebsite.InvokeAsync();
     private Task RequestExportSite() => OnExportSite.InvokeAsync();
+    private Task RequestExportStructuredSite() => OnExportStructuredSite.InvokeAsync();
     private Task RequestExportVideo() => OnExportVideo.InvokeAsync();
     private Task RequestPicture() => OnInsertPicture.InvokeAsync();
     private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();

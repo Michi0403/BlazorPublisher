@@ -1,0 +1,69 @@
+PublisherStudio v1.0.74 source changes
+=====================================
+
+Structured export workflow
+--------------------------
+- Components/Editor/PublicationRibbon.razor
+  Added the File-tab structured website ZIP command and managed callback.
+- Components/Pages/Editor.razor
+  Added the export dialog, site/presentation mode, picture/video optimization
+  settings, fallback/archive options, C# -> JavaScript invocation, typed result
+  handling, progress state, recovery save, and user-facing size/warning report.
+- wwwroot/css/site.css
+  Added responsive modal/export-option styling.
+
+Browser exporter and runtime
+----------------------------
+- wwwroot/js/publisherInterop.js
+  Added a structured-site projection of the established standalone HTML builder;
+  extraction of inline CSS/scripts and data-URL media; SHA-256 content addressing;
+  asset deduplication; relative-path rewriting; PNG/WebP/AVIF image processing;
+  optional real-time WebM VP9/VP8 + Opus conversion; original-video playback
+  fallback; export manifest/README generation; and typed report return.
+- wwwroot/js/publisherInterop.js
+  Extended ZIP writing with optional raw Deflate through CompressionStream while
+  preserving STORE fallback and the existing createStoredZip contract.
+- wwwroot/js/publisherInterop.js
+  Extended editor and exported media-sequence runtimes to recognize
+  data-publisher-original-src after an optimized video playback error.
+
+Documentation
+-------------
+- docs/architecture/structured-website-export.md
+  Added the fact-checked packaging/compression doctrine, format choices,
+  browser-compatibility boundary, safety policy, and Blazor/JavaScript ownership.
+- docs/ARCHITECTURE.md
+  Added the structured static export architecture and runtime-parity contract.
+- docs/COMPONENT_RUNTIME.md
+  Documented externalized component runtime and publication-media behavior.
+- docs/DEVEXTREME_RUNTIME_LICENSE.md
+  Documented externalized licensed runtime ordering without private-key exposure.
+- docs/ANIMATION_EXPORT.md
+  Documented animation, interaction, signal, and media parity with standalone HTML.
+- VALIDATION.md
+  Added structured export, media fallback, ZIP and release-validation scenarios.
+
+Tests and versioning
+--------------------
+- tests/structuredWebsiteExport.test.mjs
+  Added contracts for ribbon/C# workflow, file structure, shared builder projection,
+  content addressing, media formats/fallbacks, Deflate, doctrine, and versioning.
+- tests/fontIntegration.test.mjs, tests/streamingRuntime.test.mjs,
+  tests/videoProjectImport.test.mjs
+  Advanced current release-version expectations to 1.0.74.
+- src/PublisherStudio.Web/package.json
+  Added test:structured-site to the aggregate Node suite and advanced version.
+- src/PublisherStudio.Web/package-lock.json
+  Advanced root/package version without changing dependency sets.
+- Web and installer .csproj files and StreamingRuntimeUseCases.cs
+  Advanced application/installer/runtime capability versions to 1.0.74.
+- Added CHANGELOG-v1.0.74.md, SOURCE-CHANGES-v1.0.74.txt and
+  TEST-RESULTS-v1.0.74.txt; updated inner and outer RELEASE.md.
+
+Compatibility
+-------------
+- Existing standalone presentation and website HTML exports remain available.
+- Publication format remains 1.52; Picture Studio format remains 1.4.
+- NuGet, npm, native-process and remote-service dependency sets are unchanged.
+- Preserve-source mode is byte-exact; optional browser conversions never replace
+  a source when unsupported, failed, or larger.

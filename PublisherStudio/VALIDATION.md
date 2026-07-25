@@ -724,3 +724,53 @@ Static checks completed for the v1.0.37 source package:
 - Feed malformed/deep JSON, XML with a DTD/external entity, OTIOZ path traversal, excessive archive entries, excessive expanded archive size, and oversized inputs. Every case must fail before publication state is mutated.
 - Run all 22 Node contract suites, syntax-check all non-vendor JavaScript/test modules, parse repository JSON and project XML, verify version/format alignment and unchanged dependency sets, replay the release patch on untouched v1.0.72, and validate ZIP CRC, extraction parity, SHA-256 and SHA-512. Results are recorded in `TEST-RESULTS-v1.0.73.txt`.
 - A release-machine `dotnet restore`/`dotnet build` and real-browser imports with fixture projects remain required because this container has no .NET SDK or licensed DevExpress feed.
+
+## Structured static website export (v1.0.74)
+
+### Managed workflow
+
+- Open **File > Export structured website (ZIP)** and verify that the dialog offers website/presentation behavior, preserve/PNG/WebP/AVIF picture modes, preserve/WebM video modes, video fallback, and archive Deflate.
+- Start the export and verify that managed code refreshes web data, saves recovery state, disables duplicate export activation, invokes `publisherStudio.exportStructuredWebsite`, and reports asset count, archive size reduction and warnings.
+- Cancel the dialog before export and verify that no download or document mutation occurs.
+
+### File structure and runtime parity
+
+- Extract the ZIP and verify `index.html`, `css/site.css`, ordered files under `js/`, content-addressed files below `assets/`, `publisherstudio-export.json`, and `README.txt`.
+- Open `index.html` from the extracted folder and from a static HTTP host. Compare page navigation, animations, interactions, DevExtreme components, Signal Connectors, media-sequence playback and styling against the matching standalone HTML export.
+- Verify that no generated `src` or `href` points to `about:blank`, a Blob URL, or the running PublisherStudio application.
+- Verify external REST/OData bindings retain their configured endpoints and obey ordinary browser network/CORS behavior.
+
+### Exact media externalization and deduplication
+
+- Export in Preserve source mode and compare each extracted asset byte-for-byte with its embedded source.
+- Use one picture/video/audio source in several publication objects and verify the ZIP contains one content-addressed asset with several relative references.
+- Verify SVG and GIF sources are not flattened.
+- Verify the structured `index.html` no longer contains the externalized Base64 payloads.
+
+### Optional picture processing
+
+- Test PNG with JPEG/WebP/AVIF inputs and verify the output is a browser-decoded PNG raster.
+- Test WebP and AVIF at several quality values. Verify unsupported AVIF encoding falls back to WebP, unsupported conversion preserves source, and a result larger than source is rejected.
+- Verify warnings are written to `publisherstudio-export.json` and returned through Blazor interop.
+
+### Optional video processing and fallback
+
+- Test WebM export in a browser that supports VP9 + Opus and one that falls back to VP8 + Opus or generic WebM.
+- Verify conversion is local, approximately real-time, accepted only when smaller, and never described as lossless.
+- With fallback enabled, verify both optimized and original video assets are present and the optimized element has `data-publisher-original-src`.
+- Force optimized-source playback failure and verify both editor/exported media runtimes load the original source while retaining the current segment/playhead where possible.
+- Verify unsupported input decoding, capture, MediaRecorder, empty output, encoding failure and larger output all preserve the source and report a warning.
+
+### ZIP implementation
+
+- Run the exact `createZip` implementation under a runtime with `CompressionStream('deflate-raw')`, verify method 8 entries extract correctly, and verify STORE is selected when compression is disabled, unavailable or not smaller.
+- Confirm already compressed assets are marked `compress: false` and that existing `createStoredZip` callers retain STORE-only behavior.
+
+### Release validation
+
+- Run `npm test`; the aggregate suite must include `structuredWebsiteExport.test.mjs`.
+- Run `node --check` over all non-vendor JavaScript and test modules.
+- Parse package JSON/lock files and both project files; verify app, installer, npm, lock and streaming capability versions are `1.0.74`.
+- Compare NuGet/npm dependency sets with v1.0.73; no dependency addition is expected.
+- Apply the release patch to a clean v1.0.73 source tree and compare the result with the packaged v1.0.74 tree.
+- Run ZIP integrity, clean extraction parity, SHA-256 and SHA-512 checks.

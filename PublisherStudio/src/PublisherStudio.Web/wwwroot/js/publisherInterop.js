@@ -3401,14 +3401,29 @@ function dosDateTime(date = new Date()) {
     };
 }
 
-async function createStoredZip(files) {
+async function deflateRawZipBytes(bytes) {
+    if (typeof CompressionStream !== 'function') return null;
+    try {
+        const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+        return new Uint8Array(await new Response(stream).arrayBuffer());
+    } catch {
+        return null;
+    }
+}
+
+async function createZip(files, options = {}) {
     const encoder = new TextEncoder();
     const localParts = [];
     const centralParts = [];
     let offset = 0;
+    const allowCompression = options.compress !== false;
     for (const file of files) {
         const name = encoder.encode(file.name);
         const bytes = new Uint8Array(await file.blob.arrayBuffer());
+        const compressed = allowCompression && file.compress !== false ? await deflateRawZipBytes(bytes) : null;
+        const useDeflate = Boolean(compressed && compressed.length + 8 < bytes.length);
+        const payload = useDeflate ? compressed : bytes;
+        const method = useDeflate ? 8 : 0;
         const crc = crc32(bytes);
         const stamp = dosDateTime(file.modified || new Date());
         const local = new Uint8Array(30 + name.length);
@@ -3416,16 +3431,16 @@ async function createStoredZip(files) {
         localView.setUint32(0, 0x04034b50, true);
         localView.setUint16(4, 20, true);
         localView.setUint16(6, 0x0800, true);
-        localView.setUint16(8, 0, true);
+        localView.setUint16(8, method, true);
         localView.setUint16(10, stamp.time, true);
         localView.setUint16(12, stamp.date, true);
         localView.setUint32(14, crc, true);
-        localView.setUint32(18, bytes.length, true);
+        localView.setUint32(18, payload.length, true);
         localView.setUint32(22, bytes.length, true);
         localView.setUint16(26, name.length, true);
         localView.setUint16(28, 0, true);
         local.set(name, 30);
-        localParts.push(local, bytes);
+        localParts.push(local, payload);
 
         const central = new Uint8Array(46 + name.length);
         const centralView = new DataView(central.buffer);
@@ -3433,11 +3448,11 @@ async function createStoredZip(files) {
         centralView.setUint16(4, 20, true);
         centralView.setUint16(6, 20, true);
         centralView.setUint16(8, 0x0800, true);
-        centralView.setUint16(10, 0, true);
+        centralView.setUint16(10, method, true);
         centralView.setUint16(12, stamp.time, true);
         centralView.setUint16(14, stamp.date, true);
         centralView.setUint32(16, crc, true);
-        centralView.setUint32(20, bytes.length, true);
+        centralView.setUint32(20, payload.length, true);
         centralView.setUint32(24, bytes.length, true);
         centralView.setUint16(28, name.length, true);
         centralView.setUint16(30, 0, true);
@@ -3448,7 +3463,7 @@ async function createStoredZip(files) {
         centralView.setUint32(42, offset, true);
         central.set(name, 46);
         centralParts.push(central);
-        offset += local.length + bytes.length;
+        offset += local.length + payload.length;
     }
     const centralOffset = offset;
     const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
@@ -3463,6 +3478,10 @@ async function createStoredZip(files) {
     endView.setUint32(16, centralOffset, true);
     endView.setUint16(20, 0, true);
     return new Blob([...localParts, ...centralParts, end], { type: 'application/zip' });
+}
+
+async function createStoredZip(files) {
+    return createZip(files, { compress: false });
 }
 
 
@@ -4194,7 +4213,7 @@ function publicationMediaSegments(node, media, number = animationNumber) {
             const src = source.getAttribute('src') || '';
             const start = Math.max(0, number(source.dataset.mediaTrimStart, 0));
             const end = Math.max(start + .01, number(source.dataset.mediaTrimEnd, start + 1));
-            return { src, start, end, poster: source.dataset.mediaPoster || '', name: source.dataset.mediaName || '' };
+            return { src, start, end, poster: source.dataset.mediaPoster || '', name: source.dataset.mediaName || '', originalSrc: source.dataset.publisherOriginalSrc || '' };
         })
         .filter(segment => segment.src);
     if (sources.length) return sources;
@@ -4202,7 +4221,7 @@ function publicationMediaSegments(node, media, number = animationNumber) {
     const src = media.getAttribute('src') || media.currentSrc || '';
     const start = Math.max(0, number(node?.dataset?.mediaTrimStart, 0));
     const end = Math.max(start + .01, number(node?.dataset?.mediaTrimEnd, media.duration || start + 1));
-    return src ? [{ src, start, end, poster: media.getAttribute('poster') || '', name: '' }] : [];
+    return src ? [{ src, start, end, poster: media.getAttribute('poster') || '', name: '', originalSrc: media.dataset.publisherOriginalSrc || '' }] : [];
 }
 function publicationMediaSourceEquals(media, source) {
     if (!media || !source) return false;
@@ -4260,6 +4279,24 @@ function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = f
     if (media instanceof HTMLVideoElement && segment.poster) media.poster = segment.poster;
 
     const prepare = async () => {
+        if (media.__publisherFallbackHandler) media.removeEventListener('error', media.__publisherFallbackHandler);
+        media.__publisherFallbackHandler = null;
+        if (segment.originalSrc) {
+            const fallbackHandler = async () => {
+                if (state.token !== token || publicationMediaSourceEquals(media, segment.originalSrc)) return;
+                media.removeEventListener('error', fallbackHandler);
+                media.__publisherFallbackHandler = null;
+                media.pause();
+                media.src = segment.originalSrc;
+                media.load();
+                await waitForPublicationMediaMetadata(media);
+                if (state.token !== token) return;
+                try { media.currentTime = segment.start; } catch { }
+                if (autoPlay) media.play().catch(() => {});
+            };
+            media.__publisherFallbackHandler = fallbackHandler;
+            media.addEventListener('error', fallbackHandler, { once: true });
+        }
         if (!publicationMediaSourceEquals(media, segment.src)) {
             media.pause();
             media.src = segment.src;
@@ -5039,13 +5076,13 @@ function websitePresentationRuntime() {
                 const src = source.getAttribute('src') || '';
                 const start = Math.max(0, num(source.dataset.mediaTrimStart, 0));
                 const end = Math.max(start + .01, num(source.dataset.mediaTrimEnd, start + 1));
-                return { src, start, end, poster: source.dataset.mediaPoster || '' };
+                return { src, start, end, poster: source.dataset.mediaPoster || '', originalSrc: source.dataset.publisherOriginalSrc || '' };
             }).filter(segment => segment.src);
         if (sources.length) return sources;
         const src = media?.getAttribute('src') || media?.currentSrc || '';
         const start = Math.max(0, num(node?.dataset?.mediaTrimStart, 0));
         const end = Math.max(start + .01, num(node?.dataset?.mediaTrimEnd, media?.duration || start + 1));
-        return src ? [{ src, start, end, poster: media?.getAttribute('poster') || '' }] : [];
+        return src ? [{ src, start, end, poster: media?.getAttribute('poster') || '', originalSrc: media?.dataset?.publisherOriginalSrc || '' }] : [];
     };
     const sameSource = (media, source) => {
         try { return new URL(media.currentSrc || media.getAttribute('src') || '', location.href).href === new URL(source, location.href).href; }
@@ -5089,6 +5126,21 @@ function websitePresentationRuntime() {
         media.volume = fadeIn > 0 && index === 0 ? 0 : baseVolume;
         if (media instanceof HTMLVideoElement && segment.poster) media.poster = segment.poster;
         const prepare = async () => {
+            if (media.__psFallbackHandler) media.removeEventListener('error', media.__psFallbackHandler);
+            media.__psFallbackHandler = null;
+            if (segment.originalSrc) {
+                const fallbackHandler = async () => {
+                    if (state.token !== token || sameSource(media, segment.originalSrc)) return;
+                    media.removeEventListener('error', fallbackHandler);
+                    media.__psFallbackHandler = null;
+                    media.pause(); media.src = segment.originalSrc; media.load(); await waitMetadata(media);
+                    if (state.token !== token) return;
+                    try { media.currentTime = segment.start; } catch { }
+                    if (autoPlay) media.play().catch(() => {});
+                };
+                media.__psFallbackHandler = fallbackHandler;
+                media.addEventListener('error', fallbackHandler, { once: true });
+            }
             if (!sameSource(media, segment.src)) {
                 media.pause(); media.src = segment.src; media.load(); await waitMetadata(media);
             }
@@ -6831,6 +6883,343 @@ ${modeCss}
 </html>`;
 }
 
+const structuredExportScriptPaths = [
+    'js/vendor/jquery.min.js',
+    'js/vendor/devextreme.js',
+    'js/vendor/vectormap-world.js',
+    'js/vendor/vectormap-europe.js',
+    'js/vendor/vectormap-eurasia.js',
+    'js/vendor/vectormap-africa.js',
+    'js/vendor/vectormap-usa.js',
+    'js/vendor/vectormap-canada.js',
+    'js/vendor/devextreme-license.js',
+    'js/live-data-runtime.js',
+    'js/component-runtime.js',
+    'js/publisher-runtime.js'
+];
+
+function structuredWebsiteOptions(options = {}) {
+    const imageMode = ['preserve', 'png', 'webp', 'avif'].includes(String(options.imageMode || '').toLowerCase())
+        ? String(options.imageMode).toLowerCase()
+        : 'preserve';
+    const videoMode = String(options.videoMode || '').toLowerCase() === 'webm' ? 'webm' : 'preserve';
+    return {
+        mode: String(options.mode || '').toLowerCase() === 'presentation' ? 'presentation' : 'site',
+        imageMode,
+        imageQuality: clamp(number(options.imageQuality, .82), .35, 1),
+        videoMode,
+        videoQuality: clamp(number(options.videoQuality, .78), .35, 1),
+        keepVideoFallback: options.keepVideoFallback !== false,
+        compressArchive: options.compressArchive !== false
+    };
+}
+
+function structuredMimeExtension(mimeType) {
+    const mime = String(mimeType || '').split(';', 1)[0].trim().toLowerCase();
+    return ({
+        'image/png': 'png', 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/webp': 'webp',
+        'image/avif': 'avif', 'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/bmp': 'bmp',
+        'video/webm': 'webm', 'video/mp4': 'mp4', 'video/ogg': 'ogv', 'video/quicktime': 'mov',
+        'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3', 'audio/mp4': 'm4a',
+        'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/flac': 'flac',
+        'font/woff2': 'woff2', 'font/woff': 'woff', 'application/json': 'json'
+    })[mime] || 'bin';
+}
+
+function structuredAssetFolder(mimeType) {
+    const mime = String(mimeType || '').toLowerCase();
+    if (mime.startsWith('image/')) return 'assets/images';
+    if (mime.startsWith('video/')) return 'assets/video';
+    if (mime.startsWith('audio/')) return 'assets/audio';
+    if (mime.startsWith('font/')) return 'assets/fonts';
+    return 'assets/files';
+}
+
+async function structuredBlobHash(blob) {
+    const bytes = await blob.arrayBuffer();
+    if (globalThis.crypto?.subtle) {
+        const digest = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', bytes));
+        return [...digest.slice(0, 10)].map(value => value.toString(16).padStart(2, '0')).join('');
+    }
+    return crc32(new Uint8Array(bytes)).toString(16).padStart(8, '0');
+}
+
+async function structuredImageCanvas(blob) {
+    const url = URL.createObjectURL(blob);
+    try {
+        const image = new Image();
+        image.decoding = 'async';
+        await new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Image decoding timed out.')), 20000);
+            image.onload = () => { clearTimeout(timer); resolve(); };
+            image.onerror = () => { clearTimeout(timer); reject(new Error('The browser could not decode the image.')); };
+            image.src = url;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, image.naturalWidth);
+        canvas.height = Math.max(1, image.naturalHeight);
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('The browser did not provide an image conversion canvas.');
+        context.drawImage(image, 0, 0);
+        return canvas;
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+}
+
+async function structuredEncodeImage(blob, mimeType, quality) {
+    const canvas = await structuredImageCanvas(blob);
+    const encoded = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+    if (!encoded || encoded.type.toLowerCase() !== mimeType.toLowerCase()) return null;
+    return encoded;
+}
+
+function structuredRecorderMimeType() {
+    if (typeof MediaRecorder !== 'function' || typeof MediaRecorder.isTypeSupported !== 'function') return '';
+    return [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm'
+    ].find(type => MediaRecorder.isTypeSupported(type)) || '';
+}
+
+function waitForStructuredMedia(media, eventName, timeoutMs) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => done(new Error(`Media ${eventName} timed out.`)), timeoutMs);
+        const onSuccess = () => done();
+        const onError = () => done(new Error('The browser could not decode this media source.'));
+        function done(error) {
+            clearTimeout(timer);
+            media.removeEventListener(eventName, onSuccess);
+            media.removeEventListener('error', onError);
+            error ? reject(error) : resolve();
+        }
+        media.addEventListener(eventName, onSuccess, { once: true });
+        media.addEventListener('error', onError, { once: true });
+    });
+}
+
+async function structuredTranscodeVideo(blob, quality) {
+    const mimeType = structuredRecorderMimeType();
+    if (!mimeType) return null;
+    const video = document.createElement('video');
+    const url = URL.createObjectURL(blob);
+    let stream = null;
+    try {
+        video.preload = 'auto';
+        video.playsInline = true;
+        video.muted = true;
+        video.src = url;
+        await waitForStructuredMedia(video, 'loadedmetadata', 20000);
+        if (!Number.isFinite(video.duration) || video.duration <= 0) return null;
+        if (video.readyState < 3) await waitForStructuredMedia(video, 'canplay', 20000);
+        const capture = video.captureStream || video.mozCaptureStream;
+        if (typeof capture !== 'function') return null;
+        stream = capture.call(video);
+        if (!stream?.getVideoTracks?.().length) return null;
+        const pixels = Math.max(1, video.videoWidth * video.videoHeight);
+        const sizeFactor = Math.max(.5, Math.min(2.5, pixels / (1280 * 720)));
+        const videoBitsPerSecond = Math.round((900_000 + quality * 5_600_000) * sizeFactor);
+        const chunks = [];
+        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond });
+        recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
+        const stopped = new Promise((resolve, reject) => {
+            recorder.addEventListener('stop', resolve, { once: true });
+            recorder.addEventListener('error', event => reject(event.error || new Error('WebM recording failed.')), { once: true });
+        });
+        recorder.start(1000);
+        await video.play();
+        await waitForStructuredMedia(video, 'ended', Math.max(30000, Math.ceil(video.duration * 2000 + 30000)));
+        if (recorder.state !== 'inactive') recorder.stop();
+        await stopped;
+        const output = new Blob(chunks, { type: mimeType.split(';', 1)[0] });
+        return output.size > 0 ? output : null;
+    } finally {
+        try { video.pause(); } catch { }
+        try { stream?.getTracks?.().forEach(track => track.stop()); } catch { }
+        video.removeAttribute('src');
+        try { video.load(); } catch { }
+        URL.revokeObjectURL(url);
+    }
+}
+
+function structuredDataUrlMatches(value) {
+    return [...String(value || '').matchAll(/data:[a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+(?:;[^,"'\s<>)]*)?,[^"'\s<>)]*/g)];
+}
+
+async function replaceStructuredDataUrls(value, prefix, resolveAsset) {
+    const text = String(value || '');
+    const matches = structuredDataUrlMatches(text);
+    if (!matches.length) return text;
+    let output = '';
+    let cursor = 0;
+    for (const match of matches) {
+        output += text.slice(cursor, match.index);
+        const asset = await resolveAsset(match[0]);
+        output += `${prefix}${asset.path}`;
+        cursor = match.index + match[0].length;
+    }
+    return output + text.slice(cursor);
+}
+
+async function buildPublisherStructuredSite(title, rawOptions = {}) {
+    const options = structuredWebsiteOptions(rawOptions);
+    const standaloneHtml = await buildPublisherSingleHtml(options.mode, title);
+    const parser = new DOMParser();
+    const exportedDocument = parser.parseFromString(standaloneHtml, 'text/html');
+    if (!exportedDocument.documentElement || exportedDocument.querySelector('parsererror'))
+        throw new Error('The browser could not parse the generated website document.');
+
+    const files = [];
+    const warnings = [];
+    const assetCache = new Map();
+    const pathCache = new Map();
+    let assetCount = 0;
+
+    const addFile = (name, blob, compress = true) => {
+        files.push({ name, blob, compress });
+        return name;
+    };
+    const storeAsset = async blob => {
+        const mimeType = blob.type || 'application/octet-stream';
+        const hash = await structuredBlobHash(blob);
+        const extension = structuredMimeExtension(mimeType);
+        const key = `${hash}.${extension}`;
+        if (pathCache.has(key)) return pathCache.get(key);
+        const path = `${structuredAssetFolder(mimeType)}/${key}`;
+        addFile(path, blob, false);
+        pathCache.set(key, path);
+        assetCount++;
+        return path;
+    };
+    const resolveAsset = async dataUrl => {
+        if (assetCache.has(dataUrl)) return assetCache.get(dataUrl);
+        const task = (async () => {
+            let original;
+            try { original = await (await fetch(dataUrl)).blob(); }
+            catch { throw new Error('An embedded media asset could not be decoded for structured export.'); }
+            const mime = String(original.type || '').toLowerCase();
+            let selected = original;
+            let selectedMime = original.type || 'application/octet-stream';
+            let keepOriginalFallback = false;
+
+            if (mime.startsWith('image/') && !['image/svg+xml', 'image/gif'].includes(mime) && options.imageMode !== 'preserve') {
+                try {
+                    let requestedMime = options.imageMode === 'png' ? 'image/png'
+                        : options.imageMode === 'avif' ? 'image/avif'
+                            : 'image/webp';
+                    let converted = await structuredEncodeImage(original, requestedMime, options.imageQuality);
+                    if (!converted && requestedMime === 'image/avif') {
+                        warnings.push('This browser cannot encode AVIF; WebP was used for affected pictures.');
+                        requestedMime = 'image/webp';
+                        converted = await structuredEncodeImage(original, requestedMime, options.imageQuality);
+                    }
+                    if (converted) {
+                        const shouldUse = options.imageMode === 'png' || converted.size < original.size;
+                        if (shouldUse) {
+                            selected = converted;
+                            selectedMime = converted.type;
+                        } else {
+                            warnings.push('A picture conversion was skipped because it would have increased the exported file size.');
+                        }
+                    } else {
+                        warnings.push('A picture was preserved because this browser could not encode the selected format.');
+                    }
+                } catch {
+                    warnings.push('A picture was preserved because browser-side conversion failed.');
+                }
+            }
+
+            if (mime.startsWith('video/') && options.videoMode === 'webm') {
+                try {
+                    const converted = await structuredTranscodeVideo(original, options.videoQuality);
+                    if (converted && converted.size < original.size) {
+                        selected = converted;
+                        selectedMime = converted.type;
+                        keepOriginalFallback = options.keepVideoFallback;
+                    } else if (converted) {
+                        warnings.push('A video was preserved because the WebM result was not smaller than its source.');
+                    } else {
+                        warnings.push('A video was preserved because this browser cannot perform the requested WebM conversion.');
+                    }
+                } catch {
+                    warnings.push('A video was preserved because browser-side WebM conversion failed.');
+                }
+            }
+
+            const selectedPath = await storeAsset(selected);
+            const fallbackPath = keepOriginalFallback && selected !== original ? await storeAsset(original) : '';
+            return { path: selectedPath, originalPath: fallbackPath, mimeType: selectedMime, sourceMimeType: original.type || '' };
+        })();
+        assetCache.set(dataUrl, task);
+        return task;
+    };
+
+    for (const node of exportedDocument.querySelectorAll('video[src],audio[src],source[src]')) {
+        const value = node.getAttribute('src') || '';
+        if (!value.startsWith('data:')) continue;
+        const asset = await resolveAsset(value);
+        node.setAttribute('src', asset.path);
+        if (asset.originalPath) node.setAttribute('data-publisher-original-src', asset.originalPath);
+        if (node instanceof HTMLSourceElement || node.tagName.toLowerCase() === 'source') node.setAttribute('type', asset.mimeType);
+    }
+
+    for (const element of exportedDocument.querySelectorAll('*')) {
+        for (const attribute of [...element.attributes]) {
+            if (attribute.name === 'src' && /^(video|audio|source)$/i.test(element.tagName)) continue;
+            if (!attribute.value.includes('data:')) continue;
+            const replaced = await replaceStructuredDataUrls(attribute.value, '', resolveAsset);
+            if (replaced !== attribute.value) element.setAttribute(attribute.name, replaced);
+        }
+    }
+
+    const style = exportedDocument.head.querySelector('style');
+    if (style) {
+        const cssText = await replaceStructuredDataUrls(style.textContent || '', '../', resolveAsset);
+        addFile('css/site.css', new Blob([cssText], { type: 'text/css;charset=utf-8' }), true);
+        const link = exportedDocument.createElement('link');
+        link.rel = 'stylesheet';
+        link.setAttribute('href', 'css/site.css');
+        style.replaceWith(link);
+    }
+
+    const scripts = [...exportedDocument.querySelectorAll('script')];
+    for (let index = 0; index < scripts.length; index++) {
+        const script = scripts[index];
+        const path = structuredExportScriptPaths[index] || `js/runtime-${String(index + 1).padStart(2, '0')}.js`;
+        addFile(path, new Blob([script.textContent || ''], { type: 'text/javascript;charset=utf-8' }), true);
+        script.textContent = '';
+        script.setAttribute('src', path);
+    }
+
+    const uniqueWarnings = [...new Set(warnings)];
+    const manifest = {
+        publisherStudioVersion: '1.0.74',
+        kind: options.mode,
+        generatedUtc: new Date().toISOString(),
+        assetCount,
+        options,
+        warnings: uniqueWarnings
+    };
+    addFile('publisherstudio-export.json', new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json;charset=utf-8' }), true);
+    addFile('README.txt', new Blob([
+        'PublisherStudio structured website export\n',
+        'Open index.html in a modern browser or upload this folder to any static web host.\n',
+        'The site is offline-capable. Live REST/OData bindings still require browser access to their configured endpoints.\n',
+        'Files under assets/ are content-addressed and may be shared by several publication objects.\n'
+    ], { type: 'text/plain;charset=utf-8' }), true);
+
+    const html = `<!doctype html>\n${exportedDocument.documentElement.outerHTML}`;
+    files.unshift({ name: 'index.html', blob: new Blob([html], { type: 'text/html;charset=utf-8' }), compress: true });
+    return {
+        files,
+        assetCount,
+        sourceBytes: new TextEncoder().encode(standaloneHtml).length,
+        warnings: uniqueWarnings,
+        options
+    };
+}
+
 
 window.publisherStudio = {
     setDocumentDirty(value) { publisherDocumentDirty = Boolean(value); },
@@ -7045,6 +7434,19 @@ window.publisherStudio = {
     async exportSite(fileName, title) {
         const html = await buildPublisherSingleHtml('site', title);
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
+    },
+
+    async exportStructuredWebsite(fileName, title, options = {}) {
+        const result = await buildPublisherStructuredSite(title, options);
+        const archive = await createZip(result.files, { compress: result.options.compressArchive });
+        downloadBlob(fileName, archive);
+        return {
+            fileName,
+            assetCount: result.assetCount,
+            sourceBytes: result.sourceBytes,
+            archiveBytes: archive.size,
+            warnings: result.warnings
+        };
     },
 
     async printPublication() {

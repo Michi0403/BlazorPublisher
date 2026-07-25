@@ -1,0 +1,114 @@
+PublisherStudio v1.0.74 validation results
+==========================================
+
+Validation date
+---------------
+2026-07-25
+
+Scope
+-----
+This validation covers the structured static website workflow, standalone-runtime
+projection, media externalization/deduplication, optional picture/video delivery
+processing, original-video playback fallback, ZIP Deflate/STORE behavior,
+Blazor/JavaScript contracts, version/dependency alignment, reproducible patching,
+and release archive integrity.
+
+Automated Node contract suite
+-----------------------------
+Command:
+  cd src/PublisherStudio.Web && npm test
+
+Result: PASS
+
+All 23 suites passed:
+  1. timeline editing
+  2. component runtime
+  3. signal routing
+  4. pointer interaction
+  5. map modes
+  6. font integration
+  7. canvas zoom
+  8. streaming runtime
+  9. interface workflow
+ 10. installer resilience
+ 11. publication persistence
+ 12. editor usability
+ 13. architecture contracts
+ 14. C# contract ownership
+ 15. C# composition/interpolation safety
+ 16. open interchange
+ 17. media gesture editing
+ 18. Studio interaction overlays
+ 19. managed component drop
+ 20. video temporal overlay
+ 21. layered video effects
+ 22. open video-project import
+ 23. structured static website export
+
+The v1.0.74 structured-site suite verifies:
+- the File-tab DxRibbon command, managed dialog/options/result types, and explicit
+  C# -> JavaScript invocation;
+- projection through the established single-file builder rather than a parallel
+  website renderer;
+- separate index/CSS/ordered-JavaScript paths and typed content-addressed asset
+  folders;
+- SHA-256 deduplication, PNG/WebP/AVIF processing, WebM VP9/VP8 + Opus capability
+  paths, source-preserving fallbacks, and optimized-video playback fallback;
+- optional raw Deflate ZIP support and STORE compatibility;
+- export manifest/README generation, documented format doctrine, and v1.0.74
+  version alignment.
+
+One existing Node warning remains: pictureStudioInterop.js is reparsed as an ES
+module because package.json does not declare "type": "module". It does not fail
+or alter the test result.
+
+Static validation
+-----------------
+Result: PASS
+
+- 38 non-vendor JavaScript and test modules passed `node --check`.
+- 6 non-vendor JSON files parsed successfully.
+- 2 project files parsed as XML successfully.
+- No merge-conflict markers were found.
+- Web application, installer, npm package, lock file, and streaming runtime
+  capability versions align at 1.0.74.
+- Publication format remains 1.52 and Picture Studio format remains 1.4.
+- NuGet PackageReference, npm dependency, and npm devDependency sets are
+  unchanged from v1.0.73.
+
+Exact ZIP implementation validation
+-----------------------------------
+Result: PASS
+
+The `createZip`/`createStoredZip` implementation was extracted directly from
+`publisherInterop.js` and executed under Node's browser-compatible Blob and
+CompressionStream APIs. The generated archives passed `unzip -t`.
+
+- A compressible HTML entry used ZIP method 8 Deflate.
+- An asset marked `compress: false` used STORE.
+- The compatibility `createStoredZip` archive used STORE.
+
+Patch reproducibility
+---------------------
+Result: PASS
+
+The final v1.0.74 Git-compatible binary source patch applies cleanly to the
+v1.0.73 release source with `git apply --check` and `git apply`. The patched
+result matches the v1.0.74 work tree when excluding only Git metadata.
+
+Release archive
+---------------
+Result: PASS
+
+- ZIP structural integrity passed with `unzip -t`.
+- A clean extraction matches the packaged v1.0.74 work tree.
+- SHA-256 and SHA-512 checksum files are supplied beside the archive.
+
+Compilation limitation
+----------------------
+A real .NET/Razor/DevExpress compile was not run in this environment because
+`dotnet` and `csc` are unavailable and the licensed DevExpress restore feed is
+not available. The Node architecture/contract/compilation-safety suites,
+project XML parsing, exact ZIP execution, static checks, patch replay, and
+archive validation passed. The release should still be compiled on the normal
+licensed release machine before production shipping.

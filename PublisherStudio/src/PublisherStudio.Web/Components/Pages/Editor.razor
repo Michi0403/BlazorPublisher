@@ -47,6 +47,7 @@
                        OnExportSelectedSvg="ExportSelectedSvg"
                        OnExportWebsite="ExportPresentationHtml"
                        OnExportSite="ExportSite"
+                       OnExportStructuredSite="OpenStructuredWebsiteExport"
                        OnExportVideo="ExportVideo"
                        OnInsertPicture="OpenPicturePicker"
                        OnCreatePicture="CreatePicture"
@@ -214,6 +215,89 @@
 <BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
 <StreamingStudio Visible="_streamingStudioVisible" Document="State.Document" Saved="SaveStreamingStudio" Cancelled="CloseStreamingStudio" />
 
+@if (_structuredWebsiteExportVisible)
+{
+    <div class="publisher-dialog-backdrop" role="presentation" @onclick="CloseStructuredWebsiteExport">
+        <section class="publisher-dialog website-export-dialog" role="dialog" aria-modal="true" aria-labelledby="structured-export-title" @onclick:stopPropagation>
+            <header>
+                <div>
+                    <h2 id="structured-export-title">Structured website export</h2>
+                    <p>Creates an offline ZIP with <code>index.html</code>, separate CSS/JavaScript, and deduplicated media assets.</p>
+                </div>
+                <button type="button" class="publisher-dialog-close" title="Close" @onclick="CloseStructuredWebsiteExport">×</button>
+            </header>
+
+            <div class="website-export-grid">
+                <label>
+                    <span>Website behavior</span>
+                    <select @bind="_structuredWebsiteOptions.Mode">
+                        <option value="site">Website</option>
+                        <option value="presentation">Interactive presentation</option>
+                    </select>
+                    <small>Uses the same runtime and interactions as the matching single-file export.</small>
+                </label>
+
+                <label>
+                    <span>Pictures</span>
+                    <select @bind="_structuredWebsiteOptions.ImageMode">
+                        <option value="preserve">Preserve source — exact/lossless</option>
+                        <option value="png">PNG — lossless pixels</option>
+                        <option value="webp">WebP — smaller, lossy</option>
+                        <option value="avif">AVIF — smallest when browser encoding is available</option>
+                    </select>
+                    <small>SVG and animated images are preserved so vector data and animation are not flattened.</small>
+                </label>
+
+                @if (_structuredWebsiteOptions.ImageMode is "webp" or "avif")
+                {
+                    <label>
+                        <span>Picture quality: @Math.Round(_structuredWebsiteOptions.ImageQuality * 100)%</span>
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_structuredWebsiteOptions.ImageQuality" @bind:event="oninput" />
+                        <small>The exporter keeps the original whenever conversion is unsupported or does not reduce the file.</small>
+                    </label>
+                }
+
+                <label>
+                    <span>Videos</span>
+                    <select @bind="_structuredWebsiteOptions.VideoMode">
+                        <option value="preserve">Preserve source — exact/lossless</option>
+                        <option value="webm">WebM VP9/VP8 + Opus — optional browser conversion</option>
+                    </select>
+                    <small>WebM conversion runs locally in the browser and can take approximately the video duration.</small>
+                </label>
+
+                @if (_structuredWebsiteOptions.VideoMode == "webm")
+                {
+                    <label>
+                        <span>Video quality: @Math.Round(_structuredWebsiteOptions.VideoQuality * 100)%</span>
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_structuredWebsiteOptions.VideoQuality" @bind:event="oninput" />
+                    </label>
+                    <label class="publisher-check-row">
+                        <input type="checkbox" @bind="_structuredWebsiteOptions.KeepVideoFallback" />
+                        <span>Keep the original video as a compatibility fallback</span>
+                    </label>
+                }
+
+                <label class="publisher-check-row">
+                    <input type="checkbox" @bind="_structuredWebsiteOptions.CompressArchive" />
+                    <span>Deflate HTML, CSS, and JavaScript inside the ZIP when the browser supports it</span>
+                </label>
+            </div>
+
+            <aside class="website-export-doctrine">
+                Separating media from HTML is already lossless and removes Base64 overhead. PublisherStudio never labels video transcoding as lossless; exact preservation remains the default.
+            </aside>
+
+            <footer>
+                <button type="button" @onclick="CloseStructuredWebsiteExport" disabled="@_structuredWebsiteExporting">Cancel</button>
+                <button type="button" class="primary" @onclick="ExportStructuredWebsite" disabled="@_structuredWebsiteExporting">
+                    @(_structuredWebsiteExporting ? "Exporting…" : "Export website ZIP")
+                </button>
+            </footer>
+        </section>
+    </div>
+}
+
 @if (!string.IsNullOrWhiteSpace(_error))
 {
     <div class="toast error" @onclick="() => _error = null">@_error</div>
@@ -241,6 +325,9 @@
     private bool _barcodeEditorVisible;
     private bool _streamingStudioVisible;
     private bool _videoExporting;
+    private bool _structuredWebsiteExportVisible;
+    private bool _structuredWebsiteExporting;
+    private readonly StructuredWebsiteExportOptions _structuredWebsiteOptions = new();
     private Guid? _pendingNewBarcodeId;
     private Guid _mediaStudioSessionId;
     private Guid? _mediaStudioTargetId;
@@ -826,6 +913,54 @@
             ShowNotice($"Exported {fileName}");
         }
         catch (Exception ex) { ShowError(ex); }
+    }
+
+    private Task OpenStructuredWebsiteExport()
+    {
+        _structuredWebsiteExportVisible = true;
+        _structuredWebsiteExporting = false;
+        return Task.CompletedTask;
+    }
+
+    private Task CloseStructuredWebsiteExport()
+    {
+        if (!_structuredWebsiteExporting) _structuredWebsiteExportVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task ExportStructuredWebsite()
+    {
+        if (_structuredWebsiteExporting) return;
+        _structuredWebsiteExporting = true;
+        try
+        {
+            await State.RefreshWebDataAsync(force: true);
+            await InvokeAsync(StateHasChanged);
+            await SaveRecoveryNow();
+            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + "-website.zip";
+            ShowNotice("Preparing structured website and media assets…");
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+            var result = await JS.InvokeAsync<StructuredWebsiteExportResult>(
+                "publisherStudio.exportStructuredWebsite",
+                fileName,
+                State.Document.Name,
+                _structuredWebsiteOptions);
+            _structuredWebsiteExportVisible = false;
+            var reduction = result.SourceBytes > 0
+                ? $" · {Math.Max(0, 100d - result.ArchiveBytes * 100d / result.SourceBytes):0.#}% smaller than embedded source data"
+                : string.Empty;
+            var warningText = result.Warnings.Count > 0 ? $" · {result.Warnings.Count} warning(s)" : string.Empty;
+            ShowNotice($"Exported {result.FileName} with {result.AssetCount} asset(s){reduction}{warningText}.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+        finally
+        {
+            _structuredWebsiteExporting = false;
+        }
     }
 
     private async Task ExportVideo()
@@ -1961,6 +2096,26 @@
         _notice = message;
         _error = null;
         StateChanged();
+    }
+
+    private sealed class StructuredWebsiteExportOptions
+    {
+        public string Mode { get; set; } = "site";
+        public string ImageMode { get; set; } = "preserve";
+        public double ImageQuality { get; set; } = 0.82;
+        public string VideoMode { get; set; } = "preserve";
+        public double VideoQuality { get; set; } = 0.78;
+        public bool KeepVideoFallback { get; set; } = true;
+        public bool CompressArchive { get; set; } = true;
+    }
+
+    private sealed class StructuredWebsiteExportResult
+    {
+        public string FileName { get; set; } = string.Empty;
+        public int AssetCount { get; set; }
+        public long SourceBytes { get; set; }
+        public long ArchiveBytes { get; set; }
+        public List<string> Warnings { get; set; } = [];
     }
 
     private sealed class VideoExportResult

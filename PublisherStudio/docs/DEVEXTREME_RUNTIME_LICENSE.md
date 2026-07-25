@@ -71,3 +71,7 @@ dotnet publish src\PublisherStudio.Web\PublisherStudio.Web.csproj -c Release
 - A key generated for another DevExtreme version usually surfaces as `W0020`.
 - Supplying the private/.NET key directly to browser configuration is not a replacement for the generated public runtime key.
 - When preparation fails, the script leaves an existing generated runtime key untouched and reports whether Node.js, package restore, license discovery, or generation failed.
+
+## Structured website export (v1.0.74)
+
+Structured exports keep the same validated script order as standalone HTML. The generated public runtime-license script is written as `js/vendor/devextreme-license.js` immediately after the externalized DevExtreme runtime and before PublisherStudio component initialization. The private DevExpress license remains absent from the project and export.

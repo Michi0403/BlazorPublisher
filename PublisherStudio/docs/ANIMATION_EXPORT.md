@@ -90,3 +90,7 @@ Signal motion now has two distinct size mechanisms:
 Click and hover triggers are delegated from the publication root and resolve their current endpoint target for every event. This avoids stale listeners when a DevExtreme component, spreadsheet preview, chart, or custom HTML subtree replaces its internal DOM. A mutation observer separately maintains connector-line hit testing.
 
 Page-entry playback calls signal reset before evaluating its triggers. Replaying or re-entering a page therefore uses the current publication objects as a stable initial baseline instead of compounding a previous preview run. The runtime implementation is embedded directly in offline HTML exports, including its reset and resize behavior.
+
+## Structured website parity (v1.0.74)
+
+Structured website and presentation ZIP exports are packaging projections of the same single-file builder described above. Animation, media sequencing, Signal Connectors, interactions, reduced-motion behavior, and page navigation use the same runtime source; the scripts are external files rather than inline `<script>` blocks. Local media sources are relative content-addressed assets, with an optional original-video fallback for browser-generated WebM delivery copies.

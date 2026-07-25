@@ -1,0 +1,40 @@
+PublisherStudio v1.0.75 source changes
+=====================================
+
+Razor compilation repair
+------------------------
+- src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor
+  Moved authoredLiveLayers, selectedLiveLayer and selectedLiveFilter to the
+  beginning of the existing liveSource.IsVisual Razor control-flow body and
+  removed the nested explicit Razor code block that produced RZ1010.
+
+Regression validation
+---------------------
+- tests/csharpCompilationSafety.test.mjs
+  Added a contract that verifies the live streaming-effect locals are normal
+  C# declarations inside the existing @if body and rejects the invalid nested
+  @{ ... } form.
+
+Version and release metadata
+----------------------------
+- src/PublisherStudio.Web/PublisherStudio.Web.csproj
+- src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj
+- src/PublisherStudio.Web/package.json
+- src/PublisherStudio.Web/package-lock.json
+- src/PublisherStudio.Web/Services/Streaming/UseCases/Runtime/StreamingRuntimeUseCases.cs
+- src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+  Advanced application, installer, npm, lock, streaming capability and export
+  manifest versions to 1.0.75.
+- tests/fontIntegration.test.mjs
+- tests/streamingRuntime.test.mjs
+- tests/videoProjectImport.test.mjs
+- tests/structuredWebsiteExport.test.mjs
+  Advanced current-release version expectations to 1.0.75.
+- Added CHANGELOG-v1.0.75.md, SOURCE-CHANGES-v1.0.75.txt and
+  TEST-RESULTS-v1.0.75.txt; updated inner and outer RELEASE.md.
+
+Compatibility
+-------------
+- No publication, Picture Studio or video-project schema change.
+- No runtime behavior change beyond restoring Razor compilation.
+- No NuGet, npm, native-process or remote-service dependency change.

@@ -774,3 +774,12 @@ Static checks completed for the v1.0.37 source package:
 - Compare NuGet/npm dependency sets with v1.0.73; no dependency addition is expected.
 - Apply the release patch to a clean v1.0.73 source tree and compare the result with the packaged v1.0.74 tree.
 - Run ZIP integrity, clean extraction parity, SHA-256 and SHA-512 checks.
+
+## v1.0.75 Razor compilation hotfix validation
+
+- Compile `PublisherStudio.Web` on the licensed release machine and verify `InspectorPanel.razor` no longer reports `RZ1010` around the visual live-source section.
+- Open the Inspector for camera, screen, window, browser-tab, capture-device, and network-video sources. Verify the layered streaming-effect editor still lists, selects, edits, reorders, duplicates, hides and removes authored layers and filters.
+- Enable chroma key and verify the key color, similarity, smoothness, spill and residual-opacity controls still bind to the selected live source.
+- Run the aggregate Node suite. The compilation-safety contract must confirm that the three live-layer locals are ordinary declarations at the start of the existing `liveSource.IsVisual` body and that no nested explicit `@{ ... }` block wraps them.
+- Parse project XML and package JSON, verify all current-release versions are `1.0.75`, replay the patch against untouched v1.0.74, and validate ZIP CRC/extraction parity plus SHA-256/SHA-512 checksums.
+- A real .NET/Razor/DevExpress compile remains mandatory on the normal release machine because this packaging environment has no .NET SDK or licensed DevExpress restore feed.

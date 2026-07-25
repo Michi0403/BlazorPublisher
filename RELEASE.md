@@ -1,9 +1,9 @@
-# PublisherStudio v1.0.74 release
+# PublisherStudio v1.0.75 release
 
-See `PublisherStudio/CHANGELOG-v1.0.74.md`, `PublisherStudio/SOURCE-CHANGES-v1.0.74.txt`, `PublisherStudio/TEST-RESULTS-v1.0.74.txt`, `PublisherStudio/RELEASE.md`, `PublisherStudio/docs/architecture/structured-website-export.md`, and `PublisherStudio/VALIDATION.md`.
+The complete source release is in `PublisherStudio/`.
 
-v1.0.74 preserves the standalone HTML exports and adds an ordinary file-structured static website ZIP. CSS, ordered JavaScript runtimes, and deduplicated media/font assets are externalized from the same generated publication runtime, reducing Base64-heavy HTML without changing publication behavior.
+See `PublisherStudio/CHANGELOG-v1.0.75.md`, `PublisherStudio/SOURCE-CHANGES-v1.0.75.txt`, `PublisherStudio/TEST-RESULTS-v1.0.75.txt`, `PublisherStudio/RELEASE.md`, and `PublisherStudio/VALIDATION.md`.
 
-The export dialog provides exact source preservation, PNG pixel-lossless output, optional WebP/AVIF image optimization, optional WebM VP9/VP8 + Opus video delivery with original fallback, and optional ZIP Deflate for text files. Browser capability/failure/size checks preserve the source rather than silently degrading an export.
+v1.0.75 fixes Razor compiler error `RZ1010` in the Inspector streaming-effects editor by removing an invalid nested `@{ ... }` block from an existing `@if` control-flow body. A regression contract now protects the corrected structure.
 
-Application and installer version is `1.0.74`. Publication format remains `1.52`; Picture Studio format remains `1.4`; dependency versions and sets are unchanged.
+Application and installer version is `1.0.75`. Publication format remains `1.52`; Picture Studio format remains `1.4`; dependency versions and sets are unchanged.

@@ -458,6 +458,10 @@
                     }
                     @if (liveSource.IsVisual)
                     {
+                        var authoredLiveLayers = LiveEffectLayers(liveSource);
+                        var selectedLiveLayer = SelectedLiveEffectLayer(liveSource);
+                        var selectedLiveFilter = SelectedLiveEffectFilter(liveSource);
+
                         <label>Capture width<input type="number" min="320" max="7680" step="2" value="@liveSource.CaptureWidth" @onchange="ChangeLiveCaptureWidth" /></label>
                         <label>Capture height<input type="number" min="180" max="4320" step="2" value="@liveSource.CaptureHeight" @onchange="ChangeLiveCaptureHeight" /></label>
                         <label>Capture FPS<input type="number" min="15" max="120" value="@liveSource.CaptureFrameRate" @onchange="ChangeLiveCaptureFrameRate" /></label>
@@ -481,11 +485,6 @@
                             @RangeField("Keyed residual opacity", liveSource.ChromaResidualOpacity, 0, 1, .01, "liveChromaResidual")
                         }
 
-                        @{
-                            var authoredLiveLayers = LiveEffectLayers(liveSource);
-                            var selectedLiveLayer = SelectedLiveEffectLayer(liveSource);
-                            var selectedLiveFilter = SelectedLiveEffectFilter(liveSource);
-                        }
                         <div class="live-video-effect-editor">
                             <h4>Layered streaming effects</h4>
                             <p class="property-note">These authored layers render live on camera, screen, window, browser-tab, capture-device, and network-video inputs. The compatibility controls above remain in their own protected layer.</p>

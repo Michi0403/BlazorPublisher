@@ -194,4 +194,18 @@ const rtsp = fs.readFileSync(path.join(web, 'Services', 'Streaming', 'Lan', 'Rts
 assert.match(rtsp, /var\s+contentLength\s*=\s*TextEncoding\.ASCII\.GetByteCount\(sdp\)\s*;/);
 assert.match(rtsp, /\$"Content-Length:\s*\{contentLength\}"/);
 
-console.log('PublisherStudio C# composition-root, namespace and interpolation safety checks passed.');
+// Razor control-flow bodies already are C# code blocks. Starting another `@{`
+// inside one produces RZ1010. Keep the streaming-layer locals as normal C#
+// declarations at the beginning of the existing `@if` body.
+const inspectorPanel = fs.readFileSync(path.join(web, 'Components', 'Editor', 'InspectorPanel.razor'), 'utf8');
+assert.match(
+  inspectorPanel,
+  /@if \(liveSource\.IsVisual\)\s*\{\s*var authoredLiveLayers = LiveEffectLayers\(liveSource\);\s*var selectedLiveLayer = SelectedLiveEffectLayer\(liveSource\);\s*var selectedLiveFilter = SelectedLiveEffectFilter\(liveSource\);/
+);
+assert.doesNotMatch(
+  inspectorPanel,
+  /@\{\s*var authoredLiveLayers = LiveEffectLayers\(liveSource\);/,
+  'Do not nest an explicit Razor code block inside the existing liveSource.IsVisual control-flow body.'
+);
+
+console.log('PublisherStudio C# composition-root, namespace, interpolation and Razor control-flow safety checks passed.');

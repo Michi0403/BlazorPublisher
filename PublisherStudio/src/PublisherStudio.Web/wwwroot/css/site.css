@@ -3748,6 +3748,182 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     isolation: isolate;
 }
 .media-studio-frame-stage > video { grid-area: 1 / 1; }
+.media-video-time-overlay {
+    --video-time-start: 0%;
+    --video-time-end: 100%;
+    --video-time-playhead: 0%;
+    --video-drop-position: 0%;
+    position: absolute;
+    z-index: 7;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: visible;
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    cursor: crosshair;
+    isolation: isolate;
+}
+.media-video-time-overlay.disabled { pointer-events: none; opacity: .32; }
+.media-video-time-overlay::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background: linear-gradient(to right,
+        #02061770 0 var(--video-time-start),
+        #02061708 var(--video-time-start) var(--video-time-end),
+        #02061770 var(--video-time-end) 100%);
+    pointer-events: none;
+}
+.media-video-time-overlay.point-selection::before { background: #02061718; }
+.media-video-time-toolbar {
+    position: absolute;
+    z-index: 7;
+    left: 8px;
+    top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 6px;
+    border: 1px solid #ffffff55;
+    border-radius: 5px;
+    background: #020617c7;
+    color: #f8fafc;
+    box-shadow: 0 3px 12px #0008;
+    cursor: default;
+}
+.media-video-time-toolbar button {
+    width: 27px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #ffffff66;
+    border-radius: 3px;
+    background: #ffffff18;
+    color: #fff;
+    cursor: pointer;
+}
+.media-video-time-toolbar button:hover { background: #ffffff2b; }
+.media-video-time-readout { display: flex; align-items: center; gap: 4px; font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.media-video-time-readout b { color: #7dd3fc; }
+.media-video-time-track {
+    position: absolute;
+    z-index: 5;
+    left: 14px;
+    right: 14px;
+    bottom: 31px;
+    height: 10px;
+    border: 1px solid #ffffff99;
+    border-radius: 999px;
+    background: #020617cc;
+    box-shadow: 0 2px 10px #000b;
+    pointer-events: none;
+}
+.media-video-time-selected {
+    position: absolute;
+    inset-block: 1px;
+    left: var(--video-time-start);
+    width: calc(var(--video-time-end) - var(--video-time-start));
+    min-width: 2px;
+    border-radius: 999px;
+    background: #38bdf8cc;
+    box-shadow: 0 0 0 1px #e0f2feaa inset;
+}
+.media-video-time-handle {
+    position: absolute;
+    z-index: 8;
+    top: 50%;
+    width: 9px;
+    height: 30px;
+    translate: -50% -50%;
+    border: 1px solid #0f172a;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 0 0 1px #ffffff88, 0 2px 7px #000b;
+    pointer-events: auto;
+    cursor: ew-resize;
+}
+.media-video-time-handle.start { left: var(--video-time-start); }
+.media-video-time-handle.end { left: var(--video-time-end); }
+.media-video-time-overlay.point-selection .media-video-time-handle,
+.media-video-time-overlay.point-selection .media-video-time-selected { display: none; }
+.media-video-time-point,
+.media-video-time-playhead,
+.media-video-time-drop-marker {
+    position: absolute;
+    z-index: 6;
+    top: -8px;
+    bottom: -8px;
+    width: 2px;
+    translate: -50% 0;
+    pointer-events: none;
+}
+.media-video-time-point { left: var(--video-time-start); display: none; background: #f8fafc; box-shadow: 0 0 0 1px #0f172a, 0 0 8px #fff; }
+.media-video-time-overlay.point-selection .media-video-time-point { display: block; }
+.media-video-time-playhead { left: var(--video-time-playhead); width: 1px; background: #fb923c; box-shadow: 0 0 0 1px #7c2d12; }
+.media-video-time-drop-marker { left: var(--video-drop-position); display: none; width: 3px; background: #22c55e; box-shadow: 0 0 0 2px #052e16, 0 0 12px #4ade80; }
+.media-video-time-overlay.media-video-drop-target .media-video-time-drop-marker { display: block; }
+.media-video-time-overlay.media-video-drop-target::after {
+    content: "Drop here, then choose the exact insertion timestamp";
+    position: absolute;
+    z-index: 9;
+    left: var(--video-drop-position);
+    bottom: 54px;
+    translate: -50% 0;
+    max-width: 230px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    background: #14532ded;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.media-video-time-help {
+    position: absolute;
+    z-index: 6;
+    left: 8px;
+    right: 8px;
+    bottom: 6px;
+    overflow: hidden;
+    color: #e2e8f0;
+    font-size: 9px;
+    line-height: 1.2;
+    text-align: center;
+    text-shadow: 0 1px 2px #000;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.media-video-insert-placement {
+    position: absolute;
+    z-index: 12;
+    left: 50%;
+    top: 50%;
+    width: min(340px, calc(100% - 28px));
+    display: grid;
+    gap: 8px;
+    translate: -50% -50%;
+    padding: 10px;
+    border: 1px solid #7dd3fc;
+    border-radius: 6px;
+    background: #082f49f2;
+    color: #f0f9ff;
+    box-shadow: 0 12px 34px #000c;
+    cursor: default;
+}
+.media-video-insert-placement > div:first-child { min-width: 0; display: flex; justify-content: space-between; gap: 8px; }
+.media-video-insert-placement > div:first-child span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+.media-video-insert-placement label { display: grid; gap: 4px; font-size: 10px; }
+.media-video-insert-placement input[type="range"] { width: 100%; padding: 0; }
+.media-video-insert-fixed { color: #bae6fd; font-size: 10px; }
+.media-video-insert-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.media-video-insert-actions time { margin-right: auto; color: #7dd3fc; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.media-video-insert-actions button { padding: 4px 8px; border: 1px solid #bae6fd; border-radius: 3px; background: #f0f9ff; color: #0c4a6e; cursor: pointer; }
+.media-video-insert-actions button:last-child { background: transparent; color: #e0f2fe; }
 .media-studio-frame-overlay-host {
     --media-pointer-x: 50%;
     --media-pointer-y: 50%;

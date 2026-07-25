@@ -86,6 +86,66 @@ public sealed class MediaTimelineEditService
         return right.Id;
     }
 
+    public Guid InsertAt(
+        List<PublicationMediaSegment> segments,
+        double playbackRate,
+        double timelineSeconds,
+        PublicationMediaSegment inserted)
+    {
+        ArgumentNullException.ThrowIfNull(inserted);
+        inserted.Id = inserted.Id == Guid.Empty ? Guid.NewGuid() : inserted.Id;
+
+        if (segments.Count == 0)
+        {
+            segments.Add(inserted);
+            return inserted.Id;
+        }
+
+        var timelineLength = TimelineLength(segments, playbackRate);
+        var position = double.IsFinite(timelineSeconds)
+            ? Math.Clamp(timelineSeconds, 0, Math.Max(0, timelineLength))
+            : timelineLength;
+        var tolerance = Math.Min(MinimumSourceLength, Math.Max(.001, timelineLength / 10_000));
+
+        if (position <= tolerance)
+        {
+            segments.Insert(0, inserted);
+            return inserted.Id;
+        }
+
+        if (position >= timelineLength - tolerance)
+        {
+            segments.Add(inserted);
+            return inserted.Id;
+        }
+
+        var index = SegmentIndexAt(segments, playbackRate, position);
+        if (index < 0)
+        {
+            segments.Add(inserted);
+            return inserted.Id;
+        }
+
+        var segmentStart = SegmentTimelineStart(segments, index, playbackRate);
+        var segmentLength = segments[index].SourceLengthSeconds / Math.Max(.1, playbackRate);
+        if (position <= segmentStart + tolerance)
+        {
+            segments.Insert(index, inserted);
+            return inserted.Id;
+        }
+
+        if (position >= segmentStart + segmentLength - tolerance)
+        {
+            segments.Insert(index + 1, inserted);
+            return inserted.Id;
+        }
+
+        var rightId = SplitAt(segments, playbackRate, position);
+        var rightIndex = rightId is Guid id ? segments.FindIndex(segment => segment.Id == id) : -1;
+        segments.Insert(rightIndex >= 0 ? rightIndex : index + 1, inserted);
+        return inserted.Id;
+    }
+
     public bool CanMergeBoundary(IReadOnlyList<PublicationMediaSegment> segments, int rightIndex)
     {
         if (rightIndex <= 0 || rightIndex >= segments.Count) return false;

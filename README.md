@@ -7,8 +7,8 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 - **Page layout and presentations:** layered, grouped, animated, rotatable objects with rulers, guides, snapping, transitions, print, PDF, HTML, and recorded-presentation export.
 - **Word-class stories:** embedded DevExpress RichEdit documents with DOCX storage, fields, page settings, and backgrounds.
 - **Excel-class workbooks:** embedded DevExpress Spreadsheet editing, import/download, and scalable worksheet frames.
-- **Picture Studio:** a built-in mini image workshop for crop, filters, masks, tinting, transparency, drawing, gradients, layered picture documents, and visible rectangle/ellipse/freehand/magnetic/polygon selection overlays.
-- **Audio and video studio:** import, record, trim, arrange, preview, and export media directly inside publications, with explicit timeline modes and a source-frame-aligned video region overlay.
+- **Picture Studio:** a built-in mini image workshop for crop, filters, masks, tinting, transparency, drawing, gradients, and layered picture documents.
+- **Audio and video studio:** import, record, trim, arrange, preview, and export media directly inside publications.
 - **Live data publishing:** every DevExtreme Cartesian series type plus pie/doughnut, PolarChart, sparkline, bar/circular/linear gauges, range selector, Sankey, funnel, pyramid, tree map, data grid, KPI visuals, barcodes, QR codes, WordArt, connectors, and data-bound fields.
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
@@ -401,3 +401,7 @@ See `CHANGELOG-v1.0.52.md`. Self-contained presentation and site exports now kee
 ## v1.0.67 interpolation-safe compiler correction
 
 See `CHANGELOG-v1.0.67.md`, `AGENTS.md`, ADR-008 and `VALIDATION.md`. The v1.0.66 namespace-collision repair is corrected so `global::` is no longer placed directly in an interpolated-string hole. Streaming Chat and RTSP use the explicit `TextEncoding` alias, and RTSP calculates SDP content length before formatting the header. The compilation-safety contract now rejects the exact parser trap that produced `CS0103`. Runtime behavior, publication format `1.48`, Picture Studio format `1.3`, and package dependencies remain unchanged.
+
+## v1.0.68 media gesture editing and polygon regions
+
+See `CHANGELOG-v1.0.68.md`, ADR-009 and `docs/architecture/media-gesture-editing.md`. Video Studio and Audio Studio now provide explicit timeline mouse/touch modes with synchronized playhead/section selection, visible cutlines, section copy/paste/delete, direct cutline commands, and insertion of compatible media into the selected range. Video Studio additionally supports arbitrary normalized polygon frame regions; Picture Studio supports rectangle, ellipse, freehand, magnetic and polygon area clips, inverted cuts and clipped-layer clipboard reuse. Audio stays one-dimensional. All internal sections and overlays remain inside the owning element/layer, while the existing Mainframe orchestration preserves geometry, Z-order, grouping, connectors, animations and interactions. Publication format is `1.49`; Picture Studio format is `1.4`; no dependency was added.

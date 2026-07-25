@@ -159,6 +159,9 @@ public sealed class PublicationComponentService
         item.ChatCurrentUserId = string.IsNullOrWhiteSpace(item.ChatCurrentUserId) ? "publisher" : item.ChatCurrentUserId.Trim();
         item.ChatCurrentUserName = string.IsNullOrWhiteSpace(item.ChatCurrentUserName) ? "Streamer" : item.ChatCurrentUserName.Trim();
         item.ChatCurrentUserAvatar ??= string.Empty;
+        item.ChatMaxVisibleMessages = Math.Clamp(item.ChatMaxVisibleMessages <= 0 ? 12 : item.ChatMaxVisibleMessages, 1, 100);
+        item.ChatBackgroundOpacity = Math.Clamp(double.IsFinite(item.ChatBackgroundOpacity) ? item.ChatBackgroundOpacity : .88, 0, 1);
+        item.ChatMessageOpacity = Math.Clamp(double.IsFinite(item.ChatMessageOpacity) ? item.ChatMessageOpacity : .78, 0, 1);
         item.CustomCssClass = SanitizeCssClass(item.CustomCssClass);
         item.CustomCss = SanitizeInlineCss(item.CustomCss);
         foreach (var feature in item.VectorFeatures)
@@ -388,6 +391,13 @@ public sealed class PublicationComponentService
             item.ChatShowAvatar,
             item.ChatShowTimestamp,
             item.ChatOptimisticSend,
+            chatDisplayMode = item.ChatDisplayMode.ToString(),
+            item.ChatMaxVisibleMessages,
+            item.ChatCompact,
+            item.ChatFadeOlderMessages,
+            item.ChatShowPlatformBadge,
+            item.ChatBackgroundOpacity,
+            item.ChatMessageOpacity,
             item.Placeholder,
             item.InitialValue,
             item.Background,

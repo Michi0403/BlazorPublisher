@@ -71,13 +71,17 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
         const overlay = target?.closest?.('.media-video-time-overlay');
         if (!overlay) return null;
         const duration = Math.max(.01, Number(overlay.dataset.duration) || 0);
+        const trimStart = Math.max(0, Math.min(duration, Number(overlay.dataset.trimStart) || 0));
+        const trimEnd = Math.max(trimStart + .01, Math.min(duration, Number(overlay.dataset.trimEnd) || duration));
+        const visibleSpan = Math.max(.01, trimEnd - trimStart);
         const pointSelection = overlay.dataset.selectionPoint === 'true';
-        const selectionStart = Math.max(0, Math.min(duration, Number(overlay.dataset.selectionStart) || 0));
-        const selectionEnd = Math.max(selectionStart, Math.min(duration, Number(overlay.dataset.selectionEnd) || selectionStart));
+        const selectionStart = Math.max(trimStart, Math.min(trimEnd, Number(overlay.dataset.selectionStart) || trimStart));
+        const selectionEnd = Math.max(selectionStart, Math.min(trimEnd, Number(overlay.dataset.selectionEnd) || selectionStart));
         const bounds = overlay.getBoundingClientRect();
-        const raw = Math.max(0, Math.min(duration, ((Number(clientX) - bounds.left) / Math.max(1, bounds.width)) * duration));
+        const ratio = Math.max(0, Math.min(1, (Number(clientX) - bounds.left) / Math.max(1, bounds.width)));
+        const raw = trimStart + ratio * visibleSpan;
         const seconds = pointSelection ? selectionStart : Math.max(selectionStart, Math.min(selectionEnd, raw));
-        overlay.style.setProperty('--video-drop-position', `${Math.max(0, Math.min(100, seconds / duration * 100))}%`);
+        overlay.style.setProperty('--video-drop-position', `${Math.max(0, Math.min(100, (seconds - trimStart) / visibleSpan * 100))}%`);
         overlay.classList.add('media-video-drop-target');
         return { seconds, pointSelection };
     };
@@ -208,6 +212,10 @@ function stateFor(id) {
             timeOverlayGesture: null,
             lastReportedDuration: 0,
             durationReportPending: false,
+            durationProbePending: false,
+            durationProbeSeekedHandler: null,
+            durationProbeTimer: 0,
+            durationProbeRestoreTime: 0,
             playCommandVersion: 0,
             dropRoot: null,
             dropHandlers: null,
@@ -323,6 +331,8 @@ function releaseVideoTimeOverlayBindings(state) {
     }
     if (video && state.timeOverlayDurationHandler)
         video.removeEventListener('durationchange', state.timeOverlayDurationHandler);
+    if (video && state.durationProbeSeekedHandler)
+        video.removeEventListener('seeked', state.durationProbeSeekedHandler);
     if (video && state.timeOverlayUpdateHandler) {
         video.removeEventListener('timeupdate', state.timeOverlayUpdateHandler);
         video.removeEventListener('seeked', state.timeOverlayUpdateHandler);
@@ -340,6 +350,10 @@ function releaseVideoTimeOverlayBindings(state) {
     state.timeOverlayUpdateHandler = null;
     state.timeOverlayGesture = null;
     state.durationReportPending = false;
+    state.durationProbePending = false;
+    state.durationProbeSeekedHandler = null;
+    if (state.durationProbeTimer) clearTimeout(state.durationProbeTimer);
+    state.durationProbeTimer = 0;
 }
 
 function syncFrameOverlay(state) {
@@ -492,7 +506,8 @@ function videoTimeAt(overlay, clientX, clampToSelection = false) {
     const data = videoTimeData(overlay);
     const bounds = overlay.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (Number(clientX) - bounds.left) / Math.max(1, bounds.width)));
-    const raw = ratio * data.duration;
+    const visibleSpan = Math.max(.01, data.trimEnd - data.trimStart);
+    const raw = data.trimStart + ratio * visibleSpan;
     if (!clampToSelection) return raw;
     return data.pointSelection ? data.start : Math.max(data.start, Math.min(data.end, raw));
 }
@@ -569,9 +584,10 @@ function setVideoTimeVisual(overlay, start, end, pointSelection) {
     overlay.dataset.selectionPoint = pointSelection ? 'true' : 'false';
     overlay.classList.toggle('point-selection', pointSelection);
     overlay.classList.toggle('range-selection', !pointSelection);
-    overlay.style.setProperty('--video-time-start', `${safeStart / duration * 100}%`);
-    overlay.style.setProperty('--video-time-end', `${safeEnd / duration * 100}%`);
-    overlay.style.setProperty('--video-time-playhead', `${point / duration * 100}%`);
+    const visibleSpan = Math.max(.01, maximum - minimum);
+    overlay.style.setProperty('--video-time-start', `${(safeStart - minimum) / visibleSpan * 100}%`);
+    overlay.style.setProperty('--video-time-end', `${(safeEnd - minimum) / visibleSpan * 100}%`);
+    overlay.style.setProperty('--video-time-playhead', `${(point - minimum) / visibleSpan * 100}%`);
     syncVideoSelectionControls(overlay, safeStart, safeEnd, pointSelection);
 }
 
@@ -597,7 +613,8 @@ function videoCanvasMode(overlay) {
 function setVideoPlayheadVisual(overlay, sourceSeconds) {
     const data = videoTimeData(overlay);
     const current = Math.max(data.trimStart, Math.min(data.trimEnd, Number(sourceSeconds) || data.trimStart));
-    overlay.style.setProperty('--video-time-playhead', `${current / data.duration * 100}%`);
+    const visibleSpan = Math.max(.01, data.trimEnd - data.trimStart);
+    overlay.style.setProperty('--video-time-playhead', `${(current - data.trimStart) / visibleSpan * 100}%`);
     const readout = document.getElementById('media-studio-video-current-time');
     if (readout) readout.textContent = formatMediaTime(current);
 
@@ -624,14 +641,38 @@ function updateVideoTimeReadout(state) {
 function resolvedVideoDuration(video) {
     const direct = Number(video?.duration);
     if (Number.isFinite(direct) && direct > .01) return direct;
-    try {
-        const seekable = video?.seekable;
-        if (seekable?.length) {
-            const end = Number(seekable.end(seekable.length - 1));
-            if (Number.isFinite(end) && end > .01) return end;
-        }
-    } catch { }
-    return 0;
+    for (const ranges of [video?.seekable, video?.buffered]) {
+        try {
+            if (ranges?.length) {
+                const end = Number(ranges.end(ranges.length - 1));
+                if (Number.isFinite(end) && end > .01) return end;
+            }
+        } catch { }
+    }
+    const current = Number(video?.currentTime);
+    return Number.isFinite(current) && current > .01 && direct === Infinity ? current : 0;
+}
+
+function requestVideoDurationProbe(state, video, overlay) {
+    if (!(video instanceof HTMLVideoElement) || !overlay || state.durationProbePending) return;
+    if (resolvedVideoDuration(video) > .01 || video.readyState < 1) return;
+    state.durationProbePending = true;
+    state.durationProbeRestoreTime = Math.max(0, Number(video.currentTime) || 0);
+    const finish = () => {
+        if (!state.durationProbePending) return;
+        state.durationProbePending = false;
+        if (state.durationProbeTimer) clearTimeout(state.durationProbeTimer);
+        state.durationProbeTimer = 0;
+        if (state.durationProbeSeekedHandler) video.removeEventListener('seeked', state.durationProbeSeekedHandler);
+        state.durationProbeSeekedHandler = null;
+        reportResolvedVideoDuration(state, video, overlay);
+        try { video.currentTime = state.durationProbeRestoreTime; } catch { }
+    };
+    state.durationProbeSeekedHandler = finish;
+    video.addEventListener('seeked', finish, { once: true });
+    state.durationProbeTimer = window.setTimeout(finish, 1200);
+    try { video.currentTime = Number.MAX_SAFE_INTEGER; }
+    catch { finish(); }
 }
 
 function reconcileResolvedVideoDuration(video, overlay) {
@@ -669,9 +710,9 @@ function reconcileResolvedVideoDuration(video, overlay) {
 }
 
 function reportResolvedVideoDuration(state, video, overlay) {
+    const modeled = Math.max(.01, Number(overlay?.dataset?.duration) || 0);
     const duration = reconcileResolvedVideoDuration(video, overlay);
     if (!(duration > .01) || state.durationReportPending) return duration;
-    const modeled = Math.max(.01, Number(overlay?.dataset?.duration) || 0);
     const tolerance = Math.max(.02, duration / 10000);
     if (Math.abs(duration - state.lastReportedDuration) <= tolerance
         && Math.abs(duration - modeled) <= tolerance) return duration;
@@ -868,11 +909,15 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
         pauseMedia(state.id);
     };
     state.timeOverlayMetadataHandler = () => {
-        reportResolvedVideoDuration(state, video, overlay);
+        const duration = reportResolvedVideoDuration(state, video, overlay);
+        if (!(duration > .01)) requestVideoDurationProbe(state, video, overlay);
         syncFrameOverlay(state);
         updateVideoTimeReadout(state);
     };
-    state.timeOverlayDurationHandler = () => reportResolvedVideoDuration(state, video, overlay);
+    state.timeOverlayDurationHandler = () => {
+        const duration = reportResolvedVideoDuration(state, video, overlay);
+        if (!(duration > .01)) requestVideoDurationProbe(state, video, overlay);
+    };
     state.timeOverlayUpdateHandler = () => {
         reportResolvedVideoDuration(state, video, overlay);
         updateVideoTimeReadout(state);
@@ -892,7 +937,8 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
     video.addEventListener('timeupdate', state.timeOverlayUpdateHandler);
     video.addEventListener('seeked', state.timeOverlayUpdateHandler);
     requestAnimationFrame(() => {
-        reportResolvedVideoDuration(state, video, overlay);
+        const initialResolvedDuration = reportResolvedVideoDuration(state, video, overlay);
+        if (!(initialResolvedDuration > .01)) requestVideoDurationProbe(state, video, overlay);
         syncFrameOverlay(state);
         const data = videoTimeData(overlay);
         setVideoTimeVisual(overlay, data.start, data.end, data.pointSelection);

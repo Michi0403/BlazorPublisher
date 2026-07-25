@@ -19,6 +19,105 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
 
     public IReadOnlyList<PublicationPanelPresetDescriptor> GetPresets() => Presets;
 
+    private static readonly PanelComponentToolDescriptor[] ComponentTools =
+    [
+        new("text", "Text", "Rich text frame shared with the Mainframe.", "Content", "pub-icon pub-icon-text", "text"),
+        new("picture", "Picture", "Picture frame that can later open in Picture Studio.", "Content", "pub-icon pub-icon-picture", "picture"),
+        new("video", "Video", "Video frame compatible with Video Studio and HTML export.", "Content", "pub-icon pub-icon-video", "video"),
+        new("audio", "Audio", "Audio player compatible with Audio Studio and HTML export.", "Content", "pub-icon pub-icon-audio", "audio"),
+        new("shape", "Shape", "Reusable visual container or accent shape.", "Content", "pub-icon pub-icon-shape", "shape"),
+        new("kpi", "KPI", "Live KPI bound to a publication data object.", "Data", "pub-icon pub-icon-chart", "kpi"),
+        new("chart", "Chart", "Live chart bound to publication or web data.", "Data", "pub-icon pub-icon-chart", "chart"),
+        new("table", "Data table", "Read-only data table using the shared data model.", "Data", "pub-icon pub-icon-data", "table"),
+        new("datagrid", "Data Grid", "Interactive DevExtreme grid with reusable connection settings.", "Interactive", "pub-icon pub-icon-data", "datagrid"),
+        new("button", "Button", "Interactive action button.", "Interactive", "pub-icon pub-icon-button", "button"),
+        new("menu", "Menu", "Interactive local or data-driven menu.", "Interactive", "pub-icon pub-icon-menu", "menu"),
+        new("chat", "Chat", "Operator, viewer or privacy-safe streaming chat.", "Interactive", "pub-icon pub-icon-chat", "chat"),
+        new("map", "Map", "Interactive map backed by publication or web data.", "Interactive", "pub-icon pub-icon-map", "map"),
+        new("camera", "Live camera", "Live camera source for preview, streaming and capture.", "Live", "pub-icon pub-icon-video", "camera"),
+        new("screen", "Screen capture", "Live screen capture source.", "Live", "pub-icon pub-icon-screen", "screen"),
+        new("html", "HTML experience", "Sandboxed HTML/CSS/JavaScript experience.", "Web", "pub-icon pub-icon-web", "html"),
+        new("panel", "Nested panel", "Another reusable Panel / Div module.", "Web", "pub-icon pub-icon-panel", "panel")
+    ];
+
+    public IReadOnlyList<PanelComponentToolDescriptor> GetComponentTools(PublicationDocument document)
+    {
+        var result = ComponentTools.ToList();
+        foreach (var template in document.ComponentTemplates.OrderBy(template => template.Category).ThenBy(template => template.Name))
+        {
+            result.Add(new PanelComponentToolDescriptor(
+                $"template:{template.Id:D}",
+                template.Name,
+                template.Description,
+                string.IsNullOrWhiteSpace(template.Category) ? "My modules" : template.Category,
+                string.IsNullOrWhiteSpace(template.IconCssClass) ? "pub-icon pub-icon-panel" : template.IconCssClass,
+                template.Prototype.Kind.ToString().ToLowerInvariant(),
+                template.Id));
+        }
+        return result;
+    }
+
+    public PublicationElement CreateComponentTool(PublicationDocument document, string toolId)
+    {
+        var id = (toolId ?? string.Empty).Trim().ToLowerInvariant();
+        return id switch
+        {
+            "text" => new TextFrameElement
+            {
+                Name = "Text", PreviewHtml = "<h2 style=\"margin:0\">Panel text</h2><p>Shared authored content.</p>",
+                Width = 60, Height = 22, Background = "#ffffffcc", BorderColor = "#cbd5e1", BorderWidth = .2
+            },
+            "picture" => new ImageFrameElement
+            {
+                Name = "Picture", Width = 52, Height = 34, AltText = "Panel picture",
+                DataUrl = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgMzYwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjZGJlYWZlIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOTNhY2ZmIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjY0MCIgaGVpZ2h0PSIzNjAiIGZpbGw9InVybCgjZykiLz48Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMTUiIHI9IjQ1IiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuOCIvPjxwYXRoIGQ9Ik00MCAzMTBsMTYwLTE0MCA5MCA4MCA5MC04MCAyMjAgMTQweiIgZmlsbD0iIzFmMjkzNyIgb3BhY2l0eT0iLjY1Ii8+PHRleHQgeD0iMzIwIiB5PSIzMzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxB cmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzFmMjkzNyI+UGljdHVyZVN0dWRpbyByZWFkeTwvdGV4dD48L3N2Zz4="
+                    .Replace(" ", string.Empty)
+            },
+            "video" => new VideoElement { Name = "Video", Width = 72, Height = 42, Background = "#0f172a", ShowControls = true, FitMode = PublicationVideoFitMode.Stretch },
+            "audio" => new AudioElement { Name = "Audio", Width = 72, Height = 16, ShowControls = true, DisplayKind = PublicationAudioDisplayKind.Compact },
+            "shape" => new ShapeElement { Name = "Panel card", Width = 48, Height = 28, Shape = PublicationShape.RoundedRectangle, Fill = "#ffffff", Stroke = "#cbd5e1", CornerRadiusMm = 3 },
+            "kpi" => CreateVisual(document, DataVisualKind.KpiProgress, "KPI", 52, 24),
+            "chart" => CreateVisual(document, DataVisualKind.CartesianChart, "Chart", 72, 44),
+            "table" => CreateVisual(document, DataVisualKind.DataTable, "Data table", 82, 44),
+            "datagrid" => CreateComponent(document, PublicationComponentKind.DataGrid, "Data Grid", 82, 44),
+            "button" => CreateComponent(document, PublicationComponentKind.Button, "Button", 28, 12),
+            "menu" => CreateComponent(document, PublicationComponentKind.Menu, "Menu", 60, 16),
+            "chat" => CreateComponent(document, PublicationComponentKind.Chat, "Chat", 48, 64),
+            "map" => CreateComponent(document, PublicationComponentKind.Map, "Map", 72, 44),
+            "camera" => new LiveSourceElement { Name = "Live camera", SourceKind = PublicationLiveSourceKind.Camera, Width = 72, Height = 42, CaptureWidth = 1920, CaptureHeight = 1080, CaptureFrameRate = 30, Muted = true },
+            "screen" => new LiveSourceElement { Name = "Screen capture", SourceKind = PublicationLiveSourceKind.Screen, Width = 80, Height = 45, CaptureWidth = 1920, CaptureHeight = 1080, CaptureFrameRate = 30, Muted = true },
+            "html" => new HtmlEmbedElement { Name = "HTML experience", Width = 100, Height = 58 },
+            "panel" => CreateBlank("Nested panel"),
+            _ => throw new ArgumentOutOfRangeException(nameof(toolId), toolId, "Unknown Panel Studio component tool.")
+        };
+    }
+
+    private DataVisualElement CreateVisual(PublicationDocument document, DataVisualKind kind, string name, double width, double height)
+    {
+        var dataObject = EnsureData(document);
+        var columns = _data.ResolveColumns(dataObject).ToArray();
+        var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
+        var value = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name
+            ?? columns.Skip(1).FirstOrDefault()?.Name
+            ?? argument;
+        return new DataVisualElement
+        {
+            Name = name, Title = name, VisualKind = kind, DataObjectId = dataObject.Id,
+            ArgumentField = argument, ValueFields = string.IsNullOrWhiteSpace(value) ? [] : [value], TargetField = value,
+            Width = width, Height = height, Background = "#ffffff", BorderColor = "#cbd5e1"
+        };
+    }
+
+    private DevExtremeComponentElement CreateComponent(PublicationDocument document, PublicationComponentKind kind, string name, double width, double height)
+    {
+        var component = _components.Create(document, kind);
+        component.Name = name;
+        component.Title = name;
+        component.Width = width;
+        component.Height = height;
+        return component;
+    }
+
     public PanelElement CreatePreset(PublicationDocument document, string? presetId)
     {
         var id = string.IsNullOrWhiteSpace(presetId) ? "blank" : presetId.Trim().ToLowerInvariant();
@@ -48,6 +147,22 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
     }
 
     public void Normalize(PublicationDocument document, PanelElement panel) => NormalizePanel(document, panel, 0);
+
+    public void NormalizeTemplate(PublicationDocument document, PublicationElementTemplate template)
+    {
+        if (template.Id == Guid.Empty) template.Id = Guid.NewGuid();
+        template.Name = string.IsNullOrWhiteSpace(template.Name) ? "Reusable component" : template.Name.Trim();
+        template.Category = string.IsNullOrWhiteSpace(template.Category) ? "My modules" : template.Category.Trim();
+        template.Description ??= string.Empty;
+        template.IconCssClass = string.IsNullOrWhiteSpace(template.IconCssClass) ? "pub-icon pub-icon-panel" : template.IconCssClass.Trim();
+        template.Prototype ??= new TextFrameElement { Name = template.Name };
+        var holder = CreateBlank("Template normalization");
+        holder.CanvasWidth = Math.Max(160, template.Prototype.Width + 16);
+        holder.CanvasHeight = Math.Max(90, template.Prototype.Height + 16);
+        holder.Views[0].Elements.Add(template.Prototype);
+        NormalizePanel(document, holder, 0);
+        template.Prototype = holder.Views[0].Elements[0];
+    }
 
     private void NormalizePanel(PublicationDocument document, PanelElement panel, int depth)
     {
@@ -118,9 +233,6 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
                 html.Html ??= string.Empty;
                 html.Css ??= string.Empty;
                 html.JavaScript ??= string.Empty;
-                if (html.Html.Length > 8_000_000) html.Html = html.Html[..8_000_000];
-                if (html.Css.Length > 2_000_000) html.Css = html.Css[..2_000_000];
-                if (html.JavaScript.Length > 2_000_000) html.JavaScript = html.JavaScript[..2_000_000];
             }
             if (element is DataVisualElement visual)
             {
@@ -202,7 +314,8 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
         chat.Name = "Platform Chat";
         chat.Title = "Live chat";
         chat.ChatPlatform = PublicationChatPlatform.OutputContext;
-        chat.ChatAllowSending = true;
+        chat.ChatDisplayMode = PublicationChatDisplayMode.StreamOverlay;
+        chat.ChatAllowSending = false;
         chat.ChatShowAvatar = true;
         chat.ChatShowTimestamp = true;
         chat.X = 110;

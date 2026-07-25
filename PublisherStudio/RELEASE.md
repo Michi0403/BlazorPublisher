@@ -1,7 +1,7 @@
-# PublisherStudio v1.0.79 release
+# PublisherStudio v1.0.81 release
 
-See `CHANGELOG-v1.0.79.md`, `SOURCE-CHANGES-v1.0.79.txt`, `TEST-RESULTS-v1.0.79.txt`, and `VALIDATION.md`.
+See `CHANGELOG-v1.0.81.md`, `SOURCE-CHANGES-v1.0.81.txt`, `TEST-RESULTS-v1.0.81.txt`, and `docs/architecture/panel-composer-media-workflow.md`.
 
-v1.0.79 fixes the Creator / Gamer Hub compile failure without deleting the intended chat feature. The preset now embeds PublisherStudio's existing shared platform-chat component instead of referencing a nonexistent media-capture enum value, and recursive panels normalize all shared components consistently.
+v1.0.81 completes the Panel / Div Studio visual composer and reusable module workflow, rebuilds Media Converter Studio around the shared FFmpeg service/controller contracts, and connects Mainframe export, Mainframe insertion and VideoStudio clip/range editing into that conversion workflow. It also removes PublisherStudio-defined byte ceilings from affected local import paths while retaining structural validation.
 
-Application and installer version is `1.0.79`. Publication format remains `1.54`; package dependency names and versions are unchanged.
+Application and installer version is `1.0.81`. Publication format is `1.55` because documents can now persist reusable component templates. Package dependency names and versions are unchanged.

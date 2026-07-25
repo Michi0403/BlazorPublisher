@@ -1,0 +1,12 @@
+PublisherStudio v1.0.80 source changes
+
+Modified:
+- Domain/PublicationComponentModels.cs: persistent chat presentation and styling properties.
+- Services/PublicationComponentService.cs: normalization and runtime serialization.
+- Components/Editor/DevExtremeComponentEditor.razor: operator/viewer chat controls and privacy explanation.
+- Services/Panels/PanelDocumentService.cs: privacy-safe Creator Hub preset.
+- wwwroot/js/componentRuntime.js: native read-only viewer/stream renderer and safe message handling.
+- wwwroot/js/streamingInterop.js: hardened broadcast-canvas chat rendering.
+- wwwroot/css/site.css: stream-facing chat design.
+- tests/streamingChatHardening.test.mjs: cross-layer regression contracts.
+- Version and release metadata updated to 1.0.80.

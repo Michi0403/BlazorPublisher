@@ -45,6 +45,14 @@ public enum PublicationChatPlatform
     Custom
 }
 
+public enum PublicationChatDisplayMode
+{
+    Auto,
+    Interactive,
+    ViewerOnly,
+    StreamOverlay
+}
+
 public enum PublicationVectorMapBaseLayer
 {
     World,
@@ -377,6 +385,13 @@ public sealed class DevExtremeComponentElement : PublicationElement
     public bool ChatShowAvatar { get; set; } = true;
     public bool ChatShowTimestamp { get; set; } = true;
     public bool ChatOptimisticSend { get; set; } = true;
+    public PublicationChatDisplayMode ChatDisplayMode { get; set; } = PublicationChatDisplayMode.Auto;
+    public int ChatMaxVisibleMessages { get; set; } = 12;
+    public bool ChatCompact { get; set; }
+    public bool ChatFadeOlderMessages { get; set; } = true;
+    public bool ChatShowPlatformBadge { get; set; } = true;
+    public double ChatBackgroundOpacity { get; set; } = .88;
+    public double ChatMessageOpacity { get; set; } = .78;
     public string Placeholder { get; set; } = string.Empty;
     public string InitialValue { get; set; } = string.Empty;
     public string Background { get; set; } = "#ffffff";

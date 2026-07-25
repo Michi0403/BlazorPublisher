@@ -452,7 +452,20 @@
     }
 
     function wrapCanvasText(context, text, maxWidth) {
-        const words = String(text || "").split(/\s+/).filter(Boolean);
+        const source = String(text || "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
+        if (!source) return [""];
+        const tokens = source.split(/\s+/).filter(Boolean);
+        const words = [];
+        for (const token of tokens) {
+            if (context.measureText(token).width <= maxWidth) { words.push(token); continue; }
+            let part = "";
+            for (const character of token) {
+                const next = part + character;
+                if (part && context.measureText(next).width > maxWidth) { words.push(part); part = character; }
+                else part = next;
+            }
+            if (part) words.push(part);
+        }
         if (!words.length) return [""];
         const lines = [];
         let line = words.shift();
@@ -486,47 +499,107 @@
         const width = Math.max(8, Number(layer.width || 0) * sx);
         const height = Math.max(8, Number(layer.height || 0) * sy);
         if (x >= outputWidth || y >= outputHeight || x + width <= 0 || y + height <= 0) return;
+
         const fontScale = Math.max(.65, Math.min(2.5, (sx + sy) / 2));
         const baseFontSize = Math.max(10, Number(layer.fontSize || 16) * fontScale);
-        const padding = Math.max(8, baseFontSize * .65);
+        const compact = layer.compact === true;
+        const padding = Math.max(6, baseFontSize * (compact ? .42 : .62));
         const radius = Math.max(4, Number(layer.borderRadius || 8) * fontScale);
+        const backgroundOpacity = Math.max(0, Math.min(1, Number(layer.backgroundOpacity ?? .88)));
+        const messageOpacity = Math.max(0, Math.min(1, Number(layer.messageOpacity ?? .78)));
+        const showHeader = layer.showPlatformBadge !== false;
+        const showAvatar = layer.showAvatar !== false;
+        const showTimestamp = layer.showTimestamp !== false;
+        const maximum = Math.max(1, Math.min(100, Number(layer.maxVisibleMessages || 12)));
+        const items = (Array.isArray(layer.items) ? layer.items : []).slice(-maximum);
+
         context.save();
         roundedRect(context, x, y, width, height, radius);
         context.clip();
-        context.fillStyle = layer.background && layer.background !== "rgba(0, 0, 0, 0)" ? layer.background : "rgba(15,23,42,.88)";
+        context.globalAlpha = backgroundOpacity;
+        context.fillStyle = layer.background && layer.background !== "rgba(0, 0, 0, 0)" ? layer.background : "rgb(8,15,28)";
         context.fillRect(x, y, width, height);
-        context.font = `600 ${baseFontSize}px ${layer.fontFamily || "system-ui"}`;
-        context.fillStyle = layer.color || "#f8fafc";
+        context.globalAlpha = 1;
         context.textBaseline = "top";
-        const heading = `${layer.platform || "Chat"}${layer.channel ? ` · ${layer.channel}` : ""}`;
-        context.fillText(heading, x + padding, y + padding, Math.max(0, width - padding * 2));
-        const headingHeight = baseFontSize * 1.5;
-        const messageFont = Math.max(9, baseFontSize * .9);
-        const authorFont = Math.max(9, messageFont * .88);
+
+        let contentTop = y + padding;
+        if (showHeader) {
+            context.fillStyle = "rgba(255,255,255,.055)";
+            context.fillRect(x, y, width, Math.max(baseFontSize * 2, padding * 2 + baseFontSize));
+            context.beginPath();
+            context.arc(x + padding + baseFontSize * .24, y + padding + baseFontSize * .48, Math.max(3, baseFontSize * .22), 0, Math.PI * 2);
+            context.fillStyle = "#f43f5e";
+            context.fill();
+            context.font = `700 ${Math.max(10, baseFontSize * .82)}px ${layer.fontFamily || "system-ui"}`;
+            context.fillStyle = layer.color || "#f8fafc";
+            const heading = `${layer.platform || "Chat"}${layer.channel ? ` · ${layer.channel}` : ""}`;
+            context.fillText(heading, x + padding + baseFontSize * .65, y + padding, Math.max(0, width - padding * 2 - baseFontSize * .65));
+            contentTop = y + Math.max(baseFontSize * 2, padding * 2 + baseFontSize);
+        }
+
+        const messageFont = Math.max(9, baseFontSize * (compact ? .72 : .82));
+        const authorFont = Math.max(9, messageFont * .92);
+        const lineHeight = messageFont * 1.3;
+        const avatarSize = showAvatar ? Math.max(20, baseFontSize * (compact ? 1.45 : 1.75)) : 0;
         let cursor = y + height - padding;
-        const items = Array.isArray(layer.items) ? layer.items : [];
         for (let index = items.length - 1; index >= 0; index--) {
             const item = items[index] || {};
+            const age = items.length - index - 1;
+            const messageLeft = x + padding + (showAvatar ? avatarSize + padding * .65 : 0);
+            const messageWidth = Math.max(20, width - padding * 2 - (showAvatar ? avatarSize + padding * .65 : 0));
             context.font = `${messageFont}px ${layer.fontFamily || "system-ui"}`;
-            const lines = wrapCanvasText(context, item.text || "", Math.max(20, width - padding * 2));
-            const lineHeight = messageFont * 1.25;
-            const blockHeight = authorFont * 1.25 + lines.length * lineHeight + padding * .45;
+            const lines = wrapCanvasText(context, String(item.text || "").slice(0, 1600), messageWidth);
+            const metaHeight = authorFont * 1.25;
+            const blockHeight = Math.max(avatarSize, metaHeight + lines.length * lineHeight) + padding * (compact ? .6 : .85);
             cursor -= blockHeight;
-            if (cursor < y + padding + headingHeight) break;
-            context.fillStyle = "rgba(255,255,255,.075)";
-            roundedRect(context, x + padding * .5, cursor, width - padding, blockHeight - padding * .15, radius * .65);
+            if (cursor < contentTop + padding * .4) break;
+
+            const fade = layer.fadeOlder === false ? 1 : Math.max(.42, 1 - age * .055);
+            context.globalAlpha = fade * messageOpacity;
+            context.fillStyle = "rgb(30,41,59)";
+            roundedRect(context, x + padding * .45, cursor, width - padding * .9, blockHeight - padding * .18, radius * .72);
             context.fill();
-            context.font = `600 ${authorFont}px ${layer.fontFamily || "system-ui"}`;
-            context.fillStyle = layer.color || "#f8fafc";
-            context.fillText(String(item.authorName || "Viewer"), x + padding, cursor + padding * .25);
+            context.globalAlpha = fade;
+
+            if (showAvatar) {
+                const centerX = x + padding + avatarSize / 2;
+                const centerY = cursor + padding * .32 + avatarSize / 2;
+                context.beginPath();
+                context.arc(centerX, centerY, avatarSize / 2, 0, Math.PI * 2);
+                context.fillStyle = item.authorColor || "#4f46e5";
+                context.fill();
+                const parts = String(item.authorName || "Viewer").trim().split(/\s+/).filter(Boolean);
+                const initials = `${parts[0]?.[0] || "?"}${parts.length > 1 ? parts[parts.length - 1]?.[0] || "" : ""}`.toUpperCase();
+                context.font = `800 ${Math.max(8, avatarSize * .34)}px ${layer.fontFamily || "system-ui"}`;
+                context.fillStyle = "#f8fafc";
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillText(initials, centerX, centerY, avatarSize * .8);
+                context.textAlign = "left";
+                context.textBaseline = "top";
+            }
+
+            context.font = `700 ${authorFont}px ${layer.fontFamily || "system-ui"}`;
+            context.fillStyle = item.authorColor || layer.color || "#f8fafc";
+            context.fillText(String(item.authorName || "Viewer").slice(0, 80), messageLeft, cursor + padding * .28, messageWidth);
+            if (showTimestamp && item.timestamp) {
+                let timestamp = "";
+                try { timestamp = new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch { }
+                if (timestamp) {
+                    context.font = `${Math.max(8, authorFont * .82)}px ${layer.fontFamily || "system-ui"}`;
+                    context.fillStyle = "#94a3b8";
+                    const measured = context.measureText(timestamp).width;
+                    context.fillText(timestamp, messageLeft + Math.max(0, messageWidth - measured), cursor + padding * .3, measured);
+                }
+            }
             context.font = `${messageFont}px ${layer.fontFamily || "system-ui"}`;
-            context.fillStyle = layer.color || "#f8fafc";
-            let lineY = cursor + padding * .25 + authorFont * 1.2;
+            context.fillStyle = layer.color || "#e2e8f0";
+            let lineY = cursor + padding * .3 + metaHeight;
             for (const line of lines) {
-                context.fillText(line, x + padding, lineY);
+                context.fillText(line, messageLeft, lineY, messageWidth);
                 lineY += lineHeight;
             }
-            cursor -= padding * .25;
+            cursor -= padding * .22;
         }
         context.restore();
     }

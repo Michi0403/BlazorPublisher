@@ -33,7 +33,7 @@ const installerProject = read('src/PublisherStudio.InstallerConsole/PublisherStu
 assert.match(models, /PublicationElementKind[^\n]*Panel, HtmlEmbed/);
 assert.match(models, /JsonDerivedType\(typeof\(PanelElement\), "panel"\)/);
 assert.match(models, /JsonDerivedType\(typeof\(HtmlEmbedElement\), "htmlEmbed"\)/);
-assert.match(models, /FormatVersion \{ get; set; \} = "1\.54"/);
+assert.match(models, /FormatVersion \{ get; set; \} = "1\.55"/);
 assert.match(panelModels, /sealed class PanelElement : PublicationElement/);
 assert.match(panelModels, /List<PublicationPanelView> Views/);
 assert.match(panelModels, /sealed class HtmlEmbedElement : PublicationElement/);
@@ -53,8 +53,9 @@ assert.match(panelView, /case PanelElement nestedPanel/);
 assert.match(panelView, /case HtmlEmbedElement/);
 assert.match(panelStudio, /Panel \/ Div Studio/);
 assert.match(panelStudio, /Import standalone HTML/);
-assert.match(panelStudio, /Components\.Create\(Document, kind\)/);
-assert.match(panelStudio, /PublicationLiveSourceKind\.Camera/);
+assert.match(panelStudio, /Panels\.CreateComponentTool\(Document, toolId\)/);
+assert.match(panels, /_components\.Create\(document, kind\)/);
+assert.match(panels, /PublicationLiveSourceKind\.Camera/);
 assert.match(panelLibrary, /GetPresets/);
 assert.match(editor, /<PanelStudio/);
 assert.match(editor, /<MediaConverterStudio/);
@@ -80,15 +81,15 @@ assert.doesNotMatch(converter, /ProcessStartInfo[^}]*Arguments\s*=/s, 'FFmpeg ar
 assert.match(converterController, /\[Route\("api\/media-conversion"\)\]/);
 assert.match(converterController, /\[HttpPost\("jobs"\)\]/);
 assert.match(converterController, /jobs\/\{id:guid\}\/file/);
-assert.match(converterStudio, /Insert into Mainframe/);
+assert.match(converterStudio, /Insert Mainframe/);
 assert.match(program, /AddSingleton<IMediaConversionService, MediaConversionService>/);
 assert.match(program, /AddSingleton<PanelDocumentService>/);
 assert.equal(appsettings.PublisherStudio.FFmpegPath, '');
 
-assert.equal(packageJson.version, '1.0.79');
-assert.equal(lockJson.version, '1.0.79');
-assert.equal(lockJson.packages[''].version, '1.0.79');
-assert.match(webProject, /<Version>1\.0\.79<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.79<\/Version>/);
+assert.equal(packageJson.version, '1.0.81');
+assert.equal(lockJson.version, '1.0.81');
+assert.equal(lockJson.packages[''].version, '1.0.81');
+assert.match(webProject, /<Version>1\.0\.81<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.81<\/Version>/);
 
 console.log('Panel/Div Studio, recursive shared-component rendering, dashboard library, FFmpeg service/controller/UI, and version contracts passed.');

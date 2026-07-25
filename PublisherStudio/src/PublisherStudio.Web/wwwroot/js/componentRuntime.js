@@ -934,6 +934,160 @@
         return String(message?.id || "").trim();
     }
 
+    function chatDisplayMode(config) {
+        const configured = lower(config?.chatDisplayMode || "auto");
+        if (configured === "interactive") return "interactive";
+        if (configured === "vieweronly") return "vieweronly";
+        if (configured === "streamoverlay") return "streamoverlay";
+        if (chatBroadcastMode()) return "streamoverlay";
+        return config?.chatAllowSending === false ? "vieweronly" : "interactive";
+    }
+
+    function chatAllowsSending(config) {
+        return chatDisplayMode(config) === "interactive" && config?.chatAllowSending !== false && !chatBroadcastMode();
+    }
+
+    function chatMaximumMessages(config) {
+        return Math.max(1, Math.min(100, Math.round(number(config?.chatMaxVisibleMessages, 12))));
+    }
+
+    function chatSafeText(value, maximum = 1600) {
+        const text = String(value ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
+        return text.length > maximum ? `${text.slice(0, Math.max(0, maximum - 1))}…` : text;
+    }
+
+    function chatInitials(name) {
+        const parts = chatSafeText(name, 80).split(/\s+/).filter(Boolean);
+        if (!parts.length) return "?";
+        return `${parts[0][0] || ""}${parts.length > 1 ? parts[parts.length - 1][0] || "" : ""}`.toUpperCase();
+    }
+
+    function formatChatTimestamp(value) {
+        const timestamp = value instanceof Date ? value : validDate(value);
+        if (!timestamp) return "";
+        try { return timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch { return ""; }
+    }
+
+    function renderChatOverlayContent(element, config, items) {
+        const mode = chatDisplayMode(config);
+        const maximum = chatMaximumMessages(config);
+        const visible = (Array.isArray(items) ? items : []).slice(-maximum);
+        element.classList.add("ps-chat-overlay-host", `ps-chat-mode-${mode}`);
+        element.classList.toggle("ps-chat-compact", config.chatCompact === true);
+        element.classList.toggle("ps-chat-fade-older", config.chatFadeOlderMessages !== false);
+        element.style.setProperty("--ps-chat-background-opacity", String(Math.max(0, Math.min(1, number(config.chatBackgroundOpacity, .88)))));
+        element.style.setProperty("--ps-chat-message-opacity", String(Math.max(0, Math.min(1, number(config.chatMessageOpacity, .78)))));
+
+        const shell = document.createElement("section");
+        shell.className = "ps-stream-chat";
+        shell.setAttribute("aria-label", `${activeChatPlatform(config)} chat`);
+        shell.dataset.chatMode = mode;
+
+        if (config.chatShowPlatformBadge !== false) {
+            const header = document.createElement("header");
+            header.className = "ps-stream-chat-header";
+            const live = document.createElement("span");
+            live.className = "ps-stream-chat-live";
+            live.setAttribute("aria-hidden", "true");
+            const title = document.createElement("strong");
+            title.textContent = activeChatPlatform(config);
+            header.append(live, title);
+            const channel = activeChatChannel(config);
+            if (channel) {
+                const label = document.createElement("span");
+                label.className = "ps-stream-chat-channel";
+                label.textContent = channel;
+                header.append(label);
+            }
+            shell.append(header);
+        }
+
+        const list = document.createElement("div");
+        list.className = "ps-stream-chat-list";
+        list.setAttribute("role", "log");
+        list.setAttribute("aria-live", "polite");
+        list.setAttribute("aria-relevant", "additions");
+        if (!visible.length) {
+            const empty = document.createElement("div");
+            empty.className = "ps-chat-empty";
+            empty.innerHTML = `<span class="dx-icon dx-icon-chat" aria-hidden="true"></span><strong>${escapeHtml(activeChatPlatform(config))} chat</strong><small>Waiting for messages on the selected output.</small>`;
+            list.append(empty);
+        } else {
+            visible.forEach((message, index) => {
+                const row = document.createElement("article");
+                row.className = "ps-stream-chat-message";
+                row.dataset.messageId = chatMessageId(message);
+                row.style.setProperty("--ps-chat-age", String(visible.length - index - 1));
+                const authorName = chatSafeText(message?.author?.name || "Viewer", 120) || "Viewer";
+                if (config.chatShowAvatar !== false) {
+                    const avatar = document.createElement("span");
+                    avatar.className = "ps-stream-chat-avatar";
+                    const source = allowedMediaSource(message?.author?.avatarUrl);
+                    if (source) {
+                        const image = document.createElement("img");
+                        image.src = source;
+                        image.alt = "";
+                        image.loading = "lazy";
+                        image.referrerPolicy = "no-referrer";
+                        image.addEventListener("error", () => { image.remove(); avatar.textContent = chatInitials(authorName); }, { once: true });
+                        avatar.append(image);
+                    } else avatar.textContent = chatInitials(authorName);
+                    row.append(avatar);
+                }
+                const body = document.createElement("div");
+                body.className = "ps-stream-chat-body";
+                const meta = document.createElement("div");
+                meta.className = "ps-stream-chat-meta";
+                const author = document.createElement("strong");
+                author.textContent = authorName;
+                meta.append(author);
+                if (config.chatShowTimestamp !== false) {
+                    const time = document.createElement("time");
+                    time.textContent = formatChatTimestamp(message?.timestamp);
+                    if (message?.timestamp instanceof Date) time.dateTime = message.timestamp.toISOString();
+                    meta.append(time);
+                }
+                const text = document.createElement("p");
+                text.textContent = chatSafeText(message?.text, 1600);
+                body.append(meta, text);
+                row.append(body);
+                list.append(row);
+            });
+        }
+        shell.append(list);
+        element.replaceChildren(shell);
+        list.scrollTop = list.scrollHeight;
+    }
+
+    function renderChatOverlay(element, config, initialItems) {
+        let disposed = false;
+        let items = Array.isArray(initialItems) ? [...initialItems] : [];
+        const repaint = () => { if (!disposed) renderChatOverlayContent(element, config, items); };
+        repaint();
+        return {
+            option(name, value) {
+                if (arguments.length === 1 && typeof name === "string") return name === "items" ? items : config[name];
+                if (name && typeof name === "object") {
+                    Object.assign(config, name);
+                    if (Array.isArray(name.items)) items = [...name.items];
+                } else if (name === "items") items = Array.isArray(value) ? [...value] : [];
+                else if (typeof name === "string") config[name] = value;
+                repaint();
+                return undefined;
+            },
+            renderMessage(message) {
+                const id = chatMessageId(message);
+                if (id && items.some(item => chatMessageId(item) === id)) return;
+                items.push(message);
+                if (items.length > chatMaximumMessages(config) * 4) items = items.slice(-chatMaximumMessages(config) * 4);
+                repaint();
+            },
+            repaint,
+            updateDimensions: repaint,
+            dispose() { disposed = true; element.replaceChildren(); }
+        };
+    }
+
     function mergeChatItems(config, rows, transient = [], context = null) {
         const result = [];
         const ids = new Set();
@@ -1042,6 +1196,8 @@
                     text: String(message.text || ""),
                     authorName: String(message.author?.name || "Viewer"),
                     authorAvatar: String(message.author?.avatarUrl || ""),
+                    authorColor: String(message.color || ""),
+                    badges: String(message.badges || ""),
                     timestamp: message.timestamp instanceof Date ? message.timestamp.toISOString() : String(message.timestamp || "")
                 }));
             layers.push({
@@ -1059,6 +1215,14 @@
                 borderRadius: parseFloat(style.borderRadius) || 8,
                 platform: activeChatPlatform(config, context),
                 channel: activeChatChannel(config, context),
+                showAvatar: config.chatShowAvatar !== false,
+                showTimestamp: config.chatShowTimestamp !== false,
+                showPlatformBadge: config.chatShowPlatformBadge !== false,
+                compact: config.chatCompact === true,
+                fadeOlder: config.chatFadeOlderMessages !== false,
+                backgroundOpacity: Math.max(0, Math.min(1, number(config.chatBackgroundOpacity, .88))),
+                messageOpacity: Math.max(0, Math.min(1, number(config.chatMessageOpacity, .78))),
+                maxVisibleMessages: chatMaximumMessages(config),
                 items
             });
         }
@@ -1624,7 +1788,7 @@
                 break;
             }
             case "Chat": {
-                const allowChatSending = config.chatAllowSending !== false && !chatBroadcastMode();
+                const allowChatSending = chatAllowsSending(config);
                 element.classList.toggle("ps-chat-readonly", !allowChatSending);
                 options = {
                     ...base,
@@ -1820,7 +1984,8 @@
             states.set(element, { config, instance: null, data: null, dataSource: null, timer: null, fallback: true });
             return null;
         }
-        if (!window.jQuery || !window.DevExpress) {
+        const nativeChatOverlay = config.kind === "Chat" && chatDisplayMode(config) !== "interactive";
+        if (!nativeChatOverlay && (!window.jQuery || !window.DevExpress)) {
             element.innerHTML = '<div class="ps-component-error">DevExtreme browser assets are not loaded.</div>';
             return null;
         }
@@ -1838,6 +2003,25 @@
         try {
             if (["Form", "Menu", "ContextMenu", "TextBox", "TextArea", "NumberBox", "DateBox", "CheckBox", "Map", "VectorMap", "Scheduler", "Chat"].includes(String(config.kind || "")))
                 config.rows = normalizeDateRows(config, await materializeRows(config, data));
+            if (config.kind === "Chat" && chatDisplayMode(config) !== "interactive") {
+                const items = mergeChatItems(config, config.rows || []);
+                const instance = renderChatOverlay(element, config, items);
+                const state = {
+                    config, instance, data, dataSource: data.dataSource, pivotSource: null, timer: null,
+                    chatMessageIds: new Set(items.map(chatMessageId).filter(Boolean)), chatTransient: [], fallback: true
+                };
+                states.set(element, state);
+                installChatSubscription(element, state);
+                installLayoutObserver(element, state);
+                const interval = number(config.connection?.dataObjectLive?.refreshIntervalSeconds, 0);
+                if (options.polling !== false && interval > 0) {
+                    state.timer = setInterval(async () => {
+                        try { await refreshState(element, state); }
+                        catch (error) { console.error("PublisherStudio chat refresh failed.", error); }
+                    }, Math.max(1, interval) * 1000);
+                }
+                return instance;
+            }
             const plugin = pluginNames[config.kind];
             if (!plugin || typeof window.jQuery.fn[plugin] !== "function") throw new Error(`${config.kind} is not available in the bundled DevExtreme runtime.`);
             const optionsValue = buildOptions(config, element, data);

@@ -1730,7 +1730,7 @@
         var file = args.File;
         var mimeType = PictureMimeType(file.Name, file.ContentType);
         if (string.IsNullOrWhiteSpace(mimeType)) return;
-        await using var input = file.OpenReadStream(256L * 1024 * 1024);
+        await using var input = file.OpenReadStream(long.MaxValue);
         using var buffer = new MemoryStream();
         await input.CopyToAsync(buffer);
         var bytes = buffer.ToArray();
@@ -1755,7 +1755,7 @@
         var file = args.File;
         var mimeType = VideoMimeType(file.Name, file.ContentType);
         if (string.IsNullOrWhiteSpace(mimeType)) return;
-        await using var input = file.OpenReadStream(512L * 1024 * 1024);
+        await using var input = file.OpenReadStream(long.MaxValue);
         using var buffer = new MemoryStream();
         await input.CopyToAsync(buffer);
         var bytes = buffer.ToArray();

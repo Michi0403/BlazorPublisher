@@ -122,6 +122,14 @@ public sealed partial class PublicationFileService
         JsonSerializer.Deserialize<PublicationElement>(JsonSerializer.Serialize<PublicationElement>(element, _options), _options)
         ?? throw new InvalidDataException("The publication element could not be cloned.");
 
+
+    public string SerializeElement(PublicationElement element) =>
+        JsonSerializer.Serialize<PublicationElement>(element, _options);
+
+    public PublicationElement DeserializeElement(string json) =>
+        JsonSerializer.Deserialize<PublicationElement>(json, _options)
+        ?? throw new InvalidDataException("The component configuration is empty or invalid.");
+
     public PublicationPage ClonePage(PublicationPage publicationPage) =>
         JsonSerializer.Deserialize<PublicationPage>(JsonSerializer.Serialize(publicationPage, _options), _options)
         ?? throw new InvalidDataException("The publication page could not be cloned.");
@@ -135,6 +143,7 @@ public sealed partial class PublicationFileService
         document.Streaming ??= new PublicationStreamingSettings();
         document.Pages ??= [];
         document.DataObjects ??= [];
+        document.ComponentTemplates ??= [];
         if (document.Pages.Count == 0)
             document.Pages.Add(PublicationPage.CreateA4());
         foreach (var publicationPage in document.Pages)
@@ -142,6 +151,8 @@ public sealed partial class PublicationFileService
         _data.Normalize(document);
         foreach (var panel in document.Pages.SelectMany(page => page.Elements).OfType<PanelElement>())
             _panels.Normalize(document, panel);
+        foreach (var template in document.ComponentTemplates)
+            _panels.NormalizeTemplate(document, template);
         NormalizeStreaming(document);
         var allElements = PublicationElementTraversal.Descendants(document).ToArray();
         document.Zoom = Math.Clamp(Math.Round((document.Zoom <= 0 ? .8 : document.Zoom) * 100d, MidpointRounding.AwayFromZero) / 100d, .2, 4);
@@ -313,9 +324,6 @@ public sealed partial class PublicationFileService
             html.Css ??= string.Empty;
             html.JavaScript ??= string.Empty;
             html.Background = NormalizeCssBackground(html.Background);
-            if (html.Html.Length > 8_000_000) html.Html = html.Html[..8_000_000];
-            if (html.Css.Length > 2_000_000) html.Css = html.Css[..2_000_000];
-            if (html.JavaScript.Length > 2_000_000) html.JavaScript = html.JavaScript[..2_000_000];
         }
 
         foreach (var component in allElements.OfType<DevExtremeComponentElement>())
@@ -502,7 +510,7 @@ public sealed partial class PublicationFileService
             }
         }
 
-        document.FormatVersion = "1.54";
+        document.FormatVersion = "1.55";
         return document;
     }
 

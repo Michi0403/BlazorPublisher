@@ -21,7 +21,7 @@ public static class SvgInterchangeSanitizer
             DtdProcessing = DtdProcessing.Prohibit,
             XmlResolver = null,
             MaxCharactersFromEntities = 0,
-            MaxCharactersInDocument = 64L * 1024 * 1024
+            MaxCharactersInDocument = 0
         };
         using var stringReader = new StringReader(svg);
         using var reader = XmlReader.Create(stringReader, settings);

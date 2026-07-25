@@ -2,17 +2,86 @@
 @implements IAsyncDisposable
 @inject IMediaConversionService Conversions
 @inject IJSRuntime JS
+@inject PublicationMediaAssetStore MediaAssets
 
 @if (Visible)
 {
-    <div class="modal-backdrop data-modal-backdrop">
-        <section class="data-visual-editor-dialog" role="dialog" aria-modal="true" aria-label="Media Converter Studio">
+    <div class="modal-backdrop data-modal-backdrop media-converter-backdrop">
+        <section class="data-visual-editor-dialog media-converter-dialog" role="dialog" aria-modal="true" aria-label="Media Converter Studio"
+                 @oncontextmenu="ShowConverterContextMenu" @oncontextmenu:preventDefault>
             <header>
-                <div><strong>Media Converter Studio</strong><span>Reusable FFmpeg conversion for Mainframe, PictureStudio, VideoStudio, streaming inputs and controller clients.</span></div>
+                <div>
+                    <strong>Media Converter Studio</strong>
+                    <span>Reusable FFmpeg pipeline for Mainframe exports, VideoStudio, PictureStudio, audio, streaming and controller clients.</span>
+                </div>
                 <button type="button" class="window-close" @onclick="Close">×</button>
             </header>
-            <div class="media-converter-grid" style="padding:12px;min-height:520px">
-                <aside class="visual-settings">
+
+            <DxRibbon CssClass="media-converter-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Home">
+                    <DxRibbonGroup Text="Source" IconCssClass="pub-icon pub-icon-open">
+                        <DxRibbonItem Text="Open media…" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Click="OpenSourcePicker" />
+                        <DxRibbonItem Text="Edit source in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSourceInVideoStudio" Click="OpenSourceInVideoStudio" />
+                        <DxRibbonItem Text="Clear source" IconCssClass="pub-icon pub-icon-delete" Enabled="@HasSource" Click="ClearSource" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Convert" IconCssClass="pub-icon pub-icon-media">
+                        <DxRibbonItem Text="Convert" IconCssClass="pub-icon pub-icon-play" IsPrimary="true" Enabled="@CanStart" Click="Start" />
+                        <DxRibbonItem Text="Cancel selected" IconCssClass="pub-icon pub-icon-stop" Enabled="@SelectedJobRunning" Click="CancelSelected" />
+                        <DxRibbonItem Text="Refresh jobs" IconCssClass="pub-icon pub-icon-refresh" Click="RefreshJobsCommand" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Result" IconCssClass="pub-icon pub-icon-download">
+                        <DxRibbonItem Text="Download" IconCssClass="pub-icon pub-icon-download" Enabled="@SelectedJobCompleted" Click="DownloadSelected" />
+                        <DxRibbonItem Text="Insert Mainframe" IconCssClass="pub-icon pub-icon-insert" Enabled="@SelectedJobCompleted" Click="InsertSelected" />
+                        <DxRibbonItem Text="Open in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSelectedInVideoStudio" Click="OpenSelectedInVideoStudio" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Profiles" IconCssClass="pub-icon pub-icon-save">
+                        <DxRibbonItem Text="Save profile" IconCssClass="pub-icon pub-icon-save" Click="SaveProfile" />
+                        <DxRibbonItem Text="Delete profile" IconCssClass="pub-icon pub-icon-delete" Enabled="@CanDeleteProfile" Click="DeleteProfile" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+                <DxRibbonTab Text="Video">
+                    <DxRibbonGroup Text="Resolution" IconCssClass="pub-icon pub-icon-video">
+                        <DxRibbonItem Text="Keep source" Click="ResolutionSource" />
+                        <DxRibbonItem Text="2160p" Click="Resolution2160" />
+                        <DxRibbonItem Text="1440p" Click="Resolution1440" />
+                        <DxRibbonItem Text="1080p" Click="Resolution1080" />
+                        <DxRibbonItem Text="720p" Click="Resolution720" />
+                        <DxRibbonItem Text="480p" Click="Resolution480" />
+                        <DxRibbonItem Text="Vertical 1080×1920" Click="ResolutionVertical" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Canvas mapping" IconCssClass="pub-icon pub-icon-select">
+                        <DxRibbonItem Text="Fit" Click="ScaleFit" />
+                        <DxRibbonItem Text="Fill" Click="ScaleFill" />
+                        <DxRibbonItem Text="Stretch" Click="ScaleStretch" />
+                        <DxRibbonItem Text="Preserve" Click="ScalePreserve" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Web output" IconCssClass="pub-icon pub-icon-web">
+                        <DxRibbonItem Text="PublisherStudio HTML" Click="PublisherStudioWebDefaults" />
+                        <DxRibbonItem Text="Broad browser MP4" Click="BroadWebDefaults" />
+                        <DxRibbonItem Text="Editing intermediate" Click="EditingDefaults" />
+                        <DxRibbonItem Text="Lossless archive" Click="ArchiveDefaults" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+                <DxRibbonTab Text="Audio & filters">
+                    <DxRibbonGroup Text="Audio" IconCssClass="pub-icon pub-icon-audio">
+                        <DxRibbonItem Text="Normalize loudness" Click="ToggleNormalizeAudio" />
+                        <DxRibbonItem Text="Stereo" Click="AudioStereo" />
+                        <DxRibbonItem Text="Mono" Click="AudioMono" />
+                        <DxRibbonItem Text="Mute output" Click="ToggleDisableAudio" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Video processing" IconCssClass="pub-icon pub-icon-effects">
+                        <DxRibbonItem Text="Deinterlace" Click="ToggleDeinterlace" />
+                        <DxRibbonItem Text="30 fps" Click="FrameRate30" />
+                        <DxRibbonItem Text="60 fps" Click="FrameRate60" />
+                        <DxRibbonItem Text="Keep frame rate" Click="FrameRateSource" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+            </DxRibbon>
+
+            <InputFile id="media-converter-source-input" class="hidden-file-input" OnChange="SelectFile" accept="image/*,video/*,audio/*,.mkv,.mxf,.avi,.tif,.tiff,.heic,.heif,.flac,.wav,.mov,.mp4,.webm,.ogg,.m4v,.mts,.m2ts,.vob,.gif,.bmp,.exr" />
+
+            <div class="media-converter-layout">
+                <aside class="media-converter-sidebar visual-settings">
                     @if (!string.IsNullOrWhiteSpace(_error))
                     {
                         <div class="inline-error"><strong>Media conversion error</strong><p>@_error</p></div>
@@ -29,9 +98,37 @@
                     {
                         <div class="inline-success"><strong>@_capabilities.Version</strong><small>@_capabilities.Executable</small></div>
                     }
-                    <label>Source media<InputFile OnChange="SelectFile" accept="image/*,video/*,audio/*,.mkv,.mxf,.avi,.tif,.tiff,.heic,.heif,.flac,.wav,.mov,.mp4,.webm,.ogg" /></label>
-                    @if (_file is not null) { <p><strong>@_file.Name</strong><br /><small>@_file.ContentType · @FormatBytes(_file.Size)</small></p> }
-                    <label>Conversion preset
+
+                    <section class="converter-source-card" @ref="_sourceDropZone" @ondblclick="OpenSourcePicker"
+                             @oncontextmenu="ShowConverterContextMenu" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
+                        <span class="pub-icon pub-icon-media"></span>
+                        @if (HasSource)
+                        {
+                            <div><strong>@SourceName</strong><small>@SourceMimeType · @FormatBytes(SourceSize)</small><small>@SourceOrigin</small></div>
+                        }
+                        else
+                        {
+                            <div><strong>Drop/open a media source</strong><small>No application-defined file-size ceiling.</small></div>
+                        }
+                        <div class="converter-source-actions">
+                            <button type="button" @onclick="OpenSourcePicker">Browse…</button>
+                            @if (CanOpenSourceInVideoStudio)
+                            {
+                                <button type="button" @onclick="OpenSourceInVideoStudio">Edit in VideoStudio</button>
+                            }
+                        </div>
+                    </section>
+
+                    <label>Saved profile
+                        <select value="@_selectedProfileId" @onchange="SelectProfile">
+                            <option value="@Guid.Empty">Custom settings</option>
+                            @foreach (var profile in _profiles.OrderByDescending(profile => profile.BuiltIn).ThenBy(profile => profile.Name))
+                            {
+                                <option value="@profile.Id">@(profile.BuiltIn ? "Built-in · " : "My profile · ")@profile.Name</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Base preset
                         <select value="@_presetId" @onchange="ChangePreset">
                             @foreach (var preset in MatchingPresets)
                             {
@@ -39,65 +136,186 @@
                             }
                         </select>
                     </label>
-                    @if (SelectedPreset is { } selected)
+                    @if (SelectedPreset is { } selectedPreset)
                     {
-                        <p>@selected.Description</p>
-                        <small>@(selected.Lossless ? "Lossless output" : "Re-encoded output") · @selected.OutputMimeType</small>
-                        @if (!selected.Available) { <div class="inline-error">@selected.UnavailableReason</div> }
+                        <p>@selectedPreset.Description</p>
+                        <small>@(selectedPreset.Lossless ? "Lossless output" : "Re-encoded output") · @selectedPreset.OutputMimeType</small>
+                        @if (!selectedPreset.Available) { <div class="inline-error">@selectedPreset.UnavailableReason</div> }
                     }
-                    <button type="button" class="primary" @onclick="Start" disabled="@(!CanStart)">Convert with FFmpeg</button>
+
+                    <label>Profile name<input @bind="_profileName" /></label>
+                    <label>Profile description<textarea rows="2" @bind="_profileDescription"></textarea></label>
+                    <div class="panel-inline-actions">
+                        <button type="button" @onclick="SaveProfile">Save profile</button>
+                        <button type="button" @onclick="DeleteProfile" disabled="@(!CanDeleteProfile)">Delete</button>
+                    </div>
                     @if (_capabilities is not null)
                     {
                         <p class="field-help">@_capabilities.LicenseNotice</p>
                     }
                 </aside>
-                <main class="visual-settings">
-                    <h3>Conversion jobs</h3>
-                    @if (_jobs.Count == 0)
-                    {
-                        <div class="data-visual-empty"><strong>No conversions yet</strong><span>Select media and a browser-oriented output preset.</span></div>
-                    }
-                    @foreach (var job in _jobs)
-                    {
-                        <article class="media-converter-job">
-                            <div><strong>@job.SourceFileName</strong><br /><small>@PresetName(job.PresetId) · @job.Message</small></div>
-                            <span>@job.Status</span>
-                            <progress max="1" value="@job.Progress"></progress>
-                            <div>
-                                @if (job.Status == MediaConversionJobStatus.Completed)
-                                {
-                                    <button type="button" @onclick="() => Download(job)">Download</button>
-                                    <button type="button" @onclick="() => Insert(job)">Insert into Mainframe</button>
-                                }
-                                else if (job.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running)
-                                {
-                                    <button type="button" @onclick="() => Cancel(job.Id)">Cancel</button>
-                                }
-                                else
-                                {
-                                    <button type="button" @onclick="() => Remove(job.Id)">Remove</button>
-                                }
+
+                <main class="media-converter-workspace">
+                    <div class="media-converter-settings-grid">
+                        <details open>
+                            <summary>Output and web compatibility</summary>
+                            <div class="data-form-grid">
+                                <label>Workflow target
+                                    <select value="@_options.Target" @onchange="ChangeTarget">
+                                        @foreach (var target in Enum.GetValues<MediaConversionTarget>()) { <option value="@target">@target</option> }
+                                    </select>
+                                </label>
+                                <label>Output filename<input value="@_options.OutputFileName" @onchange="args => _options.OutputFileName = Text(args)" placeholder="Source name + extension" /></label>
+                                <label>Extension<input value="@_options.OutputExtension" @onchange="args => _options.OutputExtension = Text(args)" placeholder="Preset default" /></label>
+                                <label>MIME type<input value="@_options.OutputMimeType" @onchange="args => _options.OutputMimeType = Text(args)" placeholder="Preset default" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@_options.FastStart" @onchange="args => _options.FastStart = Bool(args)" /> MP4 fast-start</label>
+                                <label class="check-row"><input type="checkbox" checked="@_options.CopyMetadata" @onchange="args => _options.CopyMetadata = Bool(args)" /> Preserve metadata</label>
                             </div>
-                            @if (job.OutputSize > 0) { <small>@job.OutputFileName · @FormatBytes(job.OutputSize)</small> }
-                        </article>
-                    }
+                        </details>
+
+                        <details open>
+                            <summary>Trim, resolution and frame rate</summary>
+                            <div class="data-form-grid">
+                                <label>Start seconds<input type="number" min="0" step="0.001" value="@NullableNumber(_options.StartSeconds)" @onchange="args => _options.StartSeconds = NullableDouble(args)" /></label>
+                                <label>Duration seconds<input type="number" min="0" step="0.001" value="@NullableNumber(_options.DurationSeconds)" @onchange="args => _options.DurationSeconds = NullableDouble(args)" /></label>
+                                <label>Width<input type="number" min="1" step="1" value="@NullableNumber(_options.Width)" @onchange="args => _options.Width = NullableInt(args)" /></label>
+                                <label>Height<input type="number" min="1" step="1" value="@NullableNumber(_options.Height)" @onchange="args => _options.Height = NullableInt(args)" /></label>
+                                <label>Scale mode
+                                    <select value="@_options.ScaleMode" @onchange="ChangeScaleMode">
+                                        @foreach (var mode in Enum.GetValues<MediaConversionScaleMode>()) { <option value="@mode">@mode</option> }
+                                    </select>
+                                </label>
+                                <label>Frame rate<input type="number" min="1" max="1000" step="0.001" value="@NullableNumber(_options.FrameRate)" @onchange="args => _options.FrameRate = NullableDouble(args)" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@_options.PreserveAspectRatio" @onchange="args => _options.PreserveAspectRatio = Bool(args)" /> Preserve aspect ratio</label>
+                                <label class="check-row"><input type="checkbox" checked="@_options.Deinterlace" @onchange="args => _options.Deinterlace = Bool(args)" /> Deinterlace</label>
+                            </div>
+                        </details>
+
+                        <details open>
+                            <summary>Video encoder</summary>
+                            <div class="data-form-grid">
+                                <label>Encoder<input value="@_options.VideoCodec" @onchange="args => _options.VideoCodec = Text(args)" placeholder="Preset encoder" list="ffmpeg-encoders" /></label>
+                                <label>Encoder preset<input value="@_options.VideoEncoderPreset" @onchange="args => _options.VideoEncoderPreset = Text(args)" placeholder="medium / slow / veryfast" /></label>
+                                <label>CRF / quality<input type="number" min="0" max="63" value="@NullableNumber(_options.Crf)" @onchange="args => _options.Crf = NullableInt(args)" /></label>
+                                <label>Bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.VideoBitrateKbps)" @onchange="args => _options.VideoBitrateKbps = NullableInt(args)" /></label>
+                                <label>Max bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.MaximumVideoBitrateKbps)" @onchange="args => _options.MaximumVideoBitrateKbps = NullableInt(args)" /></label>
+                                <label>Buffer kbit<input type="number" min="1" value="@NullableNumber(_options.VideoBufferKbps)" @onchange="args => _options.VideoBufferKbps = NullableInt(args)" /></label>
+                                <label>Pixel format<input value="@_options.PixelFormat" @onchange="args => _options.PixelFormat = Text(args)" placeholder="yuv420p" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@_options.DisableVideo" @onchange="args => _options.DisableVideo = Bool(args)" /> Remove video</label>
+                            </div>
+                        </details>
+
+                        <details>
+                            <summary>Audio encoder and loudness</summary>
+                            <div class="data-form-grid">
+                                <label>Encoder<input value="@_options.AudioCodec" @onchange="args => _options.AudioCodec = Text(args)" placeholder="Preset encoder" list="ffmpeg-encoders" /></label>
+                                <label>Bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.AudioBitrateKbps)" @onchange="args => _options.AudioBitrateKbps = NullableInt(args)" /></label>
+                                <label>Sample rate<input type="number" min="1" value="@NullableNumber(_options.AudioSampleRate)" @onchange="args => _options.AudioSampleRate = NullableInt(args)" /></label>
+                                <label>Channels<input type="number" min="1" max="32" value="@NullableNumber(_options.AudioChannels)" @onchange="args => _options.AudioChannels = NullableInt(args)" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@_options.NormalizeAudio" @onchange="args => _options.NormalizeAudio = Bool(args)" /> EBU loudness normalization</label>
+                                <label>Target LUFS<input type="number" min="-70" max="-5" step="0.1" value="@Number(_options.LoudnessTargetLufs)" @onchange="args => _options.LoudnessTargetLufs = Double(args, -16)" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@_options.DisableAudio" @onchange="args => _options.DisableAudio = Bool(args)" /> Remove audio</label>
+                            </div>
+                        </details>
+
+                        <details>
+                            <summary>Filters, metadata and any FFmpeg parameter</summary>
+                            <label>Video filter graph<textarea rows="3" value="@_options.VideoFilter" @onchange="args => _options.VideoFilter = Text(args)" placeholder="eq=contrast=1.1:saturation=1.2,unsharp=5:5:0.5"></textarea></label>
+                            <label>Audio filter graph<textarea rows="3" value="@_options.AudioFilter" @onchange="args => _options.AudioFilter = Text(args)" placeholder="highpass=f=80,acompressor"></textarea></label>
+                            <label>Metadata (one key=value per line)<textarea rows="4" value="@MetadataText" @onchange="ChangeMetadata"></textarea></label>
+                            <label>Advanced FFmpeg arguments<textarea rows="5" value="@_options.AdvancedArguments" @onchange="args => _options.AdvancedArguments = Text(args)" placeholder="-threads 8 -g 60 -sc_threshold 0"></textarea></label>
+                            <p class="field-help">Advanced arguments are passed through <code>ProcessStartInfo.ArgumentList</code>, never through a shell. PublisherStudio blocks input/output/progress arguments it must own, while codec, muxer, mapping, filter, color, hardware and quality options remain available.</p>
+                        </details>
+                    </div>
+
+                    <datalist id="ffmpeg-encoders">
+                        @foreach (var encoder in _capabilities?.Encoders ?? Array.Empty<string>()) { <option value="@encoder"></option> }
+                    </datalist>
+
+                    <section class="media-converter-jobs">
+                        <header><div><strong>Conversion jobs</strong><span>Click to select; double-click a completed video to open it in VideoStudio.</span></div></header>
+                        @if (_jobs.Count == 0)
+                        {
+                            <div class="data-visual-empty"><strong>No conversions yet</strong><span>Choose a source, profile or preset, then use Convert in the ribbon.</span></div>
+                        }
+                        @foreach (var job in _jobs)
+                        {
+                            <article class="media-converter-job @(job.Id == _selectedJobId ? "selected" : null)"
+                                     role="button" tabindex="0" @onclick="() => SelectJob(job.Id)" @ondblclick="() => DefaultJobAction(job)">
+                                <div><strong>@job.SourceFileName</strong><br /><small>@PresetName(job.PresetId) · @job.Message</small></div>
+                                <span class="converter-status @job.Status.ToString().ToLowerInvariant()">@job.Status</span>
+                                <progress max="1" value="@job.Progress"></progress>
+                                <div class="panel-inline-actions">
+                                    @if (job.Status == MediaConversionJobStatus.Completed)
+                                    {
+                                        <button type="button" @onclick:stopPropagation @onclick="() => Download(job)">Download</button>
+                                        <button type="button" @onclick:stopPropagation @onclick="() => Insert(job)">Insert</button>
+                                        @if (job.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <button type="button" class="primary" @onclick:stopPropagation @onclick="() => OpenInVideoStudio(job)">VideoStudio</button>
+                                        }
+                                    }
+                                    else if (job.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running)
+                                    {
+                                        <button type="button" @onclick:stopPropagation @onclick="() => Cancel(job.Id)">Cancel</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" @onclick:stopPropagation @onclick="() => Remove(job.Id)">Remove</button>
+                                    }
+                                </div>
+                                @if (job.OutputSize > 0) { <small>@job.OutputFileName · @FormatBytes(job.OutputSize)</small> }
+                            </article>
+                        }
+                    </section>
                 </main>
             </div>
-            <footer><button type="button" @onclick="Close">Close</button></footer>
+            <footer>
+                <span>@(HasSource ? $"Ready: {SourceName}" : "Select a source or send a Mainframe export into the converter.")</span>
+                <button type="button" @onclick="Close">Close</button>
+                <button type="button" class="primary" @onclick="Start" disabled="@(!CanStart)">Convert</button>
+            </footer>
         </section>
+        <DxContextMenu @ref="_contextMenu">
+            <Items>
+                <DxContextMenuItem Text="Open media…" IconCssClass="pub-icon pub-icon-open" Click="OpenSourcePicker" />
+                <DxContextMenuItem Text="Edit source in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSourceInVideoStudio" Click="OpenSourceInVideoStudio" />
+                <DxContextMenuItem Text="Convert with current settings" IconCssClass="pub-icon pub-icon-play" BeginGroup="true" Enabled="@CanStart" Click="Start" />
+                <DxContextMenuItem Text="Save current settings as profile" IconCssClass="pub-icon pub-icon-save" Click="SaveProfile" />
+                <DxContextMenuItem Text="Download selected result" IconCssClass="pub-icon pub-icon-download" BeginGroup="true" Enabled="@SelectedJobCompleted" Click="DownloadSelected" />
+                <DxContextMenuItem Text="Insert selected result into Mainframe" IconCssClass="pub-icon pub-icon-insert" Enabled="@SelectedJobCompleted" Click="InsertSelected" />
+                <DxContextMenuItem Text="Open selected result in VideoStudio" IconCssClass="pub-icon pub-icon-video" Enabled="@CanOpenSelectedInVideoStudio" Click="OpenSelectedInVideoStudio" />
+                <DxContextMenuItem Text="Cancel selected job" IconCssClass="pub-icon pub-icon-stop" BeginGroup="true" Enabled="@SelectedJobRunning" Click="CancelSelected" />
+                <DxContextMenuItem Text="Remove selected job" IconCssClass="pub-icon pub-icon-delete" Enabled="@(SelectedJob is not null && !SelectedJobRunning)" Click="RemoveSelected" />
+            </Items>
+        </DxContextMenu>
     </div>
 }
 
 @code {
     [Parameter] public bool Visible { get; set; }
+    [Parameter] public MediaConversionInsertRequest? InitialSource { get; set; }
     [Parameter] public EventCallback Closed { get; set; }
     [Parameter] public EventCallback<MediaConversionInsertRequest> Inserted { get; set; }
+    [Parameter] public EventCallback<MediaConversionInsertRequest> OpenedInVideoStudio { get; set; }
 
     private MediaConversionCapabilities? _capabilities;
     private IBrowserFile? _file;
+    private MediaConversionInsertRequest? _memorySource;
+    private MediaConversionInsertRequest? _lastInitialSource;
     private string _presetId = string.Empty;
+    private MediaConversionOptions _options = new();
     private readonly List<MediaConversionJobInfo> _jobs = [];
+    private readonly List<MediaConversionProfile> _profiles = [];
+    private Guid _selectedProfileId;
+    private Guid? _selectedJobId;
+    private string _profileName = "My conversion profile";
+    private string _profileDescription = string.Empty;
     private CancellationTokenSource? _polling;
+    private DotNetObjectReference<MediaConverterStudio>? _self;
+    private ElementReference _sourceDropZone;
+    private DxContextMenu _contextMenu = default!;
+    private bool _dropBound;
     private bool _wasVisible;
     private string _error = string.Empty;
 
@@ -110,22 +328,45 @@
             return string.IsNullOrWhiteSpace(kind) ? presets : presets.Where(preset => preset.InputKind == kind);
         }
     }
-    private string SourceKind => _file?.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true ? "image"
-        : _file?.ContentType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true ? "audio"
-        : _file is null ? string.Empty : "video";
+    private string SourceKind => SourceMimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image"
+        : SourceMimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ? "audio"
+        : HasSource ? "video" : string.Empty;
+    private string SourceName => _file?.Name ?? _memorySource?.FileName ?? string.Empty;
+    private string SourceMimeType => _file?.ContentType ?? _memorySource?.MimeType ?? string.Empty;
+    private long SourceSize => _file?.Size ?? _memorySource?.Content.LongLength ?? 0;
+    private string SourceOrigin => _file is not null ? "Local file" : _memorySource?.Origin ?? string.Empty;
+    private bool HasSource => _file is not null || _memorySource is not null;
     private MediaConversionPreset? SelectedPreset => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == _presetId);
-    private bool CanStart => _file is not null && _capabilities?.Available == true && SelectedPreset?.Available == true;
+    private MediaConversionJobInfo? SelectedJob => _selectedJobId is { } id ? _jobs.FirstOrDefault(job => job.Id == id) : null;
+    private bool SelectedJobCompleted => SelectedJob?.Status == MediaConversionJobStatus.Completed;
+    private bool CanOpenSourceInVideoStudio => HasSource && IsVideoMime(SourceMimeType, SourceName);
+    private bool SelectedJobRunning => SelectedJob?.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running;
+    private bool CanOpenSelectedInVideoStudio => SelectedJobCompleted && SelectedJob?.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true;
+    private bool CanDeleteProfile => _selectedProfileId != Guid.Empty && _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId)?.BuiltIn == false;
+    private bool CanStart => HasSource && _capabilities?.Available == true && SelectedPreset?.Available == true;
+    private string MetadataText => string.Join(Environment.NewLine, _options.Metadata.Select(pair => $"{pair.Key}={pair.Value}"));
 
     protected override async Task OnParametersSetAsync()
     {
-        if (!Visible) { _wasVisible = false; return; }
+        if (!Visible) { _wasVisible = false; _dropBound = false; return; }
+        if (InitialSource is not null && !ReferenceEquals(InitialSource, _lastInitialSource))
+        {
+            _memorySource = InitialSource;
+            _file = null;
+            _lastInitialSource = InitialSource;
+            if (InitialSource.SuggestedOptions is not null) _options = InitialSource.SuggestedOptions.Clone();
+            if (!string.IsNullOrWhiteSpace(InitialSource.SuggestedPresetId)) _presetId = InitialSource.SuggestedPresetId;
+        }
         if (_wasVisible) return;
         _wasVisible = true;
         try
         {
             _error = string.Empty;
             _capabilities = await Conversions.GetCapabilitiesAsync();
+            _profiles.Clear();
+            _profiles.AddRange(Conversions.GetProfiles());
             RefreshJobs();
+            EnsurePreset();
         }
         catch (Exception exception)
         {
@@ -133,22 +374,86 @@
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Visible || _dropBound) return;
+        _self ??= DotNetObjectReference.Create(this);
+        try
+        {
+            await JS.InvokeVoidAsync("publisherStudio.bindMediaConverterDrop", _sourceDropZone, _self);
+            _dropBound = true;
+        }
+        catch (JSException exception)
+        {
+            _error = $"The media drop surface could not be initialized: {exception.Message}";
+        }
+    }
+
+    [JSInvokable]
+    public Task ReceiveDroppedMedia(string assetId, string fileName, string mimeType)
+    {
+        if (!Guid.TryParse(assetId, out var id) || !MediaAssets.TryGet(id, out var bytes, out var storedMime, out _))
+        {
+            _error = "The dropped media could not be retained by PublisherStudio.";
+            return InvokeAsync(StateHasChanged);
+        }
+        _file = null;
+        _memorySource = new MediaConversionInsertRequest(
+            string.IsNullOrWhiteSpace(fileName) ? "dropped-media" : fileName,
+            string.IsNullOrWhiteSpace(mimeType) ? storedMime : mimeType,
+            bytes,
+            "Drag and drop");
+        _selectedProfileId = Guid.Empty;
+        _error = string.Empty;
+        EnsurePreset();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task ReceiveMediaDropError(string message)
+    {
+        _error = string.IsNullOrWhiteSpace(message) ? "The dropped media could not be loaded." : message;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private Task OpenSourcePicker() => JS.InvokeVoidAsync("publisherStudio.clickElement", "media-converter-source-input").AsTask();
     private void SelectFile(InputFileChangeEventArgs args)
     {
         _file = args.File;
+        _memorySource = null;
+        _selectedProfileId = Guid.Empty;
+        EnsurePreset();
+    }
+    private void ClearSource() { _file = null; _memorySource = null; }
+    private void EnsurePreset()
+    {
+        if (MatchingPresets.Any(preset => preset.Id == _presetId && preset.Available)) return;
         var first = MatchingPresets.FirstOrDefault(preset => preset.Available) ?? MatchingPresets.FirstOrDefault();
         _presetId = first?.Id ?? string.Empty;
     }
-    private void ChangePreset(ChangeEventArgs args) => _presetId = args.Value?.ToString() ?? string.Empty;
+    private void ChangePreset(ChangeEventArgs args) { _presetId = Text(args); _selectedProfileId = Guid.Empty; }
+
     private async Task Start()
     {
-        if (!CanStart || _file is null) return;
+        if (!CanStart) return;
         try
         {
             _error = string.Empty;
-            await using var source = _file.OpenReadStream(long.MaxValue);
-            var job = await Conversions.QueueAsync(source, _file.Name, _file.ContentType, _presetId);
+            MediaConversionJobInfo job;
+            if (_file is not null)
+            {
+                await using var source = _file.OpenReadStream(long.MaxValue);
+                job = await Conversions.QueueAsync(source, _file.Name, _file.ContentType, _presetId, _options);
+            }
+            else if (_memorySource is not null)
+            {
+                await using var source = new MemoryStream(_memorySource.Content, writable: false);
+                job = await Conversions.QueueAsync(source, _memorySource.FileName, _memorySource.MimeType, _presetId, _options);
+            }
+            else return;
+            _jobs.RemoveAll(existing => existing.Id == job.Id);
             _jobs.Insert(0, job);
+            _selectedJobId = job.Id;
             StartPolling();
         }
         catch (Exception exception)
@@ -156,6 +461,7 @@
             _error = exception.Message;
         }
     }
+
     private void StartPolling()
     {
         if (_polling is not null) return;
@@ -186,42 +492,208 @@
         var latest = Conversions.GetJobs().ToDictionary(job => job.Id);
         for (var index = 0; index < _jobs.Count; index++) if (latest.TryGetValue(_jobs[index].Id, out var job)) _jobs[index] = job;
         foreach (var job in latest.Values.OrderByDescending(job => job.CreatedUtc)) if (_jobs.All(existing => existing.Id != job.Id)) _jobs.Add(job);
+        if (_selectedJobId is null && _jobs.Count > 0) _selectedJobId = _jobs[0].Id;
+    }
+    private void RefreshJobsCommand() { RefreshJobs(); StartPolling(); }
+    private void SelectJob(Guid id) => _selectedJobId = id;
+
+
+    private async Task OpenSourceInVideoStudio()
+    {
+        try
+        {
+            _error = string.Empty;
+            if (!CanOpenSourceInVideoStudio) throw new InvalidOperationException("Only video sources can be opened in VideoStudio.");
+            MediaConversionInsertRequest request;
+            if (_memorySource is not null)
+            {
+                request = new MediaConversionInsertRequest(_memorySource.FileName, _memorySource.MimeType, _memorySource.Content.ToArray(), _memorySource.Origin);
+            }
+            else if (_file is not null)
+            {
+                await using var source = _file.OpenReadStream(long.MaxValue);
+                using var memory = new MemoryStream();
+                await source.CopyToAsync(memory);
+                var mime = string.IsNullOrWhiteSpace(_file.ContentType) ? MimeFromName(_file.Name) : _file.ContentType;
+                request = new MediaConversionInsertRequest(_file.Name, mime, memory.ToArray(), "Media Converter source");
+            }
+            else
+            {
+                return;
+            }
+            await OpenedInVideoStudio.InvokeAsync(request);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+    }
+
+    private async Task<MediaConversionInsertRequest> ReadOutput(MediaConversionJobInfo job)
+    {
+        var output = await Conversions.OpenOutputAsync(job.Id);
+        if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
+        await using var stream = output;
+        using var memory = new MemoryStream();
+        await stream.CopyToAsync(memory);
+        return new MediaConversionInsertRequest(job.OutputFileName, job.OutputMimeType, memory.ToArray(), "FFmpeg conversion");
     }
     private async Task Download(MediaConversionJobInfo job)
     {
         try
         {
             _error = string.Empty;
-            await using var stream = await Conversions.OpenOutputAsync(job.Id);
-            if (stream is null) throw new InvalidOperationException("The converted file is no longer available.");
+            var output = await Conversions.OpenOutputAsync(job.Id);
+            if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
+            await using var stream = output;
             using var reference = new DotNetStreamReference(stream, leaveOpen: false);
             await JS.InvokeVoidAsync("publisherStudio.downloadStream", job.OutputFileName, reference, job.OutputMimeType);
         }
-        catch (Exception exception)
-        {
-            _error = exception.Message;
-        }
+        catch (Exception exception) { _error = exception.Message; }
     }
     private async Task Insert(MediaConversionJobInfo job)
     {
+        try { await Inserted.InvokeAsync(await ReadOutput(job)); }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+    private async Task OpenInVideoStudio(MediaConversionJobInfo job)
+    {
         try
         {
-            _error = string.Empty;
-            await using var stream = await Conversions.OpenOutputAsync(job.Id);
-            if (stream is null) throw new InvalidOperationException("The converted file is no longer available.");
-            using var memory = new MemoryStream();
-            await stream.CopyToAsync(memory);
-            await Inserted.InvokeAsync(new MediaConversionInsertRequest(job.OutputFileName, job.OutputMimeType, memory.ToArray()));
+            if (!job.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Only video output can be opened in VideoStudio.");
+            await OpenedInVideoStudio.InvokeAsync(await ReadOutput(job));
         }
-        catch (Exception exception)
-        {
-            _error = exception.Message;
-        }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+    private Task DownloadSelected() => SelectedJob is { } job ? Download(job) : Task.CompletedTask;
+    private Task InsertSelected() => SelectedJob is { } job ? Insert(job) : Task.CompletedTask;
+    private Task OpenSelectedInVideoStudio() => SelectedJob is { } job ? OpenInVideoStudio(job) : Task.CompletedTask;
+    private void CancelSelected() { if (_selectedJobId is { } id) Cancel(id); }
+    private void RemoveSelected() { if (_selectedJobId is { } id) Remove(id); }
+    private Task ShowConverterContextMenu(MouseEventArgs args) => _contextMenu.ShowAsync(args);
+    private async Task ShowJobContextMenu(MediaConversionJobInfo job, MouseEventArgs args)
+    {
+        _selectedJobId = job.Id;
+        await _contextMenu.ShowAsync(args);
     }
     private void Cancel(Guid id) { Conversions.Cancel(id); RefreshJobs(); }
-    private void Remove(Guid id) { Conversions.Remove(id); _jobs.RemoveAll(job => job.Id == id); }
+    private void Remove(Guid id) { Conversions.Remove(id); _jobs.RemoveAll(job => job.Id == id); if (_selectedJobId == id) _selectedJobId = _jobs.FirstOrDefault()?.Id; }
+    private Task DefaultJobAction(MediaConversionJobInfo job) => job.Status == MediaConversionJobStatus.Completed && job.OutputMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ? OpenInVideoStudio(job) : Task.CompletedTask;
+
+    private void SelectProfile(ChangeEventArgs args)
+    {
+        if (!Guid.TryParse(Text(args), out var id) || id == Guid.Empty) { _selectedProfileId = Guid.Empty; return; }
+        var profile = _profiles.FirstOrDefault(candidate => candidate.Id == id);
+        if (profile is null) return;
+        _selectedProfileId = profile.Id;
+        _presetId = profile.PresetId;
+        _options = profile.Options.Clone();
+        _profileName = profile.Name;
+        _profileDescription = profile.Description;
+        EnsurePreset();
+    }
+    private void SaveProfile()
+    {
+        try
+        {
+            var current = _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId && !profile.BuiltIn);
+            var saved = Conversions.SaveProfile(new MediaConversionProfile
+            {
+                Id = current?.Id ?? Guid.NewGuid(), Name = _profileName, Description = _profileDescription,
+                PresetId = _presetId, Options = _options.Clone()
+            });
+            _profiles.RemoveAll(profile => profile.Id == saved.Id);
+            _profiles.Add(saved);
+            _selectedProfileId = saved.Id;
+            _error = string.Empty;
+        }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+    private void DeleteProfile()
+    {
+        if (!CanDeleteProfile) return;
+        if (Conversions.DeleteProfile(_selectedProfileId)) _profiles.RemoveAll(profile => profile.Id == _selectedProfileId);
+        _selectedProfileId = Guid.Empty;
+    }
+
+    private void ResolutionSource() { _options.Width = null; _options.Height = null; }
+    private void Resolution2160() => SetResolution(3840, 2160);
+    private void Resolution1440() => SetResolution(2560, 1440);
+    private void Resolution1080() => SetResolution(1920, 1080);
+    private void Resolution720() => SetResolution(1280, 720);
+    private void Resolution480() => SetResolution(854, 480);
+    private void ResolutionVertical() => SetResolution(1080, 1920);
+    private void SetResolution(int width, int height) { _options.Width = width; _options.Height = height; }
+    private void ScaleFit() { _options.ScaleMode = MediaConversionScaleMode.Fit; _options.PreserveAspectRatio = true; }
+    private void ScaleFill() { _options.ScaleMode = MediaConversionScaleMode.Fill; _options.PreserveAspectRatio = true; }
+    private void ScaleStretch() { _options.ScaleMode = MediaConversionScaleMode.Stretch; _options.PreserveAspectRatio = false; }
+    private void ScalePreserve() { _options.ScaleMode = MediaConversionScaleMode.Preserve; _options.PreserveAspectRatio = true; }
+    private void FrameRate30() => _options.FrameRate = 30;
+    private void FrameRate60() => _options.FrameRate = 60;
+    private void FrameRateSource() => _options.FrameRate = null;
+    private void ToggleNormalizeAudio() => _options.NormalizeAudio = !_options.NormalizeAudio;
+    private void ToggleDisableAudio() => _options.DisableAudio = !_options.DisableAudio;
+    private void ToggleDeinterlace() => _options.Deinterlace = !_options.Deinterlace;
+    private void AudioStereo() => _options.AudioChannels = 2;
+    private void AudioMono() => _options.AudioChannels = 1;
+
+    private void PublisherStudioWebDefaults() => ApplyBuiltIn("PublisherStudio HTML · balanced");
+    private void BroadWebDefaults() => ApplyBuiltIn("Browser compatibility · MP4");
+    private void EditingDefaults() => ApplyBuiltIn("Editing intermediate · ProRes");
+    private void ArchiveDefaults() => ApplyBuiltIn("Lossless archive · FFV1");
+    private void ApplyBuiltIn(string name)
+    {
+        var profile = _profiles.FirstOrDefault(candidate => candidate.BuiltIn && candidate.Name == name);
+        if (profile is null) return;
+        _selectedProfileId = profile.Id; _presetId = profile.PresetId; _options = profile.Options.Clone();
+        _profileName = profile.Name; _profileDescription = profile.Description; EnsurePreset();
+    }
+
+    private void ChangeTarget(ChangeEventArgs args) { if (Enum.TryParse<MediaConversionTarget>(Text(args), out var value)) _options.Target = value; }
+    private void ChangeScaleMode(ChangeEventArgs args) { if (Enum.TryParse<MediaConversionScaleMode>(Text(args), out var value)) _options.ScaleMode = value; }
+    private void ChangeMetadata(ChangeEventArgs args)
+    {
+        _options.Metadata.Clear();
+        foreach (var line in Text(args).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var separator = line.IndexOf('=');
+            if (separator <= 0) continue;
+            _options.Metadata[line[..separator].Trim()] = line[(separator + 1)..].Trim();
+        }
+    }
+
+    private static bool IsVideoMime(string mimeType, string fileName) =>
+        mimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase)
+        || (string.IsNullOrWhiteSpace(mimeType) || mimeType.Equals("application/octet-stream", StringComparison.OrdinalIgnoreCase))
+            && Path.GetExtension(fileName).ToLowerInvariant() is ".mp4" or ".webm" or ".mov" or ".m4v";
+
+    private static string MimeFromName(string fileName) => Path.GetExtension(fileName).ToLowerInvariant() switch
+    {
+        ".webm" => "video/webm",
+        ".mov" => "video/quicktime",
+        ".mkv" => "video/x-matroska",
+        ".avi" => "video/x-msvideo",
+        ".mxf" => "application/mxf",
+        _ => "video/mp4"
+    };
+
     private string PresetName(string id) => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == id)?.Name ?? id;
+    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+    private static int? NullableInt(ChangeEventArgs args) => int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0 ? value : null;
+    private static double? NullableDouble(ChangeEventArgs args) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && value >= 0 && double.IsFinite(value) ? value : null;
+    private static double Double(ChangeEventArgs args, double fallback) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && double.IsFinite(value) ? value : fallback;
+    private static string NullableNumber(double? value) => value?.ToString("0.###", CultureInfo.InvariantCulture) ?? string.Empty;
+    private static string NullableNumber(int? value) => value?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+    private static string Number(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private static string FormatBytes(long bytes) => bytes switch { >= 1024L * 1024 * 1024 => $"{bytes / 1024d / 1024 / 1024:0.##} GB", >= 1024L * 1024 => $"{bytes / 1024d / 1024:0.##} MB", >= 1024 => $"{bytes / 1024d:0.##} KB", _ => $"{bytes} B" };
+
     private Task Close() => Closed.InvokeAsync();
-    private static string FormatBytes(long bytes) => bytes switch { >= 1024L * 1024 * 1024 => $"{bytes / (1024d * 1024 * 1024):0.##} GB", >= 1024L * 1024 => $"{bytes / (1024d * 1024):0.##} MB", >= 1024 => $"{bytes / 1024d:0.##} KB", _ => $"{bytes} B" };
-    public ValueTask DisposeAsync() { _polling?.Cancel(); _polling?.Dispose(); return ValueTask.CompletedTask; }
+    public async ValueTask DisposeAsync()
+    {
+        if (_polling is not null) { await _polling.CancelAsync(); _polling.Dispose(); _polling = null; }
+        try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone); } catch { }
+        _self?.Dispose();
+        _self = null;
+    }
 }

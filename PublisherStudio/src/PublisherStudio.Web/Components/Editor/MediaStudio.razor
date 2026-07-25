@@ -35,6 +35,10 @@
                         }
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-stop" Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
+                        @if (IsVideo)
+                        {
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-media" Text="Send selection to converter" Enabled="@HasSelectedSegment" Click="SendSelectedVideoToConverter" />
+                        }
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Pointer mode" IconCssClass="pub-icon pub-icon-select">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Select time")" Click="SelectSectionMode" />
@@ -708,6 +712,10 @@
         }
         <DxContextMenuItem Text="@(_muted ? "Unmute" : "Mute")" BeginGroup="true" Click="ToggleMutedFromMenu" />
         <DxContextMenuItem Text="@(_loop ? "Disable loop" : "Loop selected range")" Click="ToggleLoopFromMenu" />
+        @if (IsVideo)
+        {
+            <DxContextMenuItem Text="Send selected clip/range to Media Converter" Enabled="@HasSelectedSegment" BeginGroup="true" Click="SendSelectedVideoToConverter" />
+        }
         <DxContextMenuItem Text="Import replacement…" Enabled="@(!_recording)" BeginGroup="true" Click="OpenMediaPicker" />
     </Items>
 </DxContextMenu>
@@ -725,6 +733,7 @@
     [Parameter] public PublicationMediaSegment? InitialInsertedSegment { get; set; }
     [Parameter] public bool EditingExisting { get; set; }
     [Parameter] public EventCallback<MediaEditorResult> Saved { get; set; }
+    [Parameter] public EventCallback<MediaConversionInsertRequest> SendToMediaConverter { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private DotNetObjectReference<MediaStudio>? _self;
@@ -886,10 +895,12 @@
     {
         get
         {
-            var duration = Math.Max(.01, _duration);
-            var start = Math.Clamp(VideoSelectionStart / duration, 0, 1);
-            var end = Math.Clamp(VideoSelectionEnd / duration, 0, 1);
-            var point = Math.Clamp((_videoSelectionIsPoint ? _videoSelectionPointSeconds : _trimStart) / duration, 0, 1);
+            var visibleStart = Math.Max(0, Math.Min(_duration, _trimStart));
+            var visibleEnd = Math.Max(visibleStart + .01, Math.Min(Math.Max(.01, _duration), _trimEnd));
+            var visibleSpan = Math.Max(.01, visibleEnd - visibleStart);
+            var start = Math.Clamp((VideoSelectionStart - visibleStart) / visibleSpan, 0, 1);
+            var end = Math.Clamp((VideoSelectionEnd - visibleStart) / visibleSpan, 0, 1);
+            var point = Math.Clamp(((_videoSelectionIsPoint ? _videoSelectionPointSeconds : visibleStart) - visibleStart) / visibleSpan, 0, 1);
             return $"--video-time-start:{Percent(start)};--video-time-end:{Percent(end)};--video-time-playhead:{Percent(point)};";
         }
     }
@@ -1790,9 +1801,11 @@
 
     private string VideoCutSectionStyle(MediaTemporalSection section)
     {
-        var duration = Math.Max(.01, _duration);
-        var start = Math.Clamp(section.StartSeconds / duration, 0, 1);
-        var end = Math.Clamp(section.EndSeconds / duration, start, 1);
+        var visibleStart = Math.Max(0, Math.Min(_duration, _trimStart));
+        var visibleEnd = Math.Max(visibleStart + .01, Math.Min(Math.Max(.01, _duration), _trimEnd));
+        var visibleSpan = Math.Max(.01, visibleEnd - visibleStart);
+        var start = Math.Clamp((section.StartSeconds - visibleStart) / visibleSpan, 0, 1);
+        var end = Math.Clamp((section.EndSeconds - visibleStart) / visibleSpan, start, 1);
         return $"left:{Percent(start)};width:{Percent(Math.Max(.001, end - start))}";
     }
 
@@ -2292,7 +2305,7 @@
         try
         {
             CommitProjectTrack();
-            await using var stream = args.File.OpenReadStream(512L * 1024 * 1024);
+            await using var stream = args.File.OpenReadStream(long.MaxValue);
             var imported = await VideoProjectImporter.ImportAsync(stream, args.File.Name);
             _videoProject = TimelineEdits.CloneVideoProject(imported.Project);
             _videoProjectIssues = [.. imported.Issues];
@@ -2323,7 +2336,7 @@
             var unmatched = new List<string>();
             foreach (var file in files)
             {
-                await using var stream = file.OpenReadStream(512L * 1024 * 1024);
+                await using var stream = file.OpenReadStream(long.MaxValue);
                 using var buffer = new MemoryStream();
                 await stream.CopyToAsync(buffer);
                 if (buffer.Length == 0) continue;
@@ -3076,6 +3089,48 @@
     private void ToggleAutoPlay(ChangeEventArgs args) => _autoPlay = Bool(args);
     private void ChangePlaybackTrigger(ChangeEventArgs args) { if (Enum.TryParse<PublicationMediaPlaybackTrigger>(Text(args), out var value)) _playbackTrigger = value; }
     private void ClampFades() { _fadeIn = Math.Min(_fadeIn, MaxFade); _fadeOut = Math.Min(_fadeOut, MaxFade); }
+
+    private async Task SendSelectedVideoToConverter()
+    {
+        if (!IsVideo || SelectedSegment is not { } segment) return;
+        try
+        {
+            CommitSelectedSegment();
+            segment = SelectedSegment!;
+            _ = MediaAssets.GetOrRegister(segment);
+            if (!MediaAssets.TryGet(segment.Id, out var bytes, out var storedMime, out _))
+                throw new InvalidOperationException("The selected clip is not retained as local media and cannot be handed to the converter.");
+
+            var start = _videoSelectionUserCommitted ? VideoSelectionStart : segment.TrimStartSeconds;
+            var end = _videoSelectionUserCommitted && !_videoSelectionIsPoint
+                ? VideoSelectionEnd
+                : segment.EffectiveTrimEndSeconds;
+            var duration = Math.Max(.001, end - start);
+            var request = new MediaConversionInsertRequest(
+                string.IsNullOrWhiteSpace(segment.Name) ? "video-clip" : segment.Name,
+                PublicationMediaData.NormalizeMimeType(segment.MimeType, storedMime),
+                bytes,
+                _videoSelectionUserCommitted ? "VideoStudio selected range" : "VideoStudio selected clip")
+            {
+                SuggestedPresetId = "webm-vp9",
+                SuggestedOptions = new MediaConversionOptions
+                {
+                    Target = MediaConversionTarget.PublisherStudioWeb,
+                    StartSeconds = Math.Max(0, start),
+                    DurationSeconds = duration,
+                    ScaleMode = MediaConversionScaleMode.Preserve,
+                    PreserveAspectRatio = true,
+                    PixelFormat = "yuv420p",
+                    FastStart = true
+                }
+            };
+            await SendToMediaConverter.InvokeAsync(request);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+    }
 
     private async Task DownloadRecording()
     {

@@ -60,7 +60,6 @@ public partial class PictureEditor
     private double _drawWidth = 12;
     private double _drawOpacity = 1;
     private double _drawHardness = .8;
-    private const int MaxPictureExportDataUrlLength = 192 * 1024 * 1024;
     private StringBuilder? _pictureExportBuffer;
     private string? _pictureExportId;
     private PictureDocument? _pictureExportSourceDocument;
@@ -451,7 +450,7 @@ public partial class PictureEditor
             var file = args.File;
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();
             PictureImportResult result;
-            await using var stream = file.OpenReadStream(512L * 1024 * 1024);
+            await using var stream = file.OpenReadStream(long.MaxValue);
             if (extension == ".ora")
             {
                 result = await OpenRasterImporter.ImportAsync(stream, file.Name);
@@ -463,11 +462,11 @@ public partial class PictureEditor
                 if (extension == ".svgz" || file.ContentType.Contains("gzip", StringComparison.OrdinalIgnoreCase))
                 {
                     using var gzip = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
-                    svgText = await ReadSvgTextWithLimitAsync(gzip, 64L * 1024 * 1024);
+                    svgText = await ReadSvgTextAsync(gzip);
                 }
                 else
                 {
-                    svgText = await ReadSvgTextWithLimitAsync(stream, 64L * 1024 * 1024);
+                    svgText = await ReadSvgTextAsync(stream);
                 }
                 var dataUrl = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(svgText))}";
                 result = await _module.InvokeAsync<PictureImportResult>("importPictureStudioSvg", dataUrl, file.Name);
@@ -601,12 +600,12 @@ public partial class PictureEditor
     public bool BeginPictureExport(string exportId, int totalLength, int chunkCount)
     {
         if (!IsCurrentPictureExport(exportId)) return false;
-        if (totalLength <= 0 || totalLength > MaxPictureExportDataUrlLength)
+        if (totalLength <= 0)
         {
-            FailPictureExport(exportId, "The rendered picture is too large to insert into the publication.");
+            FailPictureExport(exportId, "The rendered picture export reported an invalid length.");
             return false;
         }
-        if (chunkCount <= 0 || chunkCount > 100_000)
+        if (chunkCount <= 0)
         {
             FailPictureExport(exportId, "The rendered picture export contains an invalid chunk count.");
             return false;
@@ -628,12 +627,6 @@ public partial class PictureEditor
             FailPictureExport(exportId, "The rendered picture chunks arrived out of order.");
             return false;
         }
-        if (_pictureExportBuffer.Length + chunk.Length > MaxPictureExportDataUrlLength)
-        {
-            FailPictureExport(exportId, "The rendered picture is too large to insert into the publication.");
-            return false;
-        }
-
         _pictureExportBuffer.Append(chunk);
         _pictureExportNextChunk++;
         return true;
@@ -1320,19 +1313,10 @@ public partial class PictureEditor
     }
 
 
-    private static async Task<string> ReadSvgTextWithLimitAsync(Stream input, long maximumBytes)
+    private static async Task<string> ReadSvgTextAsync(Stream input)
     {
         using var buffer = new MemoryStream();
-        var block = new byte[81920];
-        long total = 0;
-        while (true)
-        {
-            var read = await input.ReadAsync(block);
-            if (read == 0) break;
-            total += read;
-            if (total > maximumBytes) throw new InvalidDataException("The SVG document exceeds the 64 MB decompressed text limit.");
-            await buffer.WriteAsync(block.AsMemory(0, read));
-        }
+        await input.CopyToAsync(buffer);
         return new UTF8Encoding(false, true).GetString(buffer.ToArray());
     }
 

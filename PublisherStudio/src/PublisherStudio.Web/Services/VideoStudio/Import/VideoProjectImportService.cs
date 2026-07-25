@@ -15,10 +15,7 @@ namespace PublisherStudio.Services.VideoStudio.Import;
 /// </summary>
 public sealed partial class VideoProjectImportService
 {
-    private const int MaxProjectBytes = 64 * 1024 * 1024;
     private const int MaxArchiveEntries = 4096;
-    private const long MaxBundledMediaBytes = 512L * 1024 * 1024;
-    private const long MaxArchiveUncompressedBytes = 1024L * 1024 * 1024;
 
     public static readonly string[] SupportedExtensions =
         [".otio", ".otioz", ".mlt", ".kdenlive", ".xges", ".osp", ".edl"];
@@ -36,7 +33,7 @@ public sealed partial class VideoProjectImportService
         if (extension == ".otioz")
             return await ImportOtioBundleAsync(source, fileName, cancellationToken);
 
-        var bytes = await ReadWithLimitAsync(source, MaxProjectBytes, cancellationToken);
+        var bytes = await ReadAllAsync(source, cancellationToken);
         var result = extension switch
         {
             ".otio" => ImportOtio(bytes, fileName, null),
@@ -54,22 +51,16 @@ public sealed partial class VideoProjectImportService
         string fileName,
         CancellationToken cancellationToken)
     {
-        using var archiveBuffer = new MemoryStream(await ReadWithLimitAsync(source, MaxBundledMediaBytes, cancellationToken));
+        using var archiveBuffer = new MemoryStream(await ReadAllAsync(source, cancellationToken));
         using var archive = new ZipArchive(archiveBuffer, ZipArchiveMode.Read, leaveOpen: false);
         if (archive.Entries.Count > MaxArchiveEntries)
             throw new InvalidDataException($"The OTIOZ archive contains more than {MaxArchiveEntries} entries.");
 
         var entryMap = new Dictionary<string, ZipArchiveEntry>(StringComparer.OrdinalIgnoreCase);
-        long archiveUncompressedBytes = 0;
         foreach (var entry in archive.Entries)
         {
-            archiveUncompressedBytes += Math.Max(0, entry.Length);
-            if (archiveUncompressedBytes > MaxArchiveUncompressedBytes)
-                throw new InvalidDataException($"The expanded OTIOZ archive exceeds the {FormatBytes(MaxArchiveUncompressedBytes)} limit.");
             var path = NormalizeArchivePath(entry.FullName);
             if (string.IsNullOrWhiteSpace(path)) continue;
-            if (entry.Length > MaxBundledMediaBytes)
-                throw new InvalidDataException($"OTIOZ entry '{path}' exceeds the supported size limit.");
             entryMap[path] = entry;
         }
 
@@ -78,7 +69,7 @@ public sealed partial class VideoProjectImportService
 
         byte[] content;
         await using (var stream = contentEntry.Open())
-            content = await ReadWithLimitAsync(stream, MaxProjectBytes, cancellationToken);
+            content = await ReadAllAsync(stream, cancellationToken);
 
         EmbeddedMedia? Resolver(string targetUrl)
         {
@@ -94,7 +85,7 @@ public sealed partial class VideoProjectImportService
             {
                 if (!entryMap.TryGetValue(candidate, out var entry) || entry.Length <= 0) continue;
                 using var media = entry.Open();
-                var bytes = ReadWithLimit(media, MaxBundledMediaBytes);
+                var bytes = ReadAll(media);
                 var mime = MimeFromPath(candidate, "video/mp4");
                 return new EmbeddedMedia(candidate, mime, bytes);
             }
@@ -1018,42 +1009,24 @@ public sealed partial class VideoProjectImportService
         {
             DtdProcessing = DtdProcessing.Prohibit,
             XmlResolver = null,
-            MaxCharactersInDocument = MaxProjectBytes,
+            MaxCharactersInDocument = 0,
             IgnoreComments = false,
             IgnoreWhitespace = false
         });
         return XDocument.Load(reader, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
     }
 
-    private static async Task<byte[]> ReadWithLimitAsync(Stream source, long limit, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadAllAsync(Stream source, CancellationToken cancellationToken)
     {
         using var buffer = new MemoryStream();
-        var chunk = new byte[81920];
-        long total = 0;
-        while (true)
-        {
-            var read = await source.ReadAsync(chunk.AsMemory(0, chunk.Length), cancellationToken);
-            if (read <= 0) break;
-            total += read;
-            if (total > limit) throw new InvalidDataException($"The imported project exceeds the {FormatBytes(limit)} limit.");
-            await buffer.WriteAsync(chunk.AsMemory(0, read), cancellationToken);
-        }
+        await source.CopyToAsync(buffer, cancellationToken);
         return buffer.ToArray();
     }
 
-    private static byte[] ReadWithLimit(Stream source, long limit)
+    private static byte[] ReadAll(Stream source)
     {
         using var buffer = new MemoryStream();
-        var chunk = new byte[81920];
-        long total = 0;
-        while (true)
-        {
-            var read = source.Read(chunk, 0, chunk.Length);
-            if (read <= 0) break;
-            total += read;
-            if (total > limit) throw new InvalidDataException($"An embedded media entry exceeds the {FormatBytes(limit)} limit.");
-            buffer.Write(chunk, 0, read);
-        }
+        source.CopyTo(buffer);
         return buffer.ToArray();
     }
 

@@ -9,12 +9,13 @@ public sealed class PublicationDocument
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "Untitled Publication";
-    public string FormatVersion { get; set; } = "1.54";
+    public string FormatVersion { get; set; } = "1.55";
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
     public double Zoom { get; set; } = 0.8;
     public PublicationViewSettings View { get; set; } = new();
     public List<PublicationPage> Pages { get; set; } = [];
     public List<PublicationDataObject> DataObjects { get; set; } = [];
+    public List<PublicationElementTemplate> ComponentTemplates { get; set; } = [];
     public PublicationPlaybackSettings Playback { get; set; } = new();
     public PublicationStreamingSettings Streaming { get; set; } = new();
 

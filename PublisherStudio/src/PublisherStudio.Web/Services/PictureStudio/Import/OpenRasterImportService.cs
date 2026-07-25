@@ -15,7 +15,7 @@ public sealed class OpenRasterImportService
     public async Task<PictureImportResult> ImportAsync(Stream input, string fileName, CancellationToken cancellationToken = default)
     {
         using var buffer = new MemoryStream();
-        await CopyWithLimitAsync(input, buffer, 512L * 1024 * 1024, cancellationToken);
+        await input.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
         using var archive = new ZipArchive(buffer, ZipArchiveMode.Read, leaveOpen: false);
         var issues = new List<InterchangeIssue>();
@@ -39,7 +39,7 @@ public sealed class OpenRasterImportService
         XDocument stackDocument;
         await using (var stackStream = stackEntry.Open())
         {
-            var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersFromEntities = 0, MaxCharactersInDocument = 64L * 1024 * 1024 };
+            var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersFromEntities = 0, MaxCharactersInDocument = 0 };
             using var reader = XmlReader.Create(stackStream, settings);
             stackDocument = XDocument.Load(reader);
         }
@@ -116,14 +116,14 @@ public sealed class OpenRasterImportService
             }
 
             var name = CleanName(child.Attribute("name")?.Value, Path.GetFileNameWithoutExtension(source));
-            if (entry.Length <= 0 || entry.Length > 256L * 1024 * 1024)
+            if (entry.Length <= 0)
             {
-                issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_TOO_LARGE", $"Layer '{name}' exceeds the 256 MB layer limit and was skipped.", groupPath));
+                issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_EMPTY", $"Layer '{name}' is empty and was skipped.", groupPath));
                 continue;
             }
             await using var layerStream = entry.Open();
             using var layerBuffer = new MemoryStream();
-            await CopyWithLimitAsync(layerStream, layerBuffer, 256L * 1024 * 1024, cancellationToken);
+            await layerStream.CopyToAsync(layerBuffer, cancellationToken);
             var bytes = layerBuffer.ToArray();
             var extension = Path.GetExtension(source).ToLowerInvariant();
             var x = ReadInt(child.Attribute("x")?.Value, 0) * scale;
@@ -205,69 +205,6 @@ public sealed class OpenRasterImportService
         return (0, 0);
     }
 
-
-    private static async Task CopyWithLimitAsync(Stream input, Stream output, long maximumBytes, CancellationToken cancellationToken)
-    {
-        var buffer = new byte[81920];
-        long total = 0;
-        while (true)
-        {
-            var read = await input.ReadAsync(buffer, cancellationToken);
-            if (read == 0) return;
-            total += read;
-            if (total > maximumBytes) throw new InvalidDataException("The OpenRaster input exceeds its configured import limit.");
-            await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-        }
-    }
-
-    private static int ReadBigEndianInt(byte[] bytes, int offset) =>
-        (bytes[offset] << 24) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3];
-
-    private static string DecodeSvg(byte[] bytes)
-    {
-        if (bytes.Length > 64L * 1024 * 1024)
-            throw new InvalidDataException("The SVG layer exceeds the 64 MB text limit.");
-        return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true).GetString(bytes);
-    }
-
-    private static string DecompressSvg(byte[] bytes)
-    {
-        using var input = new MemoryStream(bytes);
-        using var gzip = new GZipStream(input, CompressionMode.Decompress);
-        using var output = new MemoryStream();
-        CopyWithLimit(gzip, output, 64L * 1024 * 1024);
-        return DecodeSvg(output.ToArray());
-    }
-
-    private static void CopyWithLimit(Stream input, Stream output, long maximumBytes)
-    {
-        var buffer = new byte[81920];
-        long total = 0;
-        while (true)
-        {
-            var read = input.Read(buffer, 0, buffer.Length);
-            if (read == 0) return;
-            total += read;
-            if (total > maximumBytes) throw new InvalidDataException("The compressed SVG layer exceeds its 64 MB decompression limit.");
-            output.Write(buffer, 0, read);
-        }
-    }
-
-    private static PictureBlendMode MapBlendMode(string? value) => value?.Trim().ToLowerInvariant() switch
-    {
-        "svg:multiply" or "multiply" => PictureBlendMode.Multiply,
-        "svg:screen" or "screen" => PictureBlendMode.Screen,
-        "svg:overlay" or "overlay" => PictureBlendMode.Overlay,
-        "svg:darken" or "darken" => PictureBlendMode.Darken,
-        "svg:lighten" or "lighten" => PictureBlendMode.Lighten,
-        _ => PictureBlendMode.Normal
-    };
-
-    private static int ReadInt(string? value, int fallback) =>
-        int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
-
-    private static double ReadDouble(string? value, double fallback) =>
-        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
 
     private static string CleanName(string? value, string fallback) => string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
     private static bool IsTrue(string? value) => value is not null && (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1");

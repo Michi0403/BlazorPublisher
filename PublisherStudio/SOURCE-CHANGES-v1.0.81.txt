@@ -1,0 +1,34 @@
+PublisherStudio v1.0.81 source changes
+
+Panel / Div Studio
+- Components/Editor/PanelStudio.razor: Ribbon, draggable palette, real component preview, arrange/test modes, move/resize commits, component inspectors, reusable modules and advanced JSON editing.
+- Components/Editor/PanelElementPreview.razor: shared preview surface for authored panel components.
+- Services/Panels/PanelDocumentService.cs: component-tool catalogue, template instantiation and recursive normalization.
+- Domain/PublicationPanelModels.cs: reusable component-template and palette contracts.
+- Domain/PublicationModels.cs: persisted document-level ComponentTemplates and publication format 1.55.
+- Services/PublicationFileService.cs: element serialization/deserialization and template migration/normalization.
+- wwwroot/js/publisherInterop.js: browser-owned panel drag ghost, hit testing and committed move/resize handling.
+- wwwroot/css/site.css: Panel Studio composer, palette, preview, ghost, resize and icon-fallback styling.
+
+Media Converter
+- Components/Editor/MediaConverterStudio.razor: complete Ribbon/context-menu converter workspace, profiles, source drop, FFmpeg settings, jobs and hand-off commands.
+- Domain/MediaConversionModels.cs: canonical options, targets, profiles, job data and insertion request contracts.
+- Services/MediaConversion/IMediaConversionService.cs: reusable profile and option-aware service API.
+- Services/MediaConversion/MediaConversionService.cs: capability-aware presets, profile persistence, argument generation, progress, cancellation, filtering and output lifecycle.
+- Controllers/MediaConversionController.cs: profiles, option-aware jobs and local-first multipart handling.
+- wwwroot/js/publisherInterop.js: converter source-drop bridge.
+
+Mainframe and VideoStudio
+- Components/Pages/Editor.razor: Mainframe export-to-converter, converter-to-Mainframe and converter-to-VideoStudio orchestration.
+- Components/Editor/MediaStudio.razor: selected clip/range hand-off to converter.
+- wwwroot/js/mediaStudioInterop.js: clip-trim-relative temporal geometry and late source-duration recovery.
+- Components/Editor/InspectorPanel.razor: related panel/template and media workflow integration.
+
+Local-first import policy
+- Picture Studio, OpenRaster, SVG, OpenDocument, VideoProject and related file-picker/import paths no longer impose PublisherStudio-defined byte ceilings.
+- Structural/archive/XML validation remains enabled.
+
+Validation
+- tests/panelComposerMediaWorkflow.test.mjs: Panel composer, module persistence, local gesture ownership, unlimited local imports, FFmpeg workflow and Mainframe/VideoStudio hand-off contracts.
+- Existing suites updated for publication format 1.55 and application version 1.0.81.
+- Version and release metadata updated to 1.0.81.

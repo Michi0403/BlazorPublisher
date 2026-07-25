@@ -38,11 +38,10 @@ public sealed partial class OpenDocumentImportService
     private async Task<PublicationImportResult> ImportPackageAsync(Stream source, string fileName, CancellationToken cancellationToken)
     {
         using var buffer = new MemoryStream();
-        await CopyWithLimitAsync(source, buffer, 512L * 1024 * 1024, cancellationToken);
+        await source.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
         using var archive = new ZipArchive(buffer, ZipArchiveMode.Read, leaveOpen: false);
         var contentEntry = archive.GetEntry("content.xml") ?? throw new InvalidDataException("The OpenDocument package does not contain content.xml.");
-        if (contentEntry.Length > 128L * 1024 * 1024) throw new InvalidDataException("The OpenDocument content.xml is too large.");
 
         XDocument content;
         await using (var contentStream = contentEntry.Open())
@@ -74,7 +73,7 @@ public sealed partial class OpenDocumentImportService
         var document = new PublicationDocument
         {
             Name = Path.GetFileNameWithoutExtension(fileName),
-            FormatVersion = "1.54",
+            FormatVersion = "1.55",
             Zoom = .8,
             View = new PublicationViewSettings(),
             Playback = new PublicationPlaybackSettings(),
@@ -155,8 +154,6 @@ public sealed partial class OpenDocumentImportService
                     {
                         var compact = string.Concat(inlineData.Where(character => !char.IsWhiteSpace(character)));
                         bytes = Convert.FromBase64String(compact);
-                        if (bytes.Length > 256L * 1024 * 1024)
-                            throw new InvalidDataException("The embedded image exceeds the 256 MB asset limit.");
                     }
                     catch (Exception ex) when (ex is FormatException or InvalidDataException)
                     {
@@ -482,10 +479,10 @@ public sealed partial class OpenDocumentImportService
         var normalized = NormalizePackagePath(path);
         if (string.IsNullOrWhiteSpace(normalized)) return null;
         var entry = archive.GetEntry(normalized);
-        if (entry is null || entry.Length <= 0 || entry.Length > 256L * 1024 * 1024) return null;
+        if (entry is null || entry.Length <= 0) return null;
         using var stream = entry.Open();
         using var buffer = new MemoryStream();
-        CopyWithLimit(stream, buffer, 256L * 1024 * 1024, "The OpenDocument image asset exceeds the 256 MB import limit.");
+        stream.CopyTo(buffer);
         return buffer.ToArray();
     }
 
@@ -499,20 +496,6 @@ public sealed partial class OpenDocumentImportService
         var parts = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 0 || parts.Any(part => part is "." or "..")) return string.Empty;
         return string.Join('/', parts);
-    }
-
-    private static async Task CopyWithLimitAsync(Stream input, Stream output, long maximumBytes, CancellationToken cancellationToken)
-    {
-        var buffer = new byte[81920];
-        long total = 0;
-        while (true)
-        {
-            var read = await input.ReadAsync(buffer, cancellationToken);
-            if (read == 0) return;
-            total += read;
-            if (total > maximumBytes) throw new InvalidDataException("The OpenDocument package exceeds the 512 MB import limit.");
-            await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-        }
     }
 
     private static string ResolveImageMime(string? declared, string path, byte[] bytes)
@@ -539,20 +522,6 @@ public sealed partial class OpenDocumentImportService
         return string.Empty;
     }
 
-    private static void CopyWithLimit(Stream input, Stream output, long maximumBytes, string message)
-    {
-        var buffer = new byte[81920];
-        long total = 0;
-        while (true)
-        {
-            var read = input.Read(buffer, 0, buffer.Length);
-            if (read == 0) return;
-            total += read;
-            if (total > maximumBytes) throw new InvalidDataException(message);
-            output.Write(buffer, 0, read);
-        }
-    }
-
     private static async Task<XDocument> LoadXmlAsync(Stream source, CancellationToken cancellationToken)
     {
         var settings = new XmlReaderSettings
@@ -561,7 +530,7 @@ public sealed partial class OpenDocumentImportService
             DtdProcessing = DtdProcessing.Prohibit,
             XmlResolver = null,
             MaxCharactersFromEntities = 0,
-            MaxCharactersInDocument = 128L * 1024 * 1024
+            MaxCharactersInDocument = 0
         };
         using var reader = XmlReader.Create(source, settings);
         return await XDocument.LoadAsync(reader, LoadOptions.PreserveWhitespace, cancellationToken);

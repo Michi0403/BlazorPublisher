@@ -87,6 +87,27 @@ public sealed class HtmlEmbedElement : PublicationElement
     }
 }
 
+
+public sealed class PublicationElementTemplate
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = "Reusable component";
+    public string Description { get; set; } = string.Empty;
+    public string Category { get; set; } = "My modules";
+    public string IconCssClass { get; set; } = "pub-icon pub-icon-panel";
+    public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
+    public PublicationElement Prototype { get; set; } = new TextFrameElement();
+}
+
+public sealed record PanelComponentToolDescriptor(
+    string Id,
+    string Name,
+    string Description,
+    string Category,
+    string IconCssClass,
+    string PreviewKind,
+    Guid? TemplateId = null);
+
 public sealed record PublicationPanelPresetDescriptor(
     string Id,
     string Name,

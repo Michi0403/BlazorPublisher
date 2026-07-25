@@ -56,7 +56,7 @@ assert.match(pictureModels, /sealed class SvgPictureLayer/);
 assert.match(interchangeModels, /enum InterchangeIssueSeverity \{ Information, Warning, Loss \}/);
 assert.match(interchangeModels, /sealed class PictureImportResult/);
 assert.match(interchangeModels, /sealed class PublicationImportResult/);
-assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.54"/);
+assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.55"/);
 
 // SVG is retained as vector markup and sanitized before it enters the canonical model.
 assert.match(sanitizer, /DtdProcessing = DtdProcessing\.Prohibit/);
@@ -89,9 +89,9 @@ assert.match(openRaster, /layerVisible/);
 assert.match(openRaster, /edit-locked/);
 assert.match(openRaster, /SvgInterchangeSanitizer\.Sanitize/);
 assert.match(openRaster, /ORA_LAYER_SOURCE_INVALID/);
-assert.match(openRaster, /CopyWithLimitAsync/);
+assert.match(openRaster, /CopyToAsync/);
+assert.doesNotMatch(openRaster, /CopyWithLimitAsync|64 MB decompression limit/, 'Local-first imports must not impose an application-defined media byte ceiling.');
 assert.match(openRaster, /ORA_SVG_LAYER_INVALID/);
-assert.match(openRaster, /64 MB decompression limit/);
 
 // OpenDocument Drawing/Presentation imports map pages and common objects into the native page system.
 assert.match(openDocument, /\.fodg" or "\.fodp/);

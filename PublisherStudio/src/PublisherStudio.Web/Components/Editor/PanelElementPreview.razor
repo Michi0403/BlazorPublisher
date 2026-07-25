@@ -1,0 +1,78 @@
+@namespace PublisherStudio.Components.Editor
+
+<div class="panel-element-preview kind-@Item.Kind.ToString().ToLowerInvariant()">
+    @switch (Item)
+    {
+        case TextFrameElement text:
+            <div class="panel-preview-text">@((MarkupString)(string.IsNullOrWhiteSpace(text.PreviewHtml) ? "<b>Text</b>" : text.PreviewHtml))</div>
+            break;
+        case ImageFrameElement image:
+            @if (!string.IsNullOrWhiteSpace(image.DataUrl))
+            {
+                <img src="@image.DataUrl" alt="" />
+            }
+            else
+            {
+                <div class="panel-preview-glyph">▧</div>
+            }
+            break;
+        case VideoElement:
+            <div class="panel-preview-media"><span>▶</span><small>Video</small></div>
+            break;
+        case AudioElement:
+            <div class="panel-preview-media"><span>♪</span><small>Audio</small></div>
+            break;
+        case ShapeElement shape:
+            <div class="panel-preview-shape" style="background:@shape.Fill;border-color:@shape.Stroke"></div>
+            break;
+        case DataVisualElement visual:
+            <div class="panel-preview-data">
+                <strong>@visual.Title</strong>
+                @if (visual.VisualKind == DataVisualKind.KpiProgress)
+                {
+                    <b>72%</b><span><i style="width:72%"></i></span>
+                }
+                else if (visual.VisualKind == DataVisualKind.DataTable)
+                {
+                    <em></em><em></em><em></em><em></em>
+                }
+                else
+                {
+                    <span class="bars"><i></i><i></i><i></i><i></i><i></i></span>
+                }
+            </div>
+            break;
+        case DevExtremeComponentElement component:
+            <div class="panel-preview-component">
+                <span class="@Icon(component.ComponentKind)"></span>
+                <strong>@component.Title</strong>
+                <small>@component.ComponentKind</small>
+            </div>
+            break;
+        case LiveSourceElement live:
+            <div class="panel-preview-live"><span>● LIVE</span><strong>@live.SourceKind</strong></div>
+            break;
+        case HtmlEmbedElement html:
+            <div class="panel-preview-web"><span>&lt;/&gt;</span><strong>@html.Name</strong></div>
+            break;
+        case PanelElement panel:
+            <div class="panel-preview-panel"><span>▦</span><strong>@panel.Name</strong><small>@panel.Views.Count view(s)</small></div>
+            break;
+        default:
+            <div class="panel-preview-component"><strong>@Item.Name</strong><small>@Item.Kind</small></div>
+            break;
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PublicationElement Item { get; set; } = default!;
+
+    private static string Icon(PublicationComponentKind kind) => kind switch
+    {
+        PublicationComponentKind.Chat => "pub-icon pub-icon-chat",
+        PublicationComponentKind.Map or PublicationComponentKind.VectorMap => "pub-icon pub-icon-map",
+        PublicationComponentKind.Button => "pub-icon pub-icon-button",
+        PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu => "pub-icon pub-icon-menu",
+        _ => "pub-icon pub-icon-data"
+    };
+}

@@ -504,14 +504,21 @@
                                     <label>Sender name<input @bind="_draft.ChatCurrentUserName" /></label>
                                     <label>Sender avatar URL<input @bind="_draft.ChatCurrentUserAvatar" placeholder="optional" /></label>
                                     <label>Input placeholder<input @bind="_draft.Placeholder" placeholder="Send a message…" /></label>
+                                    <label>Display mode<select @bind="_draft.ChatDisplayMode">@foreach (var mode in Enum.GetValues<PublicationChatDisplayMode>()) { <option value="@mode">@mode</option> }</select></label>
+                                    <label>Maximum visible messages<input type="number" min="1" max="100" @bind="_draft.ChatMaxVisibleMessages" /></label>
+                                    <label>Background opacity<input type="range" min="0" max="1" step="0.05" @bind="_draft.ChatBackgroundOpacity" /></label>
+                                    <label>Message opacity<input type="range" min="0" max="1" step="0.05" @bind="_draft.ChatMessageOpacity" /></label>
                                 </div>
                                 <div class="component-option-grid three">
-                                    <label><input type="checkbox" @bind="_draft.ChatAllowSending" /> Show answer field</label>
+                                    <label><input type="checkbox" @bind="_draft.ChatAllowSending" /> Operator input</label>
                                     <label><input type="checkbox" @bind="_draft.ChatShowAvatar" /> Show avatars</label>
                                     <label><input type="checkbox" @bind="_draft.ChatShowTimestamp" /> Show timestamps</label>
                                     <label><input type="checkbox" @bind="_draft.ChatOptimisticSend" /> Show sent message immediately</label>
+                                    <label><input type="checkbox" @bind="_draft.ChatCompact" /> Compact stream layout</label>
+                                    <label><input type="checkbox" @bind="_draft.ChatFadeOlderMessages" /> Fade older messages</label>
+                                    <label><input type="checkbox" @bind="_draft.ChatShowPlatformBadge" /> Platform badge</label>
                                 </div>
-                                <p class="component-info">The runtime accepts a platform adapter through <code>window.PublisherStudioChatBridge</code>. It subscribes and sends only for the selected platform and channel. The same publication can therefore be rendered once for Twitch and once for YouTube without exposing the other platform's chat.</p>
+                                <p class="component-info">Auto uses interactive chat for the operator and a privacy-safe viewer overlay in broadcast output. ViewerOnly and StreamOverlay never render a message input, moderation controls, sender credentials, or private operator metadata. The runtime accepts a platform adapter through <code>window.PublisherStudioChatBridge</code>. It subscribes and sends only for the selected platform and channel. The same publication can therefore be rendered once for Twitch and once for YouTube without exposing the other platform's chat.</p>
                             }
                             @if (SupportsGridOptions || _draft.ComponentKind == PublicationComponentKind.TreeList)
                             {

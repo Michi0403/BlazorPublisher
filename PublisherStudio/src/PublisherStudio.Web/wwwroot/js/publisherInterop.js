@@ -6283,12 +6283,28 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         if (!blob.size) throw new Error('The browser completed the capture but produced an empty video.');
         step = 'downloading WebM';
         downloadBlob(fileName || 'publication.webm', blob);
+        let assetId = '';
+        try {
+            assetId = crypto.randomUUID();
+            const response = await fetch(`/api/assets/drop/${assetId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': blobType },
+                body: blob
+            });
+            if (!response.ok) assetId = '';
+        } catch (error) {
+            assetId = '';
+            console.warn('The exported video was downloaded but could not be retained for Media Converter Studio.', error);
+        }
         return {
             fileName: fileName || 'publication.webm',
             durationSeconds: totalDuration,
             width: frameWidth,
             height: frameHeight,
-            pageSizedCapture: true
+            pageSizedCapture: true,
+            assetId,
+            mimeType: blobType,
+            sizeBytes: blob.size
         };
     } catch (error) {
         const message = error?.message || String(error);
@@ -6397,6 +6413,127 @@ export function cancelCanvasInteraction(stageId = 'publisher-stage') {
     resetCanvasTransientState(state, true);
     state.lastCanvasClick = null;
     try { state.stage.focus({ preventScroll: true }); } catch { }
+}
+
+export function panelStudioPoint(element, clientX, clientY) {
+    if (!(element instanceof HTMLElement)) return { x: 0.5, y: 0.5 };
+    const bounds = element.getBoundingClientRect();
+    const width = Math.max(1, bounds.width);
+    const height = Math.max(1, bounds.height);
+    return {
+        x: clamp((Number(clientX) - bounds.left) / width, 0, 1),
+        y: clamp((Number(clientY) - bounds.top) / height, 0, 1)
+    };
+}
+
+const panelStudioDropBindings = new WeakMap();
+
+export function unbindPanelStudioDropSurface(element) {
+    if (!(element instanceof HTMLElement)) return;
+    const binding = panelStudioDropBindings.get(element);
+    if (!binding) return;
+    binding.cancelResize?.();
+    element.removeEventListener('dragenter', binding.dragenter);
+    element.removeEventListener('dragover', binding.dragover);
+    element.removeEventListener('dragleave', binding.dragleave);
+    element.removeEventListener('drop', binding.drop);
+    element.removeEventListener('pointerdown', binding.pointerdown);
+    panelStudioDropBindings.delete(element);
+}
+
+export function bindPanelStudioDropSurface(element, dotNetReference) {
+    if (!(element instanceof HTMLElement)) return false;
+    unbindPanelStudioDropSurface(element);
+    const setActive = active => element.querySelector('.panel-studio-drop-layer')?.classList.toggle('active', active);
+    const updateGhost = event => {
+        event.preventDefault();
+        const ghost = element.querySelector('.panel-studio-drag-ghost');
+        if (!(ghost instanceof HTMLElement)) return;
+        const point = panelStudioPoint(element, event.clientX, event.clientY);
+        ghost.style.left = `${point.x * 100}%`;
+        ghost.style.top = `${point.y * 100}%`;
+        ghost.style.transform = 'translate(-50%, -50%)';
+        setActive(true);
+    };
+    const dragenter = event => updateGhost(event);
+    const dragover = event => updateGhost(event);
+    const dragleave = event => {
+        if (event.relatedTarget instanceof Node && element.contains(event.relatedTarget)) return;
+        setActive(false);
+    };
+    const drop = () => setActive(false);
+
+    let resize = null;
+    const cancelResize = () => {
+        if (!resize) return;
+        window.removeEventListener('pointermove', resize.move, true);
+        window.removeEventListener('pointerup', resize.finish, true);
+        window.removeEventListener('pointercancel', resize.finish, true);
+        resize = null;
+    };
+    const pointerdown = event => {
+        const handle = event.target instanceof Element ? event.target.closest('.panel-studio-hitbox.selected > i[data-resize]') : null;
+        if (!(handle instanceof HTMLElement)) return;
+        const hitbox = handle.closest('.panel-studio-hitbox');
+        if (!(hitbox instanceof HTMLElement)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        cancelResize();
+        const canvasBounds = element.getBoundingClientRect();
+        const boxBounds = hitbox.getBoundingClientRect();
+        const initial = {
+            x: clamp((boxBounds.left - canvasBounds.left) / Math.max(1, canvasBounds.width), 0, 1),
+            y: clamp((boxBounds.top - canvasBounds.top) / Math.max(1, canvasBounds.height), 0, 1),
+            width: clamp(boxBounds.width / Math.max(1, canvasBounds.width), .005, 1),
+            height: clamp(boxBounds.height / Math.max(1, canvasBounds.height), .005, 1)
+        };
+        const edge = handle.dataset.resize || 'se';
+        const originX = event.clientX;
+        const originY = event.clientY;
+        const move = moveEvent => {
+            if (moveEvent.pointerId !== event.pointerId) return;
+            moveEvent.preventDefault();
+            const dx = (moveEvent.clientX - originX) / Math.max(1, canvasBounds.width);
+            const dy = (moveEvent.clientY - originY) / Math.max(1, canvasBounds.height);
+            let { x, y, width, height } = initial;
+            if (edge.includes('w')) { x += dx; width -= dx; }
+            if (edge.includes('e')) width += dx;
+            if (edge.includes('n')) { y += dy; height -= dy; }
+            if (edge.includes('s')) height += dy;
+            const minimum = .01;
+            if (width < minimum) { if (edge.includes('w')) x -= minimum - width; width = minimum; }
+            if (height < minimum) { if (edge.includes('n')) y -= minimum - height; height = minimum; }
+            x = clamp(x, 0, Math.max(0, 1 - minimum));
+            y = clamp(y, 0, Math.max(0, 1 - minimum));
+            width = clamp(width, minimum, 1 - x);
+            height = clamp(height, minimum, 1 - y);
+            hitbox.style.left = `${x * 100}%`;
+            hitbox.style.top = `${y * 100}%`;
+            hitbox.style.width = `${width * 100}%`;
+            hitbox.style.height = `${height * 100}%`;
+            resize.bounds = { x, y, width, height };
+        };
+        const finish = finishEvent => {
+            if (finishEvent.pointerId !== event.pointerId) return;
+            finishEvent.preventDefault();
+            const bounds = resize?.bounds || initial;
+            cancelResize();
+            dotNetReference?.invokeMethodAsync('CommitPanelElementBounds', hitbox.dataset.panelElementId || '', bounds.x, bounds.y, bounds.width, bounds.height).catch(() => {});
+        };
+        resize = { move, finish, bounds: initial };
+        window.addEventListener('pointermove', move, { capture: true, passive: false });
+        window.addEventListener('pointerup', finish, { capture: true, passive: false });
+        window.addEventListener('pointercancel', finish, { capture: true, passive: false });
+    };
+
+    const binding = { dragenter, dragover, dragleave, drop, pointerdown, cancelResize };
+    panelStudioDropBindings.set(element, binding);
+    element.addEventListener('dragenter', dragenter);
+    element.addEventListener('dragover', dragover);
+    element.addEventListener('dragleave', dragleave);
+    element.addEventListener('drop', drop);
+    element.addEventListener('pointerdown', pointerdown);
+    return true;
 }
 
 export function clickElementById(id) {
@@ -7194,7 +7331,7 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
 
     const uniqueWarnings = [...new Set(warnings)];
     const manifest = {
-        publisherStudioVersion: '1.0.79',
+        publisherStudioVersion: '1.0.81',
         kind: options.mode,
         generatedUtc: new Date().toISOString(),
         assetCount,
@@ -7220,6 +7357,70 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
     };
 }
 
+
+
+    const mediaConverterDropBindings = new WeakMap();
+
+    function unbindMediaConverterDrop(element) {
+        if (!element) return;
+        const binding = mediaConverterDropBindings.get(element);
+        if (!binding) return;
+        element.removeEventListener("dragenter", binding.dragenter);
+        element.removeEventListener("dragover", binding.dragover);
+        element.removeEventListener("dragleave", binding.dragleave);
+        element.removeEventListener("drop", binding.drop);
+        element.classList.remove("drag-active");
+        mediaConverterDropBindings.delete(element);
+    }
+
+    function bindMediaConverterDrop(element, dotNetReference) {
+        if (!element || !dotNetReference) return false;
+        unbindMediaConverterDrop(element);
+        let depth = 0;
+        const dragenter = event => {
+            if (!event.dataTransfer?.types?.includes("Files")) return;
+            event.preventDefault();
+            depth += 1;
+            element.classList.add("drag-active");
+        };
+        const dragover = event => {
+            if (!event.dataTransfer?.types?.includes("Files")) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+            element.classList.add("drag-active");
+        };
+        const dragleave = event => {
+            event.preventDefault();
+            depth = Math.max(0, depth - 1);
+            if (depth === 0) element.classList.remove("drag-active");
+        };
+        const drop = async event => {
+            event.preventDefault();
+            depth = 0;
+            element.classList.remove("drag-active");
+            const file = event.dataTransfer?.files?.[0];
+            if (!file) return;
+            try {
+                const assetId = crypto.randomUUID();
+                const response = await fetch(`/api/assets/drop/${assetId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": file.type || "application/octet-stream" },
+                    body: file
+                });
+                if (!response.ok) throw new Error(await response.text() || `Media upload failed (${response.status}).`);
+                await dotNetReference.invokeMethodAsync("ReceiveDroppedMedia", assetId, file.name || "dropped-media", file.type || "application/octet-stream");
+            } catch (error) {
+                await dotNetReference.invokeMethodAsync("ReceiveMediaDropError", String(error?.message || error || "The dropped media could not be loaded.")).catch(() => {});
+            }
+        };
+        const binding = { dragenter, dragover, dragleave, drop };
+        mediaConverterDropBindings.set(element, binding);
+        element.addEventListener("dragenter", dragenter);
+        element.addEventListener("dragover", dragover);
+        element.addEventListener("dragleave", dragleave);
+        element.addEventListener("drop", drop);
+        return true;
+    }
 
 window.publisherStudio = {
     setDocumentDirty(value) { publisherDocumentDirty = Boolean(value); },
@@ -7255,6 +7456,9 @@ window.publisherStudio = {
         root?.__publisherSignalRuntime?.reset?.();
     },
 
+    panelStudioPoint(element, clientX, clientY) { return panelStudioPoint(element, clientX, clientY); },
+    bindPanelStudioDropSurface(element) { return bindPanelStudioDropSurface(element); },
+    unbindPanelStudioDropSurface(element) { unbindPanelStudioDropSurface(element); },
     clickElement(id) { clickElementById(id); },
     focusElement(id) {
         const element = document.getElementById(id);
@@ -7462,3 +7666,6 @@ window.publisherStudio = {
         try { window.print(); } finally { setTimeout(cleanup, 1500); }
     }
 };
+
+window.publisherStudio.bindMediaConverterDrop = bindMediaConverterDrop;
+window.publisherStudio.unbindMediaConverterDrop = unbindMediaConverterDrop;

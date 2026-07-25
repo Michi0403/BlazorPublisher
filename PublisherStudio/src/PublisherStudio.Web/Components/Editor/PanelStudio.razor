@@ -1,51 +1,101 @@
 @namespace PublisherStudio.Components.Editor
+@implements IAsyncDisposable
 @inject PanelDocumentService Panels
 @inject PublicationFileService Files
-@inject PublicationDataService Data
 @inject PublicationComponentService Components
+@inject IJSRuntime JS
 
 @if (Visible && _draft is not null)
 {
-    <div class="modal-backdrop data-modal-backdrop">
+    <div class="modal-backdrop data-modal-backdrop panel-studio-backdrop">
         <section class="data-visual-editor-dialog panel-studio-dialog" role="dialog" aria-modal="true" aria-label="Panel Studio">
             <header>
                 <div>
                     <strong>Panel / Div Studio</strong>
-                    <span>Compose reusable views, dashboards, nested panels and isolated interactive HTML from the same publication components.</span>
+                    <span>Build reusable live modules from the same components, data connections and web runtimes used by the Mainframe and exports.</span>
                 </div>
                 <button type="button" class="window-close" @onclick="Cancel">×</button>
             </header>
-            <DxRibbon CssClass="data-visual-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
-                <DxRibbonTab Text="Panel">
-                    <DxRibbonGroup Text="Views">
+
+            <DxRibbon CssClass="data-visual-editor-ribbon categorized-ribbon panel-studio-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text="Home">
+                    <DxRibbonGroup Text="Views" IconCssClass="pub-icon pub-icon-page">
                         <DxRibbonItem Text="Add view" IconCssClass="pub-icon pub-icon-page" Click="AddView" />
-                        <DxRibbonItem Text="Duplicate view" Click="DuplicateView" Enabled="@(CurrentView is not null)" />
-                        <DxRibbonItem Text="Delete view" Click="DeleteView" Enabled="@(_draft.Views.Count > 1)" />
+                        <DxRibbonItem Text="Duplicate view" IconCssClass="pub-icon pub-icon-copy" Click="DuplicateView" Enabled="@(CurrentView is not null)" />
+                        <DxRibbonItem Text="Delete view" IconCssClass="pub-icon pub-icon-delete" Click="DeleteView" Enabled="@(_draft.Views.Count > 1)" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Publisher components">
+                    <DxRibbonGroup Text="Designer" IconCssClass="pub-icon pub-icon-select">
+                        <DxRibbonItem Text="@(_interactionPreview ? "✓ Test interactions" : "Arrange components")" IconCssClass="pub-icon pub-icon-select" Click="ToggleInteractionPreview" />
+                        <DxRibbonItem Text="Refresh preview" IconCssClass="pub-icon pub-icon-refresh" Click="RefreshPreview" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Layer" IconCssClass="pub-icon pub-icon-layers">
+                        <DxRibbonItem Text="Duplicate" IconCssClass="pub-icon pub-icon-copy" Click="DuplicateElement" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Bring forward" IconCssClass="pub-icon pub-icon-up" Click="MoveElementUp" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Send backward" IconCssClass="pub-icon pub-icon-down" Click="MoveElementDown" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Click="DeleteElement" Enabled="@(SelectedElement is not null)" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Reusable module" IconCssClass="pub-icon pub-icon-panel">
+                        <DxRibbonItem Text="Save/update module" IconCssClass="pub-icon pub-icon-save" Click="SaveSelectedAsTemplate" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Save as new module" IconCssClass="pub-icon pub-icon-copy" Click="SaveSelectedAsNewTemplate" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Delete saved module" IconCssClass="pub-icon pub-icon-delete" Click="DeleteSelectedTemplate" Enabled="@(_selectedTemplateId is not null)" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+                <DxRibbonTab Text="Insert">
+                    <DxRibbonGroup Text="Content">
                         <DxRibbonItem Text="Text" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
+                        <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" Click="AddPicture" />
+                        <DxRibbonItem Text="Video" IconCssClass="pub-icon pub-icon-video" Click="AddVideo" />
+                        <DxRibbonItem Text="Audio" IconCssClass="pub-icon pub-icon-audio" Click="AddAudio" />
+                        <DxRibbonItem Text="Shape" IconCssClass="pub-icon pub-icon-shape" Click="AddShape" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Data">
                         <DxRibbonItem Text="KPI" IconCssClass="pub-icon pub-icon-chart" Click="AddKpi" />
                         <DxRibbonItem Text="Chart" IconCssClass="pub-icon pub-icon-chart" Click="AddChart" />
                         <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-data" Click="AddTable" />
                         <DxRibbonItem Text="Data Grid" IconCssClass="pub-icon pub-icon-data" Click="AddDataGrid" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Interactive">
                         <DxRibbonItem Text="Button" IconCssClass="pub-icon pub-icon-button" Click="AddButton" />
                         <DxRibbonItem Text="Menu" IconCssClass="pub-icon pub-icon-menu" Click="AddMenu" />
-                        <DxRibbonItem Text="Live camera" IconCssClass="pub-icon pub-icon-video" Click="AddCamera" />
+                        <DxRibbonItem Text="Chat" IconCssClass="pub-icon pub-icon-chat" Click="AddChat" />
+                        <DxRibbonItem Text="Map" IconCssClass="pub-icon pub-icon-map" Click="AddMap" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Web composition">
+                    <DxRibbonGroup Text="Live and web">
+                        <DxRibbonItem Text="Live camera" IconCssClass="pub-icon pub-icon-video" Click="AddCamera" />
+                        <DxRibbonItem Text="Screen capture" IconCssClass="pub-icon pub-icon-screen" Click="AddScreen" />
                         <DxRibbonItem Text="HTML experience" IconCssClass="pub-icon pub-icon-web" Click="AddHtml" />
                         <DxRibbonItem Text="Nested panel" IconCssClass="pub-icon pub-icon-panel" Click="AddNestedPanel" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Layer">
-                        <DxRibbonItem Text="Duplicate" Click="DuplicateElement" Enabled="@(SelectedElement is not null)" />
-                        <DxRibbonItem Text="Up" Click="MoveElementUp" Enabled="@(SelectedElement is not null)" />
-                        <DxRibbonItem Text="Down" Click="MoveElementDown" Enabled="@(SelectedElement is not null)" />
-                        <DxRibbonItem Text="Delete" Click="DeleteElement" Enabled="@(SelectedElement is not null)" />
-                    </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
+
+            <div class="panel-component-ribbon" aria-label="Draggable panel components">
+                @foreach (var category in PaletteTools.GroupBy(tool => tool.Category))
+                {
+                    <section class="panel-component-ribbon-group">
+                        <strong>@category.Key</strong>
+                        <div>
+                            @foreach (var tool in category)
+                            {
+                                <button type="button"
+                                        class="panel-component-tool @(_selectedTemplateId == tool.TemplateId ? "selected-template" : null) @(_dragToolId == tool.Id ? "dragging" : null)"
+                                        draggable="true"
+                                        title="@tool.Description"
+                                        @ondragstart="() => BeginPaletteDrag(tool)"
+                                        @ondragend="EndDrag"
+                                        @onclick="() => AddTool(tool.Id)">
+                                    <span class="@tool.IconCssClass"></span>
+                                    <b>@tool.Name</b>
+                                    <small>@tool.Description</small>
+                                </button>
+                            }
+                        </div>
+                    </section>
+                }
+            </div>
+
             <div class="data-visual-editor-body panel-studio-grid">
-                <aside class="visual-type-list">
+                <aside class="visual-type-list panel-studio-sidebar">
                     <strong>Views</strong>
                     @foreach (var view in _draft.Views)
                     {
@@ -65,63 +115,270 @@
                             }
                         </select>
                     </label>
+                    <label>Layout
+                        <select value="@_draft.LayoutMode" @onchange="ChangeLayoutMode">
+                            @foreach (var mode in Enum.GetValues<PublicationPanelLayoutMode>())
+                            {
+                                <option value="@mode">@mode</option>
+                            }
+                        </select>
+                    </label>
                     <label>Panel name<input value="@_draft.Name" @onchange="ChangePanelName" /></label>
                     <label>View name<input value="@CurrentView?.Name" @onchange="ChangeViewName" /></label>
+                    <label>Canvas width<input type="number" min="16" step="1" value="@Inv(_draft.CanvasWidth)" @onchange="args => ChangeNumber(args, value => _draft.CanvasWidth = value)" /></label>
+                    <label>Canvas height<input type="number" min="9" step="1" value="@Inv(_draft.CanvasHeight)" @onchange="args => ChangeNumber(args, value => _draft.CanvasHeight = value)" /></label>
                     <label class="panel-html-import">Import standalone HTML into this view
                         <InputFile accept=".html,.htm,text/html" OnChange="ImportHtml" />
                     </label>
+                    @if (Document.ComponentTemplates.Count > 0)
+                    {
+                        <strong>Saved modules</strong>
+                        @foreach (var template in Document.ComponentTemplates.OrderBy(template => template.Category).ThenBy(template => template.Name))
+                        {
+                            <button type="button" class="@(_selectedTemplateId == template.Id ? "selected" : null)" @onclick="() => SelectTemplate(template.Id)">
+                                <strong>@template.Name</strong>
+                                <small>@template.Category · @template.Prototype.Kind</small>
+                            </button>
+                        }
+                    }
                     @if (!string.IsNullOrWhiteSpace(_error))
                     {
                         <div class="inline-error">@_error</div>
                     }
                 </aside>
-                <main class="visual-settings">
-                    <div class="panel-studio-canvas">
-                        <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="true" />
+
+                <main class="visual-settings panel-studio-workspace">
+                    <div class="panel-studio-canvas-shell @(_interactionPreview ? "interaction-preview" : "arrange-preview")">
+                        <div class="panel-studio-mode-banner">
+                            <b>@(_interactionPreview ? "Interaction test" : "Arrange mode")</b>
+                            <span>@(_interactionPreview ? "Live components receive pointer input. Switch back to Arrange to move them." : "Drag a toolbar component onto the canvas or drag an existing component to move it.")</span>
+                        </div>
+                        <div class="panel-studio-canvas" @ref="_canvasElement"
+                             @ondragover:preventDefault
+                             @ondrop="DropDraggedElement" @ondrop:preventDefault>
+                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="true" />
+
+                            @if (!_interactionPreview && CurrentView is not null)
+                            {
+                                <div class="panel-studio-hit-layer" aria-label="Panel component arrangement surface">
+                                    @foreach (var element in CurrentView.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
+                                    {
+                                        <button type="button"
+                                                class="panel-studio-hitbox @(element.Id == _selectedElementId ? "selected" : null)"
+                                                style="@HitStyle(element)"
+                                                draggable="true"
+                                                data-panel-element-id="@element.Id"
+                                                title="Drag @element.Name"
+                                                @onclick="() => SelectElement(element.Id)"
+                                                @ondragstart="() => BeginExistingDrag(element.Id)"
+                                                @ondragend="EndDrag">
+                                            <span>@element.Name</span>
+                                            <i data-resize="nw" title="Resize from top left"></i>
+                                            <i data-resize="ne" title="Resize from top right"></i>
+                                            <i data-resize="se" title="Resize from bottom right"></i>
+                                            <i data-resize="sw" title="Resize from bottom left"></i>
+                                        </button>
+                                    }
+                                </div>
+                            }
+
+                            @if (_dragPrototype is not null)
+                            {
+                                <div class="panel-studio-drop-layer">
+                                    <div class="panel-studio-drag-ghost" style="@DragGhostStyle">
+                                        <PanelElementPreview Item="_dragPrototype" />
+                                        <span>@_dragPrototype.Name</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     </div>
-                    <p class="field-help">The preview uses the same DataVisual, DevExtreme, media, live-source, HTML and nested-panel renderers used by the Mainframe and HTML exports.</p>
+                    <p class="field-help">The canvas uses the same DataVisual, DevExtreme, media, live-source, HTML and nested-panel renderers used by Mainframe, presentation, standalone HTML and structured website export.</p>
                 </main>
-                <aside class="visual-settings">
+
+                <aside class="visual-settings panel-studio-inspector">
                     <strong>Components in @CurrentView?.Name</strong>
                     <div class="panel-studio-element-list">
                         @foreach (var element in CurrentView?.Elements.OrderByDescending(element => element.ZIndex) ?? Enumerable.Empty<PublicationElement>())
                         {
-                            <button type="button" class="@(element.Id == _selectedElementId ? "selected" : null)" @onclick="() => _selectedElementId = element.Id">
+                            <button type="button" class="@(element.Id == _selectedElementId ? "selected" : null)" @onclick="() => SelectElement(element.Id)">
                                 <strong>@element.Name</strong>
                                 <small>@element.Kind · @element.X.ToString("0.#")/@element.Y.ToString("0.#")</small>
                             </button>
                         }
                     </div>
+
                     @if (SelectedElement is { } selected)
                     {
-                        <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
-                            <label style="grid-column:1/-1">Name<input value="@selected.Name" @onchange="ChangeElementName" /></label>
-                            <label>X<input type="number" step="1" value="@selected.X" @onchange="args => ChangeNumber(args, value => selected.X = value)" /></label>
-                            <label>Y<input type="number" step="1" value="@selected.Y" @onchange="args => ChangeNumber(args, value => selected.Y = value)" /></label>
-                            <label>Width<input type="number" min="1" step="1" value="@selected.Width" @onchange="args => ChangeNumber(args, value => selected.Width = value)" /></label>
-                            <label>Height<input type="number" min="1" step="1" value="@selected.Height" @onchange="args => ChangeNumber(args, value => selected.Height = value)" /></label>
-                        </div>
+                        <section class="panel-inspector-section">
+                            <strong>Layout and identity</strong>
+                            <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
+                                <label style="grid-column:1/-1">Name<input value="@selected.Name" @onchange="ChangeElementName" /></label>
+                                <label>X<input type="number" step="1" value="@Inv(selected.X)" @onchange="args => ChangeNumber(args, value => selected.X = value)" /></label>
+                                <label>Y<input type="number" step="1" value="@Inv(selected.Y)" @onchange="args => ChangeNumber(args, value => selected.Y = value)" /></label>
+                                <label>Width<input type="number" min="1" step="1" value="@Inv(selected.Width)" @onchange="args => ChangeNumber(args, value => selected.Width = value)" /></label>
+                                <label>Height<input type="number" min="1" step="1" value="@Inv(selected.Height)" @onchange="args => ChangeNumber(args, value => selected.Height = value)" /></label>
+                                <label>Rotation<input type="number" step="1" value="@Inv(selected.Rotation)" @onchange="args => ChangeNumber(args, value => selected.Rotation = value)" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@selected.Visible" @onchange="args => selected.Visible = AsBool(args)" /> Visible</label>
+                            </div>
+                        </section>
+
+                        @if (selected is DataVisualElement visual)
+                        {
+                            <section class="panel-inspector-section">
+                                <strong>Data visual</strong>
+                                <label>Visual type
+                                    <select value="@visual.VisualKind" @onchange="ChangeVisualKind">
+                                        @foreach (var kind in Enum.GetValues<DataVisualKind>())
+                                        {
+                                            <option value="@kind">@kind</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Title<input value="@visual.Title" @onchange="args => visual.Title = Text(args)" /></label>
+                                <label>Data source
+                                    <select value="@visual.DataObjectId" @onchange="ChangeVisualDataObject">
+                                        @foreach (var dataObject in Document.DataObjects)
+                                        {
+                                            <option value="@dataObject.Id">@dataObject.Name</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Argument field<input value="@visual.ArgumentField" @onchange="args => visual.ArgumentField = Text(args)" /></label>
+                                <label>Value fields<input value="@string.Join(", ", visual.ValueFields)" @onchange="ChangeVisualValueFields" /></label>
+                                <label>Target field<input value="@visual.TargetField" @onchange="args => visual.TargetField = Text(args)" /></label>
+                                <label>Rows<input type="number" min="1" max="10000" value="@visual.RowLimit" @onchange="args => ChangeInt(args, value => visual.RowLimit = value)" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@visual.ShowLegend" @onchange="args => visual.ShowLegend = AsBool(args)" /> Legend</label>
+                                <label class="check-row"><input type="checkbox" checked="@visual.ShowLabels" @onchange="args => visual.ShowLabels = AsBool(args)" /> Labels</label>
+                            </section>
+                        }
+
+                        @if (selected is DevExtremeComponentElement component)
+                        {
+                            <section class="panel-inspector-section">
+                                <strong>Interactive component</strong>
+                                <label>Component
+                                    <select value="@component.ComponentKind" @onchange="ChangeComponentKind">
+                                        @foreach (var kind in Enum.GetValues<PublicationComponentKind>())
+                                        {
+                                            <option value="@kind">@kind</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Title<input value="@component.Title" @onchange="args => component.Title = Text(args)" /></label>
+                                <label>Data mode
+                                    <select value="@component.Connection.Mode" @onchange="ChangeComponentDataMode">
+                                        @foreach (var mode in Enum.GetValues<PublicationComponentDataMode>())
+                                        {
+                                            <option value="@mode">@mode</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Publication data
+                                    <select value="@component.Connection.DataObjectId" @onchange="ChangeComponentDataObject">
+                                        <option value="@Guid.Empty">None</option>
+                                        @foreach (var dataObject in Document.DataObjects)
+                                        {
+                                            <option value="@dataObject.Id">@dataObject.Name</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>REST/OData URL<input value="@component.Connection.Url" @onchange="args => component.Connection.Url = Text(args)" /></label>
+                                <label>JSON path<input value="@component.Connection.JsonPath" @onchange="args => component.Connection.JsonPath = Text(args)" /></label>
+                                <label>Advanced DevExtreme options<textarea rows="5" value="@component.AdvancedOptionsJson" @onchange="args => component.AdvancedOptionsJson = Text(args)"></textarea></label>
+                                <label>Custom CSS<textarea rows="4" value="@component.CustomCss" @onchange="args => component.CustomCss = Text(args)"></textarea></label>
+                                @if (component.ComponentKind == PublicationComponentKind.Chat)
+                                {
+                                    <label>Chat surface
+                                        <select value="@component.ChatDisplayMode" @onchange="ChangeChatDisplayMode">
+                                            @foreach (var mode in Enum.GetValues<PublicationChatDisplayMode>())
+                                            {
+                                                <option value="@mode">@mode</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <label class="check-row"><input type="checkbox" checked="@component.ChatAllowSending" @onchange="args => component.ChatAllowSending = AsBool(args)" /> Allow operator sending</label>
+                                }
+                            </section>
+                        }
+
+                        @if (selected is LiveSourceElement live)
+                        {
+                            <section class="panel-inspector-section">
+                                <strong>Live source</strong>
+                                <label>Source
+                                    <select value="@live.SourceKind" @onchange="ChangeLiveSourceKind">
+                                        @foreach (var kind in Enum.GetValues<PublicationLiveSourceKind>())
+                                        {
+                                            <option value="@kind">@kind</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Capture width<input type="number" min="1" value="@live.CaptureWidth" @onchange="args => ChangeInt(args, value => live.CaptureWidth = value)" /></label>
+                                <label>Capture height<input type="number" min="1" value="@live.CaptureHeight" @onchange="args => ChangeInt(args, value => live.CaptureHeight = value)" /></label>
+                                <label>Frame rate<input type="number" min="1" max="240" value="@live.CaptureFrameRate" @onchange="args => ChangeInt(args, value => live.CaptureFrameRate = value)" /></label>
+                                <label class="check-row"><input type="checkbox" checked="@live.Muted" @onchange="args => live.Muted = AsBool(args)" /> Muted</label>
+                            </section>
+                        }
+
+                        @if (selected is ImageFrameElement or PublicationMediaElement)
+                        {
+                            <section class="panel-inspector-section">
+                                <strong>Media source</strong>
+                                <InputFile OnChange="ReplaceSelectedMedia" accept="image/*,video/*,audio/*,.mkv,.mov,.avi,.mxf,.heic,.heif,.tif,.tiff,.flac,.wav" />
+                                <p class="field-help">PublisherStudio imposes no application file-size ceiling. Very large embedded media remains the user's memory and disk responsibility.</p>
+                            </section>
+                        }
+
                         @if (selected is HtmlEmbedElement html)
                         {
-                            <label>HTML<textarea rows="7" value="@html.Html" @onchange="args => html.Html = args.Value?.ToString() ?? string.Empty"></textarea></label>
-                            <label>CSS<textarea rows="5" value="@html.Css" @onchange="args => html.Css = args.Value?.ToString() ?? string.Empty"></textarea></label>
-                            <label>JavaScript<textarea rows="5" value="@html.JavaScript" @onchange="args => html.JavaScript = args.Value?.ToString() ?? string.Empty"></textarea></label>
-                            <label class="check-row"><input type="checkbox" checked="@html.AllowScripts" @onchange="args => html.AllowScripts = AsBool(args)" /> Enable JavaScript inside sandbox</label>
-                            <label class="check-row"><input type="checkbox" checked="@html.AllowForms" @onchange="args => html.AllowForms = AsBool(args)" /> Allow forms</label>
-                            <label class="check-row"><input type="checkbox" checked="@html.AllowPopups" @onchange="args => html.AllowPopups = AsBool(args)" /> Allow popups</label>
-                            <p class="field-help">Imported scripts stay disabled until you opt in. Each HTML experience runs in its own iframe sandbox.</p>
+                            <section class="panel-inspector-section">
+                                <strong>HTML experience</strong>
+                                <label>HTML<textarea rows="7" value="@html.Html" @onchange="args => html.Html = Text(args)"></textarea></label>
+                                <label>CSS<textarea rows="5" value="@html.Css" @onchange="args => html.Css = Text(args)"></textarea></label>
+                                <label>JavaScript<textarea rows="5" value="@html.JavaScript" @onchange="args => html.JavaScript = Text(args)"></textarea></label>
+                                <label class="check-row"><input type="checkbox" checked="@html.AllowScripts" @onchange="args => html.AllowScripts = AsBool(args)" /> Enable JavaScript inside sandbox</label>
+                                <label class="check-row"><input type="checkbox" checked="@html.AllowForms" @onchange="args => html.AllowForms = AsBool(args)" /> Allow forms</label>
+                                <label class="check-row"><input type="checkbox" checked="@html.AllowPopups" @onchange="args => html.AllowPopups = AsBool(args)" /> Allow popups</label>
+                                <p class="field-help">Imported scripts stay disabled until explicitly enabled. Each experience remains isolated in its own iframe sandbox.</p>
+                            </section>
                         }
+
                         @if (selected is PanelElement nested)
                         {
-                            <label>Nested navigation
-                                <select value="@nested.NavigationMode" @onchange="ChangeNestedNavigation">
-                                    @foreach (var mode in Enum.GetValues<PublicationPanelNavigationMode>())
-                                    {
-                                        <option value="@mode">@mode</option>
-                                    }
-                                </select>
-                            </label>
+                            <section class="panel-inspector-section">
+                                <strong>Nested panel</strong>
+                                <label>Nested navigation
+                                    <select value="@nested.NavigationMode" @onchange="ChangeNestedNavigation">
+                                        @foreach (var mode in Enum.GetValues<PublicationPanelNavigationMode>())
+                                        {
+                                            <option value="@mode">@mode</option>
+                                        }
+                                    </select>
+                                </label>
+                            </section>
                         }
+
+                        <details class="panel-inspector-section panel-advanced-json">
+                            <summary>Complete component configuration</summary>
+                            <p class="field-help">This is the complete persisted module state, including data/web connections, chart settings, fields, actions, filters and advanced options.</p>
+                            <textarea rows="12" @bind="_advancedElementJson"></textarea>
+                            <div class="panel-inline-actions">
+                                <button type="button" @onclick="RefreshAdvancedJson">Refresh JSON</button>
+                                <button type="button" class="primary" @onclick="ApplyAdvancedJson">Apply JSON</button>
+                            </div>
+                        </details>
+
+                        <section class="panel-inspector-section">
+                            <strong>Save for reuse</strong>
+                            <label>Module name<input @bind="_templateName" /></label>
+                            <label>Category<input @bind="_templateCategory" /></label>
+                            <label>Description<textarea rows="3" @bind="_templateDescription"></textarea></label>
+                            <div class="panel-inline-actions">
+                                <button type="button" class="primary" @onclick="SaveSelectedAsTemplate">@(_selectedTemplateId is null ? "Save configured module" : "Update saved module")</button>
+                                <button type="button" @onclick="SaveSelectedAsNewTemplate">Save as new</button>
+                            </div>
+                        </section>
                     }
                 </aside>
             </div>
@@ -144,16 +401,31 @@
     private PanelElement? _draft;
     private Guid _selectedViewId;
     private Guid? _selectedElementId;
+    private Guid? _selectedTemplateId;
     private Guid? _loadedId;
     private string _error = string.Empty;
+    private bool _interactionPreview;
+    private string _dragToolId = string.Empty;
+    private ElementReference _canvasElement;
+    private DotNetObjectReference<PanelStudio>? _self;
+    private Guid? _dragExistingId;
+    private PublicationElement? _dragPrototype;
+    private bool _dropSurfaceBound;
+    private string _advancedElementJson = string.Empty;
+    private string _templateName = string.Empty;
+    private string _templateCategory = "My modules";
+    private string _templateDescription = string.Empty;
+
     private PublicationPanelView? CurrentView => _draft?.Views.FirstOrDefault(view => view.Id == _selectedViewId) ?? _draft?.ActiveView;
     private PublicationElement? SelectedElement => CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
+    private IReadOnlyList<PanelComponentToolDescriptor> PaletteTools => Panels.GetComponentTools(Document);
 
     protected override void OnParametersSet()
     {
         if (!Visible)
         {
             _loadedId = null;
+            _dropSurfaceBound = false;
             return;
         }
 
@@ -165,23 +437,47 @@
         _selectedElementId = CurrentView?.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id;
         _loadedId = id;
         _error = string.Empty;
+        _interactionPreview = false;
+        RefreshAdvancedJson();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Visible || _draft is null || _dropSurfaceBound) return;
+        try
+        {
+            _self ??= DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self);
+            _dropSurfaceBound = true;
+        }
+        catch (JSException exception)
+        {
+            _error = $"The Panel Studio drop preview could not be initialized: {exception.Message}";
+        }
     }
 
     private void SelectView(Guid id)
     {
         _selectedViewId = id;
         if (_draft is not null) _draft.ActiveViewId = id;
-        _selectedElementId = CurrentView?.Elements.LastOrDefault()?.Id;
+        SelectElement(CurrentView?.Elements.LastOrDefault()?.Id);
+    }
+
+    private void SelectElement(Guid? id)
+    {
+        _selectedElementId = id;
+        if (SelectedElement is { } selected)
+        {
+            _templateName = selected.Name;
+            _templateDescription = $"Reusable {selected.Kind} configured in Panel Studio.";
+        }
+        RefreshAdvancedJson();
     }
 
     private void AddView()
     {
         if (_draft is null) return;
-        var view = new PublicationPanelView
-        {
-            Name = $"View {_draft.Views.Count + 1}",
-            Slug = $"view-{_draft.Views.Count + 1}"
-        };
+        var view = new PublicationPanelView { Name = $"View {_draft.Views.Count + 1}", Slug = $"view-{_draft.Views.Count + 1}" };
         _draft.Views.Add(view);
         SelectView(view.Id);
     }
@@ -207,50 +503,144 @@
         SelectView(_draft.Views[0].Id);
     }
 
-    private void AddText() => AddElement(new TextFrameElement
-    {
-        Name = "Text",
-        PreviewHtml = "<h2 style=\"margin:0\">Panel text</h2><p>Shared authored content.</p>",
-        X = 8,
-        Y = 8,
-        Width = 60,
-        Height = 22,
-        Background = "#ffffffcc",
-        BorderColor = "#cbd5e1",
-        BorderWidth = .2
-    });
+    private void AddText() => AddTool("text");
+    private void AddPicture() => AddTool("picture");
+    private void AddVideo() => AddTool("video");
+    private void AddAudio() => AddTool("audio");
+    private void AddShape() => AddTool("shape");
+    private void AddKpi() => AddTool("kpi");
+    private void AddChart() => AddTool("chart");
+    private void AddTable() => AddTool("table");
+    private void AddDataGrid() => AddTool("datagrid");
+    private void AddButton() => AddTool("button");
+    private void AddMenu() => AddTool("menu");
+    private void AddChat() => AddTool("chat");
+    private void AddMap() => AddTool("map");
+    private void AddCamera() => AddTool("camera");
+    private void AddScreen() => AddTool("screen");
+    private void AddHtml() => AddTool("html");
+    private void AddNestedPanel() => AddTool("panel");
 
-    private void AddKpi() => AddVisual(DataVisualKind.KpiProgress, "KPI");
-    private void AddChart() => AddVisual(DataVisualKind.CartesianChart, "Chart");
-    private void AddTable() => AddVisual(DataVisualKind.DataTable, "Data table");
-    private void AddDataGrid() => AddComponent(PublicationComponentKind.DataGrid);
-    private void AddButton() => AddComponent(PublicationComponentKind.Button);
-    private void AddMenu() => AddComponent(PublicationComponentKind.Menu);
-
-    private void AddComponent(PublicationComponentKind kind)
+    private void AddTool(string toolId)
     {
-        var element = Components.Create(Document, kind);
-        element.X = 8;
-        element.Y = 8;
+        var element = CreateToolElement(toolId);
+        if (element is null || _draft is null) return;
+        element.X = Math.Max(0, (_draft.CanvasWidth - element.Width) / 2);
+        element.Y = Math.Max(0, (_draft.CanvasHeight - element.Height) / 2);
         AddElement(element);
     }
 
-    private void AddCamera() => AddElement(new LiveSourceElement
+    private PublicationElement? CreateToolElement(string toolId)
     {
-        Name = "Live camera",
-        SourceKind = PublicationLiveSourceKind.Camera,
-        X = 8,
-        Y = 8,
-        Width = 72,
-        Height = 42,
-        CaptureWidth = 1920,
-        CaptureHeight = 1080,
-        CaptureFrameRate = 30,
-        Muted = true
-    });
+        if (toolId.StartsWith("template:", StringComparison.OrdinalIgnoreCase)
+            && Guid.TryParse(toolId["template:".Length..], out var templateId))
+        {
+            var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == templateId);
+            if (template is null) return null;
+            _selectedTemplateId = template.Id;
+            var clone = Files.CloneElement(template.Prototype);
+            clone.Id = Guid.NewGuid();
+            return clone;
+        }
+        return Panels.CreateComponentTool(Document, toolId);
+    }
 
-    private void AddHtml() => AddElement(new HtmlEmbedElement { Name = "HTML experience", X = 8, Y = 8, Width = 100, Height = 58 });
-    private void AddNestedPanel() => AddElement(Panels.CreateBlank("Nested panel"));
+    private void BeginPaletteDrag(PanelComponentToolDescriptor tool)
+    {
+        _dragToolId = tool.Id;
+        _dragExistingId = null;
+        _dragPrototype = CreateToolElement(tool.Id);
+    }
+
+    private void BeginExistingDrag(Guid id)
+    {
+        SelectElement(id);
+        _dragToolId = string.Empty;
+        _dragExistingId = id;
+        _dragPrototype = SelectedElement is null ? null : Files.CloneElement(SelectedElement);
+    }
+
+    private async Task DropDraggedElement(DragEventArgs args)
+    {
+        if (_draft is null || CurrentView is null || _dragPrototype is null) return;
+        var point = await ResolveCanvasPoint(args);
+        var pointX = point.X * Math.Max(1, _draft.CanvasWidth);
+        var pointY = point.Y * Math.Max(1, _draft.CanvasHeight);
+        if (_dragExistingId is { } existingId && CurrentView.Elements.FirstOrDefault(element => element.Id == existingId) is { } existing)
+        {
+            existing.X = Math.Clamp(pointX - existing.Width / 2, 0, Math.Max(0, _draft.CanvasWidth - existing.Width));
+            existing.Y = Math.Clamp(pointY - existing.Height / 2, 0, Math.Max(0, _draft.CanvasHeight - existing.Height));
+            SelectElement(existing.Id);
+        }
+        else
+        {
+            var element = _dragPrototype;
+            element.Id = Guid.NewGuid();
+            element.X = Math.Clamp(pointX - element.Width / 2, 0, Math.Max(0, _draft.CanvasWidth - element.Width));
+            element.Y = Math.Clamp(pointY - element.Height / 2, 0, Math.Max(0, _draft.CanvasHeight - element.Height));
+            AddElement(element);
+        }
+        EndDrag();
+    }
+
+    [JSInvokable]
+    public Task CommitPanelElementBounds(string elementId, double x, double y, double width, double height)
+    {
+        if (_draft is null || CurrentView is null || !Guid.TryParse(elementId, out var id)) return Task.CompletedTask;
+        var element = CurrentView.Elements.FirstOrDefault(candidate => candidate.Id == id);
+        if (element is null) return Task.CompletedTask;
+        var canvasWidth = Math.Max(1, _draft.CanvasWidth);
+        var canvasHeight = Math.Max(1, _draft.CanvasHeight);
+        element.Width = Math.Clamp(width * canvasWidth, 1, canvasWidth);
+        element.Height = Math.Clamp(height * canvasHeight, 1, canvasHeight);
+        element.X = Math.Clamp(x * canvasWidth, 0, Math.Max(0, canvasWidth - element.Width));
+        element.Y = Math.Clamp(y * canvasHeight, 0, Math.Max(0, canvasHeight - element.Height));
+        _selectedElementId = element.Id;
+        RefreshAdvancedJson();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task<PanelCanvasPoint> ResolveCanvasPoint(DragEventArgs args)
+    {
+        try
+        {
+            return await JS.InvokeAsync<PanelCanvasPoint>("publisherStudio.panelStudioPoint", _canvasElement, args.ClientX, args.ClientY);
+        }
+        catch (JSException)
+        {
+            var x = Math.Clamp(args.OffsetX / 960d, 0, 1);
+            var y = Math.Clamp(args.OffsetY / 540d, 0, 1);
+            return new PanelCanvasPoint { X = x, Y = y };
+        }
+    }
+
+    private void EndDrag()
+    {
+        _dragToolId = string.Empty;
+        _dragExistingId = null;
+        _dragPrototype = null;
+    }
+
+    private string DragGhostStyle
+    {
+        get
+        {
+            if (_draft is null || _dragPrototype is null) return "display:none";
+            var width = Math.Clamp(_dragPrototype.Width / Math.Max(1, _draft.CanvasWidth) * 100, 1, 100);
+            var height = Math.Clamp(_dragPrototype.Height / Math.Max(1, _draft.CanvasHeight) * 100, 1, 100);
+            return $"left:50%;top:50%;width:{Inv(width)}%;height:{Inv(height)}%;transform:translate(-50%,-50%)";
+        }
+    }
+
+    private string HitStyle(PublicationElement element)
+    {
+        if (_draft is null) return string.Empty;
+        var left = element.X / Math.Max(1, _draft.CanvasWidth) * 100;
+        var top = element.Y / Math.Max(1, _draft.CanvasHeight) * 100;
+        var width = element.Width / Math.Max(1, _draft.CanvasWidth) * 100;
+        var height = element.Height / Math.Max(1, _draft.CanvasHeight) * 100;
+        return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{element.ZIndex + 10000};transform:rotate({Inv(element.Rotation)}deg)";
+    }
 
     private async Task ImportHtml(InputFileChangeEventArgs args)
     {
@@ -258,20 +648,14 @@
         try
         {
             var file = args.File;
-            await using var source = file.OpenReadStream(16L * 1024 * 1024);
+            await using var source = file.OpenReadStream(long.MaxValue);
             using var reader = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
             var markup = await reader.ReadToEndAsync();
             AddElement(new HtmlEmbedElement
             {
-                Name = Path.GetFileNameWithoutExtension(file.Name),
-                Html = markup,
-                Css = "html,body{margin:0;min-height:100%}",
-                JavaScript = string.Empty,
-                AllowScripts = false,
-                X = 0,
-                Y = 0,
-                Width = _draft?.CanvasWidth ?? 160,
-                Height = _draft?.CanvasHeight ?? 90
+                Name = Path.GetFileNameWithoutExtension(file.Name), Html = markup,
+                Css = "html,body{margin:0;min-height:100%}", JavaScript = string.Empty, AllowScripts = false,
+                X = 0, Y = 0, Width = _draft?.CanvasWidth ?? 160, Height = _draft?.CanvasHeight ?? 90
             });
         }
         catch (Exception exception)
@@ -280,34 +664,41 @@
         }
     }
 
-    private void AddVisual(DataVisualKind kind, string name)
+    private async Task ReplaceSelectedMedia(InputFileChangeEventArgs args)
     {
-        var data = Document.DataObjects.FirstOrDefault();
-        if (data is null)
+        if (SelectedElement is not { } selected) return;
+        _error = string.Empty;
+        try
         {
-            data = Data.CreateSample();
-            Document.DataObjects.Add(data);
+            var file = args.File;
+            await using var source = file.OpenReadStream(long.MaxValue);
+            using var memory = new MemoryStream();
+            await source.CopyToAsync(memory);
+            var mime = PublicationMediaData.NormalizeMimeType(file.ContentType, "application/octet-stream");
+            var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(memory.ToArray())}";
+            switch (selected)
+            {
+                case ImageFrameElement image:
+                    image.DataUrl = dataUrl;
+                    image.OriginalDataUrl = dataUrl;
+                    image.Name = Path.GetFileNameWithoutExtension(file.Name);
+                    break;
+                case PublicationMediaElement media:
+                    media.DataUrl = dataUrl;
+                    media.MimeType = mime;
+                    media.Name = Path.GetFileNameWithoutExtension(file.Name);
+                    media.DurationSeconds = Math.Max(.01, media.DurationSeconds);
+                    media.TrimStartSeconds = 0;
+                    media.TrimEndSeconds = media.DurationSeconds;
+                    media.Segments = [];
+                    break;
+            }
+            RefreshAdvancedJson();
         }
-
-        var columns = Data.ResolveColumns(data).ToArray();
-        var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
-        var value = columns.FirstOrDefault(column => column.ValueKind == PublicationDataValueKind.Number)?.Name
-            ?? columns.Skip(1).FirstOrDefault()?.Name
-            ?? argument;
-        AddElement(new DataVisualElement
+        catch (Exception exception)
         {
-            Name = name,
-            Title = name,
-            VisualKind = kind,
-            DataObjectId = data.Id,
-            ArgumentField = argument,
-            ValueFields = string.IsNullOrWhiteSpace(value) ? [] : [value],
-            TargetField = value,
-            X = 8,
-            Y = 8,
-            Width = 70,
-            Height = kind == DataVisualKind.KpiProgress ? 24 : 48
-        });
+            _error = $"Media import failed: {exception.Message}";
+        }
     }
 
     private void AddElement(PublicationElement element)
@@ -315,8 +706,8 @@
         if (CurrentView is null) return;
         element.ZIndex = CurrentView.Elements.Count + 1;
         CurrentView.Elements.Add(element);
-        _selectedElementId = element.Id;
         if (_draft is not null) Panels.Normalize(Document, _draft);
+        SelectElement(element.Id);
     }
 
     private void DuplicateElement()
@@ -329,14 +720,14 @@
         clone.Y += 4;
         clone.ZIndex = CurrentView.Elements.Count + 1;
         CurrentView.Elements.Add(clone);
-        _selectedElementId = clone.Id;
+        SelectElement(clone.Id);
     }
 
     private void DeleteElement()
     {
         if (CurrentView is null || SelectedElement is null) return;
         CurrentView.Elements.Remove(SelectedElement);
-        _selectedElementId = CurrentView.Elements.LastOrDefault()?.Id;
+        SelectElement(CurrentView.Elements.LastOrDefault()?.Id);
     }
 
     private void MoveElementUp() => MoveElement(1);
@@ -354,50 +745,118 @@
         CurrentView.Elements = ordered;
     }
 
-    private void ChangePanelName(ChangeEventArgs args)
+    private void SelectTemplate(Guid id)
     {
-        if (_draft is not null) _draft.Name = args.Value?.ToString() ?? "Panel";
+        var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == id);
+        if (template is null) return;
+        _selectedTemplateId = template.Id;
+        _templateName = template.Name;
+        _templateCategory = template.Category;
+        _templateDescription = template.Description;
     }
 
-    private void ChangeViewName(ChangeEventArgs args)
+    private void SaveSelectedAsTemplate()
     {
-        if (CurrentView is not null) CurrentView.Name = args.Value?.ToString() ?? "View";
+        if (SelectedElement is null) return;
+        var name = string.IsNullOrWhiteSpace(_templateName) ? SelectedElement.Name : _templateName.Trim();
+        var template = _selectedTemplateId is { } selectedId
+            ? Document.ComponentTemplates.FirstOrDefault(item => item.Id == selectedId)
+            : null;
+        template ??= new PublicationElementTemplate();
+        var isNew = !Document.ComponentTemplates.Contains(template);
+        template.Name = name;
+        template.Description = _templateDescription.Trim();
+        template.Category = string.IsNullOrWhiteSpace(_templateCategory) ? "My modules" : _templateCategory.Trim();
+        template.IconCssClass = IconFor(SelectedElement);
+        template.Prototype = Files.CloneElement(SelectedElement);
+        template.Prototype.Id = Guid.NewGuid();
+        template.ModifiedUtc = DateTimeOffset.UtcNow;
+        Panels.NormalizeTemplate(Document, template);
+        if (isNew) Document.ComponentTemplates.Add(template);
+        SelectTemplate(template.Id);
     }
 
-    private void ChangeElementName(ChangeEventArgs args)
+    private void SaveSelectedAsNewTemplate()
     {
-        if (SelectedElement is not null) SelectedElement.Name = args.Value?.ToString() ?? SelectedElement.Kind.ToString();
+        _selectedTemplateId = null;
+        SaveSelectedAsTemplate();
     }
 
-    private void ChangeNavigation(ChangeEventArgs args)
+    private void DeleteSelectedTemplate()
     {
-        if (_draft is not null && Enum.TryParse<PublicationPanelNavigationMode>(args.Value?.ToString(), out var mode))
-            _draft.NavigationMode = mode;
+        if (_selectedTemplateId is not { } id) return;
+        Document.ComponentTemplates.RemoveAll(template => template.Id == id);
+        _selectedTemplateId = null;
+        _templateName = SelectedElement?.Name ?? string.Empty;
+        _templateCategory = "My modules";
+        _templateDescription = SelectedElement is null ? string.Empty : $"Reusable {SelectedElement.Kind} configured in Panel Studio.";
     }
 
-    private void ChangeNestedNavigation(ChangeEventArgs args)
+    private static string IconFor(PublicationElement element) => element switch
     {
-        if (SelectedElement is PanelElement nested
-            && Enum.TryParse<PublicationPanelNavigationMode>(args.Value?.ToString(), out var mode))
+        TextFrameElement => "pub-icon pub-icon-text",
+        ImageFrameElement => "pub-icon pub-icon-picture",
+        VideoElement => "pub-icon pub-icon-video",
+        AudioElement => "pub-icon pub-icon-audio",
+        DataVisualElement => "pub-icon pub-icon-chart",
+        DevExtremeComponentElement component when component.ComponentKind == PublicationComponentKind.Chat => "pub-icon pub-icon-chat",
+        DevExtremeComponentElement => "pub-icon pub-icon-data",
+        LiveSourceElement => "pub-icon pub-icon-video",
+        HtmlEmbedElement => "pub-icon pub-icon-web",
+        PanelElement => "pub-icon pub-icon-panel",
+        _ => "pub-icon pub-icon-panel"
+    };
+
+    private void RefreshAdvancedJson()
+    {
+        try { _advancedElementJson = SelectedElement is null ? string.Empty : Files.SerializeElement(SelectedElement); }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void ApplyAdvancedJson()
+    {
+        if (CurrentView is null || SelectedElement is null || string.IsNullOrWhiteSpace(_advancedElementJson)) return;
+        try
         {
-            nested.NavigationMode = mode;
+            var replacement = Files.DeserializeElement(_advancedElementJson);
+            replacement.Id = SelectedElement.Id;
+            replacement.ZIndex = SelectedElement.ZIndex;
+            var index = CurrentView.Elements.IndexOf(SelectedElement);
+            CurrentView.Elements[index] = replacement;
+            if (_draft is not null) Panels.Normalize(Document, _draft);
+            SelectElement(replacement.Id);
+            _error = string.Empty;
+        }
+        catch (Exception exception)
+        {
+            _error = $"Component configuration could not be applied: {exception.Message}";
         }
     }
 
-    private void ToggleViewEnabled(ChangeEventArgs args)
-    {
-        if (CurrentView is not null) CurrentView.Enabled = AsBool(args);
-    }
+    private void ToggleInteractionPreview() => _interactionPreview = !_interactionPreview;
+    private void RefreshPreview() { if (_draft is not null) Panels.Normalize(Document, _draft); }
 
-    private static bool AsBool(ChangeEventArgs args) => args.Value is bool value
-        ? value
-        : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
+    private void ChangePanelName(ChangeEventArgs args) { if (_draft is not null) _draft.Name = Text(args); }
+    private void ChangeViewName(ChangeEventArgs args) { if (CurrentView is not null) CurrentView.Name = Text(args); }
+    private void ChangeElementName(ChangeEventArgs args) { if (SelectedElement is not null) SelectedElement.Name = Text(args); }
+    private void ChangeNavigation(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) _draft.NavigationMode = mode; }
+    private void ChangeLayoutMode(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PublicationPanelLayoutMode>(Text(args), out var mode)) _draft.LayoutMode = mode; }
+    private void ChangeNestedNavigation(ChangeEventArgs args) { if (SelectedElement is PanelElement nested && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) nested.NavigationMode = mode; }
+    private void ChangeVisualKind(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual && Enum.TryParse<DataVisualKind>(Text(args), out var kind)) visual.VisualKind = kind; }
+    private void ChangeVisualDataObject(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual && Guid.TryParse(Text(args), out var id)) visual.DataObjectId = id; }
+    private void ChangeVisualValueFields(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual) visual.ValueFields = Text(args).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(); }
+    private void ChangeComponentKind(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentKind>(Text(args), out var kind)) { component.ComponentKind = kind; Components.Normalize(Document, component); } }
+    private void ChangeComponentDataMode(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentDataMode>(Text(args), out var mode)) component.Connection.Mode = mode; }
+    private void ChangeComponentDataObject(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Guid.TryParse(Text(args), out var id)) component.Connection.DataObjectId = id; }
+    private void ChangeChatDisplayMode(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationChatDisplayMode>(Text(args), out var mode)) component.ChatDisplayMode = mode; }
+    private void ChangeLiveSourceKind(ChangeEventArgs args) { if (SelectedElement is LiveSourceElement live && Enum.TryParse<PublicationLiveSourceKind>(Text(args), out var kind)) live.SourceKind = kind; }
+    private void ToggleViewEnabled(ChangeEventArgs args) { if (CurrentView is not null) CurrentView.Enabled = AsBool(args); }
 
-    private static void ChangeNumber(ChangeEventArgs args, Action<double> update)
-    {
-        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
-            update(value);
-    }
+    private static bool AsBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
+    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private static void ChangeNumber(ChangeEventArgs args, Action<double> update) { if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value)) update(value); }
+    private static void ChangeInt(ChangeEventArgs args, Action<int> update) { if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) update(value); }
 
     private async Task Save()
     {
@@ -407,4 +866,18 @@
     }
 
     private Task Cancel() => Cancelled.InvokeAsync();
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement); } catch { }
+        _dropSurfaceBound = false;
+        _self?.Dispose();
+        _self = null;
+    }
+
+    private sealed class PanelCanvasPoint
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+    }
 }

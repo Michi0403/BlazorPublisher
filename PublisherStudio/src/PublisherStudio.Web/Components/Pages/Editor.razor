@@ -221,6 +221,7 @@
              InitialInsertedSegment="_mediaStudioInitialInsertedSegment"
              EditingExisting="@(_mediaStudioTargetId is not null)"
              Saved="SaveMediaStudio"
+             SendToMediaConverter="OpenMediaConverterFromStudio"
              Cancelled="CloseMediaStudio" />
 
 <DataVisualEditor Visible="_dataVisualEditorVisible" State="State" Saved="SaveDataVisualEditor" Cancelled="CancelDataVisualEditor" ManageDataRequested="OpenDataManagerFromVisual" />
@@ -229,7 +230,7 @@
 <BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
 <StreamingStudio Visible="_streamingStudioVisible" Document="State.Document" Saved="SaveStreamingStudio" Cancelled="CloseStreamingStudio" />
 <PanelStudio Visible="_panelStudioVisible" Document="State.Document" CurrentPageId="State.SelectedPageId" InitialPanel="_panelStudioInitial" Saved="SavePanelStudio" Cancelled="ClosePanelStudio" />
-<MediaConverterStudio Visible="_mediaConverterVisible" Closed="CloseMediaConverter" Inserted="InsertConvertedMedia" />
+<MediaConverterStudio Visible="_mediaConverterVisible" InitialSource="_mediaConverterInitialSource" Closed="CloseMediaConverter" Inserted="InsertConvertedMedia" OpenedInVideoStudio="OpenConvertedInVideoStudio" />
 
 @if (_structuredWebsiteExportVisible)
 {
@@ -342,6 +343,7 @@
     private bool _streamingStudioVisible;
     private bool _panelStudioVisible;
     private bool _mediaConverterVisible;
+    private MediaConversionInsertRequest? _mediaConverterInitialSource;
     private PanelElement? _panelStudioInitial;
     private Guid? _panelStudioTargetId;
     private bool _panelStudioTargetsHtml;
@@ -491,7 +493,44 @@
         _panelStudioTargetsHtml = false;
     }
     private void OpenMediaConverter() => _mediaConverterVisible = true;
+    private Task OpenMediaConverterFromStudio(MediaConversionInsertRequest source)
+    {
+        _mediaConverterInitialSource = source;
+        _mediaConverterVisible = true;
+        ShowNotice("The selected VideoStudio clip/range is loaded in Media Converter Studio.");
+        return Task.CompletedTask;
+    }
+
     private void CloseMediaConverter() => _mediaConverterVisible = false;
+
+    private async Task OpenConvertedInVideoStudio(MediaConversionInsertRequest converted)
+    {
+        var mime = PublicationMediaData.NormalizeMimeType(converted.MimeType, "video/webm");
+        if (!mime.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+        {
+            ShowError(new InvalidDataException($"The converted output type '{mime}' is not a video."));
+            return;
+        }
+        var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(converted.Content)}";
+        await CancelPublisherPointerAsync();
+        _mediaConverterVisible = false;
+        _mediaStudioTargetId = null;
+        _mediaStudioKind = PublicationElementKind.Video;
+        _mediaStudioInitial = new VideoElement
+        {
+            Name = Path.GetFileNameWithoutExtension(converted.FileName),
+            DataUrl = dataUrl,
+            MimeType = mime,
+            DurationSeconds = .01,
+            TrimStartSeconds = 0,
+            TrimEndSeconds = .01,
+            FitMode = PublicationVideoFitMode.Stretch,
+            FitModeExplicit = true
+        };
+        _mediaStudioInitialInsertedSegment = null;
+        _mediaStudioSessionId = Guid.NewGuid();
+        _mediaStudioVisible = true;
+    }
     private void InsertConvertedMedia(MediaConversionInsertRequest converted)
     {
         var mime = PublicationMediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
@@ -1091,7 +1130,21 @@
             var frame = result.PageSizedCapture && result.Width > 0 && result.Height > 0
                 ? $" · page frame {result.Width} × {result.Height}"
                 : " · full-tab fallback";
-            ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds){frame}.");
+            if (Guid.TryParse(result.AssetId, out var retainedAssetId)
+                && MediaAssets.TryGet(retainedAssetId, out var exportedBytes, out var storedMimeType, out _))
+            {
+                _mediaConverterInitialSource = new MediaConversionInsertRequest(
+                    result.FileName,
+                    PublicationMediaData.NormalizeMimeType(result.MimeType, storedMimeType),
+                    exportedBytes,
+                    "Mainframe video export");
+                _mediaConverterVisible = true;
+                ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds){frame}. The result is loaded in Media Converter Studio.");
+            }
+            else
+            {
+                ShowNotice($"Exported {result.FileName} ({result.DurationSeconds:0.##} seconds){frame}. The download completed, but the converter hand-off was unavailable.");
+            }
         }
         catch (Exception ex) when (ex.Message.Contains("cancel", StringComparison.OrdinalIgnoreCase))
         {
@@ -1149,7 +1202,7 @@
     {
         try
         {
-            await using var stream = args.File.OpenReadStream(512L * 1024 * 1024);
+            await using var stream = args.File.OpenReadStream(long.MaxValue);
             var result = await OpenDocumentImporter.ImportAsync(stream, args.File.Name);
             State.Load(Files.Serialize(result.Document));
             var warningCount = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Warning);
@@ -2235,6 +2288,9 @@
         public int Width { get; set; }
         public int Height { get; set; }
         public bool PageSizedCapture { get; set; }
+        public string AssetId { get; set; } = string.Empty;
+        public string MimeType { get; set; } = "video/webm";
+        public long SizeBytes { get; set; }
     }
 
     private sealed class PageExportResult

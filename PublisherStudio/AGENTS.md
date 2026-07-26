@@ -130,3 +130,19 @@ Range controls must tolerate zero-length and sub-step media during recording fin
 4. Keep public behavior and serialized formats compatible unless the task explicitly changes them.
 5. Add or update architecture and behavior tests.
 6. Do not create a new architectural dialect to mirror a tutorial or library sample.
+
+## Interface-first services, lifetimes and local API access
+
+Reusable behavior must be called through a public interface. Register it with an intentional Singleton, Scoped or Transient lifetime in the composition root. Stateful editor/session data is not a singleton merely for convenience; stateless catalogs, formatters and immutable adapters may be singleton. Keep compatibility by adding interfaces beside working concrete services and migrate callers incrementally.
+
+Do not hide reusable processing in private static methods. Extract it to an injected service when another component, controller, hosted service, LocalGPT client, plugin or test could use it. Static methods remain allowed for extension methods, framework entry points, constants, compiler-generated regex and genuinely irreducible language helpers. A service must not become stateful simply to avoid parameter passing.
+
+When an external/local automation caller can reasonably use a new service capability, expose a thin controller method that calls the same interface as the frontend. Do not duplicate logic in the controller. MVC inspection and route metadata belong in a controller-layer adapter, never inside reusable Services.
+
+## OpenSCAD builder compatibility
+
+OpenSCAD work must use the canonical `OpenScadDocument`/`OpenScadNode` graph, catalog definitions and registered `IOpenScadNodeRenderer` implementations. Do not introduce a closed switch-only generator or a second visual-builder model. New primitives, transforms and exporters must be registrable without rewriting the document service. Animation targets stable node IDs and must declare native/HTML export limitations.
+
+## Release task ledger
+
+Every release that leaves incomplete work must update `docs/architecture/task-ledger.md` and its changelog with Closed, Partial or Deferred status. A later release closes a task only when implementation evidence and a maintained test exist. Do not silently drop open architecture tasks between ZIP releases.

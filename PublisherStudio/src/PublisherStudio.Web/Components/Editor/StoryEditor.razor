@@ -2,6 +2,8 @@
 @implements IDisposable
 @inject IJSRuntime JS
 @inject SystemFontCatalog SystemFonts
+@inject PublisherStudio.Services.CodeEditing.ICodeLanguageService CodeLanguages
+@inject PublisherStudio.Services.CodeEditing.ICodeFormattingService CodeFormatting
 
 @if (Visible && TextFrame is not null)
 {
@@ -31,6 +33,16 @@
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
+                <DxRibbonTab Text="Code">
+                    <DxRibbonGroup Text="Programming language">
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-code" Text="Code workspace" IsPrimary="true" Click="OpenCodeWorkspace" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Format" Click="FormatCodeWorkspace" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Toggle comments" Click="ToggleCodeComments" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Insert">
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Insert code at caret" Click="InsertCodeAtCaret" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
                 <DxRibbonTab Text="Export">
                     <DxRibbonGroup Text="Download">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download document" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
@@ -43,6 +55,38 @@
                     <DxRibbonGroup Text="Output"><DxRibbonItem Text="Print" IconCssClass="pub-icon pub-icon-print" Click="PrintStory" /></DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
+            @if (_codeWorkspaceVisible)
+            {
+                <section class="story-code-workspace" aria-label="Programming language workspace">
+                    <header>
+                        <strong>Code workspace</strong>
+                        <span>Language profiles, formatting, comments and token analysis are also available through <code>/api/code</code>.</span>
+                        <button class="window-close" @onclick="CloseCodeWorkspace" aria-label="Close code workspace">×</button>
+                    </header>
+                    <div class="story-code-toolbar">
+                        <label>Language
+                            <select @bind="_codeLanguageId">
+                                @foreach (var language in CodeLanguages.GetProfiles())
+                                {
+                                    <option value="@language.Id">@language.DisplayName</option>
+                                }
+                            </select>
+                        </label>
+                        <label>Indent
+                            <input type="number" min="1" max="8" @bind="_codeIndentSize" />
+                        </label>
+                        <button type="button" @onclick="FormatCodeWorkspace">Format</button>
+                        <button type="button" @onclick="ToggleCodeComments">Toggle comments</button>
+                        <button type="button" @onclick="InsertCodeAtCaret">Insert at caret</button>
+                    </div>
+                    <div class="story-code-grid">
+                        <textarea rows="10" spellcheck="false" @bind="_codeWorkspaceText" @bind:event="oninput" aria-label="Code source"></textarea>
+                        <pre class="story-code-preview" aria-label="Syntax analysis preview">@_codeWorkspaceText</pre>
+                    </div>
+                    <footer><span>@CodeWorkspaceSummary</span></footer>
+                </section>
+            }
+
             <details class="story-field-help story-field-help-strip">
                 <summary>Available dynamic fields</summary>
                 <div>
@@ -69,6 +113,7 @@
                             BarMode="BarMode.Ribbon"
                             ViewType="ViewType.PrintLayout"
                             ReadOnly="false"
+                            CheckSpelling="true"
                             HorizontalRulerVisible="true"
                             CssClass="story-rich-edit" />
                 @if (_upgradingLegacyStory)
@@ -122,6 +167,12 @@
     private string _storyPreviewBackground = "transparent";
     private StoryPreviewResult? _storyPreviewResult;
     private string? _storyPreviewTransferError;
+    private bool _codeWorkspaceVisible;
+    private string _codeLanguageId = "csharp";
+    private string _codeWorkspaceText = "// PublisherStudio code block";
+    private int _codeIndentSize = 4;
+    private IReadOnlyList<CodeTokenSpan> _codeTokens = [];
+    private string CodeWorkspaceSummary => $"{CodeLanguages.Get(_codeLanguageId).DisplayName} · {_codeTokens.Count} recognized token(s) · {_codeWorkspaceText.Length} character(s)";
 
     private void CustomizeRichEditRibbon(IRibbon ribbon)
     {
@@ -309,6 +360,56 @@
             _content = openXml.ToArray();
             _documentFormat = DocumentFormat.OpenXml;
             await Saved.InvokeAsync((openXml, preview, documentBackground, StoryStorageFormat.OpenXml));
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private Task OpenCodeWorkspace()
+    {
+        _codeWorkspaceVisible = true;
+        AnalyzeCodeWorkspace();
+        return Task.CompletedTask;
+    }
+
+    private void CloseCodeWorkspace() => _codeWorkspaceVisible = false;
+
+    private Task FormatCodeWorkspace()
+    {
+        var result = CodeFormatting.Format(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize));
+        _codeWorkspaceText = result.Text;
+        _codeTokens = result.Tokens;
+        _codeWorkspaceVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task ToggleCodeComments()
+    {
+        var result = CodeFormatting.ToggleComment(new CodeCommentRequest(_codeLanguageId, _codeWorkspaceText));
+        _codeWorkspaceText = result.Text;
+        _codeTokens = result.Tokens;
+        _codeWorkspaceVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private void AnalyzeCodeWorkspace()
+    {
+        _codeTokens = CodeFormatting.Analyze(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize)).Tokens;
+    }
+
+    private async Task InsertCodeAtCaret()
+    {
+        if (_selection is null) return;
+        try
+        {
+            var profile = CodeLanguages.Get(_codeLanguageId);
+            var normalized = CodeFormatting.Format(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize));
+            _codeWorkspaceText = normalized.Text;
+            _codeTokens = normalized.Tokens;
+            var block = $"{Environment.NewLine}[{profile.DisplayName}]{Environment.NewLine}{_codeWorkspaceText}{Environment.NewLine}";
+            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, block);
         }
         catch (Exception ex)
         {

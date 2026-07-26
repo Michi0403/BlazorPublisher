@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>1.0.83</Version>
+    <Version>1.0.85</Version>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
     <DevExpressVersion>25.2.8</DevExpressVersion>
     <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
@@ -22,10 +22,17 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.RichEdit" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Blazor.de" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Blazor.es" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Blazor.ja" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Blazor.RichEdit.de" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Blazor.RichEdit.es" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Blazor.RichEdit.ja" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.AspNetCore.Spreadsheet" Version="$(DevExpressVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Localization\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--

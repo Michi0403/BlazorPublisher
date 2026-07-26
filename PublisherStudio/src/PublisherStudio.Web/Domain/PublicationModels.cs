@@ -18,6 +18,7 @@ public sealed class PublicationDocument
     public List<PublicationElementTemplate> ComponentTemplates { get; set; } = [];
     public PublicationPlaybackSettings Playback { get; set; } = new();
     public PublicationStreamingSettings Streaming { get; set; } = new();
+    public PublicationProjectSettings ProjectSettings { get; set; } = new();
 
     public static PublicationDocument CreateDefault()
     {

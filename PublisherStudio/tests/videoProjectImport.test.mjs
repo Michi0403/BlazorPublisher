@@ -14,6 +14,7 @@ const studio = read('src/PublisherStudio.Web/Components/Editor/MediaStudio.razor
 const editor = read('src/PublisherStudio.Web/Components/Pages/Editor.razor');
 const persistence = read('src/PublisherStudio.Web/Services/PublicationFileService.cs');
 const program = read('src/PublisherStudio.Web/Program.cs');
+const applicationComposition = read('src/PublisherStudio.Web/PublisherStudioServiceCollectionExtensions.cs');
 const interop = read('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js');
 const packageJson = JSON.parse(read('src/PublisherStudio.Web/package.json'));
 const lockJson = JSON.parse(read('src/PublisherStudio.Web/package-lock.json'));
@@ -70,15 +71,15 @@ assert.match(studio, /VideoProject = IsVideo/);
 assert.match(editor, /video\.VideoProject = result\.VideoProject/);
 assert.match(persistence, /video\.VideoProject is \{ Tracks\.Count: > 0 \}/);
 assert.match(persistence, /document\.FormatVersion = "1\.55"/);
-assert.match(program, /AddSingleton<VideoProjectImportService>/);
+assert.match(applicationComposition, /AddSingleton<VideoProjectImportService, VideoProjectImportService>/);
 assert.match(interop, /\(otio\|otioz\|mlt\|kdenlive\|xges\|osp\|edl\)/);
 assert.match(interop, /actualKind === 'project'/);
 
-assert.equal(packageJson.version, '1.0.83');
-assert.equal(lockJson.version, '1.0.83');
-assert.equal(lockJson.packages[''].version, '1.0.83');
-assert.match(webProject, /<Version>1\.0\.83<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.83<\/Version>/);
+assert.equal(packageJson.version, '1.0.85');
+assert.equal(lockJson.version, '1.0.85');
+assert.equal(lockJson.packages[''].version, '1.0.85');
+assert.match(webProject, /<Version>1\.0\.85<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.85<\/Version>/);
 
 assert.match(doctrine, /OpenTimelineIO/);
 assert.match(doctrine, /MLT XML/);
@@ -96,7 +97,13 @@ const packageRefs = [...webProject.matchAll(/<PackageReference Include="([^"]+)"
 assert.deepEqual(packageRefs, [
   'DevExpress.AspNetCore.Spreadsheet',
   'DevExpress.Blazor',
-  'DevExpress.Blazor.RichEdit'
+  'DevExpress.Blazor.RichEdit',
+  'DevExpress.Blazor.RichEdit.de',
+  'DevExpress.Blazor.RichEdit.es',
+  'DevExpress.Blazor.RichEdit.ja',
+  'DevExpress.Blazor.de',
+  'DevExpress.Blazor.es',
+  'DevExpress.Blazor.ja'
 ]);
 
 console.log('open video-project canonical model, safe adapters, relinking UI, project persistence, and doctrine contracts passed');

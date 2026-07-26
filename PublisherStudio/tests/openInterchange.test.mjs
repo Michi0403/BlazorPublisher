@@ -22,6 +22,7 @@ const ribbon = read('src', 'PublisherStudio.Web', 'Components', 'Editor', 'Publi
 const pictureInterop = read('src', 'PublisherStudio.Web', 'wwwroot', 'js', 'pictureStudioInterop.js');
 const publisherInterop = read('src', 'PublisherStudio.Web', 'wwwroot', 'js', 'publisherInterop.js');
 const program = read('src', 'PublisherStudio.Web', 'Program.cs');
+const applicationComposition = read('src', 'PublisherStudio.Web', 'PublisherStudioServiceCollectionExtensions.cs');
 const project = read('src', 'PublisherStudio.Web', 'PublisherStudio.Web.csproj');
 const packageJson = JSON.parse(read('src', 'PublisherStudio.Web', 'package.json'));
 const docs = read('docs', 'architecture', 'interchange-formats.md');
@@ -125,8 +126,8 @@ assert.match(pictureEditorCode, /importPictureStudioSvg/);
 assert.match(ribbon, /Import OpenDocument pages/);
 assert.match(editor, /OpenDocumentImportService OpenDocumentImporter/);
 assert.match(editor, /accept="\.odg,\.odp,\.fodg,\.fodp/);
-assert.match(program, /AddSingleton<OpenRasterImportService>/);
-assert.match(program, /AddSingleton<OpenDocumentImportService>/);
+assert.match(applicationComposition, /AddSingleton<OpenRasterImportService, OpenRasterImportService>/);
+assert.match(applicationComposition, /AddSingleton<OpenDocumentImportService, OpenDocumentImportService>/);
 
 // The path tool is node-based rather than an alias for a brush stroke.
 assert.match(pictureInterop, /function addPathNode/);

@@ -1,0 +1,18 @@
+{
+  "App.Name": "PublisherStudio",
+  "Common.Apply": "適用",
+  "Common.Cancel": "キャンセル",
+  "Common.Close": "閉じる",
+  "Common.Export": "エクスポート",
+  "Common.Settings": "設定",
+  "StoryEditor.Title": "ストーリー編集",
+  "StoryEditor.CodeTab": "コード",
+  "StoryEditor.SpellCheck": "スペルチェック",
+  "OpenScad.Title": "OpenSCAD",
+  "Render.Export": "レンダー書き出し",
+  "Automation.Input": "入力自動化",
+  "Automation.Screenshot": "スクリーンショット",
+  "Compatibility.HtmlNative": "HTML ネイティブ",
+  "Compatibility.CanvasRuntime": "Canvas ランタイム",
+  "Compatibility.RenderBeforeExport": "HTML 書き出し前にレンダー"
+}

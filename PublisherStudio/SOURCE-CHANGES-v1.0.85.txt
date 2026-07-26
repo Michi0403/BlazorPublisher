@@ -1,0 +1,92 @@
+PublisherStudio v1.0.85 source changes
+======================================
+
+Architecture and composition
+- src/PublisherStudio.Web/PublisherStudioServiceCollectionExtensions.cs
+- src/PublisherStudio.Web/Program.cs
+- src/PublisherStudio.Web/Services/ApplicationHostServices.cs
+- src/PublisherStudio.Web/Services/VideoStudio/Export/PolygonGeometryService.cs
+- src/PublisherStudio.Web/Services/VideoStudio/Export/BrowserRuntimeTemplateService.cs
+- src/PublisherStudio.Web/Services/VideoStudio/Export/VideoLayerInterchangeService.cs
+- src/PublisherStudio.Web/Controllers/ApiSurfaceCatalogService.cs
+- src/PublisherStudio.Web/Controllers/VideoLayerInterchangeController.cs
+
+Local automation and domain context
+- src/PublisherStudio.Web/Domain/AutomationModels.cs
+- src/PublisherStudio.Web/Services/Automation/IAutomationServices.cs
+- src/PublisherStudio.Web/Services/Automation/BrowserAutomationServices.cs
+- src/PublisherStudio.Web/Services/Automation/BusinessObjectContextService.cs
+- src/PublisherStudio.Web/Controllers/AutomationController.cs
+- src/PublisherStudio.Web/wwwroot/js/automationInterop.js
+- src/PublisherStudio.Web/Components/App.razor
+
+OpenSCAD graph/generation
+- src/PublisherStudio.Web/Domain/OpenScadModels.cs
+- src/PublisherStudio.Web/Services/OpenScad/IOpenScadServices.cs
+- src/PublisherStudio.Web/Services/OpenScad/OpenScadCatalogService.cs
+- src/PublisherStudio.Web/Services/OpenScad/OpenScadValueFormatter.cs
+- src/PublisherStudio.Web/Services/OpenScad/OpenScadNodeFactoryService.cs
+- src/PublisherStudio.Web/Services/OpenScad/OpenScadNodeRenderers.cs
+- src/PublisherStudio.Web/Services/OpenScad/OpenScadDocumentService.cs
+- src/PublisherStudio.Web/Services/OpenScad/OpenScadVideoLayerAdapter.cs
+- src/PublisherStudio.Web/Controllers/OpenScadController.cs
+
+Code editing and text correction
+- src/PublisherStudio.Web/Domain/CodeEditingModels.cs
+- src/PublisherStudio.Web/Services/CodeEditing/ICodeEditingServices.cs
+- src/PublisherStudio.Web/Services/CodeEditing/CodeLanguageService.cs
+- src/PublisherStudio.Web/Services/CodeEditing/CodeFormattingService.cs
+- src/PublisherStudio.Web/Controllers/CodeController.cs
+- src/PublisherStudio.Web/Components/Editor/StoryEditor.razor
+- src/PublisherStudio.Web/wwwroot/css/site.css
+
+Localization, paths and render capabilities
+- src/PublisherStudio.Web/Domain/ApplicationConfigurationModels.cs
+- src/PublisherStudio.Web/Domain/PublicationModels.cs
+- src/PublisherStudio.Web/Services/Configuration/IApplicationConfigurationServices.cs
+- src/PublisherStudio.Web/Services/Configuration/ApplicationPathService.cs
+- src/PublisherStudio.Web/Services/Configuration/FileLocalizationService.cs
+- src/PublisherStudio.Web/Services/Configuration/RenderExportCatalogService.cs
+- src/PublisherStudio.Web/Controllers/ConfigurationController.cs
+- src/PublisherStudio.Web/Localization/en-US.json
+- src/PublisherStudio.Web/Localization/de-DE.json
+- src/PublisherStudio.Web/Localization/es-ES.json
+- src/PublisherStudio.Web/Localization/ja-JP.json
+- src/PublisherStudio.Web/wwwroot/js/localizationRuntime.js
+- src/PublisherStudio.Web/appsettings.json
+- src/PublisherStudio.Web/PublisherStudio.Web.csproj
+
+Render-export repair
+- src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+- src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor
+
+Architecture and release documentation
+- AGENTS.md
+- README.md
+- RELEASE.md
+- CHANGELOG-v1.0.85.md
+- SOURCE-CHANGES-v1.0.85.txt
+- TEST-RESULTS-v1.0.85.txt
+- docs/ARCHITECTURE.md
+- docs/architecture/system-overview.md
+- docs/architecture/interface-first-api-evolution-v1.0.85.md
+- docs/architecture/static-service-migration-inventory-v1.0.85.md
+- docs/architecture/openscad-node-graph-and-visual-builder-readiness.md
+- docs/architecture/automation-and-screenshot-api.md
+- docs/architecture/localization-code-editing-and-render-export.md
+- docs/architecture/task-ledger.md
+- docs/decisions/ADR-011-interface-first-service-evolution.md
+- docs/decisions/ADR-012-openscad-extensible-node-graph.md
+- docs/decisions/ADR-013-loopback-browser-automation.md
+- docs/decisions/ADR-014-file-localization-paths-render-export.md
+
+Regression contracts
+- tests/serviceApiEvolution.test.mjs
+- tests/openScadBuilderArchitecture.test.mjs
+- tests/automationAndScreenshotApi.test.mjs
+- tests/localizationAndCodeEditing.test.mjs
+- tests/renderExportCanvasSnapshot.test.mjs
+- tests/releaseTaskLedger.test.mjs
+- updated existing architecture/version/composition tests
+- src/PublisherStudio.Web/package.json
+- src/PublisherStudio.Web/package-lock.json

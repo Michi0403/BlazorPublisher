@@ -39,3 +39,7 @@ The enforceable repository contract is in [`AGENTS.md`](../../AGENTS.md). Archit
 Folder and namespace names participate in C# name resolution. New subnamespace leaves must avoid simple names that collide with framework or project types visible from the same enclosing namespace. Existing compatibility collisions use a deliberate file-level alias or explicit `global::` qualification. Aliases are preferred inside interpolated strings because an unparenthesized `{global::...}` hole is parsed as a format expression. Composition-root files (`Program.cs` and service-collection extensions) explicitly import or qualify moved Services, Hubs and HostedServices; they do not rely on IDE caches or accidental global usings.
 
 The `csharpCompilationSafety` contract scans DI registrations and namespace/type collisions. It supplements—but does not replace—a real compiler build.
+
+## Interface-first local API layer (v1.0.85)
+
+Application registrations are centralized in `PublisherStudioServiceCollectionExtensions`. New OpenSCAD, code editing, automation, screenshot, localization/path and render-export capabilities are public interfaces shared by components and controllers. Refer to the v1.0.85 architecture guides and task ledger for completed and deferred scope.

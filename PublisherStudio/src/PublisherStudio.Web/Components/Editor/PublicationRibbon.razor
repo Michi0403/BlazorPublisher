@@ -9,6 +9,9 @@
         <DxRibbonApplicationTabItem Text="Export current page as PNG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportPng" />
         <DxRibbonApplicationTabItem Text="Export current page as JPEG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportJpeg" />
         <DxRibbonApplicationTabItem Text="Export current page as SVG" IconCssClass="pub-icon pub-icon-vector" Click="RequestExportSvg" />
+        <DxRibbonApplicationTabItem Text="Render current page as PNG (video + effects)" IconCssClass="pub-icon pub-icon-image" Click="RequestExportPng" />
+        <DxRibbonApplicationTabItem Text="Render current page as JPEG (video + effects)" IconCssClass="pub-icon pub-icon-image" Click="RequestExportJpeg" />
+        <DxRibbonApplicationTabItem Text="Render current page as SVG (frozen media)" IconCssClass="pub-icon pub-icon-vector" Click="RequestExportSvg" />
         @if (CanExportSelection)
         {
             <DxRibbonApplicationTabItem Text="Export selected object as PNG" IconCssClass="pub-icon pub-icon-image" Click="RequestExportSelectedPng" />

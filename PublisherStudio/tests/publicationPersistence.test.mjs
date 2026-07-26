@@ -10,6 +10,7 @@ const files = read('src/PublisherStudio.Web/Services/PublicationFileService.cs')
 const state = read('src/PublisherStudio.Web/Services/EditorStateService.cs');
 const streamStore = read('src/PublisherStudio.Web/Services/Streaming/Settings/PublicationStreamingSettingsStore.cs');
 const program = read('src/PublisherStudio.Web/Program.cs');
+const applicationComposition = read('src/PublisherStudio.Web/PublisherStudioServiceCollectionExtensions.cs');
 const preview = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
 const timeline = read('src/PublisherStudio.Web/wwwroot/js/timelineInterop.js');
 const components = read('src/PublisherStudio.Web/wwwroot/js/componentRuntime.js');
@@ -26,7 +27,7 @@ assert.match(state, /public void SetCanvasZoomMode\(PublicationCanvasZoomMode mo
 assert.match(files, /Enum\.IsDefined\(document\.View\.CanvasZoomMode\)/);
 
 // Stream routing/recording/LAN/hotkey configuration stays local and protected.
-assert.match(program, /AddSingleton<PublicationStreamingSettingsStore>\(\)/);
+assert.match(applicationComposition, /AddSingleton<PublicationStreamingSettingsStore, PublicationStreamingSettingsStore>/);
 assert.match(streamStore, /SpecialFolder\.LocalApplicationData/);
 assert.match(streamStore, /CreateProtector\("PublisherStudio\.PublicationStreamingSettings\.v1"\)/);
 assert.match(streamStore, /_protector\.Protect\(json\)/);

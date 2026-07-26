@@ -13,6 +13,7 @@ const streaming = read('docs', 'architecture', 'streaming.md');
 const formats = read('docs', 'architecture', 'interchange-formats.md');
 const program = read('src', 'PublisherStudio.Web', 'Program.cs');
 const composition = read('src', 'PublisherStudio.Web', 'StreamingServiceCollectionExtensions.cs');
+const applicationComposition = read('src', 'PublisherStudio.Web', 'PublisherStudioServiceCollectionExtensions.cs');
 const mediaHostClient = read('src', 'PublisherStudio.Web', 'Services', 'Streaming', 'MediaHost', 'StreamingMediaHostClient.cs');
 const hotkeyService = read('src', 'PublisherStudio.Web', 'Services', 'Streaming', 'Hotkeys', 'GlobalHotkeyService.cs');
 const hotkeyHostedService = read('src', 'PublisherStudio.Web', 'HostedServices', 'Streaming', 'GlobalHotkeyHostedService.cs');
@@ -93,7 +94,10 @@ for (const file of serviceFiles) {
   assert.doesNotMatch(text, /Microsoft\.AspNetCore\.Mvc/, `Reusable service depends on MVC: ${path.relative(root, file)}`);
 }
 
-assert.match(program, /builder\.Services\.AddPublisherStreaming\(\)/);
+assert.match(program, /builder\.Services\.AddPublisherStudioApplication\(builder\.Configuration\)/);
+assert.match(applicationComposition, /services\.AddPublisherStreaming\(\)/);
+assert.match(applicationComposition, /AddSingleton<IOpenScadDocumentService, OpenScadDocumentService>/);
+assert.match(applicationComposition, /AddSingleton<IUserInputAutomationService, UserInputAutomationService>/);
 assert.doesNotMatch(program, /MapPublisherStreamingRuntime|StreamingRuntimeEndpoints/);
 assert.doesNotMatch(program, /app\.Map(?:Get|Post|Put|Delete)\(/);
 assert.match(composition, /namespace PublisherStudio;/);

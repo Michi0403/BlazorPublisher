@@ -1,0 +1,18 @@
+{
+  "App.Name": "PublisherStudio",
+  "Common.Apply": "Anwenden",
+  "Common.Cancel": "Abbrechen",
+  "Common.Close": "Schließen",
+  "Common.Export": "Exportieren",
+  "Common.Settings": "Einstellungen",
+  "StoryEditor.Title": "Text bearbeiten",
+  "StoryEditor.CodeTab": "Code",
+  "StoryEditor.SpellCheck": "Rechtschreibung",
+  "OpenScad.Title": "OpenSCAD",
+  "Render.Export": "Render-Export",
+  "Automation.Input": "Eingabeautomatisierung",
+  "Automation.Screenshot": "Bildschirmaufnahme",
+  "Compatibility.HtmlNative": "HTML-nativ",
+  "Compatibility.CanvasRuntime": "Canvas-Laufzeit",
+  "Compatibility.RenderBeforeExport": "Vor HTML-Export rendern"
+}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,11 +30,13 @@
     <script src="js/vendor/JsBarcode.all.min.js"></script>
     <script src="js/vendor/qrcode-generator.js"></script>
     <script src="js/vendor/html2canvas.min.js"></script>
+    <script src="js/localizationRuntime.js"></script>
     <script src="js/liveDataInterop.js"></script>
     <script src="js/videoEffectRuntime.js"></script>
     <script src="js/streamingInterop.js"></script>
     <script src="js/componentRuntime.js"></script>
     <script src="js/tooltipRuntime.js"></script>
+    <script src="js/automationInterop.js"></script>
     <script type="module" src="js/publisherInterop.js"></script>
     <script src="_framework/blazor.web.js"></script>
 </body>

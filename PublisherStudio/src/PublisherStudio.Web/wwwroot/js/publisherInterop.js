@@ -3033,7 +3033,55 @@ async function snapshotVideoForRaster(video, owner) {
     }
 }
 
+function createFrozenRasterImage(source, clone, dataUrl, fallbackLabel) {
+    const image = document.createElement('img');
+    image.alt = source?.getAttribute?.('aria-label') || source?.getAttribute?.('title') || fallbackLabel;
+    image.draggable = false;
+    image.style.cssText = clone?.getAttribute?.('style') || 'width:100%;height:100%;object-fit:contain;';
+    image.style.display = getComputedStyle(source || clone).display === 'none' ? 'none' : 'block';
+    image.style.width = image.style.width || '100%';
+    image.style.height = image.style.height || '100%';
+    image.style.maxWidth = 'none';
+    image.style.objectFit = image.style.objectFit || 'contain';
+    image.src = dataUrl;
+    return image;
+}
+
+function snapshotCanvasForRaster(canvas) {
+    if (!(canvas instanceof HTMLCanvasElement) || canvas.width < 1 || canvas.height < 1) return '';
+    try { return canvas.toDataURL('image/png'); }
+    catch (error) {
+        console.warn('PublisherStudio could not snapshot a canvas for render export.', error);
+        return '';
+    }
+}
+
+async function snapshotIframeForRaster(frame) {
+    if (!(frame instanceof HTMLIFrameElement)) return '';
+    try {
+        const body = frame.contentDocument?.body;
+        if (!body || typeof window.html2canvas !== 'function') return '';
+        const canvas = await window.html2canvas(body, { backgroundColor: null, scale: 1, logging: false, useCORS: true, allowTaint: false });
+        return canvas.toDataURL('image/png');
+    } catch {
+        return '';
+    }
+}
+
 async function freezeMediaForRaster(sourcePage, clonePage) {
+    // cloneNode() copies canvas elements but never their pixel buffers. Snapshot every source
+    // canvas before rasterization so Video Studio effects, Mainframe 3D layers, charts and
+    // plugin canvases remain visible in PNG/JPEG/SVG render exports.
+    const sourceCanvases = [...sourcePage.querySelectorAll('canvas')];
+    const cloneCanvases = [...clonePage.querySelectorAll('canvas')];
+    for (let index = 0; index < cloneCanvases.length; index++) {
+        const sourceCanvas = sourceCanvases[index];
+        const cloneCanvas = cloneCanvases[index];
+        const snapshot = snapshotCanvasForRaster(sourceCanvas);
+        if (!snapshot) continue;
+        cloneCanvas.replaceWith(createFrozenRasterImage(sourceCanvas, cloneCanvas, snapshot, 'Rendered canvas effect'));
+    }
+
     const sourceVideos = [...sourcePage.querySelectorAll('video')];
     const cloneVideos = [...clonePage.querySelectorAll('video')];
     for (let index = 0; index < cloneVideos.length; index++) {
@@ -3041,17 +3089,18 @@ async function freezeMediaForRaster(sourcePage, clonePage) {
         const sourceVideo = sourceVideos[index];
         const sourceOwner = sourceVideo?.closest?.('[data-media-kind]');
         const snapshot = await snapshotVideoForRaster(sourceVideo, sourceOwner);
-        const image = document.createElement('img');
-        image.alt = sourceVideo?.getAttribute('aria-label') || sourceVideo?.getAttribute('title') || 'Frozen video frame';
-        image.draggable = false;
-        image.style.cssText = cloneVideo.getAttribute('style') || 'width:100%;height:100%;object-fit:contain;';
-        image.style.display = 'block';
-        image.style.width = '100%';
-        image.style.height = '100%';
-        image.style.maxWidth = 'none';
-        image.src = snapshot || 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360"><rect width="100%" height="100%" fill="#111827"/><text x="50%" y="50%" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="26" text-anchor="middle" dominant-baseline="middle">Video frame unavailable</text></svg>');
-        cloneVideo.replaceWith(image);
+        const fallback = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360"><rect width="100%" height="100%" fill="#111827"/><text x="50%" y="50%" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="26" text-anchor="middle" dominant-baseline="middle">Video frame unavailable</text></svg>');
+        cloneVideo.replaceWith(createFrozenRasterImage(sourceVideo, cloneVideo, snapshot || fallback, 'Frozen video frame'));
     }
+
+    const sourceFrames = [...sourcePage.querySelectorAll('iframe')];
+    const cloneFrames = [...clonePage.querySelectorAll('iframe')];
+    for (let index = 0; index < cloneFrames.length; index++) {
+        const snapshot = await snapshotIframeForRaster(sourceFrames[index]);
+        if (!snapshot) continue;
+        cloneFrames[index].replaceWith(createFrozenRasterImage(sourceFrames[index], cloneFrames[index], snapshot, 'Rendered embedded component'));
+    }
+
     clonePage.querySelectorAll('audio').forEach(audio => audio.remove());
     clonePage.querySelectorAll('.media-object-badge').forEach(badge => badge.remove());
 }
@@ -7331,7 +7380,7 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
 
     const uniqueWarnings = [...new Set(warnings)];
     const manifest = {
-        publisherStudioVersion: '1.0.83',
+        publisherStudioVersion: '1.0.85',
         kind: options.mode,
         generatedUtc: new Date().toISOString(),
         assetCount,

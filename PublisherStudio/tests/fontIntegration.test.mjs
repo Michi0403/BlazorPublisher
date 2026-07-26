@@ -9,6 +9,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
 const catalog = read('src/PublisherStudio.Web/Services/SystemFontCatalog.cs');
 const program = read('src/PublisherStudio.Web/Program.cs');
+const applicationComposition = read('src/PublisherStudio.Web/PublisherStudioServiceCollectionExtensions.cs');
 const picker = read('src/PublisherStudio.Web/Components/Editor/SystemFontPicker.razor');
 const inspector = read('src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor');
 const picture = read('src/PublisherStudio.Web/Components/Editor/PictureEditor.razor');
@@ -20,12 +21,12 @@ const installerProject = read('src/PublisherStudio.InstallerConsole/PublisherStu
 const packageJson = JSON.parse(read('src/PublisherStudio.Web/package.json'));
 const runtimeCapabilities = read('src/PublisherStudio.Web/Services/Streaming/UseCases/Runtime/StreamingRuntimeUseCases.cs');
 
-assert.match(webProject, /<Version>1\.0\.83<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.83<\/Version>/);
-assert.equal(packageJson.version, '1.0.83');
-assert.match(runtimeCapabilities, /Version = "1\.0\.83"/);
+assert.match(webProject, /<Version>1\.0\.85<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.85<\/Version>/);
+assert.equal(packageJson.version, '1.0.85');
+assert.match(runtimeCapabilities, /Version = "1\.0\.85"/);
 
-assert.match(program, /AddSingleton<SystemFontCatalog>\(\)/);
+assert.match(applicationComposition, /AddSingleton<SystemFontCatalog, SystemFontCatalog>/);
 assert.match(catalog, /fc-list/);
 assert.match(catalog, /\/usr\/share\/fonts/);
 assert.match(catalog, /System\/Library\/Fonts/);

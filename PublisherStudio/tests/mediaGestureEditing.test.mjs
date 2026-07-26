@@ -22,6 +22,7 @@ const pictureEditorCode = read('src', 'PublisherStudio.Web', 'Components', 'Edit
 const pictureState = read('src', 'PublisherStudio.Web', 'Services', 'PictureEditorStateService.cs');
 const editorState = read('src', 'PublisherStudio.Web', 'Services', 'EditorStateService.cs');
 const program = read('src', 'PublisherStudio.Web', 'Program.cs');
+const applicationComposition = read('src', 'PublisherStudio.Web', 'PublisherStudioServiceCollectionExtensions.cs');
 const agents = read('AGENTS.md');
 const architecture = read('docs', 'architecture', 'media-gesture-editing.md');
 const adr = read('docs', 'decisions', 'ADR-009-editor-gesture-and-z-order-ownership.md');
@@ -64,7 +65,7 @@ assert.match(timelineService, /namespace PublisherStudio\.Services\.MediaStudio\
 assert.match(timelineService, /Guid\? SplitAt/);
 assert.match(timelineService, /bool MergeBoundary/);
 assert.match(timelineService, /PublicationMediaSegment Duplicate/);
-assert.match(program, /AddSingleton<MediaTimelineEditService>/);
+assert.match(applicationComposition, /AddSingleton<MediaTimelineEditService, MediaTimelineEditService>/);
 assert.match(mediaStudio, /@inject MediaTimelineEditService TimelineEdits/);
 assert.match(mediaStudio, /MouseModeText\(MediaStudioMouseMode\.SelectSection/);
 assert.match(mediaStudio, /MouseModeText\(MediaStudioMouseMode\.PlacePlayhead/);

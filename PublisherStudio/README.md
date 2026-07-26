@@ -15,6 +15,12 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## v1.0.85: interface-first automation, OpenSCAD and render evolution
+
+This source package adds reusable DI interfaces and loopback controller access for OpenSCAD generation, Video Studio interchange, LocalGPT/AICouncil browser commands, screenshots, business-object discovery, programming-language text commands, localization, configurable paths and render-export capability analysis. OpenSCAD is represented as an extensible node graph with typed properties and per-part `$t` animation tracks so a later visual builder can use the same model. PNG/JPEG/SVG render export now snapshots canvas effects and current video frames instead of exporting blank cloned media.
+
+The implementation is intentionally evolutionary. Existing component APIs and exporters remain available. Remaining legacy-static migration, a visual OpenSCAD builder, native OpenSCAD process execution, full UI-string migration, non-English spelling dictionaries and OS-global input are tracked explicitly in `docs/architecture/task-ledger.md`.
+
 > **Developer setup:** Node.js 20 or newer is required only on a licensed developer/build machine. Run `Prepare-DevExpressAssets.cmd` after a clean checkout. It restores the local browser packages and uses the matching `devextreme-license` CLI to generate the public runtime key required by PublisherStudio and standalone HTML exports. Published/installed releases do **not** require Node.js, npm, npx, or a private DevExpress license at runtime.
 
 ## Implemented in this source package
@@ -403,6 +409,10 @@ See `CHANGELOG-v1.0.52.md`. Self-contained presentation and site exports now kee
 ## v1.0.67 interpolation-safe compiler correction
 
 See `CHANGELOG-v1.0.67.md`, `AGENTS.md`, ADR-008 and `VALIDATION.md`. The v1.0.66 namespace-collision repair is corrected so `global::` is no longer placed directly in an interpolated-string hole. Streaming Chat and RTSP use the explicit `TextEncoding` alias, and RTSP calculates SDP content length before formatting the header. The compilation-safety contract now rejects the exact parser trap that produced `CS0103`. Runtime behavior, publication format `1.48`, Picture Studio format `1.3`, and package dependencies remain unchanged.
+
+## v1.0.84 interchange compiler compatibility
+
+VideoLayerInterchangeService no longer depends on `Math.Hypot`, uses a numerically stable SDK-compatible Euclidean distance helper, passes concrete polygon lists through the hot resampling path, and uses C# collection expressions consistently. This clears the reported CS0117, CA1859 and IDE0305 diagnostics without changing OpenSCAD, HTML canvas, morphing or temporal-selection behavior. See `CHANGELOG-v1.0.84.md`.
 
 ## v1.0.83 temporal selection layers and 3D HTML interchange
 

@@ -24,6 +24,7 @@ const converterInterface = read('src/PublisherStudio.Web/Services/MediaConversio
 const converterController = read('src/PublisherStudio.Web/Controllers/MediaConversionController.cs');
 const converterStudio = read('src/PublisherStudio.Web/Components/Editor/MediaConverterStudio.razor');
 const program = read('src/PublisherStudio.Web/Program.cs');
+const applicationComposition = read('src/PublisherStudio.Web/PublisherStudioServiceCollectionExtensions.cs');
 const appsettings = JSON.parse(read('src/PublisherStudio.Web/appsettings.json'));
 const packageJson = JSON.parse(read('src/PublisherStudio.Web/package.json'));
 const lockJson = JSON.parse(read('src/PublisherStudio.Web/package-lock.json'));
@@ -82,14 +83,14 @@ assert.match(converterController, /\[Route\("api\/media-conversion"\)\]/);
 assert.match(converterController, /\[HttpPost\("jobs"\)\]/);
 assert.match(converterController, /jobs\/\{id:guid\}\/file/);
 assert.match(converterStudio, /Insert Mainframe/);
-assert.match(program, /AddSingleton<IMediaConversionService, MediaConversionService>/);
-assert.match(program, /AddSingleton<PanelDocumentService>/);
+assert.match(applicationComposition, /AddSingleton<IMediaConversionService, MediaConversionService>/);
+assert.match(applicationComposition, /AddSingleton<PanelDocumentService, PanelDocumentService>/);
 assert.equal(appsettings.PublisherStudio.FFmpegPath, '');
 
-assert.equal(packageJson.version, '1.0.83');
-assert.equal(lockJson.version, '1.0.83');
-assert.equal(lockJson.packages[''].version, '1.0.83');
-assert.match(webProject, /<Version>1\.0\.83<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.83<\/Version>/);
+assert.equal(packageJson.version, '1.0.85');
+assert.equal(lockJson.version, '1.0.85');
+assert.equal(lockJson.packages[''].version, '1.0.85');
+assert.match(webProject, /<Version>1\.0\.85<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.85<\/Version>/);
 
 console.log('Panel/Div Studio, recursive shared-component rendering, dashboard library, FFmpeg service/controller/UI, and version contracts passed.');

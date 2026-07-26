@@ -164,7 +164,8 @@ for (const file of csharpFiles) {
 }
 
 const program = fs.readFileSync(path.join(web, 'Program.cs'), 'utf8');
-assert.match(program, /using PublisherStudio\.HostedServices\.Streaming;/);
+const appComposition = fs.readFileSync(path.join(web, 'PublisherStudioServiceCollectionExtensions.cs'), 'utf8');
+assert.match(appComposition, /using PublisherStudio\.HostedServices\.Streaming;/);
 
 for (const relative of [
   ['Services', 'Streaming', 'Chat', 'PlatformChatService.cs'],

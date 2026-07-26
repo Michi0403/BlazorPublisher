@@ -217,3 +217,14 @@ The Blazor editor owns the command, options, progress state and result reporting
 Preserve-source mode copies media bytes exactly. PNG is the browser-decoded pixel-lossless raster option. WebP/AVIF picture conversion and WebM VP9/VP8 + Opus video conversion are explicitly optional lossy delivery optimizations; unsupported, failed or larger conversions retain the source. A WebM result may carry `data-publisher-original-src`, which the shared media-sequence runtime uses as a playback-error fallback. SVG and GIF remain unchanged so vectors and animation are not flattened.
 
 The ZIP uses STORE for already compressed media and optional Deflate for text-oriented files through `CompressionStream('deflate-raw')`, with automatic STORE fallback. No new npm, NuGet, native-process or remote-service dependency is introduced. See `docs/architecture/structured-website-export.md`.
+
+## v1.0.85 interface/API evolution
+
+See:
+
+- `docs/architecture/interface-first-api-evolution-v1.0.85.md`
+- `docs/architecture/static-service-migration-inventory-v1.0.85.md`
+- `docs/architecture/openscad-node-graph-and-visual-builder-readiness.md`
+- `docs/architecture/automation-and-screenshot-api.md`
+- `docs/architecture/localization-code-editing-and-render-export.md`
+- `docs/architecture/task-ledger.md`

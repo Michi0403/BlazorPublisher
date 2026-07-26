@@ -1,0 +1,19 @@
+PublisherStudio v1.0.84 source changes
+
+Compiler and analyzer repair
+- Services/VideoStudio/Export/VideoLayerInterchangeService.cs
+  - Replaced Math.Hypot with a stable EuclideanDistance helper.
+  - Specialized ResamplePolygon to List<MediaFramePoint> because every internal caller already owns that concrete type.
+  - Converted fallback polygon cloning and normalization materialization to collection expressions.
+  - Preserved source/target resampling, OpenSCAD generation and browser-runtime payload semantics.
+
+Regression coverage
+- tests/videoSelection3dInterop.test.mjs
+  - Rejects Math.Hypot in the C# interchange service.
+  - Requires the concrete resampling signature and EuclideanDistance helper.
+  - Rejects reintroduction of ToList materializations in the service.
+
+Release metadata
+- Advanced Web, Installer, npm/lock, streaming runtime and structured HTML export manifest versions to 1.0.84.
+- Updated version assertions in existing repository tests.
+- Added CHANGELOG-v1.0.84.md, SOURCE-CHANGES-v1.0.84.txt and TEST-RESULTS-v1.0.84.txt.

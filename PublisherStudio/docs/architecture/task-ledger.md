@@ -2,8 +2,9 @@
 
 Status values are **Closed**, **Partial**, or **Deferred**. A task may be removed only after a later changelog records it as solved and the related contract test remains green.
 
-| Task | Status in 1.0.85 | Evidence / next step |
+| Task | Status in 1.0.86 | Evidence / next step |
 |---|---|---|
+| v1.0.86 .NET SDK duplicate localization Content items (`NETSDK1022`) | Closed | Project-local localization files use `Content Update`; guarded by `sdkDefaultItems.test.mjs`. |
 | v1.0.84 `Math.Hypot`, CA1859 and IDE0305 compiler findings | Closed | Replaced and protected by compilation-safety/interchange tests. |
 | Temporal selection layers, point ownership, selected deletion and HTML compatibility marking | Closed | Delivered in 1.0.83 and retained by video selection/layer tests. |
 | Reusable interface-first service composition and explicit lifetimes | Partial | New and touched areas use interfaces/lifetime descriptors. The raw static baseline and priority candidates are maintained in `static-service-migration-inventory-v1.0.85.md`; remaining legacy candidates migrate when touched. |

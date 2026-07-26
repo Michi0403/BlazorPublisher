@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>1.0.85</Version>
+    <Version>1.0.86</Version>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
     <DevExpressVersion>25.2.8</DevExpressVersion>
     <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
@@ -32,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="Localization\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Update="Localization\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--

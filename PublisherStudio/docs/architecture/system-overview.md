@@ -43,3 +43,7 @@ The `csharpCompilationSafety` contract scans DI registrations and namespace/type
 ## Interface-first local API layer (v1.0.85)
 
 Application registrations are centralized in `PublisherStudioServiceCollectionExtensions`. New OpenSCAD, code editing, automation, screenshot, localization/path and render-export capabilities are public interfaces shared by components and controllers. Refer to the v1.0.85 architecture guides and task ledger for completed and deferred scope.
+
+## SDK content discovery (v1.0.86)
+
+PublisherStudio.Web keeps the Web SDK's implicit content discovery enabled. Project-local localization JSON files are implicit `Content` items; the project uses `Content Update` only to attach output and publish copy metadata. Files outside the project tree, such as the linked application icon, remain explicit `Content Include` items.

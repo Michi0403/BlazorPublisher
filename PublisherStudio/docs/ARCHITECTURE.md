@@ -228,3 +228,7 @@ See:
 - `docs/architecture/automation-and-screenshot-api.md`
 - `docs/architecture/localization-code-editing-and-render-export.md`
 - `docs/architecture/task-ledger.md`
+
+## v1.0.86 SDK default-item rule
+
+For files physically inside an SDK-style web project, use `Update` when only adding MSBuild metadata to an item already discovered by the SDK. Do not add the same project-local file with `Content Include`, and do not disable all default content merely to avoid a duplicate. External linked assets may still require `Include`. `tests/sdkDefaultItems.test.mjs` protects the localization implementation of this rule.

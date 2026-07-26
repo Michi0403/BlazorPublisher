@@ -15,6 +15,10 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## v1.0.86: SDK implicit-content compatibility
+
+This hotfix keeps the v1.0.85 localization design intact while correcting its MSBuild item metadata. The Web SDK already discovers `Localization/*.json` as content, so the project now uses `Content Update` to attach copy-to-output/publish behavior instead of including the same files a second time. A repository contract protects this rule against future `NETSDK1022` regressions.
+
 ## v1.0.85: interface-first automation, OpenSCAD and render evolution
 
 This source package adds reusable DI interfaces and loopback controller access for OpenSCAD generation, Video Studio interchange, LocalGPT/AICouncil browser commands, screenshots, business-object discovery, programming-language text commands, localization, configurable paths and render-export capability analysis. OpenSCAD is represented as an extensible node graph with typed properties and per-part `$t` animation tracks so a later visual builder can use the same model. PNG/JPEG/SVG render export now snapshots canvas effects and current video frames instead of exporting blank cloned media.

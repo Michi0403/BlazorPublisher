@@ -1,0 +1,114 @@
+@namespace PublisherStudio.Components
+@implements IDisposable
+@inject IOrganicWorkCoordinator WorkCoordinator
+@inject ILocalGptConnectionService Connection
+@inject IUserNotificationService Notifications
+
+@if (_visible && _pending.Count > 0)
+{
+    <aside class="organic-approval-bar" role="region" aria-label="Organic plugin approvals">
+        <button type="button" class="organic-approval-toggle" @onclick="ToggleCollapsed" aria-expanded="@(!_collapsed)">
+            AI Council actions <span class="organic-approval-count">@_pending.Count</span>
+        </button>
+        @if (!_collapsed)
+        {
+            var current = _pending[0];
+            <div class="organic-approval-content">
+                <div class="organic-approval-summary">
+                    <strong>@current.CapabilityKey</strong>
+                    <span>@DescribeInteraction(current.Request)</span>
+                    <small>@(string.IsNullOrWhiteSpace(current.Request.WorkOrderKey) ? current.CorrelationId.ToString("N") : current.Request.WorkOrderKey)</small>
+                </div>
+                <div class="organic-approval-actions">
+                    <button type="button" class="organic-primary" disabled="@_busy" @onclick="ApproveCurrentAsync">Approve once</button>
+                    <button type="button" class="organic-danger" disabled="@_busy" @onclick="DeclineCurrentAsync">Decline</button>
+                    <button type="button" class="organic-secondary" @onclick="Hide">Hide bar</button>
+                </div>
+            </div>
+        }
+    </aside>
+}
+else if (!_visible && _pending.Count > 0)
+{
+    <button type="button" class="organic-approval-reopen" @onclick="Show">
+        Review AI actions <span>@_pending.Count</span>
+    </button>
+}
+
+@code {
+    private IReadOnlyList<OrganicPluginWorkItem> _pending = [];
+    private bool _collapsed;
+    private bool _visible = true;
+    private bool _busy;
+
+    protected override void OnInitialized()
+    {
+        WorkCoordinator.Changed += OnChanged;
+        Refresh();
+    }
+
+    private void Refresh() => _pending = WorkCoordinator.GetWork()
+        .Where(item => item.Status == OrganicWorkStatus.PendingApproval)
+        .OrderBy(item => item.CreatedUtc)
+        .ToList();
+
+    private void OnChanged() => _ = InvokeAsync(() =>
+    {
+        Refresh();
+        StateHasChanged();
+    });
+
+    private async Task ApproveCurrentAsync()
+    {
+        if (_busy || _pending.Count == 0) return;
+        _busy = true;
+        try
+        {
+            var item = await WorkCoordinator.ApproveAsync(_pending[0].Id);
+            if (item is not null && Connection.State.IsConnected)
+                await Connection.SendWorkResultAsync(item);
+            Notifications.Success("The requested AI Council action was approved once.", "Organic approval", nameof(OrganicApprovalBar));
+        }
+        finally
+        {
+            _busy = false;
+            Refresh();
+        }
+    }
+
+    private async Task DeclineCurrentAsync()
+    {
+        if (_busy || _pending.Count == 0) return;
+        _busy = true;
+        try
+        {
+            var id = _pending[0].Id;
+            if (WorkCoordinator.Decline(id, "Declined by the PublisherStudio user."))
+            {
+                var item = WorkCoordinator.Get(id);
+                if (item is not null && Connection.State.IsConnected)
+                    await Connection.SendWorkResultAsync(item);
+                Notifications.Warning("The requested AI Council action was declined.", "Organic approval", nameof(OrganicApprovalBar));
+            }
+        }
+        finally
+        {
+            _busy = false;
+            Refresh();
+        }
+    }
+
+    private static string DescribeInteraction(OrganicWireEnvelope request) => request.InteractionKind switch
+    {
+        OrganicInteractionKind.HumanAndAutomated => "Needs human confirmation and automated interaction on PublisherStudio.",
+        OrganicInteractionKind.Human => "Needs human interaction on PublisherStudio.",
+        OrganicInteractionKind.Automated => "Uses an automated PublisherStudio interaction after approval.",
+        _ => "Requests a bounded PublisherStudio function."
+    };
+
+    private void ToggleCollapsed() => _collapsed = !_collapsed;
+    private void Hide() => _visible = false;
+    private void Show() { _visible = true; _collapsed = false; }
+
+    public void Dispose() => WorkCoordinator.Changed -= OnChanged;
+}

@@ -258,3 +258,47 @@ for (const file of [...csharpFiles, ...razorFiles]) {
 }
 
 console.log('PublisherStudio C# composition-root, enum-reference, namespace, interpolation, Razor control-flow and local-scope safety checks passed.');
+
+// Source-package closure: every project reference and every composition-root-only
+// use-case that is required by a registration must be present in the delivered tree.
+const projectFiles = [];
+(function walkProjects(directory) {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (['bin', 'obj', 'node_modules', '.git', 'artifacts'].includes(entry.name)) continue;
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) walkProjects(full);
+    else if (entry.isFile() && entry.name.endsWith('.csproj')) projectFiles.push(full);
+  }
+})(root);
+assert.ok(projectFiles.length >= 3, 'The source package must include the web, installer and WireProtocolVersion projects.');
+for (const projectFile of projectFiles) {
+  const xml = fs.readFileSync(projectFile, 'utf8');
+  for (const match of xml.matchAll(/<ProjectReference\s+Include="([^"]+)"/g)) {
+    const target = path.resolve(path.dirname(projectFile), match[1].replaceAll('\\', path.sep));
+    assert.ok(fs.existsSync(target), `Missing ProjectReference ${match[1]} from ${path.relative(root, projectFile)}.`);
+  }
+}
+
+const streamingRuntimePath = path.join(web, 'Services', 'Streaming', 'UseCases', 'Runtime', 'StreamingRuntimeUseCases.cs');
+assert.ok(fs.existsSync(streamingRuntimePath), 'StreamingRuntimeUseCases.cs must be included in every source package.');
+const streamingRuntime = fs.readFileSync(streamingRuntimePath, 'utf8');
+assert.match(streamingRuntime, /namespace PublisherStudio\.Services\.Streaming\.UseCases\.Runtime;/);
+assert.match(streamingRuntime, /public sealed class StreamingRuntimeUseCases/);
+const streamingComposition = fs.readFileSync(path.join(web, 'StreamingServiceCollectionExtensions.cs'), 'utf8');
+assert.match(streamingComposition, /AddSingleton<StreamingRuntimeUseCases>/);
+assert.ok(globalImports.has('PublisherStudio.Services.Streaming.UseCases.Runtime'), 'The runtime use-case namespace must remain globally imported.');
+
+const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'LocalGPT.WireProtocolVersion.csproj');
+const wireContractPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'OneWireProtocolContracts.cs');
+assert.ok(fs.existsSync(wireProjectPath), 'The reusable LocalGPT.WireProtocolVersion project is missing.');
+assert.ok(fs.existsSync(wireContractPath), 'The reusable 1-Wire contract source is missing.');
+const wireContract = fs.readFileSync(wireContractPath, 'utf8');
+for (const token of [
+  'public interface IOneWireInteractionContract',
+  'RequiresHumanInteractionOnTargetSystem',
+  'RequiresAutomatedInteractionOnTargetSystem',
+  'InteractionValueJson',
+  'public interface IOneWireCapabilityProvider',
+  'public interface IOneWireTransportAdapter'
+]) assert.ok(wireContract.includes(token), `Shared WireProtocolVersion contract is missing ${token}.`);
+console.log('PublisherStudio source-package project closure and StreamingRuntimeUseCases inventory checks passed.');

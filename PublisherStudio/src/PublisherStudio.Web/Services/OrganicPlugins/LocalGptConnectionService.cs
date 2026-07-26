@@ -18,6 +18,8 @@ public sealed class LocalGptConnectionService(
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
     private readonly SemaphoreSlim writeGate = new(1, 1);
     private readonly ConcurrentDictionary<Guid, Task> activeInvocations = new();
+    private readonly ConcurrentDictionary<Guid, TaskCompletionSource<OrganicWireEnvelope>> responseWaiters = new();
+    private readonly ConcurrentDictionary<Guid, OrganicWireEnvelope> recentResponses = new();
     private TcpClient? client;
     private StreamReader? reader;
     private StreamWriter? writer;
@@ -61,6 +63,9 @@ public sealed class LocalGptConnectionService(
             Changed?.Invoke();
 
             var localCapabilities = await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
+            var localSkills = await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false);
+            var localUiFeatures = await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false);
+            var localHardware = await capabilities.GetHardwareAsync(cancellationToken).ConfigureAwait(false);
             var hello = new OrganicWireEnvelope
             {
                 MessageType = OrganicWireMessageType.Hello,
@@ -80,7 +85,10 @@ public sealed class LocalGptConnectionService(
                         DiscoveryPort = OrganicWireProtocol.DefaultDiscoveryPort,
                         WebBaseUrl = RuntimeEndpointStore.BaseUrl,
                         IsConnected = true,
-                        Capabilities = localCapabilities.ToList()
+                        Capabilities = localCapabilities.ToList(),
+                        Skills = localSkills.ToList(),
+                        UiFeatures = localUiFeatures.ToList(),
+                        Hardware = localHardware.ToList()
                     }, OrganicPluginProtocolCodec.JsonOptions)
                 }
             };
@@ -136,6 +144,28 @@ public sealed class LocalGptConnectionService(
         return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, cancellationToken);
     }
 
+    public async Task<OrganicWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        if (correlationId == Guid.Empty) throw new ArgumentException("A correlation id is required.", nameof(correlationId));
+        if (recentResponses.TryRemove(correlationId, out var cached)) return cached;
+        var waiter = responseWaiters.GetOrAdd(correlationId, _ => new TaskCompletionSource<OrganicWireEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously));
+        if (recentResponses.TryRemove(correlationId, out cached))
+        {
+            responseWaiters.TryRemove(correlationId, out _);
+            return cached;
+        }
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(timeout);
+        try
+        {
+            return await waiter.Task.WaitAsync(timeoutCts.Token).ConfigureAwait(false);
+        }
+        finally
+        {
+            responseWaiters.TryRemove(correlationId, out _);
+        }
+    }
+
     public async Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(item);
@@ -174,15 +204,45 @@ public sealed class LocalGptConnectionService(
 
     private async Task HandleIncomingAsync(OrganicWireEnvelope envelope, Guid connectedId, string connectedPeerId, StreamWriter connectedWriter, CancellationToken cancellationToken)
     {
+        if (envelope.MessageType is OrganicWireMessageType.WorkResult or OrganicWireMessageType.Error or OrganicWireMessageType.ApprovalRequired)
+        {
+            recentResponses[envelope.CorrelationId] = envelope;
+            if (responseWaiters.TryGetValue(envelope.CorrelationId, out var waiter))
+                waiter.TrySetResult(envelope);
+            foreach (var stale in recentResponses.Where(pair => pair.Value.CreatedUtc < DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10)).Select(pair => pair.Key).ToArray())
+                recentResponses.TryRemove(stale, out _);
+        }
+
         switch (envelope.MessageType)
         {
             case OrganicWireMessageType.HelloAck:
             case OrganicWireMessageType.CapabilityResponse:
-                if (TryRead<List<OrganicCapabilityDescriptor>>(envelope, "Capabilities", out var remoteCapabilities) && discovery.GetPeer(connectedPeerId) is { } peer)
+            case OrganicWireMessageType.SkillResponse:
+            case OrganicWireMessageType.SkillStateUpdate:
+                if (discovery.GetPeer(connectedPeerId) is { } peer)
                 {
-                    peer.Capabilities = remoteCapabilities ?? [];
+                    if (TryRead<OrganicPeerAdvertisement>(envelope, "Peer", out var advertisedPeer) && advertisedPeer is not null)
+                    {
+                        advertisedPeer.Address = string.IsNullOrWhiteSpace(advertisedPeer.Address) ? peer.Address : advertisedPeer.Address;
+                        advertisedPeer.ServicePort = advertisedPeer.ServicePort <= 0 ? peer.ServicePort : advertisedPeer.ServicePort;
+                        advertisedPeer.DiscoveryPort = advertisedPeer.DiscoveryPort <= 0 ? peer.DiscoveryPort : advertisedPeer.DiscoveryPort;
+                        peer = advertisedPeer;
+                    }
+                    if (TryRead<List<OrganicCapabilityDescriptor>>(envelope, "Capabilities", out var remoteCapabilities))
+                        peer.Capabilities = remoteCapabilities ?? [];
+                    if (TryRead<List<OrganicSkillDescriptor>>(envelope, "Skills", out var remoteSkills))
+                        peer.Skills = remoteSkills ?? [];
+                    if (TryRead<List<OrganicUiFeatureDescriptor>>(envelope, "UiFeatures", out var remoteUiFeatures))
+                        peer.UiFeatures = remoteUiFeatures ?? [];
+                    if (TryRead<List<OrganicHardwareDescriptor>>(envelope, "Hardware", out var remoteHardware))
+                        peer.Hardware = remoteHardware ?? [];
                     peer.IsConnected = true;
                     discovery.Upsert(peer);
+                    State.RemoteCapabilities = peer.Capabilities.ToList();
+                    State.RemoteSkills = peer.Skills.ToList();
+                    State.RemoteUiFeatures = peer.UiFeatures.ToList();
+                    State.RemoteHardware = peer.Hardware.ToList();
+                    Changed?.Invoke();
                 }
                 results.RecordEnvelope(envelope);
                 break;
@@ -277,6 +337,13 @@ public sealed class LocalGptConnectionService(
         State.PeerId = string.Empty;
         State.DisplayName = string.Empty;
         State.ConnectedUtc = null;
+        State.RemoteCapabilities = [];
+        State.RemoteSkills = [];
+        State.RemoteUiFeatures = [];
+        State.RemoteHardware = [];
+        foreach (var waiter in responseWaiters.Values)
+            waiter.TrySetException(new IOException("PublisherStudio disconnected from LocalGPT before the 1-Wire result arrived."));
+        responseWaiters.Clear();
         if (!string.IsNullOrWhiteSpace(oldPeerId)) discovery.SetConnected(oldPeerId, false);
         Changed?.Invoke();
     }

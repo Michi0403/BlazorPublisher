@@ -20,6 +20,8 @@ public sealed class OrganicCapabilityCatalog(
         {
             Capability("publisher.screen.capture", "Eyes: screen capture", "Queues a browser screenshot. Browser/user gesture permission is still required.", "eyes", false, true, true),
             Capability("publisher.screen.capture.result", "Eyes: screen capture result", "Reads the bounded status and result of a previously queued browser screenshot for the next council heartbeat.", "eyes", true, false, true),
+            Capability("publisher.screenreader.start", "Start recurring screen-reader help", "Starts one debounced single-flight screen-reader session. The interval is clamped to at least 15 seconds.", "eyes", false, true, true),
+            Capability("publisher.screenreader.stop", "Stop recurring screen-reader help", "Stops a recurring screen-reader session by id.", "eyes", false, true, true),
             Capability("publisher.input.execute", "Hands: browser input", "Queues one bounded mouse, keyboard, hover, focus or gesture command through the existing automation service.", "hands", false, true, true),
             Capability("publisher.input.result", "Hands: browser input result", "Reads the status and bounded result of a previously queued browser input command.", "eyes", true, false, true),
             Capability("publisher.openscad.generate", "OpenSCAD canonical project generation", "Validates and renders a canonical OpenScadDocument/OpenScadNode graph through the existing registered renderer path.", "hands", false, true, false),
@@ -32,18 +34,78 @@ public sealed class OrganicCapabilityCatalog(
         return capabilities;
     }
 
+    public async Task<IReadOnlyList<OrganicSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default)
+    {
+        var capabilities = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
+        return capabilities
+            .SelectMany(capability => capability.Skills.Select(skill => new { skill, capability }))
+            .GroupBy(item => item.skill, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new OrganicSkillDescriptor
+            {
+                Key = group.Key,
+                DisplayName = group.Key,
+                Description = $"PublisherStudio organic skill backed by {group.Select(item => item.capability.Key).Distinct().Count()} capability route(s).",
+                SourcePeerId = "publisherstudio",
+                Organs = group.SelectMany(item => item.capability.Organs).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+                CapabilityKeys = group.Select(item => item.capability.Key).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+                UiActivationKeys = group.SelectMany(item => item.capability.UiActivationKeys).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+                IsOnline = group.Any(item => item.capability.IsOnline),
+                IsEnabled = group.Any(item => item.capability.IsEnabled),
+                UpdatedUtc = DateTimeOffset.UtcNow
+            })
+            .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    public Task<IReadOnlyList<OrganicUiFeatureDescriptor>> GetUiFeaturesAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<OrganicUiFeatureDescriptor>>
+        ([
+            new() { Key = "publisherstudio.council.run", DisplayName = "AI Council ribbon", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["council.run"] },
+            new() { Key = "publisherstudio.council.team-picker", DisplayName = "Council team picker", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["council.teams"] },
+            new() { Key = "publisherstudio.screenreader.recurring", DisplayName = "Recurring screen-reader help", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["publisher.screen.capture"] },
+            new() { Key = "publisherstudio.spreadsheet.ai", DisplayName = "Spreadsheet AI help", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["publisher.spreadsheet.inspect", "council.run"] },
+            new() { Key = "publisherstudio.openscad.ai", DisplayName = "OpenSCAD Team", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["publisher.openscad.generate", "council.run"] }
+        ]);
+
+    public Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<OrganicHardwareDescriptor>>
+        ([
+            new()
+            {
+                Kind = OrganicHardwareKind.Cpu, Index = 0, Name = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER") ?? "CPU",
+                Vendor = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE") ?? string.Empty,
+                LogicalProcessorCount = Environment.ProcessorCount, IsOnline = true
+            }
+        ]);
+
     private static OrganicCapabilityDescriptor Capability(string key, string name, string description, string organ, bool readOnly, bool confirmation, bool scheduling) => new()
     {
         Key = key, DisplayName = name, Description = description, Controller = "OrganicPlugins", Method = "POST",
-        Route = $"/api/organic/capabilities/{key}", Organs = [organ], Skills = Skills(key), IsOnline = true,
+        Route = $"/api/organic/capabilities/{key}", Organs = [organ], Skills = Skills(key), RequiredSkillKeys = Skills(key),
+        UiActivationKeys = UiActivationKeys(key), IsOnline = true, IsEnabled = true,
         IsReadOnly = readOnly, RequiresHumanConfirmation = confirmation, SupportsScheduling = scheduling,
+        SupportsRecurringExecution = key is "publisher.screen.capture" or "publisher.screenreader.start",
+        RequiresHumanInteractionOnTargetSystem = confirmation,
+        RequiresAutomatedInteractionOnTargetSystem = key is "publisher.screen.capture" or "publisher.input.execute" or "publisher.screenreader.start" or "publisher.screenreader.stop",
         ParameterSchemaJson = Schema(key)
+    };
+
+    private static List<string> UiActivationKeys(string key) => key switch
+    {
+        "publisher.screen.capture" => ["publisherstudio.screenreader.recurring"],
+        "publisher.screenreader.start" => ["publisherstudio.screenreader.recurring"],
+        "publisher.screenreader.stop" => ["publisherstudio.screenreader.recurring"],
+        "publisher.openscad.generate" => ["publisherstudio.openscad.ai"],
+        "publisher.spreadsheet.inspect" => ["publisherstudio.spreadsheet.ai"],
+        _ => []
     };
 
     private static List<string> Skills(string key) => key switch
     {
         "publisher.screen.capture" => ["vision", "screen", "screenshot"],
         "publisher.screen.capture.result" => ["vision", "screen", "screenshot", "evidence"],
+        "publisher.screenreader.start" => ["vision", "screen", "screenreader", "recurring"],
+        "publisher.screenreader.stop" => ["vision", "screen", "screenreader", "recurring"],
         "publisher.input.execute" => ["mouse", "keyboard", "gesture", "navigation"],
         "publisher.input.result" => ["mouse", "keyboard", "gesture", "verification"],
         "publisher.openscad.generate" => ["openscad", "3d", "geometry", "render"],
@@ -57,6 +119,8 @@ public sealed class OrganicCapabilityCatalog(
     {
         "publisher.screen.capture" => "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"format\":{\"type\":\"string\"},\"quality\":{\"type\":\"number\"}}}",
         "publisher.screen.capture.result" => "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"},\"includeData\":{\"type\":\"boolean\"}}}",
+        "publisher.screenreader.start" => "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"prompt\":{\"type\":\"string\"},\"intervalSeconds\":{\"type\":\"integer\",\"minimum\":15}}}",
+        "publisher.screenreader.stop" => "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
         "publisher.input.execute" => "{\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
         "publisher.input.result" => "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"}}}",
         "publisher.openscad.generate" => "{\"type\":\"object\",\"required\":[\"document\"],\"properties\":{\"document\":{\"type\":\"object\"}}}",
@@ -74,24 +138,45 @@ public sealed class OrganicWorkExecutor(
     IBusinessObjectContextService businessContext,
     IMediaConversionService mediaConversion,
     IOrganicResultStore resultStore,
+    IRecurringScreenReaderService recurringScreenReader,
     ILogger<OrganicWorkExecutor> logger) : IOrganicWorkExecutor
 {
     public async Task<string> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         var parameters = ReadParameters(envelope);
-        object result = envelope.CapabilityKey switch
+        object result;
+        if (string.Equals(envelope.CapabilityKey, "publisher.screenreader.start", StringComparison.OrdinalIgnoreCase))
         {
-            "publisher.screen.capture" => QueueScreenshot(parameters),
-            "publisher.screen.capture.result" => ReadScreenshotResult(parameters),
-            "publisher.input.execute" => QueueInput(parameters),
-            "publisher.input.result" => ReadInputResult(parameters),
-            "publisher.openscad.generate" => GenerateOpenScad(parameters),
-            "publisher.spreadsheet.inspect" => InspectSpreadsheet(parameters),
-            "publisher.text.insert.propose" => ProposeText(parameters),
-            "publisher.business-context" => businessContext.CreateSnapshot(),
-            "publisher.media.capabilities" => await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
-            _ => throw new KeyNotFoundException($"Unknown organic capability '{envelope.CapabilityKey}'.")
-        };
+            var session = await recurringScreenReader.StartAsync(
+                envelope.SourcePeerId,
+                GetString(parameters, "selector", "body"),
+                GetString(parameters, "prompt", "Describe meaningful screen changes and suggest the next safe action."),
+                GetInt(parameters, "intervalSeconds", 15),
+                cancellationToken).ConfigureAwait(false);
+            result = new { session.Id, session.IsActive, session.Selector, session.Prompt, session.IntervalSeconds, MinimumIntervalSeconds = 15 };
+        }
+        else if (string.Equals(envelope.CapabilityKey, "publisher.screenreader.stop", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!Guid.TryParse(GetString(parameters, "sessionId", string.Empty), out var sessionId))
+                throw new ArgumentException("sessionId is required.");
+            result = new { SessionId = sessionId, Stopped = await recurringScreenReader.StopAsync(sessionId).ConfigureAwait(false) };
+        }
+        else
+        {
+            result = envelope.CapabilityKey switch
+            {
+                "publisher.screen.capture" => QueueScreenshot(parameters),
+                "publisher.screen.capture.result" => ReadScreenshotResult(parameters),
+                "publisher.input.execute" => QueueInput(parameters),
+                "publisher.input.result" => ReadInputResult(parameters),
+                "publisher.openscad.generate" => GenerateOpenScad(parameters),
+                "publisher.spreadsheet.inspect" => InspectSpreadsheet(parameters),
+                "publisher.text.insert.propose" => ProposeText(parameters),
+                "publisher.business-context" => businessContext.CreateSnapshot(),
+                "publisher.media.capabilities" => await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
+                _ => throw new KeyNotFoundException($"Unknown organic capability '{envelope.CapabilityKey}'.")
+            };
+        }
         logger.LogInformation("Executed organic capability {CapabilityKey} for correlation {CorrelationId}.", envelope.CapabilityKey, envelope.CorrelationId);
         return JsonSerializer.Serialize(result, OrganicPluginProtocolCodec.JsonOptions);
     }

@@ -91,6 +91,8 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);
         AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);
         AddSingleton<ILocalGptConnectionService, LocalGptConnectionService>(services);
+        AddSingleton<IRecurringScreenReaderService, RecurringScreenReaderService>(services);
+
         services.AddHostedService<LocalGptDiscoveryHostedService>();
 
         AddScoped<EditorStateService, EditorStateService>(services);

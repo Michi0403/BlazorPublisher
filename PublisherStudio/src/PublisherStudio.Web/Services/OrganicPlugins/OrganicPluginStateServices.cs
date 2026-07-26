@@ -52,7 +52,9 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
         PeerId = peer.PeerId, DisplayName = peer.DisplayName, Application = peer.Application,
         ApplicationVersion = peer.ApplicationVersion, HostName = peer.HostName, Address = peer.Address,
         ServicePort = peer.ServicePort, DiscoveryPort = peer.DiscoveryPort, WebBaseUrl = peer.WebBaseUrl,
-        SeenUtc = peer.SeenUtc, IsConnected = peer.IsConnected, Capabilities = peer.Capabilities.ToList()
+        SeenUtc = peer.SeenUtc, IsConnected = peer.IsConnected,
+        Capabilities = peer.Capabilities.ToList(), Skills = peer.Skills.ToList(),
+        UiFeatures = peer.UiFeatures.ToList(), Hardware = peer.Hardware.ToList()
     };
 }
 

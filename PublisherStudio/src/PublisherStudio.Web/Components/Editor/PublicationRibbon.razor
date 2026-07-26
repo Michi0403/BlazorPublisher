@@ -1,5 +1,7 @@
 @namespace PublisherStudio.Components.Editor
+@implements IDisposable
 @inject NavigationManager Navigation
+@inject ILocalGptConnectionService LocalGptConnection
 
 <DxRibbon CssClass="publication-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text="File">
@@ -56,6 +58,9 @@
             </DxRibbonItem>
             <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Group" Enabled="State.CanGroupSelection" Click="GroupSelected" />
             <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Ungroup" Enabled="State.CanUngroupSelection" Click="UngroupSelected" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="LocalGPT" IconCssClass="pub-icon pub-icon-command">
+            <DxRibbonItem Text="@LocalGptButtonText" IconCssClass="pub-icon pub-icon-command" Click="OpenOrganicPlugins" />
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -246,16 +251,25 @@
         </DxRibbonGroup>
     </DxRibbonTab>
 
-    <DxRibbonTab Text="AI Council">
-        <DxRibbonGroup Text="LocalGPT" IconCssClass="pub-icon pub-icon-command">
-            <DxRibbonItem Text="Organic plugins" IconCssClass="pub-icon pub-icon-command" IsPrimary="true" Click="OpenOrganicPlugins" />
-            <DxRibbonItem Text="OpenSCAD Team" IconCssClass="pub-icon pub-icon-effects" Click="OpenOrganicPlugins" />
-            <DxRibbonItem Text="Spreadsheet Team" IconCssClass="pub-icon pub-icon-spreadsheet" Click="OpenOrganicPlugins" />
-        </DxRibbonGroup>
-        <DxRibbonGroup Text="Safety" IconCssClass="pub-icon pub-icon-info">
-            <DxRibbonItem Text="Eye/hand actions require permission" Enabled="false" />
-        </DxRibbonGroup>
-    </DxRibbonTab>
+    @if (CanShowAiCouncil)
+    {
+        <DxRibbonTab Text="AI Council">
+            <DxRibbonGroup Text="LocalGPT" IconCssClass="pub-icon pub-icon-command">
+                <DxRibbonItem Text="Organic plugins" IconCssClass="pub-icon pub-icon-command" IsPrimary="true" Click="OpenOrganicPlugins" />
+                @if (HasCouncilTeam("openscad-team"))
+                {
+                    <DxRibbonItem Text="OpenSCAD Team" IconCssClass="pub-icon pub-icon-effects" Click="OpenOrganicPlugins" />
+                }
+                @if (HasCouncilTeam("spreadsheet-team"))
+                {
+                    <DxRibbonItem Text="Spreadsheet Team" IconCssClass="pub-icon pub-icon-spreadsheet" Click="OpenOrganicPlugins" />
+                }
+            </DxRibbonGroup>
+            <DxRibbonGroup Text="Safety" IconCssClass="pub-icon pub-icon-info">
+                <DxRibbonItem Text="Eye/hand actions require permission" Enabled="false" />
+            </DxRibbonGroup>
+        </DxRibbonTab>
+    }
 
     <DxRibbonTab Text="Page Design">
         <DxRibbonGroup Text="Page setup">
@@ -601,6 +615,21 @@
 </DxRibbon>
 
 @code {
+    private string LocalGptButtonText => LocalGptConnection.State.IsConnected ? "Organic plugins connected" : "Connect LocalGPT";
+    private bool CanShowAiCouncil => LocalGptConnection.State.HasCapability("council.run");
+
+    protected override void OnInitialized()
+    {
+        LocalGptConnection.Changed += OnLocalGptChanged;
+    }
+
+    private void OnLocalGptChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private bool HasCouncilTeam(string teamKey) => LocalGptConnection.State.RemoteCapabilities
+        .Where(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "council.run", StringComparison.OrdinalIgnoreCase))
+        .SelectMany(item => item.Skills)
+        .Any(item => string.Equals(item, teamKey, StringComparison.OrdinalIgnoreCase));
+
     private void OpenOrganicPlugins() => Navigation.NavigateTo("/organic-plugins");
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }
@@ -1045,4 +1074,6 @@
             image.ShadowEnabled = false; image.FitInsideFrame = false; image.TintOpacity = 0;
         });
     }
+
+    public void Dispose() => LocalGptConnection.Changed -= OnLocalGptChanged;
 }

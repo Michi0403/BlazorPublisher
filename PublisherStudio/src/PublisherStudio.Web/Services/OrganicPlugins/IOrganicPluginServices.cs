@@ -22,6 +22,9 @@ public interface ILocalGptDiscoveryRegistry
 public interface IOrganicCapabilityCatalog
 {
     Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<OrganicSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<OrganicUiFeatureDescriptor>> GetUiFeaturesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default);
 }
 
 public interface IOrganicPermissionStore
@@ -64,5 +67,14 @@ public interface ILocalGptConnectionService : IAsyncDisposable
     Task DisconnectAsync();
     Task<Guid> SendCouncilRequestAsync(OrganicCouncilPromptRequest request, CancellationToken cancellationToken = default);
     Task<Guid> SendEnvelopeAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
+    Task<OrganicWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default);
     Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default);
+}
+
+public interface IRecurringScreenReaderService
+{
+    event Action? Changed;
+    IReadOnlyList<RecurringScreenReaderSession> GetSessions();
+    Task<RecurringScreenReaderSession> StartAsync(string peerId, string selector, string prompt, int intervalSeconds, CancellationToken cancellationToken = default);
+    Task<bool> StopAsync(Guid sessionId);
 }

@@ -1,0 +1,19 @@
+global using OrganicWireProtocol = LocalGPT.WireProtocol.OneWireProtocol;
+global using OrganicWireMessageType = LocalGPT.WireProtocol.OneWireMessageType;
+global using OrganicExecutionMode = LocalGPT.WireProtocol.OneWireExecutionMode;
+global using OrganicWorkStatus = LocalGPT.WireProtocol.OneWireWorkStatus;
+global using OrganicApprovalMode = LocalGPT.WireProtocol.OneWireApprovalMode;
+global using OrganicHardwareKind = LocalGPT.WireProtocol.OneWireHardwareKind;
+global using OrganicWireEnvelope = LocalGPT.WireProtocol.OneWireEnvelope;
+global using OrganicCapabilityDescriptor = LocalGPT.WireProtocol.OneWireCapabilityDescriptor;
+global using OrganicSkillDescriptor = LocalGPT.WireProtocol.OneWireSkillDescriptor;
+global using OrganicPeerAdvertisement = LocalGPT.WireProtocol.OneWirePeerAdvertisement;
+global using OrganicPermissionRule = LocalGPT.WireProtocol.OneWirePermissionRule;
+global using OrganicCouncilModelRoute = LocalGPT.WireProtocol.OneWireCouncilModelRoute;
+global using OrganicCouncilPromptRequest = LocalGPT.WireProtocol.OneWireCouncilRequest;
+
+global using OrganicUiFeatureDescriptor = LocalGPT.WireProtocol.OneWireUiFeatureDescriptor;
+global using OrganicUiFeatureState = LocalGPT.WireProtocol.OneWireUiFeatureState;
+global using OrganicHardwareDescriptor = LocalGPT.WireProtocol.OneWireHardwareDescriptor;
+global using OrganicRecurringExecution = LocalGPT.WireProtocol.OneWireRecurringExecution;
+global using OrganicInteractionKind = LocalGPT.WireProtocol.OneWireInteractionKind;

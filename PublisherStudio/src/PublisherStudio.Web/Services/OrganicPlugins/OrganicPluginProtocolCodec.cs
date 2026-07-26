@@ -20,6 +20,7 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
         ArgumentNullException.ThrowIfNull(envelope);
         if (seal)
         {
+            envelope.NormalizeInteractionKind();
             ValidatePayloadShape(envelope);
             var integrity = BuildIntegrityBytes(envelope);
             envelope.Hash = Convert.ToHexString(SHA256.HashData(integrity));
@@ -44,7 +45,7 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
         try
         {
             ArgumentNullException.ThrowIfNull(envelope);
-            if (!string.Equals(envelope.ProtocolVersion, OrganicWireProtocol.Version, StringComparison.Ordinal))
+            if (!OrganicWireProtocol.IsCompatible(envelope.ProtocolVersion))
                 throw new InvalidDataException($"Unsupported organic 1-Wire protocol version '{envelope.ProtocolVersion}'.");
             if (envelope.MessageId == Guid.Empty || envelope.CorrelationId == Guid.Empty)
                 throw new InvalidDataException("MessageId and CorrelationId are required.");
@@ -90,7 +91,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
             Skills = envelope.Skills.OrderBy(value => value, StringComparer.Ordinal).ToArray(),
             Properties = orderedProperties, envelope.EncryptedPayload, envelope.UserConfirmed,
             envelope.ApprovalMode, envelope.WorkOrderKey, envelope.NotBeforeUtc, envelope.WorkflowJson,
-            envelope.Error
+            envelope.Error, envelope.RequiresHumanInteractionOnTargetSystem,
+            envelope.RequiresAutomatedInteractionOnTargetSystem, envelope.InteractionKind,
+            envelope.InteractionValueJson, envelope.InteractionValueContentType
         };
         return JsonSerializer.SerializeToUtf8Bytes(view, JsonOptions);
     }

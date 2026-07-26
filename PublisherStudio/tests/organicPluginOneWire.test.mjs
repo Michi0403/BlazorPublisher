@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
+const sharedWireContract = read('src','LocalGPT.WireProtocolVersion','OneWireProtocolContracts.cs');
+const sharedWireProject = read('src','LocalGPT.WireProtocolVersion','LocalGPT.WireProtocolVersion.csproj');
 const models = read('src','PublisherStudio.Web','Domain','OrganicPluginModels.cs');
 const interfaces = read('src','PublisherStudio.Web','Services','OrganicPlugins','IOrganicPluginServices.cs');
 const codec = read('src','PublisherStudio.Web','Services','OrganicPlugins','OrganicPluginProtocolCodec.cs');
@@ -22,11 +24,24 @@ const packageJson = JSON.parse(read('src','PublisherStudio.Web','package.json'))
 const webProject = read('src','PublisherStudio.Web','PublisherStudio.Web.csproj');
 const installerProject = read('src','PublisherStudio.InstallerConsole','PublisherStudio.InstallerConsole.csproj');
 
-assert.match(models, /DefaultLocalGptServicePort = 51140/);
-assert.match(models, /DefaultDiscoveryPort = 51141/);
+
+for (const token of [
+  'public interface IOneWireInteractionContract',
+  'RequiresHumanInteractionOnTargetSystem',
+  'RequiresAutomatedInteractionOnTargetSystem',
+  'InteractionValueJson',
+  'InteractionValueContentType',
+  'public interface IOneWireCapabilityProvider',
+  'public interface IOneWireTransportAdapter'
+]) assert.ok(sharedWireContract.includes(token), `${token} missing from shared WireProtocolVersion contract.`);
+assert.match(sharedWireProject, /<AssemblyName>LocalGPT\.WireProtocolVersion<\/AssemblyName>/);
+assert.ok(webProject.includes('<ProjectReference Include="..\\LocalGPT.WireProtocolVersion\\LocalGPT.WireProtocolVersion.csproj" />'));
+
+assert.match(sharedWireContract, /DefaultServicePort = 51140/);
+assert.match(sharedWireContract, /DefaultDiscoveryPort = 51141/);
 for (const field of ['Properties', 'EncryptedPayload', 'Signature', 'Hash', 'ErrorCheck', 'ExecutionMode', 'NotBeforeUtc', 'Organs', 'Skills'])
-  assert.match(models, new RegExp(`\\b${field}\\b`), `${field} missing from protocol envelope.`);
-assert.match(models, /enum OrganicApprovalMode \{ AskEveryTime, SameCapability, CurrentWorkOrder, AlwaysAllow, Deny \}/);
+  assert.ok(sharedWireContract.includes(field), `${field} missing from protocol envelope.`);
+assert.match(sharedWireContract, /enum OneWireApprovalMode \{ AskEveryTime, SameCapability, CurrentWorkOrder, AlwaysAllow, Deny \}/);
 
 assert.match(codec, /SHA256\.HashData/);
 assert.match(codec, /ComputeCrc32/);

@@ -7,6 +7,7 @@
 @inject IOrganicPermissionStore PermissionStore
 @inject IOrganicWorkCoordinator WorkCoordinator
 @inject IOrganicResultStore ResultStore
+@inject IRecurringScreenReaderService RecurringScreenReader
 @inject IUserNotificationService Notifications
 @inject ILogger<OrganicPlugins> Logger
 @inject NavigationManager Navigation
@@ -66,10 +67,11 @@
             <h2>Start an AI Council round</h2>
             <label>
                 Council team
-                <select @bind="_councilRequest.TeamKey">
-                    <option value="general">General Council</option>
-                    <option value="openscad-team">OpenSCAD Team</option>
-                    <option value="spreadsheet-team">Spreadsheet Team</option>
+                <select @bind="_councilRequest.TeamKey" disabled="@(!CanRunCouncil)">
+                    @foreach (var team in CouncilTeams)
+                    {
+                        <option value="@team.Key">@team.Name</option>
+                    }
                 </select>
             </label>
             <label>
@@ -84,10 +86,31 @@
                 <label>Rounds <input type="number" min="1" max="20" @bind="_councilRequest.MaxRounds" /></label>
                 <label>Parallel models <input type="number" min="1" max="8" @bind="_councilRequest.MaxParallelModels" /></label>
             </div>
-            <button type="button" class="organic-primary" disabled="@(!Connection.State.IsConnected || string.IsNullOrWhiteSpace(_councilRequest.Prompt))" @onclick="SendCouncilAsync">Submit with user authorization</button>
+            <button type="button" class="organic-primary" disabled="@(!CanRunCouncil || string.IsNullOrWhiteSpace(_councilRequest.Prompt))" @onclick="SendCouncilAsync">Submit with user authorization</button>
             <p class="organic-note">The request only enters LocalGPT after this explicit frontend action. Any required PublisherStudio eye/hand call is still checked against the permission matrix below.</p>
         </section>
     </div>
+
+    @if (Connection.State.IsConnected)
+    {
+        <section class="organic-card">
+            <h2>Negotiated LocalGPT surface</h2>
+            <div class="organic-capability-grid">
+                <article class="organic-capability">
+                    <strong>Remote capabilities</strong>
+                    <p>@string.Join(", ", Connection.State.RemoteCapabilities.Where(item => item.IsEnabled && item.IsOnline).Select(item => item.Key).OrderBy(item => item))</p>
+                </article>
+                <article class="organic-capability">
+                    <strong>Remote skills</strong>
+                    <p>@string.Join(", ", Connection.State.RemoteSkills.Where(item => item.IsEnabled && item.IsOnline).Select(item => item.Key).OrderBy(item => item))</p>
+                </article>
+                <article class="organic-capability">
+                    <strong>Hardware roads</strong>
+                    <p>@(Connection.State.RemoteHardware.Count == 0 ? "Not advertised" : string.Join(", ", Connection.State.RemoteHardware.Where(item => item.IsOnline).Select(item => item.LaneKey)))</p>
+                </article>
+            </div>
+        </section>
+    }
 
     <section class="organic-card">
         <h2>PublisherStudio organ capabilities</h2>
@@ -104,6 +127,37 @@
                 </article>
             }
         </div>
+    </section>
+
+    <section class="organic-card">
+        <h2>Recurring screen-reader help</h2>
+        <p class="organic-note">Single-flight scheduling waits for capture and LocalGPT response before the next tick. Intervals are clamped to at least 15 seconds, so requests cannot pile up.</p>
+        <div class="organic-form-grid">
+            <label>Selector <input @bind="_screenReaderSelector" placeholder="body" /></label>
+            <label>Interval seconds <input type="number" min="15" max="3600" @bind="_screenReaderIntervalSeconds" /></label>
+            <label class="organic-form-wide">Instruction <textarea rows="3" @bind="_screenReaderPrompt" @bind:event="oninput"></textarea></label>
+        </div>
+        <button type="button" class="organic-primary" disabled="@(!CanUseScreenReader)" @onclick="StartScreenReaderAsync">Start recurring help</button>
+        @if (_screenReaderSessions.Count > 0)
+        {
+            <div class="organic-list organic-session-list">
+                @foreach (var session in _screenReaderSessions)
+                {
+                    <article class="organic-work" @key="session.Id">
+                        <div>
+                            <strong>@session.Selector · every @session.IntervalSeconds seconds</strong>
+                            <span>@(session.IsActive ? "Active" : "Stopped") · completed @session.CompletedExecutions</span>
+                            @if (!string.IsNullOrWhiteSpace(session.LastError)) { <span class="organic-error">@session.LastError</span> }
+                            @if (!string.IsNullOrWhiteSpace(session.LastResultJson)) { <details><summary>Latest guidance</summary><pre>@session.LastResultJson</pre></details> }
+                        </div>
+                        @if (session.IsActive)
+                        {
+                            <button type="button" class="organic-danger" @onclick="() => StopScreenReaderAsync(session.Id)">Stop</button>
+                        }
+                    </article>
+                }
+            </div>
+        }
     </section>
 
     <div class="organic-grid organic-grid-two">
@@ -236,6 +290,10 @@
     private IReadOnlyList<OrganicPluginWorkItem> _work = [];
     private IReadOnlyList<OrganicPluginWorkItem> _results = [];
     private IReadOnlyList<OrganicTextInsertionProposal> _textProposals = [];
+    private IReadOnlyList<RecurringScreenReaderSession> _screenReaderSessions = [];
+    private string _screenReaderSelector = "body";
+    private string _screenReaderPrompt = "Describe meaningful screen changes and suggest the next safe action.";
+    private int _screenReaderIntervalSeconds = 15;
     private OrganicCouncilPromptRequest _councilRequest = NewCouncilRequest("general");
     private OrganicPermissionRule _permission = new();
 
@@ -244,8 +302,35 @@
         Discovery.Changed += OnServiceChanged;
         Connection.Changed += OnServiceChanged;
         WorkCoordinator.Changed += OnServiceChanged;
+        RecurringScreenReader.Changed += OnServiceChanged;
         _capabilities = await CapabilityCatalog.GetCapabilitiesAsync();
         Refresh();
+    }
+
+    private bool CanRunCouncil => Connection.State.HasCapability("council.run");
+    private bool CanUseScreenReader => Connection.State.IsConnected
+        && Connection.State.HasCapability("localgpt.screenreader.help")
+        && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase));
+
+    private IReadOnlyList<(string Key, string Name)> CouncilTeams
+    {
+        get
+        {
+            var keys = Connection.State.RemoteCapabilities
+                .Where(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "council.run", StringComparison.OrdinalIgnoreCase))
+                .SelectMany(item => item.Skills)
+                .Where(key => !string.IsNullOrWhiteSpace(key))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (keys.Count == 0) keys.Add("general");
+            return keys.Select(key => (key, key switch
+            {
+                "general" => "General Council",
+                "openscad-team" => "OpenSCAD Team",
+                "spreadsheet-team" => "Spreadsheet Team",
+                _ => key
+            })).ToList();
+        }
     }
 
     private void BackToPublisher() => Navigation.NavigateTo("/");
@@ -257,6 +342,9 @@
         _work = WorkCoordinator.GetWork();
         _results = ResultStore.GetResults();
         _textProposals = ResultStore.GetTextProposals();
+        _screenReaderSessions = RecurringScreenReader.GetSessions();
+        if (!CouncilTeams.Any(team => string.Equals(team.Key, _councilRequest.TeamKey, StringComparison.OrdinalIgnoreCase)))
+            _councilRequest.TeamKey = CouncilTeams.First().Key;
         if (string.IsNullOrWhiteSpace(_permission.PeerId))
             _permission.PeerId = Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _peers.FirstOrDefault()?.PeerId ?? "localgpt";
     }
@@ -310,6 +398,29 @@
             Logger.LogError(ex, "Could not submit the LocalGPT council request.");
             Notifications.Error(ex.Message, "Council request failed", nameof(OrganicPlugins));
         }
+    }
+
+    private async Task StartScreenReaderAsync()
+    {
+        try
+        {
+            var session = await RecurringScreenReader.StartAsync(
+                Connection.State.PeerId, _screenReaderSelector, _screenReaderPrompt, _screenReaderIntervalSeconds);
+            Notifications.Success($"Recurring screen-reader session {session.Id} started.", "Screen reader", nameof(OrganicPlugins));
+            Refresh();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not start recurring screen-reader help.");
+            Notifications.Error(ex.Message, "Screen reader did not start", nameof(OrganicPlugins));
+        }
+    }
+
+    private async Task StopScreenReaderAsync(Guid id)
+    {
+        if (await RecurringScreenReader.StopAsync(id))
+            Notifications.Information("Recurring screen-reader help stopped.", source: nameof(OrganicPlugins));
+        Refresh();
     }
 
     private void SavePermission()
@@ -367,5 +478,6 @@
         Discovery.Changed -= OnServiceChanged;
         Connection.Changed -= OnServiceChanged;
         WorkCoordinator.Changed -= OnServiceChanged;
+        RecurringScreenReader.Changed -= OnServiceChanged;
     }
 }

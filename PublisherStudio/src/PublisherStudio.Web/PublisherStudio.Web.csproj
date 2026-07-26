@@ -20,6 +20,9 @@
     <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.RichEdit" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.de" Version="$(DevExpressVersion)" />

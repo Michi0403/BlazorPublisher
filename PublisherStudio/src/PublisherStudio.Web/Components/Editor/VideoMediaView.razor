@@ -62,7 +62,7 @@
     }
 
     private static bool LayerNeedsCanvas(VideoEffectLayer layer) =>
-        !layer.Visible || layer.Opacity < .999 || layer.BlendMode != VideoEffectBlendMode.Normal ||
+        layer.Kind == VideoEffectLayerKind.Blob3D || !layer.Visible || layer.Opacity < .999 || layer.BlendMode != VideoEffectBlendMode.Normal ||
         layer.HasTemporalRange || layer.Region.Points.Count >= 3 || layer.Filters.Any(filter => filter.Enabled);
 
     private static object LayerPayload(VideoEffectLayer layer) => new
@@ -70,15 +70,28 @@
         id = layer.Id.ToString("D"),
         layer.Name,
         layer.Visible,
+        kind = layer.Kind.ToString(),
         layer.Opacity,
         blendMode = layer.BlendMode.ToString(),
         layer.HasTemporalRange,
         layer.TemporalStartSeconds,
         layer.TemporalEndSeconds,
+        layer.MorphEnabled,
+        layer.AnimateMorph,
+        layer.MorphAmount,
+        layer.AnimationSpeed,
+        layer.Depth,
+        layer.Roundness,
+        htmlExportSupport = layer.HtmlExportSupport.ToString(),
         region = new
         {
             layer.Region.Inverted,
             points = layer.Region.Points.Select(point => new { point.X, point.Y }).ToArray()
+        },
+        morphRegion = new
+        {
+            layer.MorphRegion.Inverted,
+            points = layer.MorphRegion.Points.Select(point => new { point.X, point.Y }).ToArray()
         },
         filters = layer.Filters.Select(filter => new
         {
@@ -89,7 +102,8 @@
             filter.SecondaryAmount,
             filter.TertiaryAmount,
             filter.ResidualOpacity,
-            filter.Color
+            filter.Color,
+            htmlExportSupport = filter.HtmlExportSupport.ToString()
         }).ToArray()
     };
 

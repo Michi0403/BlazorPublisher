@@ -4,6 +4,7 @@
 @inject PublicationMediaAssetStore MediaAssets
 @inject MediaTimelineEditService TimelineEdits
 @inject VideoProjectImportService VideoProjectImporter
+@inject VideoLayerInterchangeService VideoLayerInterchange
 
 @if (Visible)
 {
@@ -71,7 +72,10 @@
                         <DxRibbonGroup Text="Video layers" IconCssClass="pub-icon pub-icon-layers">
                             <DxRibbonItem Text="Add layer" Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
                             <DxRibbonItem Text="Duplicate layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+                            <DxRibbonItem Text="Selection → new layer" Enabled="@CanCreateSelectionLayer" Click="CreateSelectionLayer" />
                             <DxRibbonItem Text="Selection → layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
+                            <DxRibbonItem Text="3D blob" Enabled="@(SelectedVideoLayer is not null)" Click="ConvertSelectedLayerToBlob" />
+                            <DxRibbonItem Text="3D → Mainframe" Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
                             <DxRibbonItem Text="Layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
                             <DxRibbonItem Text="Layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
@@ -237,16 +241,17 @@
                                         @for (var pointIndex = 0; pointIndex < ActiveFramePoints.Count; pointIndex++)
                                         {
                                             var point = ActiveFramePoints[pointIndex];
-                                            <circle class="media-frame-node" data-frame-node-index="@pointIndex" cx="@Inv(point.X * 1000)" cy="@Inv(point.Y * 1000)" r="9" />
+                                            <circle class="media-frame-node @(pointIndex == _selectedFramePointIndex ? "selected" : null)" data-frame-node-index="@pointIndex" cx="@Inv(point.X * 1000)" cy="@Inv(point.Y * 1000)" r="9" />
                                         }
                                     </svg>
                                     <span class="media-frame-cursor-ring" aria-hidden="true"></span>
                                     <div class="media-frame-mode-help">
-                                        <b>Frame region mode</b>
-                                        <span>Click/tap vertices · Enter or double-click applies · Esc cancels</span>
+                                        <b>@(_editingMorphRegion ? "Morph target mode" : "Frame region mode")</b>
+                                        <span>Click selects or adds a point · drag moves it · Delete removes the selected point</span>
                                     </div>
                                     <div class="media-frame-overlay-actions" @onpointerdown:stopPropagation>
                                         <button type="button" disabled="@(!CanFinishFrameRegion)" @onclick="FinishFrameRegion">Apply region</button>
+                                        <button type="button" disabled="@(SelectedFramePoint is null)" @onclick="RemoveSelectedFramePoint">Delete point</button>
                                         <button type="button" disabled="@(!_frameRegionEditing || _frameDraft.Count == 0)" @onclick="RemoveLastFramePoint">Undo point</button>
                                         <button type="button" @onclick="CancelFrameRegion">Exit mode</button>
                                     </div>
@@ -422,9 +427,11 @@
                                 <DxButton Text="Cut selection" Enabled="@CanCutVideoSelection" Click="CutVideoSelection" />
                                 <DxButton Text="Use as trim" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
                                 <DxButton Text="Copy area" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
+                                <DxButton Text="New selection layer" Enabled="@CanCreateSelectionLayer" Click="CreateSelectionLayer" />
                                 <DxButton Text="Apply to layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
                             </div>
-                            <p class="property-note">A point creates one cutline. A range creates cutlines at both boundaries and selects the resulting middle clip. Dropped video is inserted only inside this selection.</p>
+                            <label class="check-row"><input type="checkbox" checked="@_autoCreateSelectionLayers" @onchange="ToggleAutoCreateSelectionLayers" /> Create/reuse one effect layer for every committed range</label>
+                            <p class="property-note">A point creates one cutline. A range is persisted on its own selection layer, so filters and frame regions render only inside that time span. Dropped video is inserted only inside this selection.</p>
                         </section>
 
                         <section class="media-cut-sections-properties">
@@ -460,7 +467,8 @@
                                     <div class="media-video-layer-row @(layer.Id == _selectedVideoLayerId ? "selected" : null)">
                                         <button type="button" class="media-video-layer-select" @onclick="() => SelectVideoLayer(layer.Id)">
                                             <span>@layer.Name</span>
-                                            <small>@(layer.Region.IsFullFrame ? "Full frame" : $"{layer.Region.Points.Count} region points") · @layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s")@(layer.HasTemporalRange ? $" · {Time(layer.TemporalStartSeconds)}—{Time(layer.TemporalEndSeconds)}" : " · full clip")</small>
+                                            <small>@VideoLayerKindName(layer.Kind) · @(layer.Region.IsFullFrame ? "Full frame" : $"{layer.Region.Points.Count} region points") · @layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s")@(layer.HasTemporalRange ? $" · {Time(layer.TemporalStartSeconds)}—{Time(layer.TemporalEndSeconds)}" : " · full clip")</small>
+                                            <em class="media-html-support @HtmlSupportCss(layer.HtmlExportSupport)">@HtmlSupportLabel(layer.HtmlExportSupport)</em>
                                         </button>
                                         <button type="button" class="media-video-layer-visibility" title="Toggle layer visibility" @onclick="() => ToggleVideoLayerVisibility(layer.Id)">@(layer.Visible ? "●" : "○")</button>
                                     </div>
@@ -476,6 +484,18 @@
                             @if (SelectedVideoLayer is { } selectedLayer)
                             {
                                 <label>Layer name<input value="@selectedLayer.Name" @onchange="ChangeVideoLayerName" /></label>
+                                <label>Layer type
+                                    <select value="@selectedLayer.Kind" @onchange="ChangeVideoLayerKind">
+                                        @foreach (var layerKind in Enum.GetValues<VideoEffectLayerKind>())
+                                        {
+                                            <option value="@layerKind">@VideoLayerKindName(layerKind)</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div class="media-export-compatibility @HtmlSupportCss(selectedLayer.HtmlExportSupport)">
+                                    <b>@HtmlSupportLabel(selectedLayer.HtmlExportSupport)</b>
+                                    <span>@selectedLayer.HtmlExportNote</span>
+                                </div>
                                 <label>Opacity <b>@Math.Round(selectedLayer.Opacity * 100)%</b>
                                     <input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLayer.Opacity)" @oninput="ChangeVideoLayerOpacity" />
                                 </label>
@@ -496,6 +516,29 @@
                                     </div>
                                     <DxButton Text="Apply selected range" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" CssClass="wide-button" />
                                 }
+                                @if (selectedLayer.Kind == VideoEffectLayerKind.Blob3D)
+                                {
+                                    <div class="property-action-row">
+                                        <DxButton Text="Edit source area" Click="BeginFrameRegion" />
+                                        <DxButton Text="Draw morph target" Click="BeginMorphRegion" />
+                                    </div>
+                                    <label class="check-row"><input type="checkbox" checked="@selectedLayer.MorphEnabled" @onchange="ToggleVideoLayerMorph" /> Morph between both areas</label>
+                                    <label class="check-row"><input type="checkbox" checked="@selectedLayer.AnimateMorph" @onchange="ToggleVideoLayerMorphAnimation" /> Animate morph in preview and HTML</label>
+                                    <label>Morph amount <b>@Inv(selectedLayer.MorphAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLayer.MorphAmount)" @oninput="ChangeVideoLayerMorphAmount" /></label>
+                                    <label>Animation speed <b>@Inv(selectedLayer.AnimationSpeed)</b><input type="range" min="0" max="8" step="0.05" value="@Inv(selectedLayer.AnimationSpeed)" @oninput="ChangeVideoLayerAnimationSpeed" /></label>
+                                    <label>Depth <b>@Inv(selectedLayer.Depth)</b><input type="range" min="0.02" max="0.5" step="0.01" value="@Inv(selectedLayer.Depth)" @oninput="ChangeVideoLayerDepth" /></label>
+                                    <label>Roundness <b>@Inv(selectedLayer.Roundness)</b><input type="range" min="0" max="0.5" step="0.01" value="@Inv(selectedLayer.Roundness)" @oninput="ChangeVideoLayerRoundness" /></label>
+                                    <div class="property-action-row">
+                                        <DxButton Text="Refresh OpenSCAD" Click="RefreshSelectedLayerOpenScad" />
+                                        <DxButton Text="Insert in Mainframe" Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
+                                    </div>
+                                    <label>OpenSCAD interchange<textarea rows="7" readonly>@selectedLayer.OpenScadScript</textarea></label>
+                                    <div class="media-export-compatibility render">
+                                        <b>@HtmlSupportLabel(PublicationHtmlExportSupport.RenderBeforeExport)</b>
+                                        <span>Native OpenSCAD mesh, Minkowski rounding and boolean-solid output are interchange/render sources. Bake them to image or video before HTML export; the interactive canvas fallback stays available.</span>
+                                    </div>
+                                    <p class="property-note">The canvas blob remains interactive in HTML export. The OpenSCAD solid is an interchange/render source and must be baked for native mesh-quality video output.</p>
+                                }
                             }
                         </section>
 
@@ -515,7 +558,7 @@
                                 {
                                     <div class="media-video-filter-row @(filter.Id == _selectedVideoFilterId ? "selected" : null)">
                                         <button type="button" @onclick="() => SelectVideoFilter(filter.Id)">
-                                            <span>@filter.Name</span><small>@VideoFilterSummary(filter)</small>
+                                            <span>@filter.Name</span><small>@VideoFilterSummary(filter) · @HtmlSupportLabel(filter.HtmlExportSupport)</small>
                                         </button>
                                         <button type="button" title="Enable or disable filter" @onclick="() => ToggleVideoFilter(filter.Id)">@(filter.Enabled ? "●" : "○")</button>
                                     </div>
@@ -528,6 +571,7 @@
                             @if (SelectedVideoFilter is { } selectedFilter)
                             {
                                 <label>Filter name<input value="@selectedFilter.Name" @onchange="ChangeVideoFilterName" /></label>
+                                <div class="media-export-compatibility @HtmlSupportCss(selectedFilter.HtmlExportSupport)"><b>@HtmlSupportLabel(selectedFilter.HtmlExportSupport)</b><span>@selectedFilter.HtmlExportNote</span></div>
                                 @if (selectedFilter.Kind == VideoEffectFilterKind.ChromaKey)
                                 {
                                     <label>Key color<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
@@ -604,21 +648,32 @@
                     {
                         <section>
                             <h3>Video frame region</h3>
-                            <p class="property-note">This polygon belongs to <b>@(SelectedVideoLayer?.Name ?? "the selected video layer")</b>. Drag its nodes directly on the frame. Normalized source coordinates keep every angle stable across canvas sizes.</p>
-                            @if (SelectedVideoLayer is { } frameLayer)
+                            <p class="property-note">Editing the <b>@ActiveFrameRegionName</b> on <b>@(SelectedVideoLayer?.Name ?? "the selected video layer")</b>. A grabbed point remains selected until another point or the canvas is selected. Delete/Backspace removes that exact point.</p>
+                            @if (SelectedVideoLayer is not null)
                             {
-                                <label class="check-row"><input type="checkbox" checked="@frameLayer.Region.Inverted" @onchange="ToggleFrameRegionInverted" /> Invert this layer region</label>
+                                <label class="check-row"><input type="checkbox" checked="@ActiveFrameRegionInverted" @onchange="ToggleFrameRegionInverted" /> Invert the active region</label>
                             }
                             <div class="property-action-row">
-                                <DxButton Text="Edit region" Enabled="@HasSource" Click="BeginFrameRegion" />
+                                <DxButton Text="Edit source region" Enabled="@HasSource" Click="BeginFrameRegion" />
+                                <DxButton Text="Edit morph target" Enabled="@(SelectedVideoLayer is not null)" Click="BeginMorphRegion" />
                                 <DxButton Text="Apply" Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
-                                <DxButton Text="Clear" Enabled="@HasFrameRegion" Click="ClearFrameRegion" />
+                                <DxButton Text="Clear active" Enabled="@(HasFrameRegion || HasMorphRegion)" Click="ClearFrameRegion" />
                             </div>
                             <div class="property-action-row">
-                                <DxButton Text="Copy region" Enabled="@HasFrameRegion" Click="CopyFrameRegion" />
-                                <DxButton Text="Paste region" Enabled="@CanPasteFrameRegion" Click="PasteFrameRegion" />
-                                <DxButton Text="Remove last line" Enabled="@(_frameRegionEditing && _frameDraft.Count > 0)" Click="RemoveLastFramePoint" />
+                                <DxButton Text="Copy active region" Enabled="@(ActiveFramePoints.Count >= 3)" Click="CopyFrameRegion" />
+                                <DxButton Text="Paste active region" Enabled="@CanPasteFrameRegion" Click="PasteFrameRegion" />
+                                <DxButton Text="Delete selected point" Enabled="@(SelectedFramePoint is not null)" Click="RemoveSelectedFramePoint" />
                             </div>
+                            @if (SelectedFramePoint is { } selectedPoint)
+                            {
+                                <div class="media-frame-point-properties">
+                                    <h4>Selected point @(_selectedFramePointIndex.GetValueOrDefault() + 1)</h4>
+                                    <div class="property-grid two">
+                                        <label>X (0–1)<input type="number" min="0" max="1" step="0.001" value="@Inv(selectedPoint.X)" @onchange="ChangeSelectedFramePointX" /></label>
+                                        <label>Y (0–1)<input type="number" min="0" max="1" step="0.001" value="@Inv(selectedPoint.Y)" @onchange="ChangeSelectedFramePointY" /></label>
+                                    </div>
+                                </div>
+                            }
                         </section>
                         <section>
                             <h3>Video</h3>
@@ -685,12 +740,15 @@
             <DxContextMenuItem Text="Save selection as cut section" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
             <DxContextMenuItem Text="Use selected saved section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
             <DxContextMenuItem Text="Remove selected saved section" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
-            <DxContextMenuItem Text="Add video layer" Enabled="@HasSelectedSegment" BeginGroup="true" Click="AddVideoLayer" />
+            <DxContextMenuItem Text="Create layer from selected range" Enabled="@CanCreateSelectionLayer" BeginGroup="true" Click="CreateSelectionLayer" />
+            <DxContextMenuItem Text="Add video layer" Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
             <DxContextMenuItem Text="Duplicate selected layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
             <DxContextMenuItem Text="Apply selected range to layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
             <DxContextMenuItem Text="Move layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
             <DxContextMenuItem Text="Move layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
             <DxContextMenuItem Text="Delete selected layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
+            <DxContextMenuItem Text="Convert selected layer to animated 3D blob" Enabled="@(SelectedVideoLayer is not null)" Click="ConvertSelectedLayerToBlob" />
+            <DxContextMenuItem Text="Insert selected 3D blob into Mainframe" Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
             <DxContextMenuItem Text="Add chroma key filter" Enabled="@(SelectedVideoLayer is not null)" BeginGroup="true" Click="AddChromaKeyFilter" />
             <DxContextMenuItem Text="Add color adjustment filters" Enabled="@(SelectedVideoLayer is not null)" Click="AddColorAdjustmentFilters" />
             <DxContextMenuItem Text="Add vignette filter" Enabled="@(SelectedVideoLayer is not null)" Click="AddVignetteFilter" />
@@ -705,7 +763,9 @@
         {
             <DxContextMenuItem Text="Edit frame region" Enabled="@HasSource" BeginGroup="true" Click="BeginFrameRegion" />
             <DxContextMenuItem Text="Apply frame region" Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
-            <DxContextMenuItem Text="Clear frame region" Enabled="@HasFrameRegion" Click="ClearFrameRegion" />
+            <DxContextMenuItem Text="Edit morph target region" Enabled="@(SelectedVideoLayer is not null)" Click="BeginMorphRegion" />
+            <DxContextMenuItem Text="Delete selected region point" Enabled="@(SelectedFramePoint is not null)" Click="RemoveSelectedFramePoint" />
+            <DxContextMenuItem Text="Clear active region" Enabled="@(HasFrameRegion || HasMorphRegion)" Click="ClearFrameRegion" />
         }
         <DxContextMenuItem Text="@(_muted ? "Unmute" : "Mute")" BeginGroup="true" Click="ToggleMutedFromMenu" />
         <DxContextMenuItem Text="@(_loop ? "Disable loop" : "Loop selected range")" Click="ToggleLoopFromMenu" />
@@ -728,6 +788,7 @@
     [Parameter] public bool EditingExisting { get; set; }
     [Parameter] public EventCallback<MediaEditorResult> Saved { get; set; }
     [Parameter] public EventCallback<MediaConversionInsertRequest> SendToMediaConverter { get; set; }
+    [Parameter] public EventCallback<VideoLayerMainframeInsertRequest> InsertLayerIntoMainframe { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private DotNetObjectReference<MediaStudio>? _self;
@@ -776,9 +837,13 @@
     private MediaStudioMouseMode _mouseMode = MediaStudioMouseMode.SelectSection;
     private double _playhead;
     private readonly List<MediaFramePoint> _frameClipPolygon = [];
+    private readonly List<MediaFramePoint> _morphClipPolygon = [];
     private readonly List<MediaFramePoint> _frameDraft = [];
     private readonly List<MediaFramePoint> _frameClipboard = [];
     private bool _frameRegionEditing;
+    private bool _editingMorphRegion;
+    private int? _selectedFramePointIndex;
+    private bool _autoCreateSelectionLayers = true;
     private Guid? _selectedVideoLayerId;
     private Guid? _selectedVideoFilterId;
     private Guid? _selectedCutSectionId;
@@ -858,10 +923,19 @@
                 yield return TimelineEdits.SegmentTimelineStart(_segments, index, _playbackRate);
         }
     }
-    private IReadOnlyList<MediaFramePoint> ActiveFramePoints => _frameRegionEditing ? _frameDraft : _frameClipPolygon;
+    private List<MediaFramePoint> StoredActiveFramePoints => _editingMorphRegion ? _morphClipPolygon : _frameClipPolygon;
+    private IReadOnlyList<MediaFramePoint> ActiveFramePoints => _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
+    private MediaFramePoint? SelectedFramePoint => _selectedFramePointIndex is int index && index >= 0 && index < ActiveFramePoints.Count ? ActiveFramePoints[index] : null;
     private bool HasFrameRegion => _frameClipPolygon.Count >= 3;
+    private bool HasMorphRegion => _morphClipPolygon.Count >= 3;
+    private bool ActiveFrameRegionInverted => _editingMorphRegion
+        ? SelectedVideoLayer?.MorphRegion?.Inverted == true
+        : SelectedVideoLayer?.Region?.Inverted == true;
+    private string ActiveFrameRegionName => _editingMorphRegion ? "morph target" : "source region";
     private bool CanFinishFrameRegion => _frameRegionEditing && _frameDraft.Count >= 3;
     private bool CanPasteFrameRegion => _frameClipboard.Count >= 3;
+    private bool CanCreateSelectionLayer => CanSaveCutSection;
+    private bool CanInsertLayerIntoMainframe => SelectedVideoLayer is { Kind: VideoEffectLayerKind.Blob3D };
     private double VideoSelectionStart => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionStartSeconds;
     private double VideoSelectionEnd => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionEndSeconds;
     private string VideoSelectionLabel => _videoSelectionIsPoint ? "Timestamp" : "Range";
@@ -998,8 +1072,11 @@
         _playhead = 0;
         _mouseMode = MediaStudioMouseMode.SelectSection;
         _frameClipPolygon.Clear();
+        _morphClipPolygon.Clear();
         _frameDraft.Clear();
         _frameRegionEditing = false;
+        _editingMorphRegion = false;
+        _selectedFramePointIndex = null;
         _selectedVideoLayerId = null;
         _selectedVideoFilterId = null;
         _selectedCutSectionId = null;
@@ -1157,24 +1234,42 @@
         .Where(layer => layer is not null)
         .Select(layer =>
         {
-            var region = layer.Region ?? new VideoFrameRegion();
-            var points = layer.Id == _selectedVideoLayerId && _frameRegionEditing
-                ? ActiveFramePoints
-                : region.Points;
+            var sourceRegion = layer.Region ?? new VideoFrameRegion();
+            var morphRegion = layer.MorphRegion ?? new VideoFrameRegion { Name = "Morph target" };
+            IReadOnlyList<MediaFramePoint> sourcePoints = sourceRegion.Points;
+            IReadOnlyList<MediaFramePoint> morphPoints = morphRegion.Points;
+            if (layer.Id == _selectedVideoLayerId && _frameRegionEditing)
+            {
+                if (_editingMorphRegion) morphPoints = ActiveFramePoints;
+                else sourcePoints = ActiveFramePoints;
+            }
             return (object)new
             {
                 id = layer.Id.ToString("D"),
                 layer.Name,
                 layer.Visible,
+                kind = layer.Kind.ToString(),
                 layer.Opacity,
                 blendMode = layer.BlendMode.ToString(),
                 layer.HasTemporalRange,
                 layer.TemporalStartSeconds,
                 layer.TemporalEndSeconds,
+                layer.MorphEnabled,
+                layer.AnimateMorph,
+                layer.MorphAmount,
+                layer.AnimationSpeed,
+                layer.Depth,
+                layer.Roundness,
+                htmlExportSupport = layer.HtmlExportSupport.ToString(),
                 region = new
                 {
-                    region.Inverted,
-                    points = (points ?? []).Select(point => new { point.X, point.Y }).ToArray()
+                    sourceRegion.Inverted,
+                    points = sourcePoints.Select(point => new { point.X, point.Y }).ToArray()
+                },
+                morphRegion = new
+                {
+                    morphRegion.Inverted,
+                    points = morphPoints.Select(point => new { point.X, point.Y }).ToArray()
                 },
                 filters = (layer.Filters ?? []).Select(filter => new
                 {
@@ -1185,7 +1280,8 @@
                     filter.SecondaryAmount,
                     filter.TertiaryAmount,
                     filter.ResidualOpacity,
-                    filter.Color
+                    filter.Color,
+                    htmlExportSupport = filter.HtmlExportSupport.ToString()
                 }).ToArray()
             };
         })
@@ -1282,7 +1378,10 @@
         _selectedVideoFilterId = null;
         _selectedCutSectionId = null;
         _frameClipPolygon.Clear();
+        _morphClipPolygon.Clear();
         _frameDraft.Clear();
+        _editingMorphRegion = false;
+        _selectedFramePointIndex = null;
         ClearPendingInsert();
         _waveform = [];
         RefreshPreviewSource();
@@ -1571,6 +1670,7 @@
         SetVideoSelectionRange(startSeconds, endSeconds, pointSelection);
         _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
+        if (_autoCreateSelectionLayers && !pointSelection) CreateOrReuseSelectionLayer(forceNew: false, announce: false);
         _playhead = SourcePositionToTimeline(VideoSelectionStart);
         return InvokeAsync(StateHasChanged);
     }
@@ -1702,21 +1802,30 @@
         _pendingDropIsPoint = false;
     }
 
-    private void BeginFrameRegion()
+    private void BeginFrameRegion() => BeginActiveFrameRegion(editMorph: false);
+
+    private void BeginMorphRegion() => BeginActiveFrameRegion(editMorph: true);
+
+    private void BeginActiveFrameRegion(bool editMorph)
     {
         if (!IsVideo || !HasSource || SelectedVideoLayer is null) return;
+        CommitFrameRegionToSelectedLayer();
         LoadFrameRegionFromSelectedLayer();
+        _editingMorphRegion = editMorph;
         _frameDraft.Clear();
-        _frameDraft.AddRange(CloneFramePoints(_frameClipPolygon));
+        _frameDraft.AddRange(CloneFramePoints(StoredActiveFramePoints));
+        _selectedFramePointIndex = null;
         _frameRegionEditing = true;
         _mouseMode = MediaStudioMouseMode.FrameRegion;
-        _warning = $"Editing the frame region owned by {SelectedVideoLayer.Name}. Drag existing nodes or click to add vertices.";
+        var label = editMorph ? "morph target" : "source region";
+        _warning = $"Editing the {label} owned by {SelectedVideoLayer.Name}. A grabbed point stays selected until another point or the canvas is selected.";
     }
 
     private async Task FrameOverlayPointerDown(PointerEventArgs args)
     {
         if (!IsVideo || args.Button != 0 || _mouseMode != MediaStudioMouseMode.FrameRegion) return;
-        if (!_frameRegionEditing) BeginFrameRegion();
+        if (!_frameRegionEditing) BeginActiveFrameRegion(_editingMorphRegion);
+        _selectedFramePointIndex = null;
         var module = await EnsureMediaModuleAsync();
         var point = await module.InvokeAsync<MediaFramePoint>(
             "normalizedPoint",
@@ -1726,7 +1835,10 @@
         point.X = Math.Clamp(point.X, 0, 1);
         point.Y = Math.Clamp(point.Y, 0, 1);
         if (_frameDraft.Count == 0 || Distance(_frameDraft[^1], point) > .003)
+        {
             _frameDraft.Add(point);
+            _selectedFramePointIndex = _frameDraft.Count - 1;
+        }
     }
 
     private Task FinishFrameRegion()
@@ -1735,14 +1847,17 @@
         if (_frameDraft.Count > 3 && Distance(_frameDraft[0], _frameDraft[^1]) < .015)
             _frameDraft.RemoveAt(_frameDraft.Count - 1);
         if (_frameDraft.Count < 3) return Task.CompletedTask;
-        _frameClipPolygon.Clear();
-        _frameClipPolygon.AddRange(CloneFramePoints(_frameDraft));
+        var target = StoredActiveFramePoints;
+        target.Clear();
+        target.AddRange(CloneFramePoints(_frameDraft));
+        _selectedFramePointIndex = Math.Clamp(_selectedFramePointIndex ?? target.Count - 1, 0, target.Count - 1);
         _frameDraft.Clear();
         _frameRegionEditing = false;
         _mouseMode = MediaStudioMouseMode.SelectSection;
         CommitFrameRegionToSelectedLayer();
+        RefreshSelectedLayerOpenScad(commit: false);
         CommitSelectedSegment(refreshVideoEffects: true);
-        _warning = $"Applied the frame region to {SelectedVideoLayer?.Name}.";
+        _warning = $"Applied the {(_editingMorphRegion ? "morph target" : "source region")} to {SelectedVideoLayer?.Name}.";
         return Task.CompletedTask;
     }
 
@@ -1750,39 +1865,68 @@
     {
         _frameDraft.Clear();
         _frameRegionEditing = false;
+        _selectedFramePointIndex = null;
         if (_mouseMode == MediaStudioMouseMode.FrameRegion) _mouseMode = MediaStudioMouseMode.SelectSection;
     }
 
     private void ClearFrameRegion()
     {
-        _frameClipPolygon.Clear();
-        CancelFrameRegion();
+        var label = _editingMorphRegion ? "morph target" : "source region";
+        StoredActiveFramePoints.Clear();
+        _frameDraft.Clear();
+        _frameRegionEditing = false;
+        _selectedFramePointIndex = null;
+        if (_mouseMode == MediaStudioMouseMode.FrameRegion) _mouseMode = MediaStudioMouseMode.SelectSection;
         CommitFrameRegionToSelectedLayer();
+        RefreshSelectedLayerOpenScad(commit: false);
         CommitSelectedSegment(refreshVideoEffects: true);
-        _warning = $"Cleared the frame region on {SelectedVideoLayer?.Name}.";
+        _warning = $"Cleared the {label} on {SelectedVideoLayer?.Name}.";
     }
 
     private void RemoveLastFramePoint()
     {
-        if (_frameDraft.Count > 0) _frameDraft.RemoveAt(_frameDraft.Count - 1);
+        if (_frameDraft.Count == 0) return;
+        _frameDraft.RemoveAt(_frameDraft.Count - 1);
+        _selectedFramePointIndex = _frameDraft.Count == 0 ? null : _frameDraft.Count - 1;
+    }
+
+    private void RemoveSelectedFramePoint()
+    {
+        if (_selectedFramePointIndex is not int index) return;
+        var points = _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
+        if (index < 0 || index >= points.Count) return;
+        points.RemoveAt(index);
+        _selectedFramePointIndex = points.Count == 0 ? null : Math.Min(index, points.Count - 1);
+        if (!_frameRegionEditing)
+        {
+            CommitFrameRegionToSelectedLayer();
+            RefreshSelectedLayerOpenScad(commit: false);
+            CommitSelectedSegment(refreshVideoEffects: true);
+        }
+        _warning = $"Removed point {index + 1} from the {(_editingMorphRegion ? "morph target" : "source region")}.";
     }
 
     private void CopyFrameRegion()
     {
-        if (!HasFrameRegion) return;
+        var points = ActiveFramePoints;
+        if (points.Count < 3) return;
         _frameClipboard.Clear();
-        _frameClipboard.AddRange(CloneFramePoints(_frameClipPolygon));
+        _frameClipboard.AddRange(CloneFramePoints(points));
     }
 
     private void PasteFrameRegion()
     {
         if (!CanPasteFrameRegion || SelectedVideoLayer is null) return;
-        _frameClipPolygon.Clear();
-        _frameClipPolygon.AddRange(CloneFramePoints(_frameClipboard));
-        _frameDraft.Clear();
-        _frameRegionEditing = false;
-        CommitFrameRegionToSelectedLayer();
-        CommitSelectedSegment(refreshVideoEffects: true);
+        var target = _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
+        target.Clear();
+        target.AddRange(CloneFramePoints(_frameClipboard));
+        _selectedFramePointIndex = target.Count - 1;
+        if (!_frameRegionEditing)
+        {
+            CommitFrameRegionToSelectedLayer();
+            RefreshSelectedLayerOpenScad(commit: false);
+            CommitSelectedSegment(refreshVideoEffects: true);
+        }
     }
 
     private static MediaTemporalSection CloneTemporalSection(MediaTemporalSection section) => new()
@@ -1880,10 +2024,14 @@
     private void LoadFrameRegionFromSelectedLayer()
     {
         _frameClipPolygon.Clear();
+        _morphClipPolygon.Clear();
         _frameDraft.Clear();
         _frameRegionEditing = false;
+        _selectedFramePointIndex = null;
         if (SelectedVideoLayer?.Region?.Points is { } points)
             _frameClipPolygon.AddRange(CloneFramePoints(points));
+        if (SelectedVideoLayer?.MorphRegion?.Points is { } morphPoints)
+            _morphClipPolygon.AddRange(CloneFramePoints(morphPoints));
     }
 
     private void CommitFrameRegionToSelectedLayer()
@@ -1891,6 +2039,9 @@
         if (!IsVideo || SelectedVideoLayer is not { } layer) return;
         layer.Region ??= new VideoFrameRegion();
         layer.Region.Points = CloneFramePoints(_frameClipPolygon);
+        layer.MorphRegion ??= new VideoFrameRegion { Name = "Morph target" };
+        layer.MorphRegion.Points = CloneFramePoints(_morphClipPolygon);
+        layer.MorphEnabled = layer.MorphEnabled && layer.MorphRegion.Points.Count >= 3;
     }
 
     private void SelectVideoLayer(Guid id)
@@ -1901,6 +2052,46 @@
         _selectedVideoFilterId = SelectedVideoLayer?.Filters.FirstOrDefault()?.Id;
         LoadFrameRegionFromSelectedLayer();
         _warning = $"Selected video layer {SelectedVideoLayer?.Name}.";
+    }
+
+    private void ToggleAutoCreateSelectionLayers(ChangeEventArgs args) => _autoCreateSelectionLayers = Bool(args);
+
+    private void CreateSelectionLayer() => CreateOrReuseSelectionLayer(forceNew: true, announce: true);
+
+    private VideoEffectLayer? CreateOrReuseSelectionLayer(bool forceNew, bool announce)
+    {
+        if (!CanCreateSelectionLayer || SelectedSegment is not { } segment) return null;
+        CommitFrameRegionToSelectedLayer();
+        var start = VideoSelectionStart;
+        var end = VideoSelectionEnd;
+        VideoEffectLayer? layer = null;
+        if (!forceNew)
+        {
+            layer = segment.VideoLayers.FirstOrDefault(candidate =>
+                candidate.Kind == VideoEffectLayerKind.Selection2D && candidate.HasTemporalRange &&
+                Math.Abs(candidate.TemporalStartSeconds - start) <= .02 &&
+                Math.Abs(candidate.TemporalEndSeconds - end) <= .02);
+        }
+        if (layer is null)
+        {
+            layer = TimelineEdits.CreateDefaultVideoLayer($"Selection layer {segment.VideoLayers.Count(candidate => candidate.Kind == VideoEffectLayerKind.Selection2D) + 1}");
+            layer.Kind = VideoEffectLayerKind.Selection2D;
+            layer.Name = $"Selection {Time(start)}–{Time(end)}";
+            layer.HasTemporalRange = true;
+            layer.TemporalStartSeconds = start;
+            layer.TemporalEndSeconds = end;
+            var sourceRegion = _frameClipPolygon.Count >= 3
+                ? _frameClipPolygon
+                : SelectedVideoLayer?.Region?.Points;
+            if (sourceRegion is { Count: >= 3 }) layer.Region.Points = CloneFramePoints(sourceRegion);
+            segment.VideoLayers.Add(layer);
+        }
+        _selectedVideoLayerId = layer.Id;
+        _selectedVideoFilterId = layer.Filters.FirstOrDefault()?.Id;
+        LoadFrameRegionFromSelectedLayer();
+        CommitSelectedSegment(refreshVideoEffects: true);
+        if (announce) _warning = $"Created {layer.Name}. Effects on this layer render only from {Time(start)} to {Time(end)} and inside its frame region.";
+        return layer;
     }
 
     private void AddVideoLayer()
@@ -1933,6 +2124,7 @@
         clone.Id = Guid.NewGuid();
         clone.Name = $"{selected.Name} (copy)";
         clone.Region.Id = Guid.NewGuid();
+        clone.MorphRegion.Id = Guid.NewGuid();
         foreach (var filter in clone.Filters) filter.Id = Guid.NewGuid();
         segment.VideoLayers.Insert(index + 1, clone);
         _selectedVideoLayerId = clone.Id;
@@ -1998,6 +2190,114 @@
         if (SelectedVideoLayer is not { } layer || !Enum.TryParse<VideoEffectBlendMode>(Text(args), out var blend)) return;
         layer.BlendMode = blend;
         CommitSelectedSegment(refreshVideoEffects: true);
+    }
+
+    private void ChangeVideoLayerKind(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer || !Enum.TryParse<VideoEffectLayerKind>(Text(args), out var kind)) return;
+        layer.Kind = kind;
+        if (kind == VideoEffectLayerKind.Selection2D && !layer.HasTemporalRange && CanSaveCutSection)
+        {
+            layer.HasTemporalRange = true;
+            layer.TemporalStartSeconds = VideoSelectionStart;
+            layer.TemporalEndSeconds = VideoSelectionEnd;
+        }
+        if (kind == VideoEffectLayerKind.Blob3D)
+        {
+            layer.HtmlExportSupport = PublicationHtmlExportSupport.CanvasRuntime;
+            layer.HtmlExportNote = "Animated in HTML through the shared canvas runtime. Native OpenSCAD mesh quality requires a pre-rendered asset.";
+            if (layer.Region.Points.Count < 3) layer.Region.Points = DefaultBlobRegion();
+            if (layer.MorphRegion.Points.Count < 3)
+                layer.MorphRegion.Points = layer.Region.Points.Select((point, index) => new MediaFramePoint
+                {
+                    X = Math.Clamp(point.X + (index % 2 == 0 ? -.04 : .04), 0, 1),
+                    Y = Math.Clamp(point.Y + (index % 3 == 0 ? .05 : -.03), 0, 1)
+                }).ToList();
+            layer.MorphEnabled = true;
+        }
+        else
+        {
+            layer.HtmlExportSupport = PublicationHtmlExportSupport.Native;
+            layer.HtmlExportNote = "Rendered by the shared Video Studio, Mainframe and HTML runtime.";
+        }
+        LoadFrameRegionFromSelectedLayer();
+        if (kind == VideoEffectLayerKind.Blob3D) RefreshSelectedLayerOpenScad(commit: false);
+        CommitSelectedSegment(refreshVideoEffects: true);
+    }
+
+    private void ConvertSelectedLayerToBlob()
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        layer.Kind = VideoEffectLayerKind.Blob3D;
+        if (layer.Region.Points.Count < 3) layer.Region.Points = DefaultBlobRegion();
+        if (layer.MorphRegion.Points.Count < 3)
+            layer.MorphRegion.Points = layer.Region.Points.Select((point, index) => new MediaFramePoint
+            {
+                X = Math.Clamp(point.X + (index % 2 == 0 ? -.045 : .045), 0, 1),
+                Y = Math.Clamp(point.Y + (index % 3 == 0 ? .04 : -.035), 0, 1)
+            }).ToList();
+        layer.MorphEnabled = true;
+        layer.AnimateMorph = true;
+        layer.HtmlExportSupport = PublicationHtmlExportSupport.CanvasRuntime;
+        layer.HtmlExportNote = "Animated in HTML through the shared canvas runtime. Native OpenSCAD mesh quality requires a pre-rendered asset.";
+        LoadFrameRegionFromSelectedLayer();
+        RefreshSelectedLayerOpenScad(commit: false);
+        CommitSelectedSegment(refreshVideoEffects: true);
+        _warning = $"Converted {layer.Name} to an animated 3D blob. Draw source and morph regions, then reuse it in Mainframe or HTML export.";
+    }
+
+    private static List<MediaFramePoint> DefaultBlobRegion() =>
+    [
+        new() { X = .28, Y = .22 }, new() { X = .65, Y = .18 }, new() { X = .82, Y = .43 },
+        new() { X = .72, Y = .76 }, new() { X = .35, Y = .82 }, new() { X = .18, Y = .52 }
+    ];
+
+    private void ToggleVideoLayerMorph(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        layer.MorphEnabled = Bool(args) && layer.MorphRegion.Points.Count >= 3;
+        RefreshSelectedLayerOpenScad(commit: false);
+        CommitSelectedSegment(refreshVideoEffects: true);
+    }
+
+    private void ToggleVideoLayerMorphAnimation(ChangeEventArgs args)
+    {
+        if (SelectedVideoLayer is not { } layer) return;
+        layer.AnimateMorph = Bool(args);
+        CommitSelectedSegment(refreshVideoEffects: true);
+    }
+
+    private void ChangeVideoLayerMorphAmount(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.MorphAmount = Math.Clamp(value, 0, 1), refreshScad: false);
+    private void ChangeVideoLayerAnimationSpeed(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.AnimationSpeed = Math.Clamp(value, 0, 8), refreshScad: false);
+    private void ChangeVideoLayerDepth(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.Depth = Math.Clamp(value, .02, .5), refreshScad: true);
+    private void ChangeVideoLayerRoundness(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.Roundness = Math.Clamp(value, 0, .5), refreshScad: true);
+
+    private void ChangeSelectedVideoLayerNumber(ChangeEventArgs args, Action<VideoEffectLayer, double> assign, bool refreshScad)
+    {
+        if (SelectedVideoLayer is not { } layer || !TryDouble(args, out var value)) return;
+        assign(layer, value);
+        if (refreshScad) RefreshSelectedLayerOpenScad(commit: false);
+        CommitSelectedSegment(refreshVideoEffects: true);
+    }
+
+    private void RefreshSelectedLayerOpenScad() => RefreshSelectedLayerOpenScad(commit: true);
+
+    private void RefreshSelectedLayerOpenScad(bool commit)
+    {
+        if (SelectedVideoLayer is not { Kind: VideoEffectLayerKind.Blob3D } layer) return;
+        CommitFrameRegionToSelectedLayer();
+        layer.OpenScadScript = VideoLayerInterchange.CreateOpenScad(layer);
+        if (commit) CommitSelectedSegment(refreshVideoEffects: true);
+    }
+
+    private async Task InsertSelectedLayerIntoMainframe()
+    {
+        if (SelectedVideoLayer is not { Kind: VideoEffectLayerKind.Blob3D } layer || !InsertLayerIntoMainframe.HasDelegate) return;
+        CommitFrameRegionToSelectedLayer();
+        layer.OpenScadScript = VideoLayerInterchange.CreateOpenScad(layer);
+        var request = VideoLayerInterchange.CreateMainframeInsert(layer);
+        await InsertLayerIntoMainframe.InvokeAsync(request);
+        _warning = $"Inserted {layer.Name} into Mainframe as an interactive HTML canvas object with embedded OpenSCAD source.";
     }
 
     private void ToggleVideoLayerTemporalRange(ChangeEventArgs args)
@@ -2140,6 +2440,27 @@
         CommitSelectedSegment(refreshVideoEffects: true);
     }
 
+    private static string VideoLayerKindName(VideoEffectLayerKind kind) => kind switch
+    {
+        VideoEffectLayerKind.Selection2D => "Selection effect layer",
+        VideoEffectLayerKind.Blob3D => "Interactive 3D blob",
+        _ => "Base video layer"
+    };
+
+    private static string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
+    {
+        PublicationHtmlExportSupport.CanvasRuntime => "HTML · canvas runtime",
+        PublicationHtmlExportSupport.RenderBeforeExport => "Render before HTML export",
+        _ => "HTML native"
+    };
+
+    private static string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
+    {
+        PublicationHtmlExportSupport.CanvasRuntime => "canvas",
+        PublicationHtmlExportSupport.RenderBeforeExport => "render",
+        _ => "native"
+    };
+
     private static string VideoFilterKindName(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.HueRotation => "Hue rotation",
@@ -2184,19 +2505,56 @@
     private void ToggleFrameRegionInverted(ChangeEventArgs args)
     {
         if (SelectedVideoLayer is not { } layer) return;
-        layer.Region ??= new VideoFrameRegion();
-        layer.Region.Inverted = Bool(args);
+        var region = _editingMorphRegion ? layer.MorphRegion : layer.Region;
+        region ??= new VideoFrameRegion { Name = _editingMorphRegion ? "Morph target" : "Frame region" };
+        region.Inverted = Bool(args);
+        if (_editingMorphRegion) layer.MorphRegion = region;
+        else layer.Region = region;
         CommitSelectedSegment(refreshVideoEffects: true);
+    }
+
+    private void ChangeSelectedFramePointX(ChangeEventArgs args) => ChangeSelectedFramePoint(args, changeX: true);
+    private void ChangeSelectedFramePointY(ChangeEventArgs args) => ChangeSelectedFramePoint(args, changeX: false);
+
+    private void ChangeSelectedFramePoint(ChangeEventArgs args, bool changeX)
+    {
+        if (!TryDouble(args, out var value) || _selectedFramePointIndex is not int index) return;
+        var points = _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
+        if (index < 0 || index >= points.Count) return;
+        if (changeX) points[index].X = Math.Clamp(value, 0, 1);
+        else points[index].Y = Math.Clamp(value, 0, 1);
+        if (!_frameRegionEditing)
+        {
+            CommitFrameRegionToSelectedLayer();
+            RefreshSelectedLayerOpenScad(commit: false);
+            CommitSelectedSegment(refreshVideoEffects: true);
+        }
+    }
+
+    [JSInvokable]
+    public Task VideoFramePointSelected(int pointIndex)
+    {
+        if (!IsVideo || _mouseMode != MediaStudioMouseMode.FrameRegion || pointIndex < 0 || pointIndex >= ActiveFramePoints.Count)
+            return Task.CompletedTask;
+        _selectedFramePointIndex = pointIndex;
+        return InvokeAsync(StateHasChanged);
     }
 
     [JSInvokable]
     public Task VideoFramePointCommitted(int pointIndex, double x, double y)
     {
         if (!IsVideo || _mouseMode != MediaStudioMouseMode.FrameRegion || pointIndex < 0) return Task.CompletedTask;
-        var points = _frameRegionEditing ? _frameDraft : _frameClipPolygon;
+        var points = _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
         if (pointIndex >= points.Count) return Task.CompletedTask;
+        _selectedFramePointIndex = pointIndex;
         points[pointIndex].X = Math.Clamp(double.IsFinite(x) ? x : points[pointIndex].X, 0, 1);
         points[pointIndex].Y = Math.Clamp(double.IsFinite(y) ? y : points[pointIndex].Y, 0, 1);
+        if (!_frameRegionEditing)
+        {
+            CommitFrameRegionToSelectedLayer();
+            RefreshSelectedLayerOpenScad(commit: false);
+            CommitSelectedSegment(refreshVideoEffects: true);
+        }
         return InvokeAsync(StateHasChanged);
     }
 
@@ -2216,8 +2574,8 @@
             case "delete":
                 if (_mouseMode == MediaStudioMouseMode.FrameRegion)
                 {
-                    if (_frameRegionEditing && _frameDraft.Count > 0) RemoveLastFramePoint();
-                    else ClearFrameRegion();
+                    if (SelectedFramePoint is not null) RemoveSelectedFramePoint();
+                    else if (_frameRegionEditing && _frameDraft.Count > 0) RemoveLastFramePoint();
                 }
                 else DeleteSelectedSection();
                 break;
@@ -3011,6 +3369,7 @@
         }
         _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
+        if (_autoCreateSelectionLayers && !_videoSelectionIsPoint) CreateOrReuseSelectionLayer(forceNew: false, announce: false);
         await SeekVideoSelectionStartAsync();
     }
 
@@ -3020,6 +3379,7 @@
         SetVideoSelectionRange(value, _videoSelectionIsPoint ? value : VideoSelectionEnd, _videoSelectionIsPoint);
         _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
+        if (_autoCreateSelectionLayers && !_videoSelectionIsPoint) CreateOrReuseSelectionLayer(forceNew: false, announce: false);
         await SeekVideoSelectionStartAsync();
     }
 
@@ -3029,6 +3389,7 @@
         SetVideoSelectionRange(VideoSelectionStart, value, pointSelection: false);
         _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
+        if (_autoCreateSelectionLayers) CreateOrReuseSelectionLayer(forceNew: false, announce: false);
         await SeekVideoSelectionStartAsync();
     }
 

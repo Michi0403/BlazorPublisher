@@ -70,6 +70,9 @@ public sealed class HtmlEmbedElement : PublicationElement
     public bool AllowSameOrigin { get; set; }
     public bool AllowTopNavigation { get; set; }
     public string Background { get; set; } = "#ffffff";
+    public PublicationHtmlExportSupport HtmlExportSupport { get; set; } = PublicationHtmlExportSupport.Native;
+    public string HtmlExportNote { get; set; } = "Native HTML content.";
+    public string InterchangeFormat { get; set; } = string.Empty;
 
     [JsonIgnore]
     public string Sandbox

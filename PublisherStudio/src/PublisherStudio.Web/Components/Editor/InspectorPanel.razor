@@ -157,10 +157,21 @@
                     <DxButton Text="Edit in Panel Studio" Click="RequestEditPanel" CssClass="wide-button" />
                 </section>
             }
-            @if (element is HtmlEmbedElement)
+            @if (element is HtmlEmbedElement htmlEmbed)
             {
                 <section class="property-section">
                     <h3>Web content</h3>
+                    <div class="media-export-compatibility @HtmlSupportCss(htmlEmbed.HtmlExportSupport)">
+                        <b>@HtmlSupportLabel(htmlEmbed.HtmlExportSupport)</b>
+                        <span>@htmlEmbed.HtmlExportNote</span>
+                    </div>
+                    @if (string.Equals(htmlEmbed.InterchangeFormat, "OpenSCAD", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="media-export-compatibility render">
+                            <b>@HtmlSupportLabel(PublicationHtmlExportSupport.RenderBeforeExport)</b>
+                            <span>Native OpenSCAD mesh/solid output is embedded as interchange source and must be rendered before HTML export. The canvas object itself remains interactive.</span>
+                        </div>
+                    }
                     <p class="property-note">Edit isolated HTML, CSS and optional JavaScript inside Panel Studio.</p>
                     <DxButton Text="Edit in Panel Studio" Click="RequestEditPanel" CssClass="wide-button" />
                 </section>
@@ -1997,6 +2008,18 @@
     private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
     private static bool ReadBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
     private static bool Nearly(double left, double right) => Math.Abs(left - right) < .05;
+    private static string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
+    {
+        PublicationHtmlExportSupport.CanvasRuntime => "HTML · canvas runtime",
+        PublicationHtmlExportSupport.RenderBeforeExport => "Render before HTML export",
+        _ => "HTML · native"
+    };
+    private static string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
+    {
+        PublicationHtmlExportSupport.CanvasRuntime => "canvas",
+        PublicationHtmlExportSupport.RenderBeforeExport => "render",
+        _ => "native"
+    };
     private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
     private static string Inv(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
     private static string UsableColor(string value) => value.StartsWith('#') && value.Length >= 7 ? value[..7] : "#ffffff";

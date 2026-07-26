@@ -14,6 +14,7 @@ using PublisherStudio.Services.PictureStudio.Import;
 using PublisherStudio.Services.MediaStudio.UseCases;
 using PublisherStudio.Services.Publication.Import;
 using PublisherStudio.Services.VideoStudio.Import;
+using PublisherStudio.Services.VideoStudio.Export;
 using PublisherStudio.Services.Panels;
 using PublisherStudio.Services.MediaConversion;
 using PublisherStudio.HostedServices.Streaming;
@@ -105,6 +106,7 @@ public static class Program
         builder.Services.AddSingleton<OpenDocumentImportService>();
         builder.Services.AddSingleton<MediaTimelineEditService>();
         builder.Services.AddSingleton<VideoProjectImportService>();
+        builder.Services.AddSingleton<VideoLayerInterchangeService>();
         builder.Services.AddSingleton<SpreadsheetDocumentService>();
         builder.Services.AddSingleton<SpreadsheetSessionStore>();
         builder.Services.AddSingleton<PublicationDataService>();

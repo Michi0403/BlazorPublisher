@@ -25,6 +25,19 @@
         }
     }
 
+    function layerKind(value) {
+        const kind = String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+        if (kind === 'blob3d') return 'blob3d';
+        if (kind === 'selection2d') return 'selection2d';
+        return 'basevideo';
+    }
+
+    function normalizePoints(points) {
+        return (Array.isArray(points) ? points : [])
+            .slice(0, 256)
+            .map(point => ({ x: clamp(point?.x, 0, 1, 0), y: clamp(point?.y, 0, 1, 0) }));
+    }
+
     function normalizedLayers(config) {
         return (Array.isArray(config?.layers) ? config.layers : [])
             .filter(layer => layer && layer.visible !== false)
@@ -32,16 +45,26 @@
             .map((layer, layerIndex) => ({
                 id: String(layer.id || layerIndex),
                 name: String(layer.name || `Video layer ${layerIndex + 1}`),
+                kind: layerKind(layer.kind),
                 opacity: clamp(layer.opacity, 0, 1, 1),
                 blendMode: blendMode(layer.blendMode),
                 hasTemporalRange: layer.hasTemporalRange === true,
                 temporalStartSeconds: Math.max(0, Number(layer.temporalStartSeconds) || 0),
                 temporalEndSeconds: Math.max(0, Number(layer.temporalEndSeconds) || 0),
+                morphEnabled: layer.morphEnabled === true,
+                animateMorph: layer.animateMorph !== false,
+                morphAmount: clamp(layer.morphAmount, 0, 1, 0),
+                animationSpeed: clamp(layer.animationSpeed, 0, 8, 1),
+                depth: clamp(layer.depth, .02, .5, .18),
+                roundness: clamp(layer.roundness, 0, .5, .12),
+                htmlExportSupport: String(layer.htmlExportSupport || 'Native'),
                 region: {
                     inverted: layer.region?.inverted === true,
-                    points: (Array.isArray(layer.region?.points) ? layer.region.points : [])
-                        .slice(0, 256)
-                        .map(point => ({ x: clamp(point?.x, 0, 1, 0), y: clamp(point?.y, 0, 1, 0) }))
+                    points: normalizePoints(layer.region?.points)
+                },
+                morphRegion: {
+                    inverted: layer.morphRegion?.inverted === true,
+                    points: normalizePoints(layer.morphRegion?.points)
                 },
                 filters: (Array.isArray(layer.filters) ? layer.filters : [])
                     .filter(filter => filter && filter.enabled !== false)
@@ -52,7 +75,8 @@
                         secondaryAmount: Number(filter.secondaryAmount),
                         tertiaryAmount: Number(filter.tertiaryAmount),
                         residualOpacity: Number(filter.residualOpacity),
-                        color: normalizeColor(filter.color, filterKind(filter) === 'chromakey' ? '#00ff00' : '#3b82f6')
+                        color: normalizeColor(filter.color, filterKind(filter) === 'chromakey' ? '#00ff00' : '#3b82f6'),
+                        htmlExportSupport: String(filter.htmlExportSupport || 'Native')
                     }))
             }));
     }
@@ -109,18 +133,122 @@
         };
     }
 
-    function regionPath(context, region, rect, outputWidth, outputHeight) {
+    function polygonLength(points) {
+        if (!Array.isArray(points) || points.length < 2) return 0;
+        let total = 0;
+        for (let index = 0; index < points.length; index++) {
+            const current = points[index];
+            const next = points[(index + 1) % points.length];
+            total += Math.hypot(next.x - current.x, next.y - current.y);
+        }
+        return total;
+    }
+
+    function resamplePolygon(points, count) {
+        if (!Array.isArray(points) || points.length < 3 || count < 3) return [];
+        const lengths = [];
+        let total = 0;
+        for (let index = 0; index < points.length; index++) {
+            const current = points[index];
+            const next = points[(index + 1) % points.length];
+            const length = Math.hypot(next.x - current.x, next.y - current.y);
+            lengths.push(length);
+            total += length;
+        }
+        if (total <= 1e-8) return Array.from({ length: count }, () => ({ ...points[0] }));
+        const result = [];
+        for (let sample = 0; sample < count; sample++) {
+            let distance = total * sample / count;
+            let edge = 0;
+            while (edge < lengths.length - 1 && distance > lengths[edge]) {
+                distance -= lengths[edge];
+                edge++;
+            }
+            const current = points[edge];
+            const next = points[(edge + 1) % points.length];
+            const amount = lengths[edge] > 1e-8 ? distance / lengths[edge] : 0;
+            result.push({
+                x: current.x + (next.x - current.x) * amount,
+                y: current.y + (next.y - current.y) * amount
+            });
+        }
+        return result;
+    }
+
+    function morphPhase(layer, currentTime) {
+        if (!layer.morphEnabled || layer.morphRegion.points.length < 3 || layer.region.points.length < 3) return 0;
+        if (!layer.animateMorph) return layer.morphAmount;
+        const origin = layer.hasTemporalRange ? layer.temporalStartSeconds : 0;
+        const elapsed = Math.max(0, currentTime - origin);
+        return (Math.sin(elapsed * layer.animationSpeed * Math.PI * 2 - Math.PI / 2) + 1) / 2;
+    }
+
+    function activeRegion(layer, currentTime) {
+        const source = layer.region;
+        if (!layer.morphEnabled || source.points.length < 3 || layer.morphRegion.points.length < 3) return source;
+        const count = Math.max(3, Math.min(256, Math.max(source.points.length, layer.morphRegion.points.length)));
+        const from = resamplePolygon(source.points, count);
+        const to = resamplePolygon(layer.morphRegion.points, count);
+        const amount = morphPhase(layer, currentTime);
+        return {
+            inverted: source.inverted,
+            points: from.map((point, index) => ({
+                x: point.x + (to[index].x - point.x) * amount,
+                y: point.y + (to[index].y - point.y) * amount
+            }))
+        };
+    }
+
+    function regionPath(context, region, rect, outputWidth, outputHeight, offsetX = 0, offsetY = 0) {
         const points = region?.points || [];
         context.beginPath();
         if (region?.inverted && points.length >= 3) context.rect(0, 0, outputWidth, outputHeight);
         if (points.length >= 3) {
-            context.moveTo(rect.x + points[0].x * rect.width, rect.y + points[0].y * rect.height);
+            context.moveTo(rect.x + points[0].x * rect.width + offsetX, rect.y + points[0].y * rect.height + offsetY);
             for (let index = 1; index < points.length; index++)
-                context.lineTo(rect.x + points[index].x * rect.width, rect.y + points[index].y * rect.height);
+                context.lineTo(rect.x + points[index].x * rect.width + offsetX, rect.y + points[index].y * rect.height + offsetY);
             context.closePath();
         } else {
-            context.rect(rect.x, rect.y, rect.width, rect.height);
+            context.rect(rect.x + offsetX, rect.y + offsetY, rect.width, rect.height);
         }
+    }
+
+    function drawBlobDepth(context, region, rect, outputWidth, outputHeight, layer) {
+        if (layer.kind !== 'blob3d' || region.points.length < 3 || region.inverted) return;
+        const maximum = Math.max(2, Math.round(Math.min(outputWidth, outputHeight) * layer.depth * .16));
+        context.save();
+        for (let step = maximum; step >= 1; step--) {
+            const ratio = step / maximum;
+            regionPath(context, region, rect, outputWidth, outputHeight, step * .55, step * .78);
+            context.fillStyle = `rgba(2,12,32,${.14 + (1 - ratio) * .52})`;
+            context.fill();
+        }
+        context.restore();
+    }
+
+    function finishBlobSurface(context, region, rect, outputWidth, outputHeight, layer) {
+        if (layer.kind !== 'blob3d' || region.points.length < 3 || region.inverted) return;
+        context.save();
+        regionPath(context, region, rect, outputWidth, outputHeight);
+        context.clip();
+        const gradient = context.createRadialGradient(
+            rect.x + rect.width * .28, rect.y + rect.height * .22, 0,
+            rect.x + rect.width * .35, rect.y + rect.height * .32,
+            Math.max(rect.width, rect.height) * (.5 + layer.roundness)
+        );
+        gradient.addColorStop(0, 'rgba(255,255,255,.52)');
+        gradient.addColorStop(.42, 'rgba(125,211,252,.08)');
+        gradient.addColorStop(1, 'rgba(2,6,23,.42)');
+        context.globalCompositeOperation = 'source-atop';
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, outputWidth, outputHeight);
+        context.restore();
+        context.save();
+        regionPath(context, region, rect, outputWidth, outputHeight);
+        context.strokeStyle = 'rgba(186,230,253,.72)';
+        context.lineWidth = Math.max(1, Math.min(outputWidth, outputHeight) * (.002 + layer.roundness * .004));
+        context.stroke();
+        context.restore();
     }
 
     function applyChroma(context, width, height, filter) {
@@ -209,7 +337,7 @@
         if (forceCanvas) return true;
         if (layers.length !== 1) return layers.length > 0;
         const layer = layers[0];
-        return layer.opacity < .999 || layer.blendMode !== 'source-over' || layer.hasTemporalRange || layer.region.points.length >= 3 || layer.filters.length > 0;
+        return layer.kind === 'blob3d' || layer.opacity < .999 || layer.blendMode !== 'source-over' || layer.hasTemporalRange || layer.region.points.length >= 3 || layer.filters.length > 0;
     }
 
     function createRuntime(key, video, canvas, config) {
@@ -260,11 +388,13 @@
                 const currentTime = Math.max(0, Number(video.currentTime) || 0);
                 for (const layer of layers) {
                     if (!layerIsActive(layer, currentTime)) continue;
+                    const region = activeRegion(layer, currentTime);
                     layerContext.setTransform(1, 0, 0, 1, 0, 0);
                     layerContext.clearRect(0, 0, width, height);
+                    drawBlobDepth(layerContext, region, rect, width, height, layer);
                     layerContext.save();
-                    regionPath(layerContext, layer.region, rect, width, height);
-                    layerContext.clip(layer.region.inverted && layer.region.points.length >= 3 ? 'evenodd' : 'nonzero');
+                    regionPath(layerContext, region, rect, width, height);
+                    layerContext.clip(region.inverted && region.points.length >= 3 ? 'evenodd' : 'nonzero');
                     layerContext.filter = cssFilter(layer.filters);
                     try { layerContext.drawImage(video, rect.x, rect.y, rect.width, rect.height); } catch { }
                     layerContext.restore();
@@ -274,6 +404,7 @@
                     applyColorWash(layerContext, width, height, layer.filters.find(filter => filter.kind === 'colorwash'));
                     applyVignette(layerContext, width, height, layer.filters.find(filter => filter.kind === 'vignette'));
                     applyGrain(layerContext, width, height, layer.filters.find(filter => filter.kind === 'grain'), currentTime);
+                    finishBlobSurface(layerContext, region, rect, width, height, layer);
 
                     context.save();
                     context.globalAlpha = layer.opacity;
@@ -338,5 +469,5 @@
         runtimes.get(String(key || ''))?.stop();
     }
 
-    window.publisherVideoEffects = { install, installById, update, dispose, normalizedLayers };
+    window.publisherVideoEffects = { install, installById, update, dispose, normalizedLayers, resamplePolygon, activeRegion };
 })();

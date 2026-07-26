@@ -323,6 +323,11 @@ public sealed partial class PublicationFileService
             html.Html ??= string.Empty;
             html.Css ??= string.Empty;
             html.JavaScript ??= string.Empty;
+            html.HtmlExportNote ??= html.HtmlExportSupport == PublicationHtmlExportSupport.Native
+                ? "Native HTML content."
+                : "Check HTML export compatibility before publishing.";
+            html.InterchangeFormat ??= string.Empty;
+            if (!Enum.IsDefined(html.HtmlExportSupport)) html.HtmlExportSupport = PublicationHtmlExportSupport.Native;
             html.Background = NormalizeCssBackground(html.Background);
         }
 

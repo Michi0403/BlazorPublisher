@@ -340,8 +340,12 @@ public sealed class EditorStateService : IDisposable
         return element;
     }
 
-    public HtmlEmbedElement AddHtmlEmbed(double? centerX = null, double? centerY = null)
+    public HtmlEmbedElement AddHtmlEmbed(double? centerX = null, double? centerY = null) =>
+        AddHtmlEmbed(_ => { }, centerX, centerY);
+
+    public HtmlEmbedElement AddHtmlEmbed(Action<HtmlEmbedElement> configure, double? centerX = null, double? centerY = null)
     {
+        ArgumentNullException.ThrowIfNull(configure);
         Capture();
         var element = new HtmlEmbedElement
         {
@@ -352,6 +356,7 @@ public sealed class EditorStateService : IDisposable
             Height = 72,
             ZIndex = NextZ()
         };
+        configure(element);
         PlaceAt(element, centerX, centerY);
         CurrentPage.Elements.Add(element);
         SetSelectionCore([element.Id], element.Id);
@@ -409,6 +414,9 @@ public sealed class EditorStateService : IDisposable
         selected.AllowSameOrigin = draft.AllowSameOrigin;
         selected.AllowTopNavigation = draft.AllowTopNavigation;
         selected.Background = draft.Background;
+        selected.HtmlExportSupport = draft.HtmlExportSupport;
+        selected.HtmlExportNote = draft.HtmlExportNote;
+        selected.InterchangeFormat = draft.InterchangeFormat;
         Notify();
         return true;
     }

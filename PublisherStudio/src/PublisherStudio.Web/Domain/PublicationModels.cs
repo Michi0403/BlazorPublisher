@@ -94,6 +94,7 @@ public sealed class GuideLine
 public enum GuideOrientation { Horizontal, Vertical }
 public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
 public enum PublicationCanvasZoomMode { CssLayout, Transform }
+public enum PublicationHtmlExportSupport { Native, CanvasRuntime, RenderBeforeExport }
 public enum PublicationElementKind { Text, Image, Video, Audio, Shape, WordArt, Connector, DataVisual, Barcode, Spreadsheet, DevExtremeComponent, LiveSource, Panel, HtmlEmbed }
 public enum PublicationShape { Rectangle, RoundedRectangle, Ellipse, Line }
 public enum ConnectorPathKind { Straight, Elbow, Curved }

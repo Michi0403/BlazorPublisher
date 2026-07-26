@@ -172,7 +172,11 @@ public sealed class MediaTimelineEditService
     public VideoEffectLayer CreateDefaultVideoLayer(string? name = null) => new()
     {
         Name = string.IsNullOrWhiteSpace(name) ? "Base video" : $"{name.Trim()} · base",
-        Region = new VideoFrameRegion { Name = "Full frame" }
+        Kind = VideoEffectLayerKind.BaseVideo,
+        Region = new VideoFrameRegion { Name = "Full frame" },
+        MorphRegion = new VideoFrameRegion { Name = "Morph target" },
+        HtmlExportSupport = PublicationHtmlExportSupport.Native,
+        HtmlExportNote = "Rendered by the shared Video Studio, Mainframe and HTML runtime."
     };
 
     public List<VideoEffectLayer> NormalizeVideoLayers(
@@ -391,6 +395,7 @@ public sealed class MediaTimelineEditService
         {
             layer.Id = Guid.NewGuid();
             layer.Region.Id = Guid.NewGuid();
+            layer.MorphRegion.Id = Guid.NewGuid();
             foreach (var filter in layer.Filters) filter.Id = Guid.NewGuid();
         }
         return clone;
@@ -402,12 +407,23 @@ public sealed class MediaTimelineEditService
         Name = layer.Name,
         Visible = layer.Visible,
         Locked = layer.Locked,
+        Kind = layer.Kind,
         Opacity = layer.Opacity,
         BlendMode = layer.BlendMode,
         HasTemporalRange = layer.HasTemporalRange,
         TemporalStartSeconds = layer.TemporalStartSeconds,
         TemporalEndSeconds = layer.TemporalEndSeconds,
         Region = CloneVideoRegion(layer.Region),
+        MorphRegion = CloneVideoRegion(layer.MorphRegion),
+        MorphEnabled = layer.MorphEnabled,
+        AnimateMorph = layer.AnimateMorph,
+        MorphAmount = layer.MorphAmount,
+        AnimationSpeed = layer.AnimationSpeed,
+        Depth = layer.Depth,
+        Roundness = layer.Roundness,
+        OpenScadScript = layer.OpenScadScript,
+        HtmlExportSupport = layer.HtmlExportSupport,
+        HtmlExportNote = layer.HtmlExportNote,
         Filters = CloneVideoFilters(layer.Filters)
     };
 
@@ -550,7 +566,9 @@ public sealed class MediaTimelineEditService
             SecondaryAmount = filter.SecondaryAmount,
             TertiaryAmount = filter.TertiaryAmount,
             ResidualOpacity = filter.ResidualOpacity,
-            Color = string.IsNullOrWhiteSpace(filter.Color) ? "#00ff00" : filter.Color
+            Color = string.IsNullOrWhiteSpace(filter.Color) ? "#00ff00" : filter.Color,
+            HtmlExportSupport = filter.HtmlExportSupport,
+            HtmlExportNote = filter.HtmlExportNote
         })
         .ToList();
 
@@ -560,6 +578,7 @@ public sealed class MediaTimelineEditService
         layer.Name = string.IsNullOrWhiteSpace(layer.Name) ? $"Video layer {index + 1}" : layer.Name.Trim();
         layer.Opacity = Math.Clamp(double.IsFinite(layer.Opacity) ? layer.Opacity : 1, 0, 1);
         if (!Enum.IsDefined(layer.BlendMode)) layer.BlendMode = VideoEffectBlendMode.Normal;
+        if (!Enum.IsDefined(layer.Kind)) layer.Kind = VideoEffectLayerKind.BaseVideo;
         layer.Region ??= new VideoFrameRegion();
         layer.Region.Id = layer.Region.Id == Guid.Empty ? Guid.NewGuid() : layer.Region.Id;
         layer.Region.Name = string.IsNullOrWhiteSpace(layer.Region.Name) ? "Full frame" : layer.Region.Name.Trim();
@@ -573,6 +592,30 @@ public sealed class MediaTimelineEditService
             })
             .ToList();
         if (layer.Region.Points.Count is > 0 and < 3) layer.Region.Points.Clear();
+        layer.MorphRegion ??= new VideoFrameRegion { Name = "Morph target" };
+        layer.MorphRegion.Id = layer.MorphRegion.Id == Guid.Empty ? Guid.NewGuid() : layer.MorphRegion.Id;
+        layer.MorphRegion.Name = string.IsNullOrWhiteSpace(layer.MorphRegion.Name) ? "Morph target" : layer.MorphRegion.Name.Trim();
+        layer.MorphRegion.Points = layer.MorphRegion.Points
+            .Where(point => point is not null)
+            .Take(256)
+            .Select(point => new MediaFramePoint
+            {
+                X = Math.Clamp(double.IsFinite(point.X) ? point.X : 0, 0, 1),
+                Y = Math.Clamp(double.IsFinite(point.Y) ? point.Y : 0, 0, 1)
+            })
+            .ToList();
+        if (layer.MorphRegion.Points.Count is > 0 and < 3) layer.MorphRegion.Points.Clear();
+        layer.MorphEnabled = layer.MorphEnabled && layer.MorphRegion.Points.Count >= 3;
+        layer.MorphAmount = Math.Clamp(double.IsFinite(layer.MorphAmount) ? layer.MorphAmount : 0, 0, 1);
+        layer.AnimationSpeed = Math.Clamp(double.IsFinite(layer.AnimationSpeed) ? layer.AnimationSpeed : 1, 0, 8);
+        layer.Depth = Math.Clamp(double.IsFinite(layer.Depth) ? layer.Depth : .18, .02, .5);
+        layer.Roundness = Math.Clamp(double.IsFinite(layer.Roundness) ? layer.Roundness : .12, 0, .5);
+        layer.HtmlExportSupport = layer.Kind == VideoEffectLayerKind.Blob3D
+            ? PublicationHtmlExportSupport.CanvasRuntime
+            : PublicationHtmlExportSupport.Native;
+        layer.HtmlExportNote = layer.Kind == VideoEffectLayerKind.Blob3D
+            ? "Animated browser canvas fallback is available. Native OpenSCAD mesh output must be rendered before HTML export."
+            : "Rendered by the shared Video Studio/Mainframe/HTML runtime.";
 
         if (layer.HasTemporalRange)
         {
@@ -632,6 +675,11 @@ public sealed class MediaTimelineEditService
                 filter.SecondaryAmount = Math.Clamp(double.IsFinite(filter.SecondaryAmount) ? filter.SecondaryAmount : .55, 0, 1);
                 break;
         }
+        var canvasEffect = filter.Kind is VideoEffectFilterKind.ChromaKey or VideoEffectFilterKind.Vignette or VideoEffectFilterKind.Grain or VideoEffectFilterKind.ColorWash;
+        filter.HtmlExportSupport = canvasEffect ? PublicationHtmlExportSupport.CanvasRuntime : PublicationHtmlExportSupport.Native;
+        filter.HtmlExportNote = canvasEffect
+            ? "HTML compatible through the shared canvas runtime; external media must permit canvas access (CORS)."
+            : "HTML compatible through native browser filters.";
     }
 
     private static string NormalizeColor(string? value, string fallback)

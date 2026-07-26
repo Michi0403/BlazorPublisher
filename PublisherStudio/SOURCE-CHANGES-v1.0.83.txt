@@ -1,0 +1,25 @@
+PublisherStudio v1.0.83 source changes
+
+Domain and services
+- Added VideoEffectLayerKind and PublicationHtmlExportSupport contracts.
+- Extended VideoEffectLayer and VideoEffectFilter with temporal/3D/export compatibility data.
+- Added VideoLayerInterchangeService for portable canvas HTML and OpenSCAD generation.
+- Updated MediaTimelineEditService clone, duplicate, normalization and compatibility classification paths.
+
+Video Studio
+- Added automatic/manual selection-layer creation with exact source ranges.
+- Added persistent selected polygon vertex state, X/Y properties and exact deletion.
+- Added independent source and morph regions.
+- Added Blob3D conversion, morph animation, depth/roundness controls and OpenSCAD preview.
+- Added Mainframe insertion and HTML compatibility badges/notes.
+
+Mainframe and shared runtime
+- Added direct Interactive 3D blob insertion to PublicationRibbon and Quick Insert.
+- Embedded generated OpenSCAD source in the Mainframe HTML object.
+- Extended VideoMediaView and videoEffectRuntime.js with morph and 2.5D blob rendering.
+- Extended mediaStudioInterop.js with click/context ownership for region points.
+
+Release and tests
+- Added tests/videoSelection3dInterop.test.mjs and package script.
+- Advanced application, installer, npm, lock-file, streaming runtime and browser runtime metadata to 1.0.83.
+- Added CHANGELOG-v1.0.83.md, TEST-RESULTS-v1.0.83.txt and architecture notes.

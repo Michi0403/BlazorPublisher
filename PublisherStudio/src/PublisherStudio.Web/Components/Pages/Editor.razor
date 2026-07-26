@@ -6,6 +6,7 @@
 @inject PublisherStudio.Services.Publication.Import.OpenDocumentImportService OpenDocumentImporter
 @inject PublicationMediaAssetStore MediaAssets
 @inject PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService TimelineEdits
+@inject VideoLayerInterchangeService VideoLayerInterchange
 @inject PictureDocumentService PictureDocuments
 @inject SpreadsheetDocumentService Spreadsheets
 @inject SpreadsheetSessionStore SpreadsheetSessions
@@ -75,6 +76,7 @@
                        OnEditComponent="OpenComponentEditor"
                        OnInsertPanel="InsertPanel"
                        OnInsertHtmlEmbed="InsertHtmlEmbed"
+                       OnInsertVideoBlob="InsertDefaultVideoBlob"
                        OnTogglePanelLibrary="TogglePanelLibrary"
                        OnOpenMediaConverter="OpenMediaConverter"
                        OnPreviewPageAnimations="PreviewPageAnimations"
@@ -100,6 +102,7 @@
         <button type="button" draggable="true" data-publisher-insert="picture" title="Drag to choose and place a picture, or click to insert" @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>Picture</button>
         <button type="button" draggable="true" data-publisher-insert="spreadsheet" title="Drag to create and place a spreadsheet, or click to open a workbook" @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>Sheet</button>
         <button type="button" draggable="true" data-publisher-insert="video" title="Drag to create or import and place a video, or click to insert" @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>Video</button>
+        <button type="button" title="Create an animated HTML-compatible 3D blob with embedded OpenSCAD interchange source" @onclick="InsertDefaultVideoBlob"><i class="pub-icon pub-icon-effects"></i>3D Blob</button>
         <small>Ctrl/Shift-click objects for multi-selection</small>
     </div>
 
@@ -222,6 +225,7 @@
              EditingExisting="@(_mediaStudioTargetId is not null)"
              Saved="SaveMediaStudio"
              SendToMediaConverter="OpenMediaConverterFromStudio"
+             InsertLayerIntoMainframe="InsertVideoLayerIntoMainframe"
              Cancelled="CloseMediaStudio" />
 
 <DataVisualEditor Visible="_dataVisualEditorVisible" State="State" Saved="SaveDataVisualEditor" Cancelled="CancelDataVisualEditor" ManageDataRequested="OpenDataManagerFromVisual" />
@@ -437,6 +441,11 @@
     {
         State.AddHtmlEmbed();
         OpenPanelStudio();
+    }
+    private Task InsertDefaultVideoBlob()
+    {
+        var layer = VideoLayerInterchange.CreateDefaultBlobLayer();
+        return InsertVideoLayerIntoMainframe(VideoLayerInterchange.CreateMainframeInsert(layer));
     }
     private void InsertPanelPreset(string presetId)
     {
@@ -1584,6 +1593,30 @@
         _mediaStudioInitialInsertedSegment = insertedSegment;
         _mediaStudioSessionId = Guid.NewGuid();
         _mediaStudioVisible = true;
+    }
+
+    private Task InsertVideoLayerIntoMainframe(VideoLayerMainframeInsertRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var encodedScad = System.Net.WebUtility.HtmlEncode(request.OpenScadScript ?? string.Empty);
+        var element = State.AddHtmlEmbed(item =>
+        {
+            item.Name = string.IsNullOrWhiteSpace(request.Name) ? "3D video object" : request.Name.Trim();
+            item.Html = $"{request.Html}<script type='text/x-openscad' data-publisher-openscad hidden>{encodedScad}</script>";
+            item.Css = request.Css ?? string.Empty;
+            item.JavaScript = request.JavaScript ?? string.Empty;
+            item.AllowScripts = true;
+            item.AllowForms = false;
+            item.AllowPopups = false;
+            item.AllowSameOrigin = false;
+            item.AllowTopNavigation = false;
+            item.Background = "transparent";
+            item.HtmlExportSupport = request.HtmlExportSupport;
+            item.HtmlExportNote = request.HtmlExportNote;
+            item.InterchangeFormat = "OpenSCAD";
+        });
+        ShowNotice($"Inserted {element.Name} into Mainframe. {request.HtmlExportNote}");
+        return Task.CompletedTask;
     }
 
     private Task SaveMediaStudio(MediaEditorResult result)

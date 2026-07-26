@@ -60,6 +60,7 @@
             <DxRibbonItem Text="Objects" IconCssClass="pub-icon pub-icon-insert" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem Text="Panel / dashboard" IconCssClass="pub-icon pub-icon-panel" Click="RequestPanel" />
                 <DxRibbonItem Text="Web content" IconCssClass="pub-icon pub-icon-web" Click="RequestHtmlEmbed" />
+                <DxRibbonItem Text="Interactive 3D blob" IconCssClass="pub-icon pub-icon-effects" Click="RequestVideoBlob" />
                 <DxRibbonItem Text="Text box" IconCssClass="pub-icon pub-icon-text" Click="AddText" />
                 <DxRibbonItem Text="WordArt" IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
                 <DxRibbonItem Text="Picture" IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
@@ -627,6 +628,7 @@
     [Parameter] public EventCallback OnEditComponent { get; set; }
     [Parameter] public EventCallback OnInsertPanel { get; set; }
     [Parameter] public EventCallback OnInsertHtmlEmbed { get; set; }
+    [Parameter] public EventCallback OnInsertVideoBlob { get; set; }
     [Parameter] public EventCallback OnTogglePanelLibrary { get; set; }
     [Parameter] public EventCallback OnOpenMediaConverter { get; set; }
     [Parameter] public EventCallback OnPreviewPageAnimations { get; set; }
@@ -730,6 +732,7 @@
     private Task RequestEditComponent() => OnEditComponent.InvokeAsync();
     private Task RequestPanel() => OnInsertPanel.InvokeAsync();
     private Task RequestHtmlEmbed() => OnInsertHtmlEmbed.InvokeAsync();
+    private Task RequestVideoBlob() => OnInsertVideoBlob.InvokeAsync();
     private Task RequestPanelLibrary() => OnTogglePanelLibrary.InvokeAsync();
     private Task RequestMediaConverter() => OnOpenMediaConverter.InvokeAsync();
     private void ToggleContentPan() => State.ToggleContentPanMode();

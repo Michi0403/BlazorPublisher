@@ -2,6 +2,7 @@ namespace PublisherStudio.Domain;
 
 public enum MediaStudioMouseMode { SelectSection, PlacePlayhead, AddCutLine, FrameRegion }
 public enum VideoEffectBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighten }
+public enum VideoEffectLayerKind { BaseVideo, Selection2D, Blob3D }
 public enum VideoEffectFilterKind { Brightness, Contrast, Saturation, HueRotation, Blur, Grayscale, Sepia, Invert, ChromaKey, Vignette, Grain, ColorWash }
 public enum MediaTimelineTrackKind { Video, Audio, Subtitle, Data }
 public enum MediaTimelineTransitionKind { Cut, Dissolve, Wipe, Fade, Unknown }
@@ -46,6 +47,8 @@ public sealed class VideoEffectFilter
     public double TertiaryAmount { get; set; } = .3;
     public double ResidualOpacity { get; set; } = 0;
     public string Color { get; set; } = "#00ff00";
+    public PublicationHtmlExportSupport HtmlExportSupport { get; set; } = PublicationHtmlExportSupport.Native;
+    public string HtmlExportNote { get; set; } = string.Empty;
 }
 
 public sealed class VideoEffectLayer
@@ -54,12 +57,23 @@ public sealed class VideoEffectLayer
     public string Name { get; set; } = "Video layer";
     public bool Visible { get; set; } = true;
     public bool Locked { get; set; }
+    public VideoEffectLayerKind Kind { get; set; } = VideoEffectLayerKind.BaseVideo;
     public double Opacity { get; set; } = 1;
     public VideoEffectBlendMode BlendMode { get; set; }
     public bool HasTemporalRange { get; set; }
     public double TemporalStartSeconds { get; set; }
     public double TemporalEndSeconds { get; set; }
     public VideoFrameRegion Region { get; set; } = new();
+    public VideoFrameRegion MorphRegion { get; set; } = new() { Name = "Morph target" };
+    public bool MorphEnabled { get; set; }
+    public bool AnimateMorph { get; set; } = true;
+    public double MorphAmount { get; set; }
+    public double AnimationSpeed { get; set; } = 1;
+    public double Depth { get; set; } = .18;
+    public double Roundness { get; set; } = .12;
+    public string OpenScadScript { get; set; } = string.Empty;
+    public PublicationHtmlExportSupport HtmlExportSupport { get; set; } = PublicationHtmlExportSupport.Native;
+    public string HtmlExportNote { get; set; } = string.Empty;
     public List<VideoEffectFilter> Filters { get; set; } = [];
 }
 
@@ -220,4 +234,16 @@ public static class PublicationMediaData
         var mimeType = NormalizeMimeType(header, fallbackMimeType);
         return $"data:{mimeType};base64,{dataUrl[(marker + 8)..]}";
     }
+}
+
+
+public sealed class VideoLayerMainframeInsertRequest
+{
+    public string Name { get; set; } = "3D video object";
+    public string Html { get; set; } = string.Empty;
+    public string Css { get; set; } = string.Empty;
+    public string JavaScript { get; set; } = string.Empty;
+    public string OpenScadScript { get; set; } = string.Empty;
+    public PublicationHtmlExportSupport HtmlExportSupport { get; set; } = PublicationHtmlExportSupport.CanvasRuntime;
+    public string HtmlExportNote { get; set; } = string.Empty;
 }

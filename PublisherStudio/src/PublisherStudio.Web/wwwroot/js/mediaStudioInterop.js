@@ -292,6 +292,7 @@ function releaseFrameOverlayBindings(state) {
     }
     if (overlay && state.frameOverlayMoveHandler) overlay.removeEventListener('pointermove', state.frameOverlayMoveHandler);
     if (overlay && state.frameNodePointerDownHandler) overlay.removeEventListener('pointerdown', state.frameNodePointerDownHandler, true);
+    if (overlay && state.frameNodeContextHandler) overlay.removeEventListener('contextmenu', state.frameNodeContextHandler, true);
     if (overlay && state.frameNodePointerMoveHandler) overlay.removeEventListener('pointermove', state.frameNodePointerMoveHandler, true);
     if (overlay && state.frameNodePointerUpHandler) {
         overlay.removeEventListener('pointerup', state.frameNodePointerUpHandler, true);
@@ -307,6 +308,7 @@ function releaseFrameOverlayBindings(state) {
     state.frameOverlayMoveHandler = null;
     state.frameOverlayLeaveHandler = null;
     state.frameNodePointerDownHandler = null;
+    state.frameNodeContextHandler = null;
     state.frameNodePointerMoveHandler = null;
     state.frameNodePointerUpHandler = null;
     state.frameNodeGesture = null;
@@ -453,9 +455,21 @@ function bindFrameOverlay(state, frameStageId, frameOverlayId) {
         event.stopImmediatePropagation();
         const pointIndex = Number(node.dataset.frameNodeIndex);
         if (!Number.isInteger(pointIndex) || pointIndex < 0) return;
+        state.dotnet?.invokeMethodAsync('VideoFramePointSelected', pointIndex).catch(() => {});
+        overlay.querySelectorAll('[data-frame-node-index].selected').forEach(candidate => candidate.classList.remove('selected'));
+        node.classList.add('selected');
         state.frameNodeGesture = { pointerId: event.pointerId, pointIndex, node };
         try { overlay.setPointerCapture(event.pointerId); } catch { }
         node.classList.add('dragging');
+    };
+    state.frameNodeContextHandler = event => {
+        const node = event.target?.closest?.('[data-frame-node-index]');
+        if (!(node instanceof SVGCircleElement) || !overlay.classList.contains('active')) return;
+        const pointIndex = Number(node.dataset.frameNodeIndex);
+        if (!Number.isInteger(pointIndex) || pointIndex < 0) return;
+        state.dotnet?.invokeMethodAsync('VideoFramePointSelected', pointIndex).catch(() => {});
+        overlay.querySelectorAll('[data-frame-node-index].selected').forEach(candidate => candidate.classList.remove('selected'));
+        node.classList.add('selected');
     };
     state.frameNodePointerMoveHandler = event => {
         const gesture = state.frameNodeGesture;
@@ -480,6 +494,7 @@ function bindFrameOverlay(state, frameStageId, frameOverlayId) {
         state.dotnet?.invokeMethodAsync('VideoFramePointCommitted', gesture.pointIndex, point.x, point.y).catch(() => {});
     };
     overlay.addEventListener('pointerdown', state.frameNodePointerDownHandler, true);
+    overlay.addEventListener('contextmenu', state.frameNodeContextHandler, true);
     overlay.addEventListener('pointermove', state.frameNodePointerMoveHandler, true);
     overlay.addEventListener('pointerup', state.frameNodePointerUpHandler, true);
     overlay.addEventListener('pointercancel', state.frameNodePointerUpHandler, true);

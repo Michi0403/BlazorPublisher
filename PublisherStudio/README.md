@@ -404,6 +404,10 @@ See `CHANGELOG-v1.0.52.md`. Self-contained presentation and site exports now kee
 
 See `CHANGELOG-v1.0.67.md`, `AGENTS.md`, ADR-008 and `VALIDATION.md`. The v1.0.66 namespace-collision repair is corrected so `global::` is no longer placed directly in an interpolated-string hole. Streaming Chat and RTSP use the explicit `TextEncoding` alias, and RTSP calculates SDP content length before formatting the header. The compilation-safety contract now rejects the exact parser trap that produced `CS0103`. Runtime behavior, publication format `1.48`, Picture Studio format `1.3`, and package dependencies remain unchanged.
 
+## v1.0.83 temporal selection layers and 3D HTML interchange
+
+Committed Video Studio ranges can become their own time-bound effect layers. Polygon points retain selection ownership for property editing and exact deletion. Layers can morph between two drawn regions as animated 3D blobs, generate OpenSCAD interchange, and move directly between Video Studio, Mainframe, Panel Studio and HTML export. Effects now display native, canvas-runtime or render-before-export compatibility. See `CHANGELOG-v1.0.83.md`.
+
 ## v1.0.82 OpenRaster and media frontend completion
 
 The missing OpenRaster parsing/decoding helpers are restored, including strict SVG/SVGZ handling and PNG dimension reads. Media Converter Studio now routes image, audio, and video sources/results to their matching Studio; Audio Studio can send its selected trimmed clip to the converter; and conversion-job right-click actions are wired to the selected job. See `CHANGELOG-v1.0.82.md`.

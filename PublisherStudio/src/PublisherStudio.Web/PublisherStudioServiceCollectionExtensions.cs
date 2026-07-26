@@ -114,12 +114,20 @@ public static class PublisherStudioServiceCollectionExtensions
         var candidates = services.ToList().Select(descriptor =>
         {
             var implementation = descriptor.ImplementationType ?? descriptor.ImplementationInstance?.GetType();
-            if (implementation is null && descriptor.ServiceType.IsClass) implementation = descriptor.ServiceType;
-            var applicationOwned = implementation?.Namespace?.StartsWith("PublisherStudio", StringComparison.Ordinal) == true
+            if (implementation is null && descriptor.ServiceType.IsClass)
+                implementation = descriptor.ServiceType;
+
+            // Factory registrations expose neither ImplementationType nor ImplementationInstance.
+            // They remain valid DI registrations, but cannot be reflected as an implementation
+            // architecture descriptor until a concrete implementation type is known.
+            if (implementation is null)
+                return null;
+
+            var applicationOwned = implementation.Namespace?.StartsWith("PublisherStudio", StringComparison.Ordinal) == true
                 || descriptor.ServiceType.Namespace?.StartsWith("PublisherStudio", StringComparison.Ordinal) == true;
             if (!applicationOwned || implementation == typeof(ServiceArchitectureDescriptor)) return null;
             var contract = descriptor.ServiceType.IsInterface ? descriptor.ServiceType : null;
-            return new ServiceArchitectureDescriptor(contract, implementation!, descriptor.Lifetime.ToString());
+            return new ServiceArchitectureDescriptor(contract, implementation, descriptor.Lifetime.ToString());
         }).Where(descriptor => descriptor is not null).Cast<ServiceArchitectureDescriptor>()
           .DistinctBy(descriptor => (descriptor.InterfaceType, descriptor.ImplementationType, descriptor.Lifetime))
           .ToList();

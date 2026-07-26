@@ -26,22 +26,62 @@ public sealed class ApplicationPortResolver : IApplicationPortResolver
 public interface IRuntimeEndpointWriter
 {
     void Write(WebApplication app);
+    void DeleteOwnedEndpoint();
 }
 
 public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
 {
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+
     public void Write(WebApplication app)
     {
         var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()?.Addresses;
-        var baseUrl = addresses?.FirstOrDefault() ?? $"http://{IPAddress.Loopback}";
+        var baseUrl = addresses?.FirstOrDefault(address => Uri.TryCreate(address, UriKind.Absolute, out _))
+            ?? throw new InvalidOperationException("PublisherStudio started without a usable server address.");
         RuntimeEndpointStore.BaseUrl = baseUrl;
         var uri = new Uri(baseUrl);
-        var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "runtime");
-        Directory.CreateDirectory(directory);
-        File.WriteAllText(Path.Combine(directory, "server.json"), System.Text.Json.JsonSerializer.Serialize(new
+        Directory.CreateDirectory(RuntimeDirectory);
+        File.WriteAllText(RuntimeFilePath, System.Text.Json.JsonSerializer.Serialize(new
         {
-            ProcessId = Environment.ProcessId, BaseUrl = baseUrl, Port = uri.Port, StartedAtUtc = DateTimeOffset.UtcNow
-        }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+            ProcessId = Environment.ProcessId,
+            BaseUrl = baseUrl,
+            Port = uri.Port,
+            StartedAtUtc = DateTimeOffset.UtcNow
+        }, JsonOptions));
         Console.WriteLine($"PublisherStudio listening on {baseUrl}");
     }
+
+    public void DeleteOwnedEndpoint()
+    {
+        try
+        {
+            if (!File.Exists(RuntimeFilePath)) return;
+            using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(RuntimeFilePath));
+            if (!document.RootElement.TryGetProperty("ProcessId", out var processId) ||
+                !processId.TryGetInt32(out var ownerProcessId) ||
+                ownerProcessId != Environment.ProcessId)
+                return;
+
+            File.Delete(RuntimeFilePath);
+            RuntimeEndpointStore.BaseUrl = string.Empty;
+        }
+        catch (IOException)
+        {
+            // A newer process may already own or replace the runtime endpoint file.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Shutdown must not fail because a diagnostic endpoint file could not be removed.
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // Never delete an endpoint file whose ownership cannot be verified.
+        }
+    }
+
+    private static string RuntimeDirectory => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "PublisherStudio", "runtime");
+
+    private static string RuntimeFilePath => Path.Combine(RuntimeDirectory, "server.json");
 }

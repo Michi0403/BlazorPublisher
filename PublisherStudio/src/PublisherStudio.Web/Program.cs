@@ -19,10 +19,18 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        var app = BuildWebApp(args);
-        await app.StartAsync();
-        app.Services.GetRequiredService<IRuntimeEndpointWriter>().Write(app);
-        await app.WaitForShutdownAsync();
+        await using var app = BuildWebApp(args);
+        var endpointWriter = app.Services.GetRequiredService<IRuntimeEndpointWriter>();
+        try
+        {
+            await app.StartAsync();
+            endpointWriter.Write(app);
+            await app.WaitForShutdownAsync();
+        }
+        finally
+        {
+            endpointWriter.DeleteOwnedEndpoint();
+        }
     }
 
     public static WebApplication BuildWebApp(string[]? args = null)
@@ -40,7 +48,9 @@ public static class Program
         var requestedPort = new ApplicationPortResolver().Resolve(effectiveArgs);
         builder.WebHost.ConfigureKestrel(options =>
         {
-            options.Listen(IPAddress.Loopback, requestedPort);
+            if (requestedPort > 0)
+                options.Listen(IPAddress.Loopback, requestedPort);
+
             options.Limits.MaxRequestBodySize = null;
         });
 

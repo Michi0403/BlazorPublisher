@@ -1,5 +1,5 @@
 param(
-    [string]$OutputPath = (Join-Path $PSScriptRoot 'artifacts/source/PublisherStudio-v1.0.89-source.zip')
+    [string]$OutputPath = (Join-Path $PSScriptRoot 'artifacts/source/PublisherStudio-v1.0.90-source.zip')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -14,6 +14,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'C# source-closure test failed.' }
     & node ../../tests/organicPluginOneWire.test.mjs
     if ($LASTEXITCODE -ne 0) { throw 'Organic WireProtocolVersion test failed.' }
+    & node ../../tests/runtimeBootstrapSafety.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw 'Runtime/bootstrap safety test failed.' }
 }
 finally { Pop-Location }
 

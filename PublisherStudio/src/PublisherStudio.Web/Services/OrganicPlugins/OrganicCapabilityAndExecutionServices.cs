@@ -221,8 +221,8 @@ public sealed class OrganicWorkExecutor(
             throw new KeyNotFoundException("Screenshot request not found or expired.");
         var includeData = GetBoolean(parameters, "includeData", true);
         var dataUrl = includeData ? request.DataUrl : string.Empty;
-        if (dataUrl.Length > 700_000)
-            throw new InvalidOperationException("The screenshot result exceeds the safe 1-Wire inline payload budget. Retry the capture with a smaller scale/quality or request metadata only.");
+        if (System.Text.Encoding.UTF8.GetByteCount(dataUrl) > OrganicWireProtocol.MaximumMessageBytes)
+            throw new InvalidOperationException("The screenshot result exceeds the configured 1-Wire message capacity. Increase OrganicPlugins:MaximumMessageBytes or request metadata only.");
         return new
         {
             request.Id, request.Status, request.PixelWidth, request.PixelHeight, request.Error,

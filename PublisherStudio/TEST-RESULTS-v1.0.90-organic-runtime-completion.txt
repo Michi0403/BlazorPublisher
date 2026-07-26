@@ -1,0 +1,12 @@
+PublisherStudio v1.0.90 organic runtime completion — source validation
+
+PASS: complete npm test suite.
+PASS: launch profile is not overridden unless an explicit port was requested.
+PASS: owner-only runtime endpoint cleanup.
+PASS: null implementation factory registrations are excluded from reflection descriptors.
+PASS: MediaConversionCapabilities.Available is used.
+PASS: StreamingRuntimeUseCases and every project reference are present.
+PASS: shared LocalGPT.WireProtocolVersion 1.4 source mirror.
+PASS: source-package closure and archive verification.
+
+Native dotnet/DevExpress execution was unavailable in this environment.

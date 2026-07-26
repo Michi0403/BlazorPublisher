@@ -91,7 +91,19 @@ public sealed class BusinessObjectContextService(
     }
 }
 
-public sealed record ServiceArchitectureDescriptor(Type? InterfaceType, Type ImplementationType, string Lifetime);
+public sealed record ServiceArchitectureDescriptor
+{
+    public ServiceArchitectureDescriptor(Type? interfaceType, Type implementationType, string lifetime)
+    {
+        InterfaceType = interfaceType;
+        ImplementationType = implementationType ?? throw new ArgumentNullException(nameof(implementationType));
+        Lifetime = string.IsNullOrWhiteSpace(lifetime) ? "Unknown" : lifetime;
+    }
+
+    public Type? InterfaceType { get; }
+    public Type ImplementationType { get; }
+    public string Lifetime { get; }
+}
 
 public interface IServiceArchitectureRegistry
 {
@@ -101,8 +113,9 @@ public interface IServiceArchitectureRegistry
 public sealed class ServiceArchitectureRegistry(IEnumerable<ServiceArchitectureDescriptor> descriptors) : IServiceArchitectureRegistry
 {
     public IReadOnlyList<ServiceArchitectureDescriptor> Descriptors { get; } = descriptors
+        .Where(descriptor => descriptor is not null)
         .DistinctBy(descriptor => (descriptor.InterfaceType, descriptor.ImplementationType, descriptor.Lifetime))
-        .OrderBy(descriptor => descriptor.ImplementationType.FullName)
+        .OrderBy(descriptor => descriptor.ImplementationType.FullName ?? descriptor.ImplementationType.Name, StringComparer.Ordinal)
         .ToList()
         .AsReadOnly();
 }

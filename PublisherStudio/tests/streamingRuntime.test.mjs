@@ -166,7 +166,7 @@ assert.match(applicationComposition, /services\.AddPublisherStreaming\(\)/);
 assert.doesNotMatch(webProgram, /MapPublisherStreamingRuntime|StreamingRuntimeEndpoints/);
 assert.match(applicationComposition, /AddHostedService<TwitchOAuthMaintenanceService>/);
 assert.match(streamingComposition, /public static class StreamingServiceCollectionExtensions/);
-assert.match(runtimeUseCases, /Version = "2\.0\.0"/);
+assert.match(runtimeUseCases, /Version = "2\.0\.1"/);
 assert.match(streamingControllers, /api\/mediahost\/sessions/);
 assert.match(streamingControllers, /ingest\/websocket/);
 assert.match(streamingClient, /In-process facade/);

@@ -1,0 +1,12 @@
+PublisherStudio 2.0.1 organic-suite build-fix source candidate
+
+PASS  complete npm test aggregate
+PASS  C# source composition/namespace/Razor/interpolation safety checks
+PASS  project-reference and protocol-package closure checks
+PASS  organic plugin, Story Editor and frontend-authority source contracts
+PASS  media, Panel, localization, export and runtime-bootstrap source contracts
+PASS  workspace-preservation proof
+PASS  XML and JSON parse checks
+PASS  exact reported-error regression checks
+
+Native .NET 10 / licensed DevExpress compilation was unavailable in this environment.

@@ -26,7 +26,8 @@ public sealed partial class VideoProjectImportService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(source);
-        var extension = Path.GetExtension(fileName ?? string.Empty).ToLowerInvariant();
+        fileName ??= string.Empty;
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
         if (!SupportedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             throw new InvalidDataException($"Unsupported video-project format '{extension}'.");
 

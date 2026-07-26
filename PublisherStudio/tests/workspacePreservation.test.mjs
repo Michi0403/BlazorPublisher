@@ -5,13 +5,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const proofPath = path.join(root, 'WORKSPACE-CONTENT-PROOF-v2.0.0.json');
+const proofPath = path.join(root, 'WORKSPACE-CONTENT-PROOF-v2.0.1.json');
 const proof = JSON.parse(fs.readFileSync(proofPath, 'utf8'));
 const ignoredParts = new Set(['bin', 'obj', 'node_modules', '.git', '.vs']);
 const ignoredNames = new Set([
   'WORKSPACE-BASELINE-MANIFEST-v1.0.92.json',
-  'WORKSPACE-CONTENT-PROOF-v2.0.0.json',
-  'WORKSPACE-CONTENT-PROOF-v2.0.0.md'
+  'WORKSPACE-CONTENT-PROOF-v2.0.1.json',
+  'WORKSPACE-CONTENT-PROOF-v2.0.1.md'
 ]);
 const sha256 = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const normalize = value => value.split(path.sep).join('/');

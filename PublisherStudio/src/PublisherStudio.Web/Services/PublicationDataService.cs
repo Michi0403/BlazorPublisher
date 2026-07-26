@@ -660,11 +660,12 @@ public sealed class PublicationDataService
 
     private static List<List<string>> ParseDelimitedRows(string source, char delimiter)
     {
+        source ??= string.Empty;
         var result = new List<List<string>>();
         var row = new List<string>();
         var value = new StringBuilder();
         var quoted = false;
-        for (var index = 0; index < (source ?? string.Empty).Length; index++)
+        for (var index = 0; index < source.Length; index++)
         {
             var character = source[index];
             if (quoted)

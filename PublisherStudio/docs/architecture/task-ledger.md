@@ -2,8 +2,14 @@
 
 Status values are **Closed**, **Partial**, or **Deferred**. A task may be removed only after a later changelog records it as solved and the related contract test remains green.
 
-| Task | Status in 1.0.88 | Evidence / next step |
+| Task | Status in 1.0.89 | Evidence / next step |
 |---|---|---|
+| v1.0.89 LocalGPT normal application/installer port compatibility | Closed | Organic discovery/service ports are separate and optional; LocalGPT restores its public read-only runtime port surface and validates distinct port contracts. |
+| v1.0.89 organic 1-Wire DTO, discovery, TCP connection and capability negotiation | Closed at TCP/UDP baseline | Versioned envelopes, bounded message size, SHA-256, CRC32, encrypted/public payload exclusivity and online capability exchange are implemented. UART/SPI/MQTT adapters remain deferred. |
+| v1.0.89 per-organ permissions and human approval | Closed for PublisherStudio browser scope | Persistent rules default to AskEveryTime; pending work is approved/declined in the UI or API and results are returned to LocalGPT. |
+| v1.0.89 OpenSCAD Team | Closed at canonical source-generation baseline | Council preset and organic capability reuse `IOpenScadDocumentService`; native OpenSCAD invocation remains deferred below. |
+| v1.0.89 Spreadsheet Team sequential hand-eye workflow | Closed at inspection/browser-queue baseline | Spreadsheet sessions are inspected read-only and screenshot/input packages serialize per work order; workbook mutation still requires bounded approved input and browser permission. |
+| Organic protocol signing, encryption and key management | Partial | Signature/encrypted payload fields and exclusivity are reserved; real signing/encryption waits for explicit trust and key lifecycle design. |
 | v1.0.88 Panel Studio drop race and Blazor circuit crash cascade | Closed | Transaction state is captured before JS await, validated afterward and cleared in `finally`; guarded by `interactionAndStackingReleaseGate.test.mjs`. |
 | Mainframe/Panel arrangement of HTML, Canvas and 3D web content | Closed | Designer-only shields preserve normal object selection/move/resize while interaction mode and exports remain unshielded. |
 | Cross-surface mouse/pen/touch/keyboard/gamepad commands | Closed at browser/device API baseline | Pointer Events, keyboard routes and standard Gamepad API mappings converge on the same object commands. Device-specific acceptance remains part of native release testing. |

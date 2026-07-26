@@ -15,6 +15,12 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## v1.0.89: LocalGPT organic-plugin bridge
+
+PublisherStudio can now discover LocalGPT on the dedicated UDP discovery port, connect on the dedicated organic service port, advertise existing eye/hand/OpenSCAD/spreadsheet/media capabilities, require per-organ user permissions, and start General, OpenSCAD Team, or Spreadsheet Team Council rounds. The normal PublisherStudio and LocalGPT installer/bootstrap ports remain separate compatibility contracts.
+
+See `CHANGELOG-v1.0.89.md` and `docs/architecture/task-ledger.md`.
+
 ## v1.0.88: publish-candidate interaction hardening
 
 - Fixes the Panel Studio drop race that could terminate a Blazor circuit.

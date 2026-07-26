@@ -1,4 +1,5 @@
 @namespace PublisherStudio.Components.Editor
+@inject NavigationManager Navigation
 
 <DxRibbon CssClass="publication-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text="File">
@@ -242,6 +243,17 @@
                 <DxRibbonItem Text="Application audio" Click="AddLiveApplicationAudio" />
                 <DxRibbonItem Text="Now Playing metadata" Click="AddNowPlaying" />
             </DxRibbonItem>
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
+    <DxRibbonTab Text="AI Council">
+        <DxRibbonGroup Text="LocalGPT" IconCssClass="pub-icon pub-icon-command">
+            <DxRibbonItem Text="Organic plugins" IconCssClass="pub-icon pub-icon-command" IsPrimary="true" Click="OpenOrganicPlugins" />
+            <DxRibbonItem Text="OpenSCAD Team" IconCssClass="pub-icon pub-icon-effects" Click="OpenOrganicPlugins" />
+            <DxRibbonItem Text="Spreadsheet Team" IconCssClass="pub-icon pub-icon-spreadsheet" Click="OpenOrganicPlugins" />
+        </DxRibbonGroup>
+        <DxRibbonGroup Text="Safety" IconCssClass="pub-icon pub-icon-info">
+            <DxRibbonItem Text="Eye/hand actions require permission" Enabled="false" />
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -589,6 +601,7 @@
 </DxRibbon>
 
 @code {
+    private void OpenOrganicPlugins() => Navigation.NavigateTo("/organic-plugins");
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }

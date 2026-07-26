@@ -1,12 +1,14 @@
 using PublisherStudio.Controllers;
 using PublisherStudio.Domain;
 using PublisherStudio.HostedServices.Streaming;
+using PublisherStudio.HostedServices.OrganicPlugins;
 using PublisherStudio.Services.Automation;
 using PublisherStudio.Services.CodeEditing;
 using PublisherStudio.Services.Configuration;
 using PublisherStudio.Services.MediaConversion;
 using PublisherStudio.Services.MediaStudio.UseCases;
 using PublisherStudio.Services.OpenScad;
+using PublisherStudio.Services.OrganicPlugins;
 using PublisherStudio.Services.Panels;
 using PublisherStudio.Services.PictureStudio.Import;
 using PublisherStudio.Services.Publication;
@@ -22,6 +24,7 @@ public static class PublisherStudioServiceCollectionExtensions
     public static IServiceCollection AddPublisherStudioApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<PublisherStudioPathOptions>(configuration.GetSection("PublisherStudio:Paths"));
+        services.Configure<OrganicPluginOptions>(configuration.GetSection(OrganicPluginOptions.SectionName));
 
         AddSingleton<IApplicationPortResolver, ApplicationPortResolver>(services);
         AddSingleton<IRuntimeEndpointWriter, RuntimeEndpointWriter>(services);
@@ -79,6 +82,16 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IApiSurfaceCatalogService, ApiSurfaceCatalogService>(services);
         services.AddSingleton<IServiceArchitectureRegistry, ServiceArchitectureRegistry>();
         AddSingleton<IBusinessObjectContextService, BusinessObjectContextService>(services);
+
+        AddSingleton<IOrganicPluginProtocolCodec, OrganicPluginProtocolCodec>(services);
+        AddSingleton<ILocalGptDiscoveryRegistry, LocalGptDiscoveryRegistry>(services);
+        AddSingleton<IOrganicCapabilityCatalog, OrganicCapabilityCatalog>(services);
+        AddSingleton<IOrganicPermissionStore, OrganicPermissionStore>(services);
+        AddSingleton<IOrganicResultStore, OrganicResultStore>(services);
+        AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);
+        AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);
+        AddSingleton<ILocalGptConnectionService, LocalGptConnectionService>(services);
+        services.AddHostedService<LocalGptDiscoveryHostedService>();
 
         AddScoped<EditorStateService, EditorStateService>(services);
         AddScoped<PictureEditorStateService, PictureEditorStateService>(services);

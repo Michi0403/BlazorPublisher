@@ -17,7 +17,7 @@ const layoutController = read('src/PublisherStudio.Web/Controllers/PublicationLa
 const automation = read('src/PublisherStudio.Web/Services/Automation/BrowserAutomationServices.cs');
 const services = read('src/PublisherStudio.Web/PublisherStudioServiceCollectionExtensions.cs');
 const editor = read('src/PublisherStudio.Web/Components/Pages/Editor.razor');
-const changelog = read('CHANGELOG-v1.0.88.md');
+const changelog = read('CHANGELOG-v1.0.89.md');
 const contributorRules = read('AGENTS.md');
 
 // The drop transaction must survive dragend and circuit timing without dereferencing cleared component state.

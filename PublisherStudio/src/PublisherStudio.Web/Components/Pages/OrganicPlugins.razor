@@ -1,0 +1,371 @@
+@page "/organic-plugins"
+@rendermode InteractiveServer
+@implements IDisposable
+@inject ILocalGptDiscoveryRegistry Discovery
+@inject ILocalGptConnectionService Connection
+@inject IOrganicCapabilityCatalog CapabilityCatalog
+@inject IOrganicPermissionStore PermissionStore
+@inject IOrganicWorkCoordinator WorkCoordinator
+@inject IOrganicResultStore ResultStore
+@inject IUserNotificationService Notifications
+@inject ILogger<OrganicPlugins> Logger
+@inject NavigationManager Navigation
+
+<PageTitle>LocalGPT Organic Plugins</PageTitle>
+<UserNotificationHost />
+
+<main class="organic-plugin-page">
+    <header class="organic-plugin-header">
+        <div>
+            <p class="organic-plugin-kicker">PublisherStudio · LocalGPT</p>
+            <h1>Organic plugin control</h1>
+            <p>Discover LocalGPT, negotiate capabilities, approve eye/hand actions, and start a role-based Council round.</p>
+        </div>
+        <button type="button" class="organic-secondary" @onclick="BackToPublisher">Back to Publisher</button>
+    </header>
+
+    <section class="organic-status-strip" aria-live="polite">
+        <strong>@(Connection.State.IsConnected ? "Connected" : "Not connected")</strong>
+        <span>@(Connection.State.IsConnected ? Connection.State.DisplayName : "Waiting for UDP discovery on port 51141")</span>
+        @if (!string.IsNullOrWhiteSpace(Connection.State.LastError))
+        {
+            <span class="organic-error">@Connection.State.LastError</span>
+        }
+        @if (Connection.State.IsConnected)
+        {
+            <button type="button" class="organic-danger" @onclick="DisconnectAsync">Disconnect</button>
+        }
+    </section>
+
+    <div class="organic-grid organic-grid-two">
+        <section class="organic-card">
+            <h2>Discovered LocalGPT instances</h2>
+            @if (_peers.Count == 0)
+            {
+                <p class="organic-empty">No LocalGPT broadcast has been received yet. LocalGPT remains available on its normal application port; organic discovery is optional.</p>
+            }
+            else
+            {
+                <div class="organic-list">
+                    @foreach (var peer in _peers)
+                    {
+                        <article class="organic-peer" @key="peer.PeerId">
+                            <div>
+                                <strong>@peer.DisplayName</strong>
+                                <span>@peer.HostName · @peer.Address:@peer.ServicePort</span>
+                                <small>@peer.ApplicationVersion · seen @peer.SeenUtc.LocalDateTime.ToString("T")</small>
+                            </div>
+                            <button type="button" disabled="@Connection.State.IsConnected" @onclick="() => ConnectAsync(peer.PeerId)">Connect</button>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+
+        <section class="organic-card">
+            <h2>Start an AI Council round</h2>
+            <label>
+                Council team
+                <select @bind="_councilRequest.TeamKey">
+                    <option value="general">General Council</option>
+                    <option value="openscad-team">OpenSCAD Team</option>
+                    <option value="spreadsheet-team">Spreadsheet Team</option>
+                </select>
+            </label>
+            <label>
+                User assignment
+                <textarea rows="7" @bind="_councilRequest.Prompt" @bind:event="oninput" placeholder="Example: Build an OpenSCAD assembly from blocks and forms, or help me inspect this spreadsheet through a sequential eye/hand workflow."></textarea>
+            </label>
+            <label>
+                External project context (JSON)
+                <textarea rows="3" @bind="_councilRequest.ExternalProjectContextJson" @bind:event="oninput"></textarea>
+            </label>
+            <div class="organic-inline-fields">
+                <label>Rounds <input type="number" min="1" max="20" @bind="_councilRequest.MaxRounds" /></label>
+                <label>Parallel models <input type="number" min="1" max="8" @bind="_councilRequest.MaxParallelModels" /></label>
+            </div>
+            <button type="button" class="organic-primary" disabled="@(!Connection.State.IsConnected || string.IsNullOrWhiteSpace(_councilRequest.Prompt))" @onclick="SendCouncilAsync">Submit with user authorization</button>
+            <p class="organic-note">The request only enters LocalGPT after this explicit frontend action. Any required PublisherStudio eye/hand call is still checked against the permission matrix below.</p>
+        </section>
+    </div>
+
+    <section class="organic-card">
+        <h2>PublisherStudio organ capabilities</h2>
+        <div class="organic-capability-grid">
+            @foreach (var capability in _capabilities)
+            {
+                <article class="organic-capability" @key="capability.Key">
+                    <div class="organic-capability-title">
+                        <strong>@capability.DisplayName</strong>
+                        <span class="organic-badge">@string.Join(" / ", capability.Organs)</span>
+                    </div>
+                    <p>@capability.Description</p>
+                    <small>@capability.Key · @(capability.RequiresHumanConfirmation ? "confirmation required by default" : "read-only/no confirmation")</small>
+                </article>
+            }
+        </div>
+    </section>
+
+    <div class="organic-grid organic-grid-two">
+        <section class="organic-card">
+            <h2>Permission matrix</h2>
+            <div class="organic-form-grid">
+                <label>
+                    LocalGPT peer
+                    <input @bind="_permission.PeerId" placeholder="localgpt:machine" />
+                </label>
+                <label>
+                    Capability
+                    <select @bind="_permission.CapabilityKey">
+                        <option value="">Select capability</option>
+                        @foreach (var capability in _capabilities)
+                        {
+                            <option value="@capability.Key">@capability.Key</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    Organ
+                    <select @bind="_permission.Organ">
+                        <option value="">All declared organs</option>
+                        <option value="eyes">eyes</option>
+                        <option value="hands">hands</option>
+                        <option value="brain">brain</option>
+                    </select>
+                </label>
+                <label>
+                    Approval
+                    <select @bind="_permission.ApprovalMode">
+                        @foreach (var mode in Enum.GetValues<OrganicApprovalMode>())
+                        {
+                            <option value="@mode">@mode</option>
+                        }
+                    </select>
+                </label>
+                @if (_permission.ApprovalMode == OrganicApprovalMode.CurrentWorkOrder)
+                {
+                    <label>
+                        Work-order key
+                        <input @bind="_permission.WorkOrderKey" />
+                    </label>
+                }
+            </div>
+            <button type="button" class="organic-primary" @onclick="SavePermission">Save permission</button>
+            <p class="organic-note">No matching rule means AskEveryTime. Scheduled and sequential spool work cannot bypass the same rule.</p>
+
+            @if (_permissions.Count > 0)
+            {
+                <div class="organic-table-wrap">
+                    <table class="organic-table">
+                        <thead><tr><th>Peer</th><th>Capability</th><th>Organ</th><th>Approval</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var rule in _permissions)
+                            {
+                                <tr @key="@(rule.PeerId + rule.CapabilityKey + rule.Organ)">
+                                    <td>@rule.PeerId</td><td>@rule.CapabilityKey</td><td>@(string.IsNullOrWhiteSpace(rule.Organ) ? "*" : rule.Organ)</td><td>@rule.ApprovalMode</td>
+                                    <td><button type="button" class="organic-link-danger" @onclick="() => DeletePermission(rule)">Remove</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+
+        <section class="organic-card">
+            <h2>Pending and recent organ work</h2>
+            @if (_work.Count == 0)
+            {
+                <p class="organic-empty">No external organ work has arrived.</p>
+            }
+            else
+            {
+                <div class="organic-list">
+                    @foreach (var item in _work)
+                    {
+                        <article class="organic-work" @key="item.Id">
+                            <div>
+                                <strong>@item.CapabilityKey</strong>
+                                <span>@item.Status · @item.UpdatedUtc.LocalDateTime.ToString("g")</span>
+                                <small>Work order: @(string.IsNullOrWhiteSpace(item.Request.WorkOrderKey) ? item.Id.ToString("N") : item.Request.WorkOrderKey)</small>
+                                @if (!string.IsNullOrWhiteSpace(item.Error)) { <span class="organic-error">@item.Error</span> }
+                            </div>
+                            @if (item.Status == OrganicWorkStatus.PendingApproval)
+                            {
+                                <div class="organic-actions">
+                                    <button type="button" class="organic-primary" @onclick="() => ApproveAsync(item.Id)">Approve once</button>
+                                    <button type="button" class="organic-danger" @onclick="() => DeclineAsync(item.Id)">Decline</button>
+                                </div>
+                            }
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+
+    <section class="organic-card">
+        <h2>Council responses and proposals</h2>
+        @if (_results.Count == 0 && _textProposals.Count == 0)
+        {
+            <p class="organic-empty">No responses have been received from LocalGPT.</p>
+        }
+        @foreach (var proposal in _textProposals)
+        {
+            <article class="organic-result" @key="proposal.Id">
+                <strong>Text proposal for @proposal.Target</strong>
+                <p>@proposal.Text</p>
+                <small>@proposal.Reason · requires explicit insertion by the user</small>
+            </article>
+        }
+        @foreach (var result in _results.Take(25))
+        {
+            <details class="organic-result" @key="result.Id">
+                <summary>@result.Request.MessageType · @result.CapabilityKey · @result.UpdatedUtc.LocalDateTime.ToString("g")</summary>
+                @if (!string.IsNullOrWhiteSpace(result.Error)) { <p class="organic-error">@result.Error</p> }
+                @if (!string.IsNullOrWhiteSpace(result.ResultJson)) { <pre>@result.ResultJson</pre> }
+            </details>
+        }
+    </section>
+</main>
+
+@code {
+    private IReadOnlyList<OrganicPeerAdvertisement> _peers = [];
+    private IReadOnlyList<OrganicCapabilityDescriptor> _capabilities = [];
+    private IReadOnlyList<OrganicPermissionRule> _permissions = [];
+    private IReadOnlyList<OrganicPluginWorkItem> _work = [];
+    private IReadOnlyList<OrganicPluginWorkItem> _results = [];
+    private IReadOnlyList<OrganicTextInsertionProposal> _textProposals = [];
+    private OrganicCouncilPromptRequest _councilRequest = NewCouncilRequest("general");
+    private OrganicPermissionRule _permission = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Discovery.Changed += OnServiceChanged;
+        Connection.Changed += OnServiceChanged;
+        WorkCoordinator.Changed += OnServiceChanged;
+        _capabilities = await CapabilityCatalog.GetCapabilitiesAsync();
+        Refresh();
+    }
+
+    private void BackToPublisher() => Navigation.NavigateTo("/");
+
+    private void Refresh()
+    {
+        _peers = Discovery.GetPeers();
+        _permissions = PermissionStore.GetRules();
+        _work = WorkCoordinator.GetWork();
+        _results = ResultStore.GetResults();
+        _textProposals = ResultStore.GetTextProposals();
+        if (string.IsNullOrWhiteSpace(_permission.PeerId))
+            _permission.PeerId = Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _peers.FirstOrDefault()?.PeerId ?? "localgpt";
+    }
+
+    private void OnServiceChanged() => _ = InvokeAsync(() => { Refresh(); StateHasChanged(); });
+
+    private async Task ConnectAsync(string peerId)
+    {
+        try
+        {
+            var state = await Connection.ConnectAsync(peerId);
+            if (state.IsConnected)
+            {
+                _permission.PeerId = peerId;
+                Notifications.Success($"Connected to {state.DisplayName}.", "LocalGPT connected", nameof(OrganicPlugins));
+            }
+            else Notifications.Error(state.LastError, "LocalGPT connection failed", nameof(OrganicPlugins));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "PublisherStudio could not connect to LocalGPT peer {PeerId}.", peerId);
+            Notifications.Error(ex.Message, "LocalGPT connection failed", nameof(OrganicPlugins));
+        }
+        Refresh();
+    }
+
+    private async Task DisconnectAsync()
+    {
+        await Connection.DisconnectAsync();
+        Notifications.Information("PublisherStudio disconnected from LocalGPT.", source: nameof(OrganicPlugins));
+        Refresh();
+    }
+
+    private async Task SendCouncilAsync()
+    {
+        try
+        {
+            _councilRequest.RequestedOrganicCapabilities = _councilRequest.TeamKey switch
+            {
+                "openscad-team" => ["publisher.business-context", "publisher.openscad.generate", "publisher.screen.capture", "publisher.screen.capture.result"],
+                "spreadsheet-team" => ["publisher.business-context", "publisher.spreadsheet.inspect", "publisher.screen.capture", "publisher.screen.capture.result", "publisher.input.execute", "publisher.input.result"],
+                _ => ["publisher.business-context"]
+            };
+            var id = await Connection.SendCouncilRequestAsync(_councilRequest);
+            Notifications.Success($"Council request {id} was submitted.", "Council round started", nameof(OrganicPlugins));
+            var team = _councilRequest.TeamKey;
+            _councilRequest = NewCouncilRequest(team);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not submit the LocalGPT council request.");
+            Notifications.Error(ex.Message, "Council request failed", nameof(OrganicPlugins));
+        }
+    }
+
+    private void SavePermission()
+    {
+        try
+        {
+            PermissionStore.Save(_permission);
+            Notifications.Success("The organ permission was saved.", source: nameof(OrganicPlugins));
+            _permission = new OrganicPermissionRule { PeerId = Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _permission.PeerId };
+            Refresh();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not save an organic plugin permission.");
+            Notifications.Error(ex.Message, "Permission was not saved", nameof(OrganicPlugins));
+        }
+    }
+
+    private void DeletePermission(OrganicPermissionRule rule)
+    {
+        PermissionStore.Delete(rule.PeerId, rule.CapabilityKey, rule.Organ);
+        Refresh();
+    }
+
+    private async Task ApproveAsync(Guid id)
+    {
+        var item = await WorkCoordinator.ApproveAsync(id);
+        if (item is null) return;
+        await Connection.SendWorkResultAsync(item);
+        Notifications.Success($"{item.CapabilityKey} completed with one-time approval.", "Organic work", nameof(OrganicPlugins));
+        Refresh();
+    }
+
+    private async Task DeclineAsync(Guid id)
+    {
+        if (!WorkCoordinator.Decline(id, "Declined by the PublisherStudio user.")) return;
+        var item = WorkCoordinator.Get(id);
+        if (item is not null) await Connection.SendWorkResultAsync(item);
+        Notifications.Warning("The requested organ action was declined.", "Organic work", nameof(OrganicPlugins));
+        Refresh();
+    }
+
+    private static OrganicCouncilPromptRequest NewCouncilRequest(string team) => new()
+    {
+        TeamKey = team,
+        ExternalProjectContextJson = "{}",
+        MaxRounds = 1,
+        MaxParallelModels = 1,
+        IncludeMemory = true,
+        SaveToMemory = true
+    };
+
+    public void Dispose()
+    {
+        Discovery.Changed -= OnServiceChanged;
+        Connection.Changed -= OnServiceChanged;
+        WorkCoordinator.Changed -= OnServiceChanged;
+    }
+}

@@ -91,6 +91,24 @@
         </section>
     </div>
 
+    <section class="organic-card" data-testid="publisher-ai-text-generation">
+        <h2>Generate a text proposal through LocalGPT</h2>
+        <p class="organic-note">This starts the selected LocalGPT Council from PublisherStudio and requires it to return the generated text through <code>publisher.text.insert.propose</code>. The proposal is reviewable and is never inserted automatically.</p>
+        <div class="organic-form-grid">
+            <label>Target document/component <input @bind="_textGenerationTarget" placeholder="Publication intro, selected text component, article body…" /></label>
+            <label>Learning/Council team
+                <select @bind="_textGenerationTeamKey">
+                    @foreach (var team in CouncilTeams)
+                    {
+                        <option value="@team.Key">@team.Name</option>
+                    }
+                </select>
+            </label>
+            <label class="organic-form-wide">Prompt <textarea rows="5" @bind="_textGenerationPrompt" @bind:event="oninput" placeholder="Write the requested text and return it as a reviewable PublisherStudio insertion proposal."></textarea></label>
+        </div>
+        <button type="button" class="organic-primary" disabled="@(!CanGenerateTextProposal)" @onclick="GenerateTextProposalAsync">Generate reviewable text proposal</button>
+    </section>
+
     @if (Connection.State.IsConnected)
     {
         <section class="organic-card">
@@ -294,6 +312,9 @@
     private string _screenReaderSelector = "body";
     private string _screenReaderPrompt = "Describe meaningful screen changes and suggest the next safe action.";
     private int _screenReaderIntervalSeconds = 15;
+    private string _textGenerationTarget = "PublisherStudio text component";
+    private string _textGenerationPrompt = string.Empty;
+    private string _textGenerationTeamKey = "general";
     private OrganicCouncilPromptRequest _councilRequest = NewCouncilRequest("general");
     private OrganicPermissionRule _permission = new();
 
@@ -308,6 +329,10 @@
     }
 
     private bool CanRunCouncil => Connection.State.HasCapability("council.run");
+    private bool CanGenerateTextProposal => CanRunCouncil
+        && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.text.insert.propose", StringComparison.OrdinalIgnoreCase))
+        && !string.IsNullOrWhiteSpace(_textGenerationPrompt)
+        && !string.IsNullOrWhiteSpace(_textGenerationTarget);
     private bool CanUseScreenReader => Connection.State.IsConnected
         && Connection.State.HasCapability("localgpt.screenreader.help")
         && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase));
@@ -328,6 +353,7 @@
                 "general" => "General Council",
                 "openscad-team" => "OpenSCAD Team",
                 "spreadsheet-team" => "Spreadsheet Team",
+                "learning-round" => "Learning Round",
                 _ => key
             })).ToList();
         }
@@ -345,6 +371,8 @@
         _screenReaderSessions = RecurringScreenReader.GetSessions();
         if (!CouncilTeams.Any(team => string.Equals(team.Key, _councilRequest.TeamKey, StringComparison.OrdinalIgnoreCase)))
             _councilRequest.TeamKey = CouncilTeams.First().Key;
+        if (!CouncilTeams.Any(team => string.Equals(team.Key, _textGenerationTeamKey, StringComparison.OrdinalIgnoreCase)))
+            _textGenerationTeamKey = CouncilTeams.First().Key;
         if (string.IsNullOrWhiteSpace(_permission.PeerId))
             _permission.PeerId = Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _peers.FirstOrDefault()?.PeerId ?? "localgpt";
     }
@@ -386,6 +414,7 @@
             {
                 "openscad-team" => ["publisher.business-context", "publisher.openscad.generate", "publisher.screen.capture", "publisher.screen.capture.result"],
                 "spreadsheet-team" => ["publisher.business-context", "publisher.spreadsheet.inspect", "publisher.screen.capture", "publisher.screen.capture.result", "publisher.input.execute", "publisher.input.result"],
+                "learning-round" => ["publisher.business-context"],
                 _ => ["publisher.business-context"]
             };
             var id = await Connection.SendCouncilRequestAsync(_councilRequest);
@@ -397,6 +426,41 @@
         {
             Logger.LogError(ex, "Could not submit the LocalGPT council request.");
             Notifications.Error(ex.Message, "Council request failed", nameof(OrganicPlugins));
+        }
+    }
+
+    private async Task GenerateTextProposalAsync()
+    {
+        if (!CanGenerateTextProposal)
+            return;
+
+        try
+        {
+            var request = NewCouncilRequest(_textGenerationTeamKey);
+            request.RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"];
+            request.ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                Source = "PublisherStudio",
+                Target = _textGenerationTarget,
+                Workflow = "Reviewable text insertion proposal"
+            });
+            request.Prompt = $"""
+PublisherStudio user request:
+{_textGenerationPrompt.Trim()}
+
+Required result contract:
+1. Generate the final text for target '{_textGenerationTarget.Trim()}'.
+2. Before completing the Council run, invoke the LocalGPT DX function publisher.text.proposal.request with JSON parameters containing target, text and a concise reason.
+3. Do not insert or mutate the publication automatically. The PublisherStudio user reviews the proposal and performs the final insertion.
+""";
+            var id = await Connection.SendCouncilRequestAsync(request);
+            Notifications.Success($"Text-generation Council request {id} was submitted.", "Text proposal requested", nameof(OrganicPlugins));
+            _textGenerationPrompt = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not submit the PublisherStudio text-generation request to LocalGPT.");
+            Notifications.Error(ex.Message, "Text proposal request failed", nameof(OrganicPlugins));
         }
     }
 
@@ -468,6 +532,8 @@
         TeamKey = team,
         ExternalProjectContextJson = "{}",
         MaxRounds = 1,
+        MaxOutputTokens = 262144,
+        MaxContextTokens = 262144,
         MaxParallelModels = 1,
         IncludeMemory = true,
         SaveToMemory = true

@@ -28,7 +28,7 @@ public sealed class OrganicCapabilityCatalog(
             Capability("publisher.spreadsheet.inspect", "Spreadsheet session inspection", "Returns bounded metadata and preview evidence for an existing workbook session without mutation.", "eyes", true, true, true),
             Capability("publisher.text.insert.propose", "Propose text insertion", "Creates a reviewable text insertion proposal. It never mutates a publication automatically.", "hands", false, true, true),
             Capability("publisher.business-context", "PublisherStudio project/API context", "Returns the current domain, service and controller context for grounded council planning.", "eyes", true, false, false),
-            Capability("publisher.media.capabilities", "FFmpeg/media capabilities", $"Returns the installed PublisherStudio media conversion capability map. FFmpeg available: {media.IsAvailable}.", "eyes", true, false, false)
+            Capability("publisher.media.capabilities", "FFmpeg/media capabilities", $"Returns the installed PublisherStudio media conversion capability map. FFmpeg available: {media.Available}.", "eyes", true, false, false)
         };
         logger.LogDebug("Published {CapabilityCount} PublisherStudio organic capabilities.", capabilities.Count);
         return capabilities;

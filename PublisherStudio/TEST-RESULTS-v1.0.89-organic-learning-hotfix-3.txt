@@ -1,0 +1,12 @@
+PublisherStudio v1.0.89 organic-learning hotfix 3 source validation
+
+PASS: npm test (all configured suites)
+Includes timeline, components, signals, pointer ownership, maps, fonts, zoom, streaming, interface, installer, persistence, architecture, C# contracts, compilation-safety heuristics, source closure, media workflows, OpenSCAD, automation/screenshot API, release gates and organic plugins.
+
+Organic plugin regression assertions include:
+- MediaConversionCapabilities.Available is used; IsAvailable is rejected.
+- Learning Round is offered when advertised by LocalGPT.
+- Publisher text-generation form and publisher.text.proposal.request contract are present.
+- StreamingRuntimeUseCases and shared LocalGPT.WireProtocolVersion project/source closure remain required.
+
+NOT RUN: native dotnet/DevExpress/installer build; target Windows build remains required.

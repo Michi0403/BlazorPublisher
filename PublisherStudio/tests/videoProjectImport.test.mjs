@@ -75,11 +75,11 @@ assert.match(applicationComposition, /AddSingleton<VideoProjectImportService, Vi
 assert.match(interop, /\(otio\|otioz\|mlt\|kdenlive\|xges\|osp\|edl\)/);
 assert.match(interop, /actualKind === 'project'/);
 
-assert.equal(packageJson.version, '1.0.86');
-assert.equal(lockJson.version, '1.0.86');
-assert.equal(lockJson.packages[''].version, '1.0.86');
-assert.match(webProject, /<Version>1\.0\.86<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.86<\/Version>/);
+assert.equal(packageJson.version, '1.0.87');
+assert.equal(lockJson.version, '1.0.87');
+assert.equal(lockJson.packages[''].version, '1.0.87');
+assert.match(webProject, /<Version>1\.0\.87<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.87<\/Version>/);
 
 assert.match(doctrine, /OpenTimelineIO/);
 assert.match(doctrine, /MLT XML/);

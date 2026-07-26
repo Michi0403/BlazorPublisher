@@ -7,9 +7,9 @@ public interface IBrowserRuntimeTemplateService
 
 public sealed class BrowserRuntimeTemplateService : IBrowserRuntimeTemplateService
 {
-    public string CreateBlobRuntime(string payload) => $$"""
+    public string CreateBlobRuntime(string payload) => """
 (() => {
-  const config = {{payload}};
+  const config = __PUBLISHERSTUDIO_BLOB_RUNTIME_PAYLOAD__;
   const canvas = document.querySelector('.publisher-3d-blob');
   if (!(canvas instanceof HTMLCanvasElement)) return;
   const ctx = canvas.getContext('2d');
@@ -31,5 +31,8 @@ public sealed class BrowserRuntimeTemplateService : IBrowserRuntimeTemplateServi
   const draw=time=>{resize();ctx.clearRect(0,0,canvas.width,canvas.height);const phase=config.animate&&config.morphEnabled?(Math.sin(time*.001*config.speed*Math.PI)+1)/2:clamp(config.morphAmount,0,1);const points=source.map((point,index)=>[point[0]+(target[index][0]-point[0])*phase,point[1]+(target[index][1]-point[1])*phase]);const depth=Math.max(2,Math.round(Math.min(canvas.width,canvas.height)*config.depth*.22));for(let step=depth;step>0;step--){path(points,step*.62,step*.78);ctx.fillStyle=`rgba(2,20,42,${.18+.48*(1-step/depth)})`;ctx.fill();}path(points);const gradient=ctx.createLinearGradient(0,0,canvas.width,canvas.height);gradient.addColorStop(0,'rgba(125,211,252,.98)');gradient.addColorStop(.48,'rgba(14,165,233,.92)');gradient.addColorStop(1,'rgba(30,64,175,.96)');ctx.globalAlpha=clamp(config.opacity,0,1);ctx.fillStyle=gradient;ctx.fill();ctx.save();ctx.clip();const shine=ctx.createRadialGradient(canvas.width*.32,canvas.height*.25,0,canvas.width*.32,canvas.height*.25,Math.max(canvas.width,canvas.height)*.7);shine.addColorStop(0,'rgba(255,255,255,.62)');shine.addColorStop(.35,'rgba(255,255,255,.08)');shine.addColorStop(1,'rgba(0,0,0,.34)');ctx.fillStyle=shine;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();ctx.globalAlpha=1;requestAnimationFrame(draw);};
   requestAnimationFrame(draw);
 })();
-""";
+""".Replace(
+    "__PUBLISHERSTUDIO_BLOB_RUNTIME_PAYLOAD__",
+    payload,
+    StringComparison.Ordinal);
 }

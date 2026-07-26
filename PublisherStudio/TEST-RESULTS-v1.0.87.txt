@@ -1,0 +1,68 @@
+PublisherStudio v1.0.87 validation report
+========================================
+
+Validation date
+---------------
+2026-07-26
+
+Reported compiler blocker
+-------------------------
+Finding: CS9007 in BrowserRuntimeTemplateService.CreateBlobRuntime. The C#
+interpolated raw string used two '$' delimiters while the embedded JavaScript
+naturally contained adjacent closing braces and JavaScript template-literal
+expressions.
+
+Repair: the JavaScript body is now a non-interpolated C# raw string. A unique
+__PUBLISHERSTUDIO_BLOB_RUNTIME_PAYLOAD__ marker is replaced once with the
+serialized payload using StringComparison.Ordinal. The public service interface,
+DI use and generated browser behavior remain compatible.
+
+Repository contract tests
+-------------------------
+Command: cd src/PublisherStudio.Web && npm test
+Result: PASS
+Suites: 36/36
+
+The new browserRuntimeTemplateSafety contract verifies:
+- CreateBlobRuntime does not use an interpolated C# raw string
+- the unique payload marker and ordinal replacement boundary remain present
+- JavaScript `${...}` template-literal syntax remains intact
+- a generated blob runtime with representative JSON passes node --check
+
+Existing timeline, components, streaming, media, Video Studio, OpenSCAD,
+automation, screenshot, localization, code-editor, render-export, interface/DI,
+SDK default-item, architecture and task-ledger contracts remain green.
+
+JavaScript validation
+---------------------
+Command: node --check for every JavaScript file outside generated folders
+Result: PASS
+Files: 66
+
+Structured-file validation
+--------------------------
+JSON parsed successfully: 13 files
+XML/MSBuild parsed successfully: 17 files
+Generated dependency/build directories found: none (no node_modules/bin/obj included)
+
+Native validation not available in this environment
+---------------------------------------------------
+- The .NET SDK is not installed in this execution environment, so a native C#,
+  Razor and MSBuild compilation could not be run here.
+- Licensed DevExpress package restore/build could not be executed here.
+- The repair avoids the CS9007 grammar boundary rather than increasing the raw
+  interpolation delimiter count, and the generated foreign-language output is
+  independently syntax-checked.
+
+Required developer-machine follow-up
+------------------------------------
+1. Extract the archive into a clean directory.
+2. Restore from the licensed DevExpress NuGet feed.
+3. Build PublisherStudio.sln with .NET 10.
+4. Report any next compiler/package finding; v1.0.87 is intended to reveal it
+   without masking it behind CS9007.
+
+Archive validation
+------------------
+The final ZIP is clean-extracted and the same 36-suite npm test run is executed
+from that extracted delivery before release. A SHA-256 file is shipped beside it.

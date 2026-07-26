@@ -2,14 +2,15 @@
 
 Status values are **Closed**, **Partial**, or **Deferred**. A task may be removed only after a later changelog records it as solved and the related contract test remains green.
 
-| Task | Status in 1.0.86 | Evidence / next step |
+| Task | Status in 1.0.87 | Evidence / next step |
 |---|---|---|
+| v1.0.87 browser runtime interpolated raw-string failure (`CS9007`) | Closed | Runtime JavaScript uses a non-interpolated raw template and explicit payload marker; guarded by `browserRuntimeTemplateSafety.test.mjs`. |
 | v1.0.86 .NET SDK duplicate localization Content items (`NETSDK1022`) | Closed | Project-local localization files use `Content Update`; guarded by `sdkDefaultItems.test.mjs`. |
 | v1.0.84 `Math.Hypot`, CA1859 and IDE0305 compiler findings | Closed | Replaced and protected by compilation-safety/interchange tests. |
 | Temporal selection layers, point ownership, selected deletion and HTML compatibility marking | Closed | Delivered in 1.0.83 and retained by video selection/layer tests. |
 | Reusable interface-first service composition and explicit lifetimes | Partial | New and touched areas use interfaces/lifetime descriptors. The raw static baseline and priority candidates are maintained in `static-service-migration-inventory-v1.0.85.md`; remaining legacy candidates migrate when touched. |
 | Controller/API access for newly reusable services | Closed | OpenSCAD, video interchange/geometry/runtime, code, automation, screenshots, localization/paths and render capability APIs exist. |
-| LocalGPT/AICouncil mouse and keyboard commands | Closed for browser scope | DOM/pointer/keyboard queue is implemented. OS-global input remains deferred. |
+| LocalGPT/AICouncil mouse and keyboard commands | Closed for browser scope | DOM/pointer/keyboard queue is implemented. operating-system-global input remains deferred. |
 | Screenshot service/controller workflow | Closed for same-origin browser scope | Queue, capture completion, status and file download implemented. Cross-origin frame capture remains browser-limited. |
 | Business-object/service/controller context | Closed | `/api/domain-context` exposes domain, method, lifetime and route relationships. |
 | OpenSCAD basic figures, transforms, CSG and typed properties | Closed | Catalog and public node graph cover built-in basic primitives and operations. |

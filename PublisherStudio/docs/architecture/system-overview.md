@@ -47,3 +47,7 @@ Application registrations are centralized in `PublisherStudioServiceCollectionEx
 ## SDK content discovery (v1.0.86)
 
 PublisherStudio.Web keeps the Web SDK's implicit content discovery enabled. Project-local localization JSON files are implicit `Content` items; the project uses `Content Update` only to attach output and publish copy metadata. Files outside the project tree, such as the linked application icon, remain explicit `Content Include` items.
+## Embedded browser-runtime templates (v1.0.87)
+
+`IBrowserRuntimeTemplateService` remains the reusable boundary for the Video Studio blob runtime. Its JavaScript body is a non-interpolated C# raw string. Only the serialized configuration marker is substituted, using ordinal matching, after the C# compiler has parsed the template. This prevents JavaScript braces and template-literal `${...}` expressions from affecting C# raw-string delimiter parsing.
+

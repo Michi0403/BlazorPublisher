@@ -232,3 +232,7 @@ See:
 ## v1.0.86 SDK default-item rule
 
 For files physically inside an SDK-style web project, use `Update` when only adding MSBuild metadata to an item already discovered by the SDK. Do not add the same project-local file with `Content Include`, and do not disable all default content merely to avoid a duplicate. External linked assets may still require `Include`. `tests/sdkDefaultItems.test.mjs` protects the localization implementation of this rule.
+## v1.0.87 embedded-language template boundary
+
+C# services that emit JavaScript, CSS, OpenSCAD or another brace-sensitive language must not use an interpolated raw string when the embedded language can naturally contain the same brace runs. Keep the foreign-language template non-interpolated and expose deliberate insertion points through a unique marker or a dedicated renderer. `BrowserRuntimeTemplateService` uses one ordinal payload substitution; `tests/browserRuntimeTemplateSafety.test.mjs` validates both the C# source contract and generated JavaScript syntax.
+

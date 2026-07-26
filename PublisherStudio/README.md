@@ -15,6 +15,10 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## v1.0.87: browser runtime raw-string compatibility
+
+This hotfix fixes `CS9007` in the reusable blob browser-runtime template. Embedded JavaScript is now a non-interpolated C# raw string with one explicit payload marker, so JavaScript block braces and `${...}` template expressions cannot be mistaken for C# interpolation delimiters. A contract test also validates a generated runtime with `node --check`.
+
 ## v1.0.86: SDK implicit-content compatibility
 
 This hotfix keeps the v1.0.85 localization design intact while correcting its MSBuild item metadata. The Web SDK already discovers `Localization/*.json` as content, so the project now uses `Content Update` to attach copy-to-output/publish behavior instead of including the same files a second time. A repository contract protects this rule against future `NETSDK1022` regressions.

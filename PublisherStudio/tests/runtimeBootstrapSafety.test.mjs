@@ -33,13 +33,13 @@ assert.doesNotMatch(organic, /media\.IsAvailable/);
 assert.match(organic, /OrganicWireProtocol\.MaximumMessageBytes/);
 
 const webProject = read('PublisherStudio.Web.csproj');
-assert.match(webProject, /PackageReference Include="LocalGPT\.WireProtocolVersion" Version="2\.0\.0"/);
-assert.ok(fs.existsSync(path.join(root, 'packages', 'LocalGPT.WireProtocolVersion.2.0.0.nupkg')));
+assert.match(webProject, /ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove=/);
+assert.ok(fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'LocalGPT.WireProtocolVersion.csproj')));
 assert.match(organic, /OrganicWireProtocol\.MaximumMessageBytes/);
 const releaseScript = fs.readFileSync(path.join(root, 'Build-Release.ps1'), 'utf8');
-assert.match(releaseScript, /WireProtocolPackageUrl = "https:\/\/github\.com\/Michi0403\/LocalGPT\/releases\/download\/v2\.0\.0\/LocalGPT\.WireProtocolVersion\.2\.0\.0\.nupkg"/);
-assert.match(releaseScript, /if \(-not \$UseBundledWireProtocolPackage\)/);
-assert.match(releaseScript, /Invoke-WebRequest -Uri \$WireProtocolPackageUrl -OutFile \$temporaryWirePackage/);
+assert.match(releaseScript, /Packing the synchronized LocalGPT 1-Wire protocol project without an application RID/);
+assert.match(releaseScript, /dotnet pack \$wireProtocolProject/);
+assert.match(releaseScript, /-p:RuntimeIdentifier= -p:RuntimeIdentifiers=/);
 assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolAppDirectory \$wireProtocolPackageName\)/);
 assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolSetupDirectory \$wireProtocolPackageName\)/);
 

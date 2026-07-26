@@ -2,7 +2,7 @@ param(
     [string]$Runtime = "win-x64",
     [string]$Configuration = "Release",
     [string]$WireProtocolVersion = "2.0.0",
-    [string]$WireProtocolPackageUrl = "https://github.com/Michi0403/LocalGPT/releases/download/v2.0.0/LocalGPT.WireProtocolVersion.2.0.0.nupkg",
+    [string]$WireProtocolPackageUrl = "",
     [switch]$UseBundledWireProtocolPackage
 )
 
@@ -14,16 +14,26 @@ $packageDirectory = Join-Path $root "packages"
 $wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
 $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
 New-Item -ItemType Directory -Path $packageDirectory -Force | Out-Null
-if (-not $UseBundledWireProtocolPackage) {
-    Write-Host "Downloading the authoritative LocalGPT 1-Wire package for the release build..." -ForegroundColor Cyan
+$wireProtocolProject = Join-Path $root "src\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj"
+if ($UseBundledWireProtocolPackage) {
+    if (-not (Test-Path $wireProtocolPackage)) {
+        throw "The bundled LocalGPT 1-Wire package was requested but is unavailable: $wireProtocolPackage"
+    }
+}
+elseif (-not [string]::IsNullOrWhiteSpace($WireProtocolPackageUrl)) {
+    Write-Host "Downloading the requested LocalGPT 1-Wire package..." -ForegroundColor Cyan
     $temporaryWirePackage = "$wireProtocolPackage.download"
     Remove-Item $temporaryWirePackage -Force -ErrorAction SilentlyContinue
     Invoke-WebRequest -Uri $WireProtocolPackageUrl -OutFile $temporaryWirePackage -UseBasicParsing
-    if (-not (Test-Path $temporaryWirePackage)) { throw "The authoritative LocalGPT 1-Wire package download did not produce a file." }
+    if (-not (Test-Path $temporaryWirePackage)) { throw "The LocalGPT 1-Wire package download did not produce a file." }
     Move-Item $temporaryWirePackage $wireProtocolPackage -Force
 }
-elseif (-not (Test-Path $wireProtocolPackage)) {
-    throw "The bundled LocalGPT 1-Wire package was requested but is unavailable: $wireProtocolPackage"
+else {
+    Write-Host "Packing the synchronized LocalGPT 1-Wire protocol project without an application RID..." -ForegroundColor Cyan
+    Remove-Item $wireProtocolPackage -Force -ErrorAction SilentlyContinue
+    dotnet pack $wireProtocolProject -c $Configuration -o $packageDirectory `
+        -p:GeneratePackageOnBuild=false -p:RuntimeIdentifier= -p:RuntimeIdentifiers=
+    if ($LASTEXITCODE -ne 0) { throw "LocalGPT 1-Wire package creation failed." }
 }
 if (-not (Test-Path $wireProtocolPackage)) { throw "LocalGPT 1-Wire package is unavailable: $wireProtocolPackage" }
 

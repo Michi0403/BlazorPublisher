@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
-const wirePackagePath = path.join(root, 'packages', 'LocalGPT.WireProtocolVersion.2.0.0.nupkg');
+const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'LocalGPT.WireProtocolVersion.csproj');
+const wireContractsPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'OneWireProtocolContracts.cs');
 const nugetConfig = read('NuGet.config');
 const models = read('src','PublisherStudio.Web','Domain','OrganicPluginModels.cs');
 const protocolAliases = read('src','PublisherStudio.Web','GlobalUsings.OrganicWire.cs');
@@ -27,11 +28,13 @@ const webProject = read('src','PublisherStudio.Web','PublisherStudio.Web.csproj'
 const installerProject = read('src','PublisherStudio.InstallerConsole','PublisherStudio.InstallerConsole.csproj');
 
 
-assert.ok(fs.existsSync(wirePackagePath), 'The authoritative LocalGPT.WireProtocolVersion 2.0.0 release package is missing.');
-assert.equal(fs.readFileSync(wirePackagePath).subarray(0, 2).toString('ascii'), 'PK', 'The 1-Wire release package must be a NuGet ZIP container.');
+assert.ok(fs.existsSync(wireProjectPath), 'The synchronized LocalGPT.WireProtocolVersion source-build project is missing.');
+assert.ok(fs.existsSync(wireContractsPath), 'The synchronized 1-Wire contracts are missing.');
 assert.match(nugetConfig, /PublisherStudio local release packages/);
-assert.ok(webProject.includes('<PackageReference Include="LocalGPT.WireProtocolVersion" Version="2.0.0" />'));
-assert.ok(!fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion')), 'PublisherStudio must not carry a competing protocol source project.');
+assert.match(webProject, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers;SelfContained;PublishSingleFile;PublishTrimmed;PublishReadyToRun;PublishAot" \/>/);
+const wireProject = fs.readFileSync(wireProjectPath, 'utf8');
+assert.match(wireProject, /<GeneratePackageOnBuild>false<\/GeneratePackageOnBuild>/);
+assert.match(fs.readFileSync(wireContractsPath, 'utf8'), /MaximumDiscoveryBytes = 32 \* 1024/);
 for (const token of [
   'RequiresHumanInteractionOnTargetSystem',
   'RequiresAutomatedInteractionOnTargetSystem',
@@ -68,12 +71,14 @@ assert.match(discovery, /DiscoveryReceivePollSeconds/);
 assert.match(discovery, /receiveCancellation\.CancelAfter\(receivePoll\)/);
 assert.match(discovery, /Ignored malformed LocalGPT discovery data.*listening continues/);
 assert.match(discovery, /Transient LocalGPT discovery receive failure.*listening continues/);
+assert.match(discovery, /OrganicWireProtocol\.MaximumDiscoveryBytes/);
 assert.match(connection, /TcpClient/);
 assert.match(connection, /OrganicWireMessageType\.Hello/);
 assert.match(models, /public bool IsLinked/);
 assert.match(models, /IsConnected && IsLinked && RemoteCapabilities/);
 assert.match(connection, /Waiting for LocalGPT frontend link approval/);
 assert.match(connection, /State\.IsLinked = true/);
+assert.match(connection, /OrganicWireMessageType\.CapabilityRequest/);
 assert.match(connection, /The 1-Wire transport is waiting for LocalGPT frontend link approval/);
 assert.match(page, /Awaiting LocalGPT approval/);
 assert.match(connection, /ProcessInvokeAsync/);

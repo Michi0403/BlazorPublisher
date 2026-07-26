@@ -288,10 +288,9 @@ const streamingComposition = fs.readFileSync(path.join(web, 'StreamingServiceCol
 assert.match(streamingComposition, /AddSingleton<StreamingRuntimeUseCases>/);
 assert.ok(globalImports.has('PublisherStudio.Services.Streaming.UseCases.Runtime'), 'The runtime use-case namespace must remain globally imported.');
 
-const wirePackagePath = path.join(root, 'packages', 'LocalGPT.WireProtocolVersion.2.0.0.nupkg');
-assert.ok(fs.existsSync(wirePackagePath), 'The authoritative 1-Wire NuGet release package is missing.');
-assert.equal(fs.readFileSync(wirePackagePath).subarray(0, 2).toString('ascii'), 'PK');
+const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'LocalGPT.WireProtocolVersion.csproj');
+assert.ok(fs.existsSync(wireProjectPath), 'The synchronized 1-Wire source-build project is missing.');
 const webProjectText = fs.readFileSync(path.join(web, 'PublisherStudio.Web.csproj'), 'utf8');
-assert.match(webProjectText, /<PackageReference Include="LocalGPT\.WireProtocolVersion" Version="2\.0\.0" \/>/);
-assert.ok(!fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion')), 'A duplicated PublisherStudio protocol source project must not be reintroduced.');
+assert.match(webProjectText, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove=/);
+assert.match(fs.readFileSync(wireProjectPath, 'utf8'), /<GeneratePackageOnBuild>false<\/GeneratePackageOnBuild>/);
 console.log('PublisherStudio source-package project closure and StreamingRuntimeUseCases inventory checks passed.');

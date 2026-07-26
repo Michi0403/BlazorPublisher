@@ -15,9 +15,11 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
-## v1.0.89: LocalGPT organic-plugin bridge
+## LocalGPT AI Council integration
 
-PublisherStudio can now discover LocalGPT on the dedicated UDP discovery port, connect on the dedicated organic service port, advertise existing eye/hand/OpenSCAD/spreadsheet/media capabilities, require per-organ user permissions, and start General, OpenSCAD Team, or Spreadsheet Team Council rounds. The normal PublisherStudio and LocalGPT installer/bootstrap ports remain separate compatibility contracts.
+PublisherStudio discovers LocalGPT through a compact UDP beacon and establishes the approved organic link over TCP. Capability, skill, UI-feature, and hardware directories are exchanged only after the link is approved, avoiding oversized discovery packets while preserving the complete shared catalogue. PublisherStudio can advertise its eye, hand, OpenSCAD, spreadsheet, media, and publishing capabilities and can submit work to configured LocalGPT Council teams.
+
+The normal PublisherStudio web port, LocalGPT web/installer port, 1-Wire TCP service port, and UDP discovery port remain separate contracts. The synchronized `src/LocalGPT.WireProtocolVersion` source-build project keeps restore/debug/publish deterministic; `Build-Release.ps1` packs it into the DLL-backed NuGet release artifact without inheriting an application runtime identifier.
 
 See `CHANGELOG-v1.0.89.md` and `docs/architecture/task-ledger.md`.
 
@@ -159,6 +161,10 @@ Build directly from a ZIP without Git:
 ```powershell
 dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip https://github.com/OWNER/REPOSITORY/archive/refs/heads/main.zip --start
 ```
+
+## Maintainer and development assistance
+
+PublisherStudio / BlazorPublisher is created and maintained by **Michael Fleischer (Michi0403)**. AI systems, including ChatGPT, have been used as development assistants for research, code review, debugging, test design, and documentation. This does not imply vendor endorsement or transfer release responsibility away from the maintainer.
 
 ## Deliberate limits
 

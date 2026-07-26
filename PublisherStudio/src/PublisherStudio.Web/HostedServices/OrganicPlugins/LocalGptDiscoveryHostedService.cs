@@ -59,7 +59,7 @@ public sealed class LocalGptDiscoveryHostedService(
                 continue;
             }
 
-            if (received.Buffer.Length > Math.Clamp(options.Value.MaximumMessageBytes, 4096, OrganicWireProtocol.MaximumMessageBytes))
+            if (received.Buffer.Length > OrganicWireProtocol.MaximumDiscoveryBytes)
             {
                 logger.LogWarning("Ignored oversized LocalGPT discovery datagram ({Length} bytes).", received.Buffer.Length);
                 continue;

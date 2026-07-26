@@ -103,8 +103,8 @@ assert.deepEqual(packageRefs, [
   'DevExpress.Blazor.RichEdit.ja',
   'DevExpress.Blazor.de',
   'DevExpress.Blazor.es',
-  'DevExpress.Blazor.ja',
-  'LocalGPT.WireProtocolVersion'
+  'DevExpress.Blazor.ja'
 ]);
+assert.match(webProject, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove=/);
 
 console.log('open video-project canonical model, safe adapters, relinking UI, project persistence, and doctrine contracts passed');

@@ -19,5 +19,5 @@ assert.match(resultInterface, /bool RemoveTextProposal\(Guid id\)/);
 assert.match(resultStore, /Changed\?\.Invoke\(\)/);
 assert.match(capabilities, /RequiresCurrentBrowserSessionPermission = true/);
 assert.match(capabilities, /BrowserPermissionCannotBePreGrantedByLocalGpt = true/);
-assert.match(project, /PackageReference Include="LocalGPT\.WireProtocolVersion" Version="2\.0\.0"/);
+assert.match(project, /ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove=/);
 console.log('paired StoryEditor Council proposal, explicit insertion, browser-session permission and package authority contracts passed');

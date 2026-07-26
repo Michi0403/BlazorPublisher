@@ -101,6 +101,14 @@ public sealed class LocalGptConnectionService(
             logger.LogInformation("Connected PublisherStudio organic plugin to LocalGPT peer {PeerId} at {Address}:{Port}.", requestedPeerId, address, peer.ServicePort);
             return State;
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            State.IsConnected = false;
+            State.LastError = string.Empty;
+            Changed?.Invoke();
+            await DisconnectCoreAsync().ConfigureAwait(false);
+            return State;
+        }
         catch (Exception ex) when (ex is SocketException or IOException or InvalidOperationException or KeyNotFoundException)
         {
             State.IsConnected = false;
@@ -236,6 +244,13 @@ public sealed class LocalGptConnectionService(
             case OrganicWireMessageType.HelloAck:
                 State.IsLinked = true;
                 State.LastError = string.Empty;
+                await SendEnvelopeCoreAsync(new OrganicWireEnvelope
+                {
+                    MessageType = OrganicWireMessageType.CapabilityRequest,
+                    CorrelationId = envelope.CorrelationId,
+                    SourcePeerId = localPeerId,
+                    TargetPeerId = connectedPeerId
+                }, connectedWriter, connectedPeerId, cancellationToken).ConfigureAwait(false);
                 goto case OrganicWireMessageType.CapabilityResponse;
             case OrganicWireMessageType.CapabilityResponse:
             case OrganicWireMessageType.SkillResponse:

@@ -21,10 +21,10 @@ const installerProject = read('src/PublisherStudio.InstallerConsole/PublisherStu
 const packageJson = JSON.parse(read('src/PublisherStudio.Web/package.json'));
 const runtimeCapabilities = read('src/PublisherStudio.Web/Services/Streaming/UseCases/Runtime/StreamingRuntimeUseCases.cs');
 
-assert.match(webProject, /<Version>1\.0\.93<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.93<\/Version>/);
-assert.equal(packageJson.version, '1.0.93');
-assert.match(runtimeCapabilities, /Version = "1\.0\.93"/);
+assert.match(webProject, /<Version>2\.0\.0<\/Version>/);
+assert.match(installerProject, /<Version>2\.0\.0<\/Version>/);
+assert.equal(packageJson.version, '2.0.0');
+assert.match(runtimeCapabilities, /Version = "2\.0\.0"/);
 
 assert.match(applicationComposition, /AddSingleton<SystemFontCatalog, SystemFontCatalog>/);
 assert.match(catalog, /fc-list/);

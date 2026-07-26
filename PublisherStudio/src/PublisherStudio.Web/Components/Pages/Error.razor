@@ -1,6 +1,16 @@
 @page "/error"
+@inject IUserNotificationService Notifications
+@inject ILogger<Error> Logger
 <PageTitle>Error</PageTitle>
 <div class="fatal-page">
     <h1>PublisherStudio could not complete the request.</h1>
     <p>Review the application log for the underlying exception.</p>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Logger.LogError("PublisherStudio rendered the fatal error page.");
+        Notifications.Error("Review the application log for the underlying exception.", "PublisherStudio request failed", nameof(Error), persistent: true);
+    }
+}

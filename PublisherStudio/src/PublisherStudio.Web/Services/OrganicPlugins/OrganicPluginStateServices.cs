@@ -226,6 +226,7 @@ public sealed class OrganicResultStore : IOrganicResultStore
     private readonly ConcurrentQueue<OrganicPluginWorkItem> results = new();
     private readonly ConcurrentDictionary<Guid, OrganicTextInsertionProposal> textProposals = new();
 
+    public event Action? Changed;
     public IReadOnlyList<OrganicPluginWorkItem> GetResults() => results.Reverse().Take(200).ToList();
     public void RecordEnvelope(OrganicWireEnvelope envelope)
     {
@@ -236,9 +237,20 @@ public sealed class OrganicResultStore : IOrganicResultStore
             Request = envelope, ResultJson = envelope.Properties is null ? string.Empty : JsonSerializer.Serialize(envelope.Properties, OrganicPluginProtocolCodec.JsonOptions), Error = envelope.Error
         });
         while (results.Count > 200) results.TryDequeue(out _);
+        Changed?.Invoke();
     }
-    public void AddTextProposal(OrganicTextInsertionProposal proposal) => textProposals[proposal.Id] = proposal;
+    public void AddTextProposal(OrganicTextInsertionProposal proposal)
+    {
+        textProposals[proposal.Id] = proposal;
+        Changed?.Invoke();
+    }
     public IReadOnlyList<OrganicTextInsertionProposal> GetTextProposals() => textProposals.Values.OrderByDescending(item => item.CreatedUtc).ToList();
+    public bool RemoveTextProposal(Guid id)
+    {
+        var removed = textProposals.TryRemove(id, out _);
+        if (removed) Changed?.Invoke();
+        return removed;
+    }
 
     private static OrganicWorkStatus ResolveStatus(OrganicWireEnvelope envelope)
     {

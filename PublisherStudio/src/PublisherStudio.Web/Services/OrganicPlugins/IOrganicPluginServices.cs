@@ -56,10 +56,12 @@ public interface IOrganicWorkExecutor
 
 public interface IOrganicResultStore
 {
+    event Action? Changed;
     IReadOnlyList<OrganicPluginWorkItem> GetResults();
     void RecordEnvelope(OrganicWireEnvelope envelope);
     void AddTextProposal(OrganicTextInsertionProposal proposal);
     IReadOnlyList<OrganicTextInsertionProposal> GetTextProposals();
+    bool RemoveTextProposal(Guid id);
 }
 
 public interface ILocalGptConnectionService : IAsyncDisposable

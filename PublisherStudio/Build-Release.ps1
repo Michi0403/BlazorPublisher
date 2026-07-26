@@ -1,11 +1,31 @@
 param(
     [string]$Runtime = "win-x64",
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+    [string]$WireProtocolVersion = "2.0.0",
+    [string]$WireProtocolPackageUrl = "https://github.com/Michi0403/LocalGPT/releases/download/v2.0.0/LocalGPT.WireProtocolVersion.2.0.0.nupkg",
+    [switch]$UseBundledWireProtocolPackage
 )
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $artifacts = Join-Path $root "artifacts\release"
+
+$packageDirectory = Join-Path $root "packages"
+$wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
+$wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
+New-Item -ItemType Directory -Path $packageDirectory -Force | Out-Null
+if (-not $UseBundledWireProtocolPackage) {
+    Write-Host "Downloading the authoritative LocalGPT 1-Wire package for the release build..." -ForegroundColor Cyan
+    $temporaryWirePackage = "$wireProtocolPackage.download"
+    Remove-Item $temporaryWirePackage -Force -ErrorAction SilentlyContinue
+    Invoke-WebRequest -Uri $WireProtocolPackageUrl -OutFile $temporaryWirePackage -UseBasicParsing
+    if (-not (Test-Path $temporaryWirePackage)) { throw "The authoritative LocalGPT 1-Wire package download did not produce a file." }
+    Move-Item $temporaryWirePackage $wireProtocolPackage -Force
+}
+elseif (-not (Test-Path $wireProtocolPackage)) {
+    throw "The bundled LocalGPT 1-Wire package was requested but is unavailable: $wireProtocolPackage"
+}
+if (-not (Test-Path $wireProtocolPackage)) { throw "LocalGPT 1-Wire package is unavailable: $wireProtocolPackage" }
 
 $profile = switch ($Runtime) {
     "win-x64"     { @{ Asset = "winx64";     SetupAsset = "setupwinx64";     AppFolder = "winx64";     SetupFolder = "setupwin-x64" } }
@@ -73,6 +93,13 @@ if (-not (Test-Path (Join-Path $setupFolder $setupExecutable))) {
     throw "Published setup executable not found: $(Join-Path $setupFolder $setupExecutable)"
 }
 
+$protocolAppDirectory = Join-Path $appFolder "protocol"
+$protocolSetupDirectory = Join-Path $setupFolder "protocol"
+New-Item -ItemType Directory -Path $protocolAppDirectory,$protocolSetupDirectory -Force | Out-Null
+Copy-Item $wireProtocolPackage (Join-Path $protocolAppDirectory $wireProtocolPackageName) -Force
+Copy-Item $wireProtocolPackage (Join-Path $protocolSetupDirectory $wireProtocolPackageName) -Force
+Copy-Item $wireProtocolPackage (Join-Path $artifacts $wireProtocolPackageName) -Force
+
 $requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "PublisherStudio.ico")
 $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path (Join-Path $setupFolder $_)) })
 if ($missingSetupFiles.Count -gt 0) {
@@ -92,6 +119,7 @@ if ($Runtime -eq "win-x64") {
 Write-Host "Release assets:" -ForegroundColor Green
 Write-Host "  $appZip"
 Write-Host "  $setupZip"
+Write-Host "  $(Join-Path $artifacts $wireProtocolPackageName)"
 if ($Runtime -eq "win-x64") {
     Write-Host "  $(Join-Path $artifacts 'PublisherStudio.Setup.exe')"
 }

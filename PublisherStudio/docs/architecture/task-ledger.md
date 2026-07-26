@@ -38,3 +38,9 @@ Status values are **Closed**, **Partial**, or **Deferred**. A task may be remove
 | Render PNG/JPEG/SVG with video/canvas effects | Closed for current-frame rendering | Canvas/video/same-origin iframe snapshots added and tested. Cross-origin/DRM media remains restricted. |
 | Extensible exporter plugin discovery | Partial | Capability interface/controller exists; runtime assembly/plugin discovery remains deferred. |
 | Native .NET 10 + licensed DevExpress build validation | Deferred in this environment | Must be run by Michael on a licensed machine; repository architecture, JS, JSON and XML tests are provided. |
+
+| v2.0.0 synchronized LocalGPT protocol package authority | Closed at package/source baseline | PublisherStudio removed its protocol source project, restores package 2.0.0, and release builds download the authoritative LocalGPT asset. Native release-build evidence remains maintainer-run. |
+| v2.0.0 paired Story Editor Council proposal | Closed at reviewable text baseline | Linked-only ribbon request, Council correlation, retained proposal and explicit user insertion are implemented and source-tested. |
+| v2.0.0 bidirectional frontend authority | Closed at browser/frontend baseline | Transport and link authorization are separate; per-capability rules and receiving-frontend confirmation/input remain authoritative. Cryptographic peer identity remains Partial. |
+| v2.0.0 screenshot double-confirmation | Closed for same-origin browser capture | PublisherStudio approval plus browser current-session permission are required. Cross-origin/DRM capture remains Deferred. |
+| v2.0.0 native licensed build verification | Deferred in this environment | Michael must run exact .NET 10/DevExpress Debug and Release builds and runtime acceptance on supported platforms. |

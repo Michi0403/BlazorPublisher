@@ -6,9 +6,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
-const sharedWireContract = read('src','LocalGPT.WireProtocolVersion','OneWireProtocolContracts.cs');
-const sharedWireProject = read('src','LocalGPT.WireProtocolVersion','LocalGPT.WireProtocolVersion.csproj');
+const wirePackagePath = path.join(root, 'packages', 'LocalGPT.WireProtocolVersion.2.0.0.nupkg');
+const nugetConfig = read('NuGet.config');
 const models = read('src','PublisherStudio.Web','Domain','OrganicPluginModels.cs');
+const protocolAliases = read('src','PublisherStudio.Web','GlobalUsings.OrganicWire.cs');
 const interfaces = read('src','PublisherStudio.Web','Services','OrganicPlugins','IOrganicPluginServices.cs');
 const codec = read('src','PublisherStudio.Web','Services','OrganicPlugins','OrganicPluginProtocolCodec.cs');
 const state = read('src','PublisherStudio.Web','Services','OrganicPlugins','OrganicPluginStateServices.cs');
@@ -26,29 +27,22 @@ const webProject = read('src','PublisherStudio.Web','PublisherStudio.Web.csproj'
 const installerProject = read('src','PublisherStudio.InstallerConsole','PublisherStudio.InstallerConsole.csproj');
 
 
+assert.ok(fs.existsSync(wirePackagePath), 'The authoritative LocalGPT.WireProtocolVersion 2.0.0 release package is missing.');
+assert.equal(fs.readFileSync(wirePackagePath).subarray(0, 2).toString('ascii'), 'PK', 'The 1-Wire release package must be a NuGet ZIP container.');
+assert.match(nugetConfig, /PublisherStudio local release packages/);
+assert.ok(webProject.includes('<PackageReference Include="LocalGPT.WireProtocolVersion" Version="2.0.0" />'));
+assert.ok(!fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion')), 'PublisherStudio must not carry a competing protocol source project.');
 for (const token of [
-  'public interface IOneWireInteractionContract',
   'RequiresHumanInteractionOnTargetSystem',
   'RequiresAutomatedInteractionOnTargetSystem',
   'InteractionValueJson',
   'InteractionValueContentType',
-  'public interface IOneWireCapabilityProvider',
-  'public interface IOneWireTransportAdapter',
   'OneWireInteractionEditor',
   'IsExposedToPeer',
   'AllowPeerInvocation',
   'RequiresFrontendUserConfirmation',
-  'ConfigurationKey'
-]) assert.ok(sharedWireContract.includes(token), `${token} missing from shared WireProtocolVersion contract.`);
-assert.match(sharedWireProject, /<AssemblyName>LocalGPT\.WireProtocolVersion<\/AssemblyName>/);
-assert.match(sharedWireContract, /public const string Version = "1\.6";/);
-assert.ok(webProject.includes('<ProjectReference Include="..\\LocalGPT.WireProtocolVersion\\LocalGPT.WireProtocolVersion.csproj" />'));
-
-assert.match(sharedWireContract, /DefaultServicePort = 51140/);
-assert.match(sharedWireContract, /DefaultDiscoveryPort = 51141/);
-for (const field of ['Properties', 'EncryptedPayload', 'Signature', 'Hash', 'ErrorCheck', 'ExecutionMode', 'NotBeforeUtc', 'Organs', 'Skills'])
-  assert.ok(sharedWireContract.includes(field), `${field} missing from protocol envelope.`);
-assert.match(sharedWireContract, /enum OneWireApprovalMode \{ AskEveryTime, SameCapability, CurrentWorkOrder, AlwaysAllow, Deny \}/);
+  'ConfigurationKey',
+]) assert.ok(models.includes(token) || codec.includes(token) || connection.includes(token) || protocolAliases.includes(token), `${token} missing from PublisherStudio's package-backed 1-Wire integration.`);
 
 assert.match(codec, /SHA256\.HashData/);
 assert.match(codec, /ComputeCrc32/);
@@ -155,8 +149,8 @@ assert.match(ribbon, /Navigation\.NavigateTo\("\/organic-plugins"\)/);
 assert.equal(settings.OrganicPlugins.DiscoveryPort, 51141);
 assert.equal(settings.OrganicPlugins.DiscoveryReceivePollSeconds, 5);
 assert.equal(settings.OrganicPlugins.Enabled, true);
-assert.equal(packageJson.version, '1.0.93');
-assert.match(webProject, /<Version>1\.0\.93<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.93<\/Version>/);
+assert.equal(packageJson.version, '2.0.0');
+assert.match(webProject, /<Version>2\.0\.0<\/Version>/);
+assert.match(installerProject, /<Version>2\.0\.0<\/Version>/);
 
 console.log('PublisherStudio LocalGPT organic 1-Wire, permission, OpenSCAD and spreadsheet workflow source contracts passed.');

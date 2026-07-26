@@ -6,18 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherStudio.Web", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherStudio.InstallerConsole", "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj", "{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalGPT.WireProtocolVersion", "src\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj", "{A2649B10-C4E6-45BA-BEF4-F7E4C1F43B0D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A2649B10-C4E6-45BA-BEF4-F7E4C1F43B0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A2649B10-C4E6-45BA-BEF4-F7E4C1F43B0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A2649B10-C4E6-45BA-BEF4-F7E4C1F43B0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A2649B10-C4E6-45BA-BEF4-F7E4C1F43B0D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A128FB05-CDEB-4D95-A76A-4B758AC3F9D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A128FB05-CDEB-4D95-A76A-4B758AC3F9D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A128FB05-CDEB-4D95-A76A-4B758AC3F9D0}.Release|Any CPU.ActiveCfg = Release|Any CPU

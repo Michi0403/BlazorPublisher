@@ -347,6 +347,7 @@
         Discovery.Changed += OnServiceChanged;
         Connection.Changed += OnServiceChanged;
         WorkCoordinator.Changed += OnServiceChanged;
+        ResultStore.Changed += OnServiceChanged;
         RecurringScreenReader.Changed += OnServiceChanged;
         _capabilities = await CapabilityCatalog.GetCapabilitiesAsync();
         Refresh();
@@ -609,6 +610,7 @@ Required result contract:
         Discovery.Changed -= OnServiceChanged;
         Connection.Changed -= OnServiceChanged;
         WorkCoordinator.Changed -= OnServiceChanged;
+        ResultStore.Changed -= OnServiceChanged;
         RecurringScreenReader.Changed -= OnServiceChanged;
     }
 }

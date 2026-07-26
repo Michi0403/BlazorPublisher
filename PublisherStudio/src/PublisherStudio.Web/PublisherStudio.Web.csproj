@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>1.0.93</Version>
+    <Version>2.0.0</Version>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
     <DevExpressVersion>25.2.8</DevExpressVersion>
     <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
@@ -20,7 +20,7 @@
     <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj" />
+    <PackageReference Include="LocalGPT.WireProtocolVersion" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="$(DevExpressVersion)" />

@@ -270,7 +270,7 @@ const projectFiles = [];
     else if (entry.isFile() && entry.name.endsWith('.csproj')) projectFiles.push(full);
   }
 })(root);
-assert.ok(projectFiles.length >= 3, 'The source package must include the web, installer and WireProtocolVersion projects.');
+assert.ok(projectFiles.length >= 2, 'The source package must include the web and installer projects.');
 for (const projectFile of projectFiles) {
   const xml = fs.readFileSync(projectFile, 'utf8');
   for (const match of xml.matchAll(/<ProjectReference\s+Include="([^"]+)"/g)) {
@@ -288,17 +288,10 @@ const streamingComposition = fs.readFileSync(path.join(web, 'StreamingServiceCol
 assert.match(streamingComposition, /AddSingleton<StreamingRuntimeUseCases>/);
 assert.ok(globalImports.has('PublisherStudio.Services.Streaming.UseCases.Runtime'), 'The runtime use-case namespace must remain globally imported.');
 
-const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'LocalGPT.WireProtocolVersion.csproj');
-const wireContractPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'OneWireProtocolContracts.cs');
-assert.ok(fs.existsSync(wireProjectPath), 'The reusable LocalGPT.WireProtocolVersion project is missing.');
-assert.ok(fs.existsSync(wireContractPath), 'The reusable 1-Wire contract source is missing.');
-const wireContract = fs.readFileSync(wireContractPath, 'utf8');
-for (const token of [
-  'public interface IOneWireInteractionContract',
-  'RequiresHumanInteractionOnTargetSystem',
-  'RequiresAutomatedInteractionOnTargetSystem',
-  'InteractionValueJson',
-  'public interface IOneWireCapabilityProvider',
-  'public interface IOneWireTransportAdapter'
-]) assert.ok(wireContract.includes(token), `Shared WireProtocolVersion contract is missing ${token}.`);
+const wirePackagePath = path.join(root, 'packages', 'LocalGPT.WireProtocolVersion.2.0.0.nupkg');
+assert.ok(fs.existsSync(wirePackagePath), 'The authoritative 1-Wire NuGet release package is missing.');
+assert.equal(fs.readFileSync(wirePackagePath).subarray(0, 2).toString('ascii'), 'PK');
+const webProjectText = fs.readFileSync(path.join(web, 'PublisherStudio.Web.csproj'), 'utf8');
+assert.match(webProjectText, /<PackageReference Include="LocalGPT\.WireProtocolVersion" Version="2\.0\.0" \/>/);
+assert.ok(!fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion')), 'A duplicated PublisherStudio protocol source project must not be reintroduced.');
 console.log('PublisherStudio source-package project closure and StreamingRuntimeUseCases inventory checks passed.');

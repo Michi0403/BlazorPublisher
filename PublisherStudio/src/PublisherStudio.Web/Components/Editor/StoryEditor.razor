@@ -4,6 +4,10 @@
 @inject SystemFontCatalog SystemFonts
 @inject PublisherStudio.Services.CodeEditing.ICodeLanguageService CodeLanguages
 @inject PublisherStudio.Services.CodeEditing.ICodeFormattingService CodeFormatting
+@inject PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService LocalGptConnection
+@inject PublisherStudio.Services.OrganicPlugins.IOrganicResultStore OrganicResults
+@inject PublisherStudio.Services.UserExperience.IUserNotificationService Notifications
+@inject ILogger<StoryEditor> Logger
 
 @if (Visible && TextFrame is not null)
 {
@@ -33,6 +37,15 @@
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
+                @if (CanUseAiCouncil)
+                {
+                    <DxRibbonTab Text="AI Council">
+                        <DxRibbonGroup Text="Story assistance">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Write story" IsPrimary="true" Click="OpenAiStoryPanel" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Refresh proposals" Click="RefreshAiProposals" />
+                        </DxRibbonGroup>
+                    </DxRibbonTab>
+                }
                 <DxRibbonTab Text="Code">
                     <DxRibbonGroup Text="Programming language">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-code" Text="Code workspace" IsPrimary="true" Click="OpenCodeWorkspace" />
@@ -55,6 +68,56 @@
                     <DxRibbonGroup Text="Output"><DxRibbonItem Text="Print" IconCssClass="pub-icon pub-icon-print" Click="PrintStory" /></DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
+            @if (_aiStoryPanelVisible && CanUseAiCouncil)
+            {
+                <section class="story-ai-workspace" aria-label="AI Council story assistance">
+                    <header>
+                        <div>
+                            <strong>AI Council story assistance</strong>
+                            <span>Paired with @LocalGptConnection.State.DisplayName. The Council returns a reviewable proposal; only you can insert it.</span>
+                        </div>
+                        <button class="window-close" @onclick="CloseAiStoryPanel" aria-label="Close AI Council story assistance">×</button>
+                    </header>
+                    <div class="story-ai-request">
+                        <label>Team
+                            <select @bind="_aiTeamKey">
+                                @foreach (var team in AiCouncilTeams)
+                                {
+                                    <option value="@team.Key">@team.Name</option>
+                                }
+                            </select>
+                        </label>
+                        <label class="story-ai-prompt">What should the story contain?
+                            <textarea rows="4" @bind="_aiStoryPrompt" @bind:event="oninput" @onkeydown="HandleAiPromptKeyDown" placeholder="Describe the topic, audience, tone, facts and desired length. Press Ctrl+Enter to send."></textarea>
+                        </label>
+                        <button type="button" disabled="@(!CanSendAiStoryRequest)" @onclick="RequestAiStoryAsync">Send to AI Council</button>
+                    </div>
+                    <div class="story-ai-proposals" aria-live="polite">
+                        <div class="story-ai-proposal-heading">
+                            <strong>Reviewable proposals</strong>
+                            <button type="button" @onclick="RefreshAiProposals">Refresh</button>
+                        </div>
+                        @if (MatchingAiProposals.Count == 0)
+                        {
+                            <p>No proposal has arrived for this story yet. The Council run can continue after this editor closes; reopen it and refresh later.</p>
+                        }
+                        else
+                        {
+                            @foreach (var proposal in MatchingAiProposals)
+                            {
+                                <article @key="proposal.Id">
+                                    <header><strong>@proposal.Reason</strong><time>@proposal.CreatedUtc.LocalDateTime.ToString("g")</time></header>
+                                    <textarea rows="6" readonly>@proposal.Text</textarea>
+                                    <div>
+                                        <button type="button" @onclick="() => InsertAiProposalAsync(proposal)">Insert at caret</button>
+                                        <button type="button" @onclick="() => DismissAiProposal(proposal.Id)">Dismiss</button>
+                                    </div>
+                                </article>
+                            }
+                        }
+                    </div>
+                </section>
+            }
             @if (_codeWorkspaceVisible)
             {
                 <section class="story-code-workspace" aria-label="Programming language workspace">
@@ -172,7 +235,41 @@
     private string _codeWorkspaceText = "// PublisherStudio code block";
     private int _codeIndentSize = 4;
     private IReadOnlyList<CodeTokenSpan> _codeTokens = [];
+    private bool _aiStoryPanelVisible;
+    private string _aiStoryPrompt = string.Empty;
+    private string _aiTeamKey = "general";
+    private IReadOnlyList<OrganicTextInsertionProposal> _aiProposals = [];
     private string CodeWorkspaceSummary => $"{CodeLanguages.Get(_codeLanguageId).DisplayName} · {_codeTokens.Count} recognized token(s) · {_codeWorkspaceText.Length} character(s)";
+    private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+    private bool CanSendAiStoryRequest => CanUseAiCouncil && !string.IsNullOrWhiteSpace(_aiStoryPrompt) && TextFrame is not null;
+    private IReadOnlyList<(string Key, string Name)> AiCouncilTeams
+    {
+        get
+        {
+            var keys = LocalGptConnection.State.RemoteCapabilities
+                .Where(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "council.run", StringComparison.OrdinalIgnoreCase))
+                .SelectMany(item => item.Skills)
+                .Where(key => !string.IsNullOrWhiteSpace(key))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (keys.Count == 0) keys.Add("general");
+            return keys.Select(key => (key, key switch
+            {
+                "general" => "General Council",
+                "learning-round" => "Learning Round",
+                "spreadsheet-team" => "Spreadsheet Team",
+                "openscad-team" => "OpenSCAD Team",
+                _ => key
+            })).ToList();
+        }
+    }
+    private IReadOnlyList<OrganicTextInsertionProposal> MatchingAiProposals => _aiProposals
+        .Where(proposal => TextFrame is not null &&
+            (string.Equals(proposal.Target, TextFrame.Name, StringComparison.OrdinalIgnoreCase)
+             || string.Equals(proposal.Target, AiProposalTarget, StringComparison.OrdinalIgnoreCase)))
+        .OrderByDescending(proposal => proposal.CreatedUtc)
+        .ToList();
+    private string AiProposalTarget => TextFrame is null ? "PublisherStudio story" : $"StoryEditor:{TextFrame.Id}:{TextFrame.Name}";
 
     private void CustomizeRichEditRibbon(IRibbon ribbon)
     {
@@ -188,6 +285,13 @@
         fontNameComboBox.Tooltip = "Select an installed system font or type another font family.";
     }
 
+    protected override void OnInitialized()
+    {
+        LocalGptConnection.Changed += OnOrganicStateChanged;
+        OrganicResults.Changed += OnOrganicStateChanged;
+        RefreshAiProposals();
+    }
+
     protected override void OnParametersSet()
     {
         if (Visible && TextFrame is not null && _loadedId != TextFrame.Id)
@@ -201,6 +305,7 @@
             _upgradingLegacyStory = false;
             _loadedId = TextFrame.Id;
             _error = null;
+            RefreshAiProposals();
             _fieldData =
             [
                 new PublicationFieldRecord
@@ -224,6 +329,7 @@
             _legacyConversionPending = false;
             _upgradingLegacyStory = false;
             _error = null;
+            _aiStoryPanelVisible = false;
             ResetStoryPreviewTransfer();
         }
     }
@@ -365,6 +471,112 @@
         {
             _error = ex.Message;
         }
+    }
+
+    private void OpenAiStoryPanel()
+    {
+        _aiStoryPanelVisible = true;
+        RefreshAiProposals();
+    }
+
+    private void CloseAiStoryPanel() => _aiStoryPanelVisible = false;
+
+    private void RefreshAiProposals()
+    {
+        _aiProposals = OrganicResults.GetTextProposals();
+        if (!AiCouncilTeams.Any(team => string.Equals(team.Key, _aiTeamKey, StringComparison.OrdinalIgnoreCase)))
+            _aiTeamKey = AiCouncilTeams.First().Key;
+    }
+
+    private void OnOrganicStateChanged() => _ = InvokeAsync(() =>
+    {
+        RefreshAiProposals();
+        StateHasChanged();
+    });
+
+    private async Task HandleAiPromptKeyDown(KeyboardEventArgs args)
+    {
+        if (args.CtrlKey && string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+            await RequestAiStoryAsync();
+    }
+
+    private async Task RequestAiStoryAsync()
+    {
+        if (!CanSendAiStoryRequest || TextFrame is null) return;
+        try
+        {
+            var request = new OrganicCouncilPromptRequest
+            {
+                TeamKey = _aiTeamKey,
+                MaxRounds = 1,
+                MaxOutputTokens = 262144,
+                MaxContextTokens = 262144,
+                MaxParallelModels = 1,
+                IncludeMemory = true,
+                SaveToMemory = true,
+                RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"],
+                ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    Source = "PublisherStudio StoryEditor",
+                    PublicationName,
+                    PageName,
+                    StoryId = TextFrame.Id,
+                    StoryName = TextFrame.Name,
+                    Target = AiProposalTarget,
+                    Workflow = "Reviewable story text proposal"
+                })
+            };
+            request.Prompt = $"""
+PublisherStudio Story Editor user request:
+{_aiStoryPrompt.Trim()}
+
+Current publication: {PublicationName}
+Current page: {PageName}
+Current story: {TextFrame.Name}
+
+Required result contract:
+1. Produce polished story text matching the user's topic, audience, tone and requested facts.
+2. Before completing, invoke publisher.text.proposal.request with JSON parameters containing target exactly '{AiProposalTarget}', the final text, and a concise reason.
+3. Never mutate the publication automatically. The user reviews and explicitly inserts the proposal in PublisherStudio.
+""";
+            var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request);
+            Logger.LogInformation("Submitted StoryEditor AI Council request {CorrelationId} for story {StoryId}.", correlationId, TextFrame.Id);
+            Notifications.Success($"Council request {correlationId} was submitted. You can close this editor; the run remains active.", "Story proposal requested", nameof(StoryEditor));
+            _aiStoryPrompt = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not submit an AI Council story request for {StoryId}.", TextFrame.Id);
+            _error = ex.Message;
+            Notifications.Error(ex.Message, "Story proposal request failed", nameof(StoryEditor));
+        }
+    }
+
+    private async Task InsertAiProposalAsync(OrganicTextInsertionProposal proposal)
+    {
+        if (_selection is null) return;
+        try
+        {
+            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, proposal.Text);
+            OrganicResults.RemoveTextProposal(proposal.Id);
+            RefreshAiProposals();
+            Logger.LogInformation("User inserted AI Council proposal {ProposalId} into story {StoryId}.", proposal.Id, TextFrame?.Id);
+            Notifications.Success("The reviewed Council proposal was inserted at the caret.", "Story updated", nameof(StoryEditor));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not insert AI Council proposal {ProposalId}.", proposal.Id);
+            _error = ex.Message;
+            Notifications.Error(ex.Message, "Proposal was not inserted", nameof(StoryEditor));
+        }
+    }
+
+    private void DismissAiProposal(Guid proposalId)
+    {
+        if (!OrganicResults.RemoveTextProposal(proposalId)) return;
+        RefreshAiProposals();
+        Logger.LogInformation("User dismissed AI Council proposal {ProposalId}.", proposalId);
+        Notifications.Information("The proposal was dismissed.", source: nameof(StoryEditor));
     }
 
     private Task OpenCodeWorkspace()
@@ -944,6 +1156,8 @@
 
     public void Dispose()
     {
+        LocalGptConnection.Changed -= OnOrganicStateChanged;
+        OrganicResults.Changed -= OnOrganicStateChanged;
         _documentLoadGeneration++;
         _mailMergeSettingsContent = null;
         ResetStoryPreviewTransfer();

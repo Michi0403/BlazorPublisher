@@ -32,8 +32,15 @@ assert.match(organic, /FFmpeg available: \{media\.Available\}/);
 assert.doesNotMatch(organic, /media\.IsAvailable/);
 assert.match(organic, /OrganicWireProtocol\.MaximumMessageBytes/);
 
-const wire = fs.readFileSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'OneWireProtocolContracts.cs'), 'utf8');
-assert.match(wire, /public const string Version = "1\.6";/);
-assert.match(wire, /public const int MaximumMessageBytes = int\.MaxValue;/);
+const webProject = read('PublisherStudio.Web.csproj');
+assert.match(webProject, /PackageReference Include="LocalGPT\.WireProtocolVersion" Version="2\.0\.0"/);
+assert.ok(fs.existsSync(path.join(root, 'packages', 'LocalGPT.WireProtocolVersion.2.0.0.nupkg')));
+assert.match(organic, /OrganicWireProtocol\.MaximumMessageBytes/);
+const releaseScript = fs.readFileSync(path.join(root, 'Build-Release.ps1'), 'utf8');
+assert.match(releaseScript, /WireProtocolPackageUrl = "https:\/\/github\.com\/Michi0403\/LocalGPT\/releases\/download\/v2\.0\.0\/LocalGPT\.WireProtocolVersion\.2\.0\.0\.nupkg"/);
+assert.match(releaseScript, /if \(-not \$UseBundledWireProtocolPackage\)/);
+assert.match(releaseScript, /Invoke-WebRequest -Uri \$WireProtocolPackageUrl -OutFile \$temporaryWirePackage/);
+assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolAppDirectory \$wireProtocolPackageName\)/);
+assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolSetupDirectory \$wireProtocolPackageName\)/);
 
 console.log('PublisherStudio runtime/bootstrap safety contracts passed.');

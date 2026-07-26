@@ -18,7 +18,7 @@ public sealed class OrganicCapabilityCatalog(
         var media = await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
         var capabilities = new List<OrganicCapabilityDescriptor>
         {
-            Capability("publisher.screen.capture", "Eyes: screen capture", "Queues a browser screenshot. Browser/user gesture permission is still required.", "eyes", false, true, true),
+            Capability("publisher.screen.capture", "Eyes: screen capture", "Queues a screenshot only after PublisherStudio frontend confirmation. The current browser session must separately grant its screen-capture/user-gesture permission each time required by the browser.", "eyes", false, true, true),
             Capability("publisher.screen.capture.result", "Eyes: screen capture result", "Reads the bounded status and result of a previously queued browser screenshot for the next council heartbeat.", "eyes", true, false, true),
             Capability("publisher.screenreader.start", "Start recurring screen-reader help", "Starts one debounced single-flight screen-reader session. The interval is clamped to at least 15 seconds.", "eyes", false, true, true),
             Capability("publisher.screenreader.stop", "Stop recurring screen-reader help", "Stops a recurring screen-reader session by id.", "eyes", false, true, true),
@@ -201,7 +201,16 @@ public sealed class OrganicWorkExecutor(
             IncludeMetadata = GetBoolean(parameters, "includeMetadata", true)
         };
         var queued = screenshots.Enqueue(request);
-        return new { queued.Id, queued.Status, RequiresBrowserUserGesture = true, NextCapability = "publisher.spreadsheet.inspect or council continuation" };
+        return new
+        {
+            queued.Id,
+            queued.Status,
+            RequiresPublisherFrontendConfirmation = true,
+            RequiresBrowserUserGesture = true,
+            RequiresCurrentBrowserSessionPermission = true,
+            BrowserPermissionCannotBePreGrantedByLocalGpt = true,
+            NextCapability = "publisher.screen.capture.result followed by council continuation"
+        };
     }
 
     private object QueueInput(JsonElement parameters)

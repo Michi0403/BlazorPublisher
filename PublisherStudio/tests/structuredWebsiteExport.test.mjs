@@ -63,11 +63,11 @@ assert.match(doctrine, /FFV1/);
 assert.match(doctrine, /FFmpeg\.wasm/);
 assert.match(doctrine, /Blazor.*JavaScript interop/is);
 
-assert.equal(packageJson.version, '1.0.93');
-assert.equal(lockJson.version, '1.0.93');
-assert.equal(lockJson.packages[''].version, '1.0.93');
-assert.match(webProject, /<Version>1\.0\.93<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.93<\/Version>/);
-assert.match(streamingRuntime, /Version = "1\.0\.93"/);
+assert.equal(packageJson.version, '2.0.0');
+assert.equal(lockJson.version, '2.0.0');
+assert.equal(lockJson.packages[''].version, '2.0.0');
+assert.match(webProject, /<Version>2\.0\.0<\/Version>/);
+assert.match(installerProject, /<Version>2\.0\.0<\/Version>/);
+assert.match(streamingRuntime, /Version = "2\.0\.0"/);
 
 console.log('structured offline website, media externalization, browser-safe optimization, fallback, and version contracts passed');

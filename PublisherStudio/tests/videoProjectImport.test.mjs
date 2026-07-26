@@ -75,11 +75,11 @@ assert.match(applicationComposition, /AddSingleton<VideoProjectImportService, Vi
 assert.match(interop, /\(otio\|otioz\|mlt\|kdenlive\|xges\|osp\|edl\)/);
 assert.match(interop, /actualKind === 'project'/);
 
-assert.equal(packageJson.version, '1.0.93');
-assert.equal(lockJson.version, '1.0.93');
-assert.equal(lockJson.packages[''].version, '1.0.93');
-assert.match(webProject, /<Version>1\.0\.93<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.93<\/Version>/);
+assert.equal(packageJson.version, '2.0.0');
+assert.equal(lockJson.version, '2.0.0');
+assert.equal(lockJson.packages[''].version, '2.0.0');
+assert.match(webProject, /<Version>2\.0\.0<\/Version>/);
+assert.match(installerProject, /<Version>2\.0\.0<\/Version>/);
 
 assert.match(doctrine, /OpenTimelineIO/);
 assert.match(doctrine, /MLT XML/);
@@ -103,7 +103,8 @@ assert.deepEqual(packageRefs, [
   'DevExpress.Blazor.RichEdit.ja',
   'DevExpress.Blazor.de',
   'DevExpress.Blazor.es',
-  'DevExpress.Blazor.ja'
+  'DevExpress.Blazor.ja',
+  'LocalGPT.WireProtocolVersion'
 ]);
 
 console.log('open video-project canonical model, safe adapters, relinking UI, project persistence, and doctrine contracts passed');

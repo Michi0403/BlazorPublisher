@@ -33,7 +33,7 @@ assert.doesNotMatch(organic, /media\.IsAvailable/);
 assert.match(organic, /OrganicWireProtocol\.MaximumMessageBytes/);
 
 const wire = fs.readFileSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'OneWireProtocolContracts.cs'), 'utf8');
-assert.match(wire, /public const string Version = "1\.4";/);
+assert.match(wire, /public const string Version = "1\.6";/);
 assert.match(wire, /public const int MaximumMessageBytes = int\.MaxValue;/);
 
 console.log('PublisherStudio runtime/bootstrap safety contracts passed.');

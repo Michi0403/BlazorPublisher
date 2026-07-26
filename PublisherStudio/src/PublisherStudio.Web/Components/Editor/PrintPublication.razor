@@ -2,6 +2,7 @@
 @inject PublicationMediaAssetStore MediaAssets
 
 <div class="print-publication" aria-hidden="true"
+     data-publication-culture="@(string.IsNullOrWhiteSpace(Document.ProjectSettings.Culture) ? CultureInfo.CurrentUICulture.Name : Document.ProjectSettings.Culture)"
      data-playback-start="@Document.Playback.StartAutomatically.ToString().ToLowerInvariant()"
      data-playback-loop="@Document.Playback.LoopPresentation.ToString().ToLowerInvariant()"
      data-playback-controls="@Document.Playback.ShowControls.ToString().ToLowerInvariant()">

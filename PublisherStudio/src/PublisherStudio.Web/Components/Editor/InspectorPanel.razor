@@ -5,6 +5,8 @@
 @inject StreamingProfileStore StreamingProfiles
 @inject PublicationMediaAssetStore MediaAssets
 @inject PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService TimelineEdits
+@inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
+@inject NavigationManager Navigation
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
@@ -70,6 +72,30 @@
     else if (_tab == "page")
     {
         <div class="property-scroll">
+            <section class="property-section">
+                <h3>View language</h3>
+                <label>Application language
+                    <select value="@ApplicationCulture" @onchange="ChangeApplicationCulture">
+                        @foreach (var culture in Localization.GetAvailableCultures())
+                        {
+                            <option value="@culture">@CultureLabel(culture)</option>
+                        }
+                    </select>
+                </label>
+                <label>Publication language
+                    <select value="@PublicationCulture" @onchange="ChangePublicationCulture">
+                        @foreach (var culture in Localization.GetAvailableCultures())
+                        {
+                            <option value="@culture">@CultureLabel(culture)</option>
+                        }
+                    </select>
+                </label>
+                <div class="property-button-row">
+                    <button type="button" @onclick="OpenTranslationEditor">Edit all application strings</button>
+                </div>
+                <p class="property-note">The application choice is stored for this browser. The publication choice controls standalone HTML language metadata and remains editable per document.</p>
+            </section>
+
             <section class="property-section">
                 <h3>Page format</h3>
                 <label>Preset
@@ -2004,6 +2030,38 @@
         _ when declared?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true => PublicationMediaData.NormalizeMimeType(declared, "video/webm"),
         _ => string.Empty
     };
+
+    private string ApplicationCulture => CultureInfo.CurrentUICulture.Name;
+    private string PublicationCulture => string.IsNullOrWhiteSpace(State.Document.ProjectSettings.Culture)
+        ? ApplicationCulture
+        : State.Document.ProjectSettings.Culture;
+
+    private void ChangeApplicationCulture(ChangeEventArgs args)
+    {
+        var culture = args.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(culture)) return;
+        var returnUrl = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+        Navigation.NavigateTo($"api/configuration/localization/select?culture={Uri.EscapeDataString(culture)}&returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+    }
+
+    private void ChangePublicationCulture(ChangeEventArgs args)
+    {
+        var culture = args.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(culture)) return;
+        State.SetPublicationCulture(culture);
+    }
+
+    private void OpenTranslationEditor() => Navigation.NavigateTo("/localization");
+
+    private static string CultureLabel(string culture)
+    {
+        try
+        {
+            var info = CultureInfo.GetCultureInfo(culture);
+            return $"{info.NativeName} ({info.Name})";
+        }
+        catch (CultureNotFoundException) { return culture; }
+    }
 
     private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
     private static bool ReadBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;

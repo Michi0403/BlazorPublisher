@@ -26,15 +26,24 @@
     </header>
 
     <section class="organic-status-strip" aria-live="polite">
-        <strong>@(Connection.State.IsConnected ? "Connected" : "Not connected")</strong>
+        <strong>@(Connection.State.IsLinked ? "Connected and linked" : Connection.State.IsConnected ? "Awaiting LocalGPT approval" : "Not connected")</strong>
         <span>@(Connection.State.IsConnected ? Connection.State.DisplayName : "Waiting for UDP discovery on port 51141")</span>
-        @if (!string.IsNullOrWhiteSpace(Connection.State.LastError))
+        @if (!string.IsNullOrWhiteSpace(Connection.State.LastError) && !Connection.State.IsConnected)
         {
             <span class="organic-error">@Connection.State.LastError</span>
         }
+        else if (Connection.State.IsConnected && !Connection.State.IsLinked)
+        {
+            <span class="organic-note">Open LocalGPT and approve the pending link in its Human Collaboration Inbox.</span>
+        }
         @if (Connection.State.IsConnected)
         {
+            <button type="button" class="organic-secondary" disabled="@(!Connection.State.IsLinked)" @onclick="RunRoundTripTestAsync">Test 1-Wire round trip</button>
             <button type="button" class="organic-danger" @onclick="DisconnectAsync">Disconnect</button>
+        }
+        @if (!string.IsNullOrWhiteSpace(_roundTripStatus))
+        {
+            <span class="organic-note">@_roundTripStatus</span>
         }
     </section>
 
@@ -221,20 +230,34 @@
                         <input @bind="_permission.WorkOrderKey" />
                     </label>
                 }
+                <label class="organic-check"><input type="checkbox" @bind="_permission.IsExposed" /> Reveal capability to this peer</label>
+                <label class="organic-check"><input type="checkbox" @bind="_permission.AllowInvocation" /> Allow this peer to invoke it</label>
+                <label class="organic-check"><input type="checkbox" @bind="_permission.RequiresFrontendConfirmation" /> Always require this PublisherStudio frontend</label>
+                <label class="organic-check"><input type="checkbox" @bind="_permission.RequireLinkedPeer" /> Require explicit frontend connection</label>
+                <label>
+                    Human input editor
+                    <select @bind="_permission.InteractionEditor">
+                        @foreach (var editor in Enum.GetValues<OrganicInteractionEditor>())
+                        {
+                            <option value="@editor">@editor</option>
+                        }
+                    </select>
+                </label>
             </div>
             <button type="button" class="organic-primary" @onclick="SavePermission">Save permission</button>
-            <p class="organic-note">No matching rule means AskEveryTime. Scheduled and sequential spool work cannot bypass the same rule.</p>
+            <p class="organic-note">The receiving frontend is authoritative. A matching rule controls discovery, invocation and the editor shown for requested human information. Scheduled and sequential spool work cannot bypass it.</p>
 
             @if (_permissions.Count > 0)
             {
                 <div class="organic-table-wrap">
                     <table class="organic-table">
-                        <thead><tr><th>Peer</th><th>Capability</th><th>Organ</th><th>Approval</th><th></th></tr></thead>
+                        <thead><tr><th>Peer</th><th>Capability</th><th>Organ</th><th>Exposed</th><th>Invoke</th><th>Frontend</th><th>Editor</th><th>Approval</th><th></th></tr></thead>
                         <tbody>
                             @foreach (var rule in _permissions)
                             {
                                 <tr @key="@(rule.PeerId + rule.CapabilityKey + rule.Organ)">
-                                    <td>@rule.PeerId</td><td>@rule.CapabilityKey</td><td>@(string.IsNullOrWhiteSpace(rule.Organ) ? "*" : rule.Organ)</td><td>@rule.ApprovalMode</td>
+                                    <td>@rule.PeerId</td><td>@rule.CapabilityKey</td><td>@(string.IsNullOrWhiteSpace(rule.Organ) ? "*" : rule.Organ)</td>
+                                    <td>@(rule.IsExposed ? "yes" : "no")</td><td>@(rule.AllowInvocation ? "yes" : "no")</td><td>@(rule.RequiresFrontendConfirmation ? "required" : "saved policy")</td><td>@rule.InteractionEditor</td><td>@rule.ApprovalMode</td>
                                     <td><button type="button" class="organic-link-danger" @onclick="() => DeletePermission(rule)">Remove</button></td>
                                 </tr>
                             }
@@ -316,7 +339,8 @@
     private string _textGenerationPrompt = string.Empty;
     private string _textGenerationTeamKey = "general";
     private OrganicCouncilPromptRequest _councilRequest = NewCouncilRequest("general");
-    private OrganicPermissionRule _permission = new();
+    private OrganicPermissionRule _permission = NewPermission(string.Empty);
+    private string _roundTripStatus = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -328,12 +352,12 @@
         Refresh();
     }
 
-    private bool CanRunCouncil => Connection.State.HasCapability("council.run");
+    private bool CanRunCouncil => Connection.State.IsLinked && Connection.State.HasCapability("council.run");
     private bool CanGenerateTextProposal => CanRunCouncil
         && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.text.insert.propose", StringComparison.OrdinalIgnoreCase))
         && !string.IsNullOrWhiteSpace(_textGenerationPrompt)
         && !string.IsNullOrWhiteSpace(_textGenerationTarget);
-    private bool CanUseScreenReader => Connection.State.IsConnected
+    private bool CanUseScreenReader => Connection.State.IsConnected && Connection.State.IsLinked
         && Connection.State.HasCapability("localgpt.screenreader.help")
         && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase));
 
@@ -387,7 +411,7 @@
             if (state.IsConnected)
             {
                 _permission.PeerId = peerId;
-                Notifications.Success($"Connected to {state.DisplayName}.", "LocalGPT connected", nameof(OrganicPlugins));
+                Notifications.Information($"Transport opened to {state.DisplayName}. Approve the pending link in LocalGPT to finish connecting.", "LocalGPT link requested", nameof(OrganicPlugins));
             }
             else Notifications.Error(state.LastError, "LocalGPT connection failed", nameof(OrganicPlugins));
         }
@@ -397,6 +421,36 @@
             Notifications.Error(ex.Message, "LocalGPT connection failed", nameof(OrganicPlugins));
         }
         Refresh();
+    }
+
+    private async Task RunRoundTripTestAsync()
+    {
+        if (!Connection.State.IsConnected) return;
+        try
+        {
+            _roundTripStatus = "Testing protocol negotiation…";
+            var envelope = new OrganicWireEnvelope
+            {
+                MessageType = OrganicWireMessageType.CapabilityRequest,
+                TargetPeerId = Connection.State.PeerId,
+                CapabilityKey = "onewire.capabilities",
+                UserConfirmed = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(10)
+            };
+            var correlationId = await Connection.SendEnvelopeAsync(envelope);
+            var result = await Connection.WaitForResultAsync(correlationId, TimeSpan.FromSeconds(10));
+            var capabilityCount = result.Properties is not null && result.Properties.TryGetValue("Capabilities", out var value) && value.ValueKind == JsonValueKind.Array
+                ? value.GetArrayLength()
+                : Connection.State.RemoteCapabilities.Count;
+            _roundTripStatus = $"1-Wire {result.ProtocolVersion} round trip succeeded; LocalGPT reported {capabilityCount} capabilities.";
+            Notifications.Success(_roundTripStatus, "Organic connection verified", nameof(OrganicPlugins));
+        }
+        catch (Exception exception)
+        {
+            _roundTripStatus = $"Round-trip test failed: {exception.Message}";
+            Notifications.Error(_roundTripStatus, "Organic connection test", nameof(OrganicPlugins));
+        }
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task DisconnectAsync()
@@ -493,7 +547,7 @@ Required result contract:
         {
             PermissionStore.Save(_permission);
             Notifications.Success("The organ permission was saved.", source: nameof(OrganicPlugins));
-            _permission = new OrganicPermissionRule { PeerId = Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _permission.PeerId };
+            _permission = NewPermission(Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _permission.PeerId);
             Refresh();
         }
         catch (Exception ex)
@@ -526,6 +580,17 @@ Required result contract:
         Notifications.Warning("The requested organ action was declined.", "Organic work", nameof(OrganicPlugins));
         Refresh();
     }
+
+    private static OrganicPermissionRule NewPermission(string peerId) => new()
+    {
+        PeerId = peerId,
+        IsExposed = true,
+        AllowInvocation = true,
+        RequiresFrontendConfirmation = true,
+        RequireLinkedPeer = true,
+        InteractionEditor = OrganicInteractionEditor.ConfirmationOnly,
+        ApprovalMode = OrganicApprovalMode.AskEveryTime
+    };
 
     private static OrganicCouncilPromptRequest NewCouncilRequest(string team) => new()
     {

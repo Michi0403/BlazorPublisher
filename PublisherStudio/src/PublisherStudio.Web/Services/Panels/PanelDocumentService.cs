@@ -276,7 +276,8 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
         return new PanelElement
         {
             Name = "Live KPI Dashboard", Width = 160, Height = 96, Background = "#eef2ff",
-            ActiveViewId = view.Id, Views = [view], NavigationMode = PublicationPanelNavigationMode.Hidden
+            ActiveViewId = view.Id, Views = [view], NavigationMode = PublicationPanelNavigationMode.Hidden,
+            LayoutMode = PublicationPanelLayoutMode.Responsive
         };
     }
 

@@ -118,7 +118,8 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
             foreach (var organ in envelope.Organs.DefaultIfEmpty(string.Empty))
             {
                 var rule = ResolveRule(candidates, organ);
-                if (rule is null || rule.ApprovalMode is OrganicApprovalMode.AskEveryTime or OrganicApprovalMode.Deny)
+                if (rule is null || !rule.AllowInvocation || rule.RequiresFrontendConfirmation ||
+                    rule.ApprovalMode is OrganicApprovalMode.AskEveryTime or OrganicApprovalMode.Deny)
                     return false;
                 if (rule.ApprovalMode == OrganicApprovalMode.CurrentWorkOrder &&
                     (string.IsNullOrWhiteSpace(rule.WorkOrderKey) ||
@@ -137,7 +138,33 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
             var candidates = MatchingRules(envelope);
             return envelope.Organs.DefaultIfEmpty(string.Empty)
                 .Select(organ => ResolveRule(candidates, organ))
-                .Any(rule => rule?.ApprovalMode == OrganicApprovalMode.Deny);
+                .Any(rule => rule is not null && (!rule.AllowInvocation || rule.ApprovalMode == OrganicApprovalMode.Deny));
+        }
+    }
+
+
+    public bool IsCapabilityExposed(string peerId, OrganicCapabilityDescriptor capability)
+    {
+        ArgumentNullException.ThrowIfNull(capability);
+        lock (gate)
+        {
+            var matching = Rules.Where(rule =>
+                string.Equals(rule.PeerId, peerId, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(rule.CapabilityKey, capability.Key, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (matching.Count == 0)
+                return capability.IsExposedToPeer;
+            return matching.Any(rule => rule.IsExposed);
+        }
+    }
+
+    public OrganicPermissionRule? Resolve(string peerId, string capabilityKey, string organ = "")
+    {
+        lock (gate)
+        {
+            var candidates = Rules.Where(rule =>
+                string.Equals(rule.PeerId, peerId, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(rule.CapabilityKey, capabilityKey, StringComparison.OrdinalIgnoreCase)).ToList();
+            return ResolveRule(candidates, organ) is { } rule ? Clone(rule) : null;
         }
     }
 
@@ -183,6 +210,11 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         CapabilityKey = rule.CapabilityKey,
         Organ = rule.Organ,
         ApprovalMode = rule.ApprovalMode,
+        IsExposed = rule.IsExposed,
+        AllowInvocation = rule.AllowInvocation,
+        RequiresFrontendConfirmation = rule.RequiresFrontendConfirmation,
+        InteractionEditor = rule.InteractionEditor,
+        RequireLinkedPeer = rule.RequireLinkedPeer,
         WorkOrderKey = rule.WorkOrderKey,
         UpdatedUtc = rule.UpdatedUtc,
         UpdatedBy = rule.UpdatedBy

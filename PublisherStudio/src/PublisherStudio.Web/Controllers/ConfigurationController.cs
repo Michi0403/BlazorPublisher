@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.Domain;
 using PublisherStudio.Services.Configuration;
@@ -29,6 +30,26 @@ public sealed class ConfigurationController(IApplicationPathService paths, IFile
 
     [HttpGet("localization/{culture}/{key}")]
     public ActionResult<string> String(string culture, string key) => Ok(localization.Get(key, culture));
+    [HttpPut("localization/{culture}")]
+    public async Task<IActionResult> SaveStrings(string culture, [FromBody] Dictionary<string, string> strings, CancellationToken cancellationToken)
+    {
+        await localization.SaveOverridesAsync(culture, strings, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    [HttpGet("localization/select")]
+    public IActionResult SelectCulture([FromQuery] string culture, [FromQuery] string? returnUrl = "/")
+    {
+        var available = localization.GetAvailableCultures();
+        var selected = available.FirstOrDefault(item => string.Equals(item, culture, StringComparison.OrdinalIgnoreCase)) ?? "en-US";
+        Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(selected)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(2), IsEssential = true, SameSite = SameSiteMode.Lax });
+        var destination = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "/";
+        return LocalRedirect(destination);
+    }
+
 }
 
 [ApiController]

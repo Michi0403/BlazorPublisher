@@ -117,7 +117,12 @@ public static class Program
         {
             DefaultRequestCulture = new RequestCulture("en-US"),
             SupportedCultures = supportedCultures,
-            SupportedUICultures = supportedCultures
+            SupportedUICultures = supportedCultures,
+            RequestCultureProviders =
+            [
+                new CookieRequestCultureProvider(),
+                new AcceptLanguageHeaderRequestCultureProvider()
+            ]
         });
         app.Services.GetRequiredService<IApplicationPathService>().EnsureDirectories();
 

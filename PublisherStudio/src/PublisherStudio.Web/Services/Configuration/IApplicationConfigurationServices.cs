@@ -15,6 +15,7 @@ public interface IFileLocalizationService
     IReadOnlyList<string> GetAvailableCultures();
     IReadOnlyDictionary<string, string> GetStrings(string? culture = null);
     string Get(string key, string? culture = null, string? fallback = null);
+    Task SaveOverridesAsync(string culture, IReadOnlyDictionary<string, string> strings, CancellationToken cancellationToken = default);
 }
 
 public interface IRenderExportCatalogService

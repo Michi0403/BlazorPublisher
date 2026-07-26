@@ -19,10 +19,10 @@
     <div class="publication-panel-viewport">
         @foreach (var view in EnabledViews)
         {
-            <section class="publication-panel-view" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
+            <section class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
                 @foreach (var element in view.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
                 {
-                    <div class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant()"
+                    <div class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant() @ResponsiveElementClass(element)"
                          data-panel-element
                          data-element-id="@element.Id"
                          data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
@@ -96,12 +96,26 @@
     private string PanelStyle => $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)}";
     private string ElementStyle(PublicationElement element)
     {
+        if (Item.LayoutMode == PublicationPanelLayoutMode.Responsive)
+        {
+            var order = Math.Max(0, element.ZIndex);
+            var minimumHeight = Math.Clamp(element.Height / Math.Max(1, Item.CanvasHeight) * 620, 72, 420);
+            return $"order:{order};min-height:{Inv(minimumHeight)}px;z-index:{element.ZIndex};--panel-element-aspect:{Inv(Math.Max(.25, element.Width / Math.Max(.25, element.Height)))}";
+        }
         var left = element.X / Math.Max(1, Item.CanvasWidth) * 100;
         var top = element.Y / Math.Max(1, Item.CanvasHeight) * 100;
         var width = element.Width / Math.Max(1, Item.CanvasWidth) * 100;
         var height = element.Height / Math.Max(1, Item.CanvasHeight) * 100;
         return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
     }
+    private static string ResponsiveElementClass(PublicationElement element) => element switch
+    {
+        TextFrameElement => "panel-responsive-title",
+        DataVisualElement visual when visual.VisualKind == DataVisualKind.DataTable => "panel-responsive-wide",
+        DevExtremeComponentElement => "panel-responsive-wide",
+        HtmlEmbedElement or PanelElement or LiveSourceElement or VideoElement => "panel-responsive-wide",
+        _ => "panel-responsive-card"
+    };
     private static string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{Mm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";

@@ -1,0 +1,97 @@
+@page "/localization"
+@rendermode InteractiveServer
+@using System.Text.Json
+@inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
+@inject NavigationManager Navigation
+
+<PageTitle>PublisherStudio translations</PageTitle>
+
+<main class="localization-editor-page">
+    <header>
+        <div>
+            <p class="organic-plugin-kicker">PublisherStudio</p>
+            <h1>Translation editor</h1>
+            <p>Edit browser and application strings without changing the shipped source files. Overrides are stored in LocalAppData.</p>
+        </div>
+        <button type="button" @onclick="Back">Back to Publisher</button>
+    </header>
+
+    <section class="localization-editor-toolbar">
+        <label>Culture
+            <select value="@_culture" @onchange="ChangeCultureAsync">
+                @foreach (var culture in Localization.GetAvailableCultures())
+                {
+                    <option value="@culture">@culture</option>
+                }
+            </select>
+        </label>
+        <label>Filter<input @bind="_filter" @bind:event="oninput" placeholder="Search key or text" /></label>
+        <button type="button" @onclick="SaveAsync" disabled="@_saving">@(_saving ? "Saving…" : "Save overrides")</button>
+        <button type="button" @onclick="ApplyCulture">Use this language</button>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(_status))
+    {
+        <p class="localization-editor-status" role="status">@_status</p>
+    }
+
+    <section class="localization-editor-grid">
+        @foreach (var pair in FilteredStrings)
+        {
+            <label>
+                <code>@pair.Key</code>
+                <textarea rows="2" value="@pair.Value" @onchange="args => Update(pair.Key, args.Value?.ToString())"></textarea>
+            </label>
+        }
+    </section>
+</main>
+
+@code {
+    private string _culture = CultureInfo.CurrentUICulture.Name;
+    private string _filter = string.Empty;
+    private Dictionary<string, string> _strings = new(StringComparer.OrdinalIgnoreCase);
+    private string _status = string.Empty;
+    private bool _saving;
+
+    private IEnumerable<KeyValuePair<string, string>> FilteredStrings => _strings
+        .Where(pair => string.IsNullOrWhiteSpace(_filter)
+            || pair.Key.Contains(_filter, StringComparison.OrdinalIgnoreCase)
+            || pair.Value.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase);
+
+    protected override void OnInitialized()
+    {
+        if (!Localization.GetAvailableCultures().Contains(_culture, StringComparer.OrdinalIgnoreCase)) _culture = "en-US";
+        Load();
+    }
+
+    private Task ChangeCultureAsync(ChangeEventArgs args)
+    {
+        _culture = args.Value?.ToString() ?? "en-US";
+        Load();
+        return Task.CompletedTask;
+    }
+
+    private void Load()
+    {
+        _strings = new Dictionary<string, string>(Localization.GetStrings(_culture), StringComparer.OrdinalIgnoreCase);
+        _status = $"Loaded {_strings.Count} strings for {_culture}.";
+    }
+
+    private void Update(string key, string? value) => _strings[key] = value ?? string.Empty;
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        try
+        {
+            await Localization.SaveOverridesAsync(_culture, _strings);
+            _status = $"Saved {_strings.Count} {_culture} string overrides.";
+        }
+        catch (Exception exception) { _status = exception.Message; }
+        finally { _saving = false; }
+    }
+
+    private void ApplyCulture() => Navigation.NavigateTo($"api/configuration/localization/select?culture={Uri.EscapeDataString(_culture)}&returnUrl=%2F", true);
+    private void Back() => Navigation.NavigateTo("/");
+}

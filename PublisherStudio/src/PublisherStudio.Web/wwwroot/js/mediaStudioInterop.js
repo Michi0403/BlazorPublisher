@@ -210,6 +210,11 @@ function stateFor(id) {
             timeOverlayPlayHandler: null,
             timeOverlayPauseHandler: null,
             timeOverlayGesture: null,
+            sequenceTimelineId: '',
+            sequencePointerDownHandler: null,
+            sequencePointerMoveHandler: null,
+            sequencePointerUpHandler: null,
+            sequenceGesture: null,
             lastReportedDuration: 0,
             durationReportPending: false,
             durationProbePending: false,
@@ -571,8 +576,20 @@ function syncVideoSelectionControls(overlay, start, end, pointSelection) {
     if (detail) detail.textContent = pointSelection
         ? `Source timestamp ${formatMediaTime(start)} · project timestamp ${formatMediaTime(timelineStart)}`
         : `Source ${formatMediaTime(start)} — ${formatMediaTime(end)} · project ${formatMediaTime(timelineStart)} — ${formatMediaTime(timelineEnd)} · ${formatMediaTime(Math.max(0, end - start))} selected`;
+    const sequenceStartHandle = document.getElementById('media-studio-sequence-selection-start');
+    const sequenceEndHandle = document.getElementById('media-studio-sequence-selection-end');
+    const startPercent = Math.max(0, Math.min(100, timelineStart / sequenceDuration * 100));
+    const endPercent = Math.max(0, Math.min(100, timelineEnd / sequenceDuration * 100));
+    if (sequenceStartHandle instanceof HTMLElement) {
+        sequenceStartHandle.style.left = `${startPercent}%`;
+        sequenceStartHandle.hidden = pointSelection;
+    }
+    if (sequenceEndHandle instanceof HTMLElement) {
+        sequenceEndHandle.style.left = `${endPercent}%`;
+        sequenceEndHandle.hidden = pointSelection;
+    }
     if (sequenceSelection instanceof HTMLElement) {
-        sequenceSelection.style.left = `${Math.max(0, Math.min(100, timelineStart / sequenceDuration * 100))}%`;
+        sequenceSelection.style.left = `${startPercent}%`;
         sequenceSelection.style.width = pointSelection
             ? '2px'
             : `${Math.max(0, Math.min(100, Math.max(0, timelineEnd - timelineStart) / sequenceDuration * 100))}%`;
@@ -961,6 +978,90 @@ function bindVideoTimeOverlay(state, timeOverlayId) {
     });
 }
 
+
+function releaseSequenceSelectionBindings(state) {
+    const timeline = document.getElementById(state.sequenceTimelineId || '');
+    if (timeline && state.sequencePointerDownHandler) timeline.removeEventListener('pointerdown', state.sequencePointerDownHandler, true);
+    if (timeline && state.sequencePointerMoveHandler) timeline.removeEventListener('pointermove', state.sequencePointerMoveHandler, true);
+    if (timeline && state.sequencePointerUpHandler) {
+        timeline.removeEventListener('pointerup', state.sequencePointerUpHandler, true);
+        timeline.removeEventListener('pointercancel', state.sequencePointerUpHandler, true);
+        timeline.removeEventListener('lostpointercapture', state.sequencePointerUpHandler, true);
+    }
+    state.sequenceTimelineId = '';
+    state.sequencePointerDownHandler = null;
+    state.sequencePointerMoveHandler = null;
+    state.sequencePointerUpHandler = null;
+    state.sequenceGesture = null;
+}
+
+function bindSequenceSelectionHandles(state, timelineId, timeOverlayId) {
+    releaseSequenceSelectionBindings(state);
+    const timeline = document.getElementById(timelineId);
+    const overlay = document.getElementById(timeOverlayId);
+    if (!(timeline instanceof HTMLElement) || !(overlay instanceof HTMLElement)) return;
+    state.sequenceTimelineId = timelineId;
+
+    const sourceAt = clientX => {
+        const bounds = timeline.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (Number(clientX) - bounds.left) / Math.max(1, bounds.width)));
+        const sequenceDuration = Math.max(.01, Number(timeline.dataset.sequenceDuration) || Number(overlay.dataset.sequenceDuration) || .01);
+        const segmentTimelineStart = Math.max(0, Number(timeline.dataset.segmentTimelineStart) || Number(overlay.dataset.segmentTimelineStart) || 0);
+        const sourceStart = Math.max(0, Number(timeline.dataset.segmentSourceStart) || Number(overlay.dataset.segmentSourceStart) || 0);
+        const sourceEnd = Math.max(sourceStart, Number(timeline.dataset.segmentSourceEnd) || Number(overlay.dataset.trimEnd) || sourceStart);
+        const effectiveRate = Math.max(.0001, Number(timeline.dataset.segmentEffectiveRate) || Number(overlay.dataset.playbackRate) || 1);
+        const source = sourceStart + (ratio * sequenceDuration - segmentTimelineStart) * effectiveRate;
+        return Math.max(sourceStart, Math.min(sourceEnd, source));
+    };
+
+    state.sequencePointerDownHandler = event => {
+        const handle = event.target?.closest?.('[data-sequence-selection-handle]');
+        if (!handle || event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation?.();
+        const data = videoTimeData(overlay);
+        state.sequenceGesture = {
+            pointerId: event.pointerId,
+            mode: handle.dataset.sequenceSelectionHandle,
+            start: data.start,
+            end: data.end
+        };
+        try { timeline.setPointerCapture(event.pointerId); } catch { }
+    };
+    state.sequencePointerMoveHandler = event => {
+        const gesture = state.sequenceGesture;
+        if (!gesture || gesture.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const current = sourceAt(event.clientX);
+        if (gesture.mode === 'start') setVideoTimeVisual(overlay, Math.min(current, gesture.end - .01), gesture.end, false);
+        else setVideoTimeVisual(overlay, gesture.start, Math.max(current, gesture.start + .01), false);
+    };
+    state.sequencePointerUpHandler = event => {
+        const gesture = state.sequenceGesture;
+        if (!gesture || (event.pointerId != null && gesture.pointerId !== event.pointerId)) return;
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        state.sequenceGesture = null;
+        try { timeline.releasePointerCapture(gesture.pointerId); } catch { }
+        const data = videoTimeData(overlay);
+        locallySeekMedia(state.id, data.start);
+        state.dotnet?.invokeMethodAsync('VideoTimeSelectionCommitted', data.start, data.end, false, data.duration).catch(() => {});
+    };
+    timeline.addEventListener('pointerdown', state.sequencePointerDownHandler, true);
+    timeline.addEventListener('pointermove', state.sequencePointerMoveHandler, true);
+    timeline.addEventListener('pointerup', state.sequencePointerUpHandler, true);
+    timeline.addEventListener('pointercancel', state.sequencePointerUpHandler, true);
+    timeline.addEventListener('lostpointercapture', state.sequencePointerUpHandler, true);
+}
+
+function locallySeekMedia(id, seconds) {
+    const element = mediaElement(id);
+    if (!element) return;
+    try { element.currentTime = Math.max(0, Number(seconds) || 0); } catch { }
+}
+
 export function configureVideoEffects(videoId, canvasId, config) {
     const video = document.getElementById(videoId);
     const canvas = document.getElementById(canvasId);
@@ -1001,6 +1102,7 @@ export function initializeMediaStudio(
     frameStageId = "",
     frameOverlayId = "",
     timeOverlayId = "",
+    sequenceTimelineId = "",
     sourceInputId = "",
     insertInputId = "",
     projectInputId = "",
@@ -1034,6 +1136,7 @@ export function initializeMediaStudio(
     document.addEventListener("keydown", state.keyboardHandler, true);
     bindFrameOverlay(state, frameStageId, frameOverlayId);
     bindVideoTimeOverlay(state, timeOverlayId);
+    bindSequenceSelectionHandles(state, sequenceTimelineId, timeOverlayId);
     bindMediaDrop(state, state.rootId, sourceInputId, insertInputId, projectInputId, String(expectedKind || 'video').toLowerCase());
 }
 
@@ -1438,6 +1541,7 @@ export function disposeMediaStudio(id) {
     state.keyboardHandler = null;
     releaseMediaDropBindings(state);
     releaseVideoTimeOverlayBindings(state);
+    releaseSequenceSelectionBindings(state);
     releaseFrameOverlayBindings(state);
     if (state.effectRuntimeKey) window.publisherVideoEffects?.dispose(state.effectRuntimeKey);
     state.effectRuntimeKey = '';

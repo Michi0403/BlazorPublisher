@@ -282,12 +282,19 @@
                         <div class="media-sequence-editor">
                             <div class="media-range-caption"><b>Sequence</b><span>@Time(SequenceDuration) · @_segments.Count section@(_segments.Count == 1 ? string.Empty : "s")</span></div>
                             <div id="media-studio-sequence-timeline" class="media-sequence-timeline mode-@_mouseMode.ToString().ToLowerInvariant()" tabindex="0"
+                                 data-sequence-duration="@Inv(SequenceDuration)"
+                                 data-segment-timeline-start="@Inv(SelectedSegmentTimelineStart)"
+                                 data-segment-source-start="@Inv(SelectedSegmentSourceStart)"
+                                 data-segment-source-end="@Inv(SelectedSegmentSourceEnd)"
+                                 data-segment-effective-rate="@Inv(SelectedSegmentEffectiveRate)"
                                  @onpointerdown="TimelinePointerDown"
                                  @oncontextmenu="ShowTimelineContextMenu" @oncontextmenu:preventDefault>
                                 @foreach (var segment in _segments)
                                 {
                                     <button type="button" class="media-sequence-segment @(segment.Id == _selectedSegmentId ? "selected" : null) @(segment.IsGap ? "gap" : string.IsNullOrWhiteSpace(segment.DataUrl) ? "offline" : null)"
-                                            style="@SegmentStyle(segment)" title="@SegmentTitle(segment)">
+                                            style="@SegmentStyle(segment)" title="@SegmentTitle(segment)"
+                                            @onpointerdown:stopPropagation
+                                            @onclick="() => SelectTimelineSegment(segment.Id)">
                                         <span>@segment.Name</span>
                                     </button>
                                 }
@@ -301,6 +308,18 @@
                                        class="media-sequence-selection @(_videoSelectionIsPoint ? "point" : "range")"
                                        style="@VideoSequenceSelectionStyle"
                                        title="@VideoSequenceSelectionTitle"></i>
+                                    <button id="media-studio-sequence-selection-start" type="button"
+                                            class="media-sequence-selection-boundary start"
+                                            data-sequence-selection-handle="start"
+                                            style="@VideoSequenceSelectionStartStyle"
+                                            title="Drag selection start" aria-label="Drag video selection start"
+                                            hidden="@_videoSelectionIsPoint"></button>
+                                    <button id="media-studio-sequence-selection-end" type="button"
+                                            class="media-sequence-selection-boundary end"
+                                            data-sequence-selection-handle="end"
+                                            style="@VideoSequenceSelectionEndStyle"
+                                            title="Drag selection end" aria-label="Drag video selection end"
+                                            hidden="@_videoSelectionIsPoint"></button>
                                 }
                                 <i id="media-studio-sequence-playhead" class="media-playhead" style="left:@Percent(_playhead / Math.Max(.01, SequenceDuration))"></i>
                             </div>
@@ -959,6 +978,8 @@
         ? TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate)
         : 0;
     private double SelectedSegmentSourceStart => SelectedSegment?.TrimStartSeconds ?? 0;
+    private double SelectedSegmentSourceEnd => SelectedSegment?.EffectiveTrimEndSeconds ?? 0;
+    private double SelectedSegmentEffectiveRate => Math.Max(.0001, Math.Max(.1, _playbackRate) * Math.Max(.0001, Math.Abs(SelectedSegment?.Speed ?? 1)));
     private bool PendingInsertHasRange => _pendingInsertMaximumSourceSeconds - _pendingInsertMinimumSourceSeconds > .01;
     private string VideoTimeOverlayStyle
     {
@@ -989,6 +1010,8 @@
             return $"left:{Percent(start / sequenceDuration)};width:{Percent(Math.Max(0, end - start) / sequenceDuration)}";
         }
     }
+    private string VideoSequenceSelectionStartStyle => $"left:{Percent(VideoSelectionTimelineStart / Math.Max(.01, SequenceDuration))}";
+    private string VideoSequenceSelectionEndStyle => $"left:{Percent(VideoSelectionTimelineEnd / Math.Max(.01, SequenceDuration))}";
     private string VideoSequenceSelectionTitle => _videoSelectionIsPoint
         ? $"{SelectedClipName}: timestamp {Time(VideoSelectionStart)}"
         : $"{SelectedClipName}: selected {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)}";
@@ -1193,8 +1216,11 @@
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
         _self ??= DotNetObjectReference.Create(this);
-        if (SessionId != Guid.Empty && SessionId != _initializedSession)
+        if (SessionId != Guid.Empty)
         {
+            // The sequence timeline and its two selection handles are rendered only after a source exists.
+            // Rebinding is intentionally idempotent so a session that started empty becomes fully interactive
+            // immediately after import, and so rerendered selected segments remain clickable/adjustable.
             await _module.InvokeVoidAsync(
                 "initializeMediaStudio",
                 "media-studio-preview",
@@ -1204,6 +1230,7 @@
                 IsVideo ? "media-studio-frame-stage" : string.Empty,
                 IsVideo ? "media-studio-frame-overlay-host" : string.Empty,
                 IsVideo ? "media-studio-video-time-overlay" : string.Empty,
+                IsVideo ? "media-studio-sequence-timeline" : string.Empty,
                 "media-studio-file-input",
                 "media-studio-insert-file-input",
                 IsVideo ? "media-studio-project-input" : string.Empty,
@@ -1359,6 +1386,15 @@
         SelectInitialVideoLayer(segment);
         RefreshPreviewSource();
         if (seek) _ = SeekSelectedAtPlayheadAsync();
+    }
+
+    private async Task SelectTimelineSegment(Guid id)
+    {
+        SelectSegment(id, seek: false);
+        if (SelectedSegment is null) return;
+        _playhead = TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate);
+        await SeekSelectedAtPlayheadAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void ClearSelectedSegmentFields()

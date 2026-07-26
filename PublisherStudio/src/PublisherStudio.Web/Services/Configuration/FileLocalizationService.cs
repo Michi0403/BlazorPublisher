@@ -6,18 +6,17 @@ namespace PublisherStudio.Services.Configuration;
 
 public sealed class FileLocalizationService(IWebHostEnvironment environment) : IFileLocalizationService
 {
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> _cache = new(StringComparer.OrdinalIgnoreCase);
     private string LocalizationPath => Path.Combine(environment.ContentRootPath, "Localization");
+    private string OverridePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "LocalizationOverrides");
 
     public IReadOnlyList<string> GetAvailableCultures()
     {
-        if (!Directory.Exists(LocalizationPath)) return ["en-US"];
-        return Directory.EnumerateFiles(LocalizationPath, "*.json", SearchOption.TopDirectoryOnly)
-            .Select(Path.GetFileNameWithoutExtension)
-            .Where(name => !string.IsNullOrWhiteSpace(name))
-            .Cast<string>()
-            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
-            .ToList().AsReadOnly();
+        var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "en-US" };
+        AddCultures(LocalizationPath, values);
+        AddCultures(OverridePath, values);
+        return values.OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
     }
 
     public IReadOnlyDictionary<string, string> GetStrings(string? culture = null)
@@ -38,18 +37,49 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment) : I
         return fallback ?? key;
     }
 
-    private IReadOnlyDictionary<string, string> Load(string culture)
+    public async Task SaveOverridesAsync(string culture, IReadOnlyDictionary<string, string> strings, CancellationToken cancellationToken = default)
     {
-        var path = Path.Combine(LocalizationPath, culture + ".json");
-        if (!System.IO.File.Exists(path) && !string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase))
-            path = Path.Combine(LocalizationPath, "en-US.json");
-        if (!System.IO.File.Exists(path)) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        using var stream = System.IO.File.OpenRead(path);
-        var data = JsonSerializer.Deserialize<Dictionary<string, string>>(stream) ?? new Dictionary<string, string>();
-        return new Dictionary<string, string>(data, StringComparer.OrdinalIgnoreCase);
+        var normalized = NormalizeCulture(culture);
+        Directory.CreateDirectory(OverridePath);
+        var clean = strings
+            .Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
+            .ToDictionary(pair => pair.Key.Trim(), pair => pair.Value ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+        var path = Path.Combine(OverridePath, normalized + ".json");
+        await using var stream = File.Create(path);
+        await JsonSerializer.SerializeAsync(stream, clean, JsonOptions, cancellationToken).ConfigureAwait(false);
+        _cache.TryRemove(normalized, out _);
     }
 
-    private string NormalizeCulture(string? culture)
+    private IReadOnlyDictionary<string, string> Load(string culture)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        MergeFile(Path.Combine(LocalizationPath, "en-US.json"), result);
+        if (!string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase))
+            MergeFile(Path.Combine(LocalizationPath, culture + ".json"), result);
+        MergeFile(Path.Combine(OverridePath, culture + ".json"), result);
+        return result;
+    }
+
+    private static void MergeFile(string path, IDictionary<string, string> result)
+    {
+        if (!File.Exists(path)) return;
+        using var stream = File.OpenRead(path);
+        var data = JsonSerializer.Deserialize<Dictionary<string, string>>(stream);
+        if (data is null) return;
+        foreach (var pair in data.Where(pair => !string.IsNullOrWhiteSpace(pair.Key))) result[pair.Key] = pair.Value ?? string.Empty;
+    }
+
+    private static void AddCultures(string path, ISet<string> values)
+    {
+        if (!Directory.Exists(path)) return;
+        foreach (var file in Directory.EnumerateFiles(path, "*.json", SearchOption.TopDirectoryOnly))
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            if (!string.IsNullOrWhiteSpace(name)) values.Add(name);
+        }
+    }
+
+    private static string NormalizeCulture(string? culture)
     {
         var requested = string.IsNullOrWhiteSpace(culture) ? CultureInfo.CurrentUICulture.Name : culture.Trim();
         try { return CultureInfo.GetCultureInfo(requested).Name; }

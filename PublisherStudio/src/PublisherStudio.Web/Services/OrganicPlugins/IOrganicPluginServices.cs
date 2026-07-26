@@ -34,6 +34,8 @@ public interface IOrganicPermissionStore
     bool Delete(string peerId, string capabilityKey, string organ);
     bool IsAllowed(OrganicWireEnvelope envelope);
     bool IsDenied(OrganicWireEnvelope envelope);
+    bool IsCapabilityExposed(string peerId, OrganicCapabilityDescriptor capability);
+    OrganicPermissionRule? Resolve(string peerId, string capabilityKey, string organ = "");
 }
 
 public interface IOrganicWorkCoordinator
@@ -43,6 +45,7 @@ public interface IOrganicWorkCoordinator
     OrganicPluginWorkItem? Get(Guid id);
     Task<OrganicPluginWorkItem> ReceiveAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
     Task<OrganicPluginWorkItem?> ApproveAsync(Guid id, CancellationToken cancellationToken = default);
+    bool UpdateInteractionValue(Guid id, string value);
     bool Decline(Guid id, string reason);
 }
 

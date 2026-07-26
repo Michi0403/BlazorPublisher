@@ -11,6 +11,7 @@ public sealed class LocalGptConnectionService(
     ILocalGptDiscoveryRegistry discovery,
     IOrganicPluginProtocolCodec codec,
     IOrganicCapabilityCatalog capabilities,
+    IOrganicPermissionStore permissions,
     IOrganicWorkCoordinator work,
     IOrganicResultStore results,
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
@@ -54,15 +55,19 @@ public sealed class LocalGptConnectionService(
             connectionId = connectedId;
             peerId = requestedPeerId;
             State.IsConnected = true;
+            State.IsLinked = false;
             State.PeerId = requestedPeerId;
             State.DisplayName = peer.DisplayName;
             State.ConnectedUtc = DateTimeOffset.UtcNow;
-            State.LastError = string.Empty;
+            State.LastError = "Waiting for LocalGPT frontend link approval.";
             discovery.SetConnected(requestedPeerId, true);
             readLoop = ReadLoopAsync(connectedId, requestedPeerId, connectedReader, connectedWriter, connectionCancellation.Token);
             Changed?.Invoke();
 
-            var localCapabilities = await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
+            var localCapabilities = (await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false))
+                .Select(capability => ApplyPermissionPolicy(requestedPeerId, capability))
+                .Where(capability => capability.IsExposedToPeer)
+                .ToList();
             var localSkills = await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false);
             var localUiFeatures = await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false);
             var localHardware = await capabilities.GetHardwareAsync(cancellationToken).ConfigureAwait(false);
@@ -78,7 +83,7 @@ public sealed class LocalGptConnectionService(
                         PeerId = localPeerId,
                         DisplayName = "PublisherStudio / BlazorPublisher",
                         Application = "PublisherStudio",
-                        ApplicationVersion = "1.0.90-organic-wire",
+                        ApplicationVersion = "1.0.93-organic-wire",
                         HostName = Environment.MachineName,
                         Address = "0.0.0.0",
                         ServicePort = 0,
@@ -141,6 +146,8 @@ public sealed class LocalGptConnectionService(
         ArgumentNullException.ThrowIfNull(envelope);
         var connectedWriter = writer;
         if (connectedWriter is null || !State.IsConnected) throw new InvalidOperationException("PublisherStudio is not connected to LocalGPT.");
+        if (!State.IsLinked && envelope.MessageType != OrganicWireMessageType.Hello)
+            throw new InvalidOperationException("The 1-Wire transport is waiting for LocalGPT frontend link approval.");
         return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, cancellationToken);
     }
 
@@ -196,6 +203,7 @@ public sealed class LocalGptConnectionService(
             if (connectionId == connectedId)
             {
                 State.IsConnected = false;
+                State.IsLinked = false;
                 discovery.SetConnected(connectedPeerId, false);
                 Changed?.Invoke();
             }
@@ -213,9 +221,22 @@ public sealed class LocalGptConnectionService(
                 recentResponses.TryRemove(stale, out _);
         }
 
+        if (envelope.MessageType == OrganicWireMessageType.ApprovalRequired &&
+            envelope.Properties is not null &&
+            envelope.Properties.TryGetValue("LinkApproval", out var linkApproval) &&
+            linkApproval.ValueKind is JsonValueKind.True)
+        {
+            State.IsLinked = false;
+            State.LastError = "Waiting for LocalGPT frontend link approval.";
+            Changed?.Invoke();
+        }
+
         switch (envelope.MessageType)
         {
             case OrganicWireMessageType.HelloAck:
+                State.IsLinked = true;
+                State.LastError = string.Empty;
+                goto case OrganicWireMessageType.CapabilityResponse;
             case OrganicWireMessageType.CapabilityResponse:
             case OrganicWireMessageType.SkillResponse:
             case OrganicWireMessageType.SkillStateUpdate:
@@ -306,11 +327,15 @@ public sealed class LocalGptConnectionService(
             TargetPeerId = item.PeerId,
             CapabilityKey = item.CapabilityKey,
             Error = item.Error,
+            InteractionValueJson = item.Request.InteractionValueJson,
+            InteractionValueContentType = item.Request.InteractionValueContentType,
             Properties = new Dictionary<string, JsonElement>
             {
                 ["WorkItemId"] = JsonSerializer.SerializeToElement(item.Id),
                 ["Status"] = JsonSerializer.SerializeToElement(item.Status.ToString()),
-                ["ResultJson"] = JsonSerializer.SerializeToElement(item.ResultJson)
+                ["ResultJson"] = JsonSerializer.SerializeToElement(item.ResultJson),
+                ["InteractionValueJson"] = JsonSerializer.SerializeToElement(item.Request.InteractionValueJson),
+                ["InteractionValueContentType"] = JsonSerializer.SerializeToElement(item.Request.InteractionValueContentType)
             }
         };
     }
@@ -334,9 +359,11 @@ public sealed class LocalGptConnectionService(
         connectionCancellation?.Dispose();
         client = null; reader = null; writer = null; connectionCancellation = null; readLoop = null; peerId = string.Empty;
         State.IsConnected = false;
+        State.IsLinked = false;
         State.PeerId = string.Empty;
         State.DisplayName = string.Empty;
         State.ConnectedUtc = null;
+        State.LastError = string.Empty;
         State.RemoteCapabilities = [];
         State.RemoteSkills = [];
         State.RemoteUiFeatures = [];
@@ -354,6 +381,21 @@ public sealed class LocalGptConnectionService(
         if (envelope.Properties is null || !envelope.Properties.TryGetValue(key, out var element)) return false;
         try { value = element.Deserialize<T>(OrganicPluginProtocolCodec.JsonOptions); return true; }
         catch (JsonException) { return false; }
+    }
+
+    private OrganicCapabilityDescriptor ApplyPermissionPolicy(string requestedPeerId, OrganicCapabilityDescriptor capability)
+    {
+        var rule = permissions.Resolve(requestedPeerId, capability.Key);
+        if (rule is null)
+            return capability;
+        capability.IsExposedToPeer = rule.IsExposed;
+        capability.AllowPeerInvocation = rule.AllowInvocation;
+        capability.RequiresFrontendUserConfirmation = rule.RequiresFrontendConfirmation;
+        capability.RequiresHumanConfirmation = rule.RequiresFrontendConfirmation;
+        capability.RequiresHumanInteractionOnTargetSystem = rule.RequiresFrontendConfirmation;
+        capability.InteractionEditor = rule.InteractionEditor;
+        capability.ConfigurationKey = $"publisher:{requestedPeerId}:{capability.Key}:{rule.Organ}";
+        return capability;
     }
 
     private static string NormalizeAddress(string address, string hostName)

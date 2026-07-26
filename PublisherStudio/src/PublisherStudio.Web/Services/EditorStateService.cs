@@ -153,6 +153,15 @@ public sealed class EditorStateService : IDisposable
         Notify();
     }
 
+    public void SetPublicationCulture(string culture)
+    {
+        culture = string.IsNullOrWhiteSpace(culture) ? "en-US" : culture.Trim();
+        if (string.Equals(Document.ProjectSettings.Culture, culture, StringComparison.OrdinalIgnoreCase)) return;
+        Capture();
+        Document.ProjectSettings.Culture = culture;
+        Notify();
+    }
+
     public void SetInsertionPoint(double x, double y)
     {
         _lastInsertionX = Math.Clamp(x, 0, CurrentPage.WidthMm);

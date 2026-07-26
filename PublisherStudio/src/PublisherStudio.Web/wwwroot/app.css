@@ -80,3 +80,6 @@
 .live-source-now-playing b { font-size: 1.15rem; }
 .live-source-now-playing span { color: #bfdbfe; }
 .live-source-now-playing small { color: #94a3b8; }
+
+/* Organic 1-Wire receiving frontend authority */
+.organic-approval-content{display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap}.organic-approval-editor{flex:1 1 34rem;min-width:min(100%,22rem);display:flex;flex-direction:column;gap:.35rem}.organic-approval-editor textarea{width:100%;resize:vertical}.organic-approval-editor small{opacity:.8}.organic-approval-actions{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}

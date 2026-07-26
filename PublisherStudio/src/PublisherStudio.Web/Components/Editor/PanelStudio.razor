@@ -155,8 +155,14 @@
                 <main class="visual-settings panel-studio-workspace">
                     <div class="panel-studio-canvas-shell @(_interactionPreview ? "interaction-preview" : "arrange-preview")">
                         <div class="panel-studio-mode-banner">
-                            <b>@(_interactionPreview ? "Interaction test" : "Arrange mode")</b>
-                            <span>@(_interactionPreview ? "Live components receive pointer input. Switch back to Arrange to move them." : "Drag a toolbar component onto the canvas or drag an existing component to move it.")</span>
+                            <div>
+                                <b>@(_interactionPreview ? "Interaction mode" : "Arrange mode")</b>
+                                <span>@(_interactionPreview ? "Live content receives mouse, touch and keyboard input." : "Move or resize components. Double-click a component to interact with its real content.")</span>
+                            </div>
+                            <div class="panel-studio-mode-actions" role="group" aria-label="Panel Studio interaction mode">
+                                <button type="button" class="@(!_interactionPreview ? "active" : null)" @onclick="DisableInteractionPreview">Arrange</button>
+                                <button type="button" class="@(_interactionPreview ? "active" : null)" @onclick="EnableInteractionPreview">Interact</button>
+                            </div>
                         </div>
                         <div class="panel-studio-canvas" @ref="_canvasElement" tabindex="0"
                              data-panel-studio-arrange="@((!_interactionPreview).ToString().ToLowerInvariant())"
@@ -175,8 +181,10 @@
                                                 style="@HitStyle(element)"
                                                 data-panel-element-id="@element.Id"
                                                 data-panel-element-z="@element.ZIndex"
-                                                title="Move @element.Name with mouse, touch, keyboard or controller"
+                                                title="Move @element.Name. Double-click to interact with its live content."
                                                 @onclick="() => SelectElement(element.Id)"
+                                                @ondblclick="() => ActivateElementInteraction(element.Id)"
+                                                @ondblclick:stopPropagation
                                                 @oncontextmenu="args => ShowElementContextMenu(element.Id, args)"
                                                 @oncontextmenu:preventDefault
                                                 @oncontextmenu:stopPropagation>
@@ -188,6 +196,11 @@
                                         </button>
                                     }
                                 </div>
+                            }
+
+                            @if (_interactionPreview)
+                            {
+                                <button type="button" class="panel-studio-return-arrange" @onclick="DisableInteractionPreview" title="Return to component arrangement">Return to Arrange</button>
                             }
 
                             @if (_dragPrototype is not null)
@@ -888,6 +901,12 @@
     }
 
     private void EnableInteractionPreview() => _interactionPreview = true;
+    private void DisableInteractionPreview() => _interactionPreview = false;
+    private void ActivateElementInteraction(Guid id)
+    {
+        SelectElement(id);
+        _interactionPreview = true;
+    }
 
     private void SelectTemplate(Guid id)
     {

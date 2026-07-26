@@ -19,6 +19,14 @@
                     <span>@DescribeInteraction(current.Request)</span>
                     <small>@(string.IsNullOrWhiteSpace(current.Request.WorkOrderKey) ? current.CorrelationId.ToString("N") : current.Request.WorkOrderKey)</small>
                 </div>
+                @if (NeedsEditor(current.Request))
+                {
+                    <div class="organic-approval-editor">
+                        <label for="organic-interaction-value">@EditorLabel(current.Request)</label>
+                        <textarea id="organic-interaction-value" class="form-control" rows="@(ReadEditor(current.Request) == OrganicInteractionEditor.RichText ? 8 : 4)" @bind="_interactionValue"></textarea>
+                        <small>The value is returned through the exact 1-Wire request only after you approve it in this PublisherStudio frontend.</small>
+                    </div>
+                }
                 <div class="organic-approval-actions">
                     <button type="button" class="organic-primary" disabled="@_busy" @onclick="ApproveCurrentAsync">Approve once</button>
                     <button type="button" class="organic-danger" disabled="@_busy" @onclick="DeclineCurrentAsync">Decline</button>
@@ -40,6 +48,8 @@ else if (!_visible && _pending.Count > 0)
     private bool _collapsed;
     private bool _visible = true;
     private bool _busy;
+    private Guid? _editorWorkItemId;
+    private string _interactionValue = string.Empty;
 
     protected override void OnInitialized()
     {
@@ -47,10 +57,24 @@ else if (!_visible && _pending.Count > 0)
         Refresh();
     }
 
-    private void Refresh() => _pending = WorkCoordinator.GetWork()
-        .Where(item => item.Status == OrganicWorkStatus.PendingApproval)
-        .OrderBy(item => item.CreatedUtc)
-        .ToList();
+    private void Refresh()
+    {
+        _pending = WorkCoordinator.GetWork()
+            .Where(item => item.Status == OrganicWorkStatus.PendingApproval)
+            .OrderBy(item => item.CreatedUtc)
+            .ToList();
+        var current = _pending.FirstOrDefault();
+        if (current is null)
+        {
+            _editorWorkItemId = null;
+            _interactionValue = string.Empty;
+        }
+        else if (_editorWorkItemId != current.Id)
+        {
+            _editorWorkItemId = current.Id;
+            _interactionValue = current.Request.InteractionValueJson ?? string.Empty;
+        }
+    }
 
     private void OnChanged() => _ = InvokeAsync(() =>
     {
@@ -64,7 +88,10 @@ else if (!_visible && _pending.Count > 0)
         _busy = true;
         try
         {
-            var item = await WorkCoordinator.ApproveAsync(_pending[0].Id);
+            var pending = _pending[0];
+            if (NeedsEditor(pending.Request) && !WorkCoordinator.UpdateInteractionValue(pending.Id, _interactionValue))
+                throw new InvalidOperationException("The pending interaction value could not be attached to the current 1-Wire work item.");
+            var item = await WorkCoordinator.ApproveAsync(pending.Id);
             if (item is not null && Connection.State.IsConnected)
                 await Connection.SendWorkResultAsync(item);
             Notifications.Success("The requested AI Council action was approved once.", "Organic approval", nameof(OrganicApprovalBar));
@@ -96,6 +123,28 @@ else if (!_visible && _pending.Count > 0)
             _busy = false;
             Refresh();
         }
+    }
+
+    private static bool NeedsEditor(OrganicWireEnvelope request) => ReadEditor(request) is
+        OrganicInteractionEditor.PlainText or OrganicInteractionEditor.RichText or OrganicInteractionEditor.Json;
+
+    private static string EditorLabel(OrganicWireEnvelope request) => ReadEditor(request) switch
+    {
+        OrganicInteractionEditor.RichText => "Text or formatted story content requested by LocalGPT",
+        OrganicInteractionEditor.Json => "Structured JSON requested by LocalGPT",
+        _ => "Information requested by LocalGPT"
+    };
+
+    private static OrganicInteractionEditor ReadEditor(OrganicWireEnvelope request)
+    {
+        if (request.Properties is not null && request.Properties.TryGetValue("InteractionEditor", out var value))
+        {
+            if (value.ValueKind == System.Text.Json.JsonValueKind.String && Enum.TryParse<OrganicInteractionEditor>(value.GetString(), true, out var parsed))
+                return parsed;
+            if (value.ValueKind == System.Text.Json.JsonValueKind.Number && value.TryGetInt32(out var numeric) && Enum.IsDefined(typeof(OrganicInteractionEditor), numeric))
+                return (OrganicInteractionEditor)numeric;
+        }
+        return request.RequiresHumanInteractionOnTargetSystem ? OrganicInteractionEditor.ConfirmationOnly : OrganicInteractionEditor.None;
     }
 
     private static string DescribeInteraction(OrganicWireEnvelope request) => request.InteractionKind switch

@@ -18,6 +18,7 @@ const discovery = read('src','PublisherStudio.Web','HostedServices','OrganicPlug
 const controller = read('src','PublisherStudio.Web','Controllers','OrganicPluginController.cs');
 const services = read('src','PublisherStudio.Web','PublisherStudioServiceCollectionExtensions.cs');
 const page = read('src','PublisherStudio.Web','Components','Pages','OrganicPlugins.razor');
+const approvalBar = read('src','PublisherStudio.Web','Components','OrganicPlugins','OrganicApprovalBar.razor');
 const ribbon = read('src','PublisherStudio.Web','Components','Editor','PublicationRibbon.razor');
 const settings = JSON.parse(read('src','PublisherStudio.Web','appsettings.json'));
 const packageJson = JSON.parse(read('src','PublisherStudio.Web','package.json'));
@@ -32,9 +33,15 @@ for (const token of [
   'InteractionValueJson',
   'InteractionValueContentType',
   'public interface IOneWireCapabilityProvider',
-  'public interface IOneWireTransportAdapter'
+  'public interface IOneWireTransportAdapter',
+  'OneWireInteractionEditor',
+  'IsExposedToPeer',
+  'AllowPeerInvocation',
+  'RequiresFrontendUserConfirmation',
+  'ConfigurationKey'
 ]) assert.ok(sharedWireContract.includes(token), `${token} missing from shared WireProtocolVersion contract.`);
 assert.match(sharedWireProject, /<AssemblyName>LocalGPT\.WireProtocolVersion<\/AssemblyName>/);
+assert.match(sharedWireContract, /public const string Version = "1\.6";/);
 assert.ok(webProject.includes('<ProjectReference Include="..\\LocalGPT.WireProtocolVersion\\LocalGPT.WireProtocolVersion.csproj" />'));
 
 assert.match(sharedWireContract, /DefaultServicePort = 51140/);
@@ -69,6 +76,12 @@ assert.match(discovery, /Ignored malformed LocalGPT discovery data.*listening co
 assert.match(discovery, /Transient LocalGPT discovery receive failure.*listening continues/);
 assert.match(connection, /TcpClient/);
 assert.match(connection, /OrganicWireMessageType\.Hello/);
+assert.match(models, /public bool IsLinked/);
+assert.match(models, /IsConnected && IsLinked && RemoteCapabilities/);
+assert.match(connection, /Waiting for LocalGPT frontend link approval/);
+assert.match(connection, /State\.IsLinked = true/);
+assert.match(connection, /The 1-Wire transport is waiting for LocalGPT frontend link approval/);
+assert.match(page, /Awaiting LocalGPT approval/);
 assert.match(connection, /ProcessInvokeAsync/);
 assert.match(connection, /new CancellationTokenSource\(\)/, 'Connection lifetime must not be tied to a single HTTP request token.');
 assert.match(connection, /ConcurrentDictionary<Guid, Task> activeInvocations/, 'Incoming invocations must be tracked.');
@@ -101,6 +114,9 @@ assert.match(state, /permissions\.json/);
 assert.match(state, /AskEveryTime remains the safe default/);
 assert.match(state, /OrganicApprovalMode\.CurrentWorkOrder/);
 assert.match(state, /public bool IsDenied\(OrganicWireEnvelope envelope\)/);
+assert.match(state, /public bool IsCapabilityExposed\(string peerId, OrganicCapabilityDescriptor capability\)/);
+assert.match(state, /rule\.RequiresFrontendConfirmation/);
+assert.match(state, /rule\.AllowInvocation/);
 assert.match(state, /OrganicApprovalMode\.Deny/);
 assert.match(state, /string\.IsNullOrWhiteSpace\(rule\.WorkOrderKey\)/);
 assert.match(state, /string\.IsNullOrWhiteSpace\(envelope\.WorkOrderKey\)/);
@@ -124,6 +140,12 @@ assert.match(page, /publisher\.text\.proposal\.request/);
 assert.match(page, /MaxOutputTokens = 262144/);
 assert.match(page, /MaxContextTokens = 262144/);
 assert.match(page, /Permission matrix/);
+assert.match(page, /Reveal capability to this peer/);
+assert.match(page, /Always require this PublisherStudio frontend/);
+assert.match(page, /Human input editor/);
+assert.match(approvalBar, /UpdateInteractionValue/);
+assert.match(approvalBar, /OrganicInteractionEditor\.RichText/);
+assert.match(approvalBar, /returned through the exact 1-Wire request/);
 assert.match(page, /Approve once/);
 assert.match(page, /IUserNotificationService Notifications/);
 assert.match(page, /ILogger<OrganicPlugins> Logger/);
@@ -133,8 +155,8 @@ assert.match(ribbon, /Navigation\.NavigateTo\("\/organic-plugins"\)/);
 assert.equal(settings.OrganicPlugins.DiscoveryPort, 51141);
 assert.equal(settings.OrganicPlugins.DiscoveryReceivePollSeconds, 5);
 assert.equal(settings.OrganicPlugins.Enabled, true);
-assert.equal(packageJson.version, '1.0.90');
-assert.match(webProject, /<Version>1\.0\.90<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.90<\/Version>/);
+assert.equal(packageJson.version, '1.0.93');
+assert.match(webProject, /<Version>1\.0\.93<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.93<\/Version>/);
 
 console.log('PublisherStudio LocalGPT organic 1-Wire, permission, OpenSCAD and spreadsheet workflow source contracts passed.');

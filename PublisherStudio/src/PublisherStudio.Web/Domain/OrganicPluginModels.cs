@@ -17,7 +17,10 @@ public sealed class OrganicPluginWorkItem
 
 public sealed class OrganicConnectionState
 {
+    /// <summary>True while the TCP transport is alive.</summary>
     public bool IsConnected { get; set; }
+    /// <summary>True only after both frontends participated: PublisherStudio initiated the link and LocalGPT approved it.</summary>
+    public bool IsLinked { get; set; }
     public string PeerId { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public DateTimeOffset? ConnectedUtc { get; set; }
@@ -27,12 +30,12 @@ public sealed class OrganicConnectionState
     public List<OrganicUiFeatureDescriptor> RemoteUiFeatures { get; set; } = [];
     public List<OrganicHardwareDescriptor> RemoteHardware { get; set; } = [];
 
-    public bool HasCapability(string key) => IsConnected && RemoteCapabilities.Any(item =>
+    public bool HasCapability(string key) => IsConnected && IsLinked && RemoteCapabilities.Any(item =>
         item.IsEnabled && item.IsOnline && string.Equals(item.Key, key, StringComparison.OrdinalIgnoreCase));
 
     public OrganicUiFeatureState GetUiFeatureState(string key, OrganicUiFeatureState fallback = OrganicUiFeatureState.Hidden)
     {
-        if (!IsConnected) return OrganicUiFeatureState.Hidden;
+        if (!IsConnected || !IsLinked) return OrganicUiFeatureState.Hidden;
         return RemoteUiFeatures.FirstOrDefault(item => string.Equals(item.Key, key, StringComparison.OrdinalIgnoreCase))?.State ?? fallback;
     }
 }

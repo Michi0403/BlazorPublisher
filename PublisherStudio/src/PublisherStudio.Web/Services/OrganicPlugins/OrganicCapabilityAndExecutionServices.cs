@@ -87,6 +87,15 @@ public sealed class OrganicCapabilityCatalog(
         SupportsRecurringExecution = key is "publisher.screen.capture" or "publisher.screenreader.start",
         RequiresHumanInteractionOnTargetSystem = confirmation,
         RequiresAutomatedInteractionOnTargetSystem = key is "publisher.screen.capture" or "publisher.input.execute" or "publisher.screenreader.start" or "publisher.screenreader.stop",
+        IsExposedToPeer = true,
+        AllowPeerInvocation = true,
+        RequiresFrontendUserConfirmation = confirmation,
+        InteractionEditor = key == "publisher.text.insert.propose"
+            ? OrganicInteractionEditor.RichText
+            : confirmation
+                ? OrganicInteractionEditor.ConfirmationOnly
+                : OrganicInteractionEditor.None,
+        ConfigurationKey = $"publisher:{key}",
         ParameterSchemaJson = Schema(key)
     };
 
@@ -292,6 +301,7 @@ public sealed class OrganicWorkExecutor(
 
 public sealed class OrganicWorkCoordinator(
     IOrganicPermissionStore permissions,
+    IOrganicCapabilityCatalog capabilityCatalog,
     IOrganicWorkExecutor executor,
     ILogger<OrganicWorkCoordinator> logger) : IOrganicWorkCoordinator
 {
@@ -304,18 +314,40 @@ public sealed class OrganicWorkCoordinator(
 
     public async Task<OrganicPluginWorkItem> ReceiveAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
+        var advertised = (await capabilityCatalog.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false))
+            .FirstOrDefault(capability => string.Equals(capability.Key, envelope.CapabilityKey, StringComparison.OrdinalIgnoreCase));
+        var permission = permissions.Resolve(envelope.SourcePeerId, envelope.CapabilityKey, envelope.Organs.FirstOrDefault() ?? string.Empty)
+            ?? permissions.Resolve(envelope.SourcePeerId, envelope.CapabilityKey);
+        var exposed = advertised is not null && advertised.IsEnabled && advertised.IsOnline &&
+            advertised.AllowPeerInvocation && permissions.IsCapabilityExposed(envelope.SourcePeerId, advertised) &&
+            (permission?.AllowInvocation ?? true);
+        if (advertised is not null)
+        {
+            envelope.RequiresHumanInteractionOnTargetSystem = permission?.RequiresFrontendConfirmation
+                ?? advertised.RequiresFrontendUserConfirmation
+                || advertised.RequiresHumanConfirmation;
+            envelope.Properties ??= new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+            envelope.Properties["InteractionEditor"] = JsonSerializer.SerializeToElement(
+                (permission?.InteractionEditor ?? advertised.InteractionEditor).ToString(), OrganicPluginProtocolCodec.JsonOptions);
+            envelope.Properties["ConfigurationKey"] = JsonSerializer.SerializeToElement(
+                advertised.ConfigurationKey, OrganicPluginProtocolCodec.JsonOptions);
+        }
         var item = new OrganicPluginWorkItem
         {
             MessageId = envelope.MessageId, CorrelationId = envelope.CorrelationId, PeerId = envelope.SourcePeerId,
             CapabilityKey = envelope.CapabilityKey, Request = envelope,
-            Status = permissions.IsDenied(envelope)
+            Status = !exposed || permissions.IsDenied(envelope)
                 ? OrganicWorkStatus.Declined
                 : permissions.IsAllowed(envelope)
                     ? OrganicWorkStatus.Queued
                     : OrganicWorkStatus.PendingApproval
         };
         if (item.Status == OrganicWorkStatus.Declined)
-            item.Error = "Denied by the PublisherStudio organic permission policy.";
+            item.Error = advertised is null
+                ? "The requested capability is not registered in PublisherStudio."
+                : !exposed
+                    ? "The PublisherStudio frontend catalog does not expose this capability to the connected peer."
+                    : "Denied by the PublisherStudio organic permission policy.";
         work[item.Id] = item;
         Changed?.Invoke();
         if (item.Status == OrganicWorkStatus.Queued)
@@ -336,6 +368,32 @@ public sealed class OrganicWorkCoordinator(
         Changed?.Invoke();
         await ExecuteAsync(item, cancellationToken).ConfigureAwait(false);
         return item;
+    }
+
+    public bool UpdateInteractionValue(Guid id, string value)
+    {
+        if (!work.TryGetValue(id, out var item) || item.Status != OrganicWorkStatus.PendingApproval)
+            return false;
+        item.Request.InteractionValueJson = value ?? string.Empty;
+        var editor = ReadInteractionEditor(item.Request);
+        item.Request.InteractionValueContentType = editor == OrganicInteractionEditor.Json
+            ? "application/json"
+            : "text/plain; charset=utf-8";
+        item.UpdatedUtc = DateTimeOffset.UtcNow;
+        Changed?.Invoke();
+        return true;
+    }
+
+    private static OrganicInteractionEditor ReadInteractionEditor(OrganicWireEnvelope envelope)
+    {
+        if (envelope.Properties is not null && envelope.Properties.TryGetValue("InteractionEditor", out var value))
+        {
+            if (value.ValueKind == JsonValueKind.String && Enum.TryParse<OrganicInteractionEditor>(value.GetString(), true, out var parsed))
+                return parsed;
+            if (value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var numeric) && Enum.IsDefined(typeof(OrganicInteractionEditor), numeric))
+                return (OrganicInteractionEditor)numeric;
+        }
+        return envelope.RequiresHumanInteractionOnTargetSystem ? OrganicInteractionEditor.ConfirmationOnly : OrganicInteractionEditor.None;
     }
 
     public bool Decline(Guid id, string reason)

@@ -17,3 +17,4 @@ global using OrganicUiFeatureState = LocalGPT.WireProtocol.OneWireUiFeatureState
 global using OrganicHardwareDescriptor = LocalGPT.WireProtocol.OneWireHardwareDescriptor;
 global using OrganicRecurringExecution = LocalGPT.WireProtocol.OneWireRecurringExecution;
 global using OrganicInteractionKind = LocalGPT.WireProtocol.OneWireInteractionKind;
+global using OrganicInteractionEditor = LocalGPT.WireProtocol.OneWireInteractionEditor;

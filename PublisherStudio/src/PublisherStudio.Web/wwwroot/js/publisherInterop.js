@@ -6668,8 +6668,11 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         };
         element.querySelectorAll('.panel-studio-hitbox.selected').forEach(node => node.classList.remove('selected'));
         hitbox.classList.add('selected');
+        const elementId = hitbox.dataset.panelElementId || '';
+        const liveElement = Array.from(element.querySelectorAll('.publication-panel-element[data-element-id]'))
+            .find(node => node instanceof HTMLElement && node.dataset.elementId === elementId) || null;
         const operation = {
-            id: hitbox.dataset.panelElementId || '', hitbox, handle: handle?.dataset?.resize || '',
+            id: elementId, hitbox, liveElement, handle: handle?.dataset?.resize || '',
             pointerId: event.pointerId, originX: event.clientX, originY: event.clientY,
             canvasBounds, initial, current: initial, moved: false
         };
@@ -6708,6 +6711,14 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         operation.hitbox.style.top = `${y * 100}%`;
         operation.hitbox.style.width = `${width * 100}%`;
         operation.hitbox.style.height = `${height * 100}%`;
+        // Keep the real panel component visually attached to its selection rectangle while dragging.
+        // The final normalized values are still committed through the C# layout service on pointer-up.
+        if (operation.liveElement instanceof HTMLElement) {
+            operation.liveElement.style.left = `${x * 100}%`;
+            operation.liveElement.style.top = `${y * 100}%`;
+            operation.liveElement.style.width = `${width * 100}%`;
+            operation.liveElement.style.height = `${height * 100}%`;
+        }
     }, activeOptions);
 
     const finishPointer = event => {
@@ -7125,7 +7136,7 @@ async function buildPublisherSingleHtml(mode, title) {
         }
         return await response.text();
     };
-    const [devExtremeCss, jquerySource, devExtremeSource, worldMapSource, europeMapSource, eurasiaMapSource, africaMapSource, usaMapSource, canadaMapSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource, componentRuntimeSource] = await Promise.all([
+    const [devExtremeCss, jquerySource, devExtremeSource, worldMapSource, europeMapSource, eurasiaMapSource, africaMapSource, usaMapSource, canadaMapSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource, componentRuntimeSource, tooltipRuntimeSource] = await Promise.all([
         fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
         fetchExportAsset('vendor/jquery/jquery.min.js'),
         fetchExportAsset('vendor/devextreme-dist/js/dx.all.js'),
@@ -7138,7 +7149,8 @@ async function buildPublisherSingleHtml(mode, title) {
         fetchExportAsset('vendor/devextreme-license.js', 'generated DevExtreme runtime license'),
         fetchExportAsset('vendor/devextreme-license.version', 'DevExtreme runtime-license version marker'),
         fetchExportAsset('js/liveDataInterop.js'),
-        fetchExportAsset('js/componentRuntime.js')
+        fetchExportAsset('js/componentRuntime.js'),
+        fetchExportAsset('js/tooltipRuntime.js')
     ]);
     if (!/DevExpress\s*\.\s*config\s*\(/.test(devExtremeLicenseSource) || !/licenseKey\s*:/.test(devExtremeLicenseSource)) {
         throw new Error('The generated DevExtreme runtime license file is invalid. Run Prepare-DevExpressAssets.cmd again on the licensed build machine.');
@@ -7174,7 +7186,7 @@ async function buildPublisherSingleHtml(mode, title) {
     const isSite = mode === 'site';
     const runtimeFunction = isSite ? websiteSiteRuntime : websitePresentationRuntime;
     const outputContextRuntime = `(()=>{const p=new URLSearchParams(location.search);const platform=p.get('publisherChatPlatform')||p.get('publisherOutputPlatform')||'Preview';const channel=p.get('publisherChatChannel')||'';const mode=p.get('publisherOutputMode')||(platform==='Preview'?'operator':'broadcast');window.PublisherStudioOutputContext={mode,platform,channel,outputId:p.get('publisherOutputId')||''};window.PublisherStudioChatPlatform=platform;window.PublisherStudioChatChannel=channel;})();`;
-    const runtime = `${outputContextRuntime}window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};(${signalConnectorRuntime.toString()})(document,{autoStart:false,expose:true});(${runtimeFunction.toString()})();window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});`;
+    const runtime = `${outputContextRuntime}window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};window.__publisherSignalRuntime=(${signalConnectorRuntime.toString()})(document,{autoStart:false,expose:true});(()=>{let booted=false;const boot=()=>{try{if(!booted){booted=true;(${runtimeFunction.toString()})();}window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});window.__publisherSignalRuntime?.startPage?.(document.querySelector('.ps-slide:not([hidden]) .print-page,.ps-site-page:not([hidden]),.print-page')||document);window.PublisherStudioTooltips?.refresh(document);}catch(error){console.error('PublisherStudio standalone runtime boot failed.',error);}};const refresh=()=>{window.PublisherStudioTooltips?.refresh(document);window.__publisherSignalRuntime?.refresh?.();};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();requestAnimationFrame(()=>{boot();refresh();requestAnimationFrame(refresh);});setTimeout(refresh,250);setTimeout(refresh,1000);new MutationObserver(()=>requestAnimationFrame(refresh)).observe(document.body,{subtree:true,childList:true,attributes:true});})();`;
     const modeCss = isSite ? `
 :root{color-scheme:light dark}
 html,body{width:100%;height:100%;overflow:hidden!important;background:#111827!important}
@@ -7216,8 +7228,9 @@ body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
 @media (prefers-reduced-motion:reduce){.ps-slide,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
 @media print{html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}.website-publication{position:static;display:block!important;overflow:visible}.ps-stage{position:static;width:auto!important;height:auto!important;overflow:visible;transform:none!important;box-shadow:none}.ps-slide,.ps-slide[hidden]{position:relative;display:block!important;inset:auto;overflow:hidden;break-after:page}.website-publication .print-page{position:relative;left:auto;top:auto;margin:0 auto;box-shadow:none;transform:none!important}.ps-controls{display:none!important}}
 `;
+    const exportCulture = String(source.dataset.publicationCulture || document.documentElement.lang || 'en-US');
     return `<!doctype html>
-<html lang="en">
+<html lang="${escapeHtml(exportCulture)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7227,7 +7240,7 @@ ${css}
 ${modeCss}
 </style>
 </head>
-<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(worldMapSource)}</script><script>${safeScript(europeMapSource)}</script><script>${safeScript(eurasiaMapSource)}</script><script>${safeScript(africaMapSource)}</script><script>${safeScript(usaMapSource)}</script><script>${safeScript(canadaMapSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(componentRuntimeSource)}</script><script>${safeScript(runtime)}</script></body>
+<body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(worldMapSource)}</script><script>${safeScript(europeMapSource)}</script><script>${safeScript(eurasiaMapSource)}</script><script>${safeScript(africaMapSource)}</script><script>${safeScript(usaMapSource)}</script><script>${safeScript(canadaMapSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(componentRuntimeSource)}</script><script>${safeScript(tooltipRuntimeSource)}</script><script>${safeScript(runtime)}</script></body>
 </html>`;
 }
 
@@ -7542,7 +7555,7 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
 
     const uniqueWarnings = [...new Set(warnings)];
     const manifest = {
-        publisherStudioVersion: '1.0.90',
+        publisherStudioVersion: '1.0.93',
         kind: options.mode,
         generatedUtc: new Date().toISOString(),
         assetCount,

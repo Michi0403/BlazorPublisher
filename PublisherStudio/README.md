@@ -15,6 +15,15 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## v1.0.88: publish-candidate interaction hardening
+
+- Fixes the Panel Studio drop race that could terminate a Blazor circuit.
+- Makes HTML/Web/Canvas/3D content arrangeable as a normal object in Mainframe and Panel Studio.
+- Adds shared layout/Z-order service and API, complete layer commands, pointer/touch/keyboard/gamepad input, local stacking rules, structured logging and user notifications.
+- Introduces a mandatory interaction/stacking/export/logging release gate for future components.
+
+See `CHANGELOG-v1.0.88.md` and `docs/architecture/interaction-stacking-and-notification-v1.0.88.md`.
+
 ## v1.0.87: browser runtime raw-string compatibility
 
 This hotfix fixes `CS9007` in the reusable blob browser-runtime template. Embedded JavaScript is now a non-interpolated C# raw string with one explicit payload marker, so JavaScript block braces and `${...}` template expressions cannot be mistaken for C# interpolation delimiters. A contract test also validates a generated runtime with `node --check`.

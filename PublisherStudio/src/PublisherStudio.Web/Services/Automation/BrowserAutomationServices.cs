@@ -3,7 +3,7 @@ using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services.Automation;
 
-public sealed class UserInputAutomationService : IUserInputAutomationService
+public sealed class UserInputAutomationService(ILogger<UserInputAutomationService> logger) : IUserInputAutomationService
 {
     private readonly ConcurrentDictionary<Guid, BrowserAutomationCommand> _commands = new();
 
@@ -14,6 +14,7 @@ public sealed class UserInputAutomationService : IUserInputAutomationService
         command.CreatedUtc = DateTimeOffset.UtcNow;
         command.Status = AutomationRequestStatus.Pending;
         _commands[command.Id] = command;
+        logger.LogInformation("Queued browser input command {CommandId} ({Kind}) for selector {Selector}.", command.Id, command.Kind, command.Selector);
         TrimCompleted();
         return command;
     }
@@ -32,6 +33,7 @@ public sealed class UserInputAutomationService : IUserInputAutomationService
                 claimed.Add(current);
             }
         }
+        if (claimed.Count > 0) logger.LogDebug("Claimed {Count} browser input command(s).", claimed.Count);
         return claimed.AsReadOnly();
     }
 
@@ -42,6 +44,8 @@ public sealed class UserInputAutomationService : IUserInputAutomationService
         command.Error = completion.Error ?? string.Empty;
         command.Status = string.IsNullOrWhiteSpace(command.Error) ? AutomationRequestStatus.Completed : AutomationRequestStatus.Failed;
         command.CompletedUtc = DateTimeOffset.UtcNow;
+        if (command.Status == AutomationRequestStatus.Failed) logger.LogWarning("Browser input command {CommandId} failed: {Error}", id, command.Error);
+        else logger.LogInformation("Browser input command {CommandId} completed.", id);
         return true;
     }
 
@@ -50,6 +54,7 @@ public sealed class UserInputAutomationService : IUserInputAutomationService
         if (!_commands.TryGetValue(id, out var command)) return false;
         command.Status = AutomationRequestStatus.Cancelled;
         command.CompletedUtc = DateTimeOffset.UtcNow;
+        logger.LogInformation("Browser input command {CommandId} was cancelled.", id);
         return true;
     }
 
@@ -65,7 +70,7 @@ public sealed class UserInputAutomationService : IUserInputAutomationService
     }
 }
 
-public sealed class ScreenshotCaptureService : IScreenshotCaptureService
+public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> logger) : IScreenshotCaptureService
 {
     private readonly ConcurrentDictionary<Guid, BrowserScreenshotRequest> _requests = new();
 
@@ -77,6 +82,7 @@ public sealed class ScreenshotCaptureService : IScreenshotCaptureService
         request.Status = AutomationRequestStatus.Pending;
         request.DataUrl = string.Empty;
         _requests[request.Id] = request;
+        logger.LogInformation("Queued screenshot request {RequestId} for selector {Selector} at scale {Scale}.", request.Id, request.Selector, request.Scale);
         return request;
     }
 
@@ -94,6 +100,7 @@ public sealed class ScreenshotCaptureService : IScreenshotCaptureService
                 claimed.Add(current);
             }
         }
+        if (claimed.Count > 0) logger.LogDebug("Claimed {Count} screenshot request(s).", claimed.Count);
         return claimed.AsReadOnly();
     }
 
@@ -106,6 +113,8 @@ public sealed class ScreenshotCaptureService : IScreenshotCaptureService
         request.Error = completion.Error ?? string.Empty;
         request.Status = string.IsNullOrWhiteSpace(request.Error) ? AutomationRequestStatus.Completed : AutomationRequestStatus.Failed;
         request.CompletedUtc = DateTimeOffset.UtcNow;
+        if (request.Status == AutomationRequestStatus.Failed) logger.LogWarning("Screenshot request {RequestId} failed: {Error}", id, request.Error);
+        else logger.LogInformation("Screenshot request {RequestId} completed at {Width}x{Height}.", id, request.PixelWidth, request.PixelHeight);
         return true;
     }
 
@@ -116,6 +125,7 @@ public sealed class ScreenshotCaptureService : IScreenshotCaptureService
         if (!_requests.TryGetValue(id, out var request)) return false;
         request.Status = AutomationRequestStatus.Cancelled;
         request.CompletedUtc = DateTimeOffset.UtcNow;
+        logger.LogInformation("Screenshot request {RequestId} was cancelled.", id);
         return true;
     }
 }

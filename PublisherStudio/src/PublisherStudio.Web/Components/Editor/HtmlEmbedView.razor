@@ -1,15 +1,25 @@
 @namespace PublisherStudio.Components.Editor
 
-<iframe class="publication-html-embed"
-        title="@Item.Name"
-        sandbox="@Item.Sandbox"
-        srcdoc="@SourceDocument"
-        loading="lazy"
-        referrerpolicy="no-referrer"
-        style="background:@Item.Background"></iframe>
+<div class="publication-html-embed-shell @(DesignerMode ? "designer-object-mode" : "interaction-mode")">
+    <iframe class="publication-html-embed"
+            title="@Item.Name"
+            sandbox="@Item.Sandbox"
+            srcdoc="@SourceDocument"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            style="background:@Item.Background"></iframe>
+    @if (DesignerMode)
+    {
+        <div class="publication-html-design-shield"
+             data-designer-object-shield
+             title="Arrange web content. Double-click to edit; use preview mode to interact."
+             aria-label="Arrange @Item.Name"></div>
+    }
+</div>
 
 @code {
     [Parameter, EditorRequired] public HtmlEmbedElement Item { get; set; } = default!;
+    [Parameter] public bool DesignerMode { get; set; }
 
     private string SourceDocument
     {

@@ -146,3 +146,21 @@ OpenSCAD work must use the canonical `OpenScadDocument`/`OpenScadNode` graph, ca
 ## Release task ledger
 
 Every release that leaves incomplete work must update `docs/architecture/task-ledger.md` and its changelog with Closed, Partial or Deferred status. A later release closes a task only when implementation evidence and a maintained test exist. Do not silently drop open architecture tasks between ZIP releases.
+
+## Interaction, stacking, input and frontend-failure release gate
+
+Every release that adds or changes a visual object, toolbar, overlay, editor mode, embedded web runtime or media interaction must begin with an explicit checklist in the current changelog. Do not mark an item complete until the relevant repository contract test passes.
+
+The checklist must cover, where applicable:
+
+- canonical object-layer participation in Mainframe and the owning Studio;
+- selection persistence, move, resize, rotate, duplicate, delete and the four layer-order operations;
+- mouse, pen, touch, keyboard and controller/gamepad command routing through shared Services rather than separate behavior forks;
+- local stacking contexts for toolbars, menus, hit surfaces and transient overlays, with no arbitrary application-wide maximum Z-index;
+- preview, HTML/website, raster/SVG, print/PDF and video-render behavior or an explicit capability/loss marker;
+- listener, pointer-capture, observer, object-URL and JavaScript interop cleanup on cancellation and disposal;
+- structured `ILogger<T>` diagnostics in every new Service and every changed frontend failure boundary;
+- a user-facing notification through `IUserNotificationService` for recoverable frontend failures, while expected circuit disconnects remain debug-level diagnostics rather than alarming notifications;
+- a regression test for every crash, race, unreachable command or stacking defect fixed by the release.
+
+A visual feature is not release-complete merely because its renderer looks correct. It is complete only when it remains operable through the shared object-layer structure and the supported input families, and when failures do not tear down the Blazor circuit.

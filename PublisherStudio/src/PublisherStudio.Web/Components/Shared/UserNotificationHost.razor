@@ -1,0 +1,37 @@
+@namespace PublisherStudio.Components.Shared
+@implements IDisposable
+@inject PublisherStudio.Services.UserExperience.IUserNotificationService Notifications
+
+<div class="publisher-notification-host" aria-live="polite" aria-atomic="false">
+    @foreach (var message in Notifications.Messages)
+    {
+        <article @key="message.Id" class="publisher-notification severity-@message.Severity.ToString().ToLowerInvariant()" role="@(message.Severity == UserNotificationSeverity.Error ? "alert" : "status")">
+            <span class="publisher-notification-icon" aria-hidden="true">@Icon(message.Severity)</span>
+            <div>
+                @if (!string.IsNullOrWhiteSpace(message.Title))
+                {
+                    <strong>@message.Title</strong>
+                }
+                <p>@message.Message</p>
+                @if (!string.IsNullOrWhiteSpace(message.Source))
+                {
+                    <small>@message.Source</small>
+                }
+            </div>
+            <button type="button" title="Dismiss notification" aria-label="Dismiss notification" @onclick="() => Notifications.Dismiss(message.Id)">×</button>
+        </article>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized() => Notifications.Changed += OnChanged;
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+    private static string Icon(UserNotificationSeverity severity) => severity switch
+    {
+        UserNotificationSeverity.Success => "✓",
+        UserNotificationSeverity.Warning => "!",
+        UserNotificationSeverity.Error => "×",
+        _ => "i"
+    };
+    public void Dispose() => Notifications.Changed -= OnChanged;
+}

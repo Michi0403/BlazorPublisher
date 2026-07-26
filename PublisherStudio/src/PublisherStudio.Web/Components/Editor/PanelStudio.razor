@@ -4,6 +4,9 @@
 @inject PublicationFileService Files
 @inject PublicationComponentService Components
 @inject IJSRuntime JS
+@inject IPublicationElementLayoutService Layout
+@inject IUserNotificationService Notifications
+@inject ILogger<PanelStudio> Logger
 
 @if (Visible && _draft is not null)
 {
@@ -30,8 +33,10 @@
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Layer" IconCssClass="pub-icon pub-icon-layers">
                         <DxRibbonItem Text="Duplicate" IconCssClass="pub-icon pub-icon-copy" Click="DuplicateElement" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Bring to front" IconCssClass="pub-icon pub-icon-up" Click="BringElementToFront" Enabled="@(SelectedElement is not null)" />
                         <DxRibbonItem Text="Bring forward" IconCssClass="pub-icon pub-icon-up" Click="MoveElementUp" Enabled="@(SelectedElement is not null)" />
                         <DxRibbonItem Text="Send backward" IconCssClass="pub-icon pub-icon-down" Click="MoveElementDown" Enabled="@(SelectedElement is not null)" />
+                        <DxRibbonItem Text="Send to back" IconCssClass="pub-icon pub-icon-down" Click="SendElementToBack" Enabled="@(SelectedElement is not null)" />
                         <DxRibbonItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Click="DeleteElement" Enabled="@(SelectedElement is not null)" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Reusable module" IconCssClass="pub-icon pub-icon-panel">
@@ -153,10 +158,12 @@
                             <b>@(_interactionPreview ? "Interaction test" : "Arrange mode")</b>
                             <span>@(_interactionPreview ? "Live components receive pointer input. Switch back to Arrange to move them." : "Drag a toolbar component onto the canvas or drag an existing component to move it.")</span>
                         </div>
-                        <div class="panel-studio-canvas" @ref="_canvasElement"
+                        <div class="panel-studio-canvas" @ref="_canvasElement" tabindex="0"
+                             data-panel-studio-arrange="@((!_interactionPreview).ToString().ToLowerInvariant())"
+                             aria-label="Panel arrangement canvas"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
-                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="true" />
+                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" />
 
                             @if (!_interactionPreview && CurrentView is not null)
                             {
@@ -166,12 +173,13 @@
                                         <button type="button"
                                                 class="panel-studio-hitbox @(element.Id == _selectedElementId ? "selected" : null)"
                                                 style="@HitStyle(element)"
-                                                draggable="true"
                                                 data-panel-element-id="@element.Id"
-                                                title="Drag @element.Name"
+                                                data-panel-element-z="@element.ZIndex"
+                                                title="Move @element.Name with mouse, touch, keyboard or controller"
                                                 @onclick="() => SelectElement(element.Id)"
-                                                @ondragstart="() => BeginExistingDrag(element.Id)"
-                                                @ondragend="EndDrag">
+                                                @oncontextmenu="args => ShowElementContextMenu(element.Id, args)"
+                                                @oncontextmenu:preventDefault
+                                                @oncontextmenu:stopPropagation>
                                             <span>@element.Name</span>
                                             <i data-resize="nw" title="Resize from top left"></i>
                                             <i data-resize="ne" title="Resize from top right"></i>
@@ -388,6 +396,22 @@
             </footer>
         </section>
     </div>
+
+    <DxContextMenu @ref="_elementContextMenu">
+        <Items>
+            <DxContextMenuItem Text="Duplicate" IconCssClass="pub-icon pub-icon-copy" Click="DuplicateElement" />
+            <DxContextMenuItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Click="DeleteElement" />
+            <DxContextMenuItem Text="Arrange" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="Bring to front" Click="BringElementToFront" />
+                    <DxContextMenuItem Text="Bring forward" Click="MoveElementUp" />
+                    <DxContextMenuItem Text="Send backward" Click="MoveElementDown" />
+                    <DxContextMenuItem Text="Send to back" Click="SendElementToBack" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="Test interactions" BeginGroup="true" Click="EnableInteractionPreview" />
+        </Items>
+    </DxContextMenu>
 }
 
 @code {
@@ -415,6 +439,8 @@
     private string _templateName = string.Empty;
     private string _templateCategory = "My modules";
     private string _templateDescription = string.Empty;
+    private DxContextMenu _elementContextMenu = default!;
+    private bool _disposed;
 
     private PublicationPanelView? CurrentView => _draft?.Views.FirstOrDefault(view => view.Id == _selectedViewId) ?? _draft?.ActiveView;
     private PublicationElement? SelectedElement => CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
@@ -450,9 +476,19 @@
             await JS.InvokeVoidAsync("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self);
             _dropSurfaceBound = true;
         }
-        catch (JSException exception)
+        catch (JSDisconnectedException exception)
         {
-            _error = $"The Panel Studio drop preview could not be initialized: {exception.Message}";
+            Logger.LogDebug(exception, "Panel Studio interaction binding ended because the browser circuit disconnected.");
+        }
+        catch (TaskCanceledException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio interaction binding was cancelled.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio interaction binding failed.");
+            _error = "The Panel Studio interaction surface could not be initialized.";
+            Notifications.Error(_error, "Panel Studio", nameof(PanelStudio));
         }
     }
 
@@ -562,42 +598,127 @@
 
     private async Task DropDraggedElement(DragEventArgs args)
     {
-        if (_draft is null || CurrentView is null || _dragPrototype is null) return;
-        var point = await ResolveCanvasPoint(args);
-        var pointX = point.X * Math.Max(1, _draft.CanvasWidth);
-        var pointY = point.Y * Math.Max(1, _draft.CanvasHeight);
-        if (_dragExistingId is { } existingId && CurrentView.Elements.FirstOrDefault(element => element.Id == existingId) is { } existing)
+        // Snapshot the complete transaction before awaiting JS. HTML dragend can fire while
+        // ResolveCanvasPoint is suspended and clear the component fields.
+        var draft = _draft;
+        var view = CurrentView;
+        var prototype = _dragPrototype;
+        var existingId = _dragExistingId;
+        if (draft is null || view is null || prototype is null)
         {
-            existing.X = Math.Clamp(pointX - existing.Width / 2, 0, Math.Max(0, _draft.CanvasWidth - existing.Width));
-            existing.Y = Math.Clamp(pointY - existing.Height / 2, 0, Math.Max(0, _draft.CanvasHeight - existing.Height));
-            SelectElement(existing.Id);
+            EndDrag();
+            return;
         }
-        else
+
+        try
         {
-            var element = _dragPrototype;
+            var point = await ResolveCanvasPoint(args);
+            if (_disposed || !ReferenceEquals(_draft, draft) || !draft.Views.Contains(view)) return;
+
+            var canvasWidth = Math.Max(1, draft.CanvasWidth);
+            var canvasHeight = Math.Max(1, draft.CanvasHeight);
+            var pointX = point.X * canvasWidth;
+            var pointY = point.Y * canvasHeight;
+
+            if (existingId is { } id && view.Elements.FirstOrDefault(element => element.Id == id) is { } existing)
+            {
+                Layout.ApplyBounds(existing, new PublicationCanvasBounds
+                {
+                    X = pointX - existing.Width / 2,
+                    Y = pointY - existing.Height / 2,
+                    Width = existing.Width,
+                    Height = existing.Height
+                }, canvasWidth, canvasHeight);
+                SelectElement(existing.Id);
+                return;
+            }
+
+            var element = Files.CloneElement(prototype);
             element.Id = Guid.NewGuid();
-            element.X = Math.Clamp(pointX - element.Width / 2, 0, Math.Max(0, _draft.CanvasWidth - element.Width));
-            element.Y = Math.Clamp(pointY - element.Height / 2, 0, Math.Max(0, _draft.CanvasHeight - element.Height));
-            AddElement(element);
+            Layout.ApplyBounds(element, new PublicationCanvasBounds
+            {
+                X = pointX - element.Width / 2,
+                Y = pointY - element.Height / 2,
+                Width = element.Width,
+                Height = element.Height
+            }, canvasWidth, canvasHeight);
+            AddElement(view, element);
         }
-        EndDrag();
+        catch (JSDisconnectedException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio drop ended because the browser circuit disconnected.");
+        }
+        catch (TaskCanceledException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio drop was cancelled.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio element drop failed.");
+            _error = "The component could not be placed. Existing panel content was kept unchanged.";
+            Notifications.Error(_error, "Component placement failed", nameof(PanelStudio), persistent: true);
+        }
+        finally
+        {
+            EndDrag();
+        }
     }
 
     [JSInvokable]
     public Task CommitPanelElementBounds(string elementId, double x, double y, double width, double height)
     {
-        if (_draft is null || CurrentView is null || !Guid.TryParse(elementId, out var id)) return Task.CompletedTask;
-        var element = CurrentView.Elements.FirstOrDefault(candidate => candidate.Id == id);
+        var draft = _draft;
+        var view = CurrentView;
+        if (_disposed || draft is null || view is null || !Guid.TryParse(elementId, out var id)) return Task.CompletedTask;
+        var element = view.Elements.FirstOrDefault(candidate => candidate.Id == id);
         if (element is null) return Task.CompletedTask;
-        var canvasWidth = Math.Max(1, _draft.CanvasWidth);
-        var canvasHeight = Math.Max(1, _draft.CanvasHeight);
-        element.Width = Math.Clamp(width * canvasWidth, 1, canvasWidth);
-        element.Height = Math.Clamp(height * canvasHeight, 1, canvasHeight);
-        element.X = Math.Clamp(x * canvasWidth, 0, Math.Max(0, canvasWidth - element.Width));
-        element.Y = Math.Clamp(y * canvasHeight, 0, Math.Max(0, canvasHeight - element.Height));
+        Layout.ApplyBounds(element, new PublicationCanvasBounds
+        {
+            X = x * Math.Max(1, draft.CanvasWidth),
+            Y = y * Math.Max(1, draft.CanvasHeight),
+            Width = width * Math.Max(1, draft.CanvasWidth),
+            Height = height * Math.Max(1, draft.CanvasHeight)
+        }, draft.CanvasWidth, draft.CanvasHeight);
         _selectedElementId = element.Id;
         RefreshAdvancedJson();
         return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task SelectPanelElement(string elementId)
+    {
+        if (Guid.TryParse(elementId, out var id)) SelectElement(id);
+        return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task PanelStudioCommand(string command, double amount = 1)
+    {
+        if (_disposed || _interactionPreview) return Task.CompletedTask;
+        switch ((command ?? string.Empty).Trim().ToLowerInvariant())
+        {
+            case "left": NudgeSelected(-amount, 0); break;
+            case "right": NudgeSelected(amount, 0); break;
+            case "up": NudgeSelected(0, -amount); break;
+            case "down": NudgeSelected(0, amount); break;
+            case "delete": DeleteElement(); break;
+            case "duplicate": DuplicateElement(); break;
+            case "front": BringElementToFront(); break;
+            case "forward": MoveElementUp(); break;
+            case "backward": MoveElementDown(); break;
+            case "back": SendElementToBack(); break;
+            case "interact": EnableInteractionPreview(); break;
+        }
+        return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task ReportPanelInteractionError(string message)
+    {
+        var detail = string.IsNullOrWhiteSpace(message) ? "Unknown browser interaction error." : message.Trim();
+        Logger.LogWarning("Panel Studio browser interaction failed: {Message}", detail);
+        Notifications.Warning(detail, "Panel Studio interaction", nameof(PanelStudio));
+        return Task.CompletedTask;
     }
 
     private async Task<PanelCanvasPoint> ResolveCanvasPoint(DragEventArgs args)
@@ -639,7 +760,7 @@
         var top = element.Y / Math.Max(1, _draft.CanvasHeight) * 100;
         var width = element.Width / Math.Max(1, _draft.CanvasWidth) * 100;
         var height = element.Height / Math.Max(1, _draft.CanvasHeight) * 100;
-        return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{element.ZIndex + 10000};transform:rotate({Inv(element.Rotation)}deg)";
+        return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{Math.Max(1, element.ZIndex)};transform:rotate({Inv(element.Rotation)}deg)";
     }
 
     private async Task ImportHtml(InputFileChangeEventArgs args)
@@ -660,7 +781,9 @@
         }
         catch (Exception exception)
         {
+            Logger.LogError(exception, "Panel Studio HTML import failed.");
             _error = $"HTML import failed: {exception.Message}";
+            Notifications.Error(_error, "HTML import failed", nameof(PanelStudio));
         }
     }
 
@@ -697,15 +820,22 @@
         }
         catch (Exception exception)
         {
+            Logger.LogError(exception, "Panel Studio media import failed.");
             _error = $"Media import failed: {exception.Message}";
+            Notifications.Error(_error, "Media import failed", nameof(PanelStudio));
         }
     }
 
     private void AddElement(PublicationElement element)
     {
-        if (CurrentView is null) return;
-        element.ZIndex = CurrentView.Elements.Count + 1;
-        CurrentView.Elements.Add(element);
+        if (CurrentView is { } view) AddElement(view, element);
+    }
+
+    private void AddElement(PublicationPanelView view, PublicationElement element)
+    {
+        element.ZIndex = Layout.NextZ(view.Elements);
+        view.Elements.Add(element);
+        Layout.NormalizeZOrder(view.Elements);
         if (_draft is not null) Panels.Normalize(Document, _draft);
         SelectElement(element.Id);
     }
@@ -718,7 +848,7 @@
         clone.Name += " copy";
         clone.X += 4;
         clone.Y += 4;
-        clone.ZIndex = CurrentView.Elements.Count + 1;
+        clone.ZIndex = Layout.NextZ(CurrentView.Elements);
         CurrentView.Elements.Add(clone);
         SelectElement(clone.Id);
     }
@@ -727,23 +857,37 @@
     {
         if (CurrentView is null || SelectedElement is null) return;
         CurrentView.Elements.Remove(SelectedElement);
-        SelectElement(CurrentView.Elements.LastOrDefault()?.Id);
+        Layout.NormalizeZOrder(CurrentView.Elements);
+        SelectElement(CurrentView.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id);
     }
 
-    private void MoveElementUp() => MoveElement(1);
-    private void MoveElementDown() => MoveElement(-1);
+    private void BringElementToFront() => MoveElement(PublicationLayerMove.BringToFront);
+    private void MoveElementUp() => MoveElement(PublicationLayerMove.BringForward);
+    private void MoveElementDown() => MoveElement(PublicationLayerMove.SendBackward);
+    private void SendElementToBack() => MoveElement(PublicationLayerMove.SendToBack);
 
-    private void MoveElement(int delta)
+    private void MoveElement(PublicationLayerMove move)
     {
         if (CurrentView is null || SelectedElement is null) return;
-        var ordered = CurrentView.Elements.OrderBy(element => element.ZIndex).ToList();
-        var index = ordered.IndexOf(SelectedElement);
-        var target = Math.Clamp(index + delta, 0, ordered.Count - 1);
-        if (target == index) return;
-        (ordered[index], ordered[target]) = (ordered[target], ordered[index]);
-        for (var i = 0; i < ordered.Count; i++) ordered[i].ZIndex = i + 1;
-        CurrentView.Elements = ordered;
+        Layout.MoveLayer(CurrentView.Elements, SelectedElement.Id, move);
+        SelectElement(SelectedElement.Id);
     }
+
+    private void NudgeSelected(double deltaX, double deltaY)
+    {
+        if (_draft is null || SelectedElement is null) return;
+        Layout.Nudge(SelectedElement, deltaX, deltaY, _draft.CanvasWidth, _draft.CanvasHeight);
+        RefreshAdvancedJson();
+    }
+
+    private async Task ShowElementContextMenu(Guid id, MouseEventArgs args)
+    {
+        SelectElement(id);
+        await InvokeAsync(StateHasChanged);
+        await _elementContextMenu.ShowAsync(args);
+    }
+
+    private void EnableInteractionPreview() => _interactionPreview = true;
 
     private void SelectTemplate(Guid id)
     {
@@ -810,7 +954,12 @@
     private void RefreshAdvancedJson()
     {
         try { _advancedElementJson = SelectedElement is null ? string.Empty : Files.SerializeElement(SelectedElement); }
-        catch (Exception exception) { _error = exception.Message; }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "Panel Studio advanced configuration could not be serialized.");
+            _error = exception.Message;
+            Notifications.Warning(_error, "Component configuration", nameof(PanelStudio));
+        }
     }
 
     private void ApplyAdvancedJson()
@@ -829,7 +978,9 @@
         }
         catch (Exception exception)
         {
+            Logger.LogError(exception, "Panel Studio advanced component configuration could not be applied.");
             _error = $"Component configuration could not be applied: {exception.Message}";
+            Notifications.Error(_error, "Component configuration", nameof(PanelStudio));
         }
     }
 
@@ -863,13 +1014,18 @@
         if (_draft is null) return;
         Panels.Normalize(Document, _draft);
         await Saved.InvokeAsync(_draft);
+        Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio));
     }
 
     private Task Cancel() => Cancelled.InvokeAsync();
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement); } catch { }
+        _disposed = true;
+        try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement); }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+        catch (InvalidOperationException) { }
         _dropSurfaceBound = false;
         _self?.Dispose();
         _self = null;

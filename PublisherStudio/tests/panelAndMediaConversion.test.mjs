@@ -87,10 +87,10 @@ assert.match(applicationComposition, /AddSingleton<IMediaConversionService, Medi
 assert.match(applicationComposition, /AddSingleton<PanelDocumentService, PanelDocumentService>/);
 assert.equal(appsettings.PublisherStudio.FFmpegPath, '');
 
-assert.equal(packageJson.version, '1.0.87');
-assert.equal(lockJson.version, '1.0.87');
-assert.equal(lockJson.packages[''].version, '1.0.87');
-assert.match(webProject, /<Version>1\.0\.87<\/Version>/);
-assert.match(installerProject, /<Version>1\.0\.87<\/Version>/);
+assert.equal(packageJson.version, '1.0.88');
+assert.equal(lockJson.version, '1.0.88');
+assert.equal(lockJson.packages[''].version, '1.0.88');
+assert.match(webProject, /<Version>1\.0\.88<\/Version>/);
+assert.match(installerProject, /<Version>1\.0\.88<\/Version>/);
 
 console.log('Panel/Div Studio, recursive shared-component rendering, dashboard library, FFmpeg service/controller/UI, and version contracts passed.');

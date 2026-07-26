@@ -236,3 +236,7 @@ For files physically inside an SDK-style web project, use `Update` when only add
 
 C# services that emit JavaScript, CSS, OpenSCAD or another brace-sensitive language must not use an interpolated raw string when the embedded language can naturally contain the same brace runs. Keep the foreign-language template non-interpolated and expose deliberate insertion points through a unique marker or a dedicated renderer. `BrowserRuntimeTemplateService` uses one ordinal payload substitution; `tests/browserRuntimeTemplateSafety.test.mjs` validates both the C# source contract and generated JavaScript syntax.
 
+
+## v1.0.88 cross-surface interaction and stacking boundary
+
+See `docs/architecture/interaction-stacking-and-notification-v1.0.88.md`. Interactive content uses explicit arrange-versus-interact ownership, all input adapters commit through shared layout semantics, and designer overlays use bounded local stacking contexts. Asynchronous UI operations capture mutable transaction state before awaiting browser interop. New/touched frontend paths must provide structured logging and circuit-scoped user notification without turning normal disconnects into application errors.

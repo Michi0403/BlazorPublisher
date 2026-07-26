@@ -2,8 +2,14 @@
 
 Status values are **Closed**, **Partial**, or **Deferred**. A task may be removed only after a later changelog records it as solved and the related contract test remains green.
 
-| Task | Status in 1.0.87 | Evidence / next step |
+| Task | Status in 1.0.88 | Evidence / next step |
 |---|---|---|
+| v1.0.88 Panel Studio drop race and Blazor circuit crash cascade | Closed | Transaction state is captured before JS await, validated afterward and cleared in `finally`; guarded by `interactionAndStackingReleaseGate.test.mjs`. |
+| Mainframe/Panel arrangement of HTML, Canvas and 3D web content | Closed | Designer-only shields preserve normal object selection/move/resize while interaction mode and exports remain unshielded. |
+| Cross-surface mouse/pen/touch/keyboard/gamepad commands | Closed at browser/device API baseline | Pointer Events, keyboard routes and standard Gamepad API mappings converge on the same object commands. Device-specific acceptance remains part of native release testing. |
+| Recurring interaction and stacking changelog gate | Closed for v1.0.88 and mandatory later | Changelog checklist plus architecture/test contract requires Mainframe, studio, input, Z-order, exports, logging and notification review. |
+| Local overlay Z-index normalization | Closed for application-owned v1.0.88 CSS/JS | Panel hit/drop layers, web/map shields, studio file-drop overlays and global application surfaces use the documented bounded scale; the release test rejects application numeric z-index values above 5000. Vendor CSS remains vendor-owned. |
+| Frontend service logging and notifier integration | Closed for new/touched v1.0.88 services; Partial repository-wide | Layout, notification, automation/screenshot and interaction failures log structurally; frontend failures publish notifications. Legacy services migrate when touched. |
 | v1.0.87 browser runtime interpolated raw-string failure (`CS9007`) | Closed | Runtime JavaScript uses a non-interpolated raw template and explicit payload marker; guarded by `browserRuntimeTemplateSafety.test.mjs`. |
 | v1.0.86 .NET SDK duplicate localization Content items (`NETSDK1022`) | Closed | Project-local localization files use `Content Update`; guarded by `sdkDefaultItems.test.mjs`. |
 | v1.0.84 `Math.Hypot`, CA1859 and IDE0305 compiler findings | Closed | Replaced and protected by compilation-safety/interchange tests. |

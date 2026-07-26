@@ -9,6 +9,8 @@ using PublisherStudio.Services.MediaStudio.UseCases;
 using PublisherStudio.Services.OpenScad;
 using PublisherStudio.Services.Panels;
 using PublisherStudio.Services.PictureStudio.Import;
+using PublisherStudio.Services.Publication;
+using PublisherStudio.Services.UserExperience;
 using PublisherStudio.Services.Publication.Import;
 using PublisherStudio.Services.VideoStudio.Export;
 using PublisherStudio.Services.VideoStudio.Import;
@@ -71,6 +73,8 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IRenderExportCatalogService, RenderExportCatalogService>(services);
         AddSingleton<ICodeLanguageService, CodeLanguageService>(services);
         AddSingleton<ICodeFormattingService, CodeFormattingService>(services);
+        AddSingleton<IPublicationElementLayoutService, PublicationElementLayoutService>(services);
+        AddScoped<IUserNotificationService, UserNotificationService>(services);
 
         AddSingleton<IApiSurfaceCatalogService, ApiSurfaceCatalogService>(services);
         services.AddSingleton<IServiceArchitectureRegistry, ServiceArchitectureRegistry>();

@@ -43,8 +43,10 @@ function safeDotNet(state, method, ...args) {
     if (!state?.dotnet) return Promise.resolve();
     return state.dotnet.invokeMethodAsync(method, ...args).catch(error => {
         const message = String(error?.message || error || '');
-        if (!/disconnected|disposed|circuit/i.test(message))
-            console.warn(`Publisher callback ${method} failed.`, error);
+        if (/disconnected|disposed|circuit/i.test(message)) return;
+        console.warn(`Publisher callback ${method} failed.`, error);
+        if (method !== 'ReportCanvasInteractionError')
+            state.dotnet.invokeMethodAsync('ReportCanvasInteractionError', method, message).catch(() => {});
     });
 }
 
@@ -1016,6 +1018,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             state.resizeObserver.observe(scroll);
         }
         canvasStates.set(stage, state);
+        startCanvasGamepad(state);
     }
 
     const pageChanged = state.page !== page;
@@ -1060,6 +1063,8 @@ export function disposeCanvas(stageId) {
     clearInsertionDrag(state);
     clearExternalDropPreview(state);
     state.resizeObserver?.disconnect?.();
+    if (state.gamepad?.frame) cancelAnimationFrame(state.gamepad.frame);
+    state.gamepad = null;
     for (const timer of state.cropTimers?.values?.() || []) clearTimeout(timer);
     state.cropTimers?.clear?.();
 
@@ -1235,6 +1240,10 @@ function canvasDocumentKeyDown(state, event) {
     if (command && key === 'z' && event.shiftKey) return invokeCanvasKeyboardCommand(state, event, 'KeyboardRedo');
     if (command && key === 'z') return invokeCanvasKeyboardCommand(state, event, 'KeyboardUndo');
     if (command && key === 'y') return invokeCanvasKeyboardCommand(state, event, 'KeyboardRedo');
+    if (event.altKey && key === 'home') return invokeCanvasKeyboardCommand(state, event, 'KeyboardLayerMove', 'front');
+    if (event.altKey && key === 'end') return invokeCanvasKeyboardCommand(state, event, 'KeyboardLayerMove', 'back');
+    if (event.altKey && key === 'pageup') return invokeCanvasKeyboardCommand(state, event, 'KeyboardLayerMove', 'forward');
+    if (event.altKey && key === 'pagedown') return invokeCanvasKeyboardCommand(state, event, 'KeyboardLayerMove', 'backward');
     if (key === 'delete' || key === 'backspace') return invokeCanvasKeyboardCommand(state, event, 'KeyboardDelete');
 
     if (key.startsWith('arrow')) {
@@ -1243,6 +1252,47 @@ function canvasDocumentKeyDown(state, event) {
         const dy = key === 'arrowup' ? -step : key === 'arrowdown' ? step : 0;
         return invokeCanvasKeyboardCommand(state, event, 'KeyboardNudge', dx, dy);
     }
+}
+
+function startCanvasGamepad(state) {
+    if (state.gamepad || typeof navigator.getGamepads !== 'function') return;
+    const controller = { frame: 0, buttons: [], axisX: 0, axisY: 0, nextRepeat: 0 };
+    state.gamepad = controller;
+    const pressed = (gamepad, index) => Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55);
+    const edge = (gamepad, index) => {
+        const value = pressed(gamepad, index);
+        const previous = Boolean(controller.buttons[index]);
+        controller.buttons[index] = value;
+        return value && !previous;
+    };
+    const tick = time => {
+        if (state.gamepad !== controller || !state.stage?.isConnected) return;
+        controller.frame = requestAnimationFrame(tick);
+        if (document.hidden || !state.keyboardActive) return;
+        const gamepad = [...(navigator.getGamepads?.() || [])].find(Boolean);
+        if (!gamepad) return;
+        const axisX = Math.abs(number(gamepad.axes?.[0])) > .45 ? Math.sign(number(gamepad.axes?.[0])) : 0;
+        const axisY = Math.abs(number(gamepad.axes?.[1])) > .45 ? Math.sign(number(gamepad.axes?.[1])) : 0;
+        const x = (pressed(gamepad, 14) ? -1 : pressed(gamepad, 15) ? 1 : 0) || axisX;
+        const y = (pressed(gamepad, 12) ? -1 : pressed(gamepad, 13) ? 1 : 0) || axisY;
+        const changed = x !== controller.axisX || y !== controller.axisY;
+        if (x || y) {
+            if (changed || time >= controller.nextRepeat) {
+                safeDotNet(state, 'KeyboardNudge', x, y);
+                controller.nextRepeat = time + (changed ? 260 : 90);
+            }
+        } else controller.nextRepeat = 0;
+        controller.axisX = x;
+        controller.axisY = y;
+
+        if (edge(gamepad, 4)) safeDotNet(state, 'KeyboardLayerMove', 'backward');
+        if (edge(gamepad, 5)) safeDotNet(state, 'KeyboardLayerMove', 'forward');
+        if (edge(gamepad, 6)) safeDotNet(state, 'KeyboardLayerMove', 'back');
+        if (edge(gamepad, 7)) safeDotNet(state, 'KeyboardLayerMove', 'front');
+        if (edge(gamepad, 2)) safeDotNet(state, 'KeyboardDuplicate');
+        if (edge(gamepad, 1)) safeDotNet(state, 'ClearSelectionFromCanvas');
+    };
+    controller.frame = requestAnimationFrame(tick);
 }
 
 function canvasKeyDown(state, event) {
@@ -6477,22 +6527,93 @@ export function panelStudioPoint(element, clientX, clientY) {
 
 const panelStudioDropBindings = new WeakMap();
 
+function reportPanelStudioError(binding, error) {
+    const message = error instanceof Error ? error.message : String(error || 'Unknown panel interaction error.');
+    console.warn('Panel Studio interaction failed.', error);
+    binding?.dotNetReference?.invokeMethodAsync?.('ReportPanelInteractionError', message).catch(() => {});
+}
+
+function panelStudioEditableTarget(target) {
+    return Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"],[role="textbox"]'));
+}
+
+function panelStudioInvoke(binding, command, amount = 1) {
+    return binding?.dotNetReference?.invokeMethodAsync?.('PanelStudioCommand', command, amount)
+        .catch(error => reportPanelStudioError(binding, error));
+}
+
+function startPanelStudioGamepad(binding) {
+    if (typeof navigator.getGamepads !== 'function') return;
+    const state = { frame: 0, buttons: [], nextRepeat: 0, axisX: 0, axisY: 0 };
+    const pressed = (gamepad, index) => Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55);
+    const edge = (gamepad, index) => {
+        const value = pressed(gamepad, index);
+        const previous = Boolean(state.buttons[index]);
+        state.buttons[index] = value;
+        return value && !previous;
+    };
+    const tick = time => {
+        if (binding.disposed || !binding.element?.isConnected) return;
+        state.frame = requestAnimationFrame(tick);
+        if (document.hidden || binding.element.dataset.panelStudioArrange !== 'true') return;
+        const active = document.activeElement === binding.element || binding.element.contains(document.activeElement);
+        if (!active) return;
+        const gamepad = [...(navigator.getGamepads?.() || [])].find(Boolean);
+        if (!gamepad) return;
+
+        const axisX = Math.abs(number(gamepad.axes?.[0])) > .45 ? Math.sign(number(gamepad.axes?.[0])) : 0;
+        const axisY = Math.abs(number(gamepad.axes?.[1])) > .45 ? Math.sign(number(gamepad.axes?.[1])) : 0;
+        const dpadX = pressed(gamepad, 14) ? -1 : pressed(gamepad, 15) ? 1 : 0;
+        const dpadY = pressed(gamepad, 12) ? -1 : pressed(gamepad, 13) ? 1 : 0;
+        const x = dpadX || axisX;
+        const y = dpadY || axisY;
+        const changed = x !== state.axisX || y !== state.axisY;
+        if (x || y) {
+            if (changed || time >= state.nextRepeat) {
+                if (x < 0) panelStudioInvoke(binding, 'left', 1);
+                if (x > 0) panelStudioInvoke(binding, 'right', 1);
+                if (y < 0) panelStudioInvoke(binding, 'up', 1);
+                if (y > 0) panelStudioInvoke(binding, 'down', 1);
+                state.nextRepeat = time + (changed ? 260 : 90);
+            }
+        } else state.nextRepeat = 0;
+        state.axisX = x;
+        state.axisY = y;
+
+        // Steam Deck / standard gamepad: bumpers move one layer, triggers move to edge,
+        // X duplicates and Y switches to interaction preview. Destructive delete remains
+        // keyboard/context-menu only to avoid accidental controller data loss.
+        if (edge(gamepad, 4)) panelStudioInvoke(binding, 'backward');
+        if (edge(gamepad, 5)) panelStudioInvoke(binding, 'forward');
+        if (edge(gamepad, 6)) panelStudioInvoke(binding, 'back');
+        if (edge(gamepad, 7)) panelStudioInvoke(binding, 'front');
+        if (edge(gamepad, 2)) panelStudioInvoke(binding, 'duplicate');
+        if (edge(gamepad, 3)) panelStudioInvoke(binding, 'interact');
+    };
+    state.frame = requestAnimationFrame(tick);
+    binding.gamepad = state;
+}
+
 export function unbindPanelStudioDropSurface(element) {
     if (!(element instanceof HTMLElement)) return;
     const binding = panelStudioDropBindings.get(element);
     if (!binding) return;
-    binding.cancelResize?.();
-    element.removeEventListener('dragenter', binding.dragenter);
-    element.removeEventListener('dragover', binding.dragover);
-    element.removeEventListener('dragleave', binding.dragleave);
-    element.removeEventListener('drop', binding.drop);
-    element.removeEventListener('pointerdown', binding.pointerdown);
+    binding.disposed = true;
+    binding.cancelPointer?.();
+    binding.controller?.abort?.();
+    if (binding.gamepad?.frame) cancelAnimationFrame(binding.gamepad.frame);
     panelStudioDropBindings.delete(element);
 }
 
 export function bindPanelStudioDropSurface(element, dotNetReference) {
     if (!(element instanceof HTMLElement)) return false;
     unbindPanelStudioDropSurface(element);
+    const controller = new AbortController();
+    const binding = { element, dotNetReference, controller, disposed: false, pointer: null, gamepad: null };
+    const options = { signal: controller.signal };
+    const activeOptions = { signal: controller.signal, passive: false };
+    panelStudioDropBindings.set(element, binding);
+
     const setActive = active => element.querySelector('.panel-studio-drop-layer')?.classList.toggle('active', active);
     const updateGhost = event => {
         event.preventDefault();
@@ -6504,30 +6625,39 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         ghost.style.transform = 'translate(-50%, -50%)';
         setActive(true);
     };
-    const dragenter = event => updateGhost(event);
-    const dragover = event => updateGhost(event);
-    const dragleave = event => {
+    element.addEventListener('dragenter', updateGhost, activeOptions);
+    element.addEventListener('dragover', updateGhost, activeOptions);
+    element.addEventListener('dragleave', event => {
         if (event.relatedTarget instanceof Node && element.contains(event.relatedTarget)) return;
         setActive(false);
-    };
-    const drop = () => setActive(false);
+    }, options);
+    element.addEventListener('drop', () => setActive(false), options);
 
-    let resize = null;
-    const cancelResize = () => {
-        if (!resize) return;
-        window.removeEventListener('pointermove', resize.move, true);
-        window.removeEventListener('pointerup', resize.finish, true);
-        window.removeEventListener('pointercancel', resize.finish, true);
-        resize = null;
+    const cancelPointer = () => {
+        const operation = binding.pointer;
+        if (!operation) return;
+        try { operation.hitbox.releasePointerCapture(operation.pointerId); } catch { }
+        binding.pointer = null;
     };
-    const pointerdown = event => {
-        const handle = event.target instanceof Element ? event.target.closest('.panel-studio-hitbox.selected > i[data-resize]') : null;
-        if (!(handle instanceof HTMLElement)) return;
-        const hitbox = handle.closest('.panel-studio-hitbox');
-        if (!(hitbox instanceof HTMLElement)) return;
+    binding.cancelPointer = cancelPointer;
+
+    const commit = operation => {
+        const bounds = operation.current || operation.initial;
+        binding.dotNetReference.invokeMethodAsync('CommitPanelElementBounds', operation.id, bounds.x, bounds.y, bounds.width, bounds.height)
+            .catch(error => reportPanelStudioError(binding, error));
+    };
+
+    element.addEventListener('pointerdown', event => {
+        if (event.button !== 0 || element.dataset.panelStudioArrange !== 'true') return;
+        const target = event.target instanceof Element ? event.target : null;
+        const hitbox = target?.closest?.('.panel-studio-hitbox[data-panel-element-id]');
+        if (!(hitbox instanceof HTMLElement) || !element.contains(hitbox)) return;
+        const handle = target.closest('i[data-resize]');
         event.preventDefault();
         event.stopPropagation();
-        cancelResize();
+        try { element.focus({ preventScroll: true }); } catch { }
+        cancelPointer();
+
         const canvasBounds = element.getBoundingClientRect();
         const boxBounds = hitbox.getBoundingClientRect();
         const initial = {
@@ -6536,15 +6666,31 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
             width: clamp(boxBounds.width / Math.max(1, canvasBounds.width), .005, 1),
             height: clamp(boxBounds.height / Math.max(1, canvasBounds.height), .005, 1)
         };
-        const edge = handle.dataset.resize || 'se';
-        const originX = event.clientX;
-        const originY = event.clientY;
-        const move = moveEvent => {
-            if (moveEvent.pointerId !== event.pointerId) return;
-            moveEvent.preventDefault();
-            const dx = (moveEvent.clientX - originX) / Math.max(1, canvasBounds.width);
-            const dy = (moveEvent.clientY - originY) / Math.max(1, canvasBounds.height);
-            let { x, y, width, height } = initial;
+        element.querySelectorAll('.panel-studio-hitbox.selected').forEach(node => node.classList.remove('selected'));
+        hitbox.classList.add('selected');
+        const operation = {
+            id: hitbox.dataset.panelElementId || '', hitbox, handle: handle?.dataset?.resize || '',
+            pointerId: event.pointerId, originX: event.clientX, originY: event.clientY,
+            canvasBounds, initial, current: initial, moved: false
+        };
+        binding.pointer = operation;
+        try { hitbox.setPointerCapture(event.pointerId); } catch { }
+    }, activeOptions);
+
+    element.addEventListener('pointermove', event => {
+        const operation = binding.pointer;
+        if (!operation || operation.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        const dx = (event.clientX - operation.originX) / Math.max(1, operation.canvasBounds.width);
+        const dy = (event.clientY - operation.originY) / Math.max(1, operation.canvasBounds.height);
+        if (!operation.moved && Math.hypot(dx * operation.canvasBounds.width, dy * operation.canvasBounds.height) < 2) return;
+        operation.moved = true;
+        let { x, y, width, height } = operation.initial;
+        if (!operation.handle) {
+            x = clamp(x + dx, 0, Math.max(0, 1 - width));
+            y = clamp(y + dy, 0, Math.max(0, 1 - height));
+        } else {
+            const edge = operation.handle;
             if (edge.includes('w')) { x += dx; width -= dx; }
             if (edge.includes('e')) width += dx;
             if (edge.includes('n')) { y += dy; height -= dy; }
@@ -6556,32 +6702,48 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
             y = clamp(y, 0, Math.max(0, 1 - minimum));
             width = clamp(width, minimum, 1 - x);
             height = clamp(height, minimum, 1 - y);
-            hitbox.style.left = `${x * 100}%`;
-            hitbox.style.top = `${y * 100}%`;
-            hitbox.style.width = `${width * 100}%`;
-            hitbox.style.height = `${height * 100}%`;
-            resize.bounds = { x, y, width, height };
-        };
-        const finish = finishEvent => {
-            if (finishEvent.pointerId !== event.pointerId) return;
-            finishEvent.preventDefault();
-            const bounds = resize?.bounds || initial;
-            cancelResize();
-            dotNetReference?.invokeMethodAsync('CommitPanelElementBounds', hitbox.dataset.panelElementId || '', bounds.x, bounds.y, bounds.width, bounds.height).catch(() => {});
-        };
-        resize = { move, finish, bounds: initial };
-        window.addEventListener('pointermove', move, { capture: true, passive: false });
-        window.addEventListener('pointerup', finish, { capture: true, passive: false });
-        window.addEventListener('pointercancel', finish, { capture: true, passive: false });
-    };
+        }
+        operation.current = { x, y, width, height };
+        operation.hitbox.style.left = `${x * 100}%`;
+        operation.hitbox.style.top = `${y * 100}%`;
+        operation.hitbox.style.width = `${width * 100}%`;
+        operation.hitbox.style.height = `${height * 100}%`;
+    }, activeOptions);
 
-    const binding = { dragenter, dragover, dragleave, drop, pointerdown, cancelResize };
-    panelStudioDropBindings.set(element, binding);
-    element.addEventListener('dragenter', dragenter);
-    element.addEventListener('dragover', dragover);
-    element.addEventListener('dragleave', dragleave);
-    element.addEventListener('drop', drop);
-    element.addEventListener('pointerdown', pointerdown);
+    const finishPointer = event => {
+        const operation = binding.pointer;
+        if (!operation || operation.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        cancelPointer();
+        if (operation.moved) commit(operation);
+        else binding.dotNetReference?.invokeMethodAsync?.('SelectPanelElement', operation.id)
+            .catch(error => reportPanelStudioError(binding, error));
+    };
+    element.addEventListener('pointerup', finishPointer, activeOptions);
+    element.addEventListener('pointercancel', cancelPointer, options);
+
+    element.addEventListener('keydown', event => {
+        if (event.defaultPrevented || panelStudioEditableTarget(event.target) || element.dataset.panelStudioArrange !== 'true') return;
+        const key = String(event.key || '').toLowerCase();
+        const command = event.ctrlKey || event.metaKey;
+        let handled = true;
+        const amount = event.altKey ? .25 : event.shiftKey ? 10 : 1;
+        if (key === 'arrowleft') panelStudioInvoke(binding, 'left', amount);
+        else if (key === 'arrowright') panelStudioInvoke(binding, 'right', amount);
+        else if (key === 'arrowup') panelStudioInvoke(binding, 'up', amount);
+        else if (key === 'arrowdown') panelStudioInvoke(binding, 'down', amount);
+        else if (key === 'delete' || key === 'backspace') panelStudioInvoke(binding, 'delete');
+        else if (command && key === 'd') panelStudioInvoke(binding, 'duplicate');
+        else if (event.altKey && key === 'pageup') panelStudioInvoke(binding, 'forward');
+        else if (event.altKey && key === 'pagedown') panelStudioInvoke(binding, 'backward');
+        else if (event.altKey && key === 'home') panelStudioInvoke(binding, 'front');
+        else if (event.altKey && key === 'end') panelStudioInvoke(binding, 'back');
+        else if (key === 'enter') panelStudioInvoke(binding, 'interact');
+        else handled = false;
+        if (handled) { event.preventDefault(); event.stopPropagation(); }
+    }, options);
+
+    startPanelStudioGamepad(binding);
     return true;
 }
 
@@ -7049,7 +7211,7 @@ body{margin:0;font-family:Segoe UI,system-ui,sans-serif;user-select:text}
 .website-publication video,.website-publication audio{pointer-events:auto;user-select:auto}
 .website-publication .text-frame-content{user-select:text}
 .ps-pointer-passive{pointer-events:none!important}.ps-interactive{cursor:pointer}.ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}.ps-action-hidden{visibility:hidden!important;pointer-events:none!important}
-.ps-controls{position:fixed;z-index:100000;left:50%;bottom:14px;display:flex;align-items:center;gap:7px;min-height:38px;padding:6px 9px;border:1px solid #ffffff38;border-radius:999px;background:#111827dd;box-shadow:0 6px 24px #0009;transform:translateX(-50%);backdrop-filter:blur(10px)}
+.ps-controls{position:fixed;z-index:20;left:50%;bottom:14px;display:flex;align-items:center;gap:7px;min-height:38px;padding:6px 9px;border:1px solid #ffffff38;border-radius:999px;background:#111827dd;box-shadow:0 6px 24px #0009;transform:translateX(-50%);backdrop-filter:blur(10px)}
 .ps-controls[hidden]{display:none!important}.ps-controls button{display:grid;place-items:center;width:31px;height:31px;padding:0;border:1px solid #ffffff38;border-radius:50%;color:#fff;background:#ffffff12;font:600 18px/1 Segoe UI,system-ui,sans-serif;cursor:pointer}.ps-controls button:hover{background:#ffffff2c}.ps-controls button:disabled{opacity:.35;cursor:default}.ps-controls span{min-width:58px;color:#e5e7eb;text-align:center;font-size:12px}
 @media (prefers-reduced-motion:reduce){.ps-slide,.website-publication [data-publication-element]{animation-duration:.001ms!important;animation-delay:0ms!important}}
 @media print{html,body{width:auto;height:auto;overflow:visible!important;background:#fff!important}.website-publication{position:static;display:block!important;overflow:visible}.ps-stage{position:static;width:auto!important;height:auto!important;overflow:visible;transform:none!important;box-shadow:none}.ps-slide,.ps-slide[hidden]{position:relative;display:block!important;inset:auto;overflow:hidden;break-after:page}.website-publication .print-page{position:relative;left:auto;top:auto;margin:0 auto;box-shadow:none;transform:none!important}.ps-controls{display:none!important}}
@@ -7380,7 +7542,7 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
 
     const uniqueWarnings = [...new Set(warnings)];
     const manifest = {
-        publisherStudioVersion: '1.0.87',
+        publisherStudioVersion: '1.0.88',
         kind: options.mode,
         generatedUtc: new Date().toISOString(),
         assetCount,

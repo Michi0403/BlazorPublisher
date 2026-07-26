@@ -91,7 +91,7 @@ assert.match(publisherInterop, /bindMediaConverterDrop/);
 assert.match(publisherInterop, /bindPanelStudioDropSurface/);
 assert.match(publisherInterop, /ghost\.style\.left/);
 assert.match(publisherInterop, /invokeMethodAsync\('CommitPanelElementBounds'/);
-assert.match(publisherInterop, /window\.addEventListener\('pointermove', move/);
+assert.match(publisherInterop, /element\.addEventListener\('pointermove', event/);
 assert.match(publisherInterop, /ReceiveMediaDropError/);
 
 // Mainframe, VideoStudio and converter hand-offs use the shared contract.

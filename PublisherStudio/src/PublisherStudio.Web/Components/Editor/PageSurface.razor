@@ -2,6 +2,8 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inject PublicationMediaAssetStore MediaAssets
+@inject IUserNotificationService Notifications
+@inject ILogger<PageSurface> Logger
 
 <div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null)"
      tabindex="0" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
@@ -229,7 +231,7 @@
                             <PanelView @key="panel.Id" Document="State.Document" Item="panel" CurrentPageId="State.SelectedPageId" DesignerMode="true" />
                             break;
                         case HtmlEmbedElement htmlEmbed:
-                            <HtmlEmbedView @key="htmlEmbed.Id" Item="htmlEmbed" />
+                            <HtmlEmbedView @key="htmlEmbed.Id" Item="htmlEmbed" DesignerMode="true" />
                             break;
                         case SpreadsheetElement spreadsheet:
                             <div class="spreadsheet-frame publication-content-frame fit-@spreadsheet.ContentFit.ToString().ToLowerInvariant() @(spreadsheet.ShowGridLines ? null : "hide-gridlines")" data-content-fit="@spreadsheet.ContentFit.ToString().ToLowerInvariant()" data-content-kind="spreadsheet" data-content-viewport data-content-offset-x="@Inv(spreadsheet.ContentOffsetX)" data-content-offset-y="@Inv(spreadsheet.ContentOffsetY)" data-content-scale="@Inv(spreadsheet.ContentScale)" style="background:@spreadsheet.Background;border:@ContentMm(spreadsheet.BorderWidthMm) solid @spreadsheet.BorderColor">
@@ -1026,6 +1028,27 @@
     [JSInvokable] public void KeyboardUndo() => State.Undo();
     [JSInvokable] public void KeyboardRedo() => State.Redo();
     [JSInvokable] public void KeyboardNudge(double dx, double dy) => State.NudgeSelection(dx, dy);
+    [JSInvokable]
+    public void KeyboardLayerMove(string command)
+    {
+        switch ((command ?? string.Empty).Trim().ToLowerInvariant())
+        {
+            case "front": State.BringToFront(); break;
+            case "forward": State.BringForward(); break;
+            case "backward": State.SendBackward(); break;
+            case "back": State.SendToBack(); break;
+        }
+    }
+    [JSInvokable]
+    public Task ReportCanvasInteractionError(string operation, string message)
+    {
+        var safeOperation = string.IsNullOrWhiteSpace(operation) ? "Canvas interaction" : operation.Trim();
+        var safeMessage = string.IsNullOrWhiteSpace(message) ? "The browser interaction could not be completed." : message.Trim();
+        Logger.LogWarning("Mainframe browser interaction {Operation} failed: {Message}", safeOperation, safeMessage);
+        Notifications.Warning(safeMessage, safeOperation, nameof(PageSurface));
+        return Task.CompletedTask;
+    }
+
     private void ResetPointerState() => State.CancelActiveTool();
 
     private static string ElementDesignerHelp(PublicationElement element) => element switch

@@ -51,3 +51,7 @@ PublisherStudio.Web keeps the Web SDK's implicit content discovery enabled. Proj
 
 `IBrowserRuntimeTemplateService` remains the reusable boundary for the Video Studio blob runtime. Its JavaScript body is a non-interpolated C# raw string. Only the serialized configuration marker is substituted, using ordinal matching, after the C# compiler has parsed the template. This prevents JavaScript braces and template-literal `${...}` expressions from affecting C# raw-string delimiter parsing.
 
+
+## Cross-surface object interaction (v1.0.88)
+
+Mainframe and Panel / Div Studio now share the same conceptual object commands across mouse, pen, touch, keyboard, standard gamepad and API automation. `IPublicationElementLayoutService` owns finite/clamped geometry and deterministic Z-order. Embedded HTML/Canvas/3D content uses a designer-only shield in arrange mode and receives native input only in interaction mode. Local overlays are isolated inside their studio/object host and cannot overtake global ribbons or dialogs through arbitrary Z-index constants. Frontend failures are structured logs plus circuit-scoped notifications; expected disconnect/cancellation paths remain quiet.

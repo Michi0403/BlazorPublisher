@@ -28,6 +28,8 @@ function Invoke-DotNet {
 
 & (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
 & (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
+& (Join-Path $root "build\Assert-LocalizationIntegrity.ps1")
+& (Join-Path $root "build\Assert-GitSourceVisibility.ps1")
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 
 if ($UseBundledWireProtocolPackage) {
@@ -90,7 +92,9 @@ $wireProperties = @(
     "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
     "-p:RestoreAdditionalProjectSources=$packageDirectory",
     "-p:SkipWireProtocolBootstrap=true",
-    "-p:SkipLoggingIntegrityGuard=true"
+    "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true"
 )
 
 Write-Host "Restoring BlazorPublisher application for $Runtime after protocol preparation..." -ForegroundColor Cyan
@@ -113,7 +117,9 @@ Invoke-DotNet -Arguments (@(
 ) + $wireProperties) -FailureMessage "BlazorPublisher application publish failed."
 
 Write-Host "Restoring BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "BlazorPublisher setup restore failed."
+Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true") -FailureMessage "BlazorPublisher setup restore failed."
 
 Write-Host "Publishing BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
 Invoke-DotNet -Arguments @(
@@ -130,7 +136,9 @@ Invoke-DotNet -Arguments @(
     "-p:DebugSymbols=false",
     "-p:DeleteExistingFiles=true",
     "-o", $setupFolder,
-    "-p:SkipLoggingIntegrityGuard=true"
+    "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true"
 ) -FailureMessage "BlazorPublisher setup publish failed."
 
 $appExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Web.exe" } else { "PublisherStudio.Web" }

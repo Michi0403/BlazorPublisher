@@ -38,8 +38,8 @@ assert.ok(fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion', '
 assert.match(organic, /OrganicWireProtocol\.MaximumMessageBytes/);
 const releaseScript = fs.readFileSync(path.join(root, 'Build-Release.ps1'), 'utf8');
 assert.match(releaseScript, /Packing the synchronized LocalGPT 1-Wire protocol project without an application RID/);
-assert.match(releaseScript, /dotnet pack \$wireProtocolProject/);
-assert.match(releaseScript, /-p:RuntimeIdentifier= -p:RuntimeIdentifiers=/);
+assert.match(releaseScript, /(?:dotnet pack \$wireProtocolProject|"pack", \$wireProtocolProject)/);
+assert.match(releaseScript, /(?:-p:RuntimeIdentifier= -p:RuntimeIdentifiers=|"-p:RuntimeIdentifier=",[\s\S]*?"-p:RuntimeIdentifiers=")/);
 assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolAppDirectory \$wireProtocolPackageName\)/);
 assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolSetupDirectory \$wireProtocolPackageName\)/);
 

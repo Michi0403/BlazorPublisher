@@ -33,8 +33,14 @@
                          data-media-trim-start="@(element is PublicationMediaElement trimStart ? Inv(trimStart.TrimStartSeconds) : null)"
                          data-media-trim-end="@(element is PublicationMediaElement trimEnd ? Inv(trimEnd.EffectiveTrimEndSeconds) : null)"
                          style="@ElementStyle(element)">
-                        @switch (element)
+                        @if (DesignPreviewOnly)
                         {
+                            <PanelElementPreview Item="element" />
+                        }
+                        else
+                        {
+                            @switch (element)
+                            {
                             case TextFrameElement text:
                                 <div class="text-frame-content" style="padding:@Mm(text.PaddingMm);background:@text.Background;border:@Mm(text.BorderWidth) solid @text.BorderColor">@((MarkupString)text.PreviewHtml)</div>
                                 break;
@@ -77,6 +83,7 @@
                             case HtmlEmbedElement html:
                                 <HtmlEmbedView Item="html" DesignerMode="@DesignerMode" />
                                 break;
+                            }
                         }
                     </div>
                 }
@@ -90,6 +97,7 @@
     [Parameter, EditorRequired] public PanelElement Item { get; set; } = default!;
     [Parameter] public Guid CurrentPageId { get; set; }
     [Parameter] public bool DesignerMode { get; set; }
+    [Parameter] public bool DesignPreviewOnly { get; set; }
 
     private IReadOnlyList<PublicationPanelView> EnabledViews => Item.Views.Where(view => view.Enabled).ToArray();
     private Guid ActiveViewId => Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;

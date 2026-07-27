@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Localization;
 using PublisherStudio.Components;
+using PublisherStudio.Diagnostics;
 using PublisherStudio.Services;
 using PublisherStudio.Services.Configuration;
 
@@ -57,7 +58,9 @@ public static class Program
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         builder.Services.Configure<CircuitOptions>(options =>
             options.JSInteropDefaultCallTimeout = Timeout.InfiniteTimeSpan);
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddScoped<ControllerRequestLoggingFilter>();
+        builder.Services.AddControllersWithViews(options =>
+            options.Filters.AddService<ControllerRequestLoggingFilter>());
         builder.Services.AddLocalization();
         builder.Services.Configure<FormOptions>(options =>
         {

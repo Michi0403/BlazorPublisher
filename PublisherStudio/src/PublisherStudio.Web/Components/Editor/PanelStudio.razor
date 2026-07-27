@@ -169,7 +169,7 @@
                              aria-label="Panel arrangement canvas"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
-                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" />
+                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" DesignPreviewOnly="@(!_interactionPreview)" />
 
                             @if (!_interactionPreview && CurrentView is not null)
                             {

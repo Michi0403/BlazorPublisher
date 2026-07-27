@@ -41,7 +41,7 @@ assert.match(panelModels, /sealed class HtmlEmbedElement : PublicationElement/);
 assert.match(traversal, /if \(element is not PanelElement panel\) continue/);
 assert.match(panels, /kpi-dashboard/);
 assert.match(panels, /creator-hub/);
-assert.match(panels, /PanelDocumentService\(PublicationDataService data, PublicationComponentService components\)/);
+assert.match(panels, /PanelDocumentService\([\s\S]*?PublicationDataService data,[\s\S]*?PublicationComponentService components,[\s\S]*?ILogger<PanelDocumentService>\? logger = null\)/);
 assert.match(panels, /_components\.Create\(document, PublicationComponentKind\.Chat\)/);
 assert.match(panels, /PublicationChatPlatform\.OutputContext/);
 assert.match(panels, /_components\.Normalize\(document, component\)/);

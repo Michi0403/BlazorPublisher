@@ -103,7 +103,8 @@ assert.deepEqual(packageRefs, [
   'DevExpress.Blazor.RichEdit.ja',
   'DevExpress.Blazor.de',
   'DevExpress.Blazor.es',
-  'DevExpress.Blazor.ja'
+  'DevExpress.Blazor.ja',
+  'LocalGPT.WireProtocolVersion'
 ]);
 assert.match(webProject, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove=/);
 

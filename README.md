@@ -15,11 +15,56 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
-## v1.0.89: LocalGPT organic-plugin bridge
+## LocalGPT AI Council integration
 
-PublisherStudio can now discover LocalGPT on the dedicated UDP discovery port, connect on the dedicated organic service port, advertise existing eye/hand/OpenSCAD/spreadsheet/media capabilities, require per-organ user permissions, and start General, OpenSCAD Team, or Spreadsheet Team Council rounds. The normal PublisherStudio and LocalGPT installer/bootstrap ports remain separate compatibility contracts.
+PublisherStudio discovers LocalGPT through a compact UDP beacon and establishes the approved organic link over TCP. Capability, skill, UI-feature, and hardware directories are exchanged only after the link is approved, avoiding oversized discovery packets while preserving the complete shared catalogue. PublisherStudio can advertise its eye, hand, OpenSCAD, spreadsheet, media, and publishing capabilities and can submit work to configured LocalGPT Council teams.
+
+The normal PublisherStudio web port, LocalGPT web/installer port, 1-Wire TCP service port, and UDP discovery port remain separate contracts. The synchronized `src/LocalGPT.WireProtocolVersion` source-build project keeps restore/debug/publish deterministic; `Build-Release.ps1` packs it into the DLL-backed NuGet release artifact without inheriting an application runtime identifier.
 
 See `CHANGELOG-v1.0.89.md` and `docs/architecture/task-ledger.md`.
+
+## Optional LocalGPT organic wiring
+
+PublisherStudio remains a complete standalone publication application. Its LocalGPT connection is optional and demonstrates the organic adaptation system rather than creating a hard dependency. PublisherStudio broadcasts or accepts only a compact local discovery identity; after explicit user authorization, the peers establish TCP and exchange the larger capability directory there. The permission matrix decides whether screen capture, browser input, OpenSCAD generation, spreadsheet inspection or another capability may run. A discovered peer never receives automatic control.
+
+The same pattern can be generated for a user's own local software: the application describes a capability contract, LocalGPT helps generate a protocol adapter and Council role/workflow, and the human reviews and enables the result. This is an example of LocalGPT adapting organically to a private local environment while keeping the installation, source and authority under the user's control.
+
+The shared wire contract supports two modes:
+
+- **Source mode (default):** PublisherStudio references `src/LocalGPT.WireProtocolVersion/LocalGPT.WireProtocolVersion.csproj` for synchronized protocol development.
+- **Package mode:** PublisherStudio consumes `packages/LocalGPT.WireProtocolVersion.2.0.1.nupkg`, normally downloaded from the official LocalGPT release. This is the mode used by standalone release builds and installed users.
+
+Put a locally downloaded package here:
+
+```text
+<BlazorPublisher repository>\packages\LocalGPT.WireProtocolVersion.2.0.1.nupkg
+```
+
+Local source development:
+
+```powershell
+.\Build-LocalDevelopment.ps1 -Configuration Debug
+```
+
+Local package-mode verification:
+
+```powershell
+.\Build-LocalDevelopment.ps1 -Configuration Debug -UseWireProtocolPackage
+```
+
+One release runtime using a package already in `packages`:
+
+```powershell
+.\Build-Release.ps1 -Runtime win-x64 -UseBundledWireProtocolPackage
+```
+
+All supported runtimes, packing the synchronized local protocol once and reusing that package:
+
+```powershell
+.\Build-AllRuntimes.ps1
+```
+
+A release package can also be supplied directly with `-WireProtocolPackageUrl`. The installer/update/start wiring remains independent: PublisherStudio can be installed and used without LocalGPT, and the organic page simply reports that no peer is connected until the user starts and authorizes one.
 
 ## v1.0.88: publish-candidate interaction hardening
 
@@ -159,6 +204,14 @@ Build directly from a ZIP without Git:
 ```powershell
 dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip https://github.com/OWNER/REPOSITORY/archive/refs/heads/main.zip --start
 ```
+
+## Maintainer and development assistance
+
+PublisherStudio / BlazorPublisher is created and maintained by **Michael Fleischer (Michi0403)**. AI systems, including ChatGPT, have been used as development assistants for research, code review, debugging, test design, and documentation. This does not imply vendor endorsement or transfer release responsibility away from the maintainer.
+
+## Logging integrity guardrail
+
+Logging is not removed as “cleanup”. Structured service/controller diagnostics, exception logging and expected-cancellation handling are protected by `build/Assert-LoggingIntegrity.ps1` and `build/logging-baseline.json`. The baseline is monotonic: a refactor may add diagnostics, but silently reducing existing logger references, log calls or catch/log boundaries fails the dedicated CI workflow. The same guard runs from the provided development/release scripts and from direct Windows MSBuild/Visual Studio application builds. See `docs/LOGGING_INTEGRITY.md`.
 
 ## Deliberate limits
 

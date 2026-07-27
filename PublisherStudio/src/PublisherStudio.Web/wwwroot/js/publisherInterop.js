@@ -6666,8 +6666,6 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
             width: clamp(boxBounds.width / Math.max(1, canvasBounds.width), .005, 1),
             height: clamp(boxBounds.height / Math.max(1, canvasBounds.height), .005, 1)
         };
-        element.querySelectorAll('.panel-studio-hitbox.selected').forEach(node => node.classList.remove('selected'));
-        hitbox.classList.add('selected');
         const elementId = hitbox.dataset.panelElementId || '';
         const liveElement = Array.from(element.querySelectorAll('.publication-panel-element[data-element-id]'))
             .find(node => node instanceof HTMLElement && node.dataset.elementId === elementId) || null;

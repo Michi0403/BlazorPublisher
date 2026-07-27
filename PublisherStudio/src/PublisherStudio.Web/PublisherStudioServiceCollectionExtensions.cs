@@ -1,4 +1,5 @@
 using PublisherStudio.Controllers;
+using PublisherStudio.Diagnostics;
 using PublisherStudio.Domain;
 using PublisherStudio.HostedServices.Streaming;
 using PublisherStudio.HostedServices.OrganicPlugins;
@@ -98,6 +99,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddScoped<EditorStateService, EditorStateService>(services);
         AddScoped<PictureEditorStateService, PictureEditorStateService>(services);
         AddArchitectureDescriptors(services);
+        services.AddHostedService<ServiceRegistrationLoggingHostedService>();
         return services;
     }
 

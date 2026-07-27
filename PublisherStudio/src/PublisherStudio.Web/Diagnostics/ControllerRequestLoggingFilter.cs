@@ -1,0 +1,63 @@
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc.Filters;
+
+namespace PublisherStudio.Diagnostics;
+
+public sealed class ControllerRequestLoggingFilter(
+    ILogger<ControllerRequestLoggingFilter> logger) : IAsyncActionFilter
+{
+    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var controller = context.ActionDescriptor.RouteValues.GetValueOrDefault("controller") ?? "unknown";
+        var action = context.ActionDescriptor.RouteValues.GetValueOrDefault("action") ?? "unknown";
+        var request = context.HttpContext.Request;
+        logger.LogInformation(
+            "Controller action {Controller}.{Action} started for {Method} {Path}.",
+            controller,
+            action,
+            request.Method,
+            request.Path);
+
+        try
+        {
+            var executed = await next();
+            if (executed.Exception is not null && !executed.ExceptionHandled)
+            {
+                logger.LogError(
+                    executed.Exception,
+                    "Controller action {Controller}.{Action} failed after {ElapsedMilliseconds} ms.",
+                    controller,
+                    action,
+                    stopwatch.ElapsedMilliseconds);
+                return;
+            }
+
+            logger.LogInformation(
+                "Controller action {Controller}.{Action} completed with status {StatusCode} after {ElapsedMilliseconds} ms.",
+                controller,
+                action,
+                context.HttpContext.Response.StatusCode,
+                stopwatch.ElapsedMilliseconds);
+        }
+        catch (OperationCanceledException exception) when (context.HttpContext.RequestAborted.IsCancellationRequested)
+        {
+            logger.LogDebug(
+                exception,
+                "Controller action {Controller}.{Action} was cancelled because the client disconnected.",
+                controller,
+                action);
+            throw;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                exception,
+                "Controller action {Controller}.{Action} threw after {ElapsedMilliseconds} ms.",
+                controller,
+                action,
+                stopwatch.ElapsedMilliseconds);
+            throw;
+        }
+    }
+}

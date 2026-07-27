@@ -14,15 +14,15 @@ const discovery = read('src', 'PublisherStudio.Web', 'HostedServices', 'OrganicP
 const release = read('Build-Release.ps1');
 const settings = JSON.parse(read('src', 'PublisherStudio.Web', 'appsettings.json'));
 
-assert.match(webProject, /ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers;SelfContained/);
+assert.match(webProject, /ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove="Platform;PlatformTarget;RuntimeIdentifier;RuntimeIdentifiers;SelfContained/);
 assert.match(protocolProject, /<GeneratePackageOnBuild>false<\/GeneratePackageOnBuild>/);
 assert.match(protocol, /MaximumDiscoveryBytes = 32 \* 1024/);
 assert.match(discovery, /received\.Buffer\.Length > OrganicWireProtocol\.MaximumDiscoveryBytes/);
 assert.match(connection, /case OrganicWireMessageType\.HelloAck:[\s\S]*?OrganicWireMessageType\.CapabilityRequest/);
 assert.match(connection, /catch \(OperationCanceledException\) when \(cancellationToken\.IsCancellationRequested\)/);
 assert.equal(settings.OrganicPlugins.MaximumMessageBytes, 8 * 1024 * 1024);
-assert.match(release, /dotnet pack \$wireProtocolProject/);
-assert.match(release, /-p:RuntimeIdentifier= -p:RuntimeIdentifiers=/);
+assert.match(release, /(?:dotnet pack \$wireProtocolProject|"pack", \$wireProtocolProject)/);
+assert.match(release, /(?:-p:RuntimeIdentifier= -p:RuntimeIdentifiers=|"-p:RuntimeIdentifier=",[\s\S]*?"-p:RuntimeIdentifiers=")/);
 assert.match(release, /WireProtocolPackageUrl = ""/);
 assert.ok(!fs.existsSync(path.join(root, 'packages', 'LocalGPT.WireProtocolVersion.2.0.0.nupkg')), 'A stale source-only package must not shadow the project reference.');
 

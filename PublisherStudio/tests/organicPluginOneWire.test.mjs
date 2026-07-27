@@ -31,7 +31,7 @@ const installerProject = read('src','PublisherStudio.InstallerConsole','Publishe
 assert.ok(fs.existsSync(wireProjectPath), 'The synchronized LocalGPT.WireProtocolVersion source-build project is missing.');
 assert.ok(fs.existsSync(wireContractsPath), 'The synchronized 1-Wire contracts are missing.');
 assert.match(nugetConfig, /PublisherStudio local release packages/);
-assert.match(webProject, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers;SelfContained;PublishSingleFile;PublishTrimmed;PublishReadyToRun;PublishAot" \/>/);
+assert.match(webProject, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove="Platform;PlatformTarget;RuntimeIdentifier;RuntimeIdentifiers;SelfContained;PublishSingleFile;PublishTrimmed;PublishReadyToRun;PublishAot" \/>/);
 const wireProject = fs.readFileSync(wireProjectPath, 'utf8');
 assert.match(wireProject, /<GeneratePackageOnBuild>false<\/GeneratePackageOnBuild>/);
 assert.match(fs.readFileSync(wireContractsPath, 'utf8'), /MaximumDiscoveryBytes = 32 \* 1024/);

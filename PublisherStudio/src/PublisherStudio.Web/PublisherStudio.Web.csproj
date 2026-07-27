@@ -19,9 +19,13 @@
     <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
     <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseLocalWireProtocolProject)' == 'true'">
     <ProjectReference Include="..\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj"
-                      GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers;SelfContained;PublishSingleFile;PublishTrimmed;PublishReadyToRun;PublishAot" />
+                      SetPlatform="AnyCPU"
+                      GlobalPropertiesToRemove="Platform;PlatformTarget;RuntimeIdentifier;RuntimeIdentifiers;SelfContained;PublishSingleFile;PublishTrimmed;PublishReadyToRun;PublishAot" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLocalWireProtocolProject)' != 'true'">
+    <PackageReference Include="LocalGPT.WireProtocolVersion" Version="$(LocalGptWireProtocolVersion)" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="$(DevExpressVersion)" />

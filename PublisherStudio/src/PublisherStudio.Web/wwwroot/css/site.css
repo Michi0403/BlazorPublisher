@@ -6,6 +6,7 @@
     /* Application-level stacking scale. Object/editor overlays use local contexts below this. */
     --publisher-z-modal: 1040;
     --publisher-z-dialog: 1080;
+    --publisher-z-tooltip: 2200;
     --publisher-z-notification: 1800;
     --publisher-z-export: 1900;
 }
@@ -3656,7 +3657,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .publisher-help-tooltip {
     position: fixed;
     inset: auto;
-    z-index: 1002;
+    z-index: var(--publisher-z-tooltip, 2200);
     width: max-content;
     max-width: min(360px, calc(100vw - 20px));
     padding: 8px 10px;
@@ -4853,3 +4854,20 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 @container (max-width:480px){.panel-layout-responsive .publication-panel-element{min-height:180px}}
 .website-publication [data-publication-signal],.website-publication [data-signal-key]{overflow:visible}
 .website-publication [data-tooltip],.website-publication [title]{pointer-events:auto}
+
+
+/* v2.0.1 Panel/Div Studio visibility, form polish and overlay hardening. */
+.panel-studio-canvas>.publication-panel{position:absolute;inset:0;z-index:1;min-width:0;min-height:0}
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element{overflow:hidden;background:transparent}
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element>.panel-element-preview{position:absolute;inset:0;z-index:2;display:grid!important;visibility:visible!important;opacity:1!important;min-width:0;min-height:0;pointer-events:none}
+.panel-studio-canvas-shell.arrange-preview .panel-preview-data,.panel-studio-canvas-shell.arrange-preview .panel-preview-component,.panel-studio-canvas-shell.arrange-preview .panel-preview-media,.panel-studio-canvas-shell.arrange-preview .panel-preview-text{width:100%;height:100%;box-sizing:border-box}
+.panel-studio-hit-layer{z-index:60}.panel-studio-hitbox{z-index:var(--panel-element-z,1)}
+.panel-studio-hitbox.selected{z-index:1000!important}
+.panel-studio-element-list{position:relative;isolation:isolate;min-height:34px;max-height:240px}
+.panel-studio-element-list button{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;width:100%;min-height:31px;padding:5px 8px;border:1px solid #94a3b8;border-radius:4px;background:#fff;color:#0f172a}
+.panel-studio-element-list button.selected{z-index:2;outline:2px solid #38bdf8;outline-offset:-2px}
+.panel-studio-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){box-sizing:border-box;width:100%;min-height:30px;border:1px solid #aab6c3;border-radius:4px;padding:5px 8px;background:#fff;color:#17202a;font:12px/1.35 "Segoe UI",system-ui,sans-serif;box-shadow:inset 0 1px 2px #0f172a0a}
+.panel-studio-dialog select{appearance:none;padding-right:28px;background-image:linear-gradient(45deg,transparent 50%,#475569 50%),linear-gradient(135deg,#475569 50%,transparent 50%);background-position:calc(100% - 14px) 50%,calc(100% - 9px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.panel-studio-dialog :is(input,select,textarea):focus{outline:2px solid #38bdf866;outline-offset:0;border-color:#0284c7}
+.panel-studio-backdrop,.panel-studio-dialog{overflow:visible}
+.panel-studio-dialog{isolation:isolate}.panel-studio-dialog .dxbl-popup,.panel-studio-dialog .dxbl-dropdown,.panel-studio-dialog .dx-overlay-wrapper{z-index:var(--publisher-z-tooltip,2200)!important}

@@ -1,27 +1,41 @@
 param(
+    [ValidateSet("win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
     [string]$Runtime = "win-x64",
     [string]$Configuration = "Release",
-    [string]$WireProtocolVersion = "2.0.0",
+    [string]$WireProtocolVersion = "2.0.1",
     [string]$WireProtocolPackageUrl = "",
     [switch]$UseBundledWireProtocolPackage
 )
 
 $ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $artifacts = Join-Path $root "artifacts\release"
-
 $packageDirectory = Join-Path $root "packages"
 $wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
 $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
-New-Item -ItemType Directory -Path $packageDirectory -Force | Out-Null
 $wireProtocolProject = Join-Path $root "src\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj"
+$webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
+$webDirectory = Split-Path -Parent $webProject
+$setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
+
+$loggingGuard = Join-Path $root "build\Assert-LoggingIntegrity.ps1"
+& $loggingGuard
+
+function Invoke-DotNet {
+    param([Parameter(Mandatory)][string[]]$Arguments, [Parameter(Mandatory)][string]$FailureMessage)
+    & dotnet @Arguments
+    if ($LASTEXITCODE -ne 0) { throw $FailureMessage }
+}
+
+New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 if ($UseBundledWireProtocolPackage) {
     if (-not (Test-Path $wireProtocolPackage)) {
         throw "The bundled LocalGPT 1-Wire package was requested but is unavailable: $wireProtocolPackage"
     }
 }
 elseif (-not [string]::IsNullOrWhiteSpace($WireProtocolPackageUrl)) {
-    Write-Host "Downloading the requested LocalGPT 1-Wire package..." -ForegroundColor Cyan
+    Write-Host "Downloading the official LocalGPT 1-Wire package..." -ForegroundColor Cyan
     $temporaryWirePackage = "$wireProtocolPackage.download"
     Remove-Item $temporaryWirePackage -Force -ErrorAction SilentlyContinue
     Invoke-WebRequest -Uri $WireProtocolPackageUrl -OutFile $temporaryWirePackage -UseBasicParsing
@@ -31,9 +45,18 @@ elseif (-not [string]::IsNullOrWhiteSpace($WireProtocolPackageUrl)) {
 else {
     Write-Host "Packing the synchronized LocalGPT 1-Wire protocol project without an application RID..." -ForegroundColor Cyan
     Remove-Item $wireProtocolPackage -Force -ErrorAction SilentlyContinue
-    dotnet pack $wireProtocolProject -c $Configuration -o $packageDirectory `
-        -p:GeneratePackageOnBuild=false -p:RuntimeIdentifier= -p:RuntimeIdentifiers=
-    if ($LASTEXITCODE -ne 0) { throw "LocalGPT 1-Wire package creation failed." }
+    Invoke-DotNet -Arguments @(
+        "pack", $wireProtocolProject,
+        "-c", $Configuration,
+        "-o", $packageDirectory,
+        "-p:PackageVersion=$WireProtocolVersion",
+        "-p:GeneratePackageOnBuild=false",
+        "-p:Platform=AnyCPU",
+        "-p:PlatformTarget=AnyCPU",
+        "-p:RuntimeIdentifier=",
+        "-p:RuntimeIdentifiers=",
+        "-p:SkipLoggingIntegrityGuard=true"
+    ) -FailureMessage "LocalGPT 1-Wire package creation failed."
 }
 if (-not (Test-Path $wireProtocolPackage)) { throw "LocalGPT 1-Wire package is unavailable: $wireProtocolPackage" }
 
@@ -51,13 +74,8 @@ $appFolder = Join-Path $artifacts $profile.AppFolder
 $setupFolder = Join-Path $artifacts $profile.SetupFolder
 $appZip = Join-Path $artifacts "$($profile.Asset).zip"
 $setupZip = Join-Path $artifacts "$($profile.SetupAsset).zip"
-
-Remove-Item $appFolder,$setupFolder,$appZip,$setupZip -Recurse -Force -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
-
-$webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
-$webDirectory = Split-Path -Parent $webProject
-$setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
+Remove-Item $appFolder, $setupFolder, $appZip, $setupZip -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path $appFolder, $setupFolder -Force | Out-Null
 
 Write-Host "Preparing local DevExpress client assets and runtime license..." -ForegroundColor Cyan
 & (Join-Path $root "Prepare-DevExpressAssets.ps1")
@@ -78,50 +96,70 @@ if ($missingSpreadsheetAssets.Count -gt 0) {
     throw "DevExpress client assets are incomplete. Missing: $($missingSpreadsheetAssets -join ', ')"
 }
 
+$wireProperties = @(
+    "-p:UseLocalWireProtocolProject=false",
+    "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
+    "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
+    "-p:RestoreAdditionalProjectSources=$packageDirectory",
+    "-p:SkipLoggingIntegrityGuard=true"
+)
+
+Write-Host "Restoring BlazorPublisher application for $Runtime in package mode..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments (@("restore", $webProject, "-r", $Runtime) + $wireProperties) -FailureMessage "BlazorPublisher application restore failed."
+
 Write-Host "Publishing BlazorPublisher application for $Runtime..." -ForegroundColor Cyan
-dotnet publish $webProject `
-    -c $Configuration -f net10.0 -r $Runtime --self-contained true `
-    -p:PublishTrimmed=false -p:PublishSingleFile=false `
-    -p:DeleteExistingFiles=true -o $appFolder
-if ($LASTEXITCODE -ne 0) { throw "BlazorPublisher application publish failed." }
+Invoke-DotNet -Arguments (@(
+    "publish", $webProject,
+    "-c", $Configuration,
+    "-f", "net10.0",
+    "-r", $Runtime,
+    "--self-contained", "true",
+    "--no-restore",
+    "-p:PublishTrimmed=false",
+    "-p:PublishSingleFile=false",
+    "-p:PublishReadyToRun=false",
+    "-p:DeleteExistingFiles=true",
+    "-o", $appFolder
+) + $wireProperties) -FailureMessage "BlazorPublisher application publish failed."
+
+Write-Host "Restoring BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "BlazorPublisher setup restore failed."
 
 Write-Host "Publishing BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
-dotnet publish $setupProject `
-    -c $Configuration -f net10.0 -r $Runtime --self-contained true `
-    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
-    -p:DebugType=None -p:DebugSymbols=false `
-    -p:DeleteExistingFiles=true -o $setupFolder
-if ($LASTEXITCODE -ne 0) { throw "BlazorPublisher setup publish failed." }
+Invoke-DotNet -Arguments @(
+    "publish", $setupProject,
+    "-c", $Configuration,
+    "-f", "net10.0",
+    "-r", $Runtime,
+    "--self-contained", "true",
+    "--no-restore",
+    "-p:PublishSingleFile=true",
+    "-p:IncludeNativeLibrariesForSelfExtract=true",
+    "-p:DebugType=None",
+    "-p:DebugSymbols=false",
+    "-p:DeleteExistingFiles=true",
+    "-o", $setupFolder,
+    "-p:SkipLoggingIntegrityGuard=true"
+) -FailureMessage "BlazorPublisher setup publish failed."
 
 $appExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Web.exe" } else { "PublisherStudio.Web" }
 $setupExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Setup.exe" } else { "PublisherStudio.Setup" }
-
-if (-not (Test-Path (Join-Path $appFolder $appExecutable))) {
-    throw "Published application executable not found: $(Join-Path $appFolder $appExecutable)"
-}
-if (-not (Test-Path (Join-Path $setupFolder $setupExecutable))) {
-    throw "Published setup executable not found: $(Join-Path $setupFolder $setupExecutable)"
-}
+if (-not (Test-Path (Join-Path $appFolder $appExecutable))) { throw "Published application executable not found: $(Join-Path $appFolder $appExecutable)" }
+if (-not (Test-Path (Join-Path $setupFolder $setupExecutable))) { throw "Published setup executable not found: $(Join-Path $setupFolder $setupExecutable)" }
 
 $protocolAppDirectory = Join-Path $appFolder "protocol"
 $protocolSetupDirectory = Join-Path $setupFolder "protocol"
-New-Item -ItemType Directory -Path $protocolAppDirectory,$protocolSetupDirectory -Force | Out-Null
+New-Item -ItemType Directory -Path $protocolAppDirectory, $protocolSetupDirectory -Force | Out-Null
 Copy-Item $wireProtocolPackage (Join-Path $protocolAppDirectory $wireProtocolPackageName) -Force
 Copy-Item $wireProtocolPackage (Join-Path $protocolSetupDirectory $wireProtocolPackageName) -Force
 Copy-Item $wireProtocolPackage (Join-Path $artifacts $wireProtocolPackageName) -Force
 
 $requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "PublisherStudio.ico")
 $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path (Join-Path $setupFolder $_)) })
-if ($missingSetupFiles.Count -gt 0) {
-    throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')"
-}
+if ($missingSetupFiles.Count -gt 0) { throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')" }
 
-# Compress the directories themselves, not only their contents. Extraction therefore creates
-# the same runtime/setup directory layout used by the LocalGPT installer construct.
 Compress-Archive -Path $appFolder -DestinationPath $appZip -CompressionLevel Optimal -Force
 Compress-Archive -Path $setupFolder -DestinationPath $setupZip -CompressionLevel Optimal -Force
-
-# The generic Windows setup executable remains the initial bootstrap download.
 if ($Runtime -eq "win-x64") {
     Copy-Item (Join-Path $setupFolder "PublisherStudio.Setup.exe") (Join-Path $artifacts "PublisherStudio.Setup.exe") -Force
 }
@@ -130,6 +168,4 @@ Write-Host "Release assets:" -ForegroundColor Green
 Write-Host "  $appZip"
 Write-Host "  $setupZip"
 Write-Host "  $(Join-Path $artifacts $wireProtocolPackageName)"
-if ($Runtime -eq "win-x64") {
-    Write-Host "  $(Join-Path $artifacts 'PublisherStudio.Setup.exe')"
-}
+if ($Runtime -eq "win-x64") { Write-Host "  $(Join-Path $artifacts 'PublisherStudio.Setup.exe')" }

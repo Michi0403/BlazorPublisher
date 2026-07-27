@@ -1,12 +1,17 @@
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging.Abstractions;
 using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services.Panels;
 
-public sealed class PanelDocumentService(PublicationDataService data, PublicationComponentService components)
+public sealed class PanelDocumentService(
+    PublicationDataService data,
+    PublicationComponentService components,
+    ILogger<PanelDocumentService>? logger = null)
 {
     private readonly PublicationDataService _data = data;
     private readonly PublicationComponentService _components = components;
+    private readonly ILogger<PanelDocumentService> _logger = logger ?? NullLogger<PanelDocumentService>.Instance;
 
     private static readonly PublicationPanelPresetDescriptor[] Presets =
     [
@@ -17,7 +22,19 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
         new("web-experience", "Web experience wrapper", "A menu-driven container for isolated interactive HTML experiences and exported web fragments.", "Web", false, "pub-icon pub-icon-web")
     ];
 
-    public IReadOnlyList<PublicationPanelPresetDescriptor> GetPresets() => Presets;
+    public IReadOnlyList<PublicationPanelPresetDescriptor> GetPresets()
+    {
+        try
+        {
+            _logger.LogDebug("Returning {PresetCount} Panel Studio presets.", Presets.Length);
+            return Presets;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Panel Studio preset discovery failed.");
+            throw;
+        }
+    }
 
     private static readonly PanelComponentToolDescriptor[] ComponentTools =
     [
@@ -42,24 +59,35 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
 
     public IReadOnlyList<PanelComponentToolDescriptor> GetComponentTools(PublicationDocument document)
     {
-        var result = ComponentTools.ToList();
-        foreach (var template in document.ComponentTemplates.OrderBy(template => template.Category).ThenBy(template => template.Name))
+        try
         {
-            result.Add(new PanelComponentToolDescriptor(
-                $"template:{template.Id:D}",
-                template.Name,
-                template.Description,
-                string.IsNullOrWhiteSpace(template.Category) ? "My modules" : template.Category,
-                string.IsNullOrWhiteSpace(template.IconCssClass) ? "pub-icon pub-icon-panel" : template.IconCssClass,
-                template.Prototype.Kind.ToString().ToLowerInvariant(),
-                template.Id));
+            var result = ComponentTools.ToList();
+            foreach (var template in document.ComponentTemplates.OrderBy(template => template.Category).ThenBy(template => template.Name))
+            {
+                result.Add(new PanelComponentToolDescriptor(
+                    $"template:{template.Id:D}",
+                    template.Name,
+                    template.Description,
+                    string.IsNullOrWhiteSpace(template.Category) ? "My modules" : template.Category,
+                    string.IsNullOrWhiteSpace(template.IconCssClass) ? "pub-icon pub-icon-panel" : template.IconCssClass,
+                    template.Prototype.Kind.ToString().ToLowerInvariant(),
+                    template.Id));
+            }
+            _logger.LogDebug("Returning {ToolCount} Panel Studio component tools.", result.Count);
+            return result;
         }
-        return result;
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Panel Studio component-tool discovery failed.");
+            throw;
+        }
     }
 
     public PublicationElement CreateComponentTool(PublicationDocument document, string toolId)
     {
-        var id = (toolId ?? string.Empty).Trim().ToLowerInvariant();
+        try
+        {
+            var id = (toolId ?? string.Empty).Trim().ToLowerInvariant();
         return id switch
         {
             "text" => new TextFrameElement
@@ -89,7 +117,13 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
             "html" => new HtmlEmbedElement { Name = "HTML experience", Width = 100, Height = 58 },
             "panel" => CreateBlank("Nested panel"),
             _ => throw new ArgumentOutOfRangeException(nameof(toolId), toolId, "Unknown Panel Studio component tool.")
-        };
+            };
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Panel Studio could not create component tool {ToolId}.", toolId);
+            throw;
+        }
     }
 
     private DataVisualElement CreateVisual(PublicationDocument document, DataVisualKind kind, string name, double width, double height)
@@ -120,48 +154,88 @@ public sealed class PanelDocumentService(PublicationDataService data, Publicatio
 
     public PanelElement CreatePreset(PublicationDocument document, string? presetId)
     {
-        var id = string.IsNullOrWhiteSpace(presetId) ? "blank" : presetId.Trim().ToLowerInvariant();
-        var panel = id switch
+        try
         {
-            "kpi-dashboard" => CreateKpiDashboard(document),
-            "operations-board" => CreateOperationsBoard(document),
-            "creator-hub" => CreateCreatorHub(document),
-            "web-experience" => CreateWebExperience(),
-            _ => CreateBlank()
-        };
-        Normalize(document, panel);
-        return panel;
+            var id = string.IsNullOrWhiteSpace(presetId) ? "blank" : presetId.Trim().ToLowerInvariant();
+            var panel = id switch
+            {
+                "kpi-dashboard" => CreateKpiDashboard(document),
+                "operations-board" => CreateOperationsBoard(document),
+                "creator-hub" => CreateCreatorHub(document),
+                "web-experience" => CreateWebExperience(),
+                _ => CreateBlank()
+            };
+            Normalize(document, panel);
+            _logger.LogInformation("Created Panel Studio preset {PresetId} with {ViewCount} views.", id, panel.Views.Count);
+            return panel;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Panel Studio preset {PresetId} could not be created.", presetId);
+            throw;
+        }
     }
 
     public PanelElement CreateBlank(string name = "Panel")
     {
-        var view = new PublicationPanelView { Name = "Home", Slug = "home" };
-        return new PanelElement
+        try
         {
-            Name = name,
-            Width = 150,
-            Height = 90,
-            ActiveViewId = view.Id,
-            Views = [view]
-        };
+            var view = new PublicationPanelView { Name = "Home", Slug = "home" };
+            var panel = new PanelElement
+            {
+                Name = name,
+                Width = 150,
+                Height = 90,
+                ActiveViewId = view.Id,
+                Views = [view]
+            };
+            _logger.LogDebug("Created blank Panel Studio panel {PanelName}.", panel.Name);
+            return panel;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Blank Panel Studio panel {PanelName} could not be created.", name);
+            throw;
+        }
     }
 
-    public void Normalize(PublicationDocument document, PanelElement panel) => NormalizePanel(document, panel, 0);
+    public void Normalize(PublicationDocument document, PanelElement panel)
+    {
+        try
+        {
+            NormalizePanel(document, panel, 0);
+            _logger.LogDebug("Normalized Panel Studio panel {PanelId} with {ViewCount} views.", panel.Id, panel.Views.Count);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Panel Studio panel {PanelId} normalization failed.", panel.Id);
+            throw;
+        }
+    }
 
     public void NormalizeTemplate(PublicationDocument document, PublicationElementTemplate template)
     {
-        if (template.Id == Guid.Empty) template.Id = Guid.NewGuid();
-        template.Name = string.IsNullOrWhiteSpace(template.Name) ? "Reusable component" : template.Name.Trim();
-        template.Category = string.IsNullOrWhiteSpace(template.Category) ? "My modules" : template.Category.Trim();
-        template.Description ??= string.Empty;
-        template.IconCssClass = string.IsNullOrWhiteSpace(template.IconCssClass) ? "pub-icon pub-icon-panel" : template.IconCssClass.Trim();
-        template.Prototype ??= new TextFrameElement { Name = template.Name };
-        var holder = CreateBlank("Template normalization");
-        holder.CanvasWidth = Math.Max(160, template.Prototype.Width + 16);
-        holder.CanvasHeight = Math.Max(90, template.Prototype.Height + 16);
-        holder.Views[0].Elements.Add(template.Prototype);
-        NormalizePanel(document, holder, 0);
-        template.Prototype = holder.Views[0].Elements[0];
+        try
+        {
+            if (template.Id == Guid.Empty) template.Id = Guid.NewGuid();
+            template.Name = string.IsNullOrWhiteSpace(template.Name) ? "Reusable component" : template.Name.Trim();
+            template.Category = string.IsNullOrWhiteSpace(template.Category) ? "My modules" : template.Category.Trim();
+            template.Description ??= string.Empty;
+            template.IconCssClass = string.IsNullOrWhiteSpace(template.IconCssClass) ? "pub-icon pub-icon-panel" : template.IconCssClass.Trim();
+            template.Prototype ??= new TextFrameElement { Name = template.Name };
+            var holder = CreateBlank("Template normalization");
+            holder.CanvasWidth = Math.Max(160, template.Prototype.Width + 16);
+            holder.CanvasHeight = Math.Max(90, template.Prototype.Height + 16);
+            holder.Views[0].Elements.Add(template.Prototype);
+            NormalizePanel(document, holder, 0);
+            template.Prototype = holder.Views[0].Elements[0];
+            _logger.LogDebug("Normalized reusable Panel Studio template {TemplateId}.", template.Id);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Reusable Panel Studio template {TemplateId} normalization failed.", template.Id);
+            throw;
+        }
     }
 
     private void NormalizePanel(PublicationDocument document, PanelElement panel, int depth)

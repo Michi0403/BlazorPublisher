@@ -42,10 +42,9 @@ public sealed class SystemFontCatalog
         foreach (var directory in EnumerateFontDirectories())
             ReadFontDirectory(directory, families);
 
-        if (families.Count == 0)
-        {
-            foreach (var fallback in EmergencyFallbackFonts) families.Add(fallback);
-        }
+        // Always merge the safe local fallback set. A damaged or partially readable font
+        // file must never leave the WordArt or RichEdit dropdown empty.
+        foreach (var fallback in EmergencyFallbackFonts) AddFamily(families, fallback);
 
         return families
             .Where(IsUsableFamilyName)

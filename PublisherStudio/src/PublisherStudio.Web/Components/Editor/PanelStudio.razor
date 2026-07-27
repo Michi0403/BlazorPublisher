@@ -33,6 +33,7 @@
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Designer" IconCssClass="pub-icon pub-icon-select">
                         <DxRibbonItem Text="@(_interactionPreview ? "✓ Test interactions" : "Arrange components")" IconCssClass="pub-icon pub-icon-select" Click="ToggleInteractionPreview" />
+                        <DxRibbonItem Text="Edit content" IconCssClass="pub-icon pub-icon-edit" Click="EditSelectedComponent" Enabled="@(SelectedElement is not null)" />
                         <DxRibbonItem Text="Refresh preview" IconCssClass="pub-icon pub-icon-refresh" Click="RefreshPreview" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Layer" IconCssClass="pub-icon pub-icon-layers">
@@ -180,7 +181,7 @@
                              aria-label="Panel arrangement canvas"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
-                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" DesignPreviewOnly="false" />
+                            <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" DesignPreviewOnly="@(!_interactionPreview)" />
 
                             @if (!_interactionPreview && CurrentView is not null)
                             {
@@ -191,6 +192,10 @@
                                                 class="panel-studio-hitbox @(element.Id == _selectedElementId ? "selected" : null)"
                                                 style="@HitStyle(element)"
                                                 data-panel-element-id="@element.Id"
+                                                data-panel-element-x="@NormalizedX(element)"
+                                                data-panel-element-y="@NormalizedY(element)"
+                                                data-panel-element-width="@NormalizedWidth(element)"
+                                                data-panel-element-height="@NormalizedHeight(element)"
                                                 data-panel-element-z="@element.ZIndex"
                                                 title="Move @element.Name. Double-click to interact with its live content."
                                                 @onclick="() => SelectElement(element.Id)"
@@ -421,8 +426,18 @@
         </section>
     </div>
 
+    <PictureEditor Visible="@_pictureEditorVisible"
+                   SessionId="@_pictureEditorSessionId"
+                   InitialDocument="@PanelPictureDocument"
+                   InitialRasterDataUrl="@PanelPictureRaster"
+                   InitialName="@PanelPictureName"
+                   EditingExisting="true"
+                   Saved="SavePanelPicture"
+                   Cancelled="ClosePanelPictureEditor" />
+
     <DxContextMenu @ref="_elementContextMenu">
         <Items>
+            <DxContextMenuItem Text="Edit content" IconCssClass="pub-icon pub-icon-edit" Click="EditSelectedComponent" />
             <DxContextMenuItem Text="Duplicate" IconCssClass="pub-icon pub-icon-copy" Click="DuplicateElement" />
             <DxContextMenuItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Click="DeleteElement" />
             <DxContextMenuItem Text="Arrange" BeginGroup="true">
@@ -464,11 +479,20 @@
     private string _templateCategory = "My modules";
     private string _templateDescription = string.Empty;
     private DxContextMenu _elementContextMenu = default!;
+    private bool _pictureEditorVisible;
+    private Guid _pictureEditorSessionId;
+    private Guid? _pictureEditorTargetId;
     private bool _disposed;
 
     private PublicationPanelView? CurrentView => _draft?.Views.FirstOrDefault(view => view.Id == _selectedViewId) ?? _draft?.ActiveView;
     private PublicationElement? SelectedElement => CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
     private IReadOnlyList<PanelComponentToolDescriptor> PaletteTools => Panels.GetComponentTools(Document);
+    private ImageFrameElement? PanelPictureTarget => _pictureEditorTargetId is { } id
+        ? _draft?.Views.SelectMany(view => view.Elements).OfType<ImageFrameElement>().FirstOrDefault(image => image.Id == id)
+        : null;
+    private PictureDocument? PanelPictureDocument => PanelPictureTarget?.PictureSource;
+    private string? PanelPictureRaster => PanelPictureTarget?.DataUrl;
+    private string PanelPictureName => PanelPictureTarget?.Name ?? "Picture";
 
     protected override void OnParametersSet()
     {
@@ -476,6 +500,8 @@
         {
             _loadedId = null;
             _dropSurfaceBound = false;
+            _pictureEditorVisible = false;
+            _pictureEditorTargetId = null;
             return;
         }
 
@@ -716,6 +742,13 @@
     }
 
     [JSInvokable]
+    public Task ActivatePanelElement(string elementId)
+    {
+        if (!Guid.TryParse(elementId, out var id)) return Task.CompletedTask;
+        return InvokeAsync(() => ActivateElementInteraction(id));
+    }
+
+    [JSInvokable]
     public Task PanelStudioCommand(string command, double amount = 1)
     {
         if (_disposed || _interactionPreview) return Task.CompletedTask;
@@ -786,6 +819,11 @@
         var height = element.Height / Math.Max(1, _draft.CanvasHeight) * 100;
         return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{Math.Max(1, element.ZIndex)};transform:rotate({Inv(element.Rotation)}deg)";
     }
+
+    private string NormalizedX(PublicationElement element) => Inv(element.X / Math.Max(1, _draft?.CanvasWidth ?? 1));
+    private string NormalizedY(PublicationElement element) => Inv(element.Y / Math.Max(1, _draft?.CanvasHeight ?? 1));
+    private string NormalizedWidth(PublicationElement element) => Inv(element.Width / Math.Max(1, _draft?.CanvasWidth ?? 1));
+    private string NormalizedHeight(PublicationElement element) => Inv(element.Height / Math.Max(1, _draft?.CanvasHeight ?? 1));
 
     private async Task ExportPanelJsonAsync()
     {
@@ -1091,9 +1129,25 @@
 
     private void MoveElement(PublicationLayerMove move)
     {
-        if (CurrentView is null || SelectedElement is null) return;
-        Layout.MoveLayer(CurrentView.Elements, SelectedElement.Id, move);
-        SelectElement(SelectedElement.Id);
+        if (CurrentView is null || SelectedElement is not { } selected) return;
+        var id = selected.Id;
+        var x = selected.X;
+        var y = selected.Y;
+        var width = selected.Width;
+        var height = selected.Height;
+        var rotation = selected.Rotation;
+        Layout.MoveLayer(CurrentView.Elements, id, move);
+        // A layer command changes only Z order. Preserve the authored geometry even when a
+        // browser pointer-up arrives late after the context menu opened.
+        if (CurrentView.Elements.FirstOrDefault(element => element.Id == id) is { } moved)
+        {
+            moved.X = x;
+            moved.Y = y;
+            moved.Width = width;
+            moved.Height = height;
+            moved.Rotation = rotation;
+        }
+        SelectElement(id);
     }
 
     private void NudgeSelected(double deltaX, double deltaY)
@@ -1105,6 +1159,7 @@
 
     private async Task ShowElementContextMenu(Guid id, MouseEventArgs args)
     {
+        await CancelPanelPointerAsync();
         SelectElement(id);
         await InvokeAsync(StateHasChanged);
         await _elementContextMenu.ShowAsync(args);
@@ -1112,10 +1167,54 @@
 
     private void EnableInteractionPreview() => _interactionPreview = true;
     private void DisableInteractionPreview() => _interactionPreview = false;
-    private void ActivateElementInteraction(Guid id)
+
+    private Task EditSelectedComponent() => SelectedElement is { } selected
+        ? ActivateElementInteraction(selected.Id)
+        : Task.CompletedTask;
+
+    private async Task ActivateElementInteraction(Guid id)
     {
+        await CancelPanelPointerAsync();
         SelectElement(id);
+        if (SelectedElement is ImageFrameElement)
+        {
+            _interactionPreview = false;
+            _pictureEditorTargetId = id;
+            _pictureEditorSessionId = Guid.NewGuid();
+            _pictureEditorVisible = true;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
         _interactionPreview = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CancelPanelPointerAsync()
+    {
+        try { await JS.InvokeVoidAsync("publisherStudio.cancelPanelStudioPointer", _canvasElement, true); }
+        catch (JSDisconnectedException) { }
+        catch (OperationCanceledException) { }
+        catch (InvalidOperationException) { }
+    }
+
+    private async Task SavePanelPicture(PictureEditorResult result)
+    {
+        if (PanelPictureTarget is { } image)
+        {
+            image.DataUrl = result.DataUrl;
+            image.OriginalDataUrl = result.DataUrl;
+            image.PictureSource = result.SourceDocument;
+            if (!string.IsNullOrWhiteSpace(result.Name)) image.Name = result.Name;
+            SelectElement(image.Id);
+        }
+        ClosePanelPictureEditor();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ClosePanelPictureEditor()
+    {
+        _pictureEditorVisible = false;
+        _pictureEditorTargetId = null;
     }
 
     private void SelectTemplate(Guid id)
@@ -1270,6 +1369,7 @@
     public async ValueTask DisposeAsync()
     {
         _disposed = true;
+        ClosePanelPictureEditor();
         try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement); }
         catch (JSDisconnectedException) { }
         catch (OperationCanceledException) { }

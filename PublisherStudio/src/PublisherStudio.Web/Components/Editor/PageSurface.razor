@@ -229,6 +229,7 @@
                             break;
                         case PanelElement panel:
                             <PanelView @key="panel.Id" Document="State.Document" Item="panel" CurrentPageId="State.SelectedPageId" DesignerMode="true" />
+                            <div class="publication-panel-design-shield" data-designer-object-shield title="Select or move this panel. Double-click to edit it in Panel Studio."></div>
                             break;
                         case HtmlEmbedElement htmlEmbed:
                             <HtmlEmbedView @key="htmlEmbed.Id" Item="htmlEmbed" DesignerMode="true" />

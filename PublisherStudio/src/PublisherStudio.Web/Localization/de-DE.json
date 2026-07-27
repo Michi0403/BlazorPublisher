@@ -2937,5 +2937,9 @@
   "Word.write": "Schreiben",
   "Word.yes": "ja",
   "Word.zoom": "Zoom",
-  "Text.Message␠body": "Nachrichtentext"
+  "Text.Message␠body": "Nachrichtentext",
+  "Text.Edit␠content": "Inhalt bearbeiten",
+  "Text.Select␠or␠move␠this␠panel.␠Double-click␠to␠edit␠it␠in␠Panel␠Studio.": "Dieses Panel auswählen oder verschieben. Doppelklicken, um es im Panel Studio zu bearbeiten.",
+  "Text.Installed␠operating-system␠fonts": "Installierte Betriebssystemschriftarten",
+  "Text.Installed␠fonts…": "Installierte Schriftarten…"
 }

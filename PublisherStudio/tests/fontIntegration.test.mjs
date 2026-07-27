@@ -43,9 +43,11 @@ assert.doesNotMatch(catalog, /https?:\/\//, 'The offline system-font catalog mus
 assert.match(picker, /<input type="text"/);
 assert.match(picker, /list="@_listId"/);
 assert.match(picker, /<datalist/);
+assert.match(picker, /<select class="system-font-picker-dropdown"/);
+assert.match(picker, /Installed operating-system fonts/);
 assert.match(picker, /SystemFonts\.FontFamilies/);
 assert.match(picker, /HandleChanged/);
-assert.doesNotMatch(picker, /<select/, 'Manual font entry must remain available.');
+assert.match(picker, /<input type="text"/, 'Manual font entry must remain available beside the native dropdown.');
 
 assert.match(inspector, /<SystemFontPicker Value="@wordArt\.FontFamily"/);
 assert.doesNotMatch(inspector, /WordArtFonts/);
@@ -56,7 +58,7 @@ assert.doesNotMatch(pictureCode, /new\[\][\s\S]{0,300}(Arial|Calibri|Courier New
 
 assert.match(story, /CustomizeRibbon="CustomizeRichEditRibbon"/);
 assert.match(story, /SystemFonts\.FontFamilies/);
-assert.match(story, /fontNameComboBox\.Items\.Clear\(\)/);
+assert.doesNotMatch(story, /fontNameComboBox\.Items\.Clear\(\)/);
 assert.match(story, /fontNameComboBox\.Items\.Add\(font, font\)/);
 assert.match(story, /fontNameComboBox\.AllowUserInput = true/);
 

@@ -2937,5 +2937,9 @@
   "Word.write": "write",
   "Word.yes": "yes",
   "Word.zoom": "zoom",
-  "Text.Message␠body": "Message body"
+  "Text.Message␠body": "Message body",
+  "Text.Edit␠content": "Edit content",
+  "Text.Select␠or␠move␠this␠panel.␠Double-click␠to␠edit␠it␠in␠Panel␠Studio.": "Select or move this panel. Double-click to edit it in Panel Studio.",
+  "Text.Installed␠operating-system␠fonts": "Installed operating-system fonts",
+  "Text.Installed␠fonts…": "Installed fonts…"
 }

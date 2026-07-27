@@ -30,7 +30,7 @@ const program = read('src/PublisherStudio.Web/Program.cs');
 // Panel / Div Studio is a real shared-component composer, not a JSON-only form.
 assert.match(panelStudio, /<DxRibbon[\s\S]*<DxRibbonTab Text="Insert">/);
 assert.match(panelStudio, /class="panel-component-tool[\s\S]*draggable="true"/);
-assert.match(panelStudio, /<PanelView Document="Document" Item="_draft"/);
+assert.match(panelStudio, /<PanelView[^>]*Document="Document" Item="_draft"/);
 assert.match(panelStudio, /<PanelElementPreview Item="_dragPrototype"/);
 assert.match(panelStudio, /@ondragover:preventDefault[\s\S]*@ondrop="DropDraggedElement"/);
 assert.match(panelStudio, /bindPanelStudioDropSurface/);
@@ -90,7 +90,7 @@ assert.match(conversionController, /RequestSizeLimit\(long\.MaxValue\)/);
 assert.match(publisherInterop, /bindMediaConverterDrop/);
 assert.match(publisherInterop, /bindPanelStudioDropSurface/);
 assert.match(publisherInterop, /ghost\.style\.left/);
-assert.match(publisherInterop, /invokeMethodAsync\('CommitPanelElementBounds'/);
+assert.match(publisherInterop, /panelStudioQueueInvoke\(binding, 'CommitPanelElementBounds'/);
 assert.match(publisherInterop, /element\.addEventListener\('pointermove', event/);
 assert.match(publisherInterop, /ReceiveMediaDropError/);
 

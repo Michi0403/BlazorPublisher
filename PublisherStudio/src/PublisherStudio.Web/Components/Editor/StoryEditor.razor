@@ -278,9 +278,15 @@
         if (fontNameItem.Type != BarItemTypes.ComboBox) return;
 
         var fontNameComboBox = (IBarComboBox)fontNameItem;
-        fontNameComboBox.Items.Clear();
+        // Preserve DevExpress' built-in entries and append the operating-system catalog.
+        // Clearing the collection left the control at "No data to display" whenever font
+        // discovery was delayed or one duplicate entry was rejected by the ribbon runtime.
         foreach (var font in SystemFonts.FontFamilies)
-            fontNameComboBox.Items.Add(font, font);
+        {
+            try { fontNameComboBox.Items.Add(font, font); }
+            catch (ArgumentException) { }
+            catch (InvalidOperationException) { }
+        }
         fontNameComboBox.AllowUserInput = true;
         fontNameComboBox.Tooltip = "Select an installed system font or type another font family.";
     }

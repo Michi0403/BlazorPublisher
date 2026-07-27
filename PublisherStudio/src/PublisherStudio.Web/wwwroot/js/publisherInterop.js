@@ -6527,10 +6527,28 @@ export function panelStudioPoint(element, clientX, clientY) {
 
 const panelStudioDropBindings = new WeakMap();
 
+function panelStudioExpectedShutdown(error) {
+    const message = error instanceof Error ? error.message : String(error || '');
+    return /cancel(?:led|ed)?|disposed|disconnect|no longer|cannot send data|circuit|abort/i.test(message);
+}
+
 function reportPanelStudioError(binding, error) {
+    if (binding?.disposed || panelStudioExpectedShutdown(error)) return;
     const message = error instanceof Error ? error.message : String(error || 'Unknown panel interaction error.');
     console.warn('Panel Studio interaction failed.', error);
     binding?.dotNetReference?.invokeMethodAsync?.('ReportPanelInteractionError', message).catch(() => {});
+}
+
+function panelStudioQueueInvoke(binding, method, ...args) {
+    if (!binding || binding.disposed || !binding.element?.isConnected) return Promise.resolve();
+    binding.invokeQueue = (binding.invokeQueue || Promise.resolve())
+        .catch(() => {})
+        .then(() => {
+            if (binding.disposed || !binding.element?.isConnected) return;
+            return binding.dotNetReference?.invokeMethodAsync?.(method, ...args);
+        })
+        .catch(error => reportPanelStudioError(binding, error));
+    return binding.invokeQueue;
 }
 
 function panelStudioEditableTarget(target) {
@@ -6538,8 +6556,7 @@ function panelStudioEditableTarget(target) {
 }
 
 function panelStudioInvoke(binding, command, amount = 1) {
-    return binding?.dotNetReference?.invokeMethodAsync?.('PanelStudioCommand', command, amount)
-        .catch(error => reportPanelStudioError(binding, error));
+    return panelStudioQueueInvoke(binding, 'PanelStudioCommand', command, amount);
 }
 
 function startPanelStudioGamepad(binding) {
@@ -6605,11 +6622,17 @@ export function unbindPanelStudioDropSurface(element) {
     panelStudioDropBindings.delete(element);
 }
 
+export function cancelPanelStudioPointer(element, restore = true) {
+    if (!(element instanceof HTMLElement)) return;
+    const binding = panelStudioDropBindings.get(element);
+    binding?.cancelPointer?.(restore !== false);
+}
+
 export function bindPanelStudioDropSurface(element, dotNetReference) {
     if (!(element instanceof HTMLElement)) return false;
     unbindPanelStudioDropSurface(element);
     const controller = new AbortController();
-    const binding = { element, dotNetReference, controller, disposed: false, pointer: null, gamepad: null };
+    const binding = { element, dotNetReference, controller, disposed: false, pointer: null, gamepad: null, invokeQueue: Promise.resolve() };
     const options = { signal: controller.signal };
     const activeOptions = { signal: controller.signal, passive: false };
     panelStudioDropBindings.set(element, binding);
@@ -6633,18 +6656,35 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
     }, options);
     element.addEventListener('drop', () => setActive(false), options);
 
-    const cancelPointer = () => {
+    const applyPanelBounds = (operation, bounds) => {
+        if (!operation || !bounds) return;
+        operation.hitbox.style.left = `${bounds.x * 100}%`;
+        operation.hitbox.style.top = `${bounds.y * 100}%`;
+        operation.hitbox.style.width = `${bounds.width * 100}%`;
+        operation.hitbox.style.height = `${bounds.height * 100}%`;
+        if (operation.liveElement instanceof HTMLElement) {
+            operation.liveElement.style.left = `${bounds.x * 100}%`;
+            operation.liveElement.style.top = `${bounds.y * 100}%`;
+            operation.liveElement.style.width = `${bounds.width * 100}%`;
+            operation.liveElement.style.height = `${bounds.height * 100}%`;
+        }
+    };
+    const cancelPointer = (restore = true) => {
         const operation = binding.pointer;
         if (!operation) return;
         try { operation.hitbox.releasePointerCapture(operation.pointerId); } catch { }
+        if (restore && operation.moved) applyPanelBounds(operation, operation.initial);
         binding.pointer = null;
     };
     binding.cancelPointer = cancelPointer;
 
     const commit = operation => {
         const bounds = operation.current || operation.initial;
-        binding.dotNetReference.invokeMethodAsync('CommitPanelElementBounds', operation.id, bounds.x, bounds.y, bounds.width, bounds.height)
-            .catch(error => reportPanelStudioError(binding, error));
+        operation.hitbox.dataset.panelElementX = String(bounds.x);
+        operation.hitbox.dataset.panelElementY = String(bounds.y);
+        operation.hitbox.dataset.panelElementWidth = String(bounds.width);
+        operation.hitbox.dataset.panelElementHeight = String(bounds.height);
+        panelStudioQueueInvoke(binding, 'CommitPanelElementBounds', operation.id, bounds.x, bounds.y, bounds.width, bounds.height);
     };
 
     element.addEventListener('pointerdown', event => {
@@ -6658,13 +6698,24 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         try { element.focus({ preventScroll: true }); } catch { }
         cancelPointer();
 
-        const canvasBounds = element.getBoundingClientRect();
+        const coordinateSurface = hitbox.closest('.panel-studio-hit-layer') || element;
+        const canvasBounds = coordinateSurface.getBoundingClientRect();
+        const readNormalized = (name, fallback) => {
+            const value = Number.parseFloat(hitbox.dataset[name] || '');
+            return Number.isFinite(value) ? value : fallback;
+        };
         const boxBounds = hitbox.getBoundingClientRect();
-        const initial = {
+        const fallback = {
             x: clamp((boxBounds.left - canvasBounds.left) / Math.max(1, canvasBounds.width), 0, 1),
             y: clamp((boxBounds.top - canvasBounds.top) / Math.max(1, canvasBounds.height), 0, 1),
             width: clamp(boxBounds.width / Math.max(1, canvasBounds.width), .005, 1),
             height: clamp(boxBounds.height / Math.max(1, canvasBounds.height), .005, 1)
+        };
+        const initial = {
+            x: clamp(readNormalized('panelElementX', fallback.x), 0, 1),
+            y: clamp(readNormalized('panelElementY', fallback.y), 0, 1),
+            width: clamp(readNormalized('panelElementWidth', fallback.width), .005, 1),
+            height: clamp(readNormalized('panelElementHeight', fallback.height), .005, 1)
         };
         const elementId = hitbox.dataset.panelElementId || '';
         const liveElement = Array.from(element.querySelectorAll('.publication-panel-element[data-element-id]'))
@@ -6705,31 +6756,37 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
             height = clamp(height, minimum, 1 - y);
         }
         operation.current = { x, y, width, height };
-        operation.hitbox.style.left = `${x * 100}%`;
-        operation.hitbox.style.top = `${y * 100}%`;
-        operation.hitbox.style.width = `${width * 100}%`;
-        operation.hitbox.style.height = `${height * 100}%`;
-        // Keep the real panel component visually attached to its selection rectangle while dragging.
-        // The final normalized values are still committed through the C# layout service on pointer-up.
-        if (operation.liveElement instanceof HTMLElement) {
-            operation.liveElement.style.left = `${x * 100}%`;
-            operation.liveElement.style.top = `${y * 100}%`;
-            operation.liveElement.style.width = `${width * 100}%`;
-            operation.liveElement.style.height = `${height * 100}%`;
-        }
+        // Keep the preview attached to its selection rectangle while dragging.
+        // The final normalized values are committed through the C# layout service on pointer-up.
+        applyPanelBounds(operation, operation.current);
     }, activeOptions);
 
     const finishPointer = event => {
         const operation = binding.pointer;
         if (!operation || operation.pointerId !== event.pointerId) return;
         event.preventDefault();
-        cancelPointer();
+        cancelPointer(false);
         if (operation.moved) commit(operation);
-        else binding.dotNetReference?.invokeMethodAsync?.('SelectPanelElement', operation.id)
-            .catch(error => reportPanelStudioError(binding, error));
+        else panelStudioQueueInvoke(binding, 'SelectPanelElement', operation.id);
     };
     element.addEventListener('pointerup', finishPointer, activeOptions);
     element.addEventListener('pointercancel', cancelPointer, options);
+
+    element.addEventListener('dblclick', event => {
+        if (element.dataset.panelStudioArrange !== 'true') return;
+        const target = event.target instanceof Element ? event.target : null;
+        const hitbox = target?.closest?.('.panel-studio-hitbox[data-panel-element-id]');
+        if (!(hitbox instanceof HTMLElement) || !element.contains(hitbox)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        cancelPointer(true);
+        panelStudioQueueInvoke(binding, 'ActivatePanelElement', hitbox.dataset.panelElementId || '');
+    }, activeOptions);
+
+    element.addEventListener('contextmenu', event => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (target?.closest?.('.panel-studio-hitbox[data-panel-element-id]')) cancelPointer(true);
+    }, options);
 
     element.addEventListener('keydown', event => {
         if (event.defaultPrevented || panelStudioEditableTarget(event.target) || element.dataset.panelStudioArrange !== 'true') return;

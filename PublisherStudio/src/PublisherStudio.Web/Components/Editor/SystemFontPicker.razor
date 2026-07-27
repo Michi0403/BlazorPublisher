@@ -1,14 +1,27 @@
 @inject SystemFontCatalog SystemFonts
 
-<input type="text"
-       class="@CssClass"
-       value="@Value"
-       list="@_listId"
-       autocomplete="off"
-       spellcheck="false"
-       placeholder="Type or select a system font"
-       title="Select an installed system font or type another font family"
-       @onchange="HandleChanged" />
+<div class="system-font-picker @CssClass">
+    <input type="text"
+           class="system-font-picker-input"
+           value="@Value"
+           list="@_listId"
+           autocomplete="off"
+           spellcheck="false"
+           placeholder="Type or select a system font"
+           title="Select an installed system font or type another font family"
+           @onchange="HandleChanged" />
+    <select class="system-font-picker-dropdown"
+            value="@Value"
+            title="Installed operating-system fonts"
+            aria-label="Installed operating-system fonts"
+            @onchange="HandleChanged">
+        <option value="">Installed fonts…</option>
+        @foreach (var font in SystemFonts.FontFamilies)
+        {
+            <option value="@font">@font</option>
+        }
+    </select>
+</div>
 <datalist id="@_listId">
     @foreach (var font in SystemFonts.FontFamilies)
     {

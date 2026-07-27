@@ -1,7 +1,20 @@
 @inherits LayoutComponentBase
 @namespace PublisherStudio.Components.Layout
+@inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
+@inject NavigationManager Navigation
 
 <main class="application-root">
-    @Body
+    <UserNotificationHost />
+    <OperationalErrorBoundary @key="Navigation.Uri">
+        <ChildContent>
+            @Body
+        </ChildContent>
+        <ErrorContent Context="exception">
+            <section class="publisher-component-error" role="alert">
+                <strong>@Localization.Get("Text.PublisherStudio␠could␠not␠render␠this␠view.", fallback: "PublisherStudio could not render this view.")</strong>
+                <span>@Localization.Get("Text.The␠exception␠was␠written␠to␠the␠local␠application␠log.", fallback: "The exception was written to the local application log.")</span>
+            </section>
+        </ErrorContent>
+    </OperationalErrorBoundary>
     <OrganicApprovalBar />
 </main>

@@ -91,4 +91,19 @@
           StandardErrorImportance="High" />
   </Target>
 
+
+  <PropertyGroup>
+    <OperationalDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-OperationalDiagnostics.ps1</OperationalDiagnosticsScript>
+  </PropertyGroup>
+  <Target Name="AssertPublisherOperationalDiagnostics"
+          BeforeTargets="BeforeBuild"
+          AfterTargets="AssertPublisherLoggingIntegrity"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOperationalDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(OperationalDiagnosticsScript)')" Text="Operational diagnostics guard script is missing: $(OperationalDiagnosticsScript)" />
+    <Exec Condition="Exists('$(OperationalDiagnosticsScript)')"
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(OperationalDiagnosticsScript)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
 </Project>

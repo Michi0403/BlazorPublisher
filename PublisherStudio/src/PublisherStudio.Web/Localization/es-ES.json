@@ -14,5 +14,7 @@
   "Automation.Screenshot": "Captura de pantalla",
   "Compatibility.HtmlNative": "HTML nativo",
   "Compatibility.CanvasRuntime": "Runtime de canvas",
-  "Compatibility.RenderBeforeExport": "Renderizar antes de exportar HTML"
+  "Compatibility.RenderBeforeExport": "Renderizar antes de exportar HTML",
+  "Text.PublisherStudio␠could␠not␠render␠this␠view.": "PublisherStudio no pudo representar esta vista.",
+  "Text.The␠exception␠was␠written␠to␠the␠local␠application␠log.": "La excepción se escribió en el registro local de la aplicación."
 }

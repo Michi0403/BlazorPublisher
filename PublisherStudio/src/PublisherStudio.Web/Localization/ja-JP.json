@@ -14,5 +14,7 @@
   "Automation.Screenshot": "スクリーンショット",
   "Compatibility.HtmlNative": "HTML ネイティブ",
   "Compatibility.CanvasRuntime": "Canvas ランタイム",
-  "Compatibility.RenderBeforeExport": "HTML 書き出し前にレンダー"
+  "Compatibility.RenderBeforeExport": "HTML 書き出し前にレンダー",
+  "Text.PublisherStudio␠could␠not␠render␠this␠view.": "PublisherStudio はこのビューを表示できませんでした。",
+  "Text.The␠exception␠was␠written␠to␠the␠local␠application␠log.": "例外はローカル アプリケーション ログに記録されました。"
 }

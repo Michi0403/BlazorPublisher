@@ -2941,5 +2941,7 @@
   "Text.Edit␠content": "Edit content",
   "Text.Select␠or␠move␠this␠panel.␠Double-click␠to␠edit␠it␠in␠Panel␠Studio.": "Select or move this panel. Double-click to edit it in Panel Studio.",
   "Text.Installed␠operating-system␠fonts": "Installed operating-system fonts",
-  "Text.Installed␠fonts…": "Installed fonts…"
+  "Text.Installed␠fonts…": "Installed fonts…",
+  "Text.PublisherStudio␠could␠not␠render␠this␠view.": "PublisherStudio could not render this view.",
+  "Text.The␠exception␠was␠written␠to␠the␠local␠application␠log.": "The exception was written to the local application log."
 }

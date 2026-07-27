@@ -2941,5 +2941,7 @@
   "Text.Edit␠content": "Inhalt bearbeiten",
   "Text.Select␠or␠move␠this␠panel.␠Double-click␠to␠edit␠it␠in␠Panel␠Studio.": "Dieses Panel auswählen oder verschieben. Doppelklicken, um es im Panel Studio zu bearbeiten.",
   "Text.Installed␠operating-system␠fonts": "Installierte Betriebssystemschriftarten",
-  "Text.Installed␠fonts…": "Installierte Schriftarten…"
+  "Text.Installed␠fonts…": "Installierte Schriftarten…",
+  "Text.PublisherStudio␠could␠not␠render␠this␠view.": "PublisherStudio konnte diese Ansicht nicht darstellen.",
+  "Text.The␠exception␠was␠written␠to␠the␠local␠application␠log.": "Die Ausnahme wurde in das lokale Anwendungsprotokoll geschrieben."
 }

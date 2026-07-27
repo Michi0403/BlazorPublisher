@@ -917,6 +917,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             lastInsertionPoint: null,
             pendingComponentAction: null,
             suppressNextComponentClickUntil: 0,
+            selectionFramePending: false,
             handlers: {}
         };
 
@@ -976,7 +977,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             }
             suppressInsertionClick(state, event);
         };
-        handlers.scroll = () => nextAnimationFrame(state);
+        handlers.scroll = () => { nextAnimationFrame(state); scheduleSelectionVisualFrame(state); };
         handlers.publisherNavigate = event => scheduleComponentNavigation(state, event.detail);
         handlers.publisherOpenUrl = event => scheduleComponentUrl(state, event.detail);
         handlers.mapViewportChanged = event => commitMapViewportEvent(state, event);
@@ -1013,7 +1014,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         scroll.addEventListener('scroll', handlers.scroll, { passive: true });
 
         if (typeof ResizeObserver === 'function') {
-            state.resizeObserver = new ResizeObserver(() => { nextAnimationFrame(state); refreshContentFit(state.page); updateResizeHandleCursors(state.page); });
+            state.resizeObserver = new ResizeObserver(() => { nextAnimationFrame(state); refreshContentFit(state.page); updateResizeHandleCursors(state.page); scheduleSelectionVisualFrame(state); });
             state.resizeObserver.observe(stage);
             state.resizeObserver.observe(scroll);
         }
@@ -1045,6 +1046,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
     syncEditorZoomRendering(state);
     refreshContentFit(state.page);
     updateResizeHandleCursors(state.page);
+    scheduleSelectionVisualFrame(state);
     nextAnimationFrame(state);
     return true;
 }
@@ -1056,6 +1058,7 @@ export function disposeCanvas(stageId) {
     if (!state) return;
 
     resetPointerOperation(state, true);
+    state.selectionFramePending = false;
     cancelPendingComponentAction(state);
     if (state.pendingPasteTimer) clearTimeout(state.pendingPasteTimer);
     state.pendingPasteTimer = 0;
@@ -1672,6 +1675,114 @@ function selectedElementIdSet(state) {
     return ids;
 }
 
+function selectionVisualFrame(state) {
+    return state.page?.querySelector?.(':scope > [data-selection-visual-frame]') || null;
+}
+
+function renderedSelectionTarget(element) {
+    if (!element) return null;
+    const content = element.querySelector(':scope > .publication-element-content');
+    if (!content) return element;
+    const kind = String(element.dataset.elementKind || '').toLowerCase();
+    const selectors = {
+        panel: '[data-panel-root]',
+        htmlembed: '.publication-html-embed-shell',
+        devextremecomponent: '.devextreme-publication-component,.devextreme-component-host',
+        datavisual: '.data-visual-view,[data-visual-root]',
+        livesource: '.live-source-view',
+        video: '.publication-video-renderer,video',
+        audio: '.publication-audio-frame,audio'
+    };
+    const selector = selectors[kind];
+    return (selector ? content.querySelector(selector) : null) || content;
+}
+
+function finiteVisibleRect(node) {
+    if (!node?.isConnected) return null;
+    const style = getComputedStyle(node);
+    if (style.display === 'none' || style.visibility === 'hidden') return null;
+    const rect = node.getBoundingClientRect();
+    if (![rect.left, rect.top, rect.right, rect.bottom, rect.width, rect.height].every(Number.isFinite)) return null;
+    if (rect.width < .5 || rect.height < .5) return null;
+    return rect;
+}
+
+function renderedSelectionBounds(element) {
+    const target = renderedSelectionTarget(element);
+    const first = finiteVisibleRect(target) || finiteVisibleRect(element);
+    if (!first) return null;
+
+    // Responsive panels and embedded component runtimes can paint outside their root box.
+    // Union only their major visible descendants, not popups or selection chrome.
+    const kind = String(element.dataset.elementKind || '').toLowerCase();
+    if (!['panel', 'htmlembed', 'devextremecomponent', 'datavisual', 'livesource'].includes(kind)) return first;
+    let left = first.left, top = first.top, right = first.right, bottom = first.bottom;
+    const candidates = target?.querySelectorAll?.(
+        ':scope > *,[data-panel-view]:not([hidden]),[data-panel-element],.dx-widget,.dashboard-card,.publication-html-embed-content'
+    ) || [];
+    let inspected = 0;
+    for (const node of candidates) {
+        if (inspected++ > 160 || node.closest?.('.dx-overlay-wrapper,.dx-popup-wrapper,[data-selection-visual-frame]')) continue;
+        const rect = finiteVisibleRect(node);
+        if (!rect) continue;
+        left = Math.min(left, rect.left);
+        top = Math.min(top, rect.top);
+        right = Math.max(right, rect.right);
+        bottom = Math.max(bottom, rect.bottom);
+    }
+    return { left, top, right, bottom, width: right - left, height: bottom - top };
+}
+
+function updateSelectionVisualFrame(state) {
+    state.selectionFramePending = false;
+    const frame = selectionVisualFrame(state);
+    if (!frame || !state.page?.isConnected) return;
+    const selected = [...state.page.querySelectorAll('[data-publication-element].selected')]
+        .filter(item => !item.matches('[data-connector-id]'));
+    const primary = selected.find(item => item.classList.contains('selection-primary')) || selected.at(-1) || null;
+    const rotation = Math.abs(number(primary?.dataset?.elementRotation));
+    if (!primary || selected.length !== 1 || rotation > .01 || state.config?.cropMode || state.config?.contentPanMode) {
+        frame.hidden = true;
+        frame.removeAttribute('data-element-id');
+        state.page.classList.remove('selection-visual-active');
+        return;
+    }
+
+    const bounds = renderedSelectionBounds(primary);
+    const pageRect = state.page.getBoundingClientRect();
+    if (!bounds || pageRect.width < .5 || pageRect.height < .5) {
+        frame.hidden = true;
+        state.page.classList.remove('selection-visual-active');
+        return;
+    }
+    const scaleX = state.page.clientWidth / pageRect.width;
+    const scaleY = state.page.clientHeight / pageRect.height;
+    const left = (bounds.left - pageRect.left) * scaleX;
+    const top = (bounds.top - pageRect.top) * scaleY;
+    const width = bounds.width * scaleX;
+    const height = bounds.height * scaleY;
+    if (![left, top, width, height].every(Number.isFinite) || width < 1 || height < 1) {
+        frame.hidden = true;
+        state.page.classList.remove('selection-visual-active');
+        return;
+    }
+
+    frame.style.left = `${left}px`;
+    frame.style.top = `${top}px`;
+    frame.style.width = `${width}px`;
+    frame.style.height = `${height}px`;
+    frame.dataset.elementId = primary.dataset.elementId || '';
+    frame.classList.toggle('locked', primary.classList.contains('locked'));
+    frame.hidden = false;
+    state.page.classList.add('selection-visual-active');
+}
+
+function scheduleSelectionVisualFrame(state) {
+    if (!state || state.selectionFramePending) return;
+    state.selectionFramePending = true;
+    requestAnimationFrame(() => updateSelectionVisualFrame(state));
+}
+
 function synchronizeSelectionDom(state, ids, primaryId = null) {
     const normalized = new Set([...ids].map(value => String(value || '').toLowerCase()).filter(Boolean));
     const primary = String(primaryId || '').toLowerCase();
@@ -1690,6 +1801,7 @@ function synchronizeSelectionDom(state, ids, primaryId = null) {
         item.classList.toggle('selection-primary', selected && id === primary);
         item.classList.toggle('content-pan-target', contentPanTarget);
     }
+    scheduleSelectionVisualFrame(state);
 }
 
 function createSelectionMarquee(state) {
@@ -2095,7 +2207,11 @@ function pointerDown(state, event) {
         return;
     }
 
-    const element = event.target.closest('[data-publication-element]');
+    const visualHandle = event.target.closest('[data-selection-visual-frame] [data-resize-handle]');
+    const visualElementId = visualHandle?.closest('[data-selection-visual-frame]')?.dataset?.elementId || '';
+    const element = visualElementId
+        ? state.page.querySelector(`[data-publication-element][data-element-id="${CSS.escape(visualElementId)}"]`)
+        : event.target.closest('[data-publication-element]');
     if ((!element || !state.page.contains(element)) && state.page.contains(event.target) && signalConnectorToolActive(state)) {
         state.lastCanvasClick = null;
         const sourcePoint = pagePointMm(state, event);
@@ -2195,7 +2311,7 @@ function pointerDown(state, event) {
     if (element.classList.contains('locked')) return;
     if (element.matches('[data-connector-id]')) return;
 
-    const handle = event.target.closest('[data-resize-handle]');
+    const handle = visualHandle || event.target.closest('[data-resize-handle]');
     const image = element.querySelector('img');
     const bounds = elementMm(element, state.config.pxPerMm);
     const moving = movingNodesForPointer(state, element, additive, wasSelected)
@@ -2416,6 +2532,7 @@ function pointerMove(state, event) {
             item.element.style.top = `${(item.y + translateY) * state.config.pxPerMm}px`;
             updateAttachedConnectors(state, item.id);
         }
+        scheduleSelectionVisualFrame(state);
         event.preventDefault();
         return;
     }
@@ -2435,6 +2552,7 @@ function pointerMove(state, event) {
     refreshContentFit(operationElement);
     updateResizeHandleCursors(operationElement.parentElement || state.page);
     updateAttachedConnectors(state, operation.id);
+    scheduleSelectionVisualFrame(state);
     event.preventDefault();
 }
 
@@ -2481,6 +2599,7 @@ function pointerUp(state, event) {
     if (!operation || operation.pointerId !== event.pointerId) return;
     state.operation = null;
     clearObjectAlignmentFeedback(state);
+    scheduleSelectionVisualFrame(state);
     try { state.stage.releasePointerCapture(event.pointerId); } catch { }
 
     if (operation.kind === 'marquee') {

@@ -4944,3 +4944,28 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .pub-element.selected .publication-panel-design-shield{box-shadow:inset 0 0 0 1px #38bdf866}
 .panel-studio-canvas-shell.interaction-preview .publication-panel-design-shield{display:none}
 @media(max-width:560px){.system-font-picker{grid-template-columns:1fr}}
+
+
+/* Browser-measured primary selection frame. Complex panels and embedded runtimes can
+   establish a visual box that differs from their persisted authoring box. The frame is
+   measured from the rendered content and therefore remains aligned after zoom, scroll,
+   responsive layout, and asynchronous component rendering. */
+.publisher-selection-visual-frame {
+    position: absolute;
+    z-index: 1200;
+    box-sizing: border-box;
+    pointer-events: none;
+    outline: 1.5px solid #1787d4;
+    outline-offset: 1px;
+    transform-origin: center;
+}
+.publisher-selection-visual-frame[hidden] { display: none !important; }
+.publisher-selection-visual-frame.locked { outline-style: dashed; }
+.publisher-selection-visual-frame > .selection-handle { pointer-events: auto; }
+.publication-page.selection-visual-active .pub-element.selection-primary { outline-color: transparent; }
+.publication-page.selection-visual-active .pub-element.selection-primary > .selection-handle { display: none; }
+.connector-tool-active .publisher-selection-visual-frame > .selection-handle,
+.crop-mode .publisher-selection-visual-frame > .selection-handle,
+.content-pan-mode .publisher-selection-visual-frame > .selection-handle,
+.publisher-selection-visual-frame.locked > .selection-handle { display: none; }
+.publisher-component-error { display:grid;gap:6px;margin:24px;padding:18px;border:1px solid #dc2626;border-radius:8px;background:#fef2f2;color:#7f1d1d; }

@@ -288,9 +288,10 @@ const streamingComposition = fs.readFileSync(path.join(web, 'StreamingServiceCol
 assert.match(streamingComposition, /AddSingleton<StreamingRuntimeUseCases>/);
 assert.ok(globalImports.has('PublisherStudio.Services.Streaming.UseCases.Runtime'), 'The runtime use-case namespace must remain globally imported.');
 
-const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'LocalGPT.WireProtocolVersion.csproj');
-assert.ok(fs.existsSync(wireProjectPath), 'The synchronized 1-Wire source-build project is missing.');
+const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion');
+assert.equal(fs.existsSync(wireProjectPath), false, 'PublisherStudio must not carry a second protocol source project.');
 const webProjectText = fs.readFileSync(path.join(web, 'PublisherStudio.Web.csproj'), 'utf8');
-assert.match(webProjectText, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove=/);
-assert.match(fs.readFileSync(wireProjectPath, 'utf8'), /<GeneratePackageOnBuild>false<\/GeneratePackageOnBuild>/);
+assert.match(webProjectText, /<PackageReference Include="LocalGPT\.WireProtocolVersion" Version="\$\(LocalGptWireProtocolVersion\)" \/>/);
+assert.doesNotMatch(webProjectText, /ProjectReference[^>]*LocalGPT\.WireProtocolVersion/);
+assert.match(fs.readFileSync(path.join(root, 'build', 'Ensure-WireProtocolPackage.ps1'), 'utf8'), /lib\/net10\.0\/LocalGPT\.WireProtocolVersion\.dll/);
 console.log('PublisherStudio source-package project closure and StreamingRuntimeUseCases inventory checks passed.');

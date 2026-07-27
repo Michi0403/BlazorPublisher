@@ -19,7 +19,7 @@ Your files remain under the signed-in user's control. PublisherStudio listens on
 
 PublisherStudio discovers LocalGPT through a compact UDP beacon and establishes the approved organic link over TCP. Capability, skill, UI-feature, and hardware directories are exchanged only after the link is approved, avoiding oversized discovery packets while preserving the complete shared catalogue. PublisherStudio can advertise its eye, hand, OpenSCAD, spreadsheet, media, and publishing capabilities and can submit work to configured LocalGPT Council teams.
 
-The normal PublisherStudio web port, LocalGPT web/installer port, 1-Wire TCP service port, and UDP discovery port remain separate contracts. The synchronized `src/LocalGPT.WireProtocolVersion` source-build project keeps restore/debug/publish deterministic; `Build-Release.ps1` packs it into the DLL-backed NuGet release artifact without inheriting an application runtime identifier.
+The normal PublisherStudio web port, LocalGPT web/installer port, 1-Wire TCP service port, and UDP discovery port remain separate contracts. The protocol source and package authority live only in the LocalGPT repository. PublisherStudio contains no mirrored protocol project and consumes the RID-neutral `LocalGPT.WireProtocolVersion` NuGet release package.
 
 See `CHANGELOG-v1.0.89.md` and `docs/architecture/task-ledger.md`.
 
@@ -29,42 +29,29 @@ PublisherStudio remains a complete standalone publication application. Its Local
 
 The same pattern can be generated for a user's own local software: the application describes a capability contract, LocalGPT helps generate a protocol adapter and Council role/workflow, and the human reviews and enables the result. This is an example of LocalGPT adapting organically to a private local environment while keeping the installation, source and authority under the user's control.
 
-The shared wire contract supports two modes:
+PublisherStudio uses one protocol mode only: an authoritative NuGet package produced by LocalGPT. There is deliberately no `src/LocalGPT.WireProtocolVersion` directory and no protocol project in `PublisherStudio.sln`. This prevents two Git repositories from silently diverging on the same wire contract.
 
-- **Source mode (default):** PublisherStudio references `src/LocalGPT.WireProtocolVersion/LocalGPT.WireProtocolVersion.csproj` for synchronized protocol development.
-- **Package mode:** PublisherStudio consumes `packages/LocalGPT.WireProtocolVersion.2.0.1.nupkg`, normally downloaded from the official LocalGPT release. This is the mode used by standalone release builds and installed users.
+The first build prepares `packages/LocalGPT.WireProtocolVersion.2.0.1.nupkg` before NuGet restore. It can copy the package from a LocalGPT checkout or per-user cache, or download the official asset from the latest LocalGPT GitHub release. The package cache is ignored by Git.
 
-Put a locally downloaded package here:
-
-```text
-<BlazorPublisher repository>\packages\LocalGPT.WireProtocolVersion.2.0.1.nupkg
-```
-
-Local source development:
+Local development:
 
 ```powershell
 .\Build-LocalDevelopment.ps1 -Configuration Debug
 ```
 
-Local package-mode verification:
+Use a local LocalGPT checkout explicitly:
 
 ```powershell
-.\Build-LocalDevelopment.ps1 -Configuration Debug -UseWireProtocolPackage
+.\Build-LocalDevelopment.ps1 -LocalGptRepository C:\Source\LocalGPT
 ```
 
-One release runtime using a package already in `packages`:
-
-```powershell
-.\Build-Release.ps1 -Runtime win-x64 -UseBundledWireProtocolPackage
-```
-
-All supported runtimes, packing the synchronized local protocol once and reusing that package:
+All supported release runtimes, strictly sequential and reusing one already prepared package:
 
 ```powershell
 .\Build-AllRuntimes.ps1
 ```
 
-A release package can also be supplied directly with `-WireProtocolPackageUrl`. The installer/update/start wiring remains independent: PublisherStudio can be installed and used without LocalGPT, and the organic page simply reports that no peer is connected until the user starts and authorizes one.
+A package URL can be supplied directly with `-WireProtocolPackageUrl`. Without one, PublisherStudio uses `https://github.com/Michi0403/LocalGPT/releases/latest/download/LocalGPT.WireProtocolVersion.2.0.1.nupkg`. The installer/update/start wiring remains independent: PublisherStudio can be installed and used without LocalGPT, and the organic page simply reports that no peer is connected until the user starts and authorizes one.
 
 ## v1.0.88: publish-candidate interaction hardening
 

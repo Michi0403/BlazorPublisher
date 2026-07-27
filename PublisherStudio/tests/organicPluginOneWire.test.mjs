@@ -6,9 +6,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
-const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'LocalGPT.WireProtocolVersion.csproj');
-const wireContractsPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion', 'OneWireProtocolContracts.cs');
-const nugetConfig = read('NuGet.config');
+const wireProjectPath = path.join(root, 'src', 'LocalGPT.WireProtocolVersion');
+const nugetConfig = read('NuGet.Config');
+const packageBootstrap = read('build', 'Ensure-WireProtocolPackage.ps1');
+const solution = read('PublisherStudio.sln');
 const models = read('src','PublisherStudio.Web','Domain','OrganicPluginModels.cs');
 const protocolAliases = read('src','PublisherStudio.Web','GlobalUsings.OrganicWire.cs');
 const interfaces = read('src','PublisherStudio.Web','Services','OrganicPlugins','IOrganicPluginServices.cs');
@@ -28,13 +29,13 @@ const webProject = read('src','PublisherStudio.Web','PublisherStudio.Web.csproj'
 const installerProject = read('src','PublisherStudio.InstallerConsole','PublisherStudio.InstallerConsole.csproj');
 
 
-assert.ok(fs.existsSync(wireProjectPath), 'The synchronized LocalGPT.WireProtocolVersion source-build project is missing.');
-assert.ok(fs.existsSync(wireContractsPath), 'The synchronized 1-Wire contracts are missing.');
-assert.match(nugetConfig, /PublisherStudio local release packages/);
-assert.match(webProject, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove="Platform;PlatformTarget;RuntimeIdentifier;RuntimeIdentifiers;SelfContained;PublishSingleFile;PublishTrimmed;PublishReadyToRun;PublishAot" \/>/);
-const wireProject = fs.readFileSync(wireProjectPath, 'utf8');
-assert.match(wireProject, /<GeneratePackageOnBuild>false<\/GeneratePackageOnBuild>/);
-assert.match(fs.readFileSync(wireContractsPath, 'utf8'), /MaximumDiscoveryBytes = 32 \* 1024/);
+assert.equal(fs.existsSync(wireProjectPath), false, 'PublisherStudio must not carry a synchronized LocalGPT.WireProtocolVersion source project.');
+assert.match(nugetConfig, /PublisherStudio LocalGPT release cache/);
+assert.match(webProject, /<PackageReference Include="LocalGPT\.WireProtocolVersion" Version="\$\(LocalGptWireProtocolVersion\)" \/>/);
+assert.doesNotMatch(webProject, /ProjectReference[^>]*LocalGPT\.WireProtocolVersion/);
+assert.doesNotMatch(solution, /LocalGPT\.WireProtocolVersion/);
+assert.match(packageBootstrap, /lib\/net10\.0\/LocalGPT\.WireProtocolVersion\.dll/);
+assert.match(packageBootstrap, /releases\/latest\/download\/\$packageName/);
 for (const token of [
   'RequiresHumanInteractionOnTargetSystem',
   'RequiresAutomatedInteractionOnTargetSystem',

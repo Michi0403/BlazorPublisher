@@ -8,6 +8,24 @@
     <LoggingIntegrityScript>$(MSBuildThisFileDirectory)build\Assert-LoggingIntegrity.ps1</LoggingIntegrityScript>
   </PropertyGroup>
 
+
+  <PropertyGroup>
+    <WireProtocolBootstrapScript>$(MSBuildThisFileDirectory)build\Ensure-WireProtocolPackage.ps1</WireProtocolBootstrapScript>
+  </PropertyGroup>
+
+  <Target Name="EnsurePublisherWireProtocolPackage"
+          BeforeTargets="Restore;_GenerateRestoreProjectSpec;_GenerateRestoreGraphProjectEntry"
+          Condition="'$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(SkipWireProtocolBootstrap)' != 'true' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(WireProtocolBootstrapScript)')"
+           Text="LocalGPT protocol package bootstrap script is missing: $(WireProtocolBootstrapScript)" />
+    <Exec Condition="Exists('$(WireProtocolBootstrapScript)')"
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(WireProtocolBootstrapScript)&quot; -Version &quot;$(LocalGptWireProtocolVersion)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="High"
+          StandardErrorImportance="High" />
+  </Target>
+
   <Target Name="AssertPublisherLoggingIntegrity"
           BeforeTargets="BeforeBuild"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">

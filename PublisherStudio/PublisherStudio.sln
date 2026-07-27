@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherStudio.Web", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherStudio.InstallerConsole", "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj", "{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalGPT.WireProtocolVersion", "src\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj", "{D37BB5D8-5C40-47A4-9D79-9D66F2D4581C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,10 +20,6 @@ Global
 		{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19EFB5D4-D114-4BD0-9B28-94BE522C95E9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D37BB5D8-5C40-47A4-9D79-9D66F2D4581C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D37BB5D8-5C40-47A4-9D79-9D66F2D4581C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D37BB5D8-5C40-47A4-9D79-9D66F2D4581C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D37BB5D8-5C40-47A4-9D79-9D66F2D4581C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

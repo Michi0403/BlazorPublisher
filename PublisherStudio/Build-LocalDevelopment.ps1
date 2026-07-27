@@ -1,6 +1,10 @@
 param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Debug",
+    [string]$WireProtocolVersion = "2.0.1",
+    [string]$WireProtocolPackageUrl = "",
+    [string]$LocalGptRepository = "",
+    [switch]$RefreshWireProtocolPackage,
     [switch]$UseWireProtocolPackage,
     [switch]$Clean
 )
@@ -8,16 +12,17 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$solution = Join-Path $root "PublisherStudio.sln"
-if (-not (Test-Path $solution)) {
-    $solution = Get-ChildItem $root -Filter *.sln -File | Select-Object -First 1 -ExpandProperty FullName
-}
-if (-not $solution) { throw "PublisherStudio solution file was not found." }
+$webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
+$setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 $packageDirectory = Join-Path $root "packages"
-$useProject = if ($UseWireProtocolPackage) { "false" } else { "true" }
 
-$loggingGuard = Join-Path $root "build\Assert-LoggingIntegrity.ps1"
-& $loggingGuard
+function Invoke-DotNet {
+    param([Parameter(Mandatory)][string[]]$Arguments, [Parameter(Mandatory)][string]$FailureMessage)
+    & dotnet @Arguments
+    if ($LASTEXITCODE -ne 0) { throw $FailureMessage }
+}
+
+& (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
 
 if ($Clean) {
     Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
@@ -26,14 +31,35 @@ if ($Clean) {
         Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-$properties = @(
-    "-p:UseLocalWireProtocolProject=$useProject",
+if ($UseWireProtocolPackage) {
+    Write-Host "PublisherStudio is package-only now; -UseWireProtocolPackage is retained as a harmless compatibility switch." -ForegroundColor DarkYellow
+}
+
+$ensureArguments = @{
+    Version = $WireProtocolVersion
+    PackageDirectory = $packageDirectory
+    PackageUrl = $WireProtocolPackageUrl
+    LocalGptRepository = $LocalGptRepository
+}
+if ($RefreshWireProtocolPackage) { $ensureArguments.ForceDownload = $true }
+& (Join-Path $root "build\Ensure-WireProtocolPackage.ps1") @ensureArguments | Out-Null
+
+$wireProperties = @(
+    "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
     "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
     "-p:RestoreAdditionalProjectSources=$packageDirectory",
+    "-p:SkipWireProtocolBootstrap=true",
     "-p:SkipLoggingIntegrityGuard=true"
 )
-& dotnet restore $solution @properties
-if ($LASTEXITCODE -ne 0) { throw "PublisherStudio solution restore failed." }
-& dotnet build $solution -c $Configuration --no-restore @properties
-if ($LASTEXITCODE -ne 0) { throw "PublisherStudio solution build failed." }
-Write-Host "PublisherStudio development build succeeded with UseLocalWireProtocolProject=$useProject." -ForegroundColor Green
+
+Write-Host "Restoring PublisherStudio.Web after the protocol package is available..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments (@("restore", $webProject, "--disable-parallel") + $wireProperties) -FailureMessage "PublisherStudio.Web restore failed."
+Write-Host "Restoring PublisherStudio installer..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments @("restore", $setupProject, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "PublisherStudio installer restore failed."
+
+Write-Host "Building PublisherStudio.Web as a single ordered project..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments (@("build", $webProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1") + $wireProperties) -FailureMessage "PublisherStudio.Web build failed."
+Write-Host "Building PublisherStudio installer after the web project..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments @("build", $setupProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1", "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "PublisherStudio installer build failed."
+
+Write-Host "PublisherStudio development build succeeded in authoritative NuGet package mode." -ForegroundColor Green

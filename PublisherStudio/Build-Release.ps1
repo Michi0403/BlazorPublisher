@@ -4,7 +4,9 @@ param(
     [string]$Configuration = "Release",
     [string]$WireProtocolVersion = "2.0.1",
     [string]$WireProtocolPackageUrl = "",
-    [switch]$UseBundledWireProtocolPackage
+    [string]$LocalGptRepository = "",
+    [switch]$UseBundledWireProtocolPackage,
+    [switch]$RefreshWireProtocolPackage
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,13 +16,9 @@ $artifacts = Join-Path $root "artifacts\release"
 $packageDirectory = Join-Path $root "packages"
 $wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
 $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
-$wireProtocolProject = Join-Path $root "src\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj"
 $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
 $webDirectory = Split-Path -Parent $webProject
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
-
-$loggingGuard = Join-Path $root "build\Assert-LoggingIntegrity.ps1"
-& $loggingGuard
 
 function Invoke-DotNet {
     param([Parameter(Mandatory)][string[]]$Arguments, [Parameter(Mandatory)][string]$FailureMessage)
@@ -28,37 +26,27 @@ function Invoke-DotNet {
     if ($LASTEXITCODE -ne 0) { throw $FailureMessage }
 }
 
+& (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
+
 if ($UseBundledWireProtocolPackage) {
-    if (-not (Test-Path $wireProtocolPackage)) {
-        throw "The bundled LocalGPT 1-Wire package was requested but is unavailable: $wireProtocolPackage"
+    if (-not (Test-Path -LiteralPath $wireProtocolPackage -PathType Leaf)) {
+        throw "The cached official LocalGPT protocol package is unavailable: $wireProtocolPackage"
     }
 }
-elseif (-not [string]::IsNullOrWhiteSpace($WireProtocolPackageUrl)) {
-    Write-Host "Downloading the official LocalGPT 1-Wire package..." -ForegroundColor Cyan
-    $temporaryWirePackage = "$wireProtocolPackage.download"
-    Remove-Item $temporaryWirePackage -Force -ErrorAction SilentlyContinue
-    Invoke-WebRequest -Uri $WireProtocolPackageUrl -OutFile $temporaryWirePackage -UseBasicParsing
-    if (-not (Test-Path $temporaryWirePackage)) { throw "The LocalGPT 1-Wire package download did not produce a file." }
-    Move-Item $temporaryWirePackage $wireProtocolPackage -Force
-}
 else {
-    Write-Host "Packing the synchronized LocalGPT 1-Wire protocol project without an application RID..." -ForegroundColor Cyan
-    Remove-Item $wireProtocolPackage -Force -ErrorAction SilentlyContinue
-    Invoke-DotNet -Arguments @(
-        "pack", $wireProtocolProject,
-        "-c", $Configuration,
-        "-o", $packageDirectory,
-        "-p:PackageVersion=$WireProtocolVersion",
-        "-p:GeneratePackageOnBuild=false",
-        "-p:Platform=AnyCPU",
-        "-p:PlatformTarget=AnyCPU",
-        "-p:RuntimeIdentifier=",
-        "-p:RuntimeIdentifiers=",
-        "-p:SkipLoggingIntegrityGuard=true"
-    ) -FailureMessage "LocalGPT 1-Wire package creation failed."
+    $ensureArguments = @{
+        Version = $WireProtocolVersion
+        PackageDirectory = $packageDirectory
+        PackageUrl = $WireProtocolPackageUrl
+        LocalGptRepository = $LocalGptRepository
+    }
+    if ($RefreshWireProtocolPackage) { $ensureArguments.ForceDownload = $true }
+    & (Join-Path $root "build\Ensure-WireProtocolPackage.ps1") @ensureArguments | Out-Null
 }
-if (-not (Test-Path $wireProtocolPackage)) { throw "LocalGPT 1-Wire package is unavailable: $wireProtocolPackage" }
+if (-not (Test-Path -LiteralPath $wireProtocolPackage -PathType Leaf)) {
+    throw "LocalGPT protocol package preparation did not produce $wireProtocolPackage"
+}
 
 $profile = switch ($Runtime) {
     "win-x64"     { @{ Asset = "winx64";     SetupAsset = "setupwinx64";     AppFolder = "winx64";     SetupFolder = "setupwin-x64" } }
@@ -97,15 +85,15 @@ if ($missingSpreadsheetAssets.Count -gt 0) {
 }
 
 $wireProperties = @(
-    "-p:UseLocalWireProtocolProject=false",
     "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
     "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
     "-p:RestoreAdditionalProjectSources=$packageDirectory",
+    "-p:SkipWireProtocolBootstrap=true",
     "-p:SkipLoggingIntegrityGuard=true"
 )
 
-Write-Host "Restoring BlazorPublisher application for $Runtime in package mode..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments (@("restore", $webProject, "-r", $Runtime) + $wireProperties) -FailureMessage "BlazorPublisher application restore failed."
+Write-Host "Restoring BlazorPublisher application for $Runtime after protocol preparation..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments (@("restore", $webProject, "-r", $Runtime, "--disable-parallel") + $wireProperties) -FailureMessage "BlazorPublisher application restore failed."
 
 Write-Host "Publishing BlazorPublisher application for $Runtime..." -ForegroundColor Cyan
 Invoke-DotNet -Arguments (@(
@@ -115,6 +103,7 @@ Invoke-DotNet -Arguments (@(
     "-r", $Runtime,
     "--self-contained", "true",
     "--no-restore",
+    "-maxcpucount:1",
     "-p:PublishTrimmed=false",
     "-p:PublishSingleFile=false",
     "-p:PublishReadyToRun=false",
@@ -123,7 +112,7 @@ Invoke-DotNet -Arguments (@(
 ) + $wireProperties) -FailureMessage "BlazorPublisher application publish failed."
 
 Write-Host "Restoring BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "BlazorPublisher setup restore failed."
+Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "BlazorPublisher setup restore failed."
 
 Write-Host "Publishing BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
 Invoke-DotNet -Arguments @(
@@ -133,6 +122,7 @@ Invoke-DotNet -Arguments @(
     "-r", $Runtime,
     "--self-contained", "true",
     "--no-restore",
+    "-maxcpucount:1",
     "-p:PublishSingleFile=true",
     "-p:IncludeNativeLibrariesForSelfExtract=true",
     "-p:DebugType=None",

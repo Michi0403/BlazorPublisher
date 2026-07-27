@@ -11,23 +11,33 @@ test('PublisherStudio release uses the RID-neutral protocol package and explicit
   const release = read('Build-Release.ps1');
   assert.match(release, /WireProtocolVersion = "2\.0\.1"/);
   assert.match(release, /"restore", \$webProject, "-r", \$Runtime/);
-  assert.match(release, /UseLocalWireProtocolProject=false/);
+  assert.doesNotMatch(release, /UseLocalWireProtocolProject/);
+  assert.match(release, /Ensure-WireProtocolPackage\.ps1/);
   assert.match(release, /RestoreAdditionalProjectSources/);
   assert.match(release, /"publish", \$webProject/);
   assert.ok(fs.existsSync(path.join(root, 'Build-AllRuntimes.ps1')));
   const all = read('Build-AllRuntimes.ps1');
   for (const rid of ['win-x64','win-arm64','linux-x64','linux-arm64','osx-x64','osx-arm64']) assert.match(all, new RegExp(rid));
+  const local = read('Build-LocalDevelopment.ps1');
+  assert.match(local, /Ensure-WireProtocolPackage\.ps1/);
+  assert.match(local, /--disable-parallel/);
+  assert.match(local, /-maxcpucount:1/);
+  assert.ok(local.indexOf('restore", $webProject') < local.indexOf('build", $webProject'));
 });
 
-test('PublisherStudio supports independent source and NuGet wire modes', () => {
+test('PublisherStudio consumes only the authoritative LocalGPT NuGet contract', () => {
   const project = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
-  assert.match(project, /UseLocalWireProtocolProject/);
-  assert.match(project, /PackageReference Include="LocalGPT\.WireProtocolVersion"/);
-  assert.match(project, /SetPlatform="AnyCPU"/);
-  assert.match(project, /GlobalPropertiesToRemove="Platform;PlatformTarget;RuntimeIdentifier/);
+  const solution = read('PublisherStudio.sln');
+  const bootstrap = read('build/Ensure-WireProtocolPackage.ps1');
+  assert.match(project, /PackageReference Include="LocalGPT\.WireProtocolVersion" Version="\$\(LocalGptWireProtocolVersion\)"/);
+  assert.doesNotMatch(project, /ProjectReference[^>]*LocalGPT\.WireProtocolVersion/);
+  assert.doesNotMatch(solution, /LocalGPT\.WireProtocolVersion/);
+  assert.equal(fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion')), false);
+  assert.match(bootstrap, /releases\/latest\/download\/\$packageName/);
+  assert.match(bootstrap, /lib\/net10\.0\/LocalGPT\.WireProtocolVersion\.dll/);
   const readme = read('README.md');
   assert.match(readme, /Optional LocalGPT organic wiring/);
-  assert.match(readme, /packages\\LocalGPT\.WireProtocolVersion\.2\.0\.1\.nupkg/);
+  assert.match(readme, /no `src\/LocalGPT\.WireProtocolVersion` directory/);
   assert.match(readme, /organic adaptation system/);
 });
 
@@ -54,6 +64,9 @@ test('every MVC controller action is covered by structured start, completion and
   assert.match(filter, /Controller action \{Controller\}\.\{Action\} started/);
   assert.match(filter, /LogError/);
   assert.match(filter, /catch \(OperationCanceledException/);
+  assert.match(filter, /TryGetValue\("controller"/);
+  assert.match(filter, /TryGetValue\("action"/);
+  assert.doesNotMatch(filter, /GetValueOrDefault/);
 });
 
 test('logging removal is blocked by a monotonic baseline and CI guard', () => {

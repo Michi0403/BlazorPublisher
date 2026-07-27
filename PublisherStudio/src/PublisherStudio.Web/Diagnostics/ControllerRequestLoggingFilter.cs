@@ -9,8 +9,13 @@ public sealed class ControllerRequestLoggingFilter(
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var stopwatch = Stopwatch.StartNew();
-        var controller = context.ActionDescriptor.RouteValues.GetValueOrDefault("controller") ?? "unknown";
-        var action = context.ActionDescriptor.RouteValues.GetValueOrDefault("action") ?? "unknown";
+        var routeValues = context.ActionDescriptor.RouteValues;
+        var controller = routeValues.TryGetValue("controller", out var controllerValue) && !string.IsNullOrWhiteSpace(controllerValue)
+            ? controllerValue
+            : "unknown";
+        var action = routeValues.TryGetValue("action", out var actionValue) && !string.IsNullOrWhiteSpace(actionValue)
+            ? actionValue
+            : "unknown";
         var request = context.HttpContext.Request;
         logger.LogInformation(
             "Controller action {Controller}.{Action} started for {Method} {Path}.",

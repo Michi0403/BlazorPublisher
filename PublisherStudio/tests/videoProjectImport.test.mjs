@@ -106,6 +106,7 @@ assert.deepEqual(packageRefs, [
   'DevExpress.Blazor.ja',
   'LocalGPT.WireProtocolVersion'
 ]);
-assert.match(webProject, /<ProjectReference Include="\.\.\\LocalGPT\.WireProtocolVersion\\LocalGPT\.WireProtocolVersion\.csproj"[\s\S]*?GlobalPropertiesToRemove=/);
+assert.match(webProject, /<PackageReference Include="LocalGPT\.WireProtocolVersion" Version="\$\(LocalGptWireProtocolVersion\)" \/>/);
+assert.doesNotMatch(webProject, /ProjectReference[^>]*LocalGPT\.WireProtocolVersion/);
 
 console.log('open video-project canonical model, safe adapters, relinking UI, project persistence, and doctrine contracts passed');

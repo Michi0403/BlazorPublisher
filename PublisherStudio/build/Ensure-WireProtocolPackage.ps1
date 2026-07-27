@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = "2.0.1",
+    [string]$Version = "2.1.0",
     [string]$PackageDirectory = "",
     [string]$PackageUrl = "",
     [string]$LocalGptRepository = "",
@@ -30,13 +30,9 @@ function Test-WireProtocolPackage {
             $hasNuspec = @($entryNames | Where-Object { $_ -like '*.nuspec' }).Count -gt 0
             return $hasAssembly -and $hasNuspec
         }
-        finally {
-            $archive.Dispose()
-        }
+        finally { $archive.Dispose() }
     }
-    catch {
-        return $false
-    }
+    catch { return $false }
 }
 
 function Add-RepositoryCandidates {
@@ -49,48 +45,67 @@ function Add-RepositoryCandidates {
     $Candidates.Add((Join-Path $cleanRepository "packages\$packageName"))
 }
 
+function Get-LockName {
+    param([Parameter(Mandatory)][string]$Value)
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($Value.ToLowerInvariant())
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try { $hash = $sha.ComputeHash($bytes) } finally { $sha.Dispose() }
+    return 'PublisherStudio.WireProtocol.' + ([System.BitConverter]::ToString($hash, 0, 12).Replace('-', ''))
+}
+
 New-Item -ItemType Directory -Path $PackageDirectory -Force | Out-Null
-if (-not $ForceDownload -and (Test-WireProtocolPackage $packagePath)) {
-    Write-Host "Using cached authoritative LocalGPT protocol package: $packagePath" -ForegroundColor DarkGreen
-    return $packagePath
-}
-Remove-Item -LiteralPath $packagePath -Force -ErrorAction SilentlyContinue
+$mutex = New-Object System.Threading.Mutex($false, (Get-LockName -Value $packagePath))
+$hasLock = $false
+try {
+    try { $hasLock = $mutex.WaitOne([TimeSpan]::FromMinutes(3)) }
+    catch [System.Threading.AbandonedMutexException] { $hasLock = $true }
+    if (-not $hasLock) { throw "Timed out waiting for another restore to prepare $packageName." }
 
-$candidates = [System.Collections.Generic.List[string]]::new()
-Add-RepositoryCandidates -Repository $LocalGptRepository -Candidates $candidates
-Add-RepositoryCandidates -Repository $env:LOCALGPT_REPOSITORY -Candidates $candidates
-
-$localApplicationData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
-if (-not [string]::IsNullOrWhiteSpace($localApplicationData)) {
-    $candidates.Add((Join-Path $localApplicationData "LocalGPT\NuGet\$packageName"))
-}
-
-foreach ($candidate in $candidates | Select-Object -Unique) {
-    if (Test-WireProtocolPackage $candidate) {
-        Copy-Item -LiteralPath $candidate -Destination $packagePath -Force
-        Write-Host "Copied authoritative LocalGPT protocol package from $candidate" -ForegroundColor Cyan
+    # A parallel restore may have completed while this invocation waited. Recheck under the lock.
+    if (-not $ForceDownload -and (Test-WireProtocolPackage $packagePath)) {
+        Write-Host "Using cached authoritative LocalGPT protocol package: $packagePath" -ForegroundColor DarkGreen
         return $packagePath
     }
-}
+    Remove-Item -LiteralPath $packagePath -Force -ErrorAction SilentlyContinue
 
-if ([string]::IsNullOrWhiteSpace($PackageUrl)) {
-    $PackageUrl = "https://github.com/Michi0403/LocalGPT/releases/latest/download/$packageName"
-}
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    Add-RepositoryCandidates -Repository $LocalGptRepository -Candidates $candidates
+    Add-RepositoryCandidates -Repository $env:LOCALGPT_REPOSITORY -Candidates $candidates
 
-Write-Host "Downloading authoritative LocalGPT protocol package $Version..." -ForegroundColor Cyan
-[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-$temporaryPath = "$packagePath.download"
-Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
-try {
-    Invoke-WebRequest -Uri $PackageUrl -OutFile $temporaryPath -UseBasicParsing
-    if (-not (Test-WireProtocolPackage $temporaryPath)) {
-        throw "The downloaded file is not a DLL-backed LocalGPT.WireProtocolVersion $Version NuGet package."
+    $localApplicationData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
+    if (-not [string]::IsNullOrWhiteSpace($localApplicationData)) {
+        $candidates.Add((Join-Path $localApplicationData "LocalGPT\NuGet\$packageName"))
     }
-    Move-Item -LiteralPath $temporaryPath -Destination $packagePath -Force
-}
-catch {
+
+    foreach ($candidate in $candidates | Select-Object -Unique) {
+        if (Test-WireProtocolPackage $candidate) {
+            $temporaryCopy = "$packagePath.copying"
+            Remove-Item -LiteralPath $temporaryCopy -Force -ErrorAction SilentlyContinue
+            Copy-Item -LiteralPath $candidate -Destination $temporaryCopy -Force
+            Move-Item -LiteralPath $temporaryCopy -Destination $packagePath -Force
+            Write-Host "Copied authoritative LocalGPT protocol package from $candidate" -ForegroundColor Cyan
+            return $packagePath
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($PackageUrl)) {
+        $PackageUrl = "https://github.com/Michi0403/LocalGPT/releases/latest/download/$packageName"
+    }
+
+    Write-Host "Downloading authoritative LocalGPT protocol package $Version..." -ForegroundColor Cyan
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    $temporaryPath = "$packagePath.download"
     Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
-    throw @"
+    try {
+        Invoke-WebRequest -Uri $PackageUrl -OutFile $temporaryPath -UseBasicParsing
+        if (-not (Test-WireProtocolPackage $temporaryPath)) {
+            throw "The downloaded file is not a DLL-backed LocalGPT.WireProtocolVersion $Version NuGet package."
+        }
+        Move-Item -LiteralPath $temporaryPath -Destination $packagePath -Force
+    }
+    catch {
+        Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
+        throw @"
 The authoritative LocalGPT protocol package could not be prepared.
 Expected package: $packageName
 Default release URL: $PackageUrl
@@ -99,7 +114,12 @@ Build LocalGPT once with Build-Release.cmd, set LOCALGPT_REPOSITORY to that chec
 pass -LocalGptRepository, or upload the package as an asset of the current LocalGPT GitHub release.
 Underlying error: $($_.Exception.Message)
 "@
-}
+    }
 
-Write-Host "Prepared authoritative LocalGPT protocol package: $packagePath" -ForegroundColor Green
-return $packagePath
+    Write-Host "Prepared authoritative LocalGPT protocol package: $packagePath" -ForegroundColor Green
+    return $packagePath
+}
+finally {
+    if ($hasLock) { try { $mutex.ReleaseMutex() } catch { } }
+    $mutex.Dispose()
+}

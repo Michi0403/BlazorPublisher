@@ -72,3 +72,13 @@ Every adapter must provide:
 6. round-trip expectations;
 7. deterministic tests with representative fixtures;
 8. no new dependency unless explicitly approved.
+
+## Panel / Div Studio
+
+| Format | Role | Status | Mapping and loss behavior |
+|---|---|---:|---|
+| PublisherStudio panel JSON (`.publisher-panel.json`) | Native panel project | **Import + export** | Lossless for views, local canvas, nested publication elements, component/data bindings, HTML sandbox policy, interactions, and layer order. Mainframe placement is preserved when an imported draft is saved over an existing object. |
+| JSON Canvas (`.canvas`) | Open layout/graph interchange | **Import + export** | Standard text, link, file, group, position, size, color, node order and edges remain consumable by JSON Canvas tools. PublisherStudio adds an optional `publisherStudioElement` extension for richer round trips; other tools may ignore it. |
+| HTML (`.html`, `.htm`) | Web content import/delivery | **Import + export through publication output** | Imported as a sandboxed HTML element. HTML does not preserve Panel Studio views, bindings, interactions, component identity, or the complete editor graph and is therefore not treated as the native project format. |
+
+Panel import is transactional at the editor boundary: the dialog edits an isolated clone, normalizes unique descendant IDs, and commits a second isolated clone only after the selected Mainframe target is still present. Adding a second object to a standalone HTML/DIV element promotes that object to a real `PanelElement` rather than discarding the newly authored content.

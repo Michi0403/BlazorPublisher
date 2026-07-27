@@ -64,6 +64,6 @@ The regex database is a maintained BusinessObject domain, not a new static subst
 
 ## Transport contract
 
-The shared `LocalGPT.WireProtocolVersion` project is embedded in the LocalGPT repository and referenced by both applications. The envelope supports one-time, sequential, scheduled, and recurring work; capability/skill/UI/hardware negotiation; human and automated target interactions; a serialized interaction value; integrity hash and error check; nullable signature/encrypted-payload placeholders; and adapter interfaces intended for later TCP, UART, SPI, and MQTT transports.
+The authoritative `LocalGPT.WireProtocolVersion` project exists only in the LocalGPT repository. PublisherStudio consumes its RID-neutral NuGet package and does not revision a second protocol source project. The envelope supports one-time, sequential, scheduled, and recurring work; capability/skill/UI/hardware negotiation; human and automated target interactions; a serialized interaction value; integrity hash and error check; nullable signature/encrypted-payload placeholders; and adapter interfaces intended for later TCP, UART, SPI, and MQTT transports.
 
 Current working transport is TCP with UDP discovery. Production cryptographic identity, signing, encryption, and UART/SPI/MQTT adapters remain explicit future work and are not represented as complete.

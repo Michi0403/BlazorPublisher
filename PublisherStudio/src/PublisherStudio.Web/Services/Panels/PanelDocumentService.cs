@@ -203,7 +203,7 @@ public sealed class PanelDocumentService(
     {
         try
         {
-            NormalizePanel(document, panel, 0);
+            NormalizePanel(document, panel, 0, new HashSet<Guid>(), panelIdRegistered: false);
             _logger.LogDebug("Normalized Panel Studio panel {PanelId} with {ViewCount} views.", panel.Id, panel.Views.Count);
         }
         catch (Exception exception)
@@ -227,7 +227,7 @@ public sealed class PanelDocumentService(
             holder.CanvasWidth = Math.Max(160, template.Prototype.Width + 16);
             holder.CanvasHeight = Math.Max(90, template.Prototype.Height + 16);
             holder.Views[0].Elements.Add(template.Prototype);
-            NormalizePanel(document, holder, 0);
+            NormalizePanel(document, holder, 0, new HashSet<Guid>(), panelIdRegistered: false);
             template.Prototype = holder.Views[0].Elements[0];
             _logger.LogDebug("Normalized reusable Panel Studio template {TemplateId}.", template.Id);
         }
@@ -238,9 +238,10 @@ public sealed class PanelDocumentService(
         }
     }
 
-    private void NormalizePanel(PublicationDocument document, PanelElement panel, int depth)
+    private void NormalizePanel(PublicationDocument document, PanelElement panel, int depth, HashSet<Guid> usedElementIds, bool panelIdRegistered)
     {
-        if (panel.Id == Guid.Empty) panel.Id = Guid.NewGuid();
+        if (!panelIdRegistered)
+            panel.Id = EnsureUniqueId(panel.Id, usedElementIds);
         panel.Name = string.IsNullOrWhiteSpace(panel.Name) ? "Panel" : panel.Name.Trim();
         panel.Width = Math.Clamp(panel.Width <= 0 ? 120 : panel.Width, 12, 1000);
         panel.Height = Math.Clamp(panel.Height <= 0 ? 70 : panel.Height, 10, 1000);
@@ -267,7 +268,7 @@ public sealed class PanelDocumentService(
             while (!usedSlugs.Add(slug)) slug = $"{baseSlug}-{suffix++}";
             view.Slug = slug;
             view.Elements ??= [];
-            NormalizeElements(document, panel, view.Elements, depth);
+            NormalizeElements(document, panel, view.Elements, depth, usedElementIds);
         }
 
         if (panel.Views.All(view => !view.Enabled)) panel.Views[0].Enabled = true;
@@ -275,7 +276,7 @@ public sealed class PanelDocumentService(
             panel.ActiveViewId = panel.Views.First(view => view.Enabled).Id;
     }
 
-    private void NormalizeElements(PublicationDocument document, PanelElement owner, List<PublicationElement> elements, int depth)
+    private void NormalizeElements(PublicationDocument document, PanelElement owner, List<PublicationElement> elements, int depth, HashSet<Guid> usedElementIds)
     {
         if (depth >= 8)
         {
@@ -283,14 +284,9 @@ public sealed class PanelDocumentService(
             return;
         }
 
-        var usedIds = new HashSet<Guid>();
         foreach (var element in elements)
         {
-            if (element.Id == Guid.Empty || !usedIds.Add(element.Id))
-            {
-                element.Id = Guid.NewGuid();
-                usedIds.Add(element.Id);
-            }
+            element.Id = EnsureUniqueId(element.Id, usedElementIds);
             element.Name = string.IsNullOrWhiteSpace(element.Name) ? element.Kind.ToString() : element.Name.Trim();
             element.X = Math.Clamp(double.IsFinite(element.X) ? element.X : 0, -owner.CanvasWidth * 4, owner.CanvasWidth * 4);
             element.Y = Math.Clamp(double.IsFinite(element.Y) ? element.Y : 0, -owner.CanvasHeight * 4, owner.CanvasHeight * 4);
@@ -301,7 +297,7 @@ public sealed class PanelDocumentService(
             element.Animations ??= [];
             element.Interaction ??= new PublicationInteraction();
 
-            if (element is PanelElement childPanel) NormalizePanel(document, childPanel, depth + 1);
+            if (element is PanelElement childPanel) NormalizePanel(document, childPanel, depth + 1, usedElementIds, panelIdRegistered: true);
             if (element is HtmlEmbedElement html)
             {
                 html.Html ??= string.Empty;
@@ -324,6 +320,14 @@ public sealed class PanelDocumentService(
 
         elements.Sort((left, right) => left.ZIndex.CompareTo(right.ZIndex));
         for (var index = 0; index < elements.Count; index++) elements[index].ZIndex = index + 1;
+    }
+
+    private static Guid EnsureUniqueId(Guid candidate, HashSet<Guid> usedIds)
+    {
+        if (candidate != Guid.Empty && usedIds.Add(candidate)) return candidate;
+        Guid generated;
+        do generated = Guid.NewGuid(); while (!usedIds.Add(generated));
+        return generated;
     }
 
     private PanelElement CreateKpiDashboard(PublicationDocument document)

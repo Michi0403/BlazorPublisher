@@ -1,4 +1,5 @@
 (() => {
+    const storageKey = 'publisherstudio.automation.enabled';
     const state = { running: false, timer: 0 };
 
     function resolveTarget(selector, x, y) {
@@ -97,6 +98,12 @@
     async function poll() {
         if (!state.running || document.visibilityState === 'prerender') return;
         try {
+            const runtimeResponse = await fetch('/api/automation/runtime/status', { cache: 'no-store' });
+            const runtime = runtimeResponse.ok ? await runtimeResponse.json() : { linked: false };
+            if (!runtime.linked) {
+                window.publisherAutomation.disableForSession();
+                return;
+            }
             const inputResponse = await fetch('/api/automation/input/pending?maximum=20', { cache: 'no-store' });
             if (inputResponse.ok) {
                 for (const command of await inputResponse.json()) {
@@ -114,15 +121,32 @@
         } catch (error) {
             console.debug('PublisherStudio automation polling paused.', error);
         } finally {
-            if (state.running) state.timer = window.setTimeout(poll, 750);
+            if (state.running) state.timer = window.setTimeout(poll, 2000);
         }
     }
 
     window.publisherAutomation = {
-        start() { if (state.running) return; state.running = true; poll(); },
+        start() {
+            if (sessionStorage.getItem(storageKey) !== 'true' || state.running) return false;
+            state.running = true;
+            void poll();
+            return true;
+        },
         stop() { state.running = false; clearTimeout(state.timer); },
+        enableForSession() {
+            sessionStorage.setItem(storageKey, 'true');
+            return this.start();
+        },
+        disableForSession() {
+            sessionStorage.removeItem(storageKey);
+            this.stop();
+            return false;
+        },
+        isEnabled() { return sessionStorage.getItem(storageKey) === 'true' && state.running; },
         execute,
         capture
     };
-    window.addEventListener('DOMContentLoaded', () => window.publisherAutomation.start(), { once: true });
+    window.addEventListener('DOMContentLoaded', () => {
+        if (sessionStorage.getItem(storageKey) === 'true') window.publisherAutomation.start();
+    }, { once: true });
 })();

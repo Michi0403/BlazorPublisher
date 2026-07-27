@@ -12,6 +12,7 @@ public interface IApplicationPortResolver
 
 public sealed class ApplicationPortResolver(ILogger<ApplicationPortResolver>? logger = null) : IApplicationPortResolver
 {
+    public const int DefaultPort = 58071;
     private readonly ILogger<ApplicationPortResolver> _logger = logger ?? NullLogger<ApplicationPortResolver>.Instance;
 
     public int Resolve(IReadOnlyList<string> args)
@@ -31,12 +32,11 @@ public sealed class ApplicationPortResolver(ILogger<ApplicationPortResolver>? lo
             var configured = Environment.GetEnvironmentVariable("PUBLISHERSTUDIO_PORT");
             var resolved = int.TryParse(configured, out var environmentPort) && environmentPort is >= 0 and <= 65535
                 ? environmentPort
-                : 0;
+                : DefaultPort;
             _logger.LogInformation(
-                resolved == 0
-                    ? "PublisherStudio will let Kestrel select an available loopback port."
-                    : "PublisherStudio port {Port} was selected from PUBLISHERSTUDIO_PORT.",
-                resolved);
+                "PublisherStudio loopback port {Port} was selected from {Source}.",
+                resolved,
+                string.IsNullOrWhiteSpace(configured) ? "the application default" : "PUBLISHERSTUDIO_PORT");
             return resolved;
         }
         catch (Exception exception)

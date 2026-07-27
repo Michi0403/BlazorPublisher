@@ -18,3 +18,13 @@ global using OrganicHardwareDescriptor = LocalGPT.WireProtocol.OneWireHardwareDe
 global using OrganicRecurringExecution = LocalGPT.WireProtocol.OneWireRecurringExecution;
 global using OrganicInteractionKind = LocalGPT.WireProtocol.OneWireInteractionKind;
 global using OrganicInteractionEditor = LocalGPT.WireProtocol.OneWireInteractionEditor;
+
+global using OneWireSecurityMode = LocalGPT.WireProtocol.OneWireSecurityMode;
+global using OneWireTrustLevel = LocalGPT.WireProtocol.OneWireTrustLevel;
+global using OneWireTransportKind = LocalGPT.WireProtocol.OneWireTransportKind;
+global using OneWireSecurityDescriptor = LocalGPT.WireProtocol.OneWireSecurityDescriptor;
+global using OneWirePairingTicket = LocalGPT.WireProtocol.OneWirePairingTicket;
+global using OneWireRuntimeSecurityStatus = LocalGPT.WireProtocol.OneWireRuntimeSecurityStatus;
+global using OneWireTrustEstablishmentRequest = LocalGPT.WireProtocol.OneWireTrustEstablishmentRequest;
+global using OneWireTrustedPeerDescriptor = LocalGPT.WireProtocol.OneWireTrustedPeerDescriptor;
+global using OneWireSensitivePayload = LocalGPT.WireProtocol.OneWireSensitivePayload;

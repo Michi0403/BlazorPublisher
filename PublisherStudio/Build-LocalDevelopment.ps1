@@ -1,7 +1,7 @@
 param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Debug",
-    [string]$WireProtocolVersion = "2.0.1",
+    [string]$WireProtocolVersion = "2.1.0",
     [string]$WireProtocolPackageUrl = "",
     [string]$LocalGptRepository = "",
     [switch]$RefreshWireProtocolPackage,
@@ -23,6 +23,7 @@ function Invoke-DotNet {
 }
 
 & (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
+& (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
 
 if ($Clean) {
     Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
@@ -53,9 +54,9 @@ $wireProperties = @(
 )
 
 Write-Host "Restoring PublisherStudio.Web after the protocol package is available..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments (@("restore", $webProject, "--disable-parallel") + $wireProperties) -FailureMessage "PublisherStudio.Web restore failed."
+Invoke-DotNet -Arguments (@("restore", $webProject, "--disable-parallel", "--force-evaluate") + $wireProperties) -FailureMessage "PublisherStudio.Web restore failed."
 Write-Host "Restoring PublisherStudio installer..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @("restore", $setupProject, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "PublisherStudio installer restore failed."
+Invoke-DotNet -Arguments @("restore", $setupProject, "--disable-parallel", "--force-evaluate", "-p:SkipLoggingIntegrityGuard=true") -FailureMessage "PublisherStudio installer restore failed."
 
 Write-Host "Building PublisherStudio.Web as a single ordered project..." -ForegroundColor Cyan
 Invoke-DotNet -Arguments (@("build", $webProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1") + $wireProperties) -FailureMessage "PublisherStudio.Web build failed."

@@ -1,0 +1,219 @@
+@using System.Text.Json
+@inject IOrganicRuntimeSecurityService Security
+@inject IUserNotificationService Notifications
+@inject IJSRuntime JS
+@inject ILogger<OrganicSecurityPanel> Logger
+
+<section class="organic-card organic-security-card" data-testid="organic-runtime-security">
+    <header class="organic-section-header">
+        <div>
+            <h2>Runtime 1-Wire identity and MFA trust</h2>
+            <p class="organic-note">The private identity is generated at runtime and stored only in a local secret file. Regenerating or deleting it intentionally invalidates all previous trust relationships.</p>
+        </div>
+        <span class="organic-badge">@(_status.HasSecret ? "Identity ready" : "Not initialized")</span>
+    </header>
+
+    <div class="organic-security-summary">
+        <span><strong>Fingerprint</strong>@(_status.HasSecret ? _status.Fingerprint : "Not created")</span>
+        <span><strong>Trusted peers</strong>@_status.TrustedPeerCount</span>
+        <span><strong>Secret file</strong><code>@_status.SecretPath</code></span>
+    </div>
+
+    <div class="organic-toolbar organic-wrap-toolbar">
+        <DxButton Text="Create identity" Enabled="@(!_status.HasSecret)" Click="CreateAsync" RenderStyle="ButtonRenderStyle.Primary" />
+        <DxButton Text="Create pairing material" Enabled="@_status.HasSecret" Click="CreatePairingMaterialAsync" />
+        <DxButton Text="Regenerate identity" Enabled="@(_status.HasSecret && _allowDestructiveReset)" Click="RegenerateAsync" RenderStyle="ButtonRenderStyle.Warning" />
+        <DxButton Text="Delete identity" Enabled="@(_status.HasSecret && _allowDestructiveReset)" Click="DeleteAsync" RenderStyle="ButtonRenderStyle.Danger" />
+        <label class="organic-inline-check"><input type="checkbox" @bind="_allowDestructiveReset" /> allow trust reset</label>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_status.Warning))
+    {
+        <p class="organic-error">@_status.Warning</p>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_otpUri) || !string.IsNullOrWhiteSpace(_pairingTicketJson))
+    {
+        <div class="organic-grid organic-grid-two organic-security-material">
+            <article>
+                <h3>Authenticator enrollment</h3>
+                <p class="organic-note">Scan this once with an Authenticator app. The displayed URI contains only the enrollment seed at the moment you explicitly request it.</p>
+                <div id="organic-security-otp-qr" class="organic-security-qr" aria-label="PublisherStudio Authenticator QR code"></div>
+                <textarea rows="3" readonly>@_otpUri</textarea>
+            </article>
+            <article>
+                <h3>Public pairing ticket</h3>
+                <p class="organic-note">This ticket contains public keys only and expires. Transfer it to the other application's trust panel.</p>
+                <div id="organic-security-ticket-qr" class="organic-security-qr" aria-label="PublisherStudio public pairing ticket QR code"></div>
+                <textarea rows="8" readonly>@_pairingTicketJson</textarea>
+            </article>
+        </div>
+    }
+
+    <div class="organic-grid organic-grid-two">
+        <article>
+            <h3>Trust another 1-Wire peer</h3>
+            <label>Remote public pairing ticket
+                <textarea rows="9" @bind="_remoteTicketJson" @bind:event="oninput" placeholder="Paste the LocalGPT or custom add-on pairing-ticket JSON here."></textarea>
+            </label>
+            <div class="organic-inline-fields">
+                <label>Current local MFA code <input inputmode="numeric" maxlength="8" @bind="_mfaCode" /></label>
+                <label>Trust validity (minutes) <input type="number" min="5" max="525600" @bind="_validForMinutes" /></label>
+            </div>
+            <DxButton Text="Verify MFA and trust peer" Click="EstablishTrustAsync" RenderStyle="ButtonRenderStyle.Primary" />
+            <p class="organic-note">Trust is reciprocal: repeat the operation in LocalGPT with PublisherStudio's public ticket. Private keys and MFA seeds are never sent over 1-Wire.</p>
+        </article>
+        <article>
+            <h3>Trusted peers</h3>
+            @if (_trustedPeers.Count == 0)
+            {
+                <p class="organic-empty">No peer is trusted yet. Discovery and explicit link approval can still operate without encrypted payloads.</p>
+            }
+            else
+            {
+                <div class="organic-list">
+                    @foreach (var peer in _trustedPeers)
+                    {
+                        <div class="organic-peer" @key="peer.PeerId">
+                            <div>
+                                <strong>@peer.DisplayName</strong>
+                                <span>@peer.PeerId</span>
+                                <small>@peer.TrustLevel · valid until @(peer.ValidUntilUtc?.LocalDateTime.ToString("g") ?? "revoked manually")</small>
+                            </div>
+                            <DxButton Text="Revoke" Click="() => RevokeAsync(peer.PeerId)" RenderStyle="ButtonRenderStyle.Danger" />
+                        </div>
+                    }
+                </div>
+            }
+        </article>
+    </div>
+</section>
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
+    private OneWireRuntimeSecurityStatus _status = new();
+    private IReadOnlyList<OneWireTrustedPeerDescriptor> _trustedPeers = [];
+    private string _otpUri = string.Empty;
+    private string _pairingTicketJson = string.Empty;
+    private string _remoteTicketJson = string.Empty;
+    private string _mfaCode = string.Empty;
+    private int _validForMinutes = 1440;
+    private bool _allowDestructiveReset;
+    private bool _renderQr;
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_renderQr) return;
+        _renderQr = false;
+        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-otp-qr", _otpUri, "PublisherStudio Authenticator enrollment");
+        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-ticket-qr", _pairingTicketJson, "PublisherStudio public 1-Wire pairing ticket");
+    }
+
+    private async Task RefreshAsync()
+    {
+        _status = await Security.GetStatusAsync();
+        _trustedPeers = await Security.GetTrustedPeersAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CreateAsync()
+    {
+        try
+        {
+            await Security.EnsureCreatedAsync();
+            Notifications.Success("The runtime-only PublisherStudio 1-Wire identity was created.", "1-Wire security", nameof(OrganicSecurityPanel));
+            await RefreshAsync();
+        }
+        catch (Exception ex) { Report(ex, "The runtime identity could not be created."); }
+    }
+
+    private async Task CreatePairingMaterialAsync()
+    {
+        try
+        {
+            await Security.EnsureCreatedAsync();
+            _otpUri = await Security.GetOtpAuthUriAsync();
+            _pairingTicketJson = JsonSerializer.Serialize(await Security.CreatePairingTicketAsync(TimeSpan.FromMinutes(15)), JsonOptions);
+            _renderQr = true;
+            await RefreshAsync();
+        }
+        catch (Exception ex) { Report(ex, "Pairing material could not be created."); }
+    }
+
+    private async Task RegenerateAsync()
+    {
+        try
+        {
+            if (!_allowDestructiveReset) return;
+            await Security.RegenerateAsync();
+            ClearMaterial();
+            Notifications.Warning("PublisherStudio generated a new identity. Previous encrypted trust is no longer valid.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
+            await RefreshAsync();
+        }
+        catch (Exception ex) { Report(ex, "The runtime identity could not be regenerated."); }
+    }
+
+    private async Task DeleteAsync()
+    {
+        try
+        {
+            if (!_allowDestructiveReset) return;
+            await Security.DeleteAsync();
+            ClearMaterial();
+            Notifications.Warning("The PublisherStudio runtime identity and local trust bindings were deleted.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
+            await RefreshAsync();
+        }
+        catch (Exception ex) { Report(ex, "The runtime identity could not be deleted."); }
+    }
+
+    private async Task EstablishTrustAsync()
+    {
+        try
+        {
+            var ticket = JsonSerializer.Deserialize<OneWirePairingTicket>(_remoteTicketJson, JsonOptions)
+                ?? throw new InvalidDataException("The remote pairing ticket is empty or invalid.");
+            var accepted = await Security.EstablishTrustAsync(new OneWireTrustEstablishmentRequest
+            {
+                Ticket = ticket,
+                MfaCode = _mfaCode.Trim(),
+                ValidForMinutes = _validForMinutes
+            });
+            if (!accepted)
+            {
+                Notifications.Warning("The current PublisherStudio MFA code was not accepted.", "1-Wire trust", nameof(OrganicSecurityPanel));
+                return;
+            }
+            _mfaCode = string.Empty;
+            Notifications.Success($"Trusted {ticket.DisplayName} for the selected validity period.", "1-Wire trust", nameof(OrganicSecurityPanel));
+            await RefreshAsync();
+        }
+        catch (Exception ex) { Report(ex, "The peer could not be trusted."); }
+    }
+
+    private async Task RevokeAsync(string peerId)
+    {
+        try
+        {
+            await Security.RevokeTrustAsync(peerId);
+            Notifications.Warning($"Trust for {peerId} was revoked.", "1-Wire trust", nameof(OrganicSecurityPanel));
+            await RefreshAsync();
+        }
+        catch (Exception ex) { Report(ex, "The trust binding could not be revoked."); }
+    }
+
+    private void ClearMaterial()
+    {
+        _otpUri = string.Empty;
+        _pairingTicketJson = string.Empty;
+        _allowDestructiveReset = false;
+        _renderQr = true;
+    }
+
+    private void Report(Exception exception, string message)
+    {
+        Logger.LogError(exception, "{Message}", message);
+        Notifications.Error(exception.Message, message, nameof(OrganicSecurityPanel));
+    }
+}

@@ -55,6 +55,7 @@ public sealed class OrganicPluginOptions
     public const string SectionName = "OrganicPlugins";
     public bool Enabled { get; set; } = true;
     public bool EnableDiscovery { get; set; } = true;
+    public bool AutoConnectDiscoveredPeer { get; set; } = true;
     public int DiscoveryPort { get; set; } = OrganicWireProtocol.DefaultDiscoveryPort;
     public int PeerExpirySeconds { get; set; } = 30;
     public int DiscoveryReceivePollSeconds { get; set; } = 5;

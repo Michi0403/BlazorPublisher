@@ -10,6 +10,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 public sealed class LocalGptConnectionService(
     ILocalGptDiscoveryRegistry discovery,
     IOrganicPluginProtocolCodec codec,
+    IOrganicRuntimeSecurityService security,
     IOrganicCapabilityCatalog capabilities,
     IOrganicPermissionStore permissions,
     IOrganicWorkCoordinator work,
@@ -71,6 +72,7 @@ public sealed class LocalGptConnectionService(
             var localSkills = await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false);
             var localUiFeatures = await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false);
             var localHardware = await capabilities.GetHardwareAsync(cancellationToken).ConfigureAwait(false);
+            var localSecurity = await security.GetPublicDescriptorAsync(cancellationToken).ConfigureAwait(false);
             var hello = new OrganicWireEnvelope
             {
                 MessageType = OrganicWireMessageType.Hello,
@@ -90,6 +92,9 @@ public sealed class LocalGptConnectionService(
                         DiscoveryPort = OrganicWireProtocol.DefaultDiscoveryPort,
                         WebBaseUrl = RuntimeEndpointStore.BaseUrl,
                         IsConnected = true,
+                        TransportKind = OneWireTransportKind.Tcp,
+                        SupportedTransports = ["tcp", "http-json"],
+                        Security = localSecurity,
                         Capabilities = localCapabilities.ToList(),
                         Skills = localSkills.ToList(),
                         UiFeatures = localUiFeatures.ToList(),
@@ -196,6 +201,7 @@ public sealed class LocalGptConnectionService(
                 var line = await connectedReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
                 if (line is null) break;
                 var envelope = codec.DeserializeAndValidate(line);
+                await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
                 await HandleIncomingAsync(envelope, connectedId, connectedPeerId, connectedWriter, cancellationToken).ConfigureAwait(false);
             }
         }
@@ -222,9 +228,14 @@ public sealed class LocalGptConnectionService(
     {
         if (envelope.MessageType is OrganicWireMessageType.WorkResult or OrganicWireMessageType.Error or OrganicWireMessageType.ApprovalRequired)
         {
-            recentResponses[envelope.CorrelationId] = envelope;
+            // A live waiter owns the response exclusively. Caching the same ApprovalRequired envelope
+            // as well caused the next wait cycle to consume that stale intermediate response instead of
+            // waiting for the final WorkResult on the same correlation id.
             if (responseWaiters.TryGetValue(envelope.CorrelationId, out var waiter))
                 waiter.TrySetResult(envelope);
+            else
+                recentResponses[envelope.CorrelationId] = envelope;
+
             foreach (var stale in recentResponses.Where(pair => pair.Value.CreatedUtc < DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10)).Select(pair => pair.Key).ToArray())
                 recentResponses.TryRemove(stale, out _);
         }
@@ -323,11 +334,12 @@ public sealed class LocalGptConnectionService(
     {
         envelope.SourcePeerId = string.IsNullOrWhiteSpace(envelope.SourcePeerId) ? localPeerId : envelope.SourcePeerId;
         envelope.TargetPeerId = string.IsNullOrWhiteSpace(envelope.TargetPeerId) ? targetPeerId : envelope.TargetPeerId;
+        await security.ProtectOutgoingAsync(envelope, cancellationToken).ConfigureAwait(false);
         var json = codec.Serialize(envelope);
         await writeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try { await connectedWriter.WriteLineAsync(json.AsMemory(), cancellationToken).ConfigureAwait(false); }
         finally { writeGate.Release(); }
-        return envelope.MessageId;
+        return envelope.CorrelationId;
     }
 
     private OrganicWireEnvelope CreateWorkResultEnvelope(OrganicPluginWorkItem item)

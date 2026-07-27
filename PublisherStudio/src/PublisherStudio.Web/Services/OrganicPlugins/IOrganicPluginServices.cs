@@ -19,6 +19,23 @@ public interface ILocalGptDiscoveryRegistry
     void RemoveExpired(TimeSpan maximumAge);
 }
 
+
+public interface IOrganicRuntimeSecurityService
+{
+    Task<OneWireRuntimeSecurityStatus> GetStatusAsync(CancellationToken cancellationToken = default);
+    Task EnsureCreatedAsync(CancellationToken cancellationToken = default);
+    Task RegenerateAsync(CancellationToken cancellationToken = default);
+    Task DeleteAsync(CancellationToken cancellationToken = default);
+    Task<OneWireSecurityDescriptor> GetPublicDescriptorAsync(CancellationToken cancellationToken = default);
+    Task<OneWirePairingTicket> CreatePairingTicketAsync(TimeSpan lifetime, CancellationToken cancellationToken = default);
+    Task<string> GetOtpAuthUriAsync(CancellationToken cancellationToken = default);
+    Task<bool> EstablishTrustAsync(OneWireTrustEstablishmentRequest request, CancellationToken cancellationToken = default);
+    Task<bool> RevokeTrustAsync(string peerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<OneWireTrustedPeerDescriptor>> GetTrustedPeersAsync(CancellationToken cancellationToken = default);
+    Task ProtectOutgoingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
+    Task UnprotectIncomingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
+}
+
 public interface IOrganicCapabilityCatalog
 {
     Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default);

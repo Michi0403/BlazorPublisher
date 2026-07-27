@@ -59,3 +59,14 @@ The KPI dashboards share `PublicationDataObject` and live-data wiring with ordin
 ## Compatibility and migration
 
 Publication format 1.54 adds `PanelElement`, `PublicationPanelView`, `HtmlEmbedElement`, and `PanelLibraryVisible`. Older documents load normally. v1.0.78 normalizes missing panel IDs, view slugs, active views and nested element contracts. Older PublisherStudio versions do not understand the new polymorphic element discriminators and should not be used to resave v1.0.78 documents containing panels.
+
+## Panel/Div Studio project and interchange files
+
+Panel/Div Studio now exposes two complementary project formats instead of pretending that one interchange file can preserve every editor feature:
+
+- **PublisherStudio panel JSON (`.publisher-panel.json`)** is the lossless native project file for the complete `PanelElement` graph. It preserves views, local canvas dimensions, navigation mode, element types, media references, HTML sandbox settings, nested panels, component bindings, interactions, z-order, and PublisherStudio extensions. Use this format for backup, continued editing, and exact round trips between PublisherStudio installations.
+- **JSON Canvas (`.canvas`)** is the open interoperability view. Standard node fields (`id`, `type`, `x`, `y`, `width`, `height`, `color`, and supported text/file/link data) remain readable by other JSON Canvas applications. PublisherStudio additionally writes a `publisherStudioElement` extension per node so a round trip back into PublisherStudio can retain the richer publication element. Applications that ignore the extension still receive a valid ordinary JSON Canvas graph.
+
+JSON Canvas node array order follows the current Panel Studio layer order. Import gives every inserted element a fresh PublisherStudio identity, validates dimensions, normalizes z-order, and falls back to standard text, link, file, or group nodes if the extension is absent or invalid. A full native panel import replaces only the dialog draft; the Mainframe target identity and placement are retained when the user chooses Save.
+
+This split is intentional: JSON Canvas is suitable for open graph/layout exchange, while PublisherStudio panel JSON is the authoritative editable project. HTML remains a delivery/interchange source rather than a complete Panel Studio project format because HTML cannot represent the editor's component identities, data bindings, interaction metadata, and nested canonical model without proprietary metadata.

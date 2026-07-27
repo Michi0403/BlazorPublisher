@@ -123,8 +123,9 @@ public static class Program
             SupportedUICultures = supportedCultures,
             RequestCultureProviders =
             [
-                new CookieRequestCultureProvider(),
-                new AcceptLanguageHeaderRequestCultureProvider()
+                // Keep the shell in one language. Browser Accept-Language no longer partially
+                // translates an otherwise English UI; users choose a reviewed culture explicitly.
+                new CookieRequestCultureProvider()
             ]
         });
         app.Services.GetRequiredService<IApplicationPathService>().EnsureDirectories();

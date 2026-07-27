@@ -85,6 +85,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IBusinessObjectContextService, BusinessObjectContextService>(services);
 
         AddSingleton<IOrganicPluginProtocolCodec, OrganicPluginProtocolCodec>(services);
+        AddSingleton<IOrganicRuntimeSecurityService, OrganicRuntimeSecurityService>(services);
         AddSingleton<ILocalGptDiscoveryRegistry, LocalGptDiscoveryRegistry>(services);
         AddSingleton<IOrganicCapabilityCatalog, OrganicCapabilityCatalog>(services);
         AddSingleton<IOrganicPermissionStore, OrganicPermissionStore>(services);

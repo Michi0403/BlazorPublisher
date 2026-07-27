@@ -27,16 +27,14 @@ internal static class Program
     {
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine($"Your args to string {ArgsToString(args)}");
+        Console.WriteLine("PublisherStudio Setup 2.0.1");
         var options = CliOptions.Parse(args);
-        if(args.Length<=0)
-        {
-            Console.WriteLine($"args were initially empty !");
-        }
-        Console.WriteLine($"Parsed options:{Environment.NewLine}{options}");
+        if (args.Length == 0)
+            Console.WriteLine("No command-line action was supplied. The setup help will be shown.");
+        else
+            Console.WriteLine($"Requested setup actions:{Environment.NewLine}{options}");
         try
         {
-            Console.WriteLine($"Starting RunAsync");
             return await RunAsync(args, options).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -46,9 +44,8 @@ internal static class Program
         }
         finally
         {
-            if (launchedByDoubleClick | options.WaitOnExit)
+            if (launchedByDoubleClick || options.WaitOnExit)
             {
-                Console.WriteLine($"Wait for Exit send me to Doomland.");
                 Console.WriteLine();
                 Console.WriteLine("Press any key to close...");
                 Console.ReadKey(intercept: true);
@@ -854,20 +851,39 @@ internal static class Program
                     $"BlazorPublisher executable not found at '{exePath}'. Install it first or pass --blazorpublisher-exe.");
 
             var port = options.BlazorPublisherPort <= 0 ? 58071 : options.BlazorPublisherPort;
-            var url = $"http://127.0.0.1:{port}";
 
             logger.LogInformation($"Starting BlazorPublisher: {exePath}");
-            logger.LogInformation($"BlazorPublisher port: {port}");
+            logger.LogInformation($"BlazorPublisher requested loopback port: {port}");
 
-            Process.Start(new ProcessStartInfo
+            if (TryGetRunningEndpoint("PublisherStudio", "PublisherStudio", out var existingUrl, logger))
+            {
+                Console.WriteLine();
+                Console.WriteLine($"PublisherStudio is already running: {existingUrl}");
+                Console.WriteLine("Ctrl+click the URL above if your console does not open links on a normal click.");
+                if (options.OpenBrowser)
+                    OpenDefaultBrowser(existingUrl, logger);
+                return;
+            }
+
+            var process = Process.Start(new ProcessStartInfo
             {
                 FileName = exePath,
                 ArgumentList = { "--port", port.ToString() },
                 UseShellExecute = true,
                 WorkingDirectory = Path.GetDirectoryName(exePath)
-            });
+            }) ?? throw new InvalidOperationException("BlazorPublisher process could not be started.");
 
-            Thread.Sleep(TimeSpan.FromSeconds(2));
+            var url = WaitForRuntimeEndpoint(
+                productName: "PublisherStudio",
+                runtimeProductDirectory: "PublisherStudio",
+                process: process,
+                fallbackPort: port,
+                logger: logger);
+
+            Console.WriteLine();
+            Console.WriteLine($"PublisherStudio is ready: {url}");
+            Console.WriteLine("Ctrl+click the URL above if your console does not open links on a normal click.");
+            logger.LogInformation("PublisherStudio is ready at {BaseUrl}.", url);
 
             if (options.OpenBrowser)
             {
@@ -877,9 +893,157 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in StartBlazorPublisher. options {options}");
+            logger.LogError(ex, "PublisherStudio startup failed.");
+            throw;
         }
     }
+    private static bool TryGetRunningEndpoint(
+        string productName,
+        string runtimeProductDirectory,
+        out string url,
+        ILogger logger)
+    {
+        url = string.Empty;
+        var endpointPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            runtimeProductDirectory,
+            "runtime",
+            "server.json");
+        try
+        {
+            if (!File.Exists(endpointPath))
+                return false;
+
+            using var document = JsonDocument.Parse(File.ReadAllText(endpointPath));
+            var root = document.RootElement;
+            if (!root.TryGetProperty("ProcessId", out var processIdElement)
+                || !processIdElement.TryGetInt32(out var processId)
+                || processId <= 0
+                || !root.TryGetProperty("BaseUrl", out var baseUrlElement))
+                return false;
+
+            var baseUrl = baseUrlElement.GetString();
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
+                || !uri.IsLoopback
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                return false;
+
+            using var process = Process.GetProcessById(processId);
+            process.Refresh();
+            if (process.HasExited)
+                return false;
+
+            url = uri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+            logger.LogInformation("Using already running {ProductName} process {ProcessId} at {BaseUrl}.", productName, processId, url);
+            return true;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+        catch (IOException ex)
+        {
+            logger.LogDebug(ex, "Could not inspect the existing {ProductName} runtime endpoint.", productName);
+            return false;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            logger.LogDebug(ex, "Could not inspect the existing {ProductName} runtime endpoint.", productName);
+            return false;
+        }
+        catch (JsonException ex)
+        {
+            logger.LogDebug(ex, "Ignored an invalid existing {ProductName} runtime endpoint file.", productName);
+            return false;
+        }
+    }
+
+    private static string WaitForRuntimeEndpoint(
+        string productName,
+        string runtimeProductDirectory,
+        Process process,
+        int fallbackPort,
+        ILogger logger)
+    {
+        var endpointPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            runtimeProductDirectory,
+            "runtime",
+            "server.json");
+        var fallbackUrl = $"http://127.0.0.1:{fallbackPort}";
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(45);
+        Exception? lastReadFailure = null;
+
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            process.Refresh();
+            if (process.HasExited)
+            {
+                throw new InvalidOperationException(
+                    $"{productName} exited with code {process.ExitCode} before publishing its runtime URL.");
+            }
+
+            if (File.Exists(endpointPath))
+            {
+                try
+                {
+                    using var document = JsonDocument.Parse(File.ReadAllText(endpointPath));
+                    var root = document.RootElement;
+                    if (!root.TryGetProperty("ProcessId", out var processIdElement)
+                        || !processIdElement.TryGetInt32(out var endpointProcessId)
+                        || endpointProcessId != process.Id)
+                    {
+                        Thread.Sleep(250);
+                        continue;
+                    }
+
+                    if (!root.TryGetProperty("BaseUrl", out var baseUrlElement))
+                    {
+                        throw new JsonException("Runtime endpoint file does not contain BaseUrl.");
+                    }
+
+                    var baseUrl = baseUrlElement.GetString();
+                    if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
+                        || !uri.IsLoopback
+                        || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                    {
+                        throw new InvalidDataException(
+                            $"{productName} published an invalid non-loopback runtime URL '{baseUrl}'.");
+                    }
+
+                    return uri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+                }
+                catch (IOException ex)
+                {
+                    lastReadFailure = ex;
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    lastReadFailure = ex;
+                }
+                catch (JsonException ex)
+                {
+                    lastReadFailure = ex;
+                }
+            }
+
+            Thread.Sleep(250);
+        }
+
+        logger.LogError(
+            lastReadFailure,
+            "{ProductName} did not publish a usable runtime endpoint at {EndpointPath}. Requested fallback was {FallbackUrl}.",
+            productName,
+            endpointPath,
+            fallbackUrl);
+        throw new TimeoutException(
+            $"{productName} did not become ready within 45 seconds. Requested URL: {fallbackUrl}");
+    }
+
     private static void OpenDefaultBrowser(string url, ILogger logger)
     {
         try

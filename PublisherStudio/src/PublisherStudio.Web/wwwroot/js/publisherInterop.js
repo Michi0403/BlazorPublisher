@@ -7738,6 +7738,10 @@ window.publisherStudio = {
         downloadBlob(fileName, new Blob([buffer], { type: mimeType || 'application/octet-stream' }));
     },
 
+    downloadTextFile(fileName, text, mimeType = 'text/plain;charset=utf-8') {
+        downloadBlob(fileName || 'publisherstudio.txt', new Blob([String(text ?? '')], { type: mimeType }));
+    },
+
     async exportPage(pageId, fileName, format, dpi, zoom) {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');

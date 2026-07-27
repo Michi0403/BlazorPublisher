@@ -4,7 +4,7 @@
     <RepositoryUrl>https://github.com/Michi0403/BlazorPublisher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <LocalGptWireProtocolVersion>2.0.1</LocalGptWireProtocolVersion>
+    <LocalGptWireProtocolVersion>2.1.0</LocalGptWireProtocolVersion>
     <LocalGptWireProtocolPackageDirectory Condition="'$(LocalGptWireProtocolPackageDirectory)' == ''">$(MSBuildThisFileDirectory)packages</LocalGptWireProtocolPackageDirectory>
   </PropertyGroup>
 </Project>

@@ -3,6 +3,7 @@
 @inject IOrganicWorkCoordinator WorkCoordinator
 @inject ILocalGptConnectionService Connection
 @inject IUserNotificationService Notifications
+@inject IJSRuntime JS
 
 @if (_visible && _pending.Count > 0)
 {
@@ -23,12 +24,16 @@
                 {
                     <div class="organic-approval-editor">
                         <label for="organic-interaction-value">@EditorLabel(current.Request)</label>
+                        @if (TryReadParameter(current.Request, "question", out var question) && !string.IsNullOrWhiteSpace(question))
+                        {
+                            <p class="organic-approval-question">@question</p>
+                        }
                         <textarea id="organic-interaction-value" class="form-control" rows="@(ReadEditor(current.Request) == OrganicInteractionEditor.RichText ? 8 : 4)" @bind="_interactionValue"></textarea>
                         <small>The value is returned through the exact 1-Wire request only after you approve it in this PublisherStudio frontend.</small>
                     </div>
                 }
                 <div class="organic-approval-actions">
-                    <button type="button" class="organic-primary" disabled="@_busy" @onclick="ApproveCurrentAsync">Approve once</button>
+                    <button type="button" class="organic-primary" disabled="@_busy" @onclick="ApproveCurrentAsync">@ApproveButtonText(current.Request)</button>
                     <button type="button" class="organic-danger" disabled="@_busy" @onclick="DeclineCurrentAsync">Decline</button>
                     <button type="button" class="organic-secondary" @onclick="Hide">Hide bar</button>
                 </div>
@@ -73,6 +78,8 @@ else if (!_visible && _pending.Count > 0)
         {
             _editorWorkItemId = current.Id;
             _interactionValue = current.Request.InteractionValueJson ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(_interactionValue) && TryReadParameter(current.Request, "initialText", out var initialText))
+                _interactionValue = initialText;
         }
     }
 
@@ -89,7 +96,21 @@ else if (!_visible && _pending.Count > 0)
         try
         {
             var pending = _pending[0];
-            if (NeedsEditor(pending.Request) && !WorkCoordinator.UpdateInteractionValue(pending.Id, _interactionValue))
+            if (string.Equals(pending.CapabilityKey, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase))
+            {
+                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.captureScreen");
+                if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
+                    throw new InvalidOperationException("The approved browser screenshot could not be attached to the current 1-Wire work item.");
+            }
+            else if (string.Equals(pending.CapabilityKey, "publisher.screen.record", StringComparison.OrdinalIgnoreCase))
+            {
+                var maximumSeconds = TryReadIntParameter(pending.Request, "maximumSeconds", 10);
+                var includeAudio = TryReadBooleanParameter(pending.Request, "includeAudio", false);
+                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.recordScreen", maximumSeconds, includeAudio);
+                if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
+                    throw new InvalidOperationException("The approved browser screen recording could not be attached to the current 1-Wire work item.");
+            }
+            else if (NeedsEditor(pending.Request) && !WorkCoordinator.UpdateInteractionValue(pending.Id, _interactionValue))
                 throw new InvalidOperationException("The pending interaction value could not be attached to the current 1-Wire work item.");
             var item = await WorkCoordinator.ApproveAsync(pending.Id);
             if (item is not null && Connection.State.IsConnected)
@@ -154,6 +175,42 @@ else if (!_visible && _pending.Count > 0)
         OrganicInteractionKind.Automated => "Uses an automated PublisherStudio interaction after approval.",
         _ => "Requests a bounded PublisherStudio function."
     };
+
+    private static string ApproveButtonText(OrganicWireEnvelope request) => request.CapabilityKey switch
+    {
+        "publisher.text.edit.request" => "Save & return to LocalGPT",
+        "publisher.website.content.request" => "Return approved content",
+        "publisher.screen.capture" => "Choose screen & capture",
+        "publisher.screen.record" => "Choose screen & record",
+        _ => "Approve once"
+    };
+
+    private static bool TryReadParameter(OrganicWireEnvelope request, string name, out string value)
+    {
+        value = string.Empty;
+        if (request.Properties is null || !request.Properties.TryGetValue("Parameters", out var parameters) ||
+            parameters.ValueKind != System.Text.Json.JsonValueKind.Object || !parameters.TryGetProperty(name, out var property) ||
+            property.ValueKind != System.Text.Json.JsonValueKind.String) return false;
+        value = property.GetString() ?? string.Empty;
+        return true;
+    }
+
+    private static int TryReadIntParameter(OrganicWireEnvelope request, string name, int fallback)
+    {
+        if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
+            parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) && property.TryGetInt32(out var value))
+            return value;
+        return fallback;
+    }
+
+    private static bool TryReadBooleanParameter(OrganicWireEnvelope request, string name, bool fallback)
+    {
+        if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
+            parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) &&
+            property.ValueKind is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False)
+            return property.GetBoolean();
+        return fallback;
+    }
 
     private void ToggleCollapsed() => _collapsed = !_collapsed;
     private void Hide() => _visible = false;

@@ -4871,3 +4871,66 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .panel-studio-dialog :is(input,select,textarea):focus{outline:2px solid #38bdf866;outline-offset:0;border-color:#0284c7}
 .panel-studio-backdrop,.panel-studio-dialog{overflow:visible}
 .panel-studio-dialog{isolation:isolate}.panel-studio-dialog .dxbl-popup,.panel-studio-dialog .dxbl-dropdown,.panel-studio-dialog .dx-overlay-wrapper{z-index:var(--publisher-z-tooltip,2200)!important}
+
+/* PublisherStudio 2.1 organic approval editor and secure capture */
+.organic-approval-question { margin: .35rem 0 .65rem; padding: .6rem .75rem; border-left: 3px solid var(--dx-color-primary, #0b6bcb); background: rgba(11,107,203,.07); white-space: pre-wrap; }
+.organic-approval-editor textarea { min-height: 10rem; max-height: min(45vh, 32rem); resize: vertical; font: inherit; }
+@media (max-width: 540px) {
+  .organic-approval-content { max-height: 78vh; overflow: auto; }
+  .organic-approval-actions { display: grid; grid-template-columns: 1fr; }
+  .organic-approval-editor textarea { min-height: 8rem; max-height: 38vh; }
+}
+
+/* Runtime-generated 1-Wire identity and MFA trust panel. */
+.organic-section-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.organic-section-header h2{margin:0 0 4px}.organic-security-summary{display:grid;grid-template-columns:minmax(160px,.7fr) minmax(120px,.35fr) minmax(260px,1.4fr);gap:8px;margin:10px 0}.organic-security-summary>span{display:grid;gap:3px;min-width:0;padding:8px;border:1px solid var(--pub-border,#cbd5e1);border-radius:5px;background:var(--pub-panel,#fff)}.organic-security-summary code{overflow-wrap:anywhere}.organic-wrap-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.organic-inline-check{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center;gap:6px!important}.organic-security-material article{min-width:0}.organic-security-qr{width:min(100%,270px);aspect-ratio:1;display:grid;place-items:center;margin:8px auto;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff}.organic-security-qr svg{width:100%;height:100%;display:block}.organic-security-card textarea{width:100%;box-sizing:border-box;overflow-wrap:anywhere}@media(max-width:850px){.organic-security-summary{grid-template-columns:1fr}.organic-section-header{display:grid}.organic-security-qr{width:min(82vw,260px)}}
+.picture-ocr-review{display:grid;gap:7px;max-height:min(260px,34vh);padding:9px 12px;border-top:1px solid #b8c3cf;background:#f8fafc;overflow:auto}.picture-ocr-review header{display:flex;align-items:center;justify-content:space-between;gap:12px}.picture-ocr-review header span{font-size:11px;color:#475569}.picture-ocr-review textarea{width:100%;min-height:72px;max-height:150px;box-sizing:border-box;resize:vertical}.picture-ocr-review>div{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}@media(max-width:620px){.picture-ocr-review{max-height:38vh}.picture-ocr-review header{display:grid}.picture-ocr-review textarea{min-height:90px}}
+
+/* v2.0.1 final Panel/Div Studio graph persistence and true arrange preview. */
+.panel-studio-canvas-shell.arrange-preview .publication-panel-view{
+  z-index:1;
+  isolation:isolate;
+}
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element{
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:none!important;
+  contain:layout paint;
+}
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element>*{
+  visibility:visible!important;
+  opacity:1!important;
+  max-width:100%;
+  max-height:100%;
+}
+.panel-studio-canvas-shell.arrange-preview .publication-html-embed-shell,
+.panel-studio-canvas-shell.arrange-preview .publication-html-embed{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:100%!important;
+  height:100%!important;
+  background:transparent;
+  pointer-events:none!important;
+}
+.panel-studio-canvas-shell.arrange-preview .publication-html-design-shield{
+  display:block;
+  pointer-events:none;
+  background:transparent;
+}
+.panel-studio-canvas-shell.arrange-preview .text-frame-content{
+  overflow:auto;
+  overflow-wrap:anywhere;
+}
+.panel-studio-hit-layer{isolation:isolate}
+.panel-studio-dialog{max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
+.panel-studio-grid{height:100%;overflow:hidden}
+@media(max-width:1050px){
+  .panel-studio-dialog{width:calc(100vw - 12px);height:calc(100dvh - 12px)}
+  .panel-studio-grid{grid-template-columns:minmax(150px,190px) minmax(0,1fr)!important}
+}
+@media(max-width:720px){
+  .panel-studio-grid{grid-template-columns:1fr!important;grid-template-rows:auto minmax(360px,1fr) auto}
+  .panel-studio-grid>aside{max-height:32dvh}
+  .panel-studio-workspace{min-height:420px}
+  .panel-studio-mode-banner{align-items:flex-start;flex-direction:column}
+}

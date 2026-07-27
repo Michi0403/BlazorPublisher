@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
@@ -9,6 +10,8 @@ using Microsoft.JSInterop;
 using PublisherStudio.Domain;
 using PublisherStudio.Services;
 using PublisherStudio.Services.PictureStudio.Import;
+using PublisherStudio.Services.OrganicPlugins;
+using PublisherStudio.Services.UserExperience;
 
 namespace PublisherStudio.Components.Editor;
 
@@ -32,6 +35,9 @@ public partial class PictureEditor
     [Inject] private SystemFontCatalog SystemFonts { get; set; } = default!;
     [Inject] public PictureEditorStateService State { get; set; } = default!;
     [Inject] private OpenRasterImportService OpenRasterImporter { get; set; } = default!;
+    [Inject] private ILocalGptConnectionService LocalGptConnection { get; set; } = default!;
+    [Inject] private IUserNotificationService Notifications { get; set; } = default!;
+    [Inject] private ILogger<PictureEditor> Logger { get; set; } = default!;
 
     [Parameter] public bool Visible { get; set; }
     [Parameter] public Guid SessionId { get; set; }
@@ -64,6 +70,10 @@ public partial class PictureEditor
     private string? _pictureExportId;
     private PictureDocument? _pictureExportSourceDocument;
     private string? _pictureExportName;
+    private string _pictureExportPurpose = "save";
+    private string _ocrText = string.Empty;
+    private string _ocrStatus = string.Empty;
+    private bool _ocrBusy;
     private int _pictureExportExpectedChunks;
     private int _pictureExportNextChunk;
     private int _pictureExportExpectedLength;
@@ -79,6 +89,8 @@ public partial class PictureEditor
     private bool IsPaintSelected => State.SelectedLayer is PaintPictureLayer;
     private bool CanDraw => _drawTool != PictureDrawTool.Select;
     private bool IsPictureExporting => _pictureExportId is not null;
+    private bool CanUseLocalGptOcr => Visible && LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("localgpt.vision.ocr");
+    private bool HasOcrText => !string.IsNullOrWhiteSpace(_ocrText);
     private string SelectToolText => ToolText(PictureDrawTool.Select, "Select");
     private string BrushToolText => ToolText(PictureDrawTool.Brush, "Brush");
     private string PencilToolText => ToolText(PictureDrawTool.Pencil, "Pencil");
@@ -133,7 +145,13 @@ public partial class PictureEditor
             ? $"{_drawTool} tool · {_drawWidth:0.#} px · {_drawColor}"
             : State.SelectedLayer is null ? "No layer selected" : $"{State.SelectedLayer.Kind}: {State.SelectedLayer.Name}");
 
-    protected override void OnInitialized() => State.Changed += StateChanged;
+    protected override void OnInitialized()
+    {
+        State.Changed += StateChanged;
+        LocalGptConnection.Changed += LocalGptConnectionChanged;
+    }
+
+    private void LocalGptConnectionChanged() => _ = InvokeAsync(StateHasChanged);
 
     protected override void OnParametersSet()
     {
@@ -565,6 +583,7 @@ public partial class PictureEditor
         _pictureExportId = exportId;
         _pictureExportSourceDocument = sourceDocument;
         _pictureExportName = State.Document.Name;
+        _pictureExportPurpose = "save";
         _pictureExportBuffer = null;
         _pictureExportExpectedChunks = 0;
         _pictureExportNextChunk = 0;
@@ -653,7 +672,13 @@ public partial class PictureEditor
 
         var sourceDocument = _pictureExportSourceDocument ?? State.CloneDocument();
         var name = string.IsNullOrWhiteSpace(_pictureExportName) ? State.Document.Name : _pictureExportName!;
+        var purpose = _pictureExportPurpose;
         ResetPictureExport();
+        if (string.Equals(purpose, "ocr", StringComparison.Ordinal))
+        {
+            await RequestLocalGptOcrAsync(dataUrl);
+            return;
+        }
         await DisposePictureRuntimeAsync();
         await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, sourceDocument, name)));
     }
@@ -677,9 +702,134 @@ public partial class PictureEditor
         _pictureExportId = null;
         _pictureExportSourceDocument = null;
         _pictureExportName = null;
+        _pictureExportPurpose = "save";
         _pictureExportExpectedChunks = 0;
         _pictureExportNextChunk = 0;
         _pictureExportExpectedLength = 0;
+    }
+
+    private async Task StartLocalGptOcrAsync()
+    {
+        if (!CanUseLocalGptOcr || _module is null || _self is null || _pictureExportId is not null || _ocrBusy) return;
+        var exportId = Guid.NewGuid().ToString("N");
+        _pictureExportId = exportId;
+        _pictureExportSourceDocument = State.CloneDocument();
+        _pictureExportName = State.Document.Name;
+        _pictureExportPurpose = "ocr";
+        _pictureExportBuffer = null;
+        _pictureExportExpectedChunks = 0;
+        _pictureExportNextChunk = 0;
+        _pictureExportExpectedLength = 0;
+        _ocrStatus = "Rendering the current picture for LocalGPT OCR…";
+        _error = null;
+        try
+        {
+            await _module.InvokeVoidAsync("startPictureStudioDataUrlExport", _pictureExportSourceDocument, "image/jpeg", .9d, _self, exportId);
+        }
+        catch (Exception ex)
+        {
+            if (IsCurrentPictureExport(exportId)) ResetPictureExport();
+            Logger.LogError(ex, "Could not render the Picture Studio canvas for LocalGPT OCR.");
+            _error = ex.Message;
+        }
+    }
+
+    private async Task RequestLocalGptOcrAsync(string dataUrl)
+    {
+        _ocrBusy = true;
+        try
+        {
+            _ocrStatus = "Waiting for LocalGPT approval and local OCR…";
+            await InvokeAsync(StateHasChanged);
+            var envelope = new OrganicWireEnvelope
+            {
+                MessageType = OrganicWireMessageType.Invoke,
+                TargetPeerId = LocalGptConnection.State.PeerId,
+                CapabilityKey = "localgpt.vision.ocr",
+                Controller = "OneWire",
+                Method = "POST",
+                Route = "/api/onewire/capabilities/localgpt.vision.ocr",
+                Organs = ["eyes"],
+                Skills = ["ocr", "vision", "text-recognition"],
+                UserConfirmed = true,
+                RequiresHumanInteractionOnTargetSystem = true,
+                Properties = new Dictionary<string, JsonElement>
+                {
+                    ["Parameters"] = JsonSerializer.SerializeToElement(new
+                    {
+                        imageDataUrl = dataUrl,
+                        modelName = "deepseek-ocr",
+                        prompt = "Recognize all visible text in this PublisherStudio picture. Preserve reading order and line breaks. Return only recognized text and mark uncertainty with [?].",
+                        maximumOutputTokens = 1600
+                    })
+                }
+            };
+            envelope.NormalizeInteractionKind();
+            var correlationId = await LocalGptConnection.SendEnvelopeAsync(envelope);
+            var deadline = DateTimeOffset.UtcNow.AddMinutes(6);
+            while (true)
+            {
+                var remaining = deadline - DateTimeOffset.UtcNow;
+                if (remaining <= TimeSpan.Zero) throw new TimeoutException("LocalGPT OCR did not finish within six minutes.");
+                var response = await LocalGptConnection.WaitForResultAsync(correlationId, remaining);
+                if (response.MessageType == OrganicWireMessageType.ApprovalRequired)
+                {
+                    _ocrStatus = "Approve the OCR request in the LocalGPT frontend; PublisherStudio will keep waiting for the same request.";
+                    await InvokeAsync(StateHasChanged);
+                    continue;
+                }
+                if (response.MessageType == OrganicWireMessageType.Error)
+                    throw new InvalidOperationException(string.IsNullOrWhiteSpace(response.Error) ? "LocalGPT rejected the OCR request." : response.Error);
+                if (response.MessageType != OrganicWireMessageType.WorkResult) continue;
+                var resultJson = ReadWireString(response, "ResultJson");
+                var result = JsonSerializer.Deserialize<PictureOcrResult>(resultJson, new JsonSerializerOptions(JsonSerializerDefaults.Web))
+                    ?? throw new JsonException("The LocalGPT OCR result was empty.");
+                if (string.IsNullOrWhiteSpace(result.Text)) throw new InvalidOperationException("LocalGPT returned no recognized text.");
+                _ocrText = result.Text.Trim();
+                _ocrStatus = $"OCR completed with {result.ModelName}. Review the text before inserting it as a layer.";
+                Notifications.Success(_ocrStatus, "Picture Studio OCR", nameof(PictureEditor));
+                break;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _ocrStatus = "LocalGPT OCR was cancelled.";
+            Logger.LogInformation("Picture Studio LocalGPT OCR was cancelled.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Picture Studio LocalGPT OCR failed.");
+            _ocrStatus = string.Empty;
+            _error = ex.Message;
+            Notifications.Error(ex.Message, "Picture Studio OCR failed", nameof(PictureEditor));
+        }
+        finally
+        {
+            _ocrBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void InsertOcrTextLayer()
+    {
+        if (string.IsNullOrWhiteSpace(_ocrText)) return;
+        var layer = State.AddText();
+        layer.Name = "OCR text";
+        layer.Text = _ocrText;
+        _notice = "Recognized text was inserted as an editable Picture Studio text layer.";
+        Notifications.Success(_notice, "Picture Studio OCR", nameof(PictureEditor));
+    }
+
+    private void ClearOcrText()
+    {
+        _ocrText = string.Empty;
+        _ocrStatus = string.Empty;
+    }
+
+    private static string ReadWireString(OrganicWireEnvelope envelope, string key)
+    {
+        if (envelope.Properties is null || !envelope.Properties.TryGetValue(key, out var value)) return string.Empty;
+        return value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : value.GetRawText();
     }
 
     private async Task DownloadPng() => await Download("image/png", "png", 1d);
@@ -1390,11 +1540,16 @@ public partial class PictureEditor
     private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string SafeColor(string value) => value.StartsWith('#') && value.Length is 4 or 7 ? value : "#000000";
 
-    public void Dispose() => State.Changed -= StateChanged;
+    public void Dispose()
+    {
+        State.Changed -= StateChanged;
+        LocalGptConnection.Changed -= LocalGptConnectionChanged;
+    }
 
     public async ValueTask DisposeAsync()
     {
         State.Changed -= StateChanged;
+        LocalGptConnection.Changed -= LocalGptConnectionChanged;
         _self?.Dispose();
         try
         {
@@ -1409,6 +1564,15 @@ public partial class PictureEditor
     {
         public string Kind { get; set; } = "polygon";
         public List<PicturePoint> Points { get; set; } = [];
+    }
+
+    private sealed class PictureOcrResult
+    {
+        public string Text { get; set; } = string.Empty;
+        public string ModelName { get; set; } = string.Empty;
+        public string ProviderUri { get; set; } = string.Empty;
+        public string MediaType { get; set; } = string.Empty;
+        public bool NeedsHumanReview { get; set; } = true;
     }
 
     private sealed class PictureImageSize

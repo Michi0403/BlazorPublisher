@@ -10,8 +10,12 @@ namespace PublisherStudio.HostedServices.OrganicPlugins;
 public sealed class LocalGptDiscoveryHostedService(
     IOptions<OrganicPluginOptions> options,
     ILocalGptDiscoveryRegistry registry,
+    ILocalGptConnectionService connection,
     ILogger<LocalGptDiscoveryHostedService> logger) : BackgroundService
 {
+    private int autoConnectInProgress;
+    private readonly HashSet<string> automaticallyAttemptedPeers = new(StringComparer.OrdinalIgnoreCase);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!options.Value.Enabled || !options.Value.EnableDiscovery) return;
@@ -73,6 +77,25 @@ public sealed class LocalGptDiscoveryHostedService(
                     peer.Address = received.RemoteEndPoint.Address.ToString();
                 peer.SeenUtc = DateTimeOffset.UtcNow;
                 registry.Upsert(peer);
+                var isLocalPeer = IPAddress.IsLoopback(received.RemoteEndPoint.Address)
+                    || string.Equals(peer.HostName, Environment.MachineName, StringComparison.OrdinalIgnoreCase);
+                if (options.Value.AutoConnectDiscoveredPeer && isLocalPeer && !connection.State.IsConnected &&
+                    !automaticallyAttemptedPeers.Contains(peer.PeerId) &&
+                    Interlocked.CompareExchange(ref autoConnectInProgress, 1, 0) == 0)
+                {
+                    automaticallyAttemptedPeers.Add(peer.PeerId);
+                    try
+                    {
+                        logger.LogInformation("Automatically opening the local 1-Wire transport to discovered peer {PeerId}; human link/MFA approval remains required.", peer.PeerId);
+                        await connection.ConnectAsync(peer.PeerId, stoppingToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Automatic 1-Wire transport connection to {PeerId} failed; the next discovery beacon may retry.", peer.PeerId);
+                    }
+                    finally { Interlocked.Exchange(ref autoConnectInProgress, 0); }
+                }
             }
             catch (JsonException ex)
             {

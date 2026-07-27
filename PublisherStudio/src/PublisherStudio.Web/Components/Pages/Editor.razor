@@ -468,7 +468,17 @@
         }
         else if (State.SelectedElement is HtmlEmbedElement html)
         {
-            var view = new PublicationPanelView { Name = "Web content", Slug = "web-content", Elements = [Files.CloneElement(html)] };
+            // Mainframe coordinates belong to the outer object. Panel Studio uses its own
+            // local canvas and must never reuse the outer element id for a descendant.
+            var embeddedHtml = (HtmlEmbedElement)Files.CloneElement(html);
+            embeddedHtml.Id = Guid.NewGuid();
+            embeddedHtml.X = 0;
+            embeddedHtml.Y = 0;
+            embeddedHtml.Width = 160;
+            embeddedHtml.Height = 90;
+            embeddedHtml.Rotation = 0;
+            embeddedHtml.ZIndex = 1;
+            var view = new PublicationPanelView { Name = "Web content", Slug = "web-content", Elements = [embeddedHtml] };
             _panelStudioTargetId = html.Id;
             _panelStudioTargetsHtml = true;
             _panelStudioInitial = new PanelElement
@@ -477,6 +487,8 @@
                 Name = html.Name,
                 Width = html.Width,
                 Height = html.Height,
+                CanvasWidth = 160,
+                CanvasHeight = 90,
                 NavigationMode = PublicationPanelNavigationMode.Hidden,
                 ActiveViewId = view.Id,
                 Views = [view]
@@ -485,18 +497,33 @@
         else return;
         _panelStudioVisible = true;
     }
-    private void SavePanelStudio(PanelElement draft)
+    private Task SavePanelStudio(PanelElement draft)
     {
-        if (_panelStudioTargetId is not { } targetId) return;
+        if (_panelStudioTargetId is not { } targetId)
+            throw new InvalidOperationException("Panel Studio no longer has a valid Mainframe target.");
+
         State.SelectElement(targetId);
+        bool applied;
         if (_panelStudioTargetsHtml)
         {
-            var html = PublicationElementTraversal.Descendants(draft.Views.SelectMany(view => view.Elements)).OfType<HtmlEmbedElement>().FirstOrDefault();
-            if (html is not null) State.ApplySelectedHtmlEmbed(html);
+            var authored = draft.Views.SelectMany(view => view.Elements).Where(element => element.Visible).ToArray();
+            var html = PublicationElementTraversal.Descendants(authored).OfType<HtmlEmbedElement>().FirstOrDefault();
+            var remainsStandaloneHtml = draft.Views.Count == 1
+                && authored.Length == 1
+                && authored[0] is HtmlEmbedElement
+                && draft.NavigationMode == PublicationPanelNavigationMode.Hidden;
+            applied = remainsStandaloneHtml && html is not null
+                ? State.ApplySelectedHtmlEmbed(html)
+                : State.PromoteSelectedHtmlEmbedToPanel(draft);
         }
-        else State.ApplySelectedPanel(draft);
+        else applied = State.ApplySelectedPanel(draft);
+
+        if (!applied)
+            throw new InvalidOperationException("The selected Mainframe object changed while Panel Studio was open. The panel was not overwritten.");
+
         ClosePanelStudio();
         ShowNotice("Panel changes applied to the Mainframe and export model.");
+        return Task.CompletedTask;
     }
     private void ClosePanelStudio()
     {

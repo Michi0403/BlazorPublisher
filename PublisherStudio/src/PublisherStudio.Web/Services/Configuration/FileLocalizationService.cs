@@ -13,10 +13,18 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment) : I
 
     public IReadOnlyList<string> GetAvailableCultures()
     {
-        var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "en-US" };
-        AddCultures(LocalizationPath, values);
-        AddCultures(OverridePath, values);
-        return values.OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
+        var candidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "en-US" };
+        AddCultures(LocalizationPath, candidates);
+        AddCultures(OverridePath, candidates);
+        var requiredKeys = LoadFile(Path.Combine(LocalizationPath, "en-US.json")).Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var available = candidates.Where(culture =>
+        {
+            if (string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase)) return true;
+            var translated = LoadFile(Path.Combine(LocalizationPath, culture + ".json"));
+            foreach (var pair in LoadFile(Path.Combine(OverridePath, culture + ".json"))) translated[pair.Key] = pair.Value;
+            return requiredKeys.All(translated.ContainsKey);
+        });
+        return available.OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
     }
 
     public IReadOnlyDictionary<string, string> GetStrings(string? culture = null)
@@ -58,6 +66,17 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment) : I
             MergeFile(Path.Combine(LocalizationPath, culture + ".json"), result);
         MergeFile(Path.Combine(OverridePath, culture + ".json"), result);
         return result;
+    }
+
+
+    private static Dictionary<string, string> LoadFile(string path)
+    {
+        if (!File.Exists(path)) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        using var stream = File.OpenRead(path);
+        var data = JsonSerializer.Deserialize<Dictionary<string, string>>(stream)
+            ?? new Dictionary<string, string>();
+        return data.Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
+            .ToDictionary(pair => pair.Key, pair => pair.Value ?? string.Empty, StringComparer.OrdinalIgnoreCase);
     }
 
     private static void MergeFile(string path, IDictionary<string, string> result)

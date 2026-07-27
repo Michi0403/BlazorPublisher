@@ -6,21 +6,57 @@
     const excludedSelector = 'script,style,code,pre,textarea,[contenteditable="true"],.print-publication,[data-publication-element],.publication-content-source,.text-frame-content,.spreadsheet-preview-html';
     let dictionary = {};
     let sourceMap = new Map();
+    let phrases = [];
+    let words = new Map();
     let observer = null;
     let applying = false;
 
     function normalize(value) { return String(value || '').replace(/\s+/g, ' ').trim(); }
     function rebuildSourceMap() {
-        sourceMap = new Map();
+        sourceMap = new Map(); phrases = []; words = new Map();
         for (const [key, value] of Object.entries(dictionary || {})) {
-            if (!key.startsWith('Text.')) continue;
-            const source = key.slice(5).replaceAll('␠', ' ');
-            if (source) sourceMap.set(normalize(source), String(value ?? ''));
+            if (key.startsWith('Text.')) {
+                const source = key.slice(5).replaceAll('␠', ' ');
+                if (source) sourceMap.set(normalize(source), String(value ?? ''));
+            } else if (key.startsWith('Phrase.')) {
+                phrases.push([key.slice(7).replaceAll('␠', ' '), String(value ?? '')]);
+            } else if (key.startsWith('Word.')) {
+                words.set(key.slice(5).toLowerCase(), String(value ?? ''));
+            }
         }
+        phrases.sort((left, right) => right[0].length - left[0].length);
+    }
+    function preserveCase(source, target) {
+        if (!target) return target;
+        if (source.toUpperCase() === source) return target.toUpperCase();
+        if (source[0] && source[0].toUpperCase() === source[0]) return target[0]?.toUpperCase() + target.slice(1);
+        return target;
+    }
+    function fallbackTranslate(value) {
+        if (neutral !== 'de') return value;
+        let result = value;
+        for (const [source, replacement] of phrases) {
+            const pattern = new RegExp(source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            result = result.replace(pattern, match => preserveCase(match, replacement));
+        }
+
+        // Never create a half German / half English label. Word fallback is accepted only
+        // when every ordinary word is known. Product names, acronyms and protocol tokens
+        // intentionally remain invariant.
+        const invariant = /^(?:AI|API|CSS|DX|DXAIChat|DIV|HTML|HTTP|HTTPS|JSON|MFA|OCR|REST|SQL|SQLite|UI|URL|GPU|CPU|LocalGPT|PublisherStudio|Blazor|DevExpress|DevExtreme|OData|Ollama|LM|Studio|Wire)$/i;
+        let complete = true;
+        const translated = result.replace(/\b[A-Za-z][A-Za-z'-]*\b/g, token => {
+            const replacement = words.get(token.toLowerCase());
+            if (replacement) return preserveCase(token, replacement);
+            if (invariant.test(token) || token.length <= 2) return token;
+            complete = false;
+            return token;
+        });
+        return complete ? translated : value;
     }
     function translated(value) {
         const original = normalize(value);
-        return sourceMap.get(original) || original;
+        return sourceMap.get(original) || fallbackTranslate(original) || original;
     }
     function isExcluded(node) {
         const element = node instanceof Element ? node : node?.parentElement;
@@ -30,7 +66,7 @@
         if (!(node instanceof Text) || isExcluded(node)) return;
         const original = normalize(node.nodeValue);
         if (!original) return;
-        const replacement = sourceMap.get(original);
+        const replacement = translated(original);
         if (!replacement || replacement === original) return;
         const leading = /^\s*/.exec(node.nodeValue)?.[0] || '';
         const trailing = /\s*$/.exec(node.nodeValue)?.[0] || '';
@@ -46,12 +82,12 @@
         for (const attribute of ['title', 'aria-label', 'placeholder']) {
             const value = element.getAttribute(attribute);
             if (!value) continue;
-            const replacement = sourceMap.get(normalize(value));
+            const replacement = translated(value);
             if (replacement && replacement !== value) element.setAttribute(attribute, replacement);
         }
         if (element.matches('input[type="button"],input[type="submit"],input[type="reset"]')) {
-            const replacement = sourceMap.get(normalize(element.value));
-            if (replacement) element.value = replacement;
+            const replacement = translated(element.value);
+            if (replacement && replacement !== element.value) element.value = replacement;
         }
         for (const node of element.childNodes) if (node instanceof Text) translateTextNode(node);
     }
@@ -72,6 +108,7 @@
             if (response.ok) dictionary = await response.json();
         } catch (error) { console.warn('PublisherStudio localization dictionary could not be loaded.', error); }
         rebuildSourceMap();
+        document.title = translated(document.title);
         apply(document.body);
         observer?.disconnect();
         observer = new MutationObserver(records => {

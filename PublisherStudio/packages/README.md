@@ -12,5 +12,5 @@ PublisherStudio no longer contains or revisions a second `LocalGPT.WireProtocolV
 Downloaded `.nupkg` files are ignored by Git and must not be committed to BlazorPublisher. The official asset name is:
 
 ```text
-LocalGPT.WireProtocolVersion.2.0.1.nupkg
+LocalGPT.WireProtocolVersion.2.1.0.nupkg
 ```

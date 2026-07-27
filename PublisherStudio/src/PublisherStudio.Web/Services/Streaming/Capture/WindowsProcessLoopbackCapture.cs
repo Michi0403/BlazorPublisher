@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
@@ -7,6 +8,7 @@ namespace PublisherStudio.Services.Streaming.Capture;
 /// follows the public ApplicationLoopback sample but writes fixed 48 kHz,
 /// stereo, 16-bit PCM into the integrated streaming runtime's FFmpeg stdin instead of a WAV file.
 /// </summary>
+[SupportedOSPlatform("windows")]
 internal sealed class WindowsProcessLoopbackCapture : IDisposable
 {
     private const string VirtualAudioDeviceProcessLoopback = "VAD\\Process_Loopback";

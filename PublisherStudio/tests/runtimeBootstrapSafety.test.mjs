@@ -17,7 +17,7 @@ assert.match(hostServices, /void DeleteOwnedEndpoint\(\);/);
 assert.match(hostServices, /processId\.TryGetInt32\(out var ownerProcessId\)/);
 
 const launch = JSON.parse(read('Properties', 'launchSettings.json'));
-assert.equal(launch.profiles['PublisherStudio.Web'].applicationUrl, 'http://127.0.0.1:5198');
+assert.equal(launch.profiles['PublisherStudio.Web'].applicationUrl, 'http://127.0.0.1:58071');
 
 const composition = read('PublisherStudioServiceCollectionExtensions.cs');
 assert.match(composition, /if \(implementation is null\)\s*\n\s*return null;/);

@@ -1,4 +1,8 @@
 @namespace PublisherStudio.Components.Editor
+@using System.Text.Json
+@using System.Text.Json.Nodes
+@using System.Text.RegularExpressions
+@using System.Net
 @implements IAsyncDisposable
 @inject PanelDocumentService Panels
 @inject PublicationFileService Files
@@ -43,6 +47,10 @@
                         <DxRibbonItem Text="Save/update module" IconCssClass="pub-icon pub-icon-save" Click="SaveSelectedAsTemplate" Enabled="@(SelectedElement is not null)" />
                         <DxRibbonItem Text="Save as new module" IconCssClass="pub-icon pub-icon-copy" Click="SaveSelectedAsNewTemplate" Enabled="@(SelectedElement is not null)" />
                         <DxRibbonItem Text="Delete saved module" IconCssClass="pub-icon pub-icon-delete" Click="DeleteSelectedTemplate" Enabled="@(_selectedTemplateId is not null)" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text="Open interchange" IconCssClass="pub-icon pub-icon-download">
+                        <DxRibbonItem Text="Export JSON Canvas" IconCssClass="pub-icon pub-icon-download" Click="ExportJsonCanvasAsync" Enabled="@(CurrentView is not null)" />
+                        <DxRibbonItem Text="Export panel JSON" IconCssClass="pub-icon pub-icon-download" Click="ExportPanelJsonAsync" Enabled="@(_draft is not null)" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 <DxRibbonTab Text="Insert">
@@ -135,6 +143,9 @@
                     <label class="panel-html-import">Import standalone HTML into this view
                         <InputFile accept=".html,.htm,text/html" OnChange="ImportHtml" />
                     </label>
+                    <label class="panel-html-import">Import JSON Canvas or PublisherStudio panel JSON
+                        <InputFile accept=".canvas,.json,application/json" OnChange="ImportPanelInterchangeAsync" />
+                    </label>
                     @if (Document.ComponentTemplates.Count > 0)
                     {
                         <strong>Saved modules</strong>
@@ -169,14 +180,14 @@
                              aria-label="Panel arrangement canvas"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
-                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" DesignPreviewOnly="@(!_interactionPreview)" />
+                            <PanelView Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" DesignPreviewOnly="false" />
 
                             @if (!_interactionPreview && CurrentView is not null)
                             {
                                 <div class="panel-studio-hit-layer" aria-label="Panel component arrangement surface">
                                     @foreach (var element in CurrentView.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
                                     {
-                                        <button type="button"
+                                        <button @key="element.Id" type="button"
                                                 class="panel-studio-hitbox @(element.Id == _selectedElementId ? "selected" : null)"
                                                 style="@HitStyle(element)"
                                                 data-panel-element-id="@element.Id"
@@ -493,7 +504,7 @@
         {
             Logger.LogDebug(exception, "Panel Studio interaction binding ended because the browser circuit disconnected.");
         }
-        catch (TaskCanceledException exception)
+        catch (OperationCanceledException exception)
         {
             Logger.LogDebug(exception, "Panel Studio interaction binding was cancelled.");
         }
@@ -776,6 +787,205 @@
         return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{Math.Max(1, element.ZIndex)};transform:rotate({Inv(element.Rotation)}deg)";
     }
 
+    private async Task ExportPanelJsonAsync()
+    {
+        if (_draft is null) return;
+        try
+        {
+            var fileName = SafeFileName(_draft.Name, "panel") + ".publisher-panel.json";
+            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", fileName, Files.SerializeElement(_draft), "application/json;charset=utf-8");
+            Notifications.Success("The complete reusable panel project was exported.", "Panel project exported", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio project export failed.");
+            Notifications.Error("The panel project could not be exported.", "Panel export failed", nameof(PanelStudio));
+        }
+    }
+
+    private async Task ExportJsonCanvasAsync()
+    {
+        if (_draft is null || CurrentView is null) return;
+        try
+        {
+            var nodes = new JsonArray();
+            foreach (var element in CurrentView.Elements.Where(item => item.Visible).OrderBy(item => item.ZIndex))
+            {
+                var node = new JsonObject
+                {
+                    ["id"] = element.Id.ToString("D"),
+                    ["type"] = JsonCanvasNodeType(element),
+                    ["x"] = (int)Math.Round(element.X),
+                    ["y"] = (int)Math.Round(element.Y),
+                    ["width"] = Math.Max(1, (int)Math.Round(element.Width)),
+                    ["height"] = Math.Max(1, (int)Math.Round(element.Height)),
+                    ["color"] = JsonCanvasColor(element),
+                    ["publisherStudioElement"] = JsonNode.Parse(Files.SerializeElement(element))
+                };
+                if (element is TextFrameElement text)
+                    node["text"] = PlainText(text.PreviewHtml);
+                else if (element is HtmlEmbedElement html)
+                    node["text"] = PlainText(html.Html);
+                else if (element is ImageFrameElement image && !string.IsNullOrWhiteSpace(image.DataUrl))
+                    node["file"] = image.DataUrl;
+                nodes.Add(node);
+            }
+            var root = new JsonObject
+            {
+                ["nodes"] = nodes,
+                ["edges"] = new JsonArray(),
+                ["publisherStudio"] = new JsonObject
+                {
+                    ["format"] = "PublisherStudio Panel/Div Studio",
+                    ["version"] = "2.0.1",
+                    ["panelName"] = _draft.Name,
+                    ["viewName"] = CurrentView.Name,
+                    ["canvasWidth"] = _draft.CanvasWidth,
+                    ["canvasHeight"] = _draft.CanvasHeight
+                }
+            };
+            var json = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", SafeFileName(CurrentView.Name, "panel-view") + ".canvas", json, "application/json;charset=utf-8");
+            Notifications.Success("The active view was exported using the open JSON Canvas format while preserving PublisherStudio element data.", "JSON Canvas exported", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio JSON Canvas export failed.");
+            Notifications.Error("The JSON Canvas file could not be exported.", "JSON Canvas export failed", nameof(PanelStudio));
+        }
+    }
+
+    private async Task ImportPanelInterchangeAsync(InputFileChangeEventArgs args)
+    {
+        _error = string.Empty;
+        try
+        {
+            var file = args.File;
+            await using var source = file.OpenReadStream(long.MaxValue);
+            using var reader = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            var json = await reader.ReadToEndAsync();
+            using var document = JsonDocument.Parse(json);
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+                throw new InvalidDataException("The selected file does not contain a JSON object.");
+
+            if (document.RootElement.TryGetProperty("nodes", out var nodes) && nodes.ValueKind == JsonValueKind.Array)
+            {
+                if (_draft is null || CurrentView is null) return;
+                var imported = new List<PublicationElement>();
+                foreach (var node in nodes.EnumerateArray())
+                {
+                    PublicationElement? element = null;
+                    if (node.TryGetProperty("publisherStudioElement", out var preserved))
+                    {
+                        try { element = Files.DeserializeElement(preserved.GetRawText()); }
+                        catch (Exception exception) { Logger.LogWarning(exception, "A JSON Canvas node contained invalid PublisherStudio extension data; importing the standard node instead."); }
+                    }
+                    element ??= ImportStandardJsonCanvasNode(node);
+                    if (element is null) continue;
+                    element.Id = Guid.NewGuid();
+                    element.X = ReadNumber(node, "x", element.X);
+                    element.Y = ReadNumber(node, "y", element.Y);
+                    element.Width = Math.Max(1, ReadNumber(node, "width", element.Width));
+                    element.Height = Math.Max(1, ReadNumber(node, "height", element.Height));
+                    imported.Add(element);
+                }
+                foreach (var element in imported) AddElement(CurrentView, element);
+                Panels.Normalize(Document, _draft);
+                SelectElement(imported.LastOrDefault()?.Id);
+                Notifications.Success($"Imported {imported.Count} JSON Canvas node(s) into the active view.", "JSON Canvas imported", nameof(PanelStudio));
+                return;
+            }
+
+            var panel = Files.DeserializeElement(json) as PanelElement
+                ?? throw new InvalidDataException("The JSON file is neither JSON Canvas nor a PublisherStudio panel project.");
+            Panels.Normalize(Document, panel);
+            _draft = panel;
+            _selectedViewId = panel.ActiveViewId;
+            _selectedElementId = panel.ActiveView?.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id;
+            // Keep the identity of the Mainframe target. Imported projects may carry a
+            // different root id and must not be replaced by OnParametersSet on rerender.
+            _loadedId = InitialPanel?.Id;
+            RefreshAdvancedJson();
+            Notifications.Success("The complete Panel/Div Studio project was imported.", "Panel project imported", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio interchange import failed.");
+            _error = $"The panel project could not be imported: {exception.Message}";
+            Notifications.Error(_error, "Panel import failed", nameof(PanelStudio), persistent: true);
+        }
+    }
+
+    private PublicationElement? ImportStandardJsonCanvasNode(JsonElement node)
+    {
+        var type = node.TryGetProperty("type", out var typeProperty) ? typeProperty.GetString() ?? string.Empty : string.Empty;
+        var text = node.TryGetProperty("text", out var textProperty) ? textProperty.GetString() ?? string.Empty : string.Empty;
+        return type.ToLowerInvariant() switch
+        {
+            "text" => new TextFrameElement
+            {
+                Name = "Imported text",
+                PreviewHtml = $"<p>{WebUtility.HtmlEncode(text).Replace(Environment.NewLine, "<br>")}</p>",
+                Background = "#ffffff",
+                BorderColor = "#cbd5e1",
+                BorderWidth = .2
+            },
+            "link" => new HtmlEmbedElement
+            {
+                Name = "Imported link",
+                Html = $"<main><a href=\"{WebUtility.HtmlEncode(node.TryGetProperty("url", out var url) ? url.GetString() : string.Empty)}\" target=\"_blank\" rel=\"noopener noreferrer\">{WebUtility.HtmlEncode(text.Length == 0 ? "Open link" : text)}</a></main>",
+                Css = "html,body{margin:0;height:100%;font:16px Segoe UI,system-ui,sans-serif}main{box-sizing:border-box;padding:20px}"
+            },
+            "file" => new TextFrameElement
+            {
+                Name = "Imported file reference",
+                PreviewHtml = $"<p><strong>File</strong><br>{WebUtility.HtmlEncode(node.TryGetProperty("file", out var file) ? file.GetString() : string.Empty)}</p>",
+                Background = "#f8fafc",
+                BorderColor = "#94a3b8",
+                BorderWidth = .2
+            },
+            "group" => new ShapeElement { Name = string.IsNullOrWhiteSpace(text) ? "Imported group" : text, Shape = PublicationShape.RoundedRectangle, Fill = "#f8fafc", Stroke = "#94a3b8", CornerRadiusMm = 2 },
+            _ => null
+        };
+    }
+
+    private static double ReadNumber(JsonElement node, string propertyName, double fallback) =>
+        node.TryGetProperty(propertyName, out var property) && property.TryGetDouble(out var value) && double.IsFinite(value) ? value : fallback;
+
+    private static string JsonCanvasNodeType(PublicationElement element) => element switch
+    {
+        TextFrameElement => "text",
+        ImageFrameElement => "file",
+        HtmlEmbedElement => "text",
+        PanelElement => "group",
+        _ => "group"
+    };
+
+    private static string JsonCanvasColor(PublicationElement element) => element switch
+    {
+        TextFrameElement => "5",
+        ImageFrameElement => "4",
+        DataVisualElement => "6",
+        DevExtremeComponentElement => "2",
+        HtmlEmbedElement => "3",
+        _ => "1"
+    };
+
+    private static string PlainText(string? markup)
+    {
+        if (string.IsNullOrWhiteSpace(markup)) return string.Empty;
+        var text = Regex.Replace(markup, "<br\\s*/?>", Environment.NewLine, RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "<[^>]+>", string.Empty);
+        return WebUtility.HtmlDecode(text).Trim();
+    }
+
+    private static string SafeFileName(string? value, string fallback)
+    {
+        var name = string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+        foreach (var invalid in Path.GetInvalidFileNameChars()) name = name.Replace(invalid, '-');
+        return string.IsNullOrWhiteSpace(name) ? fallback : name;
+    }
+
     private async Task ImportHtml(InputFileChangeEventArgs args)
     {
         _error = string.Empty;
@@ -1031,9 +1241,28 @@
     private async Task Save()
     {
         if (_draft is null) return;
-        Panels.Normalize(Document, _draft);
-        await Saved.InvokeAsync(_draft);
-        Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio));
+        _error = string.Empty;
+        try
+        {
+            Panels.Normalize(Document, _draft);
+            // Pass an isolated graph to the parent. Closing or rerendering the dialog must
+            // not mutate the object that was just committed to the Mainframe.
+            var committed = (PanelElement)Files.CloneElement(_draft);
+            Panels.Normalize(Document, committed);
+            await Saved.InvokeAsync(committed);
+            Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio));
+        }
+        catch (OperationCanceledException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio save was cancelled before the Mainframe accepted the project.");
+            _error = "The panel was not saved because the operation was cancelled.";
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio could not commit the panel project to the Mainframe.");
+            _error = exception.Message;
+            Notifications.Error(_error, "Panel save failed", nameof(PanelStudio), persistent: true);
+        }
     }
 
     private Task Cancel() => Cancelled.InvokeAsync();
@@ -1043,7 +1272,7 @@
         _disposed = true;
         try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement); }
         catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
+        catch (OperationCanceledException) { }
         catch (InvalidOperationException) { }
         _dropSurfaceBound = false;
         _self?.Dispose();

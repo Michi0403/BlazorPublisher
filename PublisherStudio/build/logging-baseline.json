@@ -42,6 +42,11 @@
       "logCalls": 1,
       "catchBlocks": 0
     },
+    "src/PublisherStudio.Web/Controllers/OrganicWireHttpController.cs": {
+      "loggerReferences": 1,
+      "logCalls": 5,
+      "catchBlocks": 5
+    },
     "src/PublisherStudio.Web/Controllers/PublicationController.cs": {
       "loggerReferences": 0,
       "logCalls": 0,
@@ -246,6 +251,11 @@
       "loggerReferences": 3,
       "logCalls": 3,
       "catchBlocks": 1
+    },
+    "src/PublisherStudio.Web/Services/OrganicPlugins/OrganicRuntimeSecurityService.cs": {
+      "loggerReferences": 1,
+      "logCalls": 20,
+      "catchBlocks": 14
     },
     "src/PublisherStudio.Web/Services/OrganicPlugins/RecurringScreenReaderService.cs": {
       "loggerReferences": 1,

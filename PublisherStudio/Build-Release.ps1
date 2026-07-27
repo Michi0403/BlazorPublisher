@@ -2,7 +2,7 @@ param(
     [ValidateSet("win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
     [string]$Runtime = "win-x64",
     [string]$Configuration = "Release",
-    [string]$WireProtocolVersion = "2.0.1",
+    [string]$WireProtocolVersion = "2.1.0",
     [string]$WireProtocolPackageUrl = "",
     [string]$LocalGptRepository = "",
     [switch]$UseBundledWireProtocolPackage,
@@ -27,6 +27,7 @@ function Invoke-DotNet {
 }
 
 & (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
+& (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 
 if ($UseBundledWireProtocolPackage) {
@@ -143,6 +144,16 @@ New-Item -ItemType Directory -Path $protocolAppDirectory, $protocolSetupDirector
 Copy-Item $wireProtocolPackage (Join-Path $protocolAppDirectory $wireProtocolPackageName) -Force
 Copy-Item $wireProtocolPackage (Join-Path $protocolSetupDirectory $wireProtocolPackageName) -Force
 Copy-Item $wireProtocolPackage (Join-Path $artifacts $wireProtocolPackageName) -Force
+
+# Single-file setup publishing does not reliably copy linked Content items on every SDK/RID.
+# Copy the repository-owned icon explicitly so desktop and Start-menu shortcuts never depend
+# on an accidental MSBuild Content-item behavior.
+$publisherIcon = Join-Path $root "assets\PublisherStudio.ico"
+if (-not (Test-Path -LiteralPath $publisherIcon -PathType Leaf)) {
+    throw "PublisherStudio release icon is unavailable: $publisherIcon"
+}
+Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $setupFolder "PublisherStudio.ico") -Force
+Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $appFolder "PublisherStudio.ico") -Force
 
 $requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "PublisherStudio.ico")
 $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path (Join-Path $setupFolder $_)) })

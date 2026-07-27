@@ -34,53 +34,44 @@ public sealed class SvgWordArtText : ComponentBase
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
-        var sequence = 0;
-
-        builder.OpenElement(sequence++, "text");
-        AddAttribute(builder, ref sequence, "class", CssClass);
-        AddAttribute(builder, ref sequence, "x", X);
-        AddAttribute(builder, ref sequence, "y", Y);
-        AddAttribute(builder, ref sequence, "dx", Dx);
-        AddAttribute(builder, ref sequence, "dy", Dy);
-        AddAttribute(builder, ref sequence, "text-anchor", TextAnchor);
-        AddAttribute(builder, ref sequence, "dominant-baseline", DominantBaseline);
-        AddAttribute(builder, ref sequence, "font-family", FontFamily);
-        AddAttribute(builder, ref sequence, "font-size", FontSize);
-        AddAttribute(builder, ref sequence, "font-weight", FontWeight);
-        AddAttribute(builder, ref sequence, "font-style", FontStyle);
-        AddAttribute(builder, ref sequence, "letter-spacing", LetterSpacing);
-        AddAttribute(builder, ref sequence, "fill", Fill);
-        AddAttribute(builder, ref sequence, "fill-opacity", FillOpacity);
-        AddAttribute(builder, ref sequence, "stroke", Stroke);
-        AddAttribute(builder, ref sequence, "stroke-width", StrokeWidth);
-        AddAttribute(builder, ref sequence, "paint-order", PaintOrder);
+        builder.OpenElement(0, "text");
+        AddAttribute(builder, 1, "class", CssClass);
+        AddAttribute(builder, 2, "x", X);
+        AddAttribute(builder, 3, "y", Y);
+        AddAttribute(builder, 4, "dx", Dx);
+        AddAttribute(builder, 5, "dy", Dy);
+        AddAttribute(builder, 6, "text-anchor", TextAnchor);
+        AddAttribute(builder, 7, "dominant-baseline", DominantBaseline);
+        AddAttribute(builder, 8, "font-family", FontFamily);
+        AddAttribute(builder, 9, "font-size", FontSize);
+        AddAttribute(builder, 10, "font-weight", FontWeight);
+        AddAttribute(builder, 11, "font-style", FontStyle);
+        AddAttribute(builder, 12, "letter-spacing", LetterSpacing);
+        AddAttribute(builder, 13, "fill", Fill);
+        AddAttribute(builder, 14, "fill-opacity", FillOpacity);
+        AddAttribute(builder, 15, "stroke", Stroke);
+        AddAttribute(builder, 16, "stroke-width", StrokeWidth);
+        AddAttribute(builder, 17, "paint-order", PaintOrder);
 
         if (!string.IsNullOrWhiteSpace(PathHref))
         {
-            builder.OpenElement(sequence++, "textPath");
-            AddAttribute(builder, ref sequence, "href", PathHref);
-            AddAttribute(builder, ref sequence, "startOffset", PathStartOffset);
-            AddAttribute(builder, ref sequence, "text-anchor", PathTextAnchor);
-            builder.AddContent(sequence++, Text);
+            builder.OpenElement(18, "textPath");
+            AddAttribute(builder, 19, "href", PathHref);
+            AddAttribute(builder, 20, "startOffset", PathStartOffset);
+            AddAttribute(builder, 21, "text-anchor", PathTextAnchor);
+            builder.AddContent(22, Text);
             builder.CloseElement();
         }
         else
         {
-            builder.AddContent(sequence++, Text);
+            builder.AddContent(23, Text);
         }
 
         builder.CloseElement();
     }
 
-    private static void AddAttribute(
-        RenderTreeBuilder builder,
-        ref int sequence,
-        string name,
-        string? value)
+    private static void AddAttribute(RenderTreeBuilder builder, int sequence, string name, string? value)
     {
-        if (!string.IsNullOrWhiteSpace(value))
-        {
-            builder.AddAttribute(sequence++, name, value);
-        }
+        if (!string.IsNullOrWhiteSpace(value)) builder.AddAttribute(sequence, name, value);
     }
 }

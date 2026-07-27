@@ -18,7 +18,8 @@ public sealed class OrganicCapabilityCatalog(
         var media = await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
         var capabilities = new List<OrganicCapabilityDescriptor>
         {
-            Capability("publisher.screen.capture", "Eyes: screen capture", "Queues a screenshot only after PublisherStudio frontend confirmation. The current browser session must separately grant its screen-capture/user-gesture permission each time required by the browser.", "eyes", false, true, true),
+            Capability("publisher.screen.capture", "Eyes: screen capture", "Captures one user-selected screen or window only after PublisherStudio confirmation and the browser's current getDisplayMedia prompt.", "eyes", false, true, false),
+            Capability("publisher.screen.record", "Eyes: screen recording", "Records a user-selected screen or window for up to 15 seconds after PublisherStudio confirmation and a fresh browser prompt.", "eyes", false, true, false),
             Capability("publisher.screen.capture.result", "Eyes: screen capture result", "Reads the bounded status and result of a previously queued browser screenshot for the next council heartbeat.", "eyes", true, false, true),
             Capability("publisher.screenreader.start", "Start recurring screen-reader help", "Starts one debounced single-flight screen-reader session. The interval is clamped to at least 15 seconds.", "eyes", false, true, true),
             Capability("publisher.screenreader.stop", "Stop recurring screen-reader help", "Stops a recurring screen-reader session by id.", "eyes", false, true, true),
@@ -27,6 +28,8 @@ public sealed class OrganicCapabilityCatalog(
             Capability("publisher.openscad.generate", "OpenSCAD canonical project generation", "Validates and renders a canonical OpenScadDocument/OpenScadNode graph through the existing registered renderer path.", "hands", false, true, false),
             Capability("publisher.spreadsheet.inspect", "Spreadsheet session inspection", "Returns bounded metadata and preview evidence for an existing workbook session without mutation.", "eyes", true, true, true),
             Capability("publisher.text.insert.propose", "Propose text insertion", "Creates a reviewable text insertion proposal. It never mutates a publication automatically.", "hands", false, true, true),
+            Capability("publisher.text.edit.request", "Request reviewed text", "Opens a bounded PublisherStudio text editor after approval, returns the user's saved text through the same CorrelationId, then closes the editor automatically.", "hands", false, true, false),
+            Capability("publisher.website.content.request", "Request approved web/document content", "Returns user-approved bounded HTML, DIV or document content plus an optional source URL for LocalGPT chat and other organic clients.", "eyes", true, true, false),
             Capability("publisher.business-context", "PublisherStudio project/API context", "Returns the current domain, service and controller context for grounded council planning.", "eyes", true, false, false),
             Capability("publisher.media.capabilities", "FFmpeg/media capabilities", $"Returns the installed PublisherStudio media conversion capability map. FFmpeg available: {media.Available}.", "eyes", true, false, false)
         };
@@ -64,7 +67,9 @@ public sealed class OrganicCapabilityCatalog(
             new() { Key = "publisherstudio.council.team-picker", DisplayName = "Council team picker", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["council.teams"] },
             new() { Key = "publisherstudio.screenreader.recurring", DisplayName = "Recurring screen-reader help", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["publisher.screen.capture"] },
             new() { Key = "publisherstudio.spreadsheet.ai", DisplayName = "Spreadsheet AI help", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["publisher.spreadsheet.inspect", "council.run"] },
-            new() { Key = "publisherstudio.openscad.ai", DisplayName = "OpenSCAD Team", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["publisher.openscad.generate", "council.run"] }
+            new() { Key = "publisherstudio.openscad.ai", DisplayName = "OpenSCAD Team", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["publisher.openscad.generate", "council.run"] },
+            new() { Key = "publisherstudio.picture.ocr", DisplayName = "Picture Studio OCR", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = ["localgpt.vision.ocr"] },
+            new() { Key = "publisherstudio.security", DisplayName = "Secure 1-Wire link", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = [] }
         ]);
 
     public Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default) =>
@@ -84,19 +89,25 @@ public sealed class OrganicCapabilityCatalog(
         Route = $"/api/organic/capabilities/{key}", Organs = [organ], Skills = Skills(key), RequiredSkillKeys = Skills(key),
         UiActivationKeys = UiActivationKeys(key), IsOnline = true, IsEnabled = true,
         IsReadOnly = readOnly, RequiresHumanConfirmation = confirmation, SupportsScheduling = scheduling,
-        SupportsRecurringExecution = key is "publisher.screen.capture" or "publisher.screenreader.start",
+        SupportsRecurringExecution = key is "publisher.screenreader.start",
         RequiresHumanInteractionOnTargetSystem = confirmation,
-        RequiresAutomatedInteractionOnTargetSystem = key is "publisher.screen.capture" or "publisher.input.execute" or "publisher.screenreader.start" or "publisher.screenreader.stop",
+        RequiresAutomatedInteractionOnTargetSystem = key is "publisher.screen.capture" or "publisher.screen.record" or "publisher.input.execute" or "publisher.screenreader.start" or "publisher.screenreader.stop",
         IsExposedToPeer = true,
         AllowPeerInvocation = true,
         RequiresFrontendUserConfirmation = confirmation,
-        InteractionEditor = key == "publisher.text.insert.propose"
+        InteractionEditor = key is "publisher.text.insert.propose" or "publisher.text.edit.request" or "publisher.website.content.request"
             ? OrganicInteractionEditor.RichText
             : confirmation
                 ? OrganicInteractionEditor.ConfirmationOnly
                 : OrganicInteractionEditor.None,
         ConfigurationKey = $"publisher:{key}",
-        ParameterSchemaJson = Schema(key)
+        ParameterSchemaJson = Schema(key),
+        InputContract = InputContract(key),
+        OutputContract = OutputContract(key),
+        SecurityContract = SecurityContract(key),
+        OrganicUseCase = OrganicUseCase(key),
+        SuggestedCouncilRoles = SuggestedCouncilRoles(key),
+        Source = "PublisherStudio"
     };
 
     private static List<string> UiActivationKeys(string key) => key switch
@@ -113,6 +124,7 @@ public sealed class OrganicCapabilityCatalog(
     {
         "publisher.screen.capture" => ["vision", "screen", "screenshot"],
         "publisher.screen.capture.result" => ["vision", "screen", "screenshot", "evidence"],
+        "publisher.screen.record" => ["vision", "screen", "video", "evidence"],
         "publisher.screenreader.start" => ["vision", "screen", "screenreader", "recurring"],
         "publisher.screenreader.stop" => ["vision", "screen", "screenreader", "recurring"],
         "publisher.input.execute" => ["mouse", "keyboard", "gesture", "navigation"],
@@ -120,6 +132,8 @@ public sealed class OrganicCapabilityCatalog(
         "publisher.openscad.generate" => ["openscad", "3d", "geometry", "render"],
         "publisher.spreadsheet.inspect" => ["spreadsheet", "workbook", "analysis"],
         "publisher.text.insert.propose" => ["text", "editing", "proposal"],
+        "publisher.text.edit.request" => ["text", "editing", "human-feedback"],
+        "publisher.website.content.request" => ["html", "document", "website", "approved-content"],
         "publisher.media.capabilities" => ["ffmpeg", "video", "audio", "conversion"],
         _ => ["publisherstudio", "project-context"]
     };
@@ -128,6 +142,7 @@ public sealed class OrganicCapabilityCatalog(
     {
         "publisher.screen.capture" => "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"format\":{\"type\":\"string\"},\"quality\":{\"type\":\"number\"}}}",
         "publisher.screen.capture.result" => "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"},\"includeData\":{\"type\":\"boolean\"}}}",
+        "publisher.screen.record" => "{\"type\":\"object\",\"properties\":{\"maximumSeconds\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":15},\"includeAudio\":{\"type\":\"boolean\"}}}",
         "publisher.screenreader.start" => "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"prompt\":{\"type\":\"string\"},\"intervalSeconds\":{\"type\":\"integer\",\"minimum\":15}}}",
         "publisher.screenreader.stop" => "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
         "publisher.input.execute" => "{\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
@@ -135,7 +150,50 @@ public sealed class OrganicCapabilityCatalog(
         "publisher.openscad.generate" => "{\"type\":\"object\",\"required\":[\"document\"],\"properties\":{\"document\":{\"type\":\"object\"}}}",
         "publisher.spreadsheet.inspect" => "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
         "publisher.text.insert.propose" => "{\"type\":\"object\",\"required\":[\"text\"],\"properties\":{\"target\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}}}",
+        "publisher.text.edit.request" => "{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"question\":{\"type\":\"string\"},\"initialText\":{\"type\":\"string\"}}}",
+        "publisher.website.content.request" => "{\"type\":\"object\",\"properties\":{\"format\":{\"enum\":[\"html\",\"div\",\"document\"]},\"sourceUrl\":{\"type\":\"string\"},\"maximumCharacters\":{\"type\":\"integer\",\"maximum\":200000}}}",
         _ => "{\"type\":\"object\",\"properties\":{}}"
+    };
+
+    private static string InputContract(string key) => key switch
+    {
+        "publisher.screen.capture" => "No image path. The PublisherStudio user selects a screen/window in a fresh browser prompt.",
+        "publisher.screen.record" => "maximumSeconds 1..15 and optional audio flag; the user selects the capture source in the browser.",
+        "publisher.text.edit.request" => "A title, question and optional initial text. The human edits the value in PublisherStudio.",
+        "publisher.website.content.request" => "Requested html/div/document format, optional source URL and maximum character count.",
+        _ => $"Parameters matching: {Schema(key)}"
+    };
+
+    private static string OutputContract(string key) => key switch
+    {
+        "publisher.screen.capture" => "A bounded PNG data URL and pixel metadata returned in the current WorkResult.",
+        "publisher.screen.record" => "A bounded WebM data URL, duration and MIME type returned in the current WorkResult.",
+        "publisher.text.edit.request" => "The exact user-saved text, ContentType and CorrelationId; the editor closes after Save & return.",
+        "publisher.website.content.request" => "Approved bounded content, format, optional source URL and truncation metadata.",
+        _ => "A bounded JSON WorkResult associated with the original CorrelationId."
+    };
+
+    private static string SecurityContract(string key) => key switch
+    {
+        "publisher.screen.capture" or "publisher.screen.record" => "Always asks in LocalGPT, always asks in PublisherStudio, and always invokes the browser's current getDisplayMedia permission prompt. Saved permission cannot bypass it.",
+        "publisher.text.edit.request" or "publisher.website.content.request" => "Requires the receiving PublisherStudio frontend for every current request. Content is encrypted after MFA trust is established.",
+        _ => "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix."
+    };
+
+    private static string OrganicUseCase(string key) => key switch
+    {
+        "publisher.screen.capture" or "publisher.screen.record" => "Eyes organ for current visual evidence.",
+        "publisher.text.edit.request" => "Human feedback organ for Council questions and reviewed text.",
+        "publisher.website.content.request" => "Approved document/web-content organ usable by LocalGPT and other 1-Wire clients.",
+        _ => "PublisherStudio organic capability."
+    };
+
+    private static List<string> SuggestedCouncilRoles(string key) => key switch
+    {
+        "publisher.screen.capture" or "publisher.screen.record" => ["vision member", "evidence verifier"],
+        "publisher.text.edit.request" => ["council leader", "human collaboration coordinator"],
+        "publisher.website.content.request" => ["web/document specialist", "content reviewer"],
+        _ => Skills(key)
     };
 }
 
@@ -174,13 +232,16 @@ public sealed class OrganicWorkExecutor(
         {
             result = envelope.CapabilityKey switch
             {
-                "publisher.screen.capture" => QueueScreenshot(parameters),
+                "publisher.screen.capture" => ReadSecureCapture(envelope, "image"),
+                "publisher.screen.record" => ReadSecureCapture(envelope, "video"),
                 "publisher.screen.capture.result" => ReadScreenshotResult(parameters),
                 "publisher.input.execute" => QueueInput(parameters),
                 "publisher.input.result" => ReadInputResult(parameters),
                 "publisher.openscad.generate" => GenerateOpenScad(parameters),
                 "publisher.spreadsheet.inspect" => InspectSpreadsheet(parameters),
                 "publisher.text.insert.propose" => ProposeText(parameters),
+                "publisher.text.edit.request" => ReturnReviewedText(envelope, parameters),
+                "publisher.website.content.request" => ReturnApprovedWebContent(envelope, parameters),
                 "publisher.business-context" => businessContext.CreateSnapshot(),
                 "publisher.media.capabilities" => await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
                 _ => throw new KeyNotFoundException($"Unknown organic capability '{envelope.CapabilityKey}'.")
@@ -210,6 +271,64 @@ public sealed class OrganicWorkExecutor(
             RequiresCurrentBrowserSessionPermission = true,
             BrowserPermissionCannotBePreGrantedByLocalGpt = true,
             NextCapability = "publisher.screen.capture.result followed by council continuation"
+        };
+    }
+
+    private static object ReadSecureCapture(OrganicWireEnvelope envelope, string expectedKind)
+    {
+        if (string.IsNullOrWhiteSpace(envelope.InteractionValueJson))
+            throw new InvalidOperationException("The PublisherStudio browser did not return current capture data after approval.");
+        using var document = JsonDocument.Parse(envelope.InteractionValueJson);
+        var root = document.RootElement;
+        var kind = GetString(root, "kind", string.Empty);
+        var dataUrl = GetString(root, "dataUrl", string.Empty);
+        var mimeType = GetString(root, "mimeType", string.Empty);
+        if (!string.Equals(kind, expectedKind, StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(dataUrl))
+            throw new InvalidDataException($"The browser returned no approved {expectedKind} capture.");
+        if (System.Text.Encoding.UTF8.GetByteCount(dataUrl) > OrganicWireProtocol.MaximumMessageBytes - 65536)
+            throw new InvalidOperationException("The browser capture exceeds the bounded 1-Wire message size.");
+        return new
+        {
+            Kind = kind, DataUrl = dataUrl, MimeType = mimeType,
+            PixelWidth = GetInt(root, "width", 0), PixelHeight = GetInt(root, "height", 0),
+            DurationMilliseconds = GetInt(root, "durationMilliseconds", 0),
+            CapturedUtc = DateTimeOffset.UtcNow,
+            RequiresHumanReview = true
+        };
+    }
+
+    private static object ReturnReviewedText(OrganicWireEnvelope envelope, JsonElement parameters)
+    {
+        var text = envelope.InteractionValueJson ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(text))
+            throw new InvalidOperationException("The PublisherStudio user saved no text for the current request.");
+        if (text.Length > 200000) text = text[..200000];
+        return new
+        {
+            Text = text,
+            Title = GetString(parameters, "title", "LocalGPT text request"),
+            ContentType = envelope.InteractionValueContentType,
+            envelope.CorrelationId,
+            SavedByPublisherStudioUser = true,
+            EditorClosedAfterSave = true
+        };
+    }
+
+    private static object ReturnApprovedWebContent(OrganicWireEnvelope envelope, JsonElement parameters)
+    {
+        var content = envelope.InteractionValueJson ?? string.Empty;
+        var maximum = Math.Clamp(GetInt(parameters, "maximumCharacters", 120000), 1000, 200000);
+        var truncated = content.Length > maximum;
+        if (truncated) content = content[..maximum];
+        return new
+        {
+            Format = GetString(parameters, "format", "html"),
+            SourceUrl = GetString(parameters, "sourceUrl", string.Empty),
+            Content = content,
+            Truncated = truncated,
+            MaximumCharacters = maximum,
+            ApprovedByPublisherStudioUser = true,
+            envelope.CorrelationId
         };
     }
 
@@ -341,15 +460,26 @@ public sealed class OrganicWorkCoordinator(
             envelope.Properties["ConfigurationKey"] = JsonSerializer.SerializeToElement(
                 advertised.ConfigurationKey, OrganicPluginProtocolCodec.JsonOptions);
         }
+        var requiresFreshCaptureConsent = envelope.CapabilityKey is "publisher.screen.capture" or "publisher.screen.record";
+        if (requiresFreshCaptureConsent)
+        {
+            // Screen sharing is deliberately non-persistable. Even an AllowAlways rule may not bypass
+            // the current PublisherStudio confirmation and the browser's fresh getDisplayMedia prompt.
+            envelope.RequiresHumanInteractionOnTargetSystem = true;
+            envelope.ApprovalMode = OrganicApprovalMode.AskEveryTime;
+            envelope.NormalizeInteractionKind();
+        }
         var item = new OrganicPluginWorkItem
         {
             MessageId = envelope.MessageId, CorrelationId = envelope.CorrelationId, PeerId = envelope.SourcePeerId,
             CapabilityKey = envelope.CapabilityKey, Request = envelope,
             Status = !exposed || permissions.IsDenied(envelope)
                 ? OrganicWorkStatus.Declined
-                : permissions.IsAllowed(envelope)
-                    ? OrganicWorkStatus.Queued
-                    : OrganicWorkStatus.PendingApproval
+                : requiresFreshCaptureConsent
+                    ? OrganicWorkStatus.PendingApproval
+                    : permissions.IsAllowed(envelope)
+                        ? OrganicWorkStatus.Queued
+                        : OrganicWorkStatus.PendingApproval
         };
         if (item.Status == OrganicWorkStatus.Declined)
             item.Error = advertised is null

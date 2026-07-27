@@ -76,6 +76,16 @@
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
+                @if (CanUseLocalGptOcr)
+                {
+                    <DxRibbonTab Text="LocalGPT AI">
+                        <DxRibbonGroup Text="Text recognition" IconCssClass="pub-icon pub-icon-text">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="Recognize text" IsPrimary="true" Enabled="@(!_ocrBusy && !IsPictureExporting)" Click="StartLocalGptOcrAsync" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Insert OCR text layer" Enabled="HasOcrText" Click="InsertOcrTextLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear OCR result" Enabled="HasOcrText" Click="ClearOcrText" />
+                        </DxRibbonGroup>
+                    </DxRibbonTab>
+                }
                 <DxRibbonTab Text="Draw">
                     <DxRibbonGroup Text="Drawing">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Drawing tools" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
@@ -716,6 +726,21 @@
                     </div>
                 </aside>
             </div>
+
+            @if (!string.IsNullOrWhiteSpace(_ocrStatus) || HasOcrText)
+            {
+                <section class="picture-ocr-review" aria-live="polite">
+                    <header><strong>LocalGPT OCR</strong><span>@_ocrStatus</span></header>
+                    @if (HasOcrText)
+                    {
+                        <textarea rows="6" @bind="_ocrText" @bind:event="oninput" aria-label="Recognized text review"></textarea>
+                        <div>
+                            <button type="button" class="primary-button" @onclick="InsertOcrTextLayer">Insert as editable text layer</button>
+                            <button type="button" @onclick="ClearOcrText">Clear</button>
+                        </div>
+                    }
+                </section>
+            }
 
             <footer class="picture-studio-footer">
                 <div>

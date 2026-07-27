@@ -19,10 +19,10 @@
     <div class="publication-panel-viewport">
         @foreach (var view in EnabledViews)
         {
-            <section class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
+            <section @key="view.Id" class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
                 @foreach (var element in view.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
                 {
-                    <div class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant() @ResponsiveElementClass(element)"
+                    <div @key="element.Id" class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant() @ResponsiveElementClass(element)"
                          data-panel-element
                          data-element-id="@element.Id"
                          data-element-kind="@element.Kind.ToString().ToLowerInvariant()"

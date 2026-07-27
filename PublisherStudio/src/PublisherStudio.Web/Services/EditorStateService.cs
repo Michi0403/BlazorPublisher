@@ -393,7 +393,7 @@ public sealed class EditorStateService : IDisposable
         replacement.Interaction = selected.Interaction;
         replacement.ConnectorPorts = selected.ConnectorPorts;
         _panels.Normalize(Document, replacement);
-        var index = CurrentPage.Elements.IndexOf(selected);
+        var index = CurrentPage.Elements.FindIndex(element => element.Id == selected.Id);
         if (index < 0) return false;
         CurrentPage.Elements[index] = replacement;
         SetSelectionCore([replacement.Id], replacement.Id);
@@ -426,6 +426,40 @@ public sealed class EditorStateService : IDisposable
         selected.HtmlExportSupport = draft.HtmlExportSupport;
         selected.HtmlExportNote = draft.HtmlExportNote;
         selected.InterchangeFormat = draft.InterchangeFormat;
+        Notify();
+        return true;
+    }
+
+    /// <summary>
+    /// Promotes a standalone HTML/DIV object to a full reusable panel when Panel Studio
+    /// contains additional authored objects. The outer Mainframe bounds and interaction
+    /// metadata stay stable while the complete panel graph replaces the original object.
+    /// </summary>
+    public bool PromoteSelectedHtmlEmbedToPanel(PanelElement draft)
+    {
+        if (SelectedElement is not HtmlEmbedElement selected || selected.Locked) return false;
+        Capture();
+        var replacement = (PanelElement)_files.CloneElement(draft);
+        replacement.Id = selected.Id;
+        replacement.Name = string.IsNullOrWhiteSpace(draft.Name) ? selected.Name : draft.Name;
+        replacement.X = selected.X;
+        replacement.Y = selected.Y;
+        replacement.Width = selected.Width;
+        replacement.Height = selected.Height;
+        replacement.Rotation = selected.Rotation;
+        replacement.ZIndex = selected.ZIndex;
+        replacement.Visible = selected.Visible;
+        replacement.Locked = selected.Locked;
+        replacement.HiddenAtPresentationStart = selected.HiddenAtPresentationStart;
+        replacement.GroupId = selected.GroupId;
+        replacement.Animations = selected.Animations;
+        replacement.Interaction = selected.Interaction;
+        replacement.ConnectorPorts = selected.ConnectorPorts;
+        _panels.Normalize(Document, replacement);
+        var index = CurrentPage.Elements.FindIndex(element => element.Id == selected.Id);
+        if (index < 0) return false;
+        CurrentPage.Elements[index] = replacement;
+        SetSelectionCore([replacement.Id], replacement.Id);
         Notify();
         return true;
     }

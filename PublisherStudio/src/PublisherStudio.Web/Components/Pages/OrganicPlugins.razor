@@ -12,6 +12,7 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<OrganicPlugins> Logger
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>LocalGPT Organic Plugins</PageTitle>
 <UserNotificationHost />
@@ -40,6 +41,12 @@
         @if (Connection.State.IsConnected)
         {
             <button type="button" class="organic-secondary" disabled="@(!Connection.State.IsLinked)" @onclick="RunRoundTripTestAsync">Test 1-Wire round trip</button>
+            @if (Connection.State.IsLinked)
+            {
+                <button type="button" class="@(_browserAutomationEnabled ? "organic-danger" : "organic-primary")" @onclick="ToggleBrowserAutomationAsync">
+                    @(_browserAutomationEnabled ? "Disable browser automation" : "Enable browser automation for this tab")
+                </button>
+            }
             <button type="button" class="organic-danger" @onclick="DisconnectAsync">Disconnect</button>
         }
         @if (!string.IsNullOrWhiteSpace(_roundTripStatus))
@@ -47,6 +54,8 @@
             <span class="organic-note">@_roundTripStatus</span>
         }
     </section>
+
+    <OrganicSecurityPanel />
 
     <div class="organic-grid organic-grid-two">
         <section class="organic-card">
@@ -342,6 +351,8 @@
     private OrganicCouncilPromptRequest _councilRequest = NewCouncilRequest("general");
     private OrganicPermissionRule _permission = NewPermission(string.Empty);
     private string _roundTripStatus = string.Empty;
+    private bool _browserAutomationEnabled;
+    private bool _automationStateLoaded;
 
     protected override async Task OnInitializedAsync()
     {
@@ -352,6 +363,15 @@
         RecurringScreenReader.Changed += OnServiceChanged;
         _capabilities = await CapabilityCatalog.GetCapabilitiesAsync();
         Refresh();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _automationStateLoaded) return;
+        _automationStateLoaded = true;
+        try { _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.isEnabled"); }
+        catch (JSException exception) { Logger.LogDebug(exception, "Browser automation state is not available before JavaScript startup completes."); }
+        await InvokeAsync(StateHasChanged);
     }
 
     private bool CanRunCouncil => Connection.State.IsLinked && Connection.State.HasCapability("council.run");
@@ -455,8 +475,29 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private async Task ToggleBrowserAutomationAsync()
+    {
+        if (!Connection.State.IsLinked)
+        {
+            Notifications.Warning("Approve and link LocalGPT before enabling browser automation.", "Browser automation", nameof(OrganicPlugins));
+            return;
+        }
+        _browserAutomationEnabled = _browserAutomationEnabled
+            ? await JS.InvokeAsync<bool>("publisherAutomation.disableForSession")
+            : await JS.InvokeAsync<bool>("publisherAutomation.enableForSession");
+        Notifications.Information(
+            _browserAutomationEnabled
+                ? "Browser automation is enabled only for this browser tab and only while the 1-Wire peer remains linked."
+                : "Browser automation polling is disabled for this browser tab.",
+            "Browser automation", nameof(OrganicPlugins));
+    }
+
     private async Task DisconnectAsync()
     {
+        if (_browserAutomationEnabled)
+        {
+            _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.disableForSession");
+        }
         await Connection.DisconnectAsync();
         Notifications.Information("PublisherStudio disconnected from LocalGPT.", source: nameof(OrganicPlugins));
         Refresh();

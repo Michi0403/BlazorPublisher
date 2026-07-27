@@ -701,7 +701,7 @@
                                             }
                                             @if (action.Action == PublicationComponentActionKind.MailTo)
                                             {
-                                                <label>Recipient<input @bind="action.MailTo" /></label><label>Subject<input @bind="action.MailSubject" /></label><label class="span-2">Body<textarea @bind="action.MailBody"></textarea></label>
+                                                <label>Recipient<input @bind="action.MailTo" /></label><label>Subject<input @bind="action.MailSubject" /></label><label class="span-2">Message body<textarea @bind="action.MailBody"></textarea></label>
                                             }
                                             @if (action.Action is PublicationComponentActionKind.SetValue or PublicationComponentActionKind.ApplyFilter)
                                             {

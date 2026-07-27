@@ -50,6 +50,16 @@ assert.match(css, /visibility:visible!important/);
 
 const en = JSON.parse(read('src/PublisherStudio.Web/Localization/en-US.json'));
 const de = JSON.parse(read('src/PublisherStudio.Web/Localization/de-DE.json'));
+const assertNoCaseInsensitiveCatalogDuplicates = (catalog, label) => {
+  const seen = new Map();
+  for (const key of Object.keys(catalog)) {
+    const normalized = key.toLocaleLowerCase('en-US');
+    assert.ok(!seen.has(normalized), `${label} catalog contains case-insensitive duplicate keys: ${seen.get(normalized)} and ${key}`);
+    seen.set(normalized, key);
+  }
+};
+assertNoCaseInsensitiveCatalogDuplicates(en, 'English');
+assertNoCaseInsensitiveCatalogDuplicates(de, 'German');
 assert.deepEqual(Object.keys(en).sort(), Object.keys(de).sort());
 assert.ok(Object.keys(en).length >= 770);
 assert.equal(de['Text.Panel␠/␠Div␠Studio'], 'Panel-/DIV-Studio');
@@ -75,7 +85,16 @@ const visit = directory => {
     if (entry.isDirectory()) visit(full);
     else if (entry.name.endsWith('.razor')) {
       const markup = fs.readFileSync(full, 'utf8').split('@code', 1)[0];
-      const values = [...markup.matchAll(attrPattern), ...markup.matchAll(nodePattern)].map(match => match[1]);
+      const attributeValues = [...markup.matchAll(attrPattern)].map(match => match[1]);
+      const nodeValues = [...markup.matchAll(nodePattern)]
+        .filter(match => {
+          const tagStart = markup.lastIndexOf('<', match.index);
+          const tagEnd = tagStart >= 0 ? markup.indexOf('>', tagStart) : -1;
+          const openingTag = tagStart >= 0 && tagEnd >= tagStart ? markup.slice(tagStart, tagEnd + 1) : '';
+          return !/^<(?:code|pre)\b/i.test(openingTag);
+        })
+        .map(match => match[1]);
+      const values = [...attributeValues, ...nodeValues];
       for (const raw of values) {
         const source = raw.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
         if (source.length < 2 || source.length > 240 || !/[A-Za-z]/.test(source)) continue;

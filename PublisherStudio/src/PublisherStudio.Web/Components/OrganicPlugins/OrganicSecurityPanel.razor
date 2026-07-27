@@ -123,7 +123,7 @@
         try
         {
             await Security.EnsureCreatedAsync();
-            Notifications.Success("The runtime-only PublisherStudio 1-Wire identity was created.", "1-Wire security", nameof(OrganicSecurityPanel));
+            Notifications.Success("The runtime-only PublisherStudio 1-Wire identity was created.", "1-Wire Security", nameof(OrganicSecurityPanel));
             await RefreshAsync();
         }
         catch (Exception ex) { Report(ex, "The runtime identity could not be created."); }

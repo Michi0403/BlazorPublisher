@@ -6,8 +6,21 @@ $root = Split-Path -Parent $PSScriptRoot
 $localization = Join-Path $root 'src\PublisherStudio.Web\Localization'
 $englishPath = Join-Path $localization 'en-US.json'
 $germanPath = Join-Path $localization 'de-DE.json'
+function Assert-NoCaseInsensitiveDuplicateKeys([string]$Path) {
+    $content = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
+    $seen = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($match in [regex]::Matches($content, '(?m)^\s*"((?:\\.|[^"\\])*)"\s*:')) {
+        $key = $match.Groups[1].Value
+        if ($seen.ContainsKey($key)) {
+            Fail "Catalog '$Path' contains case-insensitive duplicate keys '$($seen[$key])' and '$key'."
+        }
+        $seen[$key] = $key
+    }
+}
 if (-not (Test-Path -LiteralPath $englishPath -PathType Leaf)) { Fail "Missing $englishPath" }
 if (-not (Test-Path -LiteralPath $germanPath -PathType Leaf)) { Fail "Missing $germanPath" }
+Assert-NoCaseInsensitiveDuplicateKeys $englishPath
+Assert-NoCaseInsensitiveDuplicateKeys $germanPath
 try {
     $english = Get-Content -LiteralPath $englishPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $german = Get-Content -LiteralPath $germanPath -Raw -Encoding UTF8 | ConvertFrom-Json

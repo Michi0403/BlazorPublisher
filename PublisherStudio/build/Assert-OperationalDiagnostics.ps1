@@ -24,7 +24,7 @@ Require-Source 'src\PublisherStudio.Web\Components\Shared\OperationalErrorBounda
 ) 'Global component exception diagnostics'
 Require-Source 'src\PublisherStudio.Web\Components\Layout\MainLayout.razor' @(
     '<UserNotificationHost\s*/>',
-    '<OperationalErrorBoundary>'
+    '<OperationalErrorBoundary(?:\s|>)'
 ) 'Circuit-scoped notification and error boundary'
 Require-Source 'src\PublisherStudio.Web\Components\Editor\PageSurface.razor' @(
     'ILogger<PageSurface>',

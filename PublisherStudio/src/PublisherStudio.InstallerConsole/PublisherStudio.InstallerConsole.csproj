@@ -27,7 +27,40 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The wildcard keeps future reviewed launchers deployable. The explicit entries are the stable, architecture-reviewed launcher inventory. -->
     <None Update="*.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+    <None Update="Default.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="Install.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="Update.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="Start.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="Start-NoBrowser.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="Check-FFmpeg.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="Install-FFmpeg.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="Uninstall.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
     <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
   </ItemGroup>
 

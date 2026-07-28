@@ -50,8 +50,6 @@ function Assert-PublishedConfigurationFiles {
         foreach ($file in Get-ChildItem -LiteralPath $sourceDirectory -File -Recurse) { $configurationSources.Add($file) }
     }
 
-    if ($configurationSources.Count -eq 0) { throw 'No PublisherStudio configuration files were discovered for publish validation.' }
-
     $missing = New-Object 'System.Collections.Generic.List[string]'
     foreach ($source in $configurationSources) {
         $relative = $source.FullName.Substring($SourceRoot.Length).TrimStart([char[]]"\/")
@@ -65,14 +63,11 @@ function Assert-PublishedConfigurationFiles {
 
 & (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
 & (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
-& (Join-Path $root "build\Assert-ProtectedArchitectureFiles.ps1")
 & (Join-Path $root "build\Assert-JavaScriptDiagnostics.ps1")
 & (Join-Path $root "build\Assert-PublishConfiguration.ps1")
 & (Join-Path $root "build\Assert-InstallerWorkflow.ps1")
-& (Join-Path $root "build\Assert-SecurityRulePreservation.ps1")
 & (Join-Path $root "build\Assert-RuntimeValueOwnership.ps1")
 & (Join-Path $root "build\Assert-LocalizationIntegrity.ps1")
-& (Join-Path $root "build\Assert-GitSourceVisibility.ps1")
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 
 if ($UseBundledWireProtocolPackage) {

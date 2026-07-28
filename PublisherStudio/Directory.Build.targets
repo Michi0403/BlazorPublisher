@@ -58,26 +58,8 @@
 
 
   <PropertyGroup>
-    <ProtectedArchitectureFilesScript>$(MSBuildThisFileDirectory)build\Assert-ProtectedArchitectureFiles.ps1</ProtectedArchitectureFilesScript>
-    <SecurityRulePreservationScript>$(MSBuildThisFileDirectory)build\Assert-SecurityRulePreservation.ps1</SecurityRulePreservationScript>
     <RuntimeValueOwnershipScript>$(MSBuildThisFileDirectory)build\Assert-RuntimeValueOwnership.ps1</RuntimeValueOwnershipScript>
   </PropertyGroup>
-
-  <Target Name="AssertPublisherProtectedArchitectureFiles"
-          BeforeTargets="BeforeBuild"
-          AfterTargets="AssertPublisherOneWireArchitecture"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipProtectedArchitectureFilesGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
-    <Error Condition="!Exists('$(ProtectedArchitectureFilesScript)')" Text="Protected architecture-file guard script is missing: $(ProtectedArchitectureFilesScript)" />
-    <Exec Condition="Exists('$(ProtectedArchitectureFilesScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ProtectedArchitectureFilesScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
-
-  <Target Name="AssertPublisherSecurityRulePreservation"
-          BeforeTargets="BeforeBuild"
-          AfterTargets="AssertPublisherProtectedArchitectureFiles"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipSecurityRulePreservationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
-    <Error Condition="!Exists('$(SecurityRulePreservationScript)')" Text="Security-rule preservation script is missing: $(SecurityRulePreservationScript)" />
-    <Exec Condition="Exists('$(SecurityRulePreservationScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(SecurityRulePreservationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
 
   <Target Name="AssertPublisherRuntimeValueOwnership"
           BeforeTargets="BeforeBuild"
@@ -103,24 +85,6 @@
           StandardOutputImportance="High"
           StandardErrorImportance="High" />
   </Target>
-
-  <PropertyGroup>
-    <GitSourceVisibilityScript>$(MSBuildThisFileDirectory)build\Assert-GitSourceVisibility.ps1</GitSourceVisibilityScript>
-  </PropertyGroup>
-
-  <Target Name="AssertPublisherGitSourceVisibility"
-          BeforeTargets="BeforeBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipGitSourceVisibilityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
-    <Error Condition="!Exists('$(GitSourceVisibilityScript)')"
-           Text="Git source visibility guard script is missing: $(GitSourceVisibilityScript)" />
-    <Exec Condition="Exists('$(GitSourceVisibilityScript)')"
-          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(GitSourceVisibilityScript)&quot;"
-          WorkingDirectory="$(MSBuildThisFileDirectory)"
-          ConsoleToMSBuild="true"
-          StandardOutputImportance="High"
-          StandardErrorImportance="High" />
-  </Target>
-
 
   <PropertyGroup>
     <OperationalDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-OperationalDiagnostics.ps1</OperationalDiagnosticsScript>

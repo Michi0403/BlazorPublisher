@@ -1,8 +1,0 @@
-BlazorPublisher 2.0.1 final29 validation
-
-- Parsed all maintained MSBuild/XML project, target, props and publish-profile files successfully.
-- 93 Node contract tests passed.
-- Protected architecture manifest passed for 77 expected files.
-- final19 security/1-Wire preservation manifest passed with all 5 protected files unchanged.
-- The unchanged 1-Wire launcher assertions now recognize the explicit Install.cmd, Update.cmd, Start.cmd and Uninstall.cmd publish items.
-- Native dotnet compilation and Windows PowerShell execution were not run because those runtimes are unavailable in the validation environment.

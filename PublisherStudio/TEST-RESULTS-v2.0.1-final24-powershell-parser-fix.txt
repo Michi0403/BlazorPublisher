@@ -1,9 +1,0 @@
-BlazorPublisher / PublisherStudio 2.0.1 final24 validation
-
-PASS: 79 Node contract tests.
-PASS: 69 JavaScript files passed Node syntax checking.
-PASS: final24 PowerShell 5.1 regression contract verifies the required array separator and forbids the trailing comma before the closing parenthesis.
-PASS: Protected architecture manifest matches the repaired Assert-ProtectedArchitectureFiles.ps1 source.
-PASS: Existing final19 security and 1-Wire preservation sources remain byte-identical to final23.
-
-Not run: native dotnet build and Windows PowerShell execution; neither runtime is installed in the packaging environment.

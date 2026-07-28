@@ -1,6 +1,0 @@
-PublisherStudio final26 package verification
-JavaScriptDiagnosticsBridge.razor catch markers: 5
-JavaScriptDiagnosticsBridge.razor log markers: 8
-JavaScriptDiagnosticsBridge.razor notification markers: 1
-Source SHA-256: 38280256f15af0e1304e5d322e4ebbf24f583c9e4a7ba76c35f5996a39cfe0ec
-Result: PASS

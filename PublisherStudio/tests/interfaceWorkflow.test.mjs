@@ -48,7 +48,7 @@ assert.match(tooltips, /composedPath/);
 assert.match(tooltips, /showPopover/);
 assert.match(tooltips, /:popover-open/);
 assert.match(tooltips, /next === current/);
-assert.match(tooltips, /document\.addEventListener\('contextmenu', \(\) => hide\(true\)/);
+assert.match(tooltips, /document\.addEventListener\('contextmenu',\s*\(\)\s*=>\s*\{\s*try\s*\{\s*return\s*\(hide\(true\)\)/);
 assert.match(liveData, /function clearVisualInteraction/);
 assert.match(liveData, /hideTooltip/);
 assert.match(liveData, /clearHover/);

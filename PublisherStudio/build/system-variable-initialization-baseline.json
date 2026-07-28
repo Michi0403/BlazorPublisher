@@ -1,0 +1,6 @@
+[
+  "src/PublisherStudio.Web/Services/PublicationDataService.cs|points.Add(new DataChartPoint(string.IsNullOrWhiteSpace(argument) ? \"(blank)\" : argument,",
+  "src/PublisherStudio.Web/Services/Streaming/Chat/PlatformChatService.cs|Content = new StringContent(body, TextEncoding.UTF8, \"application/json\")",
+  "src/PublisherStudio.Web/Services/Streaming/Chat/PlatformChatService.cs|using var request = new HttpRequestMessage(HttpMethod.Post, \"https://www.googleapis.com/youtube/v3/liveChat/messages?part=snippet\")",
+  "src/PublisherStudio.Web/Services/Streaming/Chat/PlatformChatService.cs|var url = new StringBuilder(\"https://www.googleapis.com/youtube/v3/liveChat/messages?part=id,snippet,authorDetails&maxResults=200&profileImageSize=64&liveChatId=\")"
+]

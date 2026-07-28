@@ -5,7 +5,7 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<PageSurface> Logger
 
-<div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null)"
+<div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null) @(!SelectionVisualsEnabled ? "selection-visuals-suppressed" : null)"
      tabindex="0" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
     @if (State.Document.View.RulersVisible)
     {
@@ -656,6 +656,7 @@
 
 @code {
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public bool SelectionVisualsEnabled { get; set; } = true;
     [Parameter] public EventCallback<Guid> EditTextRequested { get; set; }
     [Parameter] public EventCallback RequestPicture { get; set; }
     [Parameter] public EventCallback RequestReplacePicture { get; set; }
@@ -697,8 +698,8 @@
     private string? _dataVisualLayoutKey;
     private double _contextPortX = .5;
     private double _contextPortY = .5;
-    private static readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
-    private static readonly ConnectorAnchor[] ConnectorAnchors =
+    private readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+    private readonly ConnectorAnchor[] ConnectorAnchors =
     [
         ConnectorAnchor.TopLeft, ConnectorAnchor.Top, ConnectorAnchor.TopRight, ConnectorAnchor.Right,
         ConnectorAnchor.BottomRight, ConnectorAnchor.Bottom, ConnectorAnchor.BottomLeft, ConnectorAnchor.Left
@@ -760,11 +761,11 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (_disposed || _canvasInitializationInProgress) return;
-        var selectedElementIds = State.SelectedElementIds
+        var selectedElementIds = (SelectionVisualsEnabled ? State.SelectedElementIds : Array.Empty<Guid>())
             .OrderBy(id => id)
             .Select(id => id.ToString("D"))
             .ToArray();
-        var selectionKey = string.Join(",", selectedElementIds);
+        var selectionKey = $"{SelectionVisualsEnabled}|{string.Join(",", selectedElementIds)}";
         var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
         var initializationKey = $"{State.CurrentPage.Id:N}|" +
             $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
@@ -1317,7 +1318,7 @@
     private void SelectedShapeRoundedRectangle() => ChangeSelectedShape(PublicationShape.RoundedRectangle);
     private void SelectedShapeEllipse() => ChangeSelectedShape(PublicationShape.Ellipse);
     private void SelectedShapeLine() => ChangeSelectedShape(PublicationShape.Line);
-    private static string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
+    private string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
     private static string ShapeMenuName(PublicationShape shape) => shape == PublicationShape.RoundedRectangle ? "Rounded rectangle" : shape.ToString();
     private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;
     private static string DataVisualMenuName(DataVisualKind kind) => kind switch

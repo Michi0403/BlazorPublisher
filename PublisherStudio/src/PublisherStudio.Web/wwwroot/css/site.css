@@ -4969,3 +4969,45 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .content-pan-mode .publisher-selection-visual-frame > .selection-handle,
 .publisher-selection-visual-frame.locked > .selection-handle { display: none; }
 .publisher-component-error { display:grid;gap:6px;margin:24px;padding:18px;border:1px solid #dc2626;border-radius:8px;background:#fef2f2;color:#7f1d1d; }
+
+
+/* final15: modal selection isolation and reliable Panel/Div Studio interaction. */
+.publication-stage.selection-visuals-suppressed :is(.pub-element.selected,.pub-connector.selected){outline-color:transparent!important;box-shadow:none!important}
+.publication-stage.selection-visuals-suppressed :is(.selection-handle,.publisher-selection-visual-frame,.connector-control-guide,.connector-endpoint,.connector-control-point,.connector-route-handle){display:none!important}
+.publication-stage.selection-visuals-suppressed .publication-page.selection-visual-active .pub-element.selection-primary{outline-color:transparent!important}
+.panel-studio-canvas-shell.arrange-preview :is(.publication-panel-design-shield,.publication-html-design-shield){display:none!important}
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element>*{visibility:visible!important;opacity:1!important}
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element>.panel-element-preview{display:none!important}
+.panel-studio-canvas-shell.interaction-preview .publication-panel,
+.panel-studio-canvas-shell.interaction-preview .publication-panel-view,
+.panel-studio-canvas-shell.interaction-preview .publication-panel-element{pointer-events:auto!important}
+.panel-studio-mode-actions button{min-width:84px;border:1px solid #64748b;border-radius:5px;background:#1e293b;color:#e2e8f0;padding:5px 10px;cursor:pointer}
+.panel-studio-mode-actions button:hover,.panel-studio-mode-actions button:focus-visible{border-color:#38bdf8;background:#0c4a6e;color:#fff;outline:2px solid #38bdf866}
+.panel-studio-mode-actions button.active{border-color:#7dd3fc;background:#0369a1;color:#fff}
+.panel-studio-dialog .field-help{color:#f1f5f9!important;background:#0f172acc;border-radius:5px;padding:7px 9px;opacity:1!important;line-height:1.45}
+.panel-studio-canvas{overflow:hidden}
+.panel-studio-canvas>.publication-panel{visibility:visible!important;opacity:1!important}
+
+
+/* final15 completion: render the real component immediately in Arrange mode, while a single
+   transparent hit layer owns movement and sizing. Interaction mode removes that hit layer. */
+.panel-studio-canvas-shell.arrange-preview .publication-panel,
+.panel-studio-canvas-shell.arrange-preview .publication-panel-view,
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+}
+.panel-studio-canvas-shell.arrange-preview .panel-studio-hit-layer,
+.panel-studio-canvas-shell.arrange-preview .panel-studio-hitbox {
+    pointer-events: auto !important;
+}
+.panel-studio-canvas-shell.interaction-preview .panel-studio-hit-layer { display: none !important; }
+.panel-studio-canvas-shell .field-help,
+.panel-studio-workspace + .field-help,
+.panel-studio-dialog .field-help {
+    color: #f8fafc !important;
+    background: #0f172a !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}

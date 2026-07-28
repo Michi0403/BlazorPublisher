@@ -15,6 +15,8 @@ $globalUsing = ReadText "src\PublisherStudio.Web\GlobalUsings.OneWire.cs"
 $securityService = ReadText "src\PublisherStudio.Web\Services\OrganicPlugins\OrganicRuntimeSecurityService.cs"
 $installer = ReadText "src\PublisherStudio.InstallerConsole\Program.cs"
 $portResolver = ReadText "src\PublisherStudio.Web\Services\ApplicationHostServices.cs"
+$systemVariableContract = ReadText "src\PublisherStudio.Web\Services\Configuration\ISystemVariableStoreService.cs"
+$systemVariableStore = ReadText "src\PublisherStudio.Web\Services\Configuration\SystemVariableStoreService.cs"
 $buildScript = ReadText "Build-LocalDevelopment.ps1"
 $installerProject = ReadText "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 $installLauncher = ReadText "src\PublisherStudio.InstallerConsole\Install.cmd"
@@ -38,7 +40,10 @@ if ($installLauncher -notmatch '--install-blazorpublisher --force-delete --start
 if ($updateLauncher -notmatch '--update-blazorpublisher --start-blazorpublisher --port 58071 --shortcuts' -or $updateLauncher -match '--force-delete') { Fail "PublisherStudio update must preserve local runtime data while restarting on the canonical port." }
 if ($startLauncher -notmatch '--start-blazorpublisher --port 58071') { Fail "PublisherStudio Start launcher no longer uses the canonical loopback port." }
 if ($uninstallLauncher -notmatch '--uninstall --force-delete') { Fail "PublisherStudio Uninstall launcher no longer performs the reviewed application removal path." }
-if ($portResolver -notmatch 'DefaultPort = 58071') { Fail "PublisherStudio debug, installer and desktop start paths must retain port 58071." }
+if ($portResolver -notmatch 'systemVariables\.DefaultPort') { Fail "PublisherStudio port resolution must use the configuration-backed system-variable store." }
+if ($portResolver -match '(?m)^[^\r\n]*58071') { Fail "PublisherStudio runtime port resolution must not reintroduce a hardcoded port literal outside the system-variable seed/configuration boundary." }
+if ($systemVariableContract -notmatch 'int\s+DefaultPort\s*\{\s*get;\s*\}') { Fail "PublisherStudio system-variable contract must expose the canonical default port." }
+if ($systemVariableStore -notmatch 'Application\.DefaultPort' -or $systemVariableStore -notmatch 'public\s+int\s+DefaultPort\s*=>\s*GetInt\(_defaultPortName,\s*58071\)') { Fail "PublisherStudio system-variable seed must retain canonical port 58071." }
 if ($securityService -notmatch 'OneWireProtocol\.') { Fail "Organic runtime security no longer references the authoritative protocol contract." }
 if ($buildScript -notmatch 'Ensure-WireProtocolPackage\.ps1') { Fail "The build must bootstrap the authoritative protocol package before restore." }
 if ([int]$settings.PublisherStudio.Port -ne 58071) { Fail "PublisherStudio default web port must remain 58071." }

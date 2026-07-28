@@ -8,15 +8,15 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
 test('Panel Studio window interop preserves the DotNet reference and exposes pointer cancellation', () => {
   const js = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
-  assert.match(js, /bindPanelStudioDropSurface\(element, dotNetReference\) \{ return bindPanelStudioDropSurface\(element, dotNetReference\); \}/);
-  assert.match(js, /cancelPanelStudioPointer\(element, restore = true\) \{ cancelPanelStudioPointer\(element, restore\); \}/);
+  assert.match(js, /bindPanelStudioDropSurface\(element, dotNetReference, bindingId = ''\)\s*\{\s*try\s*\{\s*return bindPanelStudioDropSurface\(element, dotNetReference, bindingId\);/);
+  assert.match(js, /cancelPanelStudioPointer\(element, restore = true\)\s*\{\s*try\s*\{\s*cancelPanelStudioPointer\(element, restore\);/);
   assert.match(js, /if \(!binding\.dotNetReference\) throw new Error\('Panel Studio \.NET interaction reference is unavailable\.'/);
   assert.match(js, /reportingError: false/);
 });
 
 test('Panel Studio binding and JS callbacks are guarded and renderer-affine', () => {
   const panel = read('src/PublisherStudio.Web/Components/Editor/PanelStudio.razor');
-  assert.match(panel, /InvokeAsync<bool>\("publisherStudio\.bindPanelStudioDropSurface", _canvasElement, _self\)\.ConfigureAwait\(true\)/);
+  assert.match(panel, /InvokeAsync<bool>\("publisherStudio\.bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId\)\.ConfigureAwait\(true\)/);
   assert.match(panel, /RunPanelInteropAsync\("CommitBounds"/);
   assert.match(panel, /RunPanelInteropAsync\("SelectElement"/);
   assert.match(panel, /RunPanelInteropAsync\("ActivateElement"/);

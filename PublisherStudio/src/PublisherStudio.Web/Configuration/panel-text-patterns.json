@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "patterns": {
+    "ShutdownPattern": {
+      "pattern": "cancel(?:led|ed)?|disposed|disconnect|no longer|cannot send data|circuit|abort",
+      "options": [
+        "IgnoreCase",
+        "CultureInvariant"
+      ],
+      "timeoutMilliseconds": 2000
+    },
+    "HtmlBreakPattern": {
+      "pattern": "<br\\s*/?>",
+      "options": [
+        "IgnoreCase",
+        "CultureInvariant"
+      ],
+      "timeoutMilliseconds": 2000
+    },
+    "HtmlTagPattern": {
+      "pattern": "<[^>]+>",
+      "options": [
+        "CultureInvariant"
+      ],
+      "timeoutMilliseconds": 2000
+    },
+    "UnsafeFileNamePattern": {
+      "pattern": "[^a-z0-9._-]+",
+      "options": [
+        "IgnoreCase",
+        "CultureInvariant"
+      ],
+      "timeoutMilliseconds": 2000
+    }
+  }
+}

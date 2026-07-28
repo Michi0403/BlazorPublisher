@@ -13,7 +13,8 @@ const fonts = read('src/PublisherStudio.Web/Services/SystemFontCatalog.cs');
 const story = read('src/PublisherStudio.Web/Components/Editor/StoryEditor.razor');
 const css = read('src/PublisherStudio.Web/wwwroot/css/site.css');
 
-assert.match(panel, /DesignPreviewOnly="@\(!_interactionPreview\)"/);
+assert.match(panel, /DesignerMode="false" DesignPreviewOnly="false"/);
+assert.match(css, /final15: modal selection isolation and reliable Panel\/Div Studio interaction/);
 assert.match(panel, /<PictureEditor Visible="@_pictureEditorVisible"/);
 assert.match(panel, /ActivatePanelElement/);
 assert.match(panel, /SelectedElement is ImageFrameElement/);

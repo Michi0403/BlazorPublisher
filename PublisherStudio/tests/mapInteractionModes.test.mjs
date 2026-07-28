@@ -27,7 +27,7 @@ assert.match(editor, /ElementIdOverride="ps-component-vector-designer"[\s\S]*Des
 
 // Both provider maps and vector maps are shielded in object mode. Vector-map
 // gestures and controls are enabled only in the explicit content mode.
-assert.match(runtime, /const isMapKind = config => \["map", "vectormap"\]/);
+assert.match(runtime, /const isMapKind = config =>\s*\{\s*try\s*\{\s*return\s*\(\["map", "vectormap"\]\.includes/);
 assert.match(runtime, /const designerMapContentEnabled/);
 assert.match(runtime, /panningEnabled: mapContentEnabled, zoomingEnabled: mapContentEnabled/);
 assert.match(runtime, /controlBar: \{ enabled: config\.mapControls !== false && mapContentEnabled \}/);

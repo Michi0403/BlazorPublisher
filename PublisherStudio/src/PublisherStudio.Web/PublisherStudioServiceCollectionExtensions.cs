@@ -26,7 +26,10 @@ public static class PublisherStudioServiceCollectionExtensions
     {
         services.Configure<PublisherStudioPathOptions>(configuration.GetSection("PublisherStudio:Paths"));
         services.Configure<OrganicPluginOptions>(configuration.GetSection(OrganicPluginOptions.SectionName));
+        services.Configure<PanelTextPatternStoreOptions>(configuration.GetSection(PanelTextPatternStoreOptions.SectionName));
 
+        AddSingleton<IPanelStudioTextPatternDataService, PanelStudioTextPatternDataService>(services);
+        AddSingleton<PanelStudioTextService, PanelStudioTextService>(services);
         AddSingleton<IApplicationPortResolver, ApplicationPortResolver>(services);
         AddSingleton<IRuntimeEndpointWriter, RuntimeEndpointWriter>(services);
         AddSingleton<SystemFontCatalog, SystemFontCatalog>(services);

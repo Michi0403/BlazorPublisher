@@ -1,4 +1,11 @@
-(() => {
+// javascript-diagnostics: guarded
+var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics || {
+    report(context, error) { try { console.error(`PublisherStudio JavaScript error in ${String(context || "browser-runtime")}.`, error); } catch (reportError) { console.error("PublisherStudio fallback JavaScript diagnostics failed.", reportError); } },
+    guard(context, callback) { try { return callback; } catch (error) { console.error(`PublisherStudio fallback guard failed in ${String(context || "browser-runtime")}.`, error); return callback; } },
+    guardObject(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback object guard failed in ${String(context || "browser-runtime")}.`, error); return value; } },
+    guardClass(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback class guard failed in ${String(context || "browser-runtime")}.`, error); return value; } }
+};
+(() => { try {
     const sources = new Map();
     const externalAuthorizationWindows = new Map();
     const outputContext = { mode: "operator", platform: "Preview", channel: "", outputId: "" };
@@ -8,31 +15,31 @@
     let programCapture = null;
     let chatBridgeState = null;
 
-    function runtimeHttpBase(configured) {
+    function runtimeHttpBase(configured) { try {
         const value = String(configured || "").trim().replace(/\/$/, "");
         return value || window.location.origin;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:runtimeHttpBase@12', __javascriptError); throw __javascriptError; }}
 
-    function runtimeWsBase(configured) {
+    function runtimeWsBase(configured) { try {
         return runtimeHttpBase(configured).replace(/^http/i, "ws");
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:runtimeWsBase@17', __javascriptError); throw __javascriptError; }}
 
-    function hexColor(value) {
+    function hexColor(value) { try {
         const match = /^#?([0-9a-f]{6})$/i.exec(String(value || ""));
         const hex = match ? match[1] : "00ff00";
         return [parseInt(hex.slice(0, 2), 16) / 255, parseInt(hex.slice(2, 4), 16) / 255, parseInt(hex.slice(4, 6), 16) / 255];
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:hexColor@21', __javascriptError); throw __javascriptError; }}
 
 
-    function disconnectProgramAudio(state) {
+    function disconnectProgramAudio(state) { try {
         if (!state?.programAudio) return;
-        try { state.programAudio.source.disconnect(); } catch { }
-        try { state.programAudio.delay.disconnect(); } catch { }
-        try { state.programAudio.gain.disconnect(); } catch { }
+        try { state.programAudio.source.disconnect(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@30', __caughtJavaScriptError);  }
+        try { state.programAudio.delay.disconnect(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@31', __caughtJavaScriptError);  }
+        try { state.programAudio.gain.disconnect(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@32', __caughtJavaScriptError);  }
         state.programAudio = null;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:disconnectProgramAudio@28', __javascriptError); throw __javascriptError; }}
 
-    function connectProgramAudio(state) {
+    function connectProgramAudio(state) { try {
         disconnectProgramAudio(state);
         if (!programCapture?.audioContext || !programCapture.audioDestination || !state?.stream) return;
         const audioTracks = state.stream.getAudioTracks?.() || [];
@@ -46,37 +53,37 @@
         gain.gain.value = config.muted === true ? 0 : Math.max(0, Math.min(2, Number(config.volume ?? 1)));
         source.connect(delay).connect(gain).connect(programCapture.audioDestination);
         state.programAudio = { source, delay, gain };
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:connectProgramAudio@36', __javascriptError); throw __javascriptError; }}
 
-    function connectAllProgramAudio() {
+    function connectAllProgramAudio() { try {
         for (const state of sources.values()) connectProgramAudio(state);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:connectAllProgramAudio@52', __javascriptError); throw __javascriptError; }}
 
-    async function acquireNative(config) {
+    async function acquireNative(config) { try {
         const mediaHostUrl = runtimeHttpBase(config.mediaHostUrl);
         let captureId = "";
         let target = null;
         let objectUrl = "";
         let socket = null;
         let stopped = false;
-        const stopCapture = async () => {
+        const stopCapture = async () => { try {
             if (stopped) return;
             stopped = true;
-            try { socket?.close(1000, "Native source detached"); } catch { }
+            try { socket?.close(1000, "Native source detached"); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@66', __caughtJavaScriptError);  }
             try {
                 target?.pause?.();
                 target?.removeAttribute?.("src");
                 target?.load?.();
-            } catch { }
+            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@71', __caughtJavaScriptError);  }
             if (objectUrl) {
-                try { URL.revokeObjectURL(objectUrl); } catch { }
+                try { URL.revokeObjectURL(objectUrl); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@73', __caughtJavaScriptError);  }
                 objectUrl = "";
             }
             if (captureId) {
-                await fetch(`${mediaHostUrl}/api/mediahost/native-captures/${encodeURIComponent(captureId)}`, { method: "DELETE" }).catch(() => undefined);
+                await fetch(`${mediaHostUrl}/api/mediahost/native-captures/${encodeURIComponent(captureId)}`, { method: "DELETE" }).catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/streamingInterop.js:promise-catch@77', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:fetch(`${mediaHostUrl}/api/mediahost/native-captures/${encodeURICompon@77', __javascriptError); throw __javascriptError; } });
                 captureId = "";
             }
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:stopCapture@63', __javascriptError); throw __javascriptError; }};
 
         try {
             const response = await fetch(`${mediaHostUrl}/api/mediahost/native-captures`, {
@@ -97,7 +104,7 @@
                     ffmpegPath: config.ffmpegPath || ""
                 })
             });
-            const result = await response.json().catch(() => ({}));
+            const result = await response.json().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/streamingInterop.js:promise-catch@101', __promiseError);  return (({})); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:response.json().catch@101', __javascriptError); throw __javascriptError; } });
             if (!response.ok || !result.captureId) throw new Error(result.error || "PublisherStudio could not start native capture.");
             captureId = String(result.captureId);
 
@@ -114,7 +121,7 @@
             const mediaSource = new MediaSource();
             const queue = [];
             let sourceBuffer = null;
-            const pump = () => {
+            const pump = () => { try {
                 if (stopped || !sourceBuffer || sourceBuffer.updating || mediaSource.readyState !== "open") return;
                 try {
                     if (sourceBuffer.buffered.length && sourceBuffer.buffered.end(0) - sourceBuffer.buffered.start(0) > 30) {
@@ -126,32 +133,32 @@
                 } catch (error) {
                     console.error("PublisherStudio native capture buffering failed", error);
                 }
-            };
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => reject(new Error("The native capture media buffer did not open.")), 5000);
-                mediaSource.addEventListener("sourceopen", () => {
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:pump@118', __javascriptError); throw __javascriptError; }};
+            await new Promise((resolve, reject) => { try {
+                const timeout = setTimeout(() => { try { return (reject(new Error("The native capture media buffer did not open."))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:setTimeout@132', __javascriptError); throw __javascriptError; } }, 5000);
+                mediaSource.addEventListener("sourceopen", () => { try {
                     clearTimeout(timeout);
                     try {
                         sourceBuffer = mediaSource.addSourceBuffer(mimeType);
-                        try { sourceBuffer.mode = "sequence"; } catch { }
+                        try { sourceBuffer.mode = "sequence"; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@137', __caughtJavaScriptError);  }
                         sourceBuffer.addEventListener("updateend", pump);
                         resolve();
                     } catch (error) { reject(error); }
-                }, { once: true });
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:mediaSource.addEventListener@133', __javascriptError); throw __javascriptError; }}, { once: true });
                 objectUrl = URL.createObjectURL(mediaSource);
                 target.src = objectUrl;
-            });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@131', __javascriptError); throw __javascriptError; }});
 
             const wsBase = runtimeWsBase(mediaHostUrl);
             socket = new WebSocket(`${wsBase}/api/mediahost/native-captures/${encodeURIComponent(captureId)}/websocket`);
             socket.binaryType = "arraybuffer";
-            socket.addEventListener("message", event => { queue.push(new Uint8Array(event.data)); pump(); });
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => reject(new Error("The native capture stream did not connect.")), 5000);
-                socket.addEventListener("open", () => { clearTimeout(timeout); resolve(); }, { once: true });
-                socket.addEventListener("error", () => { clearTimeout(timeout); reject(new Error("The native capture WebSocket failed.")); }, { once: true });
-            });
-            await target.play().catch(() => undefined);
+            socket.addEventListener("message", event => { try { queue.push(new Uint8Array(event.data)); pump();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@149', __javascriptError); throw __javascriptError; }});
+            await new Promise((resolve, reject) => { try {
+                const timeout = setTimeout(() => { try { return (reject(new Error("The native capture stream did not connect."))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:setTimeout@151', __javascriptError); throw __javascriptError; } }, 5000);
+                socket.addEventListener("open", () => { try { clearTimeout(timeout); resolve();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@152', __javascriptError); throw __javascriptError; }}, { once: true });
+                socket.addEventListener("error", () => { try { clearTimeout(timeout); reject(new Error("The native capture WebSocket failed."));  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@153', __javascriptError); throw __javascriptError; }}, { once: true });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@150', __javascriptError); throw __javascriptError; }});
+            await target.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/streamingInterop.js:promise-catch@155', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:target.play().catch@155', __javascriptError); throw __javascriptError; } });
             const capture = target.captureStream?.() || target.mozCaptureStream?.();
             if (!capture) throw new Error("This browser cannot expose the native media element as a MediaStream.");
             capture.__publisherNativeCleanup = stopCapture;
@@ -161,14 +168,14 @@
             await stopCapture();
             throw error;
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:acquireNative@56', __javascriptError); throw __javascriptError; }}
 
-    function networkSourceNeedsNative(url) {
+    function networkSourceNeedsNative(url) { try {
         const value = String(url || "").trim().toLowerCase();
         return /^(rtsp|rtsps|rtmp|rtmps|srt|udp|tcp):/.test(value);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:networkSourceNeedsNative@167', __javascriptError); throw __javascriptError; }}
 
-    async function acquire(config) {
+    async function acquire(config) { try {
         const kind = String(config.kind || "Camera").toLowerCase();
         const backend = String(config.captureBackend || "Auto").toLowerCase();
         if (backend === "native") return acquireNative(config);
@@ -228,9 +235,9 @@
                         surfaceSwitching: "include"
                     });
                     const audioTracks = selected.getAudioTracks();
-                    selected.getVideoTracks().forEach(track => track.stop());
+                    selected.getVideoTracks().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:selected.getVideoTracks().forEach@232', __javascriptError); throw __javascriptError; } });
                     if (audioTracks.length) return new MediaStream(audioTracks);
-                    selected.getTracks().forEach(track => track.stop());
+                    selected.getTracks().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:selected.getTracks().forEach@234', __javascriptError); throw __javascriptError; } });
                 } catch (error) {
                     if (error?.name === "NotAllowedError" && backend === "browser") throw error;
                 }
@@ -240,9 +247,9 @@
             throw new Error("This browser did not expose isolated application/system audio and the source is restricted to Browser capture.");
         }
         return null;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:acquire@172', __javascriptError); throw __javascriptError; }}
 
-    function installMeter(stream, meter) {
+    function installMeter(stream, meter) { try {
         if (!stream || !meter || !window.AudioContext) return null;
         const context = new AudioContext();
         const source = context.createMediaStreamSource(stream);
@@ -251,20 +258,20 @@
         source.connect(analyser);
         const values = new Uint8Array(analyser.frequencyBinCount);
         let frame = 0;
-        const draw = () => {
+        const draw = () => { try {
             analyser.getByteTimeDomainData(values);
             let sum = 0;
             for (const value of values) { const normalized = (value - 128) / 128; sum += normalized * normalized; }
             meter.value = Math.min(1, Math.sqrt(sum / values.length) * 2.5);
             frame = requestAnimationFrame(draw);
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:draw@255', __javascriptError); throw __javascriptError; }};
         draw();
-        return () => { cancelAnimationFrame(frame); source.disconnect(); analyser.disconnect(); context.close().catch(() => undefined); };
-    }
+        return () => { try { cancelAnimationFrame(frame); source.disconnect(); analyser.disconnect(); context.close().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/streamingInterop.js:promise-catch@263', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:context.close().catch@263', __javascriptError); throw __javascriptError; } });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@263', __javascriptError); throw __javascriptError; }};
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:installMeter@246', __javascriptError); throw __javascriptError; }}
 
-    function legacyVideoLayers(config) {
+    function legacyVideoLayers(config) { try {
         const filters = [];
-        const add = (kind, amount, extra = {}) => filters.push({ kind, enabled: true, amount, ...extra });
+        const add = (kind, amount, extra = {}) => { try { return (filters.push({ kind, enabled: true, amount, ...extra })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:add@268', __javascriptError); throw __javascriptError; } };
         if (Math.abs(Number(config.brightness ?? 1) - 1) > .001) add('Brightness', Number(config.brightness));
         if (Math.abs(Number(config.contrast ?? 1) - 1) > .001) add('Contrast', Number(config.contrast));
         if (Math.abs(Number(config.saturation ?? 1) - 1) > .001) add('Saturation', Number(config.saturation));
@@ -285,9 +292,9 @@
             region: { points: [], inverted: false },
             filters
         }];
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:legacyVideoLayers@266', __javascriptError); throw __javascriptError; }}
 
-    function installVideoEffects(video, canvas, config) {
+    function installVideoEffects(video, canvas, config) { try {
         if (!video || !canvas || !window.publisherVideoEffects) {
             canvas?.classList.remove('active');
             return null;
@@ -299,14 +306,14 @@
         window.publisherVideoEffects.install(key, video, canvas, {
             layers,
             fitMode: config.fitMode || 'cover',
-            forceCanvas: layers.some(layer => Array.isArray(layer?.filters) && layer.filters.length > 0)
+            forceCanvas: layers.some(layer => { try { return (Array.isArray(layer?.filters) && layer.filters.length > 0); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:layers.some@303', __javascriptError); throw __javascriptError; } })
         });
-        return () => window.publisherVideoEffects?.dispose(key);
-    }
+        return () => { try { return (window.publisherVideoEffects?.dispose(key)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@305', __javascriptError); throw __javascriptError; } };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:installVideoEffects@291', __javascriptError); throw __javascriptError; }}
 
 
 
-    function installNowPlaying(config) {
+    function installNowPlaying(config) { try {
         const root = document.getElementById(config.metadataId);
         if (!root || !config.nowPlayingDirectory) return null;
         const title = root.querySelector("[data-now-playing-title]");
@@ -315,7 +322,7 @@
         const cover = root.querySelector("[data-now-playing-cover]");
         let stopped = false;
         let lastIdentity = "";
-        const refresh = async () => {
+        const refresh = async () => { try {
             if (stopped) return;
             try {
                 const url = `${runtimeHttpBase(config.mediaHostUrl)}/api/mediahost/now-playing?directory=${encodeURIComponent(config.nowPlayingDirectory)}`;
@@ -339,13 +346,13 @@
             } catch (error) {
                 if (album) album.textContent = error?.message || "Streaming runtime unavailable";
             }
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:refresh@319', __javascriptError); throw __javascriptError; }};
         refresh();
         const timer = window.setInterval(refresh, 1500);
-        return () => { stopped = true; window.clearInterval(timer); };
-    }
+        return () => { try { stopped = true; window.clearInterval(timer);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@346', __javascriptError); throw __javascriptError; }};
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:installNowPlaying@310', __javascriptError); throw __javascriptError; }}
 
-    async function attachSource(config) {
+    async function attachSource(config) { try {
         detachSource(config.id);
         const video = document.getElementById(config.videoId);
         const canvas = document.getElementById(config.canvasId);
@@ -365,13 +372,13 @@
                 video.volume = Math.max(0, Math.min(1, Number(config.volume ?? 1)));
                 if (stream) video.srcObject = stream;
                 else if (String(config.kind).toLowerCase() === "networkmedia" && config.networkUrl) video.src = config.networkUrl;
-                await video.play().catch(() => undefined);
+                await video.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/streamingInterop.js:promise-catch@369', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:video.play().catch@369', __javascriptError); throw __javascriptError; } });
             }
             const stopVideoEffects = installVideoEffects(video, canvas, config);
             const stopMeter = installMeter(stream, meter);
             const tracks = stream ? stream.getTracks() : [];
-            const ended = () => detachSource(config.id);
-            tracks.forEach(track => track.addEventListener("ended", ended, { once: true }));
+            const ended = () => { try { return (detachSource(config.id)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ended@374', __javascriptError); throw __javascriptError; } };
+            tracks.forEach(track => { try { return (track.addEventListener("ended", ended, { once: true })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:tracks.forEach@375', __javascriptError); throw __javascriptError; } });
             const state = { stream, video, stopVideoEffects, stopMeter, ended, config };
             sources.set(String(config.id), state);
             connectProgramAudio(state);
@@ -381,9 +388,9 @@
             window.dispatchEvent(new CustomEvent("publisherstudio:stream-error", { detail: { id: config.id, message: error?.message || String(error) } }));
             return false;
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:attachSource@349', __javascriptError); throw __javascriptError; }}
 
-    function updateSourceEffects(config) {
+    function updateSourceEffects(config) { try {
         const state = sources.get(String(config?.id || ''));
         if (!state) return false;
         const video = state.video || document.getElementById(config.videoId);
@@ -393,65 +400,65 @@
         state.stopVideoEffects = installVideoEffects(video, canvas, { ...state.config, ...config });
         state.config = { ...state.config, ...config };
         return true;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:updateSourceEffects@387', __javascriptError); throw __javascriptError; }}
 
-    function detachSource(id) {
+    function detachSource(id) { try {
         const state = sources.get(String(id));
         if (!state) return;
         disconnectProgramAudio(state);
         state.stopVideoEffects?.();
         state.stopMeter?.();
         state.stopMetadata?.();
-        try { state.stream?.__publisherNativeCleanup?.(); } catch { }
-        state.stream?.getTracks?.().forEach(track => track.stop());
-        if (state.video) { try { state.video.pause(); state.video.srcObject = null; state.video.removeAttribute("src"); state.video.load(); } catch { } }
+        try { state.stream?.__publisherNativeCleanup?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@406', __caughtJavaScriptError);  }
+        state.stream?.getTracks?.().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:state.stream?.getTracks?.().forEach@407', __javascriptError); throw __javascriptError; } });
+        if (state.video) { try { state.video.pause(); state.video.srcObject = null; state.video.removeAttribute("src"); state.video.load(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@408', __caughtJavaScriptError);  } }
         sources.delete(String(id));
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:detachSource@399', __javascriptError); throw __javascriptError; }}
 
-    async function enumerateDevices() {
+    async function enumerateDevices() { try {
         if (!navigator.mediaDevices?.enumerateDevices) return [];
         try {
             const permission = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-            permission.getTracks().forEach(track => track.stop());
-        } catch { }
+            permission.getTracks().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:permission.getTracks().forEach@416', __javascriptError); throw __javascriptError; } });
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@417', __caughtJavaScriptError);  }
         const devices = await navigator.mediaDevices.enumerateDevices();
-        return devices.map(device => ({ deviceId: device.deviceId, kind: device.kind, label: device.label || "Permission required" }));
-    }
+        return devices.map(device => { try { return (({ deviceId: device.deviceId, kind: device.kind, label: device.label || "Permission required" })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:devices.map@419', __javascriptError); throw __javascriptError; } });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:enumerateDevices@412', __javascriptError); throw __javascriptError; }}
 
-    async function chooseDirectory() {
+    async function chooseDirectory() { try {
         if (!window.showDirectoryPicker) return null;
         try { const handle = await window.showDirectoryPicker({ mode: "readwrite" }); return handle?.name || null; }
         catch { return null; }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:chooseDirectory@422', __javascriptError); throw __javascriptError; }}
 
 
 
-    function supportedProgramMimeType() {
+    function supportedProgramMimeType() { try {
         if (typeof MediaRecorder === "undefined") return "";
         return [
             "video/webm;codecs=vp9,opus",
             "video/webm;codecs=vp8,opus",
             "video/webm"
-        ].find(value => MediaRecorder.isTypeSupported(value)) || "";
-    }
+        ].find(value => { try { return (MediaRecorder.isTypeSupported(value)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:[ "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/w@436', __javascriptError); throw __javascriptError; } }) || "";
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:supportedProgramMimeType@430', __javascriptError); throw __javascriptError; }}
 
-    function ensureStreamingCaptureStyles() {
+    function ensureStreamingCaptureStyles() { try {
         if (document.getElementById("publisherstream-capture-style")) return;
         const style = document.createElement("style");
         style.id = "publisherstream-capture-style";
         style.textContent = `html.publisherstream-base-capture [data-publisher-stream-chat-layer]{visibility:hidden!important}`;
         document.head.append(style);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ensureStreamingCaptureStyles@439', __javascriptError); throw __javascriptError; }}
 
-    function markStreamingChatLayers() {
+    function markStreamingChatLayers() { try {
         ensureStreamingCaptureStyles();
         for (const host of document.querySelectorAll?.("[data-ps-component-runtime].ps-dx-chat") || []) {
             const owner = host.closest?.("[data-publication-element]") || host;
             owner.setAttribute("data-publisher-stream-chat-layer", "");
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:markStreamingChatLayers@447', __javascriptError); throw __javascriptError; }}
 
-    function wrapCanvasText(context, text, maxWidth) {
+    function wrapCanvasText(context, text, maxWidth) { try {
         const source = String(text || "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
         if (!source) return [""];
         const tokens = source.split(/\s+/).filter(Boolean);
@@ -476,9 +483,9 @@
         }
         lines.push(line);
         return lines;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:wrapCanvasText@455', __javascriptError); throw __javascriptError; }}
 
-    function roundedRect(context, x, y, width, height, radius) {
+    function roundedRect(context, x, y, width, height, radius) { try {
         const r = Math.max(0, Math.min(radius, width / 2, height / 2));
         context.beginPath();
         context.moveTo(x + r, y);
@@ -487,9 +494,9 @@
         context.arcTo(x, y + height, x, y, r);
         context.arcTo(x, y, x + width, y, r);
         context.closePath();
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:roundedRect@482', __javascriptError); throw __javascriptError; }}
 
-    function drawBroadcastChatLayer(context, layer, outputWidth, outputHeight) {
+    function drawBroadcastChatLayer(context, layer, outputWidth, outputHeight) { try {
         const pageWidth = Math.max(1, Number(layer.pageWidth || outputWidth));
         const pageHeight = Math.max(1, Number(layer.pageHeight || outputHeight));
         const sx = outputWidth / pageWidth;
@@ -584,7 +591,7 @@
             context.fillText(String(item.authorName || "Viewer").slice(0, 80), messageLeft, cursor + padding * .28, messageWidth);
             if (showTimestamp && item.timestamp) {
                 let timestamp = "";
-                try { timestamp = new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch { }
+                try { timestamp = new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@588', __caughtJavaScriptError);  }
                 if (timestamp) {
                     context.font = `${Math.max(8, authorFont * .82)}px ${layer.fontFamily || "system-ui"}`;
                     context.fillStyle = "#94a3b8";
@@ -602,9 +609,9 @@
             cursor -= padding * .22;
         }
         context.restore();
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:drawBroadcastChatLayer@493', __javascriptError); throw __javascriptError; }}
 
-    function broadcastChatLayers(output, pageElementId) {
+    function broadcastChatLayers(output, pageElementId) { try {
         try {
             return window.PublisherStudioChatRuntime?.getBroadcastLayers?.({
                 mode: "broadcast",
@@ -616,9 +623,9 @@
             console.warn("PublisherStudio could not build the broadcast Chat layer", error);
             return [];
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:broadcastChatLayers@608', __javascriptError); throw __javascriptError; }}
 
-    function createCaptureVariant(output, audioTracks) {
+    function createCaptureVariant(output, audioTracks) { try {
         const width = Math.max(320, Math.min(7680, Number(output.width || 1920)));
         const height = Math.max(180, Math.min(4320, Number(output.height || 1080)));
         const frameRate = Math.max(15, Math.min(120, Number(output.frameRate || 60)));
@@ -630,9 +637,9 @@
         const stream = canvas.captureStream(frameRate);
         for (const track of audioTracks || []) stream.addTrack(track);
         return { ...output, width, height, frameRate, canvas, context, stream, recorder: null, socket: null };
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:createCaptureVariant@622', __javascriptError); throw __javascriptError; }}
 
-    function drawProgramFrame(state) {
+    function drawProgramFrame(state) { try {
         const { video, baseCanvas, baseContext, width, height, pageElementId } = state;
         const page = document.getElementById(String(pageElementId || "publisher-page"));
         const rect = page?.getBoundingClientRect?.();
@@ -657,10 +664,10 @@
             for (const layer of broadcastChatLayers(variant, pageElementId))
                 drawBroadcastChatLayer(context, layer, variant.width, variant.height);
         }
-        state.drawFrame = requestAnimationFrame(() => drawProgramFrame(state));
-    }
+        state.drawFrame = requestAnimationFrame(() => { try { return (drawProgramFrame(state)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:requestAnimationFrame@661', __javascriptError); throw __javascriptError; } });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:drawProgramFrame@636', __javascriptError); throw __javascriptError; }}
 
-    async function prepareProgramCapture(config = {}) {
+    async function prepareProgramCapture(config = {}) { try {
         await stopProgramIngest();
         if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === "undefined")
             throw new Error("This browser cannot capture and encode the Publisher program output.");
@@ -693,16 +700,16 @@
         let captureAudio = null;
         if (window.AudioContext) {
             audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: 48000 });
-            await audioContext.resume().catch(() => undefined);
+            await audioContext.resume().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/streamingInterop.js:promise-catch@697', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:audioContext.resume().catch@697', __javascriptError); throw __javascriptError; } });
             audioDestination = audioContext.createMediaStreamDestination();
             const displayAudioTracks = sourceStream.getAudioTracks();
             if (displayAudioTracks.length) {
                 captureAudio = audioContext.createMediaStreamSource(new MediaStream(displayAudioTracks));
                 captureAudio.connect(audioDestination);
             }
-            audioDestination.stream.getAudioTracks().forEach(track => baseStream.addTrack(track));
+            audioDestination.stream.getAudioTracks().forEach(track => { try { return (baseStream.addTrack(track)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:audioDestination.stream.getAudioTracks().forEach@704', __javascriptError); throw __javascriptError; } });
         } else {
-            sourceStream.getAudioTracks().forEach(track => baseStream.addTrack(track));
+            sourceStream.getAudioTracks().forEach(track => { try { return (baseStream.addTrack(track)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:sourceStream.getAudioTracks().forEach@706', __javascriptError); throw __javascriptError; } });
         }
         programCapture = {
             sourceStream,
@@ -727,28 +734,28 @@
         };
         drawProgramFrame(programCapture);
         connectAllProgramAudio();
-        const ended = () => { void stopProgramIngest(); };
+        const ended = () => { try { void stopProgramIngest();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ended@731', __javascriptError); throw __javascriptError; }};
         sourceStream.getVideoTracks()[0]?.addEventListener("ended", ended, { once: true });
         programCapture.ended = ended;
         window.dispatchEvent(new CustomEvent("publisherstudio:program-capture-ready", { detail: { width, height, frameRate } }));
         return true;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:prepareProgramCapture@664', __javascriptError); throw __javascriptError; }}
 
-    async function openIngestSocket(config, outputId = "") {
+    async function openIngestSocket(config, outputId = "") { try {
         const baseUrl = runtimeWsBase(config.mediaHostUrl);
         if (!config.sessionId) throw new Error("The integrated streaming session is not available.");
         const query = outputId ? `?outputId=${encodeURIComponent(outputId)}` : "";
         const socket = new WebSocket(`${baseUrl}/api/mediahost/sessions/${encodeURIComponent(config.sessionId)}/ingest/websocket${query}`);
         socket.binaryType = "arraybuffer";
-        await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error("PublisherStudio did not accept the browser ingest.")), 5000);
-            socket.addEventListener("open", () => { clearTimeout(timeout); resolve(); }, { once: true });
-            socket.addEventListener("error", () => { clearTimeout(timeout); reject(new Error("The browser could not connect to PublisherStudio's ingest socket.")); }, { once: true });
-        });
+        await new Promise((resolve, reject) => { try {
+            const timeout = setTimeout(() => { try { return (reject(new Error("PublisherStudio did not accept the browser ingest."))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:setTimeout@745', __javascriptError); throw __javascriptError; } }, 5000);
+            socket.addEventListener("open", () => { try { clearTimeout(timeout); resolve();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@746', __javascriptError); throw __javascriptError; }}, { once: true });
+            socket.addEventListener("error", () => { try { clearTimeout(timeout); reject(new Error("The browser could not connect to PublisherStudio's ingest socket."));  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@747', __javascriptError); throw __javascriptError; }}, { once: true });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@744', __javascriptError); throw __javascriptError; }});
         return socket;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:openIngestSocket@738', __javascriptError); throw __javascriptError; }}
 
-    async function startVariantRecorder(config, variant, outputId = "") {
+    async function startVariantRecorder(config, variant, outputId = "") { try {
         const mimeType = supportedProgramMimeType();
         if (!mimeType) throw new Error("The browser has no supported WebM MediaRecorder profile.");
         const socket = await openIngestSocket(config, outputId);
@@ -769,7 +776,7 @@
         }));
         const pendingWrites = new Set();
         recorder.__publisherPendingWrites = pendingWrites;
-        recorder.addEventListener("dataavailable", event => {
+        recorder.addEventListener("dataavailable", event => { try {
             if (!event.data?.size || socket.readyState !== WebSocket.OPEN) return;
             const write = (async () => {
                 try {
@@ -780,35 +787,35 @@
                 }
             })();
             pendingWrites.add(write);
-            write.finally(() => pendingWrites.delete(write));
-        });
-        recorder.addEventListener("error", event => {
+            write.finally(() => { try { return (pendingWrites.delete(write)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:write.finally@784', __javascriptError); throw __javascriptError; } });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:recorder.addEventListener@773', __javascriptError); throw __javascriptError; }});
+        recorder.addEventListener("error", event => { try {
             window.dispatchEvent(new CustomEvent("publisherstudio:stream-error", { detail: { outputId, message: event.error?.message || "Program encoding failed." } }));
-        });
-        socket.addEventListener("close", () => {
-            if (recorder.state !== "inactive") try { recorder.stop(); } catch { }
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:recorder.addEventListener@786', __javascriptError); throw __javascriptError; }});
+        socket.addEventListener("close", () => { try {
+            if (recorder.state !== "inactive") try { recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@790', __caughtJavaScriptError);  }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@789', __javascriptError); throw __javascriptError; }});
         recorder.start(250);
         programCapture.recorders.push(recorder);
         programCapture.sockets.push(socket);
         variant.recorder = recorder;
         variant.socket = socket;
         return { mimeType, width: variant.width, height: variant.height, frameRate: variant.frameRate };
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:startVariantRecorder@752', __javascriptError); throw __javascriptError; }}
 
-    async function startPublisherWebRtc(config, stream) {
+    async function startPublisherWebRtc(config, stream) { try {
         if (!config.enableWebRtc || typeof RTCPeerConnection === "undefined") return;
         const baseUrl = runtimeWsBase(config.mediaHostUrl);
         const socket = new WebSocket(`${baseUrl}/api/mediahost/sessions/${encodeURIComponent(config.sessionId)}/webrtc/publisher`);
         programCapture.signalSocket = socket;
-        const send = value => { if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(value)); };
-        const closePeer = viewerId => {
+        const send = value => { try { if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(value));  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:send@805', __javascriptError); throw __javascriptError; }};
+        const closePeer = viewerId => { try {
             const peer = programCapture?.peers?.get(viewerId);
             if (!peer) return;
-            try { peer.close(); } catch { }
+            try { peer.close(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@809', __caughtJavaScriptError);  }
             programCapture.peers.delete(viewerId);
-        };
-        socket.addEventListener("message", async event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:closePeer@806', __javascriptError); throw __javascriptError; }};
+        socket.addEventListener("message", async event => { try {
             let message;
             try { message = JSON.parse(event.data); } catch { return; }
             const viewerId = String(message.viewerId || "");
@@ -818,12 +825,12 @@
             if (!peer) {
                 peer = new RTCPeerConnection({ iceServers: [] });
                 for (const track of stream.getTracks()) peer.addTrack(track, stream);
-                peer.addEventListener("icecandidate", ice => {
+                peer.addEventListener("icecandidate", ice => { try {
                     if (ice.candidate) send({ type: "publisher-candidate", viewerId, candidate: ice.candidate });
-                });
-                peer.addEventListener("connectionstatechange", () => {
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:peer.addEventListener@822', __javascriptError); throw __javascriptError; }});
+                peer.addEventListener("connectionstatechange", () => { try {
                     if (["failed", "closed", "disconnected"].includes(peer.connectionState)) closePeer(viewerId);
-                });
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:peer.addEventListener@825', __javascriptError); throw __javascriptError; }});
                 programCapture.peers.set(viewerId, peer);
             }
             try {
@@ -839,13 +846,13 @@
                 send({ type: "publisher-error", viewerId, message: error?.message || String(error) });
                 closePeer(viewerId);
             }
-        });
-        socket.addEventListener("close", () => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@812', __javascriptError); throw __javascriptError; }});
+        socket.addEventListener("close", () => { try {
             for (const viewerId of [...(programCapture?.peers?.keys?.() || [])]) closePeer(viewerId);
-        });
-    }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@844', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:startPublisherWebRtc@800', __javascriptError); throw __javascriptError; }}
 
-    async function startProgramIngest(config = {}) {
+    async function startProgramIngest(config = {}) { try {
         if (!programCapture) throw new Error("Prepare the program capture before starting a streaming session.");
         const audioTracks = programCapture.canvasStream.getAudioTracks();
         const master = {
@@ -859,7 +866,7 @@
             videoBitsPerSecond: Number(config.videoBitsPerSecond || 16_000_000)
         };
         const results = [await startVariantRecorder(config, master, "")];
-        for (const output of Array.isArray(config.outputs) ? config.outputs.filter(item => item?.outputId && item.captureRequired !== false) : []) {
+        for (const output of Array.isArray(config.outputs) ? config.outputs.filter(item => { try { return (item?.outputId && item.captureRequired !== false); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:config.outputs.filter@863', __javascriptError); throw __javascriptError; } }) : []) {
             const variant = createCaptureVariant({
                 ...output,
                 outputId: String(output.outputId || ""),
@@ -875,80 +882,80 @@
         }
         await startPublisherWebRtc(config, programCapture.canvasStream);
         return { master: results[0], outputs: results.slice(1) };
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:startProgramIngest@849', __javascriptError); throw __javascriptError; }}
 
-    async function stopProgramIngest() {
+    async function stopProgramIngest() { try {
         const state = programCapture;
         programCapture = null;
         document.documentElement.classList.remove("publisherstream-base-capture");
         if (!state) return true;
 
-        try { cancelAnimationFrame(state.drawFrame); } catch { }
+        try { cancelAnimationFrame(state.drawFrame); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@887', __caughtJavaScriptError);  }
         const recorders = [...(state.recorders || [])];
-        const waitForStop = recorder => new Promise(resolve => {
+        const waitForStop = recorder => { try { return (new Promise(resolve => { try {
             if (!recorder || recorder.state === "inactive") { resolve(); return; }
             let settled = false;
             let timeout = 0;
-            const finish = () => {
+            const finish = () => { try {
                 if (settled) return;
                 settled = true;
                 if (timeout) window.clearTimeout(timeout);
                 resolve();
-            };
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:finish@893', __javascriptError); throw __javascriptError; }};
             recorder.addEventListener("stop", finish, { once: true });
             timeout = window.setTimeout(finish, 3000);
-            try { recorder.requestData(); } catch { }
+            try { recorder.requestData(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@901', __caughtJavaScriptError);  }
             try { recorder.stop(); } catch { finish(); }
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@889', __javascriptError); throw __javascriptError; }})); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:waitForStop@889', __javascriptError); throw __javascriptError; } };
         await Promise.all(recorders.map(waitForStop));
-        await Promise.allSettled(recorders.flatMap(recorder => [...(recorder?.__publisherPendingWrites || [])]));
+        await Promise.allSettled(recorders.flatMap(recorder => { try { return ([...(recorder?.__publisherPendingWrites || [])]); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:recorders.flatMap@905', __javascriptError); throw __javascriptError; } }));
 
         for (const socket of state.sockets || []) {
-            try { if (socket.readyState < WebSocket.CLOSING) socket.close(1000, "PublisherStudio session stopped"); } catch { }
+            try { if (socket.readyState < WebSocket.CLOSING) socket.close(1000, "PublisherStudio session stopped"); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@908', __caughtJavaScriptError);  }
         }
-        try { if (state.signalSocket?.readyState < WebSocket.CLOSING) state.signalSocket.close(1000, "PublisherStudio session stopped"); } catch { }
-        for (const peer of state.peers?.values?.() || []) { try { peer.close(); } catch { } }
+        try { if (state.signalSocket?.readyState < WebSocket.CLOSING) state.signalSocket.close(1000, "PublisherStudio session stopped"); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@910', __caughtJavaScriptError);  }
+        for (const peer of state.peers?.values?.() || []) { try { peer.close(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@911', __caughtJavaScriptError);  } }
         for (const sourceState of sources.values()) disconnectProgramAudio(sourceState);
-        try { state.captureAudio?.disconnect?.(); } catch { }
-        try { state.audioDestination?.disconnect?.(); } catch { }
-        try { await state.audioContext?.close?.(); } catch { }
-        state.canvasStream?.getTracks?.().forEach(track => track.stop());
-        for (const variant of state.variants?.values?.() || []) variant.stream?.getTracks?.().forEach(track => track.stop());
-        state.sourceStream?.getTracks?.().forEach(track => track.stop());
-        try { state.video.pause(); state.video.srcObject = null; } catch { }
+        try { state.captureAudio?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@913', __caughtJavaScriptError);  }
+        try { state.audioDestination?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@914', __caughtJavaScriptError);  }
+        try { await state.audioContext?.close?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@915', __caughtJavaScriptError);  }
+        state.canvasStream?.getTracks?.().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:state.canvasStream?.getTracks?.().forEach@916', __javascriptError); throw __javascriptError; } });
+        for (const variant of state.variants?.values?.() || []) variant.stream?.getTracks?.().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:variant.stream?.getTracks?.().forEach@917', __javascriptError); throw __javascriptError; } });
+        state.sourceStream?.getTracks?.().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:state.sourceStream?.getTracks?.().forEach@918', __javascriptError); throw __javascriptError; } });
+        try { state.video.pause(); state.video.srcObject = null; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@919', __caughtJavaScriptError);  }
         window.dispatchEvent(new CustomEvent("publisherstudio:program-capture-stopped"));
         return true;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:stopProgramIngest@881', __javascriptError); throw __javascriptError; }}
 
-    function chatKey(platform, channel) {
+    function chatKey(platform, channel) { try {
         return `${String(platform || "").trim().toLowerCase()}|${String(channel || "").trim().toLowerCase()}`;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:chatKey@924', __javascriptError); throw __javascriptError; }}
 
-    function stopChatBridge() {
+    function stopChatBridge() { try {
         const state = chatBridgeState;
         chatBridgeState = null;
         if (!state) return;
         for (const socket of state.sockets.values()) {
-            try { if (socket.readyState < WebSocket.CLOSING) socket.close(1000, "PublisherStudio Chat stopped"); } catch { }
+            try { if (socket.readyState < WebSocket.CLOSING) socket.close(1000, "PublisherStudio Chat stopped"); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@933', __caughtJavaScriptError);  }
         }
         state.sockets.clear();
         state.subscribers.clear();
         state.messages.clear();
         if (window.PublisherStudioChatBridge === state.bridge) delete window.PublisherStudioChatBridge;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:stopChatBridge@928', __javascriptError); throw __javascriptError; }}
 
-    function configureChatBridge(config = {}) {
+    function configureChatBridge(config = {}) { try {
         stopChatBridge();
         const mediaHostUrl = runtimeHttpBase(config.mediaHostUrl);
         const sessionId = String(config.sessionId || "");
         if (!sessionId) return false;
         const outputs = (Array.isArray(config.outputs) ? config.outputs : [])
-            .filter(item => item?.outputId && item.captureRequired !== false && item.chatEnabled === true)
-            .map(item => ({
+            .filter(item => { try { return (item?.outputId && item.captureRequired !== false && item.chatEnabled === true); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:(Array.isArray(config.outputs) ? config.outputs : []) .filter@947', __javascriptError); throw __javascriptError; } })
+            .map(item => { try { return (({
                 outputId: String(item.outputId),
                 platform: String(item.platform || item.provider || "Preview"),
                 channel: String(item.channel || "")
-            }));
+            })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:(Array.isArray(config.outputs) ? config.outputs : []) .filter(item => @948', __javascriptError); throw __javascriptError; } });
         const state = {
             mediaHostUrl,
             sessionId,
@@ -958,10 +965,10 @@
             subscribers: new Set(),
             bridge: null
         };
-        const notify = detail => {
+        const notify = detail => { try {
             const key = chatKey(detail.platform, detail.channel);
             const bucket = state.messages.get(key) || [];
-            if (!bucket.some(item => String(item.id || "") === String(detail.message?.id || ""))) {
+            if (!bucket.some(item => { try { return (String(item.id || "") === String(detail.message?.id || "")); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:bucket.some@965', __javascriptError); throw __javascriptError; } })) {
                 bucket.push(detail.message);
                 while (bucket.length > 200) bucket.shift();
                 state.messages.set(key, bucket);
@@ -972,10 +979,10 @@
                 if (subscription.channel && subscription.channel !== String(detail.channel || "").toLowerCase()) continue;
                 try { subscription.receive(detail); } catch (error) { console.error("PublisherStudio Chat subscriber failed", error); }
             }
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:notify@962', __javascriptError); throw __javascriptError; }};
         const bridge = {
-            subscribe(context, receive) {
-                if (typeof receive !== "function") return () => {};
+            subscribe(context, receive) { try {
+                if (typeof receive !== "function") return () => { try { } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@979', __javascriptError); throw __javascriptError; }};
                 const subscription = {
                     platform: String(context?.platform || "").toLowerCase(),
                     channel: String(context?.channel || "").toLowerCase(),
@@ -983,16 +990,16 @@
                 };
                 state.subscribers.add(subscription);
                 for (const message of state.messages.get(chatKey(context?.platform, context?.channel)) || []) {
-                    try { receive({ platform: context?.platform || "", channel: context?.channel || "", message }); } catch { }
+                    try { receive({ platform: context?.platform || "", channel: context?.channel || "", message }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@987', __caughtJavaScriptError);  }
                 }
-                return () => state.subscribers.delete(subscription);
-            },
-            async send(detail) {
+                return () => { try { return (state.subscribers.delete(subscription)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@989', __javascriptError); throw __javascriptError; } };
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:subscribe@978', __javascriptError); throw __javascriptError; }},
+            async send(detail) { try {
                 const message = String(detail?.message?.text || detail?.message || "").trim();
                 if (!message) return false;
                 const requestedOutputId = String(detail?.outputId || outputContext.outputId || "");
-                const output = state.outputs.find(item => item.outputId === requestedOutputId)
-                    || state.outputs.find(item => chatKey(item.platform, item.channel) === chatKey(detail?.platform, detail?.channel));
+                const output = state.outputs.find(item => { try { return (item.outputId === requestedOutputId); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:state.outputs.find@995', __javascriptError); throw __javascriptError; } })
+                    || state.outputs.find(item => { try { return (chatKey(item.platform, item.channel) === chatKey(detail?.platform, detail?.channel)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:state.outputs.find@996', __javascriptError); throw __javascriptError; } });
                 if (!output) throw new Error("No configured provider Chat matches the selected operator Chat.");
                 const response = await fetch(`${state.mediaHostUrl}/api/mediahost/sessions/${encodeURIComponent(state.sessionId)}/chat/${encodeURIComponent(output.outputId)}/send`, {
                     method: "POST",
@@ -1000,14 +1007,14 @@
                     body: JSON.stringify({ message })
                 });
                 if (!response.ok) {
-                    const error = await response.json().catch(() => ({}));
+                    const error = await response.json().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/streamingInterop.js:promise-catch@1004', __promiseError);  return (({})); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:response.json().catch@1004', __javascriptError); throw __javascriptError; } });
                     throw new Error(error.error || `Chat send failed (${response.status}).`);
                 }
                 return true;
-            },
-            getMessages(platform, channel) {
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:send@991', __javascriptError); throw __javascriptError; }},
+            getMessages(platform, channel) { try {
                 return [...(state.messages.get(chatKey(platform, channel)) || [])];
-            }
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:getMessages@1009', __javascriptError); throw __javascriptError; }}
         };
         state.bridge = bridge;
         chatBridgeState = state;
@@ -1017,7 +1024,7 @@
         for (const output of outputs) {
             const socket = new WebSocket(`${wsBase}/api/mediahost/sessions/${encodeURIComponent(sessionId)}/chat/${encodeURIComponent(output.outputId)}/websocket`);
             state.sockets.set(output.outputId, socket);
-            socket.addEventListener("message", event => {
+            socket.addEventListener("message", event => { try {
                 let source;
                 try { source = JSON.parse(event.data); } catch { return; }
                 const timestamp = source.timestamp ? new Date(source.timestamp) : new Date();
@@ -1036,15 +1043,15 @@
                     badges: String(source.badges || "")
                 };
                 notify({ outputId: output.outputId, platform: message.platform, channel: message.channel, message });
-            });
-            socket.addEventListener("error", () => window.dispatchEvent(new CustomEvent("publisherstudio:stream-error", {
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@1021', __javascriptError); throw __javascriptError; }});
+            socket.addEventListener("error", () => { try { return (window.dispatchEvent(new CustomEvent("publisherstudio:stream-error", {
                 detail: { id: output.outputId, message: `${output.platform} Chat connection failed.` }
-            })));
+            }))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:socket.addEventListener@1041', __javascriptError); throw __javascriptError; } });
         }
         return true;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:configureChatBridge@941', __javascriptError); throw __javascriptError; }}
 
-    function normalizeGesture(event) {
+    function normalizeGesture(event) { try {
         const parts = [];
         if (event.ctrlKey) parts.push("Ctrl");
         if (event.altKey) parts.push("Alt");
@@ -1057,66 +1064,66 @@
         key = aliases[key] || key;
         if (!["Control", "Alt", "Shift", "Meta"].includes(key)) parts.push(key);
         return parts.join("+");
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:normalizeGesture@1048', __javascriptError); throw __javascriptError; }}
 
-    function normalizeConfiguredGesture(value) {
+    function normalizeConfiguredGesture(value) { try {
         const aliases = { CTRL: "Ctrl", CONTROL: "Ctrl", ALT: "Alt", SHIFT: "Shift", META: "Meta", WIN: "Meta", CMD: "Meta", ESC: "Escape", DEL: "Delete", SPACEBAR: "Space" };
         return String(value || "")
             .split("+")
-            .map(part => part.trim())
+            .map(part => { try { return (part.trim()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:String(value || "") .split("+") .map@1067', __javascriptError); throw __javascriptError; } })
             .filter(Boolean)
-            .map(part => aliases[part.toUpperCase()] || (part.length === 1 ? part.toUpperCase() : part))
+            .map(part => { try { return (aliases[part.toUpperCase()] || (part.length === 1 ? part.toUpperCase() : part)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:String(value || "") .split("+") .map(part => part.trim()) .filter(Bool@1069', __javascriptError); throw __javascriptError; } })
             .join("+");
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:normalizeConfiguredGesture@1063', __javascriptError); throw __javascriptError; }}
 
-    function isTypingTarget(target) {
+    function isTypingTarget(target) { try {
         if (!(target instanceof Element)) return false;
         return !!target.closest("input, textarea, select, [contenteditable='true'], .dx-texteditor-input");
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:isTypingTarget@1073', __javascriptError); throw __javascriptError; }}
 
-    function unbindHotkeys() {
+    function unbindHotkeys() { try {
         if (hotkeyListener) window.removeEventListener("keydown", hotkeyListener, true);
         hotkeyListener = null;
         hotkeyReference = null;
         configuredHotkeys = [];
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:unbindHotkeys@1078', __javascriptError); throw __javascriptError; }}
 
-    function bindHotkeys(hotkeys, dotnetReference) {
+    function bindHotkeys(hotkeys, dotnetReference) { try {
         unbindHotkeys();
         configuredHotkeys = Array.isArray(hotkeys)
-            ? hotkeys.filter(item => item && item.gesture && item.command && !item.global).map(item => ({ ...item, normalized: normalizeConfiguredGesture(item.gesture) }))
+            ? hotkeys.filter(item => { try { return (item && item.gesture && item.command && !item.global); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:hotkeys.filter@1088', __javascriptError); throw __javascriptError; } }).map(item => { try { return (({ ...item, normalized: normalizeConfiguredGesture(item.gesture) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:hotkeys.filter(item => item && item.gesture && item.command && !item.g@1088', __javascriptError); throw __javascriptError; } })
             : [];
         hotkeyReference = dotnetReference || null;
         if (!configuredHotkeys.length || !hotkeyReference) return;
-        hotkeyListener = event => {
+        hotkeyListener = event => { try {
             if (event.repeat || event.isComposing) return;
             const gesture = normalizeGesture(event);
-            const match = configuredHotkeys.find(item => item.normalized === gesture);
+            const match = configuredHotkeys.find(item => { try { return (item.normalized === gesture); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:configuredHotkeys.find@1095', __javascriptError); throw __javascriptError; } });
             if (!match) return;
             if (isTypingTarget(event.target) && !/^F\d{1,2}$/.test(String(event.key || ""))) return;
             event.preventDefault();
             event.stopPropagation();
             hotkeyReference.invokeMethodAsync("HandleStreamingHotkey", String(match.command), match.targetId ? String(match.targetId) : null)
-                .catch(error => console.error("PublisherStudio streaming hotkey failed", error));
-        };
+                .catch(error => { try { return (console.error("PublisherStudio streaming hotkey failed", error)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:hotkeyReference.invokeMethodAsync("HandleStreamingHotkey", String(matc@1101', __javascriptError); throw __javascriptError; } });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:hotkeyListener@1092', __javascriptError); throw __javascriptError; }};
         window.addEventListener("keydown", hotkeyListener, true);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:bindHotkeys@1085', __javascriptError); throw __javascriptError; }}
 
-    function activateSource(id) {
+    function activateSource(id) { try {
         const normalized = String(id || "").replace(/[^0-9a-f]/gi, "").toLowerCase();
         if (!normalized) return false;
         const button = document.getElementById(`live-source-activate-${normalized}`);
         if (!(button instanceof HTMLButtonElement)) return false;
         button.click();
         return true;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:activateSource@1106', __javascriptError); throw __javascriptError; }}
 
-    function externalAuthorizationWindowName(name) {
+    function externalAuthorizationWindowName(name) { try {
         const normalized = String(name || "publisherstudio-oauth").replace(/[^a-z0-9_-]/gi, "-");
         return normalized || "publisherstudio-oauth";
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:externalAuthorizationWindowName@1115', __javascriptError); throw __javascriptError; }}
 
-    function reserveExternalAuthorizationWindow(name) {
+    function reserveExternalAuthorizationWindow(name) { try {
         const key = externalAuthorizationWindowName(name);
         try {
             const popup = window.open("", key, "popup=yes,width=760,height=820,resizable=yes,scrollbars=yes");
@@ -1124,15 +1131,15 @@
             try {
                 popup.document.title = "PublisherStudio authorization";
                 if (popup.document.body) popup.document.body.textContent = "Waiting for the provider authorization page…";
-            } catch { }
+            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@1128', __caughtJavaScriptError);  }
             externalAuthorizationWindows.set(key, popup);
             return true;
         } catch {
             return false;
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:reserveExternalAuthorizationWindow@1120', __javascriptError); throw __javascriptError; }}
 
-    function navigateExternalAuthorizationWindow(name, url) {
+    function navigateExternalAuthorizationWindow(name, url) { try {
         const key = externalAuthorizationWindowName(name);
         const destination = String(url || "").trim();
         if (!destination) return false;
@@ -1141,24 +1148,24 @@
             if (!popup || popup.closed) popup = window.open(destination, key, "popup=yes,width=760,height=820,resizable=yes,scrollbars=yes");
             else popup.location.replace(destination);
             if (!popup) return false;
-            try { popup.focus(); } catch { }
+            try { popup.focus(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@1145', __caughtJavaScriptError);  }
             externalAuthorizationWindows.set(key, popup);
             return true;
         } catch {
             return false;
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:navigateExternalAuthorizationWindow@1136', __javascriptError); throw __javascriptError; }}
 
-    function showExternalAuthorizationMessage(name, title, message) {
+    function showExternalAuthorizationMessage(name, title, message) { try {
         const key = externalAuthorizationWindowName(name);
         let popup = externalAuthorizationWindows.get(key);
         try {
             if (!popup || popup.closed) popup = window.open("", key, "popup=yes,width=760,height=820,resizable=yes,scrollbars=yes");
             if (!popup) return false;
             try { popup.location.replace("about:blank"); }
-            catch { try { popup.location.href = "about:blank"; } catch { } }
+            catch { try { popup.location.href = "about:blank"; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:suppressed-catch@1160', __caughtJavaScriptError);  } }
             let attempts = 0;
-            const renderMessage = () => {
+            const renderMessage = () => { try {
                 try {
                     if (!popup.document?.body) throw new Error("The authorization window is still navigating.");
                     popup.document.title = String(title || "PublisherStudio authorization");
@@ -1174,23 +1181,23 @@
                     closeButton.type = "button";
                     closeButton.textContent = "Close";
                     closeButton.style.cssText = "margin-top:16px;padding:9px 18px;border:0;border-radius:4px;background:#17365d;color:white;cursor:pointer";
-                    closeButton.addEventListener("click", () => popup.close());
+                    closeButton.addEventListener("click", () => { try { return (popup.close()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:callback:closeButton.addEventListener@1178', __javascriptError); throw __javascriptError; } });
                     popup.document.body.append(heading, paragraph, closeButton);
                     popup.focus();
                 } catch {
                     attempts++;
                     if (attempts < 20 && !popup.closed) window.setTimeout(renderMessage, 50);
                 }
-            };
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:renderMessage@1162', __javascriptError); throw __javascriptError; }};
             window.setTimeout(renderMessage, 50);
             externalAuthorizationWindows.set(key, popup);
             return true;
         } catch {
             return false;
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:showExternalAuthorizationMessage@1153', __javascriptError); throw __javascriptError; }}
 
-    function closeExternalAuthorizationWindow(name) {
+    function closeExternalAuthorizationWindow(name) { try {
         const key = externalAuthorizationWindowName(name);
         const popup = externalAuthorizationWindows.get(key);
         externalAuthorizationWindows.delete(key);
@@ -1201,15 +1208,15 @@
         } catch {
             return false;
         }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:closeExternalAuthorizationWindow@1194', __javascriptError); throw __javascriptError; }}
 
-    function setOutputContext(context = {}) {
+    function setOutputContext(context = {}) { try {
         Object.assign(outputContext, context);
         window.PublisherStudioOutputContext = { ...outputContext };
         window.PublisherStudioChatPlatform = outputContext.platform || "Preview";
         window.PublisherStudioChatChannel = outputContext.channel || "";
         window.dispatchEvent(new CustomEvent("publisherstudio:output-context-changed", { detail: { ...outputContext } }));
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:setOutputContext@1207', __javascriptError); throw __javascriptError; }}
 
     window.publisherStreaming = {
         attachSource,
@@ -1230,7 +1237,10 @@
         stopChatBridge,
         bindHotkeys,
         unbindHotkeys,
-        getOutputContext: () => ({ ...outputContext }),
-        stopAll: async () => { [...sources.keys()].forEach(detachSource); stopChatBridge(); await stopProgramIngest(); }
+        getOutputContext: () => { try { return (({ ...outputContext })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:getOutputContext@1234', __javascriptError); throw __javascriptError; } },
+        stopAll: async () => { try { [...sources.keys()].forEach(detachSource); stopChatBridge(); await stopProgramIngest();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:stopAll@1235', __javascriptError); throw __javascriptError; }}
     };
-})();
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/streamingInterop.js:ArrowFunction@2', __javascriptError); throw __javascriptError; }})();
+
+// Guard exported browser namespaces after the file has initialized.
+publisherStudioDiagnostics.guardObject("publisherStreaming", window.publisherStreaming);

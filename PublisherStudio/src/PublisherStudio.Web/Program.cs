@@ -46,7 +46,11 @@ public static class Program
         });
         StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
-        var requestedPort = new ApplicationPortResolver().Resolve(effectiveArgs);
+        var systemVariables = new SystemVariableStoreService(builder.Configuration);
+        builder.Services.AddSingleton<ISystemVariableStoreService>(systemVariables);
+        builder.Services.AddSingleton(systemVariables);
+
+        var requestedPort = new ApplicationPortResolver(systemVariables).Resolve(effectiveArgs);
         builder.WebHost.ConfigureKestrel(options =>
         {
             if (requestedPort > 0)
@@ -71,24 +75,24 @@ public static class Program
         builder.Services.AddHealthChecks();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHttpClient();
-        builder.Services.AddHttpClient(nameof(TwitchOAuthService), client => client.Timeout = TimeSpan.FromSeconds(20));
+        builder.Services.AddHttpClient(nameof(TwitchOAuthService), client => client.Timeout = systemVariables.TwitchHttpTimeout);
 
         var dataProtectionPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio", "DataProtection");
+            "PublisherStudio", systemVariables.DataProtectionDirectoryName);
         Directory.CreateDirectory(dataProtectionPath);
         var dataProtection = builder.Services.AddDataProtection()
             .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
-            .SetApplicationName("PublisherStudio");
+            .SetApplicationName(systemVariables.DataProtectionApplicationName);
         if (OperatingSystem.IsWindows()) dataProtection.ProtectKeysWithDpapi();
 
-        builder.Services.AddCors(options => options.AddPolicy("PublisherExport", policy =>
+        builder.Services.AddCors(options => options.AddPolicy(systemVariables.CorsPolicyName, policy =>
             policy.AllowAnyOrigin().WithMethods("GET").AllowAnyHeader()));
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = SizeMode.Small).AddSpellCheck();
 
         var spreadsheetHibernationPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio", "SpreadsheetHibernation");
+            "PublisherStudio", systemVariables.SpreadsheetHibernationDirectoryName);
         Directory.CreateDirectory(spreadsheetHibernationPath);
         builder.Services.AddDevExpressControls(options =>
         {
@@ -96,15 +100,18 @@ public static class Program
                 spreadsheetOptions.AddHibernation(hibernation =>
                 {
                     hibernation.StoragePath = spreadsheetHibernationPath;
-                    hibernation.Timeout = TimeSpan.FromMinutes(20);
-                    hibernation.DocumentsDisposeTimeout = TimeSpan.FromHours(4);
+                    hibernation.Timeout = systemVariables.SpreadsheetHibernationTimeout;
+                    hibernation.DocumentsDisposeTimeout = systemVariables.SpreadsheetDocumentsDisposeTimeout;
                     hibernation.AllDocumentsOnApplicationEnd = true;
                 }));
         });
 
         builder.Services.AddPublisherStudioApplication(builder.Configuration);
+        if (!builder.Environment.IsDevelopment())
+            builder.Logging.AddFilter((category, level) => level >= LogLevel.Warning);
 
         var app = builder.Build();
+        systemVariables.AttachLogger(app.Services.GetRequiredService<ILogger<SystemVariableStoreService>>());
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/error", createScopeForErrors: true);
@@ -115,10 +122,10 @@ public static class Program
             .GetAvailableCultures()
             .Select(CultureInfo.GetCultureInfo)
             .ToList();
-        if (supportedCultures.Count == 0) supportedCultures.Add(CultureInfo.GetCultureInfo("en-US"));
+        if (supportedCultures.Count == 0) supportedCultures.Add(CultureInfo.GetCultureInfo(systemVariables.DefaultCulture));
         app.UseRequestLocalization(new RequestLocalizationOptions
         {
-            DefaultRequestCulture = new RequestCulture("en-US"),
+            DefaultRequestCulture = new RequestCulture(systemVariables.DefaultCulture),
             SupportedCultures = supportedCultures,
             SupportedUICultures = supportedCultures,
             RequestCultureProviders =

@@ -41,13 +41,13 @@ test('PublisherStudio consumes only the authoritative LocalGPT NuGet contract', 
   assert.match(readme, /organic adaptation system/);
 });
 
-test('Panel Studio arrange mode renders stable previews without temporary duplicate DOM selection', () => {
+test('Panel Studio arrange mode renders live content beneath a single interaction hit layer', () => {
   const studio = read('src/PublisherStudio.Web/Components/Editor/PanelStudio.razor');
   const view = read('src/PublisherStudio.Web/Components/Editor/PanelView.razor');
   const preview = read('src/PublisherStudio.Web/Components/Editor/PanelElementPreview.razor');
   const interop = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
   const css = read('src/PublisherStudio.Web/wwwroot/css/site.css');
-  assert.match(studio, /DesignPreviewOnly="@\(!_interactionPreview\)"/);
+  assert.match(studio, /DesignerMode="false" DesignPreviewOnly="false"/);
   assert.match(view, /if \(DesignPreviewOnly\)/);
   assert.match(view, /<PanelElementPreview Item="element"/);
   assert.match(preview, /case DataVisualElement visual:/);

@@ -1,3 +1,10 @@
+// javascript-diagnostics: guarded
+var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics || {
+    report(context, error) { try { console.error(`PublisherStudio JavaScript error in ${String(context || "browser-runtime")}.`, error); } catch (reportError) { console.error("PublisherStudio fallback JavaScript diagnostics failed.", reportError); } },
+    guard(context, callback) { try { return callback; } catch (error) { console.error(`PublisherStudio fallback guard failed in ${String(context || "browser-runtime")}.`, error); return callback; } },
+    guardObject(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback object guard failed in ${String(context || "browser-runtime")}.`, error); return value; } },
+    guardClass(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback class guard failed in ${String(context || "browser-runtime")}.`, error); return value; } }
+};
 const editors = new Map();
 const imageCache = new Map();
 const proceduralCache = new Map();
@@ -11,33 +18,33 @@ const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", 
 const textAlignments = ["left", "center", "right"];
 const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect", "fillsolid", "fillgradient"];
 
-function enumName(value, names, fallback) {
+function enumName(value, names, fallback) { try {
     if (typeof value === "string") return value;
     if (Number.isInteger(value) && value >= 0 && value < names.length) return names[value];
     return fallback;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:enumName@16', __javascriptError); throw __javascriptError; }}
 
-function layerKind(layer) {
+function layerKind(layer) { try {
     const discriminator = layer?.$type;
     if (typeof discriminator === "string") return discriminator.toLowerCase();
     return enumName(layer?.kind, layerKinds, "shape").toLowerCase();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:layerKind@22', __javascriptError); throw __javascriptError; }}
 
-function blendMode(value) {
+function blendMode(value) { try {
     if (typeof value === "string") {
         const name = value.toLowerCase();
         return name === "normal" ? "source-over" : name;
     }
     return enumName(value, blendModes, "source-over");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:blendMode@28', __javascriptError); throw __javascriptError; }}
 
-function clamp(value, minimum, maximum) {
+function clamp(value, minimum, maximum) { try {
     const number = Number(value);
     if (!Number.isFinite(number)) return minimum;
     return Math.max(minimum, Math.min(maximum, number));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:clamp@36', __javascriptError); throw __javascriptError; }}
 
-function normalizeDocument(document) {
+function normalizeDocument(document) { try {
     return {
         ...document,
         widthPx: Math.round(clamp(document?.widthPx, 16, 8192)),
@@ -47,13 +54,13 @@ function normalizeDocument(document) {
         background: document?.background || "transparent",
         layers: Array.isArray(document?.layers) ? document.layers : []
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:normalizeDocument@42', __javascriptError); throw __javascriptError; }}
 
-function cloneDocument(document) {
+function cloneDocument(document) { try {
     return JSON.parse(JSON.stringify(normalizeDocument(document)));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:cloneDocument@54', __javascriptError); throw __javascriptError; }}
 
-function pictureDropRoute(file) {
+function pictureDropRoute(file) { try {
     const name = String(file?.name || "").toLowerCase();
     const mime = String(file?.type || "").toLowerCase();
     if (/\.(ora|svgz|svg)$/.test(name)
@@ -62,9 +69,9 @@ function pictureDropRoute(file) {
         || mime.includes("gzip")) return "layers";
     if (mime.startsWith("image/") || /\.(png|jpe?g|gif|webp)$/.test(name)) return "image";
     return "";
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pictureDropRoute@58', __javascriptError); throw __javascriptError; }}
 
-function assignDroppedFile(inputId, file) {
+function assignDroppedFile(inputId, file) { try {
     const input = document.getElementById(inputId);
     if (!(input instanceof HTMLInputElement) || input.type !== "file" || !(file instanceof File)) return false;
     const transfer = new DataTransfer();
@@ -73,9 +80,9 @@ function assignDroppedFile(inputId, file) {
     input.files = transfer.files;
     input.dispatchEvent(new Event("change", { bubbles: true }));
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:assignDroppedFile@69', __javascriptError); throw __javascriptError; }}
 
-function releasePictureDropBindings(editor) {
+function releasePictureDropBindings(editor) { try {
     const root = editor?.dropRoot;
     const handlers = editor?.dropHandlers;
     if (root && handlers) {
@@ -91,59 +98,59 @@ function releasePictureDropBindings(editor) {
         editor.dropHandlers = null;
         editor.dropDepth = 0;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:releasePictureDropBindings@80', __javascriptError); throw __javascriptError; }}
 
-function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) {
+function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) { try {
     releasePictureDropBindings(editor);
     const root = document.getElementById(rootId);
     if (!root) return;
-    const show = route => {
+    const show = route => { try {
         root.classList.add("picture-file-drag-active");
         root.dataset.pictureDropMode = route || "picture";
-    };
-    const clear = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:show@102', __javascriptError); throw __javascriptError; }};
+    const clear = () => { try {
         editor.dropDepth = 0;
         root.classList.remove("picture-file-drag-active");
         root.removeAttribute("data-picture-drop-mode");
-    };
-    const descriptor = event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:clear@106', __javascriptError); throw __javascriptError; }};
+    const descriptor = event => { try {
         const file = event.dataTransfer?.files?.[0];
         if (file) return file;
-        const item = [...(event.dataTransfer?.items || [])].find(candidate => candidate.kind === "file");
+        const item = [...(event.dataTransfer?.items || [])].find(candidate => { try { return (candidate.kind === "file"); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:[...(event.dataTransfer?.items || [])].find@114', __javascriptError); throw __javascriptError; } });
         return item ? { name: "", type: item.type || "" } : null;
-    };
-    const dropPoint = event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:descriptor@111', __javascriptError); throw __javascriptError; }};
+    const dropPoint = event => { try {
         const canvas = editor.canvas;
         if (!canvas) return null;
         const bounds = canvas.getBoundingClientRect();
         if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)
             return null;
         return canvasPoint(canvas, event);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dropPoint@117', __javascriptError); throw __javascriptError; }};
     const handlers = {
-        dragenter: event => {
+        dragenter: event => { try {
             const file = descriptor(event);
             if (!file) return;
             event.preventDefault();
             editor.dropDepth++;
             show(pictureDropRoute(file));
-        },
-        dragover: event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dragenter@126', __javascriptError); throw __javascriptError; }},
+        dragover: event => { try {
             const file = descriptor(event);
             if (!file) return;
             event.preventDefault();
             event.stopPropagation();
             event.dataTransfer.dropEffect = "copy";
             show(pictureDropRoute(file));
-        },
-        dragleave: event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dragover@133', __javascriptError); throw __javascriptError; }},
+        dragleave: event => { try {
             if (event.relatedTarget && root.contains(event.relatedTarget)) return;
             editor.dropDepth = Math.max(0, editor.dropDepth - 1);
             if (editor.dropDepth === 0) clear();
-        },
-        drop: async event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dragleave@141', __javascriptError); throw __javascriptError; }},
+        drop: async event => { try {
             const file = event.dataTransfer?.files?.[0]
-                || [...(event.dataTransfer?.items || [])].find(candidate => candidate.kind === "file")?.getAsFile?.();
+                || [...(event.dataTransfer?.items || [])].find(candidate => { try { return (candidate.kind === "file"); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:[...(event.dataTransfer?.items || [])].find@148', __javascriptError); throw __javascriptError; } })?.getAsFile?.();
             if (!file) return;
             event.preventDefault();
             event.stopPropagation();
@@ -153,13 +160,13 @@ function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) {
             const point = dropPoint(event);
             try {
                 await editor.dotNetRef?.invokeMethodAsync("PictureStudioFileDropPositioned", point?.x ?? null, point?.y ?? null);
-            } catch { }
+            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@158', __caughtJavaScriptError);  }
             if (!inputId || !assignDroppedFile(inputId, file)) {
                 editor.dotNetRef?.invokeMethodAsync(
                     "PictureStudioFileDropRejected",
-                    `The dropped file '${file.name || "file"}' is not a supported Picture Studio image or layered document.`).catch(() => { });
+                    `The dropped file '${file.name || "file"}' is not a supported Picture Studio image or layered document.`).catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:promise-catch@160', __promiseError);   } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:editor.dotNetRef?.invokeMethodAsync( "PictureStudioFileDropRejected", @162', __javascriptError); throw __javascriptError; }});
             }
-        }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drop@146', __javascriptError); throw __javascriptError; }}
     };
     editor.dropRoot = root;
     editor.dropHandlers = handlers;
@@ -168,9 +175,9 @@ function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) {
     root.addEventListener("dragover", handlers.dragover);
     root.addEventListener("dragleave", handlers.dragleave);
     root.addEventListener("drop", handlers.drop);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:bindPictureDrop@98', __javascriptError); throw __javascriptError; }}
 
-function normalizeToolSettings(settings) {
+function normalizeToolSettings(settings) { try {
     const rawTool = typeof settings?.tool === "string" ? settings.tool.toLowerCase() : "select";
     return {
         tool: drawTools.includes(rawTool) ? rawTool : "select",
@@ -180,42 +187,42 @@ function normalizeToolSettings(settings) {
         opacity: clamp(settings?.opacity ?? 1, 0, 1),
         hardness: clamp(settings?.hardness ?? .8, 0, 1)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:normalizeToolSettings@175', __javascriptError); throw __javascriptError; }}
 
-function createCanvas(width, height) {
+function createCanvas(width, height) { try {
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(width));
     canvas.height = Math.max(1, Math.round(height));
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createCanvas@187', __javascriptError); throw __javascriptError; }}
 
-function loadImage(dataUrl) {
+function loadImage(dataUrl) { try {
     if (!dataUrl) return Promise.resolve(null);
     const source = String(dataUrl).trim();
     if (!source.startsWith("data:image/") && !source.startsWith("blob:"))
         return Promise.reject(new Error("The image layer contains an invalid source instead of embedded image data."));
     if (imageCache.has(source)) return imageCache.get(source);
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => { try {
         const image = new Image();
         image.decoding = "async";
-        image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error("The image layer could not be decoded."));
+        image.onload = () => { try { return (resolve(image)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:image.onload@203', __javascriptError); throw __javascriptError; } };
+        image.onerror = () => { try { return (reject(new Error("The image layer could not be decoded."))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:image.onerror@204', __javascriptError); throw __javascriptError; } };
         image.src = source;
-    }).catch(error => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:ArrowFunction@200', __javascriptError); throw __javascriptError; }}).catch(error => { try { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:promise-catch@200', error); 
         imageCache.delete(source);
         throw error;
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:new Promise((resolve, reject) => { const image = new Image(); image.de@206', __javascriptError); throw __javascriptError; }});
     imageCache.set(source, promise);
     return promise;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:loadImage@194', __javascriptError); throw __javascriptError; }}
 
-function svgMarkupDataUrl(markup) {
+function svgMarkupDataUrl(markup) { try {
     const source = String(markup || "").trim();
     if (!source.toLowerCase().startsWith("<svg")) return "";
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(source)}`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgMarkupDataUrl@214', __javascriptError); throw __javascriptError; }}
 
-async function drawSvgLayer(ctx, layer) {
+async function drawSvgLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     try {
         const source = svgMarkupDataUrl(layer.svgMarkup);
@@ -230,9 +237,9 @@ async function drawSvgLayer(ctx, layer) {
         drawBrokenLayer(ctx, layer, "SVG");
         return `${layer.name || "Vector layer"}: ${error?.message || error}`;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawSvgLayer@220', __javascriptError); throw __javascriptError; }}
 
-function parseColor(value, fallback = [0, 0, 0, 255]) {
+function parseColor(value, fallback = [0, 0, 0, 255]) { try {
     if (typeof value !== "string") return fallback;
     const text = value.trim();
     if (text === "transparent") return [0, 0, 0, 0];
@@ -254,19 +261,19 @@ function parseColor(value, fallback = [0, 0, 0, 255]) {
         ];
     }
     return fallback;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:parseColor@237', __javascriptError); throw __javascriptError; }}
 
-function cssColor(value, fallback = "#000000") {
+function cssColor(value, fallback = "#000000") { try {
     if (typeof value !== "string" || !value.trim()) return fallback;
     return value;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:cssColor@261', __javascriptError); throw __javascriptError; }}
 
-function rgba(color, alpha = 1) {
+function rgba(color, alpha = 1) { try {
     const parsed = parseColor(color, [0, 0, 0, 255]);
     return `rgba(${parsed[0]}, ${parsed[1]}, ${parsed[2]}, ${clamp(alpha * (parsed[3] / 255), 0, 1)})`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:rgba@266', __javascriptError); throw __javascriptError; }}
 
-function mixColor(first, second, amount) {
+function mixColor(first, second, amount) { try {
     amount = clamp(amount, 0, 1);
     return [
         Math.round(first[0] + (second[0] - first[0]) * amount),
@@ -274,9 +281,9 @@ function mixColor(first, second, amount) {
         Math.round(first[2] + (second[2] - first[2]) * amount),
         Math.round(first[3] + (second[3] - first[3]) * amount)
     ];
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:mixColor@271', __javascriptError); throw __javascriptError; }}
 
-function layerFilter(layer) {
+function layerFilter(layer) { try {
     return [
         `brightness(${clamp(layer.brightness ?? 1, 0, 3)})`,
         `contrast(${clamp(layer.contrast ?? 1, 0, 3)})`,
@@ -287,9 +294,9 @@ function layerFilter(layer) {
         `sepia(${clamp(layer.sepia ?? 0, 0, 1)})`,
         `invert(${clamp(layer.invert ?? 0, 0, 1)})`
     ].join(" ");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:layerFilter@281', __javascriptError); throw __javascriptError; }}
 
-function beginLayer(ctx, layer) {
+function beginLayer(ctx, layer) { try {
     const width = Math.max(1, Number(layer.width) || 1);
     const height = Math.max(1, Number(layer.height) || 1);
     const x = Number(layer.x) || 0;
@@ -302,13 +309,13 @@ function beginLayer(ctx, layer) {
     ctx.translate(x + width / 2, y + height / 2);
     ctx.rotate(rotation);
     return { width, height };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:beginLayer@294', __javascriptError); throw __javascriptError; }}
 
-function endLayer(ctx) {
+function endLayer(ctx) { try {
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:endLayer@309', __javascriptError); throw __javascriptError; }}
 
-function roundedRectanglePath(ctx, x, y, width, height, radius) {
+function roundedRectanglePath(ctx, x, y, width, height, radius) { try {
     radius = Math.max(0, Math.min(radius, Math.abs(width) / 2, Math.abs(height) / 2));
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -321,9 +328,9 @@ function roundedRectanglePath(ctx, x, y, width, height, radius) {
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:roundedRectanglePath@313', __javascriptError); throw __javascriptError; }}
 
-function drawImageWithFit(ctx, image, width, height, fit) {
+function drawImageWithFit(ctx, image, width, height, fit) { try {
     if (!image) return;
     fit = enumName(fit, rasterFits, "contain").toLowerCase();
     if (fit === "stretch") {
@@ -343,9 +350,9 @@ function drawImageWithFit(ctx, image, width, height, fit) {
         drawWidth = height * imageRatio;
     }
     ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawImageWithFit@328', __javascriptError); throw __javascriptError; }}
 
-async function drawRasterLayer(ctx, layer) {
+async function drawRasterLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     let image;
     try {
@@ -386,9 +393,9 @@ async function drawRasterLayer(ctx, layer) {
     ctx.drawImage(scratch, -width / 2, -height / 2, width, height);
     endLayer(ctx);
     return null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawRasterLayer@350', __javascriptError); throw __javascriptError; }}
 
-function wrapText(ctx, text, maximumWidth) {
+function wrapText(ctx, text, maximumWidth) { try {
     const paragraphs = String(text ?? "").replace(/\r/g, "").split("\n");
     const lines = [];
     for (const paragraph of paragraphs) {
@@ -409,9 +416,9 @@ function wrapText(ctx, text, maximumWidth) {
         lines.push(line);
     }
     return lines;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:wrapText@393', __javascriptError); throw __javascriptError; }}
 
-function drawTextLayer(ctx, layer) {
+function drawTextLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     const fontSize = clamp(layer.fontSizePx ?? 72, 4, 1024);
     const fontStyle = `${layer.italic ? "italic " : ""}${layer.bold ? "700 " : "400 "}${fontSize}px ${layer.fontFamily || "Segoe UI"}`;
@@ -448,9 +455,9 @@ function drawTextLayer(ctx, layer) {
     }
     ctx.restore();
     endLayer(ctx);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawTextLayer@416', __javascriptError); throw __javascriptError; }}
 
-function shapeFillStyle(ctx, layer, width, height) {
+function shapeFillStyle(ctx, layer, width, height) { try {
     const fillKind = enumName(layer.fillKind, fillKinds, "solid").toLowerCase();
     const first = cssColor(layer.fillColor, "#60a5fa");
     const second = cssColor(layer.secondaryFillColor, "#ffffff");
@@ -464,9 +471,9 @@ function shapeFillStyle(ctx, layer, width, height) {
     const dx = Math.cos(angle) * distance / 2; const dy = Math.sin(angle) * distance / 2;
     const gradient = ctx.createLinearGradient(-dx, -dy, dx, dy);
     gradient.addColorStop(0, first); gradient.addColorStop(1, second); return gradient;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:shapeFillStyle@455', __javascriptError); throw __javascriptError; }}
 
-function drawShapeLayer(ctx, layer) {
+function drawShapeLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     const shape = enumName(layer.shape, shapeKinds, "rectangle").toLowerCase();
     const x = -width / 2;
@@ -482,7 +489,7 @@ function drawShapeLayer(ctx, layer) {
         const smooth = layer.pathSmooth === true;
         ctx.beginPath();
         if (points.length) {
-            const local = points.map(point => ({ x: (Number(point.x) || 0) - width / 2, y: (Number(point.y) || 0) - height / 2 }));
+            const local = points.map(point => { try { return (({ x: (Number(point.x) || 0) - width / 2, y: (Number(point.y) || 0) - height / 2 })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points.map@487', __javascriptError); throw __javascriptError; } });
             ctx.moveTo(local[0].x, local[0].y);
             if (smooth && local.length > 2) {
                 for (let index = 1; index < local.length - 1; index++) {
@@ -509,9 +516,9 @@ function drawShapeLayer(ctx, layer) {
     if (layer.fillColor !== "transparent" && (shape !== "path" || layer.pathClosed === true)) ctx.fill();
     if (ctx.lineWidth > 0 && layer.strokeColor !== "transparent") ctx.stroke();
     endLayer(ctx);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawShapeLayer@471', __javascriptError); throw __javascriptError; }}
 
-function createFillStyle(ctx, layer, width, height) {
+function createFillStyle(ctx, layer, width, height) { try {
     const fillKind = enumName(layer.fillKind, fillKinds, "linearGradient").toLowerCase();
     const first = cssColor(layer.primaryColor, "#dbeafe");
     const second = cssColor(layer.secondaryColor, "#6366f1");
@@ -531,28 +538,28 @@ function createFillStyle(ctx, layer, width, height) {
     gradient.addColorStop(0, first);
     gradient.addColorStop(1, second);
     return gradient;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createFillStyle@516', __javascriptError); throw __javascriptError; }}
 
-function drawFillLayer(ctx, layer) {
+function drawFillLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     ctx.fillStyle = createFillStyle(ctx, layer, width, height);
     ctx.fillRect(-width / 2, -height / 2, width, height);
     endLayer(ctx);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawFillLayer@538', __javascriptError); throw __javascriptError; }}
 
-function hashNoise(x, y, seed) {
+function hashNoise(x, y, seed) { try {
     let value = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(seed | 0, 1442695041);
     value = (value ^ (value >>> 13)) | 0;
     value = Math.imul(value, 1274126177);
     value = value ^ (value >>> 16);
     return (value >>> 0) / 4294967295;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hashNoise@545', __javascriptError); throw __javascriptError; }}
 
-function smoothstep(value) {
+function smoothstep(value) { try {
     return value * value * (3 - 2 * value);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:smoothstep@553', __javascriptError); throw __javascriptError; }}
 
-function valueNoise(x, y, seed) {
+function valueNoise(x, y, seed) { try {
     const x0 = Math.floor(x);
     const y0 = Math.floor(y);
     const tx = smoothstep(x - x0);
@@ -564,9 +571,9 @@ function valueNoise(x, y, seed) {
     const first = a + (b - a) * tx;
     const second = c + (d - c) * tx;
     return first + (second - first) * ty;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:valueNoise@557', __javascriptError); throw __javascriptError; }}
 
-function fractalNoise(x, y, seed, detail) {
+function fractalNoise(x, y, seed, detail) { try {
     let sum = 0;
     let amplitude = 1;
     let frequency = 1;
@@ -578,17 +585,17 @@ function fractalNoise(x, y, seed, detail) {
         frequency *= 2;
     }
     return sum / Math.max(.0001, total);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:fractalNoise@571', __javascriptError); throw __javascriptError; }}
 
-function proceduralKey(layer, width, height) {
+function proceduralKey(layer, width, height) { try {
     return JSON.stringify([
         layer.renderKind, layer.primaryColor, layer.secondaryColor, layer.seed, layer.scale,
         layer.detail, layer.softness, layer.renderContrast, layer.angleDegrees, layer.stripeWidthPx,
         Math.round(width), Math.round(height)
     ]);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:proceduralKey@585', __javascriptError); throw __javascriptError; }}
 
-function createNoiseOrClouds(layer, width, height, clouds) {
+function createNoiseOrClouds(layer, width, height, clouds) { try {
     const maximum = 480;
     const ratio = width / Math.max(1, height);
     const renderWidth = ratio >= 1 ? maximum : Math.max(64, Math.round(maximum * ratio));
@@ -627,9 +634,9 @@ function createNoiseOrClouds(layer, width, height, clouds) {
     }
     ctx.putImageData(image, 0, 0);
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createNoiseOrClouds@593', __javascriptError); throw __javascriptError; }}
 
-function createBloomCanvas(layer, width, height) {
+function createBloomCanvas(layer, width, height) { try {
     const canvas = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
     const ctx = canvas.getContext("2d", { alpha: true });
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -651,9 +658,9 @@ function createBloomCanvas(layer, width, height) {
         ctx.fill();
     }
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createBloomCanvas@634', __javascriptError); throw __javascriptError; }}
 
-function createNeonCanvas(layer, width, height) {
+function createNeonCanvas(layer, width, height) { try {
     const canvas = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
     const ctx = canvas.getContext("2d", { alpha: true });
     const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -680,9 +687,9 @@ function createNeonCanvas(layer, width, height) {
         ctx.restore();
     }
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createNeonCanvas@658', __javascriptError); throw __javascriptError; }}
 
-function createLensFlareCanvas(layer, width, height) {
+function createLensFlareCanvas(layer, width, height) { try {
     const canvas = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
     const ctx = canvas.getContext("2d", { alpha: true });
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -724,16 +731,16 @@ function createLensFlareCanvas(layer, width, height) {
         ctx.fill();
     }
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createLensFlareCanvas@687', __javascriptError); throw __javascriptError; }}
 
-function proceduralCanvasSize(width, height, maximum = 640) {
+function proceduralCanvasSize(width, height, maximum = 640) { try {
     const ratio = width / Math.max(1, height);
     return ratio >= 1
         ? { width: maximum, height: Math.max(64, Math.round(maximum / ratio)) }
         : { width: Math.max(64, Math.round(maximum * ratio)), height: maximum };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:proceduralCanvasSize@731', __javascriptError); throw __javascriptError; }}
 
-function createGrainNoiseCanvas(layer, width, height) {
+function createGrainNoiseCanvas(layer, width, height) { try {
     const size = proceduralCanvasSize(width, height, 560);
     const canvas = createCanvas(size.width, size.height);
     const ctx = canvas.getContext("2d");
@@ -759,9 +766,9 @@ function createGrainNoiseCanvas(layer, width, height) {
     }
     ctx.putImageData(image, 0, 0);
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createGrainNoiseCanvas@738', __javascriptError); throw __javascriptError; }}
 
-function createMotionBlurCanvas(layer, width, height) {
+function createMotionBlurCanvas(layer, width, height) { try {
     const size = proceduralCanvasSize(width, height, 720);
     const canvas = createCanvas(size.width, size.height);
     const ctx = canvas.getContext("2d");
@@ -803,9 +810,9 @@ function createMotionBlurCanvas(layer, width, height) {
     ctx.fillStyle = secondary;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createMotionBlurCanvas@766', __javascriptError); throw __javascriptError; }}
 
-function createWindCanvas(layer, width, height) {
+function createWindCanvas(layer, width, height) { try {
     const size = proceduralCanvasSize(width, height, 720);
     const canvas = createCanvas(size.width, size.height);
     const ctx = canvas.getContext("2d");
@@ -835,9 +842,9 @@ function createWindCanvas(layer, width, height) {
     }
     ctx.restore();
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createWindCanvas@810', __javascriptError); throw __javascriptError; }}
 
-function createOceanWavesCanvas(layer, width, height) {
+function createOceanWavesCanvas(layer, width, height) { try {
     const size = proceduralCanvasSize(width, height, 720);
     const canvas = createCanvas(size.width, size.height);
     const ctx = canvas.getContext("2d");
@@ -876,9 +883,9 @@ function createOceanWavesCanvas(layer, width, height) {
     }
     ctx.putImageData(image, 0, 0);
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createOceanWavesCanvas@842', __javascriptError); throw __javascriptError; }}
 
-function getProceduralCanvas(layer, width, height) {
+function getProceduralCanvas(layer, width, height) { try {
     const key = proceduralKey(layer, width, height);
     if (proceduralCache.has(key)) return proceduralCache.get(key);
     const kind = enumName(layer.renderKind, renderKinds, "clouds").toLowerCase();
@@ -897,9 +904,9 @@ function getProceduralCanvas(layer, width, height) {
     proceduralCache.set(key, canvas);
     if (proceduralCache.size > 40) proceduralCache.delete(proceduralCache.keys().next().value);
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:getProceduralCanvas@883', __javascriptError); throw __javascriptError; }}
 
-function drawRenderLayer(ctx, layer) {
+function drawRenderLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     const kind = enumName(layer.renderKind, renderKinds, "clouds").toLowerCase();
     if (kind === "stripes") {
@@ -925,14 +932,14 @@ function drawRenderLayer(ctx, layer) {
         ctx.drawImage(procedural, -width / 2, -height / 2, width, height);
     }
     endLayer(ctx);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawRenderLayer@904', __javascriptError); throw __javascriptError; }}
 
-function strokeKind(stroke) {
+function strokeKind(stroke) { try {
     if (typeof stroke?.kind === "string") return stroke.kind.toLowerCase();
     return enumName(stroke?.kind, ["brush", "pencil", "spray", "toothbrush", "line", "eraser"], "brush").toLowerCase();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:strokeKind@932', __javascriptError); throw __javascriptError; }}
 
-function traceStrokePath(ctx, points, kind) {
+function traceStrokePath(ctx, points, kind) { try {
     if (!points.length) return;
     ctx.beginPath();
     ctx.moveTo(Number(points[0].x) || 0, Number(points[0].y) || 0);
@@ -955,9 +962,9 @@ function traceStrokePath(ctx, points, kind) {
     }
     const last = points[points.length - 1];
     ctx.lineTo(Number(last.x) || 0, Number(last.y) || 0);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:traceStrokePath@937', __javascriptError); throw __javascriptError; }}
 
-function drawSprayStroke(ctx, points, width, color, opacity) {
+function drawSprayStroke(ctx, points, width, color, opacity) { try {
     const radius = Math.max(1, width / 2);
     ctx.save();
     ctx.fillStyle = color;
@@ -987,9 +994,9 @@ function drawSprayStroke(ctx, points, width, color, opacity) {
         }
     }
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawSprayStroke@962', __javascriptError); throw __javascriptError; }}
 
-function drawToothbrushStroke(ctx, points, width, color, opacity) {
+function drawToothbrushStroke(ctx, points, width, color, opacity) { try {
     const last = points[points.length - 1];
     if (!last) return;
     ctx.save();
@@ -1033,9 +1040,9 @@ function drawToothbrushStroke(ctx, points, width, color, opacity) {
         }
     }
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawToothbrushStroke@994', __javascriptError); throw __javascriptError; }}
 
-function drawPaintStroke(ctx, stroke, preview = false) {
+function drawPaintStroke(ctx, stroke, preview = false) { try {
     const points = Array.isArray(stroke?.points) ? stroke.points : [];
     if (points.length < 2) return;
     const kind = strokeKind(stroke);
@@ -1075,9 +1082,9 @@ function drawPaintStroke(ctx, stroke, preview = false) {
         ctx.stroke();
     }
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawPaintStroke@1040', __javascriptError); throw __javascriptError; }}
 
-function drawPaintLayer(ctx, layer) {
+function drawPaintLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     const scratch = createCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
     const scratchContext = scratch.getContext("2d", { alpha: true });
@@ -1085,9 +1092,9 @@ function drawPaintLayer(ctx, layer) {
         drawPaintStroke(scratchContext, stroke);
     ctx.drawImage(scratch, -width / 2, -height / 2, width, height);
     endLayer(ctx);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawPaintLayer@1082', __javascriptError); throw __javascriptError; }}
 
-function applyLayerClip(ctx, layer) {
+function applyLayerClip(ctx, layer) { try {
     const points = Array.isArray(layer?.clipPolygon) ? layer.clipPolygon : [];
     if (points.length < 3) return;
     ctx.beginPath();
@@ -1097,9 +1104,9 @@ function applyLayerClip(ctx, layer) {
         ctx.lineTo(Number(points[index].x) || 0, Number(points[index].y) || 0);
     ctx.closePath();
     ctx.clip(layer.clipInverted === true ? "evenodd" : "nonzero");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:applyLayerClip@1092', __javascriptError); throw __javascriptError; }}
 
-async function drawLayer(ctx, layer) {
+async function drawLayer(ctx, layer) { try {
     if (!layer || layer.visible === false || clamp(layer.opacity ?? 1, 0, 1) <= 0) return null;
     ctx.save();
     try {
@@ -1117,18 +1124,18 @@ async function drawLayer(ctx, layer) {
     } finally {
         ctx.restore();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawLayer@1104', __javascriptError); throw __javascriptError; }}
 
-function drawBackground(ctx, document, forceOpaque = false) {
+function drawBackground(ctx, document, forceOpaque = false) { try {
     const value = document.background || "transparent";
     if (value === "transparent" && !forceOpaque) return;
     ctx.save();
     ctx.fillStyle = value === "transparent" ? "#ffffff" : cssColor(value, "#ffffff");
     ctx.fillRect(0, 0, document.widthPx, document.heightPx);
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawBackground@1124', __javascriptError); throw __javascriptError; }}
 
-function drawGrid(ctx, document, zoom) {
+function drawGrid(ctx, document, zoom) { try {
     if (!document.gridVisible) return;
     const spacing = Math.max(2, Number(document.gridSpacingPx) || 25);
     ctx.save();
@@ -1145,9 +1152,9 @@ function drawGrid(ctx, document, zoom) {
     }
     ctx.stroke();
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawGrid@1133', __javascriptError); throw __javascriptError; }}
 
-function localToWorld(layer, localX, localY) {
+function localToWorld(layer, localX, localY) { try {
     const width = Number(layer.width) || 1;
     const height = Number(layer.height) || 1;
     const centerX = (Number(layer.x) || 0) + width / 2;
@@ -1159,9 +1166,9 @@ function localToWorld(layer, localX, localY) {
         x: centerX + localX * cos - localY * sin,
         y: centerY + localX * sin + localY * cos
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:localToWorld@1152', __javascriptError); throw __javascriptError; }}
 
-function worldToLocal(layer, worldX, worldY) {
+function worldToLocal(layer, worldX, worldY) { try {
     const width = Number(layer.width) || 1;
     const height = Number(layer.height) || 1;
     const centerX = (Number(layer.x) || 0) + width / 2;
@@ -1173,9 +1180,9 @@ function worldToLocal(layer, worldX, worldY) {
         x: dx * Math.cos(angle) - dy * Math.sin(angle),
         y: dx * Math.sin(angle) + dy * Math.cos(angle)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:worldToLocal@1166', __javascriptError); throw __javascriptError; }}
 
-function selectionHandles(layer, zoom) {
+function selectionHandles(layer, zoom) { try {
     const width = Number(layer.width) || 1;
     const height = Number(layer.height) || 1;
     const offset = 28 / Math.max(.05, zoom);
@@ -1186,9 +1193,9 @@ function selectionHandles(layer, zoom) {
         sw: localToWorld(layer, -width / 2, height / 2),
         rotate: localToWorld(layer, 0, -height / 2 - offset)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:selectionHandles@1180', __javascriptError); throw __javascriptError; }}
 
-function drawSelection(ctx, layer, zoom) {
+function drawSelection(ctx, layer, zoom) { try {
     if (!layer || layer.visible === false) return;
     const width = Math.max(1, Number(layer.width) || 1);
     const height = Math.max(1, Number(layer.height) || 1);
@@ -1226,16 +1233,16 @@ function drawSelection(ctx, layer, zoom) {
         ctx.stroke();
     }
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawSelection@1193', __javascriptError); throw __javascriptError; }}
 
-function isAreaSelectionTool(tool) { return ["rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect"].includes(String(tool || "").toLowerCase()); }
-function isAreaFillTool(tool) { return ["fillsolid", "fillgradient"].includes(String(tool || "").toLowerCase()); }
-function selectionKindForTool(tool) {
+function isAreaSelectionTool(tool) { try { return ["rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect"].includes(String(tool || "").toLowerCase());  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:isAreaSelectionTool@1233', __javascriptError); throw __javascriptError; }}
+function isAreaFillTool(tool) { try { return ["fillsolid", "fillgradient"].includes(String(tool || "").toLowerCase());  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:isAreaFillTool@1234', __javascriptError); throw __javascriptError; }}
+function selectionKindForTool(tool) { try {
     const name = String(tool || "").toLowerCase();
     return name === "ellipseselect" ? "ellipse" : name === "freeselect" ? "free" : name === "magneticselect" ? "magnetic" : name === "polygonselect" ? "polygon" : "rectangle";
-}
-function selectionFromDrawing(drawing) {
-    const points = Array.isArray(drawing?.points) ? drawing.points.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 })) : [];
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:selectionKindForTool@1235', __javascriptError); throw __javascriptError; }}
+function selectionFromDrawing(drawing) { try {
+    const points = Array.isArray(drawing?.points) ? drawing.points.map(point => { try { return (({ x: Number(point.x) || 0, y: Number(point.y) || 0 })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:drawing.points.map@1240', __javascriptError); throw __javascriptError; } }) : [];
     if (points.length < 2) return null;
     const kind = selectionKindForTool(drawing.tool);
     if (kind === "rectangle" || kind === "ellipse") {
@@ -1243,14 +1250,14 @@ function selectionFromDrawing(drawing) {
         return { kind, points: [{ x: Math.min(first.x,last.x), y: Math.min(first.y,last.y) }, { x: Math.max(first.x,last.x), y: Math.max(first.y,last.y) }] };
     }
     return { kind, points };
-}
-function selectionCoordinates(selection) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:selectionFromDrawing@1239', __javascriptError); throw __javascriptError; }}
+function selectionCoordinates(selection) { try {
     const points = Array.isArray(selection?.points) ? selection.points : [];
     const values = [];
     for (const point of points) values.push(Number(point.x) || 0, Number(point.y) || 0);
     return values;
-}
-function appendAreaSelectionPath(ctx, selection) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:selectionCoordinates@1249', __javascriptError); throw __javascriptError; }}
+function appendAreaSelectionPath(ctx, selection) { try {
     const points = Array.isArray(selection?.points) ? selection.points : [];
     if (points.length < 2) return false;
     if (selection.kind === "rectangle" || selection.kind === "ellipse") {
@@ -1264,9 +1271,9 @@ function appendAreaSelectionPath(ctx, selection) {
     for (let index = 1; index < points.length; index++) ctx.lineTo(points[index].x, points[index].y);
     ctx.closePath();
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:appendAreaSelectionPath@1255', __javascriptError); throw __javascriptError; }}
 
-function areaSelectionHandlePoints(selection) {
+function areaSelectionHandlePoints(selection) { try {
     const points = Array.isArray(selection?.points) ? selection.points : [];
     if (points.length < 2) return [];
     if (selection.kind === "rectangle" || selection.kind === "ellipse") {
@@ -1275,16 +1282,16 @@ function areaSelectionHandlePoints(selection) {
         return [{ x: left, y: top }, { x: right, y: top }, { x: right, y: bottom }, { x: left, y: bottom }];
     }
     return points;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:areaSelectionHandlePoints@1271', __javascriptError); throw __javascriptError; }}
 
-function drawSelectionModeVeil(ctx) {
+function drawSelectionModeVeil(ctx) { try {
     ctx.save();
     ctx.fillStyle = "rgba(2,6,23,.34)";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawSelectionModeVeil@1282', __javascriptError); throw __javascriptError; }}
 
-function drawAreaSelection(ctx, selection, zoom) {
+function drawAreaSelection(ctx, selection, zoom) { try {
     const points = Array.isArray(selection?.points) ? selection.points : [];
     if (points.length < 2) return;
     const scale = Math.max(.05, zoom);
@@ -1316,8 +1323,8 @@ function drawAreaSelection(ctx, selection, zoom) {
         ctx.stroke();
     }
     ctx.restore();
-}
-function magneticSnapPoint(editor, point) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawAreaSelection@1289', __javascriptError); throw __javascriptError; }}
+function magneticSnapPoint(editor, point) { try {
     let best = point; let distance = 18 / Math.max(.05, editor.zoom || 1);
     for (const layer of editor.document?.layers || []) {
         if (!layer.visible) continue;
@@ -1326,18 +1333,18 @@ function magneticSnapPoint(editor, point) {
         for (const candidate of candidates) { const d=Math.hypot(candidate.x-point.x,candidate.y-point.y); if (d<distance) {distance=d;best=candidate;} }
     }
     return {x:best.x,y:best.y};
-}
-function commitAreaFill(editor, selection, gradient) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:magneticSnapPoint@1322', __javascriptError); throw __javascriptError; }}
+function commitAreaFill(editor, selection, gradient) { try {
     if (!selection) return;
     safeInvoke(editor, "PictureAreaFillCommitted", selection.kind, selectionCoordinates(selection), editor.toolSettings.color, editor.toolSettings.secondaryColor, gradient);
     editor.areaSelection = null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:commitAreaFill@1332', __javascriptError); throw __javascriptError; }}
 
-function isShapeDrawingTool(tool) {
+function isShapeDrawingTool(tool) { try {
     return ["square", "rectangle", "ellipse", "arrow"].includes(String(tool || "").toLowerCase());
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:isShapeDrawingTool@1338', __javascriptError); throw __javascriptError; }}
 
-function shapeDrawingGeometry(drawing) {
+function shapeDrawingGeometry(drawing) { try {
     const first = drawing?.points?.[0];
     const last = drawing?.points?.[drawing.points.length - 1];
     if (!first || !last) return null;
@@ -1370,9 +1377,9 @@ function shapeDrawingGeometry(drawing) {
         height: Math.max(4, Math.abs(dy)),
         rotation: 0
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:shapeDrawingGeometry@1342', __javascriptError); throw __javascriptError; }}
 
-function drawDrawingPreview(ctx, drawing) {
+function drawDrawingPreview(ctx, drawing) { try {
     if (!drawing) return;
     const effectiveTool = drawing.selectionTool || drawing.tool;
     if (isAreaSelectionTool(effectiveTool)) {
@@ -1429,9 +1436,9 @@ function drawDrawingPreview(ctx, drawing) {
         ctx.strokeRect(geometry.x, geometry.y, geometry.width, geometry.height);
     }
     ctx.restore();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawDrawingPreview@1377', __javascriptError); throw __javascriptError; }}
 
-async function drawDocument(canvas, document, options = {}) {
+async function drawDocument(canvas, document, options = {}) { try {
     document = normalizeDocument(document);
     if (canvas.width !== document.widthPx) canvas.width = document.widthPx;
     if (canvas.height !== document.heightPx) canvas.height = document.heightPx;
@@ -1449,30 +1456,30 @@ async function drawDocument(canvas, document, options = {}) {
     if (options.previewStroke) drawDrawingPreview(ctx, options.previewStroke);
     if (options.areaSelection) drawAreaSelection(ctx, options.areaSelection, options.zoom || 1);
     if (options.selectedLayerId) {
-        const selected = document.layers.find(layer => String(layer.id).toLowerCase() === String(options.selectedLayerId).toLowerCase());
+        const selected = document.layers.find(layer => { try { return (String(layer.id).toLowerCase() === String(options.selectedLayerId).toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:document.layers.find@1454', __javascriptError); throw __javascriptError; } });
         drawSelection(ctx, selected, options.zoom || 1);
     }
     canvas.pictureStudioErrors = errors;
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawDocument@1436', __javascriptError); throw __javascriptError; }}
 
-function canvasPoint(canvas, event) {
+function canvasPoint(canvas, event) { try {
     const bounds = canvas.getBoundingClientRect();
     return {
         x: (event.clientX - bounds.left) * canvas.width / Math.max(1, bounds.width),
         y: (event.clientY - bounds.top) * canvas.height / Math.max(1, bounds.height)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:canvasPoint@1461', __javascriptError); throw __javascriptError; }}
 
-function distanceToSegment(pointX, pointY, firstX, firstY, secondX, secondY) {
+function distanceToSegment(pointX, pointY, firstX, firstY, secondX, secondY) { try {
     const dx = secondX - firstX;
     const dy = secondY - firstY;
     if (Math.abs(dx) < .0001 && Math.abs(dy) < .0001) return Math.hypot(pointX - firstX, pointY - firstY);
     const amount = clamp(((pointX - firstX) * dx + (pointY - firstY) * dy) / (dx * dx + dy * dy), 0, 1);
     return Math.hypot(pointX - (firstX + dx * amount), pointY - (firstY + dy * amount));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:distanceToSegment@1469', __javascriptError); throw __javascriptError; }}
 
-function hitPaintLayer(layer, worldX, worldY) {
+function hitPaintLayer(layer, worldX, worldY) { try {
     const local = worldToLocal(layer, worldX, worldY);
     const width = Math.max(1, Number(layer.width) || 1);
     const height = Math.max(1, Number(layer.height) || 1);
@@ -1490,9 +1497,9 @@ function hitPaintLayer(layer, worldX, worldY) {
         }
     }
     return false;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hitPaintLayer@1477', __javascriptError); throw __javascriptError; }}
 
-function pointInPolygon(points, x, y) {
+function pointInPolygon(points, x, y) { try {
     let inside = false;
     for (let index = 0, previous = points.length - 1; index < points.length; previous = index++) {
         const currentPoint = points[index];
@@ -1506,16 +1513,16 @@ function pointInPolygon(points, x, y) {
         if (crosses) inside = !inside;
     }
     return inside;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pointInPolygon@1497', __javascriptError); throw __javascriptError; }}
 
-function pointPassesLayerClip(layer, x, y) {
+function pointPassesLayerClip(layer, x, y) { try {
     const points = Array.isArray(layer?.clipPolygon) ? layer.clipPolygon : [];
     if (points.length < 3) return true;
     const inside = pointInPolygon(points, x, y);
     return layer.clipInverted === true ? !inside : inside;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pointPassesLayerClip@1513', __javascriptError); throw __javascriptError; }}
 
-function hitLayer(document, x, y) {
+function hitLayer(document, x, y) { try {
     for (let index = document.layers.length - 1; index >= 0; index--) {
         const layer = document.layers[index];
         if (!layer.visible) continue;
@@ -1531,9 +1538,9 @@ function hitLayer(document, x, y) {
             return layer;
     }
     return null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hitLayer@1520', __javascriptError); throw __javascriptError; }}
 
-function hitHandle(layer, x, y, zoom) {
+function hitHandle(layer, x, y, zoom) { try {
     if (!layer || layer.locked || layerKind(layer) === "paint") return null;
     const handles = selectionHandles(layer, zoom);
     const threshold = 13 / Math.max(.05, zoom);
@@ -1541,29 +1548,29 @@ function hitHandle(layer, x, y, zoom) {
         if (Math.hypot(point.x - x, point.y - y) <= threshold) return name;
     }
     return null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hitHandle@1538', __javascriptError); throw __javascriptError; }}
 
-function safeInvoke(editor, method, ...args) {
+function safeInvoke(editor, method, ...args) { try {
     if (!editor?.dotNetRef) return Promise.resolve();
-    return editor.dotNetRef.invokeMethodAsync(method, ...args).catch(error => {
+    return editor.dotNetRef.invokeMethodAsync(method, ...args).catch(error => { try { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:promise-catch@1550', error); 
         const message = String(error?.message || error || "");
         if (!/disconnected|disposed|circuit/i.test(message))
             console.warn(`Picture Studio callback ${method} failed.`, error);
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:editor.dotNetRef.invokeMethodAsync(method, ...args).catch@1550', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:safeInvoke@1548', __javascriptError); throw __javascriptError; }}
 
-function reportRenderState(editor, message) {
+function reportRenderState(editor, message) { try {
     const next = message || "";
     if (next === editor.lastRenderError) return;
     const hadError = Boolean(editor.lastRenderError);
     editor.lastRenderError = next;
     if (next) safeInvoke(editor, "PictureRenderFailed", next);
     else if (hadError) safeInvoke(editor, "PictureRenderRecovered");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:reportRenderState@1557', __javascriptError); throw __javascriptError; }}
 
-function scheduleEditorRender(editor) {
+function scheduleEditorRender(editor) { try {
     if (editor.animationFrame || !editor.canvas || !editor.document) return;
-    editor.animationFrame = requestAnimationFrame(async () => {
+    editor.animationFrame = requestAnimationFrame(async () => { try {
         editor.animationFrame = 0;
         const token = ++editor.renderToken;
         try {
@@ -1583,14 +1590,14 @@ function scheduleEditorRender(editor) {
             reportRenderState(editor, error?.message || String(error));
         }
         if (token !== editor.renderToken) scheduleEditorRender(editor);
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:requestAnimationFrame@1568', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:scheduleEditorRender@1566', __javascriptError); throw __javascriptError; }}
 
-function snap(value, spacing, enabled) {
+function snap(value, spacing, enabled) { try {
     return enabled ? Math.round(value / spacing) * spacing : value;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:snap@1591', __javascriptError); throw __javascriptError; }}
 
-function resizeLayer(interaction, point) {
+function resizeLayer(interaction, point) { try {
     const original = interaction.original;
     const local = worldToLocal(original, point.x, point.y);
     let left = -original.width / 2;
@@ -1614,14 +1621,14 @@ function resizeLayer(interaction, point) {
     interaction.layer.height = newHeight;
     interaction.layer.x = worldCenterX - newWidth / 2;
     interaction.layer.y = worldCenterY - newHeight / 2;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:resizeLayer@1595', __javascriptError); throw __javascriptError; }}
 
-function releaseEditorPointer(editor, pointerId) {
+function releaseEditorPointer(editor, pointerId) { try {
     if (!editor?.canvas || pointerId == null) return;
-    try { editor.canvas.releasePointerCapture(pointerId); } catch { }
-}
+    try { editor.canvas.releasePointerCapture(pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@1623', __caughtJavaScriptError);  }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:releaseEditorPointer@1621', __javascriptError); throw __javascriptError; }}
 
-function resetEditorPointerState(editor, cancel = true) {
+function resetEditorPointerState(editor, cancel = true) { try {
     if (!editor) return;
     if (editor.drawing) finishDrawing(editor, null, cancel);
     if (editor.interaction) finishInteraction(editor, null, cancel);
@@ -1629,9 +1636,9 @@ function resetEditorPointerState(editor, cancel = true) {
         editor.pathDraft = null;
         scheduleEditorRender(editor);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:resetEditorPointerState@1626', __javascriptError); throw __javascriptError; }}
 
-function addPathNode(editor, event) {
+function addPathNode(editor, event) { try {
     let point = canvasPoint(editor.canvas, event);
     if (editor.document.snapToGrid) {
         const spacing = Math.max(2, Number(editor.document.gridSpacingPx) || 25);
@@ -1653,15 +1660,15 @@ function addPathNode(editor, event) {
     }
     scheduleEditorRender(editor);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:addPathNode@1636', __javascriptError); throw __javascriptError; }}
 
-function finishPathDraft(editor, closed = false) {
+function finishPathDraft(editor, closed = false) { try {
     const draft = editor.pathDraft;
     editor.pathDraft = null;
     if (!draft) { scheduleEditorRender(editor); return; }
     if (draft.tool === "polygonselect") {
         if (draft.points.length >= 3)
-            editor.areaSelection = { kind: "polygon", points: draft.points.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 })) };
+            editor.areaSelection = { kind: "polygon", points: draft.points.map(point => { try { return (({ x: Number(point.x) || 0, y: Number(point.y) || 0 })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:draft.points.map@1666', __javascriptError); throw __javascriptError; } }) };
         scheduleEditorRender(editor);
         return;
     }
@@ -1670,13 +1677,13 @@ function finishPathDraft(editor, closed = false) {
     for (const point of draft.points) coordinates.push(Number(point.x) || 0, Number(point.y) || 0);
     safeInvoke(editor, "PicturePathCommitted", coordinates, closed === true, false);
     scheduleEditorRender(editor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:finishPathDraft@1660', __javascriptError); throw __javascriptError; }}
 
-function beginInteraction(editor, event) {
+function beginInteraction(editor, event) { try {
     if (!editor.document) return;
     if (editor.interaction || editor.drawing) resetEditorPointerState(editor, true);
     const point = canvasPoint(editor.canvas, event);
-    let selected = editor.document.layers.find(layer => String(layer.id) === String(editor.selectedLayerId));
+    let selected = editor.document.layers.find(layer => { try { return (String(layer.id) === String(editor.selectedLayerId)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:editor.document.layers.find@1681', __javascriptError); throw __javascriptError; } });
     const handle = hitHandle(selected, point.x, point.y, editor.zoom);
     if (!handle) {
         selected = hitLayer(editor.document, point.x, point.y);
@@ -1706,11 +1713,11 @@ function beginInteraction(editor, event) {
             rotation: Number(selected.rotation) || 0
         }
     };
-    try { editor.canvas.setPointerCapture(event.pointerId); } catch { }
+    try { editor.canvas.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@1711', __caughtJavaScriptError);  }
     if (handle) event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:beginInteraction@1677', __javascriptError); throw __javascriptError; }}
 
-function updateInteraction(editor, event) {
+function updateInteraction(editor, event) { try {
     const interaction = editor.interaction;
     if (!interaction || interaction.pointerId !== event.pointerId) return;
     if (event.pointerType === "mouse" && (event.buttons & 1) === 0) {
@@ -1741,9 +1748,9 @@ function updateInteraction(editor, event) {
     }
     scheduleEditorRender(editor);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:updateInteraction@1715', __javascriptError); throw __javascriptError; }}
 
-function finishInteraction(editor, event, cancel = false) {
+function finishInteraction(editor, event, cancel = false) { try {
     const interaction = editor.interaction;
     if (!interaction || (event && interaction.pointerId !== event.pointerId)) return;
     editor.interaction = null;
@@ -1758,22 +1765,22 @@ function finishInteraction(editor, event, cancel = false) {
         );
     }
     scheduleEditorRender(editor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:finishInteraction@1748', __javascriptError); throw __javascriptError; }}
 
-async function pickCanvasColor(editor, point) {
+async function pickCanvasColor(editor, point) { try {
     try {
         const clean = createCanvas(editor.document.widthPx, editor.document.heightPx);
         await drawDocument(clean, editor.document, { grid: false, selectedLayerId: null, zoom: 1 });
         const data = clean.getContext("2d", { willReadFrequently: true }).getImageData(
             Math.round(clamp(point.x, 0, clean.width - 1)), Math.round(clamp(point.y, 0, clean.height - 1)), 1, 1).data;
-        const hex = `#${[data[0], data[1], data[2]].map(value => value.toString(16).padStart(2, "0")).join("")}`;
+        const hex = `#${[data[0], data[1], data[2]].map(value => { try { return (value.toString(16).padStart(2, "0")); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:[data[0], data[1], data[2]].map@1771', __javascriptError); throw __javascriptError; } }).join("")}`;
         safeInvoke(editor, "PictureColorPicked", hex);
     } catch (error) {
         reportRenderState(editor, `The eyedropper could not read this pixel: ${error?.message || error}`);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pickCanvasColor@1765', __javascriptError); throw __javascriptError; }}
 
-function beginDrawing(editor, event) {
+function beginDrawing(editor, event) { try {
     if (!editor.document) return;
     if (editor.interaction || editor.drawing) resetEditorPointerState(editor, true);
     const settings = editor.toolSettings || normalizeToolSettings(null);
@@ -1815,12 +1822,12 @@ function beginDrawing(editor, event) {
         selectionTool: isAreaFillTool(settings.tool) ? "rectangleselect" : settings.tool,
         points: [point, { ...point }]
     };
-    try { editor.canvas.setPointerCapture(event.pointerId); } catch { }
+    try { editor.canvas.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@1820', __caughtJavaScriptError);  }
     scheduleEditorRender(editor);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:beginDrawing@1778', __javascriptError); throw __javascriptError; }}
 
-function updateDrawing(editor, event) {
+function updateDrawing(editor, event) { try {
     const drawing = editor.drawing;
     if (!drawing || drawing.pointerId !== event.pointerId) return;
     if (event.pointerType === "mouse" && (event.buttons & 1) === 0) {
@@ -1842,22 +1849,22 @@ function updateDrawing(editor, event) {
     }
     scheduleEditorRender(editor);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:updateDrawing@1825', __javascriptError); throw __javascriptError; }}
 
-function localizeStrokePoints(editor, points, tool) {
-    let layer = editor.document.layers.find(item => String(item.id) === String(editor.selectedLayerId));
+function localizeStrokePoints(editor, points, tool) { try {
+    let layer = editor.document.layers.find(item => { try { return (String(item.id) === String(editor.selectedLayerId)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:editor.document.layers.find@1850', __javascriptError); throw __javascriptError; } });
     if ((!layer || layer.locked || layerKind(layer) !== "paint") && tool === "eraser")
-        layer = [...editor.document.layers].reverse().find(item => layerKind(item) === "paint" && !item.locked);
+        layer = [...editor.document.layers].reverse().find(item => { try { return (layerKind(item) === "paint" && !item.locked); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:[...editor.document.layers].reverse().find@1852', __javascriptError); throw __javascriptError; } });
     if (!layer || layer.locked || layerKind(layer) !== "paint") return points;
     const width = Math.max(1, Number(layer.width) || 1);
     const height = Math.max(1, Number(layer.height) || 1);
-    return points.map(point => {
+    return points.map(point => { try {
         const local = worldToLocal(layer, point.x, point.y);
         return { x: local.x + width / 2, y: local.y + height / 2 };
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points.map@1856', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:localizeStrokePoints@1849', __javascriptError); throw __javascriptError; }}
 
-function finishDrawing(editor, event, cancel = false) {
+function finishDrawing(editor, event, cancel = false) { try {
     const drawing = editor.drawing;
     if (!drawing || (event && drawing.pointerId !== event.pointerId)) return;
     editor.drawing = null;
@@ -1895,22 +1902,22 @@ function finishDrawing(editor, event, cancel = false) {
             drawing.widthPx, drawing.opacity, drawing.hardness);
     }
     scheduleEditorRender(editor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:finishDrawing@1862', __javascriptError); throw __javascriptError; }}
 
-function pictureSelectionModeLabel(tool) {
+function pictureSelectionModeLabel(tool) { try {
     const name = String(tool || "").toLowerCase();
     if (name === "ellipseselect") return "Ellipse selection · drag to select";
     if (name === "freeselect") return "Freehand selection · draw around the area";
     if (name === "magneticselect") return "Magnetic selection · trace nearby edges";
     if (name === "polygonselect") return "Polygon selection · click angled vertices";
     return "Rectangle selection · drag to select";
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pictureSelectionModeLabel@1902', __javascriptError); throw __javascriptError; }}
 
-function pictureGestureSurface(editor) {
+function pictureGestureSurface(editor) { try {
     return editor.canvas?.closest?.(".picture-canvas-surface") || null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pictureGestureSurface@1911', __javascriptError); throw __javascriptError; }}
 
-function updatePictureGestureMode(editor) {
+function updatePictureGestureMode(editor) { try {
     const surface = pictureGestureSurface(editor);
     if (!surface) return;
     const tool = editor.toolSettings?.tool || "select";
@@ -1919,9 +1926,9 @@ function updatePictureGestureMode(editor) {
     if (!active) surface.classList.remove("pointer-visible");
     const label = surface.querySelector(".picture-gesture-mode-label");
     if (label) label.dataset.modeLabel = active ? pictureSelectionModeLabel(tool) : "";
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:updatePictureGestureMode@1915', __javascriptError); throw __javascriptError; }}
 
-function updatePictureGesturePointer(editor, event) {
+function updatePictureGesturePointer(editor, event) { try {
     const surface = pictureGestureSurface(editor);
     if (!surface || !isAreaSelectionTool(editor.toolSettings?.tool)) return;
     const bounds = editor.canvas.getBoundingClientRect();
@@ -1930,55 +1937,55 @@ function updatePictureGesturePointer(editor, event) {
     surface.style.setProperty("--picture-pointer-x", `${x}px`);
     surface.style.setProperty("--picture-pointer-y", `${y}px`);
     surface.classList.add("pointer-visible");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:updatePictureGesturePointer@1926', __javascriptError); throw __javascriptError; }}
 
-function hidePictureGesturePointer(editor) {
+function hidePictureGesturePointer(editor) { try {
     pictureGestureSurface(editor)?.classList.remove("pointer-visible");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hidePictureGesturePointer@1937', __javascriptError); throw __javascriptError; }}
 
-function updateCanvasCursor(editor) {
+function updateCanvasCursor(editor) { try {
     if (!editor.canvas) return;
     const tool = editor.toolSettings?.tool || "select";
     editor.canvas.style.cursor = isAreaSelectionTool(tool) ? "none" : tool === "select" ? "default" : tool === "eyedropper" ? "copy" : "crosshair";
     updatePictureGestureMode(editor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:updateCanvasCursor@1941', __javascriptError); throw __javascriptError; }}
 
-function bindEditorCanvas(editor, canvas) {
+function bindEditorCanvas(editor, canvas) { try {
     if (editor.canvas === canvas && canvas.dataset.pictureStudioBound === "true") return;
     editor.canvas = canvas;
     editor.interaction = null;
     editor.drawing = null;
     editor.pathDraft = null;
     canvas.dataset.pictureStudioBound = "true";
-    canvas.addEventListener("pointerdown", event => {
+    canvas.addEventListener("pointerdown", event => { try {
         canvas.focus({ preventScroll: true });
         if (event.button !== 0) return;
         if ((editor.toolSettings?.tool || "select") === "select") beginInteraction(editor, event);
         else beginDrawing(editor, event);
-    });
-    canvas.addEventListener("pointermove", event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1955', __javascriptError); throw __javascriptError; }});
+    canvas.addEventListener("pointermove", event => { try {
         updatePictureGesturePointer(editor, event);
         if (editor.pathDraft && ["path", "polygonselect"].includes(editor.toolSettings?.tool || "select")) {
             editor.pathDraft.hover = canvasPoint(canvas, event);
             scheduleEditorRender(editor);
         } else if (editor.drawing) updateDrawing(editor, event);
         else updateInteraction(editor, event);
-    });
-    canvas.addEventListener("pointerup", event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1961', __javascriptError); throw __javascriptError; }});
+    canvas.addEventListener("pointerup", event => { try {
         if (editor.drawing) finishDrawing(editor, event);
         else finishInteraction(editor, event);
-    });
-    canvas.addEventListener("pointercancel", event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1969', __javascriptError); throw __javascriptError; }});
+    canvas.addEventListener("pointercancel", event => { try {
         hidePictureGesturePointer(editor);
         if (editor.drawing) finishDrawing(editor, event, true);
         else finishInteraction(editor, event, true);
-    });
-    canvas.addEventListener("pointerleave", () => hidePictureGesturePointer(editor));
-    canvas.addEventListener("lostpointercapture", event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1973', __javascriptError); throw __javascriptError; }});
+    canvas.addEventListener("pointerleave", () => { try { return (hidePictureGesturePointer(editor)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1978', __javascriptError); throw __javascriptError; } });
+    canvas.addEventListener("lostpointercapture", event => { try {
         if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event, true);
         else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
-    });
-    canvas.addEventListener("dblclick", event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1979', __javascriptError); throw __javascriptError; }});
+    canvas.addEventListener("dblclick", event => { try {
         if (["path", "polygonselect"].includes(editor.toolSettings?.tool || "select")) {
             finishPathDraft(editor, event.shiftKey === true);
             event.preventDefault();
@@ -1994,8 +2001,8 @@ function bindEditorCanvas(editor, canvas) {
             scheduleEditorRender(editor);
         }
         event.preventDefault();
-    });
-    canvas.addEventListener("keydown", event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1983', __javascriptError); throw __javascriptError; }});
+    canvas.addEventListener("keydown", event => { try {
         const modifier = event.ctrlKey || event.metaKey;
         const key = String(event.key || "").toLowerCase();
         let command = null;
@@ -2025,11 +2032,11 @@ function bindEditorCanvas(editor, canvas) {
             else safeInvoke(editor, "PictureShortcutRequested", "select");
             event.preventDefault();
         }
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@2000', __javascriptError); throw __javascriptError; }});
     updateCanvasCursor(editor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:bindEditorCanvas@1948', __javascriptError); throw __javascriptError; }}
 
-export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageInputId = "", layeredInputId = "") {
+export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageInputId = "", layeredInputId = "") { try {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     let editor = editors.get(canvasId);
@@ -2053,20 +2060,20 @@ export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageI
             dropDepth: 0
         };
         const globalHandlers = {
-            pointerdown: event => {
+            pointerdown: event => { try {
                 if ((editor.drawing || editor.interaction) && event.target !== editor.canvas)
                     resetEditorPointerState(editor, true);
-            },
-            pointerup: event => {
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pointerdown@2058', __javascriptError); throw __javascriptError; }},
+            pointerup: event => { try {
                 if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event);
                 else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event);
-            },
-            pointercancel: event => {
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pointerup@2062', __javascriptError); throw __javascriptError; }},
+            pointercancel: event => { try {
                 if (editor.drawing?.pointerId === event.pointerId) finishDrawing(editor, event, true);
                 else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
-            },
-            blur: () => resetEditorPointerState(editor, true),
-            visibilitychange: () => { if (document.hidden) resetEditorPointerState(editor, true); }
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pointercancel@2066', __javascriptError); throw __javascriptError; }},
+            blur: () => { try { return (resetEditorPointerState(editor, true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:blur@2070', __javascriptError); throw __javascriptError; } },
+            visibilitychange: () => { try { if (document.hidden) resetEditorPointerState(editor, true);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:visibilitychange@2071', __javascriptError); throw __javascriptError; }}
         };
         editor.globalHandlers = globalHandlers;
         window.addEventListener("pointerdown", globalHandlers.pointerdown, true);
@@ -2080,14 +2087,14 @@ export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageI
     }
     bindEditorCanvas(editor, canvas);
     bindPictureDrop(editor, rootId, imageInputId, layeredInputId);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:initializePictureStudio@2034', __javascriptError); throw __javascriptError; }}
 
-export function cancelPictureStudioInteraction(canvasId) {
+export function cancelPictureStudioInteraction(canvasId) { try {
     const editor = editors.get(canvasId);
     if (editor) resetEditorPointerState(editor, true);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:cancelPictureStudioInteraction@2087', __javascriptError); throw __javascriptError; }}
 
-export function disposePictureStudio(canvasId) {
+export function disposePictureStudio(canvasId) { try {
     const editor = editors.get(canvasId);
     if (!editor) return;
     resetEditorPointerState(editor, true);
@@ -2113,9 +2120,9 @@ export function disposePictureStudio(canvasId) {
     editor.document = null;
     editor.globalHandlers = null;
     editors.delete(canvasId);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:disposePictureStudio@2092', __javascriptError); throw __javascriptError; }}
 
-export async function renderPictureStudio(canvasId, documentModel, selectedLayerId, zoom, toolSettings) {
+export async function renderPictureStudio(canvasId, documentModel, selectedLayerId, zoom, toolSettings) { try {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const editor = editors.get(canvasId);
@@ -2131,54 +2138,54 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     if (!editor.interaction && !editor.drawing && !editor.pathDraft) editor.document = nextDocument;
     updateCanvasCursor(editor);
     scheduleEditorRender(editor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:renderPictureStudio@2120', __javascriptError); throw __javascriptError; }}
 
-export function hitTestPictureStudioLayer(canvasId, clientX, clientY) {
+export function hitTestPictureStudioLayer(canvasId, clientX, clientY) { try {
     const editor = editors.get(canvasId);
     const canvas = document.getElementById(canvasId);
     if (!editor?.document || !canvas) return null;
     const point = canvasPoint(canvas, { clientX: Number(clientX) || 0, clientY: Number(clientY) || 0 });
     const layer = hitLayer(editor.document, point.x, point.y);
     return layer ? String(layer.id) : null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hitTestPictureStudioLayer@2138', __javascriptError); throw __javascriptError; }}
 
-export function clearPictureStudioAreaSelection(canvasId) {
+export function clearPictureStudioAreaSelection(canvasId) { try {
     const editor = editors.get(canvasId);
     if (!editor) return;
     editor.areaSelection = null;
     scheduleEditorRender(editor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:clearPictureStudioAreaSelection@2147', __javascriptError); throw __javascriptError; }}
 
-export function getPictureStudioAreaSelection(canvasId) {
+export function getPictureStudioAreaSelection(canvasId) { try {
     const editor = editors.get(canvasId);
     const selection = editor?.areaSelection;
     if (!selection || !Array.isArray(selection.points) || selection.points.length < 2) return null;
     return {
         kind: String(selection.kind || "polygon"),
-        points: selection.points.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 }))
+        points: selection.points.map(point => { try { return (({ x: Number(point.x) || 0, y: Number(point.y) || 0 })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:selection.points.map@2160', __javascriptError); throw __javascriptError; } })
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:getPictureStudioAreaSelection@2154', __javascriptError); throw __javascriptError; }}
 
-export function hasPictureStudioAreaSelection(canvasId) {
+export function hasPictureStudioAreaSelection(canvasId) { try {
     const selection = getPictureStudioAreaSelection(canvasId);
     return Boolean(selection && selection.points.length >= 2);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hasPictureStudioAreaSelection@2164', __javascriptError); throw __javascriptError; }}
 
-export function fitPictureStudio(hostId, width, height) {
+export function fitPictureStudio(hostId, width, height) { try {
     const host = document.getElementById(hostId);
     if (!host) return .65;
     const bounds = host.getBoundingClientRect();
     const availableWidth = Math.max(100, bounds.width - 90);
     const availableHeight = Math.max(100, bounds.height - 90);
     return clamp(Math.min(availableWidth / Math.max(1, width), availableHeight / Math.max(1, height)), .05, 2);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:fitPictureStudio@2169', __javascriptError); throw __javascriptError; }}
 
-export async function getPictureImageSize(dataUrl) {
+export async function getPictureImageSize(dataUrl) { try {
     const image = await loadImage(dataUrl);
     return { width: image?.naturalWidth || 0, height: image?.naturalHeight || 0 };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:getPictureImageSize@2178', __javascriptError); throw __javascriptError; }}
 
-async function renderExportCanvas(documentModel, mimeType) {
+async function renderExportCanvas(documentModel, mimeType) { try {
     const document = cloneDocument(documentModel);
     const canvas = createCanvas(document.widthPx, document.heightPx);
     await drawDocument(canvas, document, {
@@ -2188,18 +2195,18 @@ async function renderExportCanvas(documentModel, mimeType) {
         forceOpaque: mimeType === "image/jpeg"
     });
     return canvas;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:renderExportCanvas@2183', __javascriptError); throw __javascriptError; }}
 
-function canvasToBlob(canvas, mimeType, quality) {
-    return new Promise((resolve, reject) => {
-        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("The browser could not rasterize the picture.")), mimeType, quality);
-    });
-}
+function canvasToBlob(canvas, mimeType, quality) { try {
+    return new Promise((resolve, reject) => { try {
+        canvas.toBlob(blob => { try { return (blob ? resolve(blob) : reject(new Error("The browser could not rasterize the picture."))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.toBlob@2197', __javascriptError); throw __javascriptError; } }, mimeType, quality);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:ArrowFunction@2196', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:canvasToBlob@2195', __javascriptError); throw __javascriptError; }}
 
-async function createPictureStudioBlob(documentModel, mimeType = "image/png", quality = 1) {
+async function createPictureStudioBlob(documentModel, mimeType = "image/png", quality = 1) { try {
     const canvas = await renderExportCanvas(documentModel, mimeType);
     return await canvasToBlob(canvas, mimeType, quality);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createPictureStudioBlob@2201', __javascriptError); throw __javascriptError; }}
 
 const pictureExportChunkSize = 24 * 1024;
 
@@ -2208,7 +2215,7 @@ export function startPictureStudioDataUrlExport(
     mimeType = "image/png",
     quality = 1,
     dotNetReference,
-    exportId) {
+    exportId) { try {
     // Return immediately so the initiating .NET -> JS call is finished before
     // JavaScript starts invoking .NET with the generated image chunks.
     void exportPictureStudioDataUrlInChunks(
@@ -2217,14 +2224,14 @@ export function startPictureStudioDataUrlExport(
         quality,
         dotNetReference,
         exportId);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:startPictureStudioDataUrlExport@2208', __javascriptError); throw __javascriptError; }}
 
 async function exportPictureStudioDataUrlInChunks(
     documentModel,
     mimeType,
     quality,
     dotNetReference,
-    exportId) {
+    exportId) { try {
     try {
         const canvas = await renderExportCanvas(documentModel, mimeType);
         const dataUrl = canvas.toDataURL(mimeType, quality);
@@ -2255,35 +2262,35 @@ async function exportPictureStudioDataUrlInChunks(
         const message = error?.message || String(error);
         try {
             await dotNetReference.invokeMethodAsync("FailPictureExport", exportId, message);
-        } catch {
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@2260', __caughtJavaScriptError); 
             // The Blazor circuit may already be gone.
         }
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:exportPictureStudioDataUrlInChunks@2224', __javascriptError); throw __javascriptError; }}
 
-function xmlEscape(value) {
+function xmlEscape(value) { try {
     return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:xmlEscape@2266', __javascriptError); throw __javascriptError; }}
 
-function svgNumber(value, fallback = 0) {
+function svgNumber(value, fallback = 0) { try {
     const number = Number(value);
     return Number.isFinite(number) ? Math.round(number * 1000) / 1000 : fallback;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgNumber@2270', __javascriptError); throw __javascriptError; }}
 
-function svgIdentifier(value, fallback = "layer") {
+function svgIdentifier(value, fallback = "layer") { try {
     const identifier = String(value || fallback).replace(/[^a-z0-9_-]/gi, "-");
     return identifier || fallback;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgIdentifier@2275', __javascriptError); throw __javascriptError; }}
 
-function svgLayerTransform(layer) {
+function svgLayerTransform(layer) { try {
     const width = Math.max(1, svgNumber(layer.width, 1));
     const height = Math.max(1, svgNumber(layer.height, 1));
     const centerX = svgNumber(layer.x) + width / 2;
     const centerY = svgNumber(layer.y) + height / 2;
     return `translate(${centerX} ${centerY}) rotate(${svgNumber(layer.rotation)})`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgLayerTransform@2280', __javascriptError); throw __javascriptError; }}
 
-function svgLayerStyle(layer, includeAdjustments = true) {
+function svgLayerStyle(layer, includeAdjustments = true) { try {
     const styles = [];
     const opacity = clamp(layer.opacity ?? 1, 0, 1);
     if (opacity < .9999) styles.push(`opacity:${opacity}`);
@@ -2295,13 +2302,13 @@ function svgLayerStyle(layer, includeAdjustments = true) {
             styles.push(`filter:${filter}`);
     }
     return styles.join(";");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgLayerStyle@2288', __javascriptError); throw __javascriptError; }}
 
-function svgLayerClip(definitions, layer, prefix, documentWidth, documentHeight) {
+function svgLayerClip(definitions, layer, prefix, documentWidth, documentHeight) { try {
     const points = Array.isArray(layer?.clipPolygon) ? layer.clipPolygon : [];
     if (points.length < 3) return "";
     const polygon = points
-        .map((point, index) => `${index === 0 ? "M" : "L"} ${svgNumber(point?.x)} ${svgNumber(point?.y)}`)
+        .map((point, index) => { try { return (`${index === 0 ? "M" : "L"} ${svgNumber(point?.x)} ${svgNumber(point?.y)}`); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points .map@2306', __javascriptError); throw __javascriptError; } })
         .join(" ");
     const id = `${prefix}-area-clip`;
     const path = layer.clipInverted === true
@@ -2309,9 +2316,9 @@ function svgLayerClip(definitions, layer, prefix, documentWidth, documentHeight)
         : `${polygon} Z`;
     definitions.push(`<clipPath id="${id}" clipPathUnits="userSpaceOnUse"><path d="${path}" clip-rule="evenodd" fill-rule="evenodd"/></clipPath>`);
     return id;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgLayerClip@2302', __javascriptError); throw __javascriptError; }}
 
-function svgGradient(definitions, layer, width, height, prefix, shape = false) {
+function svgGradient(definitions, layer, width, height, prefix, shape = false) { try {
     const fillKind = enumName(layer.fillKind, fillKinds, "solid").toLowerCase();
     const first = cssColor(shape ? layer.fillColor : layer.primaryColor, shape ? "#60a5fa" : "#dbeafe");
     const second = cssColor(shape ? layer.secondaryFillColor : layer.secondaryColor, shape ? "#ffffff" : "#6366f1");
@@ -2328,15 +2335,15 @@ function svgGradient(definitions, layer, width, height, prefix, shape = false) {
         definitions.push(`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${svgNumber(-dx)}" y1="${svgNumber(-dy)}" x2="${svgNumber(dx)}" y2="${svgNumber(dy)}"><stop offset="0" stop-color="${xmlEscape(first)}"/><stop offset="1" stop-color="${xmlEscape(second)}"/></linearGradient>`);
     }
     return `url(#${id})`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgGradient@2316', __javascriptError); throw __javascriptError; }}
 
-function svgPathData(layer, width, height, closeOverride = null) {
+function svgPathData(layer, width, height, closeOverride = null) { try {
     const points = Array.isArray(layer.pathPoints) ? layer.pathPoints : [];
     if (!points.length) return `M ${svgNumber(-width / 2)} ${svgNumber(-height / 2)} H ${svgNumber(width / 2)} V ${svgNumber(height / 2)} H ${svgNumber(-width / 2)} Z`;
-    const local = points.map(point => ({
+    const local = points.map(point => { try { return (({
         x: svgNumber(point.x) - width / 2,
         y: svgNumber(point.y) - height / 2
-    }));
+    })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points.map@2338', __javascriptError); throw __javascriptError; } });
     const commands = [`M ${svgNumber(local[0].x)} ${svgNumber(local[0].y)}`];
     if (layer.pathSmooth === true && local.length > 2) {
         for (let index = 1; index < local.length - 1; index++) {
@@ -2353,9 +2360,9 @@ function svgPathData(layer, width, height, closeOverride = null) {
     const closed = closeOverride ?? layer.pathClosed === true;
     if (closed) commands.push("Z");
     return commands.join(" ");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgPathData@2335', __javascriptError); throw __javascriptError; }}
 
-function svgShapeLayer(layer, definitions, prefix) {
+function svgShapeLayer(layer, definitions, prefix) { try {
     const width = Math.max(1, svgNumber(layer.width, 1));
     const height = Math.max(1, svgNumber(layer.height, 1));
     const shape = enumName(layer.shape, shapeKinds, "rectangle").toLowerCase();
@@ -2383,16 +2390,16 @@ function svgShapeLayer(layer, definitions, prefix) {
         markup = `<rect x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${svgNumber(width)}" height="${svgNumber(height)}" ${common}/>`;
     }
     return markup;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgShapeLayer@2360', __javascriptError); throw __javascriptError; }}
 
-function svgFillLayer(layer, definitions, prefix) {
+function svgFillLayer(layer, definitions, prefix) { try {
     const width = Math.max(1, svgNumber(layer.width, 1));
     const height = Math.max(1, svgNumber(layer.height, 1));
     const fill = svgGradient(definitions, layer, width, height, prefix, false);
     return `<rect x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${svgNumber(width)}" height="${svgNumber(height)}" fill="${xmlEscape(fill)}"/>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgFillLayer@2390', __javascriptError); throw __javascriptError; }}
 
-function svgTextLayer(layer, definitions, prefix) {
+function svgTextLayer(layer, definitions, prefix) { try {
     const width = Math.max(1, svgNumber(layer.width, 1));
     const height = Math.max(1, svgNumber(layer.height, 1));
     const fontSize = clamp(layer.fontSizePx ?? 72, 4, 1024);
@@ -2415,11 +2422,11 @@ function svgTextLayer(layer, definitions, prefix) {
     const outline = outlineWidth > 0 && layer.outlineColor !== "transparent"
         ? `stroke="${xmlEscape(cssColor(layer.outlineColor, "#000000"))}" stroke-width="${svgNumber(outlineWidth)}" paint-order="stroke fill" stroke-linejoin="round"`
         : "";
-    const spans = lines.map((line, index) => `<tspan x="${svgNumber(x)}" y="${svgNumber(top + fontSize * .86 + index * lineHeight)}">${xmlEscape(line)}</tspan>`).join("");
+    const spans = lines.map((line, index) => { try { return (`<tspan x="${svgNumber(x)}" y="${svgNumber(top + fontSize * .86 + index * lineHeight)}">${xmlEscape(line)}</tspan>`); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:lines.map@2420', __javascriptError); throw __javascriptError; } }).join("");
     return `<text clip-path="url(#${clipId})" x="${svgNumber(x)}" text-anchor="${anchor}" font-family="${xmlEscape(family)}" font-size="${svgNumber(fontSize)}" font-weight="${layer.bold ? "700" : "400"}" font-style="${layer.italic ? "italic" : "normal"}" fill="${xmlEscape(cssColor(layer.fillColor, "#17365d"))}" ${outline} style="${xmlEscape(shadow)}">${spans}</text>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgTextLayer@2397', __javascriptError); throw __javascriptError; }}
 
-async function svgRasterizedLayer(layer) {
+async function svgRasterizedLayer(layer) { try {
     const width = Math.max(1, Math.round(svgNumber(layer.width, 1)));
     const height = Math.max(1, Math.round(svgNumber(layer.height, 1)));
     const canvas = createCanvas(width, height);
@@ -2440,9 +2447,9 @@ async function svgRasterizedLayer(layer) {
     await drawLayer(context, local);
     const dataUrl = canvas.toDataURL("image/png");
     return `<image x="${svgNumber(-width / 2)}" y="${svgNumber(-height / 2)}" width="${width}" height="${height}" href="${dataUrl}" preserveAspectRatio="none"/>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgRasterizedLayer@2424', __javascriptError); throw __javascriptError; }}
 
-export async function createPictureStudioSvg(documentModel) {
+export async function createPictureStudioSvg(documentModel) { try {
     const document = normalizeDocument(documentModel);
     const definitions = [];
     const layers = [];
@@ -2476,14 +2483,14 @@ export async function createPictureStudioSvg(documentModel) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${document.widthPx}" height="${document.heightPx}" viewBox="0 0 ${document.widthPx} ${document.heightPx}">
 <title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.4">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createPictureStudioSvg@2447', __javascriptError); throw __javascriptError; }}
 
 
 const svgImportRemovedElements = new Set(["script", "foreignobject", "iframe", "object", "embed", "audio", "video", "canvas"]);
 const svgImportNonVisualAncestors = new Set(["defs", "clippath", "mask", "marker", "pattern", "symbol", "lineargradient", "radialgradient", "filter"]);
 const svgImportVisualSelector = "path,rect,circle,ellipse,line,polyline,polygon,text,image,use";
 
-function decodeSvgDataUrl(dataUrl) {
+function decodeSvgDataUrl(dataUrl) { try {
     const source = String(dataUrl || "");
     const comma = source.indexOf(",");
     if (comma < 0 || !source.slice(0, comma).toLowerCase().includes("image/svg+xml"))
@@ -2497,15 +2504,15 @@ function decodeSvgDataUrl(dataUrl) {
         return new TextDecoder("utf-8", { fatal: false }).decode(bytes);
     }
     return decodeURIComponent(payload);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:decodeSvgDataUrl@2488', __javascriptError); throw __javascriptError; }}
 
-function safeSvgReference(value) {
+function safeSvgReference(value) { try {
     const text = String(value || "").trim();
     if (!text || text.startsWith("#") || /^data:image\/(?:png|jpe?g|gif|webp|bmp)(?:;|,)/i.test(text)) return text;
     return "";
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:safeSvgReference@2504', __javascriptError); throw __javascriptError; }}
 
-function hasUnsafeSvgCssReference(value) {
+function hasUnsafeSvgCssReference(value) { try {
     const text = String(value || "");
     if (/@import/i.test(text)) return true;
     const expression = /url\s*\(\s*(["']?)(.*?)\1\s*\)/gi;
@@ -2515,9 +2522,9 @@ function hasUnsafeSvgCssReference(value) {
         if (!target.startsWith("#") && !safeSvgReference(target)) return true;
     }
     return false;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:hasUnsafeSvgCssReference@2510', __javascriptError); throw __javascriptError; }}
 
-function sanitizeSvgImportDocument(sourceText) {
+function sanitizeSvgImportDocument(sourceText) { try {
     const parsed = new DOMParser().parseFromString(sourceText, "image/svg+xml");
     if (parsed.querySelector("parsererror")) throw new Error("The SVG XML is malformed.");
     const root = parsed.documentElement;
@@ -2549,9 +2556,9 @@ function sanitizeSvgImportDocument(sourceText) {
     root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     root.removeAttribute("onload");
     return parsed;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:sanitizeSvgImportDocument@2522', __javascriptError); throw __javascriptError; }}
 
-function svgNumberValue(value, fallback = 0) {
+function svgNumberValue(value, fallback = 0) { try {
     const text = String(value ?? "").trim();
     const match = text.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*([a-z%]*)$/i);
     if (!match) return fallback;
@@ -2566,18 +2573,18 @@ function svgNumberValue(value, fallback = 0) {
     if (unit === "q") return parsed * 96 / 101.6;
     if (unit === "%") return fallback;
     return parsed;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgNumberValue@2556', __javascriptError); throw __javascriptError; }}
 
-function svgImportViewport(root) {
+function svgImportViewport(root) { try {
     const viewBox = String(root.getAttribute("viewBox") || "").trim().split(/[\s,]+/).map(Number).filter(Number.isFinite);
     let width = svgNumberValue(root.getAttribute("width"), viewBox.length === 4 ? viewBox[2] : 1200);
     let height = svgNumberValue(root.getAttribute("height"), viewBox.length === 4 ? viewBox[3] : 800);
     width = Math.round(clamp(width, 16, 8192));
     height = Math.round(clamp(height, 16, 8192));
     return { width, height, viewBox: viewBox.length === 4 ? viewBox : [0, 0, width, height] };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgImportViewport@2573', __javascriptError); throw __javascriptError; }}
 
-function svgImportLayerPath(element) {
+function svgImportLayerPath(element) { try {
     const names = [];
     const inkscapeNamespace = "http://www.inkscape.org/namespaces/inkscape";
     let current = element.parentElement;
@@ -2591,16 +2598,16 @@ function svgImportLayerPath(element) {
         current = current.parentElement;
     }
     return names.join(" / ");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgImportLayerPath@2582', __javascriptError); throw __javascriptError; }}
 
-function svgImportLayerName(element, index) {
+function svgImportLayerName(element, index) { try {
     const inkscapeNamespace = "http://www.inkscape.org/namespaces/inkscape";
     const label = element.getAttributeNS(inkscapeNamespace, "label") || element.getAttribute("inkscape:label") || element.getAttribute("data-name") || element.getAttribute("aria-label");
     const title = element.querySelector(":scope > title")?.textContent?.trim();
     return label || title || element.id || `${element.localName} ${index + 1}`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgImportLayerName@2598', __javascriptError); throw __javascriptError; }}
 
-function svgImportElementVisible(element, root) {
+function svgImportElementVisible(element, root) { try {
     let current = element;
     while (current && current !== root.parentElement) {
         const style = getComputedStyle(current);
@@ -2609,9 +2616,9 @@ function svgImportElementVisible(element, root) {
         current = current.parentElement;
     }
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:svgImportElementVisible@2605', __javascriptError); throw __javascriptError; }}
 
-function revealSvgElementForMeasurement(element, root) {
+function revealSvgElementForMeasurement(element, root) { try {
     const changed = [];
     let current = element;
     while (current && current !== root.parentElement) {
@@ -2624,15 +2631,15 @@ function revealSvgElementForMeasurement(element, root) {
         if (current === root) break;
         current = current.parentElement;
     }
-    return () => {
+    return () => { try {
         for (const [node, style] of changed.reverse()) {
             if (style == null) node.removeAttribute("style");
             else node.setAttribute("style", style);
         }
-    };
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:ArrowFunction@2629', __javascriptError); throw __javascriptError; }};
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:revealSvgElementForMeasurement@2616', __javascriptError); throw __javascriptError; }}
 
-function transformedSvgBounds(element, root) {
+function transformedSvgBounds(element, root) { try {
     const restore = revealSvgElementForMeasurement(element, root);
     try {
         let box;
@@ -2646,10 +2653,10 @@ function transformedSvgBounds(element, root) {
             new DOMPoint(box.x, box.y + box.height).matrixTransform(matrix),
             new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(matrix)
         ];
-        const minX = Math.min(...points.map(point => point.x));
-        const minY = Math.min(...points.map(point => point.y));
-        const maxX = Math.max(...points.map(point => point.x));
-        const maxY = Math.max(...points.map(point => point.y));
+        const minX = Math.min(...points.map(point => { try { return (point.x); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points.map@2651', __javascriptError); throw __javascriptError; } }));
+        const minY = Math.min(...points.map(point => { try { return (point.y); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points.map@2652', __javascriptError); throw __javascriptError; } }));
+        const maxX = Math.max(...points.map(point => { try { return (point.x); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points.map@2653', __javascriptError); throw __javascriptError; } }));
+        const maxY = Math.max(...points.map(point => { try { return (point.y); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:points.map@2654', __javascriptError); throw __javascriptError; } }));
         const width = Math.max(.01, maxX - minX);
         const height = Math.max(.01, maxY - minY);
         const padding = Math.max(1, Math.min(24, Math.max(width, height) * .0125));
@@ -2657,16 +2664,16 @@ function transformedSvgBounds(element, root) {
     } finally {
         restore();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:transformedSvgBounds@2637', __javascriptError); throw __javascriptError; }}
 
-function forceSvgLayerVisibility(element) {
+function forceSvgLayerVisibility(element) { try {
     element.removeAttribute("display");
     element.removeAttribute("visibility");
     element.style?.setProperty("display", "inline", "important");
     element.style?.setProperty("visibility", "visible", "important");
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:forceSvgLayerVisibility@2664', __javascriptError); throw __javascriptError; }}
 
-function cloneSvgElementWithAncestors(element, root) {
+function cloneSvgElementWithAncestors(element, root) { try {
     let content = element.cloneNode(true);
     forceSvgLayerVisibility(content);
     let current = element.parentElement;
@@ -2679,9 +2686,9 @@ function cloneSvgElementWithAncestors(element, root) {
         current = current.parentElement;
     }
     return content;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:cloneSvgElementWithAncestors@2671', __javascriptError); throw __javascriptError; }}
 
-function standaloneSvgForElement(root, element, bounds) {
+function standaloneSvgForElement(root, element, bounds) { try {
     const document = root.ownerDocument;
     const output = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     output.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -2709,9 +2716,9 @@ function standaloneSvgForElement(root, element, bounds) {
         output.appendChild(content);
     }
     return new XMLSerializer().serializeToString(output);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:standaloneSvgForElement@2686', __javascriptError); throw __javascriptError; }}
 
-function publisherStudioPictureMetadata(root) {
+function publisherStudioPictureMetadata(root) { try {
     const metadata = root.querySelector("metadata[data-publisherstudio-picture]");
     if (!metadata?.textContent?.trim()) return null;
     try {
@@ -2720,9 +2727,9 @@ function publisherStudioPictureMetadata(root) {
     } catch {
         return null;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:publisherStudioPictureMetadata@2716', __javascriptError); throw __javascriptError; }}
 
-export async function importPictureStudioSvg(dataUrl, fileName) {
+export async function importPictureStudioSvg(dataUrl, fileName) { try {
     const sourceText = decodeSvgDataUrl(dataUrl);
     const parsed = sanitizeSvgImportDocument(sourceText);
     const root = parsed.documentElement;
@@ -2749,7 +2756,7 @@ export async function importPictureStudioSvg(dataUrl, fileName) {
     try {
         await document.fonts?.ready;
         const visualElements = [...mounted.querySelectorAll(svgImportVisualSelector)].filter(element =>
-            !element.closest("defs,clipPath,mask,marker,pattern,symbol,linearGradient,radialGradient,filter"));
+            { try { return (!element.closest("defs,clipPath,mask,marker,pattern,symbol,linearGradient,radialGradient,filter")); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:[...mounted.querySelectorAll(svgImportVisualSelector)].filter@2753', __javascriptError); throw __javascriptError; } });
         const layers = [];
         for (let index = 0; index < visualElements.length && layers.length < 5000; index++) {
             const element = visualElements[index];
@@ -2813,9 +2820,9 @@ export async function importPictureStudioSvg(dataUrl, fileName) {
     } finally {
         mounted?.remove();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:importPictureStudioSvg@2727', __javascriptError); throw __javascriptError; }}
 
-export async function downloadPictureStudioSvg(documentModel, fileName) {
+export async function downloadPictureStudioSvg(documentModel, fileName) { try {
     const svg = await createPictureStudioSvg(documentModel);
     const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -2823,10 +2830,10 @@ export async function downloadPictureStudioSvg(documentModel, fileName) {
         const anchor = globalThis.document.createElement("a");
         anchor.href = url; anchor.download = fileName || "picture.svg";
         globalThis.document.body.appendChild(anchor); anchor.click(); anchor.remove();
-    } finally { setTimeout(() => URL.revokeObjectURL(url), 2000); }
-}
+    } finally { setTimeout(() => { try { return (URL.revokeObjectURL(url)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:setTimeout@2828', __javascriptError); throw __javascriptError; } }, 2000); }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:downloadPictureStudioSvg@2820', __javascriptError); throw __javascriptError; }}
 
-export async function downloadPictureStudio(documentModel, fileName, mimeType = "image/png", quality = 1) {
+export async function downloadPictureStudio(documentModel, fileName, mimeType = "image/png", quality = 1) { try {
     const blob = await createPictureStudioBlob(documentModel, mimeType, quality);
     const url = URL.createObjectURL(blob);
     try {
@@ -2837,6 +2844,7 @@ export async function downloadPictureStudio(documentModel, fileName, mimeType = 
         anchor.click();
         anchor.remove();
     } finally {
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        setTimeout(() => { try { return (URL.revokeObjectURL(url)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:setTimeout@2842', __javascriptError); throw __javascriptError; } }, 2000);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:downloadPictureStudio@2831', __javascriptError); throw __javascriptError; }}
+

@@ -1,0 +1,10 @@
+BlazorPublisher 2.0.1 final25 validation
+
+PASS: 82 Node contract tests.
+PASS: 15 maintained PublisherStudio JavaScript files passed Node syntax checking.
+PASS: protected architecture, JavaScript diagnostics, and final19 security manifests match normalized SHA-256 values.
+PASS: JavaScriptDiagnosticsBridge includes catch, ILogger logging, and IUserNotificationService notification behavior.
+PASS: the existing component-diagnostics rule recognizes the bridge without an exemption or baseline weakening.
+PASS: JSON and MSBuild XML files parsed successfully.
+
+Not run: native dotnet compilation and Windows PowerShell execution; neither runtime is installed in the packaging environment.

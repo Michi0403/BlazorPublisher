@@ -1,4 +1,11 @@
-(() => {
+// javascript-diagnostics: guarded
+var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics || {
+    report(context, error) { try { console.error(`PublisherStudio JavaScript error in ${String(context || "browser-runtime")}.`, error); } catch (reportError) { console.error("PublisherStudio fallback JavaScript diagnostics failed.", reportError); } },
+    guard(context, callback) { try { return callback; } catch (error) { console.error(`PublisherStudio fallback guard failed in ${String(context || "browser-runtime")}.`, error); return callback; } },
+    guardObject(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback object guard failed in ${String(context || "browser-runtime")}.`, error); return value; } },
+    guardClass(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback class guard failed in ${String(context || "browser-runtime")}.`, error); return value; } }
+};
+(() => { try {
     'use strict';
 
     const selector = 'button,input,select,textarea,a[href],[role="button"],[role="tab"],[role="menuitem"],[role="option"],[role="checkbox"],[role="switch"],[data-help]';
@@ -67,33 +74,33 @@
     let showTimer = 0;
     let hideTimer = 0;
 
-    function clean(value) {
+    function clean(value) { try {
         return String(value || '')
             .replace(/[✓✔☑＋+…]/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:clean@71', __javascriptError); throw __javascriptError; }}
 
-    function key(value) {
+    function key(value) { try {
         return clean(value).toLocaleLowerCase();
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:key@78', __javascriptError); throw __javascriptError; }}
 
-    function elementText(element) {
+    function elementText(element) { try {
         return clean(element.getAttribute('aria-label')
             || element.getAttribute('data-text')
             || element.innerText
             || element.textContent);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:elementText@82', __javascriptError); throw __javascriptError; }}
 
-    function labelText(element) {
+    function labelText(element) { try {
         const label = element.closest?.('label');
         if (!label) return clean(element.getAttribute('aria-label') || element.getAttribute('placeholder'));
         const clone = label.cloneNode(true);
-        clone.querySelectorAll('input,select,textarea,button,small').forEach(node => node.remove());
+        clone.querySelectorAll('input,select,textarea,button,small').forEach(node => { try { return (node.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:clone.querySelectorAll(\'input,select,textarea,button,small\').forEach@93', __javascriptError); throw __javascriptError; } });
         return clean(clone.textContent);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:labelText@89', __javascriptError); throw __javascriptError; }}
 
-    function explicitHelp(element) {
+    function explicitHelp(element) { try {
         const dataHelp = clean(element.getAttribute('data-help'));
         if (dataHelp) return dataHelp;
 
@@ -114,9 +121,9 @@
         }
 
         return '';
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:explicitHelp@97', __javascriptError); throw __javascriptError; }}
 
-    function catalogHelp(text) {
+    function catalogHelp(text) { try {
         const normalized = key(text);
         if (!normalized) return '';
         if (catalog.has(normalized)) return catalog.get(normalized);
@@ -127,9 +134,9 @@
         }
 
         return '';
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:catalogHelp@120', __javascriptError); throw __javascriptError; }}
 
-    function describeInput(element) {
+    function describeInput(element) { try {
         const label = labelText(element) || 'this value';
         const placeholder = clean(element.getAttribute('placeholder'));
         const type = key(element.getAttribute('type') || element.tagName);
@@ -149,9 +156,9 @@
 
         const hint = placeholder ? ` Suggested format: ${placeholder}.` : '';
         return `Enter or edit “${label}”.${hint}`;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:describeInput@133', __javascriptError); throw __javascriptError; }}
 
-    function describeButton(element) {
+    function describeButton(element) { try {
         const text = elementText(element);
         const known = catalogHelp(text);
         if (known) return known;
@@ -163,9 +170,9 @@
             return 'Run this command for the current selection or open studio.';
 
         return `Run the “${text}” command. It applies to the current selection, item, page, or open studio.`;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:describeButton@155', __javascriptError); throw __javascriptError; }}
 
-    function descriptionFor(element) {
+    function descriptionFor(element) { try {
         const explicit = explicitHelp(element);
         if (explicit) return explicit;
 
@@ -173,9 +180,9 @@
             return describeInput(element);
 
         return describeButton(element);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:descriptionFor@169', __javascriptError); throw __javascriptError; }}
 
-    function prepare(element) {
+    function prepare(element) { try {
         if (!(element instanceof Element)) return;
         const description = descriptionFor(element);
         if (!description) return;
@@ -188,24 +195,24 @@
 
         if (!element.hasAttribute('aria-label') && !elementText(element) && element.matches('button,[role="button"]'))
             element.setAttribute('aria-label', description);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:prepare@179', __javascriptError); throw __javascriptError; }}
 
-    function scan(root) {
+    function scan(root) { try {
         if (!root) return;
         if (root instanceof Element && root.matches(selector)) prepare(root);
         root.querySelectorAll?.(selector).forEach(prepare);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:scan@194', __javascriptError); throw __javascriptError; }}
 
-    function supportsTopLayer(popup) {
+    function supportsTopLayer(popup) { try {
         return typeof popup?.showPopover === 'function' && typeof popup?.hidePopover === 'function';
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:supportsTopLayer@200', __javascriptError); throw __javascriptError; }}
 
-    function isPopoverOpen(popup) {
+    function isPopoverOpen(popup) { try {
         if (!supportsTopLayer(popup)) return false;
         try { return popup.matches(':popover-open'); } catch { return false; }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:isPopoverOpen@204', __javascriptError); throw __javascriptError; }}
 
-    function ensureTooltip() {
+    function ensureTooltip() { try {
         if (tooltip?.isConnected) return tooltip;
         tooltip = document.createElement('div');
         tooltip.className = 'publisher-help-tooltip';
@@ -214,21 +221,21 @@
         document.body.appendChild(tooltip);
         tooltip.hidden = !supportsTopLayer(tooltip);
         return tooltip;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:ensureTooltip@209', __javascriptError); throw __javascriptError; }}
 
-    function overlayZIndex() {
+    function overlayZIndex() { try {
         let highest = 1000;
-        document.querySelectorAll('.dx-overlay-wrapper,.dx-popup-wrapper,.dx-tooltip-wrapper,.streaming-studio-overlay,[role="dialog"],[data-publication-element]').forEach(element => {
+        document.querySelectorAll('.dx-overlay-wrapper,.dx-popup-wrapper,.dx-tooltip-wrapper,.streaming-studio-overlay,[role="dialog"],[data-publication-element]').forEach(element => { try {
             if (!(element instanceof HTMLElement || element instanceof SVGElement) || element.hidden) return;
             const style = getComputedStyle(element);
             if (style.display === 'none' || style.visibility === 'hidden' || Number.parseFloat(style.opacity || '1') <= 0) return;
             const value = Number.parseInt(style.zIndex, 10);
             if (Number.isFinite(value)) highest = Math.max(highest, value);
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.querySelectorAll(\'.dx-overlay-wrapper,.dx-popup-wrapper,.dx-t@222', __javascriptError); throw __javascriptError; }});
         return Math.min(2147483000, highest + 2);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:overlayZIndex@220', __javascriptError); throw __javascriptError; }}
 
-    function position(target) {
+    function position(target) { try {
         const popup = ensureTooltip();
         popup.style.zIndex = String(overlayZIndex());
         const rect = target.getBoundingClientRect();
@@ -243,9 +250,9 @@
 
         popup.style.left = `${Math.round(left)}px`;
         popup.style.top = `${Math.round(top)}px`;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:position@232', __javascriptError); throw __javascriptError; }}
 
-    function openTooltip(popup) {
+    function openTooltip(popup) { try {
         if (supportsTopLayer(popup)) {
             popup.hidden = false;
             if (!isPopoverOpen(popup)) {
@@ -253,17 +260,17 @@
                 catch { popup.hidden = false; }
             }
         } else popup.hidden = false;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:openTooltip@249', __javascriptError); throw __javascriptError; }}
 
-    function closeTooltip(popup) {
+    function closeTooltip(popup) { try {
         if (!popup) return;
         if (supportsTopLayer(popup) && isPopoverOpen(popup)) {
-            try { popup.hidePopover(); return; } catch { }
+            try { popup.hidePopover(); return; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:suppressed-catch@262', __caughtJavaScriptError);  }
         }
         popup.hidden = true;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:closeTooltip@259', __javascriptError); throw __javascriptError; }}
 
-    function show(target) {
+    function show(target) { try {
         const description = target?.dataset?.publisherTooltip;
         if (!description || !target.isConnected) return;
 
@@ -272,110 +279,110 @@
         const popup = ensureTooltip();
         popup.textContent = description;
         openTooltip(popup);
-        requestAnimationFrame(() => {
+        requestAnimationFrame(() => { try {
             if (activeTarget !== target) return;
             popup.classList.add('visible');
             position(target);
-        });
-    }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:requestAnimationFrame@276', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:show@267', __javascriptError); throw __javascriptError; }}
 
-    function scheduleShow(target, delay = 420) {
+    function scheduleShow(target, delay = 420) { try {
         clearTimeout(hideTimer);
         if (activeTarget === target && tooltip?.classList.contains('visible')) return;
         if (pendingTarget === target && showTimer) return;
         clearTimeout(showTimer);
         pendingTarget = target;
-        showTimer = window.setTimeout(() => {
+        showTimer = window.setTimeout(() => { try {
             showTimer = 0;
             if (pendingTarget === target) show(target);
-        }, delay);
-    }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:window.setTimeout@289', __javascriptError); throw __javascriptError; }}, delay);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:scheduleShow@283', __javascriptError); throw __javascriptError; }}
 
-    function hide(immediate = false) {
+    function hide(immediate = false) { try {
         clearTimeout(showTimer);
         clearTimeout(hideTimer);
         showTimer = 0;
         pendingTarget = null;
-        const action = () => {
+        const action = () => { try {
             activeTarget = null;
             if (!tooltip) return;
             tooltip.classList.remove('visible');
-            window.setTimeout(() => {
+            window.setTimeout(() => { try {
                 if (!tooltip?.classList.contains('visible')) closeTooltip(tooltip);
-            }, 120);
-        };
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:window.setTimeout@304', __javascriptError); throw __javascriptError; }}, 120);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:action@300', __javascriptError); throw __javascriptError; }};
         if (immediate) action();
         else hideTimer = window.setTimeout(action, 80);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:hide@295', __javascriptError); throw __javascriptError; }}
 
-    function candidateFromNode(node) {
+    function candidateFromNode(node) { try {
         if (!(node instanceof Element)) return null;
         const candidate = node.matches(selector) ? node : node.closest?.(selector);
         if (!candidate) return null;
         if (!candidate.dataset.publisherTooltip) prepare(candidate);
         return candidate.dataset.publisherTooltip ? candidate : null;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:candidateFromNode@312', __javascriptError); throw __javascriptError; }}
 
-    function targetFrom(event) {
+    function targetFrom(event) { try {
         const path = typeof event?.composedPath === 'function' ? event.composedPath() : [event?.target];
         for (const node of path) {
             const candidate = candidateFromNode(node);
             if (candidate) return candidate;
         }
         return candidateFromNode(event?.target);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:targetFrom@320', __javascriptError); throw __javascriptError; }}
 
-    document.addEventListener('pointerover', event => {
+    document.addEventListener('pointerover', event => { try {
         const target = targetFrom(event);
         if (!target) return;
         if (target === activeTarget || target === pendingTarget) return;
         scheduleShow(target);
-    }, true);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@329', __javascriptError); throw __javascriptError; }}, true);
 
-    document.addEventListener('pointerout', event => {
+    document.addEventListener('pointerout', event => { try {
         const leaving = targetFrom(event);
         const next = candidateFromNode(event.relatedTarget);
         const current = activeTarget || pendingTarget;
         if (leaving && next === leaving) return;
         if (current && next === current) return;
         hide();
-    }, true);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@336', __javascriptError); throw __javascriptError; }}, true);
 
-    document.addEventListener('focusin', event => {
+    document.addEventListener('focusin', event => { try {
         const target = targetFrom(event);
         if (target) scheduleShow(target, 220);
-    }, true);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@345', __javascriptError); throw __javascriptError; }}, true);
 
-    document.addEventListener('focusout', () => hide(), true);
-    document.addEventListener('pointerdown', () => hide(true), true);
-    document.addEventListener('contextmenu', () => hide(true), true);
-    document.addEventListener('click', () => hide(true), true);
-    document.addEventListener('keydown', event => {
+    document.addEventListener('focusout', () => { try { return (hide()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@350', __javascriptError); throw __javascriptError; } }, true);
+    document.addEventListener('pointerdown', () => { try { return (hide(true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@351', __javascriptError); throw __javascriptError; } }, true);
+    document.addEventListener('contextmenu', () => { try { return (hide(true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@352', __javascriptError); throw __javascriptError; } }, true);
+    document.addEventListener('click', () => { try { return (hide(true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@353', __javascriptError); throw __javascriptError; } }, true);
+    document.addEventListener('keydown', event => { try {
         if (event.key === 'Escape') hide(true);
-    }, true);
-    window.addEventListener('scroll', () => hide(true), true);
-    window.addEventListener('resize', () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@354', __javascriptError); throw __javascriptError; }}, true);
+    window.addEventListener('scroll', () => { try { return (hide(true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:window.addEventListener@357', __javascriptError); throw __javascriptError; } }, true);
+    window.addEventListener('resize', () => { try {
         if (activeTarget) position(activeTarget);
-    });
-    document.addEventListener('fullscreenchange', () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:window.addEventListener@358', __javascriptError); throw __javascriptError; }});
+    document.addEventListener('fullscreenchange', () => { try {
         if (!activeTarget || !tooltip) return;
         const target = activeTarget;
         tooltip.classList.remove('visible');
         closeTooltip(tooltip);
-        requestAnimationFrame(() => show(target));
-    });
+        requestAnimationFrame(() => { try { return (show(target)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:requestAnimationFrame@366', __javascriptError); throw __javascriptError; } });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@361', __javascriptError); throw __javascriptError; }});
 
-    const observer = new MutationObserver(records => {
+    const observer = new MutationObserver(records => { try {
         for (const record of records) {
-            record.addedNodes.forEach(node => {
+            record.addedNodes.forEach(node => { try {
                 if (node instanceof Element) scan(node);
-            });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:record.addedNodes.forEach@371', __javascriptError); throw __javascriptError; }});
             if (record.type === 'attributes' && record.target instanceof Element)
                 prepare(record.target);
         }
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:ArrowFunction@369', __javascriptError); throw __javascriptError; }});
 
-    function start() {
+    function start() { try {
         scan(document);
         observer.observe(document.documentElement, {
             subtree: true,
@@ -383,7 +390,7 @@
             attributes: true,
             attributeFilter: ['title', 'aria-label', 'data-help', 'placeholder', 'disabled']
         });
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:start@379', __javascriptError); throw __javascriptError; }}
 
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', start, { once: true });
@@ -391,7 +398,10 @@
         start();
 
     window.PublisherStudioTooltips = {
-        refresh(root = document) { scan(root); },
-        hide() { hide(true); }
+        refresh(root = document) { try { scan(root);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:refresh@395', __javascriptError); throw __javascriptError; }},
+        hide() { try { hide(true);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:hide@396', __javascriptError); throw __javascriptError; }}
     };
-})();
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:ArrowFunction@2', __javascriptError); throw __javascriptError; }})();
+
+// Guard exported browser namespaces after the file has initialized.
+publisherStudioDiagnostics.guardObject("PublisherStudioTooltips", window.PublisherStudioTooltips);

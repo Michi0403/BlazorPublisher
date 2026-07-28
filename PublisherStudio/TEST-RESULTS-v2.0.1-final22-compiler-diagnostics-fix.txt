@@ -1,0 +1,29 @@
+BlazorPublisher 2.0.1 final22 compiler/diagnostics validation
+Date: 2026-07-28
+
+PASS full Node source-contract suite: 75 tests across 62 test files.
+PASS final22 compiler/diagnostics regression test.
+PASS final21 build-guard regression test.
+PASS final20 runtime-value ownership regression test.
+PASS source-level method-diagnostics reproduction: 0 new violations.
+PASS protected-architecture SHA-256 manifest.
+PASS final19 security-rule SHA-256 manifest.
+PASS method-diagnostics, logging, security, runtime-value ownership, and their monotonic baselines remain unchanged.
+
+Diagnostics corrections:
+- RequirePattern, ReadStore, Compile, and ValidateOptions are instance methods using the injected logger.
+- Every corrected method has an exception boundary, structured diagnostic logging, and fail-closed rethrow behavior.
+- Pattern content and full paths remain omitted from diagnostics.
+
+Changed runtime files:
+- src/PublisherStudio.Web/Services/Configuration/PanelStudioTextPatternDataService.cs
+
+Changed review/test files:
+- build/protected-architecture-files.sha256 (reviewed hash only)
+- tests/final22CompilerDiagnosticsFix.test.mjs
+- CHANGELOG-v2.0.1-final22-compiler-diagnostics-fix.md
+- TEST-RESULTS-v2.0.1-final22-compiler-diagnostics-fix.txt
+
+No PowerShell safeguard, logging baseline, security rule, 1-Wire rule, service lifetime, runtime-value ownership rule, or object-store boundary was changed.
+Native dotnet compilation was not run because dotnet is unavailable in the packaging environment.
+Windows PowerShell execution was not run because powershell/pwsh is unavailable in the packaging environment.

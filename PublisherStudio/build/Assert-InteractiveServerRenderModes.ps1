@@ -4,6 +4,7 @@ function Fail([string]$Message) { throw "InteractiveServer render-mode validatio
 $root = Split-Path -Parent $PSScriptRoot
 $appRoot = Join-Path $root 'src\PublisherStudio.Web'
 $expected = [ordered]@{
+    'Components/Layout/JavaScriptDiagnosticsBridge.razor' = '@rendermode @(new InteractiveServerRenderMode(prerender: false))'
     'Components/Pages/Editor.razor' = '@rendermode InteractiveServer'
     'Components/Pages/Localization.razor' = '@rendermode InteractiveServer'
     'Components/Pages/OrganicPlugins.razor' = '@rendermode InteractiveServer'

@@ -13,7 +13,7 @@ assert.match(release, /Copy-Item -LiteralPath \$publisherIcon -Destination \(Joi
 assert.ok(release.indexOf('Copy-Item -LiteralPath $publisherIcon') < release.indexOf('$requiredSetupFiles'), 'Icon copy must happen before setup completeness validation.');
 
 const studio = read('src/PublisherStudio.Web/Components/Editor/PanelStudio.razor');
-assert.match(studio, /DesignPreviewOnly="@\(!_interactionPreview\)"/);
+assert.match(studio, /DesignerMode="false" DesignPreviewOnly="false"/);
 assert.match(studio, /<button @key="element\.Id"/);
 assert.match(studio, /var committed = \(PanelElement\)Files\.CloneElement\(_draft\)/);
 assert.match(studio, /_loadedId = InitialPanel\?\.Id/);

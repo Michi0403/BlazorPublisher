@@ -30,6 +30,8 @@ packages/*.download
 !New-VerifiedSourcePackage.ps1
 !build/
 !build/*.ps1
+!build/*.json
+!build/*.sha256
 !tests/
 !tests/*.mjs
 !src/PublisherStudio.Web/Localization/

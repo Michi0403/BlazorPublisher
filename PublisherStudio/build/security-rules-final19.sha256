@@ -1,0 +1,7 @@
+# SHA-256 of final19 security and 1-Wire rules, normalized to UTF-8/LF.
+# final20 must preserve these rules byte-for-byte unless Michael explicitly authorizes a reviewed refresh.
+a660b2a0131297eecb57bded08d31bc47f9663e9fbf36beaa52cb022ae710c1c  build/Assert-OneWireArchitecture.ps1
+18fb50d1db5d2478e2c5c0f6176b64ee6fa99c815f1c8ce1194c7927468e6e37  src/PublisherStudio.Web/Services/OrganicPlugins/OrganicRuntimeSecurityService.cs
+ac8dc89cf2ea1b4e4d77045ae78101eced2f92ad8da453a629923dca67e72121  src/PublisherStudio.Web/Services/OrganicPlugins/OrganicPluginStateServices.cs
+7444a85ddf615cc50930dca0b5a601b810c19df95f3e0f01ac55babf72e1bbaa  src/PublisherStudio.Web/Services/OrganicPlugins/OrganicPluginProtocolCodec.cs
+a430cc6b52190244b6a49d288b6f68254f23213e7f1c7d4654b34c54c91c1848  src/PublisherStudio.Web/Services/OrganicPlugins/OrganicCapabilityAndExecutionServices.cs

@@ -1,7 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 @using System.Text.Json
 @using System.Text.Json.Nodes
-@using System.Text.RegularExpressions
 @using System.Net
 @implements IAsyncDisposable
 @inject PanelDocumentService Panels
@@ -10,6 +9,7 @@
 @inject IJSRuntime JS
 @inject IPublicationElementLayoutService Layout
 @inject IUserNotificationService Notifications
+@inject PanelStudioTextService PanelText
 @inject ILogger<PanelStudio> Logger
 
 @if (Visible && _draft is not null)
@@ -178,10 +178,11 @@
                         </div>
                         <div class="panel-studio-canvas" @ref="_canvasElement" tabindex="0"
                              data-panel-studio-arrange="@((!_interactionPreview).ToString().ToLowerInvariant())"
+                             data-panel-studio-binding-id="@_interactionBindingId"
                              aria-label="Panel arrangement canvas"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
-                            <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="@(!_interactionPreview)" DesignPreviewOnly="@(!_interactionPreview)" />
+                            <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview, _previewRevision)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="false" DesignPreviewOnly="false" />
 
                             @if (!_interactionPreview && CurrentView is not null)
                             {
@@ -471,6 +472,9 @@
     private Guid? _dragExistingId;
     private PublicationElement? _dragPrototype;
     private bool _dropSurfaceBound;
+    private string? _dropSurfaceBindingKey;
+    private readonly string _interactionBindingId = Guid.NewGuid().ToString("N");
+    private int _previewRevision;
     private string _advancedElementJson = string.Empty;
     private string _templateName = string.Empty;
     private string _templateCategory = "My modules";
@@ -516,22 +520,24 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!Visible || _draft is null || _dropSurfaceBound) return;
+        var bindingKey = _draft is null ? null : _interactionBindingId;
+        if (!Visible || _draft is null || (_dropSurfaceBound && string.Equals(_dropSurfaceBindingKey, bindingKey, StringComparison.Ordinal))) return;
         try
         {
             _self ??= DotNetObjectReference.Create(this);
-            _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self).ConfigureAwait(true);
+            _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId).ConfigureAwait(true);
+            _dropSurfaceBindingKey = _dropSurfaceBound ? bindingKey : null;
             if (!_dropSurfaceBound)
                 throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding.");
-            Logger.LogInformation("Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active.");
+            Logger.LogInformation($"Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} PreviewRevision:{_previewRevision}.");
         }
         catch (JSDisconnectedException exception)
         {
-            Logger.LogDebug(exception, "Panel Studio interaction binding ended because the browser circuit disconnected.");
+            Logger.LogDebug(exception, $"Panel Studio interaction binding ended because the browser circuit disconnected. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} Visible:{Visible} Disposed:{_disposed}.");
         }
         catch (OperationCanceledException exception)
         {
-            Logger.LogDebug(exception, "Panel Studio interaction binding was cancelled.");
+            Logger.LogDebug(exception, $"Panel Studio interaction binding was cancelled. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} Visible:{Visible} Disposed:{_disposed} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
         }
         catch (Exception exception)
         {
@@ -544,6 +550,7 @@
     private void SelectView(Guid id)
     {
         _selectedViewId = id;
+        _previewRevision++;
         if (_draft is not null) _draft.ActiveViewId = id;
         SelectElement(CurrentView?.Elements.LastOrDefault()?.Id);
     }
@@ -699,7 +706,7 @@
         }
         catch (TaskCanceledException exception)
         {
-            Logger.LogDebug(exception, "Panel Studio drop was cancelled.");
+            Logger.LogDebug(exception, $"Panel Studio drop was cancelled. Binding:{_interactionBindingId} View:{_selectedViewId} DragTool:{_dragToolId} ExistingElement:{_dragExistingId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
         }
         catch (Exception exception)
         {
@@ -769,7 +776,6 @@
                 case "forward": MoveElementUp(); break;
                 case "backward": MoveElementDown(); break;
                 case "back": SendElementToBack(); break;
-                case "interact": EnableInteractionPreview(); break;
             }
         });
 
@@ -783,7 +789,7 @@
         }
         catch (OperationCanceledException exception)
         {
-            Logger.LogDebug(exception, "Panel Studio browser operation {Operation} was cancelled.", operation);
+            Logger.LogDebug(exception, $"Panel Studio browser operation {operation} was cancelled. Binding:{_interactionBindingId} View:{_selectedViewId} Selected:{_selectedElementId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} Visible:{Visible} Disposed:{_disposed} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
         }
         catch (Exception exception)
         {
@@ -801,7 +807,7 @@
         }
         catch (OperationCanceledException exception)
         {
-            Logger.LogDebug(exception, "Panel Studio browser operation {Operation} was cancelled.", operation);
+            Logger.LogDebug(exception, $"Panel Studio browser operation {operation} was cancelled. Binding:{_interactionBindingId} View:{_selectedViewId} Selected:{_selectedElementId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} Visible:{Visible} Disposed:{_disposed} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
         }
         catch (Exception exception)
         {
@@ -816,7 +822,7 @@
         var detail = string.IsNullOrWhiteSpace(message) ? "Unknown browser interaction error." : message.Trim();
         if (_disposed || IsExpectedInteractionShutdown(detail))
         {
-            Logger.LogDebug("Panel Studio browser interaction ended normally: {Message}", detail);
+            Logger.LogDebug($"Panel Studio browser interaction ended normally. Binding:{_interactionBindingId} View:{_selectedViewId} Selected:{_selectedElementId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} Detail:{detail}");
             return Task.CompletedTask;
         }
 
@@ -825,8 +831,8 @@
         return Task.CompletedTask;
     }
 
-    private static bool IsExpectedInteractionShutdown(string message) =>
-        Regex.IsMatch(message, "cancel(?:led|ed)?|disposed|disconnect|no longer|cannot send data|circuit|abort", RegexOptions.IgnoreCase);
+    private bool IsExpectedInteractionShutdown(string message) =>
+        PanelText.IsExpectedInteractionShutdown(message, Logger);
 
     private async Task<PanelCanvasPoint> ResolveCanvasPoint(DragEventArgs args)
     {
@@ -834,8 +840,23 @@
         {
             return await JS.InvokeAsync<PanelCanvasPoint>("publisherStudio.panelStudioPoint", _canvasElement, args.ClientX, args.ClientY).ConfigureAwait(true);
         }
-        catch (JSException)
+        catch (OperationCanceledException exception)
         {
+            Logger.LogDebug(exception, $"Panel Studio canvas-point resolution was cancelled; falling back to event offsets. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
+            var x = Math.Clamp(args.OffsetX / 960d, 0, 1);
+            var y = Math.Clamp(args.OffsetY / 540d, 0, 1);
+            return new PanelCanvasPoint { X = x, Y = y };
+        }
+        catch (InvalidOperationException exception)
+        {
+            Logger.LogDebug(exception, $"Panel Studio canvas-point resolution observed an unavailable renderer; falling back to event offsets. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")}.");
+            var x = Math.Clamp(args.OffsetX / 960d, 0, 1);
+            var y = Math.Clamp(args.OffsetY / 540d, 0, 1);
+            return new PanelCanvasPoint { X = x, Y = y };
+        }
+        catch (JSException exception)
+        {
+            Logger.LogDebug(exception, $"Panel Studio canvas-point resolution failed in browser interop; falling back to event offsets. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")}.");
             var x = Math.Clamp(args.OffsetX / 960d, 0, 1);
             var y = Math.Clamp(args.OffsetY / 540d, 0, 1);
             return new PanelCanvasPoint { X = x, Y = y };
@@ -1037,10 +1058,10 @@
         };
     }
 
-    private static double ReadNumber(JsonElement node, string propertyName, double fallback) =>
-        node.TryGetProperty(propertyName, out var property) && property.TryGetDouble(out var value) && double.IsFinite(value) ? value : fallback;
+    private double ReadNumber(JsonElement node, string propertyName, double fallback) =>
+        PanelText.ReadNumber(node, propertyName, fallback, Logger);
 
-    private static string JsonCanvasNodeType(PublicationElement element) => element switch
+    private string JsonCanvasNodeType(PublicationElement element) => element switch
     {
         TextFrameElement => "text",
         ImageFrameElement => "file",
@@ -1049,7 +1070,7 @@
         _ => "group"
     };
 
-    private static string JsonCanvasColor(PublicationElement element) => element switch
+    private string JsonCanvasColor(PublicationElement element) => element switch
     {
         TextFrameElement => "5",
         ImageFrameElement => "4",
@@ -1059,20 +1080,9 @@
         _ => "1"
     };
 
-    private static string PlainText(string? markup)
-    {
-        if (string.IsNullOrWhiteSpace(markup)) return string.Empty;
-        var text = Regex.Replace(markup, "<br\\s*/?>", Environment.NewLine, RegexOptions.IgnoreCase);
-        text = Regex.Replace(text, "<[^>]+>", string.Empty);
-        return WebUtility.HtmlDecode(text).Trim();
-    }
+    private string PlainText(string? markup) => PanelText.PlainText(markup, Logger);
 
-    private static string SafeFileName(string? value, string fallback)
-    {
-        var name = string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
-        foreach (var invalid in Path.GetInvalidFileNameChars()) name = name.Replace(invalid, '-');
-        return string.IsNullOrWhiteSpace(name) ? fallback : name;
-    }
+    private string SafeFileName(string? value, string fallback) => PanelText.SafeFileName(value, fallback, Logger);
 
     private async Task ImportHtml(InputFileChangeEventArgs args)
     {
@@ -1215,8 +1225,35 @@
         await _elementContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
-    private void EnableInteractionPreview() => _interactionPreview = true;
-    private void DisableInteractionPreview() => _interactionPreview = false;
+    private void EnableInteractionPreview()
+    {
+        try
+        {
+            _interactionPreview = true;
+            _previewRevision++;
+            Logger.LogDebug($"{nameof(EnableInteractionPreview)} activated live Panel Studio interaction.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(EnableInteractionPreview)} failed.");
+            Notifications.Error("Panel interaction mode could not be enabled.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    private void DisableInteractionPreview()
+    {
+        try
+        {
+            _interactionPreview = false;
+            _previewRevision++;
+            Logger.LogDebug($"{nameof(DisableInteractionPreview)} returned to Panel Studio arrangement.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(DisableInteractionPreview)} failed.");
+            Notifications.Error("Panel arrangement mode could not be restored.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
 
     private Task EditSelectedComponent() => SelectedElement is { } selected
         ? ActivateElementInteraction(selected.Id)
@@ -1235,7 +1272,7 @@
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             return;
         }
-        _interactionPreview = true;
+        EnableInteractionPreview();
         await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
@@ -1245,12 +1282,21 @@
         {
             await JS.InvokeVoidAsync("publisherStudio.cancelPanelStudioPointer", _canvasElement, true).ConfigureAwait(true);
         }
-        catch (JSDisconnectedException) { }
-        catch (OperationCanceledException) { }
-        catch (InvalidOperationException) { }
+        catch (JSDisconnectedException exception)
+        {
+            Logger.LogTrace(exception, $"Panel Studio pointer cancellation observed a disconnected circuit. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")}.");
+        }
+        catch (OperationCanceledException exception)
+        {
+            Logger.LogDebug(exception, $"Panel Studio pointer cancellation was cancelled while the interaction surface was changing. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
+        }
+        catch (InvalidOperationException exception)
+        {
+            Logger.LogDebug(exception, $"Panel Studio pointer cancellation observed an unavailable renderer or browser surface. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")}.");
+        }
         catch (JSException exception)
         {
-            Logger.LogDebug(exception, "Panel Studio pointer cancellation was unavailable while the interaction surface was changing.");
+            Logger.LogDebug(exception, $"Panel Studio pointer cancellation was unavailable while the interaction surface was changing. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")}.");
         }
     }
 
@@ -1321,7 +1367,7 @@
         _templateDescription = SelectedElement is null ? string.Empty : $"Reusable {SelectedElement.Kind} configured in Panel Studio.";
     }
 
-    private static string IconFor(PublicationElement element) => element switch
+    private string IconFor(PublicationElement element) => element switch
     {
         TextFrameElement => "pub-icon pub-icon-text",
         ImageFrameElement => "pub-icon pub-icon-picture",
@@ -1369,8 +1415,25 @@
         }
     }
 
-    private void ToggleInteractionPreview() => _interactionPreview = !_interactionPreview;
-    private void RefreshPreview() { if (_draft is not null) Panels.Normalize(Document, _draft); }
+    private void ToggleInteractionPreview()
+    {
+        if (_interactionPreview) DisableInteractionPreview();
+        else EnableInteractionPreview();
+    }
+    private void RefreshPreview()
+    {
+        try
+        {
+            if (_draft is not null) Panels.Normalize(Document, _draft);
+            _previewRevision++;
+            Logger.LogDebug($"{nameof(RefreshPreview)} normalized the Panel Studio preview while retaining binding:{_interactionBindingId}.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(RefreshPreview)} failed.");
+            Notifications.Error("Panel Studio preview refresh failed.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
 
     private void ChangePanelName(ChangeEventArgs args) { if (_draft is not null) _draft.Name = Text(args); }
     private void ChangeViewName(ChangeEventArgs args) { if (CurrentView is not null) CurrentView.Name = Text(args); }
@@ -1380,7 +1443,20 @@
     private void ChangeNestedNavigation(ChangeEventArgs args) { if (SelectedElement is PanelElement nested && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) nested.NavigationMode = mode; }
     private void ChangeVisualKind(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual && Enum.TryParse<DataVisualKind>(Text(args), out var kind)) visual.VisualKind = kind; }
     private void ChangeVisualDataObject(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual && Guid.TryParse(Text(args), out var id)) visual.DataObjectId = id; }
-    private void ChangeVisualValueFields(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual) visual.ValueFields = Text(args).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(); }
+    private void ChangeVisualValueFields(ChangeEventArgs args)
+    {
+        try
+        {
+            if (SelectedElement is DataVisualElement visual)
+                visual.ValueFields = PanelText.ParseList(Text(args), Logger).ToList();
+            Logger.LogDebug($"{nameof(ChangeVisualValueFields)} updated the selected visual field list.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(ChangeVisualValueFields)} failed.");
+            Notifications.Error("The visual field list could not be updated.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
     private void ChangeComponentKind(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentKind>(Text(args), out var kind)) { component.ComponentKind = kind; Components.Normalize(Document, component); } }
     private void ChangeComponentDataMode(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentDataMode>(Text(args), out var mode)) component.Connection.Mode = mode; }
     private void ChangeComponentDataObject(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Guid.TryParse(Text(args), out var id)) component.Connection.DataObjectId = id; }
@@ -1388,11 +1464,11 @@
     private void ChangeLiveSourceKind(ChangeEventArgs args) { if (SelectedElement is LiveSourceElement live && Enum.TryParse<PublicationLiveSourceKind>(Text(args), out var kind)) live.SourceKind = kind; }
     private void ToggleViewEnabled(ChangeEventArgs args) { if (CurrentView is not null) CurrentView.Enabled = AsBool(args); }
 
-    private static bool AsBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
-    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static void ChangeNumber(ChangeEventArgs args, Action<double> update) { if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value)) update(value); }
-    private static void ChangeInt(ChangeEventArgs args, Action<int> update) { if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) update(value); }
+    private bool AsBool(ChangeEventArgs args) => PanelText.AsBool(args, Logger);
+    private string Text(ChangeEventArgs args) => PanelText.Text(args, Logger);
+    private string Inv(double value) => PanelText.Invariant(value, Logger);
+    private void ChangeNumber(ChangeEventArgs args, Action<double> update) => PanelText.ChangeNumber(args, update, Logger);
+    private void ChangeInt(ChangeEventArgs args, Action<int> update) => PanelText.ChangeInt(args, update, Logger);
 
     private async Task Save()
     {
@@ -1410,7 +1486,7 @@
         }
         catch (OperationCanceledException exception)
         {
-            Logger.LogDebug(exception, "Panel Studio save was cancelled before the Mainframe accepted the project.");
+            Logger.LogDebug(exception, $"Panel Studio save was cancelled before the Mainframe accepted the project. Binding:{_interactionBindingId} Panel:{_draft?.Id} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
             _error = "The panel was not saved because the operation was cancelled.";
         }
         catch (Exception exception)
@@ -1425,16 +1501,41 @@
 
     public async ValueTask DisposeAsync()
     {
-        _disposed = true;
-        ClosePanelPictureEditor();
-        try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement).ConfigureAwait(true); }
-        catch (JSDisconnectedException) { }
-        catch (OperationCanceledException) { }
-        catch (InvalidOperationException) { }
-        catch (JSException) { }
-        _dropSurfaceBound = false;
-        _self?.Dispose();
-        _self = null;
+        try
+        {
+            _disposed = true;
+            ClosePanelPictureEditor();
+            try
+            {
+                await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement).ConfigureAwait(true);
+                Logger.LogDebug($"{nameof(DisposeAsync)} unbound the Panel Studio browser interaction surface.");
+            }
+            catch (JSDisconnectedException exception)
+            {
+                Logger.LogDebug(exception, $"{nameof(DisposeAsync)} observed a disconnected browser circuit while unbinding Panel Studio.");
+            }
+            catch (OperationCanceledException exception)
+            {
+                Logger.LogDebug(exception, $"{nameof(DisposeAsync)} observed cancellation while unbinding Panel Studio. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                Logger.LogDebug(exception, $"{nameof(DisposeAsync)} observed an unavailable renderer while unbinding Panel Studio.");
+            }
+            catch (JSException exception)
+            {
+                Logger.LogDebug(exception, $"{nameof(DisposeAsync)} observed a browser-side shutdown while unbinding Panel Studio.");
+            }
+            _dropSurfaceBound = false;
+            _dropSurfaceBindingKey = null;
+            _self?.Dispose();
+            _self = null;
+            Logger.LogDebug($"{nameof(DisposeAsync)} completed Panel Studio disposal.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(DisposeAsync)} failed while releasing Panel Studio resources.");
+        }
     }
 
     private sealed class PanelCanvasPoint

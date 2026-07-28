@@ -1,5 +1,6 @@
 using PublisherStudio.Domain;
 using PublisherStudio.Services.Panels;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
@@ -14,6 +15,7 @@ public sealed class EditorStateService : IDisposable
     private readonly PublicationWebDataService _webData;
     private readonly PublicationStreamingSettingsStore _streamingSettings;
     private readonly PanelDocumentService _panels;
+    private readonly ISystemVariableStoreService _systemVariables;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private readonly List<PublicationElement> _clipboard = [];
@@ -31,7 +33,8 @@ public sealed class EditorStateService : IDisposable
         PublicationLiveDataRegistry liveData,
         PublicationWebDataService webData,
         PublicationStreamingSettingsStore streamingSettings,
-        PanelDocumentService panels)
+        PanelDocumentService panels,
+        ISystemVariableStoreService systemVariables)
     {
         _files = files;
         _data = data;
@@ -42,6 +45,7 @@ public sealed class EditorStateService : IDisposable
         _webData = webData;
         _streamingSettings = streamingSettings;
         _panels = panels;
+        _systemVariables = systemVariables;
         Document = PublicationDocument.CreateDefault();
         Document.Streaming = _streamingSettings.LoadOrDefault(Document.Id);
         _files.NormalizeStreamingSettings(Document);
@@ -146,7 +150,7 @@ public sealed class EditorStateService : IDisposable
 
     public void RenameDocument(string value)
     {
-        value = string.IsNullOrWhiteSpace(value) ? "Untitled Publication" : value.Trim();
+        value = string.IsNullOrWhiteSpace(value) ? _systemVariables.DefaultDocumentName : value.Trim();
         if (string.Equals(Document.Name, value, StringComparison.Ordinal)) return;
         Capture();
         Document.Name = value;
@@ -155,7 +159,7 @@ public sealed class EditorStateService : IDisposable
 
     public void SetPublicationCulture(string culture)
     {
-        culture = string.IsNullOrWhiteSpace(culture) ? "en-US" : culture.Trim();
+        culture = string.IsNullOrWhiteSpace(culture) ? _systemVariables.DefaultCulture : culture.Trim();
         if (string.Equals(Document.ProjectSettings.Culture, culture, StringComparison.OrdinalIgnoreCase)) return;
         Capture();
         Document.ProjectSettings.Culture = culture;

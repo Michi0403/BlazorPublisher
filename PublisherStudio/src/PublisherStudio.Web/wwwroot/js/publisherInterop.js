@@ -1,3 +1,10 @@
+// javascript-diagnostics: guarded
+var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics || {
+    report(context, error) { try { console.error(`PublisherStudio JavaScript error in ${String(context || "browser-runtime")}.`, error); } catch (reportError) { console.error("PublisherStudio fallback JavaScript diagnostics failed.", reportError); } },
+    guard(context, callback) { try { return callback; } catch (error) { console.error(`PublisherStudio fallback guard failed in ${String(context || "browser-runtime")}.`, error); return callback; } },
+    guardObject(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback object guard failed in ${String(context || "browser-runtime")}.`, error); return value; } },
+    guardClass(context, value) { try { return value; } catch (error) { console.error(`PublisherStudio fallback class guard failed in ${String(context || "browser-runtime")}.`, error); return value; } }
+};
 const canvasStates = new WeakMap();
 const boundRulers = new WeakSet();
 const wordArtPathStates = new WeakMap();
@@ -5,130 +12,130 @@ const PX_PER_MM_AT_96_DPI = 96 / 25.4;
 let publisherDocumentDirty = false;
 let activeVideoExportCancel = null;
 
-window.addEventListener('beforeunload', event => {
+window.addEventListener('beforeunload', event => { try {
     if (!publisherDocumentDirty) return;
     event.preventDefault();
     event.returnValue = '';
-});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:window.addEventListener@10', __javascriptError); throw __javascriptError; }});
 
-function number(value, fallback = 0) {
+function number(value, fallback = 0) { try {
     const parsed = Number.parseFloat(value);
     return Number.isFinite(parsed) ? parsed : fallback;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:number@16', __javascriptError); throw __javascriptError; }}
 
-function clamp(value, min, max) {
+function clamp(value, min, max) { try {
     return Math.max(min, Math.min(max, value));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clamp@21', __javascriptError); throw __javascriptError; }}
 
-function elementMm(element, pxPerMm) {
+function elementMm(element, pxPerMm) { try {
     return {
         x: number(element.style.left) / pxPerMm,
         y: number(element.style.top) / pxPerMm,
         width: number(element.style.width) / pxPerMm,
         height: number(element.style.height) / pxPerMm
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:elementMm@25', __javascriptError); throw __javascriptError; }}
 
-function nextAnimationFrame(state) {
+function nextAnimationFrame(state) { try {
     if (!state || state.drawPending) return;
     state.drawPending = true;
-    requestAnimationFrame(() => {
+    requestAnimationFrame(() => { try {
         state.drawPending = false;
         if (!state.stage?.isConnected || !state.scroll?.isConnected || !state.page?.isConnected) return;
         try { drawRulers(state); } catch (error) { console.warn('Publisher ruler redraw failed.', error); }
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@37', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:nextAnimationFrame@34', __javascriptError); throw __javascriptError; }}
 
-function safeDotNet(state, method, ...args) {
+function safeDotNet(state, method, ...args) { try {
     if (!state?.dotnet) return Promise.resolve();
-    return state.dotnet.invokeMethodAsync(method, ...args).catch(error => {
+    return state.dotnet.invokeMethodAsync(method, ...args).catch(error => { try {
         const message = String(error?.message || error || '');
         if (/disconnected|disposed|circuit/i.test(message)) return;
         console.warn(`Publisher callback ${method} failed.`, error);
         if (method !== 'ReportCanvasInteractionError')
-            state.dotnet.invokeMethodAsync('ReportCanvasInteractionError', method, message).catch(() => {});
-    });
-}
+            state.dotnet.invokeMethodAsync('ReportCanvasInteractionError', method, message).catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@51', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state.dotnet.invokeMethodAsync(\'ReportCanvasInteractionError\', method,@51', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state.dotnet.invokeMethodAsync(method, ...args).catch@46', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:safeDotNet@44', __javascriptError); throw __javascriptError; }}
 
-function clearObjectAlignmentFeedback(state) {
+function clearObjectAlignmentFeedback(state) { try {
     if (!state?.page) return;
     state.page.querySelectorAll('.alignment-moving-green,.alignment-moving-orange,.alignment-moving-red,.alignment-target-green,.alignment-target-orange,.alignment-target-red')
-        .forEach(element => element.classList.remove('alignment-moving-green','alignment-moving-orange','alignment-moving-red','alignment-target-green','alignment-target-orange','alignment-target-red'));
-    state.page.querySelectorAll('.publisher-object-alignment-overlay').forEach(element => element.remove());
-}
+        .forEach(element => { try { return (element.classList.remove('alignment-moving-green','alignment-moving-orange','alignment-moving-red','alignment-target-green','alignment-target-orange','alignment-target-red')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state.page.querySelectorAll(\'.alignment-moving-green,.alignment-moving@58', __javascriptError); throw __javascriptError; } });
+    state.page.querySelectorAll('.publisher-object-alignment-overlay').forEach(element => { try { return (element.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state.page.querySelectorAll(\'.publisher-object-alignment-overlay\').for@59', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clearObjectAlignmentFeedback@55', __javascriptError); throw __javascriptError; }}
 
-function publicationObjectBounds(state, excludedIds) {
+function publicationObjectBounds(state, excludedIds) { try {
     const excluded = excludedIds instanceof Set ? excludedIds : new Set([excludedIds].filter(Boolean));
     return [...state.page.querySelectorAll('[data-publication-element][data-element-id]')]
-        .filter(element => !excluded.has(element.dataset.elementId) && !element.matches('[data-connector-id]') && !element.classList.contains('locked-hidden'))
-        .map(element => ({
+        .filter(element => { try { return (!excluded.has(element.dataset.elementId) && !element.matches('[data-connector-id]') && !element.classList.contains('locked-hidden')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...state.page.querySelectorAll(\'[data-publication-element][data-eleme@65', __javascriptError); throw __javascriptError; } })
+        .map(element => { try { return (({
             element,
             id: element.dataset.elementId,
             zIndex: number(element.style.zIndex),
             ...elementMm(element, state.config.pxPerMm)
-        }));
-}
+        })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...state.page.querySelectorAll(\'[data-publication-element][data-eleme@66', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationObjectBounds@62', __javascriptError); throw __javascriptError; }}
 
-function rectanglesOverlap(a, b) {
+function rectanglesOverlap(a, b) { try {
     return Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) > .15
         && Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y) > .15;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:rectanglesOverlap@74', __javascriptError); throw __javascriptError; }}
 
-function overlapArea(a, b) {
+function overlapArea(a, b) { try {
     const width = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x));
     const height = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
     return width * height;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:overlapArea@79', __javascriptError); throw __javascriptError; }}
 
-function rectangleGap(a, b) {
+function rectangleGap(a, b) { try {
     const horizontal = Math.max(b.x - (a.x + a.width), a.x - (b.x + b.width), 0);
     const vertical = Math.max(b.y - (a.y + a.height), a.y - (b.y + b.height), 0);
     return Math.hypot(horizontal, vertical);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:rectangleGap@85', __javascriptError); throw __javascriptError; }}
 
-function internalSnapFractions(size, pxPerMm) {
+function internalSnapFractions(size, pxPerMm) { try {
     const pixels = size * pxPerMm;
     const step = pixels >= 520 ? .05 : pixels >= 260 ? .1 : .25;
     const values = new Set([0, .25, .5, .75, 1]);
     for (let value = 0; value <= 1.0001; value += step) values.add(Math.round(value * 1000) / 1000);
-    return [...values].sort((a, b) => a - b);
-}
+    return [...values].sort((a, b) => { try { return (a - b); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...values].sort@96', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:internalSnapFractions@91', __javascriptError); throw __javascriptError; }}
 
-function chooseInternalTarget(targets, moving, nearTolerance) {
+function chooseInternalTarget(targets, moving, nearTolerance) { try {
     const overlapping = targets
-        .map(target => ({ target, area: overlapArea(moving, target) }))
-        .filter(item => item.area > .15)
-        .sort((a, b) => b.target.zIndex - a.target.zIndex || b.area - a.area);
+        .map(target => { try { return (({ target, area: overlapArea(moving, target) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:targets .map@101', __javascriptError); throw __javascriptError; } })
+        .filter(item => { try { return (item.area > .15); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:targets .map(target => ({ target, area: overlapArea(moving, target) })@102', __javascriptError); throw __javascriptError; } })
+        .sort((a, b) => { try { return (b.target.zIndex - a.target.zIndex || b.area - a.area); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:targets .map(target => ({ target, area: overlapArea(moving, target) })@103', __javascriptError); throw __javascriptError; } });
     if (overlapping.length) return overlapping[0].target;
 
     return targets
-        .map(target => ({ target, distance: rectangleGap(moving, target) }))
-        .filter(item => item.distance <= nearTolerance)
-        .sort((a, b) => a.distance - b.distance || b.target.zIndex - a.target.zIndex)[0]?.target || null;
-}
+        .map(target => { try { return (({ target, distance: rectangleGap(moving, target) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:targets .map@107', __javascriptError); throw __javascriptError; } })
+        .filter(item => { try { return (item.distance <= nearTolerance); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:targets .map(target => ({ target, distance: rectangleGap(moving, targe@108', __javascriptError); throw __javascriptError; } })
+        .sort((a, b) => { try { return (a.distance - b.distance || b.target.zIndex - a.target.zIndex); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:targets .map(target => ({ target, distance: rectangleGap(moving, targe@109', __javascriptError); throw __javascriptError; } })[0]?.target || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:chooseInternalTarget@99', __javascriptError); throw __javascriptError; }}
 
-function sourceAnchors(size, grab, extraOffsets = []) {
-    const offsets = new Set([0, size / 2, size, ...extraOffsets].map(value => Math.round(value * 10000) / 10000));
+function sourceAnchors(size, grab, extraOffsets = []) { try {
+    const offsets = new Set([0, size / 2, size, ...extraOffsets].map(value => { try { return (Math.round(value * 10000) / 10000); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[0, size / 2, size, ...extraOffsets].map@113', __javascriptError); throw __javascriptError; } }));
     return [...offsets]
-        .filter(offset => offset >= -.0001 && offset <= size + .0001)
-        .map(offset => {
+        .filter(offset => { try { return (offset >= -.0001 && offset <= size + .0001); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...offsets] .filter@115', __javascriptError); throw __javascriptError; } })
+        .map(offset => { try {
             const fraction = size > 0 ? offset / size : .5;
             return { offset, fraction, penalty: Math.abs(grab - fraction) };
-        });
-}
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...offsets] .filter(offset => offset >= -.0001 && offset <= size + .0@116', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:sourceAnchors@112', __javascriptError); throw __javascriptError; }}
 
-function movingAnchorOffsets(operation, axis) {
+function movingAnchorOffsets(operation, axis) { try {
     const bounds = operation.movingBounds;
     if (!bounds || !operation.moving?.length) return [];
     const origin = axis === 'x' ? bounds.x : bounds.y;
-    return operation.moving.flatMap(item => {
+    return operation.moving.flatMap(item => { try {
         const start = (axis === 'x' ? item.x : item.y) - origin;
         const size = axis === 'x' ? item.width : item.height;
         return [start, start + size / 2, start + size];
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:operation.moving.flatMap@126', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:movingAnchorOffsets@122', __javascriptError); throw __javascriptError; }}
 
-function snapCandidate(mode, axis, target, destination, source, rawStart, tolerance, percent = null) {
+function snapCandidate(mode, axis, target, destination, source, rawStart, tolerance, percent = null) { try {
     const delta = destination - (rawStart + source.offset);
     if (Math.abs(delta) > tolerance) return null;
     return {
@@ -142,18 +149,18 @@ function snapCandidate(mode, axis, target, destination, source, rawStart, tolera
         score: Math.abs(delta) + source.penalty * tolerance * .7,
         key: `${mode}:${axis}:${target.id}:${destination.toFixed(4)}:${source.fraction}`
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapCandidate@133', __javascriptError); throw __javascriptError; }}
 
-function pickSnapCandidate(candidates, previous, tolerance, releaseTolerance) {
+function pickSnapCandidate(candidates, previous, tolerance, releaseTolerance) { try {
     const valid = candidates.filter(Boolean);
     if (previous?.key) {
-        const locked = valid.find(candidate => candidate.key === previous.key && Math.abs(candidate.delta) <= releaseTolerance);
+        const locked = valid.find(candidate => { try { return (candidate.key === previous.key && Math.abs(candidate.delta) <= releaseTolerance); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:valid.find@152', __javascriptError); throw __javascriptError; } });
         if (locked) return locked;
     }
-    return valid.filter(candidate => Math.abs(candidate.delta) <= tolerance).sort((a, b) => a.score - b.score)[0] || null;
-}
+    return valid.filter(candidate => { try { return (Math.abs(candidate.delta) <= tolerance); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:valid.filter@155', __javascriptError); throw __javascriptError; } }).sort((a, b) => { try { return (a.score - b.score); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:valid.filter(candidate => Math.abs(candidate.delta) <= tolerance).sort@155', __javascriptError); throw __javascriptError; } })[0] || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pickSnapCandidate@149', __javascriptError); throw __javascriptError; }}
 
-function objectSnapResult(state, operation, x, y, width, height) {
+function objectSnapResult(state, operation, x, y, width, height) { try {
     const targets = publicationObjectBounds(state, operation.movingIds || operation.id);
     const tolerance = 7 / state.config.pxPerMm;
     const releaseTolerance = 11 / state.config.pxPerMm;
@@ -206,10 +213,10 @@ function objectSnapResult(state, operation, x, y, width, height) {
     const intentionalTargetIds = new Set([
         internalTarget?.id,
         ...[bestX, bestY]
-            .filter(candidate => candidate?.mode === 'inside')
-            .map(candidate => candidate.target.id)
+            .filter(candidate => { try { return (candidate?.mode === 'inside'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[bestX, bestY] .filter@211', __javascriptError); throw __javascriptError; } })
+            .map(candidate => { try { return (candidate.target.id); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[bestX, bestY] .filter(candidate => candidate?.mode === \'inside\') .map@212', __javascriptError); throw __javascriptError; } })
     ].filter(Boolean));
-    const collisions = targets.filter(target => !intentionalTargetIds.has(target.id) && rectanglesOverlap(moved, target));
+    const collisions = targets.filter(target => { try { return (!intentionalTargetIds.has(target.id) && rectanglesOverlap(moved, target)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:targets.filter@214', __javascriptError); throw __javascriptError; } });
     const alignedTargets = new Set([bestX?.target, bestY?.target].filter(Boolean));
     let nearTarget = null;
     let nearestDistance = Infinity;
@@ -219,15 +226,15 @@ function objectSnapResult(state, operation, x, y, width, height) {
     }
     const status = collisions.length ? 'red' : (bestX || bestY) ? 'green' : nearestDistance <= nearTolerance ? 'orange' : null;
     return { x, y, width, height, bestX, bestY, collisions, alignedTargets, nearTarget, internalTarget, status };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:objectSnapResult@158', __javascriptError); throw __javascriptError; }}
 
-function showObjectAlignmentFeedback(state, operation, result) {
+function showObjectAlignmentFeedback(state, operation, result) { try {
     clearObjectAlignmentFeedback(state);
     if (!result?.status) return;
     for (const moving of operation.moving || []) moving.element?.classList.add(`alignment-moving-${result.status}`);
     if (!operation.moving?.length) refreshOperationElement(state, operation)?.classList.add(`alignment-moving-${result.status}`);
     const highlighted = result.status === 'red' ? result.collisions : result.status === 'green' ? [...result.alignedTargets] : [result.nearTarget].filter(Boolean);
-    highlighted.forEach(target => target?.element?.classList.add(`alignment-target-${result.status}`));
+    highlighted.forEach(target => { try { return (target?.element?.classList.add(`alignment-target-${result.status}`)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:highlighted.forEach@232', __javascriptError); throw __javascriptError; } });
     const overlay = document.createElement('div');
     overlay.className = `publisher-object-alignment-overlay status-${result.status}`;
     overlay.setAttribute('aria-hidden', 'true');
@@ -249,19 +256,19 @@ function showObjectAlignmentFeedback(state, operation, result) {
     crosshair.style.top = `${(result.y + result.height / 2) * state.config.pxPerMm}px`;
     overlay.appendChild(crosshair);
 
-    const internal = [result.bestX, result.bestY].filter(candidate => candidate?.mode === 'inside');
+    const internal = [result.bestX, result.bestY].filter(candidate => { try { return (candidate?.mode === 'inside'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[result.bestX, result.bestY].filter@254', __javascriptError); throw __javascriptError; } });
     if (internal.length) {
         const label = document.createElement('span');
         label.className = 'publisher-object-alignment-label';
-        label.textContent = internal.map(candidate => `${candidate.axis.toUpperCase()} ${Math.round(candidate.percent * 100)}%`).join(' · ');
+        label.textContent = internal.map(candidate => { try { return (`${candidate.axis.toUpperCase()} ${Math.round(candidate.percent * 100)}%`); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:internal.map@258', __javascriptError); throw __javascriptError; } }).join(' · ');
         label.style.left = `${(result.x + result.width / 2) * state.config.pxPerMm}px`;
         label.style.top = `${Math.max(0, result.y * state.config.pxPerMm - 26)}px`;
         overlay.appendChild(label);
     }
     state.page.appendChild(overlay);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:showObjectAlignmentFeedback@226', __javascriptError); throw __javascriptError; }}
 
-function syncEditorElementContentFrame(state, element, widthMm, heightMm) {
+function syncEditorElementContentFrame(state, element, widthMm, heightMm) { try {
     const content = element?.querySelector?.(':scope > .publication-element-content');
     if (!content) return;
     const zoom = Math.max(.05, number(state?.page?.dataset?.zoom, state?.config?.pxPerMm / PX_PER_MM_AT_96_DPI || 1));
@@ -281,22 +288,22 @@ function syncEditorElementContentFrame(state, element, widthMm, heightMm) {
         content.style.zoom = "1";
         content.style.transform = `scale(${zoom})`;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:syncEditorElementContentFrame@266', __javascriptError); throw __javascriptError; }}
 
-function syncEditorZoomRendering(state) {
+function syncEditorZoomRendering(state) { try {
     if (!state?.page) return;
     for (const element of state.page.querySelectorAll?.('[data-publication-element]:not([data-connector-id])') || []) {
         const bounds = elementMm(element, state.config.pxPerMm);
         syncEditorElementContentFrame(state, element, bounds.width, bounds.height);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:syncEditorZoomRendering@288', __javascriptError); throw __javascriptError; }}
 
-function resetPointerOperation(state, restoreDom = false) {
+function resetPointerOperation(state, restoreDom = false) { try {
     clearObjectAlignmentFeedback(state);
     const operation = state?.operation;
     if (!operation) return;
     state.operation = null;
-    try { state.stage.releasePointerCapture(operation.pointerId); } catch { }
+    try { state.stage.releasePointerCapture(operation.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@301', __caughtJavaScriptError);  }
 
     if (operation.kind === 'connector-control') {
         const controls = operation.originalControls;
@@ -306,7 +313,7 @@ function resetPointerOperation(state, restoreDom = false) {
             operation.connector.dataset.control2X = String(controls.c2.x);
             operation.connector.dataset.control2Y = String(controls.c2.y);
             const path = connectorPath(operation.connector.dataset.pathKind || 'Curved', operation.source, operation.target, controls);
-            operation.connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
+            operation.connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => { try { return (item.setAttribute('d', path)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:operation.connector.querySelectorAll(\'.connector-line,.connector-hit\')@311', __javascriptError); throw __javascriptError; } });
             updateConnectorControlAppearance(operation.connector, operation.source, operation.target, controls);
         }
         return;
@@ -335,15 +342,15 @@ function resetPointerOperation(state, restoreDom = false) {
         refreshContentFit(element);
         updateAttachedConnectors(state, item.id);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:resetPointerOperation@296', __javascriptError); throw __javascriptError; }}
 
-function insertionKindFromEvent(state, event) {
+function insertionKindFromEvent(state, event) { try {
     return event.dataTransfer?.getData('application/x-publisher-insert')
         || event.dataTransfer?.getData('text/x-publisher-insert')
         || String(state?.insertDragSource?.dataset?.publisherInsert || '');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:insertionKindFromEvent@342', __javascriptError); throw __javascriptError; }}
 
-function insertionDragStart(state, event) {
+function insertionDragStart(state, event) { try {
     const source = event.target?.closest?.('[data-publisher-insert]');
     if (!source || !event.dataTransfer) return;
     const kind = String(source.dataset.publisherInsert || '').trim().toLowerCase();
@@ -353,9 +360,9 @@ function insertionDragStart(state, event) {
     event.dataTransfer.setData('text/x-publisher-insert', kind);
     source.classList.add('dragging');
     state.insertDragSource = source;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:insertionDragStart@348', __javascriptError); throw __javascriptError; }}
 
-function createInsertionDropPreview(state, kind) {
+function createInsertionDropPreview(state, kind) { try {
     state.insertDropPreview?.remove?.();
     const ghost = document.createElement('div');
     ghost.className = `publisher-insert-drag-ghost kind-${kind}`;
@@ -370,9 +377,9 @@ function createInsertionDropPreview(state, kind) {
     state.page?.appendChild(ghost);
     state.insertDropPreview = ghost;
     return ghost;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createInsertionDropPreview@360', __javascriptError); throw __javascriptError; }}
 
-function positionInsertionDropPreview(state, event, kind) {
+function positionInsertionDropPreview(state, event, kind) { try {
     const rect = state.page.getBoundingClientRect();
     const xPx = clamp(event.clientX - rect.left, 0, rect.width);
     const yPx = clamp(event.clientY - rect.top, 0, rect.height);
@@ -381,29 +388,29 @@ function positionInsertionDropPreview(state, event, kind) {
         : createInsertionDropPreview(state, kind);
     ghost.style.left = `${xPx}px`;
     ghost.style.top = `${yPx}px`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:positionInsertionDropPreview@377', __javascriptError); throw __javascriptError; }}
 
-function clearInsertionDrag(state) {
+function clearInsertionDrag(state) { try {
     state?.insertDragSource?.classList?.remove('dragging');
     state.insertDragSource = null;
     state?.insertDropPreview?.remove?.();
     state.insertDropPreview = null;
     state?.page?.classList?.remove('insert-drop-target');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clearInsertionDrag@388', __javascriptError); throw __javascriptError; }}
 
-function insertionDragEnd(state) {
+function insertionDragEnd(state) { try {
     state.suppressInsertClickUntil = performance.now() + 350;
     clearInsertionDrag(state);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:insertionDragEnd@396', __javascriptError); throw __javascriptError; }}
 
-function suppressInsertionClick(state, event) {
+function suppressInsertionClick(state, event) { try {
     if (performance.now() > number(state?.suppressInsertClickUntil)) return;
     if (!event.target?.closest?.('[data-publisher-insert]')) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressInsertionClick@401', __javascriptError); throw __javascriptError; }}
 
-function insertionDragOver(state, event) {
+function insertionDragOver(state, event) { try {
     if (externalFileDragOver(state, event)) return;
     const kind = insertionKindFromEvent(state, event);
     if (!kind || !state.page?.isConnected) return;
@@ -416,9 +423,9 @@ function insertionDragOver(state, event) {
     event.dataTransfer.dropEffect = 'copy';
     state.page.classList.add('insert-drop-target');
     positionInsertionDropPreview(state, event, kind);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:insertionDragOver@408', __javascriptError); throw __javascriptError; }}
 
-async function insertionDrop(state, event) {
+async function insertionDrop(state, event) { try {
     if (await externalFileDrop(state, event)) return;
     const kind = insertionKindFromEvent(state, event);
     if (!kind || !state.page?.isConnected) return;
@@ -440,26 +447,26 @@ async function insertionDrop(state, event) {
         }
     }
     safeDotNet(state, 'DropInsert', kind, x, y);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:insertionDrop@423', __javascriptError); throw __javascriptError; }}
 
 
-function externalDraggedFile(event) {
+function externalDraggedFile(event) { try {
     const transfer = event?.dataTransfer;
     if (!transfer) return null;
     if (transfer.files?.length) return transfer.files[0];
-    const item = [...(transfer.items || [])].find(candidate => candidate.kind === 'file');
+    const item = [...(transfer.items || [])].find(candidate => { try { return (candidate.kind === 'file'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(transfer.items || [])].find@452', __javascriptError); throw __javascriptError; } });
     return item?.getAsFile?.() || null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:externalDraggedFile@448', __javascriptError); throw __javascriptError; }}
 
-function externalDraggedDescriptor(event) {
+function externalDraggedDescriptor(event) { try {
     const file = externalDraggedFile(event);
     if (file) return { file, name: file.name || '', type: file.type || '', size: file.size || 0, lastModified: file.lastModified || 0 };
-    const item = [...(event?.dataTransfer?.items || [])].find(candidate => candidate.kind === 'file');
+    const item = [...(event?.dataTransfer?.items || [])].find(candidate => { try { return (candidate.kind === 'file'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(event?.dataTransfer?.items || [])].find@459', __javascriptError); throw __javascriptError; } });
     if (!item) return null;
     return { file: null, name: '', type: item.type || '', size: 0, lastModified: 0 };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:externalDraggedDescriptor@456', __javascriptError); throw __javascriptError; }}
 
-function externalDropKind(file) {
+function externalDropKind(file) { try {
     const name = String(file?.name || '').toLowerCase();
     const mime = String(file?.type || '').toLowerCase();
     if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/.test(name)) return 'picture';
@@ -471,9 +478,9 @@ function externalDropKind(file) {
     if (mime.startsWith('text/') || /\.(txt|text|log|csv|tsv)$/.test(name)) return 'text';
     if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || /\.docx$/.test(name)) return 'docx';
     return '';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:externalDropKind@464', __javascriptError); throw __javascriptError; }}
 
-function clearExternalDropPreview(state) {
+function clearExternalDropPreview(state) { try {
     const preview = state?.externalDropPreview;
     if (!preview) return;
     if (preview.url) URL.revokeObjectURL(preview.url);
@@ -482,9 +489,9 @@ function clearExternalDropPreview(state) {
     preview.overlay?.remove?.();
     state.page?.classList?.remove('external-file-drop-target');
     state.externalDropPreview = null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clearExternalDropPreview@478', __javascriptError); throw __javascriptError; }}
 
-function externalDropTargetMessage(kind, target) {
+function externalDropTargetMessage(kind, target) { try {
     if (target?.kind === 'image' && kind === 'picture') return 'Add picture as a new Picture Studio layer';
     if (target?.kind === 'video' && kind === 'video') return 'Add video as a new Video Studio sequence segment';
     if (target?.kind === 'audio' && kind === 'audio') return 'Add audio as a new Audio Studio sequence segment';
@@ -496,15 +503,15 @@ function externalDropTargetMessage(kind, target) {
         : kind === 'text' ? 'Drop text as a text frame'
         : kind === 'docx' ? 'Drop Word document as an editable text frame'
         : 'This file type is not supported yet';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:externalDropTargetMessage@489', __javascriptError); throw __javascriptError; }}
 
-function compatibleExternalDropTarget(kind, targetKind) {
+function compatibleExternalDropTarget(kind, targetKind) { try {
     return (kind === 'picture' && targetKind === 'image')
         || (kind === 'video' && targetKind === 'video')
         || (kind === 'audio' && targetKind === 'audio');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:compatibleExternalDropTarget@503', __javascriptError); throw __javascriptError; }}
 
-function externalDropTargetAt(state, event, kind, placement) {
+function externalDropTargetAt(state, event, kind, placement) { try {
     const element = event?.target?.closest?.('[data-publication-element]');
     if (!element || !state.page?.contains(element) || element.classList.contains('locked')) return null;
     const targetKind = String(element.dataset.elementKind || '').toLowerCase();
@@ -529,9 +536,9 @@ function externalDropTargetAt(state, event, kind, placement) {
         x: clamp(localX / width, 0, 1),
         y: clamp(localY / height, 0, 1)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:externalDropTargetAt@509', __javascriptError); throw __javascriptError; }}
 
-function setExternalDropTarget(preview, target) {
+function setExternalDropTarget(preview, target) { try {
     if (!preview) return;
     if (preview.target?.element !== target?.element)
         preview.target?.element?.classList?.remove('external-file-component-drop-target');
@@ -539,9 +546,9 @@ function setExternalDropTarget(preview, target) {
     preview.target?.element?.classList?.add('external-file-component-drop-target');
     const message = preview.overlay?.querySelector?.('.publisher-external-drop-message');
     if (message) message.textContent = externalDropTargetMessage(preview.kind, preview.target);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setExternalDropTarget@536', __javascriptError); throw __javascriptError; }}
 
-function createExternalDropPreview(state, file, kind) {
+function createExternalDropPreview(state, file, kind) { try {
     clearExternalDropPreview(state);
     const overlay = document.createElement('div');
     overlay.className = 'publisher-external-drop-overlay';
@@ -564,14 +571,14 @@ function createExternalDropPreview(state, file, kind) {
         const image = document.createElement('img');
         image.src = url;
         image.alt = '';
-        image.addEventListener('load', () => {
+        image.addEventListener('load', () => { try {
             preview.pixelWidth = image.naturalWidth || 0;
             preview.pixelHeight = image.naturalHeight || 0;
             if (preview.pixelWidth > 0 && preview.pixelHeight > 0) {
                 preview.heightPx = clamp(preview.widthPx * preview.pixelHeight / preview.pixelWidth, 54, 220);
                 ghost.style.height = `${preview.heightPx}px`;
             }
-        }, { once: true });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:image.addEventListener@569', __javascriptError); throw __javascriptError; }}, { once: true });
         ghost.appendChild(image);
     } else if ((kind === 'video' || kind === 'audio') && file instanceof Blob) {
         url = URL.createObjectURL(file);
@@ -584,9 +591,9 @@ function createExternalDropPreview(state, file, kind) {
             media.playsInline = true;
             media.autoplay = true;
             media.loop = true;
-            media.play().catch(() => { });
+            media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@589', __promiseError);   } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@589', __javascriptError); throw __javascriptError; }});
         }
-        media.addEventListener('loadedmetadata', () => {
+        media.addEventListener('loadedmetadata', () => { try {
             preview.durationSeconds = Number.isFinite(media.duration) ? Math.max(0, media.duration) : 0;
             if (kind === 'video') {
                 preview.pixelWidth = media.videoWidth || 0;
@@ -596,7 +603,7 @@ function createExternalDropPreview(state, file, kind) {
                 preview.heightPx = clamp(preview.widthPx * preview.pixelHeight / preview.pixelWidth, 54, 220);
                 ghost.style.height = `${preview.heightPx}px`;
             }
-        }, { once: true });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.addEventListener@591', __javascriptError); throw __javascriptError; }}, { once: true });
         if (kind === 'video') ghost.appendChild(media);
         else {
             const icon = document.createElement('b');
@@ -612,12 +619,12 @@ function createExternalDropPreview(state, file, kind) {
         label.textContent = file?.name || (kind ? `Dropped ${kind}` : 'Dropped file');
         ghost.append(icon, label);
         if ((kind === 'text' || kind === 'markdown') && file instanceof Blob) {
-            file.slice(0, 4096).text().then(text => {
+            file.slice(0, 4096).text().then(text => { try {
                 if (state.externalDropPreview !== preview) return;
                 const excerpt = document.createElement('p');
                 excerpt.textContent = text.replace(/\s+/g, ' ').trim().slice(0, 180) || '(empty text file)';
                 ghost.appendChild(excerpt);
-            }).catch(() => { });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:file.slice(0, 4096).text().then@617', __javascriptError); throw __javascriptError; }}).catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@617', __promiseError);   } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:file.slice(0, 4096).text().then(text => { if (state.externalDropPrevie@622', __javascriptError); throw __javascriptError; }});
         }
     }
     ghost.style.width = `${preview.widthPx}px`;
@@ -626,9 +633,9 @@ function createExternalDropPreview(state, file, kind) {
     state.page.classList.add('external-file-drop-target');
     state.externalDropPreview = preview;
     return preview;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createExternalDropPreview@546', __javascriptError); throw __javascriptError; }}
 
-function positionExternalDropPreviewAt(state, placement) {
+function positionExternalDropPreviewAt(state, placement) { try {
     const preview = state.externalDropPreview;
     if (!preview) return null;
     const pageWidth = number(state.page.dataset.pageWidthMm);
@@ -639,17 +646,17 @@ function positionExternalDropPreviewAt(state, placement) {
     preview.ghost.style.top = `${y * state.config.pxPerMm}px`;
     state.lastInsertionPoint = { x, y };
     return { x, y };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:positionExternalDropPreviewAt@633', __javascriptError); throw __javascriptError; }}
 
-function positionExternalDropPreview(state, event) {
+function positionExternalDropPreview(state, event) { try {
     const rect = state.page.getBoundingClientRect();
     return positionExternalDropPreviewAt(state, {
         x: (event.clientX - rect.left) / state.config.pxPerMm,
         y: (event.clientY - rect.top) / state.config.pxPerMm
     });
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:positionExternalDropPreview@646', __javascriptError); throw __javascriptError; }}
 
-function externalFileDragOver(state, event) {
+function externalFileDragOver(state, event) { try {
     const descriptor = externalDraggedDescriptor(event);
     if (!descriptor) return false;
     event.preventDefault();
@@ -662,9 +669,9 @@ function externalFileDragOver(state, event) {
     const placement = positionExternalDropPreview(state, event);
     setExternalDropTarget(state.externalDropPreview, externalDropTargetAt(state, event, kind, placement));
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:externalFileDragOver@654', __javascriptError); throw __javascriptError; }}
 
-async function importExternalFileAt(state, file, placement, existingPreview = null, target = null) {
+async function importExternalFileAt(state, file, placement, existingPreview = null, target = null) { try {
     const kind = externalDropKind(file);
     const preview = existingPreview || createExternalDropPreview(state, file, kind);
     positionExternalDropPreviewAt(state, placement);
@@ -702,9 +709,9 @@ async function importExternalFileAt(state, file, placement, existingPreview = nu
     } finally {
         clearExternalDropPreview(state);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:importExternalFileAt@669', __javascriptError); throw __javascriptError; }}
 
-async function externalFileDrop(state, event) {
+async function externalFileDrop(state, event) { try {
     const file = externalDraggedFile(event);
     if (!file) return false;
     event.preventDefault();
@@ -714,21 +721,21 @@ async function externalFileDrop(state, event) {
     const target = externalDropTargetAt(state, event, preview.kind, placement) || preview.target || null;
     await importExternalFileAt(state, file, placement, preview, target);
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:externalFileDrop@709', __javascriptError); throw __javascriptError; }}
 
-function canvasClipboardFiles(event) {
+function canvasClipboardFiles(event) { try {
     const transfer = event?.clipboardData;
     if (!transfer) return [];
-    const files = [...(transfer.files || [])].filter(file => file instanceof Blob);
+    const files = [...(transfer.files || [])].filter(file => { try { return (file instanceof Blob); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(transfer.files || [])].filter@724', __javascriptError); throw __javascriptError; } });
     for (const item of [...(transfer.items || [])]) {
         if (item.kind !== 'file') continue;
         const file = item.getAsFile?.();
         if (file && !files.includes(file)) files.push(file);
     }
     return files;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasClipboardFiles@721', __javascriptError); throw __javascriptError; }}
 
-function canvasClipboardPlacement(state, index = 0) {
+function canvasClipboardPlacement(state, index = 0) { try {
     const pageWidth = number(state.page?.dataset?.pageWidthMm);
     const pageHeight = number(state.page?.dataset?.pageHeightMm);
     const base = state.lastInsertionPoint || { x: pageWidth / 2, y: pageHeight / 2 };
@@ -737,9 +744,9 @@ function canvasClipboardPlacement(state, index = 0) {
         x: clamp(number(base.x, pageWidth / 2) + offset, 0, pageWidth),
         y: clamp(number(base.y, pageHeight / 2) + offset, 0, pageHeight)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasClipboardPlacement@733', __javascriptError); throw __javascriptError; }}
 
-function namedClipboardFile(file, index) {
+function namedClipboardFile(file, index) { try {
     if (file?.name) return file;
     const mime = String(file?.type || '').toLowerCase();
     const extension = mime.startsWith('image/') ? (mime.split('/')[1] || 'png').replace('jpeg', 'jpg')
@@ -748,15 +755,15 @@ function namedClipboardFile(file, index) {
         : 'txt';
     return new File([file], `Pasted ${mime.startsWith('image/') ? 'image' : mime.startsWith('video/') ? 'video' : 'file'} ${index + 1}.${extension}`,
         { type: file?.type || 'application/octet-stream', lastModified: Date.now() });
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:namedClipboardFile@744', __javascriptError); throw __javascriptError; }}
 
-async function canvasDocumentPaste(state, event) {
+async function canvasDocumentPaste(state, event) { try {
     if (!state?.keyboardActive || !state.stage?.isConnected || event.defaultPrevented || isPublisherEditableTarget(event.target)) return;
     if (state.pendingPasteTimer) clearTimeout(state.pendingPasteTimer);
     state.pendingPasteTimer = 0;
 
     const files = canvasClipboardFiles(event);
-    const types = [...(event.clipboardData?.types || [])].map(value => String(value).toLowerCase());
+    const types = [...(event.clipboardData?.types || [])].map(value => { try { return (String(value).toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(event.clipboardData?.types || [])].map@761', __javascriptError); throw __javascriptError; } });
     const plainText = String(event.clipboardData?.getData?.('text/plain') || '');
     const markdownText = String(event.clipboardData?.getData?.('text/markdown') || '');
     const externalText = markdownText || plainText;
@@ -792,11 +799,11 @@ async function canvasDocumentPaste(state, event) {
         lastModified: Date.now()
     });
     await importExternalFileAt(state, file, canvasClipboardPlacement(state, 0));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasDocumentPaste@755', __javascriptError); throw __javascriptError; }}
 
 
-function measureNaturalContent(source,kind){const ot=source.style.transform,ow=source.style.width,oh=source.style.height;source.style.transform='none';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';const v={width:Math.max(1,source.scrollWidth,source.getBoundingClientRect().width),height:Math.max(1,source.scrollHeight,source.getBoundingClientRect().height)};source.style.transform=ot;source.style.width=ow;source.style.height=oh;return v;}
-function applyContentViewport(frame, source, fitScaleX = number(frame.dataset.contentFitScaleX, 1), fitScaleY = number(frame.dataset.contentFitScaleY, 1)) {
+function measureNaturalContent(source,kind){ try {const ot=source.style.transform,ow=source.style.width,oh=source.style.height;source.style.transform='none';source.style.width=kind==='spreadsheet'?'max-content':'100%';source.style.height='auto';const v={width:Math.max(1,source.scrollWidth,source.getBoundingClientRect().width),height:Math.max(1,source.scrollHeight,source.getBoundingClientRect().height)};source.style.transform=ot;source.style.width=ow;source.style.height=oh;return v; } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:measureNaturalContent@800', __javascriptError); throw __javascriptError; }}
+function applyContentViewport(frame, source, fitScaleX = number(frame.dataset.contentFitScaleX, 1), fitScaleY = number(frame.dataset.contentFitScaleY, 1)) { try {
     const offsetX = number(frame.dataset.contentOffsetX, 0);
     const offsetY = number(frame.dataset.contentOffsetY, 0);
     const scale = clamp(number(frame.dataset.contentScale, 1), .1, 12);
@@ -804,9 +811,9 @@ function applyContentViewport(frame, source, fitScaleX = number(frame.dataset.co
     const translateY = offsetY * Math.max(1, frame.clientHeight) / 100;
     source.style.transformOrigin = '0 0';
     source.style.transform = `translate(${translateX}px, ${translateY}px) scale(${Math.max(.0001, fitScaleX * scale)}, ${Math.max(.0001, fitScaleY * scale)})`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:applyContentViewport@801', __javascriptError); throw __javascriptError; }}
 
-export function refreshContentFit(root = document) {
+export function refreshContentFit(root = document) { try {
     const frames = root?.matches?.('[data-content-fit]') ? [root] : [...(root?.querySelectorAll?.('[data-content-fit]') || [])];
     for (const frame of frames) {
         const source = frame.querySelector(':scope > [data-content-fit-source]');
@@ -829,19 +836,19 @@ export function refreshContentFit(root = document) {
         frame.dataset.contentFitScaleY = String(sy);
         applyContentViewport(frame, source, sx, sy);
     }
-}
-function resizeCursorFor(handle, rotation) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refreshContentFit@811', __javascriptError); throw __javascriptError; }}
+function resizeCursorFor(handle, rotation) { try {
     // CSS screen coordinates increase downward. 45 degrees therefore follows the
     // NW-SE axis and 135 degrees follows NE-SW; treating them as mathematical
     // Y-up angles swaps the diagonal cursor after an object is rotated.
     const base = { e: 0, w: 0, n: 90, s: 90, nw: 45, se: 45, ne: 135, sw: 135 }[handle] ?? 0;
     const sector = Math.round(((((base + rotation) % 180) + 180) % 180) / 45) % 4;
     return ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'][sector];
-}
-function updateResizeHandleCursors(root=document){for(const element of root.querySelectorAll?.('.pub-element')||[]){const rotation=parseRotation(element);for(const handle of element.querySelectorAll('[data-resize-handle]'))handle.style.cursor=resizeCursorFor(handle.dataset.resizeHandle,rotation);}}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:resizeCursorFor@835', __javascriptError); throw __javascriptError; }}
+function updateResizeHandleCursors(root=document){ try {for(const element of root.querySelectorAll?.('.pub-element')||[]){const rotation=parseRotation(element);for(const handle of element.querySelectorAll('[data-resize-handle]'))handle.style.cursor=resizeCursorFor(handle.dataset.resizeHandle,rotation);} } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateResizeHandleCursors@843', __javascriptError); throw __javascriptError; }}
 
 
-export function elementRelativePoint(pageId, elementId, clientX, clientY) {
+export function elementRelativePoint(pageId, elementId, clientX, clientY) { try {
     const page = typeof pageId === 'string' ? document.getElementById(pageId) : pageId;
     const element = page?.querySelector?.(`[data-element-id="${CSS.escape(String(elementId || ''))}"]`);
     if (!element) return [.5, .5];
@@ -856,17 +863,17 @@ export function elementRelativePoint(pageId, elementId, clientX, clientY) {
         rect.width > 0 ? clamp((number(clientX) - rect.left) / rect.width, 0, 1) : .5,
         rect.height > 0 ? clamp((number(clientY) - rect.top) / rect.height, 0, 1) : .5
     ];
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:elementRelativePoint@846', __javascriptError); throw __javascriptError; }}
 
-export function initializeSignalConnectors(rootId, options = {}) {
+export function initializeSignalConnectors(rootId, options = {}) { try {
     const root = typeof rootId === 'string' ? document.getElementById(rootId) : rootId;
     if (!root) return false;
     root.__publisherSignalRuntime?.dispose?.();
     root.__publisherSignalRuntime = signalConnectorRuntime(root, options);
     return Boolean(root.__publisherSignalRuntime);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeSignalConnectors@863', __javascriptError); throw __javascriptError; }}
 
-export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) {
+export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) { try {
     const stage = document.getElementById(stageId);
     const scroll = document.getElementById(scrollId);
     const page = document.getElementById(pageId);
@@ -887,7 +894,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         gridSpacingMm: Math.max(.1, number(config?.gridSpacingMm, 2.5)),
         connectorTool: String(config?.connectorTool || 'None'),
         selectedElementIds: new Set((Array.isArray(config?.selectedElementIds) ? config.selectedElementIds : [])
-            .map(value => String(value || '').toLowerCase())
+            .map(value => { try { return (String(value || '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:(Array.isArray(config?.selectedElementIds) ? config.selectedElementIds@892', __javascriptError); throw __javascriptError; } })
             .filter(Boolean)),
         internalClipboardAvailable: Boolean(config?.internalClipboardAvailable),
         clipboardRevision: number(config?.clipboardRevision, 0)
@@ -922,53 +929,53 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         };
 
         const handlers = state.handlers;
-        handlers.stagePointerDown = event => pointerDown(state, event);
-        handlers.stageDoubleClick = event => componentDoubleClick(state, event);
-        handlers.stageContextMenu = event => designerContextMenu(state, event);
-        handlers.stagePointerMove = event => pointerMove(state, event);
-        handlers.stagePointerUp = event => pointerUp(state, event);
-        handlers.stagePointerCancel = event => pointerCancel(state, event);
-        handlers.lostPointerCapture = event => {
+        handlers.stagePointerDown = event => { try { return (pointerDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerDown@927', __javascriptError); throw __javascriptError; } };
+        handlers.stageDoubleClick = event => { try { return (componentDoubleClick(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDoubleClick@928', __javascriptError); throw __javascriptError; } };
+        handlers.stageContextMenu = event => { try { return (designerContextMenu(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageContextMenu@929', __javascriptError); throw __javascriptError; } };
+        handlers.stagePointerMove = event => { try { return (pointerMove(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerMove@930', __javascriptError); throw __javascriptError; } };
+        handlers.stagePointerUp = event => { try { return (pointerUp(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerUp@931', __javascriptError); throw __javascriptError; } };
+        handlers.stagePointerCancel = event => { try { return (pointerCancel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerCancel@932', __javascriptError); throw __javascriptError; } };
+        handlers.lostPointerCapture = event => { try {
             if (state.operation?.pointerId === event.pointerId) resetPointerOperation(state, true);
-        };
-        handlers.windowPointerDown = event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.lostPointerCapture@933', __javascriptError); throw __javascriptError; }};
+        handlers.windowPointerDown = event => { try {
             if (state.operation && !state.stage.contains(event.target)) resetPointerOperation(state, true);
             if (state.stage.contains(event.target)) state.keyboardActive = true;
-        };
-        handlers.windowPointerUp = event => pointerUp(state, event);
-        handlers.windowPointerCancel = event => pointerCancel(state, event);
-        handlers.windowBlur = () => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowPointerDown@936', __javascriptError); throw __javascriptError; }};
+        handlers.windowPointerUp = event => { try { return (pointerUp(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowPointerUp@940', __javascriptError); throw __javascriptError; } };
+        handlers.windowPointerCancel = event => { try { return (pointerCancel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowPointerCancel@941', __javascriptError); throw __javascriptError; } };
+        handlers.windowBlur = () => { try {
             state.externalClipboardLikely = true;
             resetPointerOperation(state, true);
-        };
-        handlers.visibilityChange = () => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowBlur@942', __javascriptError); throw __javascriptError; }};
+        handlers.visibilityChange = () => { try {
             if (document.hidden) {
                 state.externalClipboardLikely = true;
                 resetPointerOperation(state, true);
             }
-        };
-        handlers.stagePointerLeave = () => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.visibilityChange@946', __javascriptError); throw __javascriptError; }};
+        handlers.stagePointerLeave = () => { try {
             state.cursorX = null;
             state.cursorY = null;
             nextAnimationFrame(state);
-        };
-        handlers.stageWheel = event => cropWheel(state, event);
-        handlers.stageKeyDown = event => canvasKeyDown(state, event);
-        handlers.documentKeyDown = event => canvasDocumentKeyDown(state, event);
-        handlers.documentPaste = event => canvasDocumentPaste(state, event);
-        handlers.stageDragEnter = event => insertionDragOver(state, event);
-        handlers.stageDragOver = event => insertionDragOver(state, event);
-        handlers.stageDrop = event => insertionDrop(state, event);
-        handlers.stageDragLeave = event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerLeave@952', __javascriptError); throw __javascriptError; }};
+        handlers.stageWheel = event => { try { return (cropWheel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageWheel@957', __javascriptError); throw __javascriptError; } };
+        handlers.stageKeyDown = event => { try { return (canvasKeyDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageKeyDown@958', __javascriptError); throw __javascriptError; } };
+        handlers.documentKeyDown = event => { try { return (canvasDocumentKeyDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentKeyDown@959', __javascriptError); throw __javascriptError; } };
+        handlers.documentPaste = event => { try { return (canvasDocumentPaste(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentPaste@960', __javascriptError); throw __javascriptError; } };
+        handlers.stageDragEnter = event => { try { return (insertionDragOver(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragEnter@961', __javascriptError); throw __javascriptError; } };
+        handlers.stageDragOver = event => { try { return (insertionDragOver(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragOver@962', __javascriptError); throw __javascriptError; } };
+        handlers.stageDrop = event => { try { return (insertionDrop(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDrop@963', __javascriptError); throw __javascriptError; } };
+        handlers.stageDragLeave = event => { try {
             const next = event.relatedTarget;
             if (!next || !state.stage.contains(next)) {
                 clearExternalDropPreview(state);
                 clearInsertionDrag(state);
             }
-        };
-        handlers.documentDragStart = event => insertionDragStart(state, event);
-        handlers.documentDragEnd = () => insertionDragEnd(state);
-        handlers.documentClick = event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragLeave@964', __javascriptError); throw __javascriptError; }};
+        handlers.documentDragStart = event => { try { return (insertionDragStart(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragStart@971', __javascriptError); throw __javascriptError; } };
+        handlers.documentDragEnd = () => { try { return (insertionDragEnd(state)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragEnd@972', __javascriptError); throw __javascriptError; } };
+        handlers.documentClick = event => { try {
             if (performance.now() < number(state.suppressNextComponentClickUntil) && event.target?.closest?.('.devextreme-component-host')) {
                 state.suppressNextComponentClickUntil = 0;
                 event.preventDefault();
@@ -976,11 +983,11 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
                 return;
             }
             suppressInsertionClick(state, event);
-        };
-        handlers.scroll = () => { nextAnimationFrame(state); scheduleSelectionVisualFrame(state); };
-        handlers.publisherNavigate = event => scheduleComponentNavigation(state, event.detail);
-        handlers.publisherOpenUrl = event => scheduleComponentUrl(state, event.detail);
-        handlers.mapViewportChanged = event => commitMapViewportEvent(state, event);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentClick@973', __javascriptError); throw __javascriptError; }};
+        handlers.scroll = () => { try { nextAnimationFrame(state); scheduleSelectionVisualFrame(state);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.scroll@982', __javascriptError); throw __javascriptError; }};
+        handlers.publisherNavigate = event => { try { return (scheduleComponentNavigation(state, event.detail)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.publisherNavigate@983', __javascriptError); throw __javascriptError; } };
+        handlers.publisherOpenUrl = event => { try { return (scheduleComponentUrl(state, event.detail)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.publisherOpenUrl@984', __javascriptError); throw __javascriptError; } };
+        handlers.mapViewportChanged = event => { try { return (commitMapViewportEvent(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.mapViewportChanged@985', __javascriptError); throw __javascriptError; } };
 
         // Capture phase keeps selection alive even when nested media, SVG, chart,
         // or animation content stops pointer events in its own component tree.
@@ -1014,7 +1021,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         scroll.addEventListener('scroll', handlers.scroll, { passive: true });
 
         if (typeof ResizeObserver === 'function') {
-            state.resizeObserver = new ResizeObserver(() => { nextAnimationFrame(state); refreshContentFit(state.page); updateResizeHandleCursors(state.page); scheduleSelectionVisualFrame(state); });
+            state.resizeObserver = new ResizeObserver(() => { try { nextAnimationFrame(state); refreshContentFit(state.page); updateResizeHandleCursors(state.page); scheduleSelectionVisualFrame(state);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@1019', __javascriptError); throw __javascriptError; }});
             state.resizeObserver.observe(stage);
             state.resizeObserver.observe(scroll);
         }
@@ -1032,7 +1039,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
     if (pageChanged) {
         clearInsertionDrag(state);
         clearExternalDropPreview(state);
-        try { clearPublicationPreview(state.page?.id || state.page); } catch { }
+        try { clearPublicationPreview(state.page?.id || state.page); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@1037', __caughtJavaScriptError);  }
     }
     state.scroll = scroll;
     state.page = page;
@@ -1049,9 +1056,9 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
     scheduleSelectionVisualFrame(state);
     nextAnimationFrame(state);
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeCanvas@871', __javascriptError); throw __javascriptError; }}
 
-export function disposeCanvas(stageId) {
+export function disposeCanvas(stageId) { try {
     const stage = document.getElementById(stageId);
     if (!stage) return;
     const state = canvasStates.get(stage);
@@ -1103,46 +1110,46 @@ export function disposeCanvas(stageId) {
 
     state.dotnet = null;
     canvasStates.delete(stage);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:disposeCanvas@1056', __javascriptError); throw __javascriptError; }}
 
-function bindRuler(canvas, orientation, state) {
+function bindRuler(canvas, orientation, state) { try {
     if (!canvas || boundRulers.has(canvas)) return;
     boundRulers.add(canvas);
-    canvas.addEventListener('pointerdown', event => rulerPointerDown(state, orientation, canvas, event));
-}
+    canvas.addEventListener('pointerdown', event => { try { return (rulerPointerDown(state, orientation, canvas, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:canvas.addEventListener@1113', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bindRuler@1110', __javascriptError); throw __javascriptError; }}
 
-function rulerPointerDown(state, orientation, canvas, event) {
+function rulerPointerDown(state, orientation, canvas, event) { try {
     if (event.button !== 0) return;
     state.rulerGuide = { orientation, pointerId: event.pointerId, canvas };
     canvas.setPointerCapture(event.pointerId);
 
-    const move = moveEvent => {
+    const move = moveEvent => { try {
         if (!state.rulerGuide || moveEvent.pointerId !== state.rulerGuide.pointerId) return;
         updateRulerGuidePreview(state, orientation, moveEvent);
-    };
-    const finish = upEvent => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:move@1121', __javascriptError); throw __javascriptError; }};
+    const finish = upEvent => { try {
         if (!state.rulerGuide || upEvent.pointerId !== state.rulerGuide.pointerId) return;
         canvas.removeEventListener('pointermove', move);
         canvas.removeEventListener('pointerup', finish);
         canvas.removeEventListener('pointercancel', finish);
         finishRulerGuide(state, orientation, upEvent);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finish@1125', __javascriptError); throw __javascriptError; }};
 
     canvas.addEventListener('pointermove', move);
     canvas.addEventListener('pointerup', finish);
     canvas.addEventListener('pointercancel', finish);
     updateRulerGuidePreview(state, orientation, event);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:rulerPointerDown@1116', __javascriptError); throw __javascriptError; }}
 
-function guidePositionFromPointer(state, orientation, event) {
+function guidePositionFromPointer(state, orientation, event) { try {
     const pageRect = state.page.getBoundingClientRect();
     return orientation === 'Horizontal'
         ? (event.clientY - pageRect.top) / state.config.pxPerMm
         : (event.clientX - pageRect.left) / state.config.pxPerMm;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:guidePositionFromPointer@1140', __javascriptError); throw __javascriptError; }}
 
-function updateRulerGuidePreview(state, orientation, event) {
+function updateRulerGuidePreview(state, orientation, event) { try {
     const position = guidePositionFromPointer(state, orientation, event);
     let preview = state.guidePreview;
     if (!preview) {
@@ -1153,9 +1160,9 @@ function updateRulerGuidePreview(state, orientation, event) {
     }
     if (orientation === 'Horizontal') preview.style.top = `${position * state.config.pxPerMm}px`;
     else preview.style.left = `${position * state.config.pxPerMm}px`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateRulerGuidePreview@1147', __javascriptError); throw __javascriptError; }}
 
-function finishRulerGuide(state, orientation, event) {
+function finishRulerGuide(state, orientation, event) { try {
     const position = guidePositionFromPointer(state, orientation, event);
     const max = orientation === 'Horizontal'
         ? number(state.page.dataset.pageHeightMm)
@@ -1166,16 +1173,16 @@ function finishRulerGuide(state, orientation, event) {
     state.rulerGuide = null;
     if (position >= 0 && position <= max)
         state.dotnet.invokeMethodAsync('AddGuideAt', orientation, position);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finishRulerGuide@1160', __javascriptError); throw __javascriptError; }}
 
 
-function isPublisherEditableTarget(target) {
+function isPublisherEditableTarget(target) { try {
     if (!(target instanceof Element)) return false;
     return Boolean(target.closest('input,textarea,select,button,a,[role="button"],[role="menuitem"],[contenteditable="true"],[contenteditable=""],[role="textbox"],[role="dialog"],.modal-backdrop,.editor-modal-backdrop'));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:isPublisherEditableTarget@1174', __javascriptError); throw __javascriptError; }}
 
 
-function isDesignerComponentControlTarget(target, element) {
+function isDesignerComponentControlTarget(target, element) { try {
     if (!target?.closest || !element || String(element.dataset?.elementKind || '').toLowerCase() !== 'devextremecomponent') return false;
     const control = target.closest([
         'button', 'a[href]', 'input', 'textarea', 'select',
@@ -1185,26 +1192,26 @@ function isDesignerComponentControlTarget(target, element) {
         '.dx-slider-handle', '.dx-scrollbar', '.dx-scrollable-scroll'
     ].join(','));
     return Boolean(control && element.contains(control));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:isDesignerComponentControlTarget@1180', __javascriptError); throw __javascriptError; }}
 
-function resetCanvasTransientState(state, restoreDom = true) {
+function resetCanvasTransientState(state, restoreDom = true) { try {
     resetPointerOperation(state, restoreDom);
     clearConnectorOperation(state, true);
     clearInsertionDrag(state);
     clearExternalDropPreview(state);
     try { clearPublicationPreview(state.page?.id || state.page); }
     catch (error) { console.warn('Publisher transient preview cleanup failed.', error); }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:resetCanvasTransientState@1192', __javascriptError); throw __javascriptError; }}
 
-function invokeCanvasKeyboardCommand(state, event, method, ...args) {
+function invokeCanvasKeyboardCommand(state, event, method, ...args) { try {
     resetCanvasTransientState(state, true);
     safeDotNet(state, method, ...args);
-    try { state.stage.focus({ preventScroll: true }); } catch { }
+    try { state.stage.focus({ preventScroll: true }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@1204', __caughtJavaScriptError);  }
     event.preventDefault();
     event.stopPropagation();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:invokeCanvasKeyboardCommand@1201', __javascriptError); throw __javascriptError; }}
 
-function canvasDocumentKeyDown(state, event) {
+function canvasDocumentKeyDown(state, event) { try {
     if (!state?.keyboardActive || !state.stage?.isConnected || event.defaultPrevented || isPublisherEditableTarget(event.target)) return;
     const key = String(event.key || '').toLowerCase();
     const command = event.ctrlKey || event.metaKey;
@@ -1229,11 +1236,11 @@ function canvasDocumentKeyDown(state, event) {
         // Do not cancel the native paste event: it is the only standards-based way
         // for the browser to expose files copied from Explorer/Finder or external text.
         if (state.pendingPasteTimer) clearTimeout(state.pendingPasteTimer);
-        state.pendingPasteTimer = setTimeout(() => {
+        state.pendingPasteTimer = setTimeout(() => { try {
             state.pendingPasteTimer = 0;
             resetCanvasTransientState(state, true);
             safeDotNet(state, 'KeyboardPaste');
-        }, 80);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@1234', __javascriptError); throw __javascriptError; }}, 80);
         return;
     }
     if (command && key === 'd') return invokeCanvasKeyboardCommand(state, event, 'KeyboardDuplicate');
@@ -1255,20 +1262,20 @@ function canvasDocumentKeyDown(state, event) {
         const dy = key === 'arrowup' ? -step : key === 'arrowdown' ? step : 0;
         return invokeCanvasKeyboardCommand(state, event, 'KeyboardNudge', dx, dy);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasDocumentKeyDown@1209', __javascriptError); throw __javascriptError; }}
 
-function startCanvasGamepad(state) {
+function startCanvasGamepad(state) { try {
     if (state.gamepad || typeof navigator.getGamepads !== 'function') return;
     const controller = { frame: 0, buttons: [], axisX: 0, axisY: 0, nextRepeat: 0 };
     state.gamepad = controller;
-    const pressed = (gamepad, index) => Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55);
-    const edge = (gamepad, index) => {
+    const pressed = (gamepad, index) => { try { return (Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pressed@1266', __javascriptError); throw __javascriptError; } };
+    const edge = (gamepad, index) => { try {
         const value = pressed(gamepad, index);
         const previous = Boolean(controller.buttons[index]);
         controller.buttons[index] = value;
         return value && !previous;
-    };
-    const tick = time => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:edge@1267', __javascriptError); throw __javascriptError; }};
+    const tick = time => { try {
         if (state.gamepad !== controller || !state.stage?.isConnected) return;
         controller.frame = requestAnimationFrame(tick);
         if (document.hidden || !state.keyboardActive) return;
@@ -1294,40 +1301,40 @@ function startCanvasGamepad(state) {
         if (edge(gamepad, 7)) safeDotNet(state, 'KeyboardLayerMove', 'front');
         if (edge(gamepad, 2)) safeDotNet(state, 'KeyboardDuplicate');
         if (edge(gamepad, 1)) safeDotNet(state, 'ClearSelectionFromCanvas');
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:tick@1273', __javascriptError); throw __javascriptError; }};
     controller.frame = requestAnimationFrame(tick);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startCanvasGamepad@1262', __javascriptError); throw __javascriptError; }}
 
-function canvasKeyDown(state, event) {
+function canvasKeyDown(state, event) { try {
     canvasDocumentKeyDown(state, event);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasKeyDown@1303', __javascriptError); throw __javascriptError; }}
 
-function connectorToolActive(state) {
+function connectorToolActive(state) { try {
     return state.config.connectorTool && state.config.connectorTool !== 'None';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:connectorToolActive@1307', __javascriptError); throw __javascriptError; }}
 
-function signalConnectorToolActive(state) {
+function signalConnectorToolActive(state) { try {
     return state.config.connectorTool === 'SignalConnector' || state.config.connectorTool === 'SignalArrow';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:signalConnectorToolActive@1311', __javascriptError); throw __javascriptError; }}
 
-function pagePointMm(state, event) {
+function pagePointMm(state, event) { try {
     const pageRect = state.page.getBoundingClientRect();
     return {
         x: clamp((event.clientX - pageRect.left) / state.config.pxPerMm, 0, number(state.page.dataset.pageWidthMm)),
         y: clamp((event.clientY - pageRect.top) / state.config.pxPerMm, 0, number(state.page.dataset.pageHeightMm))
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pagePointMm@1315', __javascriptError); throw __javascriptError; }}
 
-function defaultConnectorControls(source, target) {
+function defaultConnectorControls(source, target) { try {
     const dx = Math.max(12, Math.abs(target.x - source.x) * .48);
     const direction = target.x >= source.x ? 1 : -1;
     return {
         first: { x: source.x + dx * direction, y: source.y },
         second: { x: target.x - dx * direction, y: target.y }
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:defaultConnectorControls@1323', __javascriptError); throw __javascriptError; }}
 
-function connectorPath(kind, source, target, controls = null) {
+function connectorPath(kind, source, target, controls = null) { try {
     if (kind === 'Elbow') {
         const middleX = (source.x + target.x) / 2;
         return `M ${source.x} ${source.y} L ${middleX} ${source.y} L ${middleX} ${target.y} L ${target.x} ${target.y}`;
@@ -1339,9 +1346,9 @@ function connectorPath(kind, source, target, controls = null) {
         return `M ${source.x} ${source.y} C ${first.x} ${first.y}, ${second.x} ${second.y}, ${target.x} ${target.y}`;
     }
     return `M ${source.x} ${source.y} L ${target.x} ${target.y}`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:connectorPath@1332', __javascriptError); throw __javascriptError; }}
 
-function portPointMm(state, port) {
+function portPointMm(state, port) { try {
     const owner = port.closest?.('[data-publication-element][data-element-id]');
     if (owner && port.dataset.portId) {
         return pointForElementRelative(owner, {
@@ -1355,9 +1362,9 @@ function portPointMm(state, port) {
         x: (rect.left + rect.width / 2 - pageRect.left) / state.config.pxPerMm,
         y: (rect.top + rect.height / 2 - pageRect.top) / state.config.pxPerMm
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:portPointMm@1346', __javascriptError); throw __javascriptError; }}
 
-function relativePointForElement(state, element, event) {
+function relativePointForElement(state, element, event) { try {
     const point = pagePointMm(state, event);
     const bounds = elementMm(element, state.config.pxPerMm);
     const centerX = bounds.x + bounds.width / 2;
@@ -1371,9 +1378,9 @@ function relativePointForElement(state, element, event) {
         x: bounds.width > 0 ? clamp((localX - bounds.x) / bounds.width, 0, 1) : .5,
         y: bounds.height > 0 ? clamp((localY - bounds.y) / bounds.height, 0, 1) : .5
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:relativePointForElement@1362', __javascriptError); throw __javascriptError; }}
 
-function pointForElementRelative(element, relative, pxPerMm) {
+function pointForElementRelative(element, relative, pxPerMm) { try {
     const bounds = elementMm(element, pxPerMm);
     const centerX = bounds.x + bounds.width / 2;
     const centerY = bounds.y + bounds.height / 2;
@@ -1386,18 +1393,18 @@ function pointForElementRelative(element, relative, pxPerMm) {
         x: centerX + dx * Math.cos(radians) - dy * Math.sin(radians),
         y: centerY + dx * Math.sin(radians) + dy * Math.cos(radians)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pointForElementRelative@1378', __javascriptError); throw __javascriptError; }}
 
-function createConnectorPortPreview(owner, relative, className = '') {
+function createConnectorPortPreview(owner, relative, className = '') { try {
     const preview = document.createElement('span');
     preview.className = `connector-port connector-port-custom connector-port-preview ${className}`.trim();
     preview.style.left = `${clamp(relative.x, 0, 1) * 100}%`;
     preview.style.top = `${clamp(relative.y, 0, 1) * 100}%`;
     owner.appendChild(preview);
     return preview;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createConnectorPortPreview@1393', __javascriptError); throw __javascriptError; }}
 
-function dynamicConnectorTarget(state, event, excluded) {
+function dynamicConnectorTarget(state, event, excluded) { try {
     for (const candidate of document.elementsFromPoint(event.clientX, event.clientY)) {
         const owner = candidate.closest?.('[data-publication-element][data-element-id]');
         if (!owner || !state.page.contains(owner) || owner.matches('[data-connector-id]') || owner.classList.contains('locked')) continue;
@@ -1418,9 +1425,9 @@ function dynamicConnectorTarget(state, event, excluded) {
         };
     }
     return null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dynamicConnectorTarget@1402', __javascriptError); throw __javascriptError; }}
 
-function findConnectorTarget(state, event, excludedIds = []) {
+function findConnectorTarget(state, event, excludedIds = []) { try {
     const excluded = new Set(excludedIds.filter(Boolean));
     let best = null;
     let bestDistance = 22;
@@ -1448,9 +1455,9 @@ function findConnectorTarget(state, event, excludedIds = []) {
         }
     }
     return best || dynamicConnectorTarget(state, event, excluded);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:findConnectorTarget@1425', __javascriptError); throw __javascriptError; }}
 
-function ensureConnectorGhost(state, markerEnd) {
+function ensureConnectorGhost(state, markerEnd) { try {
     if (state.connectorGhost) return state.connectorGhost;
     const ns = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(ns, 'svg');
@@ -1479,20 +1486,20 @@ function ensureConnectorGhost(state, markerEnd) {
     state.page.appendChild(svg);
     state.connectorGhost = { svg, path };
     return state.connectorGhost;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ensureConnectorGhost@1455', __javascriptError); throw __javascriptError; }}
 
-function showConnectorGhost(state, operation, target) {
+function showConnectorGhost(state, operation, target) { try {
     const ghost = ensureConnectorGhost(state, operation.markerEnd);
     ghost.path.setAttribute('d', connectorPath(operation.pathKind || 'Curved', operation.fixedPoint, target.point));
     ghost.svg.classList.add('visible');
     operation.target = target;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:showConnectorGhost@1486', __javascriptError); throw __javascriptError; }}
 
-function hideConnectorGhost(state) {
+function hideConnectorGhost(state) { try {
     state.connectorGhost?.svg.classList.remove('visible');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:hideConnectorGhost@1493', __javascriptError); throw __javascriptError; }}
 
-function clearConnectorOperation(state, restoreOriginal) {
+function clearConnectorOperation(state, restoreOriginal) { try {
     const operation = state.operation;
     if (operation?.kind === 'connector-reconnect' && operation.connector && restoreOriginal)
         operation.connector.style.visibility = '';
@@ -1505,9 +1512,9 @@ function clearConnectorOperation(state, restoreOriginal) {
     operation?.sourcePreview?.remove?.();
     if (operation?.sourcePort) operation.sourcePort.classList.remove('connector-port-source');
     if (operation?.kind?.startsWith('connector-')) state.operation = null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clearConnectorOperation@1497', __javascriptError); throw __javascriptError; }}
 
-function updateConnectorDrag(state, event, operation) {
+function updateConnectorDrag(state, event, operation) { try {
     operation.target?.port?.classList.remove('connector-port-target');
     operation.target?.preview?.remove?.();
     let target = findConnectorTarget(state, event, operation.excludedIds);
@@ -1523,9 +1530,9 @@ function updateConnectorDrag(state, event, operation) {
     }
     target.port?.classList.add('connector-port-target');
     showConnectorGhost(state, operation, target);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateConnectorDrag@1512', __javascriptError); throw __javascriptError; }}
 
-function finishConnectorDrag(state, operation) {
+function finishConnectorDrag(state, operation) { try {
     const target = operation.target;
     if (target) {
         const source = operation.sourceEndpoint || {
@@ -1544,14 +1551,14 @@ function finishConnectorDrag(state, operation) {
         }
     }
     clearConnectorOperation(state, true);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finishConnectorDrag@1530', __javascriptError); throw __javascriptError; }}
 
-function parseRotation(element) {
+function parseRotation(element) { try {
     const match = /rotate\(([-+0-9.]+)deg\)/i.exec(element.style.transform || '');
     return match ? number(match[1]) : 0;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:parseRotation@1551', __javascriptError); throw __javascriptError; }}
 
-function anchorPointForElement(element, anchor, pxPerMm) {
+function anchorPointForElement(element, anchor, pxPerMm) { try {
     const bounds = elementMm(element, pxPerMm);
     const local = {
         TopLeft: [0, 0], Top: [.5, 0], TopRight: [1, 0], Right: [1, .5],
@@ -1568,9 +1575,9 @@ function anchorPointForElement(element, anchor, pxPerMm) {
         x: centerX + dx * Math.cos(radians) - dy * Math.sin(radians),
         y: centerY + dx * Math.sin(radians) + dy * Math.cos(radians)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:anchorPointForElement@1556', __javascriptError); throw __javascriptError; }}
 
-function connectorEndpointPoint(state, connector, prefix) {
+function connectorEndpointPoint(state, connector, prefix) { try {
     if (String(connector.dataset[`${prefix}Kind`] || 'Element').toLowerCase() === 'canvas') {
         return { x: number(connector.dataset[`${prefix}X`]), y: number(connector.dataset[`${prefix}Y`]) };
     }
@@ -1583,11 +1590,11 @@ function connectorEndpointPoint(state, connector, prefix) {
         if (port) return portPointMm(state, port);
     }
     return anchorPointForElement(element, connector.dataset[`${prefix}Anchor`] || 'Center', state.config.pxPerMm);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:connectorEndpointPoint@1575', __javascriptError); throw __javascriptError; }}
 
-function connectorControls(connector, source, target) {
+function connectorControls(connector, source, target) { try {
     const distance = Math.max(16, Math.min(70, Math.hypot(target.x - source.x, target.y - source.y) * .45));
-    const anchored = (point, anchor) => {
+    const anchored = (point, anchor) => { try {
         const value = { ...point };
         const name = String(anchor || 'Center').toLowerCase();
         if (name.includes('top')) value.y -= distance;
@@ -1595,7 +1602,7 @@ function connectorControls(connector, source, target) {
         else if (name === 'left') value.x -= distance;
         else if (name === 'right') value.x += distance;
         return value;
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:anchored@1592', __javascriptError); throw __javascriptError; }};
     const defaults = {
         c1: anchored(source, connector.dataset.sourceAnchor),
         c2: anchored(target, connector.dataset.targetAnchor)
@@ -1610,9 +1617,9 @@ function connectorControls(connector, source, target) {
             y: Number.isFinite(Number.parseFloat(connector.dataset.control2Y)) ? number(connector.dataset.control2Y) : defaults.c2.y
         }
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:connectorControls@1590', __javascriptError); throw __javascriptError; }}
 
-function updateConnectorControlAppearance(connector, source, target, controls) {
+function updateConnectorControlAppearance(connector, source, target, controls) { try {
     const guide = connector.querySelector('.connector-control-guide');
     if (guide) guide.setAttribute('d', `M ${source.x} ${source.y} L ${controls.c1.x} ${controls.c1.y} M ${target.x} ${target.y} L ${controls.c2.x} ${controls.c2.y}`);
     const first = connector.querySelector('[data-connector-control="1"]');
@@ -1628,9 +1635,9 @@ function updateConnectorControlAppearance(connector, source, target, controls) {
         route.setAttribute('x', x - width / 2);
         route.setAttribute('y', y - height / 2);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateConnectorControlAppearance@1617', __javascriptError); throw __javascriptError; }}
 
-function updateAttachedConnectors(state, movedId) {
+function updateAttachedConnectors(state, movedId) { try {
     for (const connector of state.page.querySelectorAll('[data-connector-id]')) {
         if (connector.dataset.sourceElementId !== movedId && connector.dataset.targetElementId !== movedId) continue;
         const source = connectorEndpointPoint(state, connector, 'source');
@@ -1638,15 +1645,15 @@ function updateAttachedConnectors(state, movedId) {
         if (!source || !target) continue;
         const controls = connectorControls(connector, source, target);
         const path = connectorPath(connector.dataset.pathKind || 'Curved', source, target, controls);
-        connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
+        connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => { try { return (item.setAttribute('d', path)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:connector.querySelectorAll(\'.connector-line,.connector-hit\').forEach@1643', __javascriptError); throw __javascriptError; } });
         const ends = connector.querySelectorAll('.connector-endpoint');
         if (ends[0]) { ends[0].setAttribute('cx', source.x); ends[0].setAttribute('cy', source.y); }
         if (ends[1]) { ends[1].setAttribute('cx', target.x); ends[1].setAttribute('cy', target.y); }
         updateConnectorControlAppearance(connector, source, target, controls);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateAttachedConnectors@1635', __javascriptError); throw __javascriptError; }}
 
-function mediaPointerTargetsControls(event) {
+function mediaPointerTargetsControls(event) { try {
     const target = event.target?.closest?.('[data-media-control],video,audio');
     if (!target) return false;
     const rect = target.getBoundingClientRect?.();
@@ -1655,17 +1662,17 @@ function mediaPointerTargetsControls(event) {
     const relativeY = event.clientY - rect.top;
     const controlBand = tag === 'audio' ? rect.height : Math.min(38, rect.height * .3);
     return relativeY >= rect.height - controlBand;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:mediaPointerTargetsControls@1651', __javascriptError); throw __javascriptError; }}
 
-function selectableNodes(state) {
+function selectableNodes(state) { try {
     return [...state.page.querySelectorAll('[data-publication-element][data-element-id]')];
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:selectableNodes@1662', __javascriptError); throw __javascriptError; }}
 
-function selectionNodes(state) {
-    return selectableNodes(state).filter(item => !item.matches('[data-connector-id]'));
-}
+function selectionNodes(state) { try {
+    return selectableNodes(state).filter(item => { try { return (!item.matches('[data-connector-id]')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:selectableNodes(state).filter@1667', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:selectionNodes@1666', __javascriptError); throw __javascriptError; }}
 
-function selectedElementIdSet(state) {
+function selectedElementIdSet(state) { try {
     const ids = new Set(state.config?.selectedElementIds || []);
     for (const item of selectableNodes(state)) {
         if (item.dataset.selected === 'true' || item.classList.contains('selected'))
@@ -1673,13 +1680,13 @@ function selectedElementIdSet(state) {
     }
     ids.delete('');
     return ids;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:selectedElementIdSet@1670', __javascriptError); throw __javascriptError; }}
 
-function selectionVisualFrame(state) {
+function selectionVisualFrame(state) { try {
     return state.page?.querySelector?.(':scope > [data-selection-visual-frame]') || null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:selectionVisualFrame@1680', __javascriptError); throw __javascriptError; }}
 
-function renderedSelectionTarget(element) {
+function renderedSelectionTarget(element) { try {
     if (!element) return null;
     const content = element.querySelector(':scope > .publication-element-content');
     if (!content) return element;
@@ -1695,9 +1702,9 @@ function renderedSelectionTarget(element) {
     };
     const selector = selectors[kind];
     return (selector ? content.querySelector(selector) : null) || content;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:renderedSelectionTarget@1684', __javascriptError); throw __javascriptError; }}
 
-function finiteVisibleRect(node) {
+function finiteVisibleRect(node) { try {
     if (!node?.isConnected) return null;
     const style = getComputedStyle(node);
     if (style.display === 'none' || style.visibility === 'hidden') return null;
@@ -1705,9 +1712,9 @@ function finiteVisibleRect(node) {
     if (![rect.left, rect.top, rect.right, rect.bottom, rect.width, rect.height].every(Number.isFinite)) return null;
     if (rect.width < .5 || rect.height < .5) return null;
     return rect;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finiteVisibleRect@1702', __javascriptError); throw __javascriptError; }}
 
-function renderedSelectionBounds(element) {
+function renderedSelectionBounds(element) { try {
     const target = renderedSelectionTarget(element);
     const first = finiteVisibleRect(target) || finiteVisibleRect(element);
     if (!first) return null;
@@ -1731,15 +1738,15 @@ function renderedSelectionBounds(element) {
         bottom = Math.max(bottom, rect.bottom);
     }
     return { left, top, right, bottom, width: right - left, height: bottom - top };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:renderedSelectionBounds@1712', __javascriptError); throw __javascriptError; }}
 
-function updateSelectionVisualFrame(state) {
+function updateSelectionVisualFrame(state) { try {
     state.selectionFramePending = false;
     const frame = selectionVisualFrame(state);
     if (!frame || !state.page?.isConnected) return;
     const selected = [...state.page.querySelectorAll('[data-publication-element].selected')]
-        .filter(item => !item.matches('[data-connector-id]'));
-    const primary = selected.find(item => item.classList.contains('selection-primary')) || selected.at(-1) || null;
+        .filter(item => { try { return (!item.matches('[data-connector-id]')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...state.page.querySelectorAll(\'[data-publication-element].selected\')@1743', __javascriptError); throw __javascriptError; } });
+    const primary = selected.find(item => { try { return (item.classList.contains('selection-primary')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:selected.find@1744', __javascriptError); throw __javascriptError; } }) || selected.at(-1) || null;
     const rotation = Math.abs(number(primary?.dataset?.elementRotation));
     if (!primary || selected.length !== 1 || rotation > .01 || state.config?.cropMode || state.config?.contentPanMode) {
         frame.hidden = true;
@@ -1775,16 +1782,16 @@ function updateSelectionVisualFrame(state) {
     frame.classList.toggle('locked', primary.classList.contains('locked'));
     frame.hidden = false;
     state.page.classList.add('selection-visual-active');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateSelectionVisualFrame@1738', __javascriptError); throw __javascriptError; }}
 
-function scheduleSelectionVisualFrame(state) {
+function scheduleSelectionVisualFrame(state) { try {
     if (!state || state.selectionFramePending) return;
     state.selectionFramePending = true;
-    requestAnimationFrame(() => updateSelectionVisualFrame(state));
-}
+    requestAnimationFrame(() => { try { return (updateSelectionVisualFrame(state)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@1785', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:scheduleSelectionVisualFrame@1782', __javascriptError); throw __javascriptError; }}
 
-function synchronizeSelectionDom(state, ids, primaryId = null) {
-    const normalized = new Set([...ids].map(value => String(value || '').toLowerCase()).filter(Boolean));
+function synchronizeSelectionDom(state, ids, primaryId = null) { try {
+    const normalized = new Set([...ids].map(value => { try { return (String(value || '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...ids].map@1789', __javascriptError); throw __javascriptError; } }).filter(Boolean));
     const primary = String(primaryId || '').toLowerCase();
     const previousPrimary = String(state.page?.querySelector?.('[data-publication-element].selection-primary')?.dataset?.elementId || '').toLowerCase();
     if (state.config?.contentPanMode && (normalized.size !== 1 || previousPrimary !== primary)) {
@@ -1802,17 +1809,17 @@ function synchronizeSelectionDom(state, ids, primaryId = null) {
         item.classList.toggle('content-pan-target', contentPanTarget);
     }
     scheduleSelectionVisualFrame(state);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:synchronizeSelectionDom@1788', __javascriptError); throw __javascriptError; }}
 
-function createSelectionMarquee(state) {
+function createSelectionMarquee(state) { try {
     const overlay = document.createElement('div');
     overlay.className = 'publisher-selection-marquee';
     overlay.setAttribute('aria-hidden', 'true');
     state.page.appendChild(overlay);
     return overlay;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createSelectionMarquee@1809', __javascriptError); throw __javascriptError; }}
 
-function marqueeViewportRect(operation, event, pageRect) {
+function marqueeViewportRect(operation, event, pageRect) { try {
     const startX = clamp(operation.startClientX, pageRect.left, pageRect.right);
     const startY = clamp(operation.startClientY, pageRect.top, pageRect.bottom);
     const endX = clamp(event.clientX, pageRect.left, pageRect.right);
@@ -1823,9 +1830,9 @@ function marqueeViewportRect(operation, event, pageRect) {
         right: Math.max(startX, endX),
         bottom: Math.max(startY, endY)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:marqueeViewportRect@1817', __javascriptError); throw __javascriptError; }}
 
-function marqueeSelectionIds(state, viewportRect, initialSelection, additive) {
+function marqueeSelectionIds(state, viewportRect, initialSelection, additive) { try {
     const hits = [];
     for (const item of selectionNodes(state)) {
         const rect = item.getBoundingClientRect();
@@ -1844,9 +1851,9 @@ function marqueeSelectionIds(state, viewportRect, initialSelection, additive) {
         }
     }
     return expanded;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:marqueeSelectionIds@1830', __javascriptError); throw __javascriptError; }}
 
-function updateSelectionMarquee(state, operation, event) {
+function updateSelectionMarquee(state, operation, event) { try {
     const pageRect = state.page.getBoundingClientRect();
     const viewportRect = marqueeViewportRect(operation, event, pageRect);
     const left = viewportRect.left - pageRect.left;
@@ -1862,78 +1869,78 @@ function updateSelectionMarquee(state, operation, event) {
         operation.additive);
     const primary = [...operation.currentSelection].at(-1) || null;
     synchronizeSelectionDom(state, operation.currentSelection, primary);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateSelectionMarquee@1851', __javascriptError); throw __javascriptError; }}
 
-function selectionUnitNodes(state, element) {
+function selectionUnitNodes(state, element) { try {
     const groupId = String(element.dataset.groupId || '').trim();
     if (!groupId) return [element];
-    return selectionNodes(state).filter(item => item.dataset.groupId === groupId);
-}
+    return selectionNodes(state).filter(item => { try { return (item.dataset.groupId === groupId); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:selectionNodes(state).filter@1872', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:selectionUnitNodes@1869', __javascriptError); throw __javascriptError; }}
 
-function optimisticSelectElement(state, element, additive) {
+function optimisticSelectElement(state, element, additive) { try {
     const unitIds = selectionUnitNodes(state, element)
-        .map(item => String(item.dataset.elementId || '').toLowerCase())
+        .map(item => { try { return (String(item.dataset.elementId || '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:selectionUnitNodes(state, element) .map@1877', __javascriptError); throw __javascriptError; } })
         .filter(Boolean);
     let ids = selectedElementIdSet(state);
     if (additive) {
-        const remove = unitIds.length > 0 && unitIds.every(id => ids.has(id));
+        const remove = unitIds.length > 0 && unitIds.every(id => { try { return (ids.has(id)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:unitIds.every@1881', __javascriptError); throw __javascriptError; } });
         for (const id of unitIds) remove ? ids.delete(id) : ids.add(id);
     } else {
         ids = new Set(unitIds);
     }
     synchronizeSelectionDom(state, ids, element.dataset.elementId);
     return ids;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:optimisticSelectElement@1875', __javascriptError); throw __javascriptError; }}
 
-function movingNodesForPointer(state, element, additive, wasSelected) {
+function movingNodesForPointer(state, element, additive, wasSelected) { try {
     const selectedIds = selectedElementIdSet(state);
-    const selected = selectionNodes(state).filter(item => selectedIds.has(String(item.dataset.elementId || '').toLowerCase()));
+    const selected = selectionNodes(state).filter(item => { try { return (selectedIds.has(String(item.dataset.elementId || '').toLowerCase())); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:selectionNodes(state).filter@1892', __javascriptError); throw __javascriptError; } });
     const unit = selectionUnitNodes(state, element);
     if (!additive) return wasSelected && selected.length ? selected : unit;
     if (wasSelected) return selected.length ? selected : unit;
     const result = [...selected];
     for (const item of unit) if (!result.includes(item)) result.push(item);
     return result;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:movingNodesForPointer@1890', __javascriptError); throw __javascriptError; }}
 
-function movingBounds(items) {
+function movingBounds(items) { try {
     if (!items.length) return { x: 0, y: 0, width: 0, height: 0 };
-    const left = Math.min(...items.map(item => item.x));
-    const top = Math.min(...items.map(item => item.y));
-    const right = Math.max(...items.map(item => item.x + item.width));
-    const bottom = Math.max(...items.map(item => item.y + item.height));
+    const left = Math.min(...items.map(item => { try { return (item.x); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:items.map@1903', __javascriptError); throw __javascriptError; } }));
+    const top = Math.min(...items.map(item => { try { return (item.y); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:items.map@1904', __javascriptError); throw __javascriptError; } }));
+    const right = Math.max(...items.map(item => { try { return (item.x + item.width); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:items.map@1905', __javascriptError); throw __javascriptError; } }));
+    const bottom = Math.max(...items.map(item => { try { return (item.y + item.height); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:items.map@1906', __javascriptError); throw __javascriptError; } }));
     return { x: left, y: top, width: right - left, height: bottom - top };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:movingBounds@1901', __javascriptError); throw __javascriptError; }}
 
-function refreshMovingElements(state, operation) {
+function refreshMovingElements(state, operation) { try {
     if (!operation?.moving) return;
     for (const item of operation.moving) {
         const current = state.page.querySelector(`[data-element-id="${CSS.escape(item.id)}"]`);
         if (current) item.element = current;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refreshMovingElements@1910', __javascriptError); throw __javascriptError; }}
 
-function cancelPendingComponentAction(state) {
+function cancelPendingComponentAction(state) { try {
     const pending = state?.pendingComponentAction;
     if (!pending) return;
     if (pending.timer) clearTimeout(pending.timer);
-    try { pending.popup?.close?.(); } catch { }
+    try { pending.popup?.close?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@1922', __caughtJavaScriptError);  }
     state.pendingComponentAction = null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelPendingComponentAction@1918', __javascriptError); throw __javascriptError; }}
 
-function scheduleComponentNavigation(state, detail) {
+function scheduleComponentNavigation(state, detail) { try {
     if (detail?.editorSurface === false) return;
     cancelPendingComponentAction(state);
     const target = detail?.pageId;
     state.pendingComponentAction = {
-        timer: setTimeout(() => {
+        timer: setTimeout(() => { try {
             state.pendingComponentAction = null;
             safeDotNet(state, 'NavigateToPage', String(target ?? ''));
-        }, 420)
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@1931', __javascriptError); throw __javascriptError; }}, 420)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:scheduleComponentNavigation@1926', __javascriptError); throw __javascriptError; }}
 
-function scheduleComponentUrl(state, detail) {
+function scheduleComponentUrl(state, detail) { try {
     if (detail?.editorSurface === false) return;
     cancelPendingComponentAction(state);
     const url = String(detail?.url || '').trim();
@@ -1945,16 +1952,16 @@ function scheduleComponentUrl(state, detail) {
     }
     state.pendingComponentAction = {
         popup,
-        timer: setTimeout(() => {
+        timer: setTimeout(() => { try {
             state.pendingComponentAction = null;
             if (newWindow && popup) { try { popup.location.href = url; } catch { window.open(url, '_blank', 'noopener'); } }
             else if (newWindow) window.open(url, '_blank', 'noopener');
             else location.href = url;
-        }, 420)
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@1950', __javascriptError); throw __javascriptError; }}, 420)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:scheduleComponentUrl@1938', __javascriptError); throw __javascriptError; }}
 
-function registerCanvasClick(state, operation, event) {
+function registerCanvasClick(state, operation, event) { try {
     if (!operation?.id || operation.kind === 'resize' || operation.kind?.startsWith('connector-')) return;
     const now = performance.now();
     const previous = state.lastCanvasClick;
@@ -1971,35 +1978,35 @@ function registerCanvasClick(state, operation, event) {
         return;
     }
     state.lastCanvasClick = { id: operation.id, time: now, x: event.clientX, y: event.clientY };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:registerCanvasClick@1959', __javascriptError); throw __javascriptError; }}
 
-function designerInteractionOwner(state, event) {
+function designerInteractionOwner(state, event) { try {
     const target = event?.target instanceof Element ? event.target : null;
     const owner = target?.closest?.('[data-publication-element][data-element-id]');
     return owner && state.page.contains(owner) ? owner : null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:designerInteractionOwner@1978', __javascriptError); throw __javascriptError; }}
 
-function componentInteractionOwner(state, event) {
+function componentInteractionOwner(state, event) { try {
     const target = event?.target instanceof Element ? event.target : null;
     if (!target?.closest?.('.devextreme-component-host')) return null;
     return designerInteractionOwner(state, event);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:componentInteractionOwner@1984', __javascriptError); throw __javascriptError; }}
 
-function mapComponentHost(owner) {
+function mapComponentHost(owner) { try {
     const host = owner?.querySelector?.('.devextreme-component-host[data-ps-component-kind]');
     const kind = String(host?.dataset?.psComponentKind || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
     return ['map', 'vectormap'].includes(kind) ? host : null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:mapComponentHost@1990', __javascriptError); throw __javascriptError; }}
 
-function componentMapContentInteractionActive(state, owner) {
+function componentMapContentInteractionActive(state, owner) { try {
     if (!state?.config?.contentPanMode || !owner) return false;
     const id = String(owner.dataset?.elementId || '').toLowerCase();
     const selected = id && selectedElementIdSet(state).has(id);
     const host = mapComponentHost(owner);
     return Boolean(selected && host && String(host.dataset.psDesignerInteraction || '').toLowerCase() === 'content');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:componentMapContentInteractionActive@1996', __javascriptError); throw __javascriptError; }}
 
-function commitMapViewportEvent(state, event) {
+function commitMapViewportEvent(state, event) { try {
     const owner = designerInteractionOwner(state, event);
     if (!componentMapContentInteractionActive(state, owner)) return;
     const detail = event?.detail || {};
@@ -2010,9 +2017,9 @@ function commitMapViewportEvent(state, event) {
     const zoom = Number(detail.zoom);
     if (![longitude, latitude, zoom].every(Number.isFinite)) return;
     safeDotNet(state, 'CommitMapViewport', componentId, longitude, latitude, zoom);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:commitMapViewportEvent@2004', __javascriptError); throw __javascriptError; }}
 
-function componentDoubleClick(state, event) {
+function componentDoubleClick(state, event) { try {
     const owner = designerInteractionOwner(state, event);
     if (!owner || componentMapContentInteractionActive(state, owner)) return;
     cancelPendingComponentAction(state);
@@ -2020,9 +2027,9 @@ function componentDoubleClick(state, event) {
     safeDotNet(state, 'ActivateElement', String(owner.dataset.elementId || ''));
     event.preventDefault();
     event.stopImmediatePropagation();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:componentDoubleClick@2017', __javascriptError); throw __javascriptError; }}
 
-function designerContextMenu(state, event) {
+function designerContextMenu(state, event) { try {
     const owner = designerInteractionOwner(state, event);
     if (!owner) return;
     const id = String(owner.dataset.elementId || '');
@@ -2033,9 +2040,9 @@ function designerContextMenu(state, event) {
     event.preventDefault();
     event.stopImmediatePropagation();
     safeDotNet(state, 'OpenElementContextMenu', id, number(event.clientX), number(event.clientY), number(event.pageX), number(event.pageY), number(event.screenX), number(event.screenY));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:designerContextMenu@2027', __javascriptError); throw __javascriptError; }}
 
-function pointerDown(state, event) {
+function pointerDown(state, event) { try {
     if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
     state.keyboardActive = true;
     try { clearPublicationPreview(state.page?.id || state.page); }
@@ -2083,15 +2090,15 @@ function pointerDown(state, event) {
         if (id && !componentOwner.classList.contains('locked')) {
             const bounds = elementMm(componentOwner, state.config.pxPerMm);
             const moving = movingNodesForPointer(state, componentOwner, false, wasSelected)
-                .filter(item => !item.classList.contains('locked') && !item.matches('[data-connector-id]'))
-                .map(item => ({ id: item.dataset.elementId, element: item, ...elementMm(item, state.config.pxPerMm) }));
-            if (!moving.some(item => item.id === id)) moving.unshift({ id, element: componentOwner, ...bounds });
+                .filter(item => { try { return (!item.classList.contains('locked') && !item.matches('[data-connector-id]')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:movingNodesForPointer(state, componentOwner, false, wasSelected) .filt@2088', __javascriptError); throw __javascriptError; } })
+                .map(item => { try { return (({ id: item.dataset.elementId, element: item, ...elementMm(item, state.config.pxPerMm) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:movingNodesForPointer(state, componentOwner, false, wasSelected) .filt@2089', __javascriptError); throw __javascriptError; } });
+            if (!moving.some(item => { try { return (item.id === id); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:moving.some@2090', __javascriptError); throw __javascriptError; } })) moving.unshift({ id, element: componentOwner, ...bounds });
             const groupBounds = movingBounds(moving);
             state.operation = {
                 kind: 'component-pending', pointerId: event.pointerId, id, element: componentOwner,
                 startX: event.clientX, startY: event.clientY, moved: false, wasSelected, additive: false, pendingToggle: false,
                 selectionCommitPending: !wasSelected,
-                moving, movingIds: new Set(moving.map(item => item.id)), movingBounds: groupBounds,
+                moving, movingIds: new Set(moving.map(item => { try { return (item.id); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:moving.map@2096', __javascriptError); throw __javascriptError; } })), movingBounds: groupBounds,
                 x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height
             };
         }
@@ -2113,7 +2120,7 @@ function pointerDown(state, event) {
             originalControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } },
             currentControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } }
         };
-        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2118', __caughtJavaScriptError);  }
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -2135,7 +2142,7 @@ function pointerDown(state, event) {
             endpoint: endpointName, fixedPoint,
             pathKind: connector.dataset.pathKind || 'Curved', markerEnd: endpointName !== 'source', excludedIds: otherId ? [otherId] : [], signal
         };
-        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2140', __caughtJavaScriptError);  }
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -2157,7 +2164,7 @@ function pointerDown(state, event) {
                 originalControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } },
                 currentControls: { c1: { ...controls.c1 }, c2: { ...controls.c2 } }
             };
-            try { state.stage.setPointerCapture(event.pointerId); } catch { }
+            try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2162', __caughtJavaScriptError);  }
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -2182,7 +2189,7 @@ function pointerDown(state, event) {
             pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow' || state.config.connectorTool === 'SignalArrow', tool: state.config.connectorTool,
             signal: signalConnectorToolActive(state), excludedIds: [sourceOwnerId]
         };
-        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2187', __caughtJavaScriptError);  }
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -2222,7 +2229,7 @@ function pointerDown(state, event) {
             pathKind: 'Curved', markerEnd: state.config.connectorTool === 'SignalArrow', tool: state.config.connectorTool,
             signal: true, excludedIds: []
         };
-        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2227', __caughtJavaScriptError);  }
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -2246,7 +2253,7 @@ function pointerDown(state, event) {
                 currentSelection: additive ? new Set(initialSelection) : new Set(),
                 overlay: createSelectionMarquee(state)
             };
-            try { state.stage.setPointerCapture(event.pointerId); } catch { }
+            try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2251', __caughtJavaScriptError);  }
             event.preventDefault();
         } else if (state.scroll.contains(event.target)) {
             state.lastCanvasClick = null;
@@ -2298,7 +2305,7 @@ function pointerDown(state, event) {
             pathKind: 'Curved', markerEnd: state.config.connectorTool === 'Arrow' || state.config.connectorTool === 'SignalArrow',
             tool: state.config.connectorTool, signal: signalConnectorToolActive(state), excludedIds: [id]
         };
-        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2303', __caughtJavaScriptError);  }
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -2315,9 +2322,9 @@ function pointerDown(state, event) {
     const image = element.querySelector('img');
     const bounds = elementMm(element, state.config.pxPerMm);
     const moving = movingNodesForPointer(state, element, additive, wasSelected)
-        .filter(item => !item.classList.contains('locked') && !item.matches('[data-connector-id]'))
-        .map(item => ({ id: item.dataset.elementId, element: item, ...elementMm(item, state.config.pxPerMm) }));
-    if (!moving.some(item => item.id === id)) moving.unshift({ id, element, ...bounds });
+        .filter(item => { try { return (!item.classList.contains('locked') && !item.matches('[data-connector-id]')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:movingNodesForPointer(state, element, additive, wasSelected) .filter@2320', __javascriptError); throw __javascriptError; } })
+        .map(item => { try { return (({ id: item.dataset.elementId, element: item, ...elementMm(item, state.config.pxPerMm) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:movingNodesForPointer(state, element, additive, wasSelected) .filter(i@2321', __javascriptError); throw __javascriptError; } });
+    if (!moving.some(item => { try { return (item.id === id); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:moving.some@2322', __javascriptError); throw __javascriptError; } })) moving.unshift({ id, element, ...bounds });
     const groupBounds = movingBounds(moving);
     const pageRect = state.page.getBoundingClientRect();
     const pointerX = (event.clientX - pageRect.left) / state.config.pxPerMm;
@@ -2333,7 +2340,7 @@ function pointerDown(state, event) {
         additive,
         pendingToggle,
         moving,
-        movingIds: new Set(moving.map(item => item.id)),
+        movingIds: new Set(moving.map(item => { try { return (item.id); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:moving.map@2338', __javascriptError); throw __javascriptError; } })),
         movingBounds: groupBounds,
         grabGroupX: groupBounds.width > 0 ? clamp((pointerX - groupBounds.x) / groupBounds.width, 0, 1) : .5,
         grabGroupY: groupBounds.height > 0 ? clamp((pointerY - groupBounds.y) / groupBounds.height, 0, 1) : .5,
@@ -2370,11 +2377,11 @@ function pointerDown(state, event) {
         state.operation = { ...base, kind: 'move' };
     }
 
-    try { state.stage.setPointerCapture(event.pointerId); } catch { }
+    try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2375', __caughtJavaScriptError);  }
     if (handle || state.config.cropMode || state.config.contentPanMode) event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pointerDown@2040', __javascriptError); throw __javascriptError; }}
 
-function refreshOperationElement(state, operation) {
+function refreshOperationElement(state, operation) { try {
     if (!operation?.id) return operation?.element || null;
     const current = state.page.querySelector(`[data-element-id="${CSS.escape(operation.id)}"]`);
     if (current) {
@@ -2383,9 +2390,9 @@ function refreshOperationElement(state, operation) {
         if (operation.kind === 'content-pan') { operation.viewport = current.querySelector('[data-content-viewport]') || operation.viewport; operation.source = operation.viewport?.querySelector(':scope > [data-content-fit-source]') || operation.source; }
     }
     return operation.element;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refreshOperationElement@2379', __javascriptError); throw __javascriptError; }}
 
-function pointerMove(state, event) {
+function pointerMove(state, event) { try {
     const stageRect = state.stage.getBoundingClientRect();
     state.cursorX = event.clientX - stageRect.left;
     state.cursorY = event.clientY - stageRect.top;
@@ -2438,7 +2445,7 @@ function pointerMove(state, event) {
         operation.connector.dataset.control2X = String(controls.c2.x);
         operation.connector.dataset.control2Y = String(controls.c2.y);
         const path = connectorPath('Curved', operation.source, operation.target, controls);
-        operation.connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => item.setAttribute('d', path));
+        operation.connector.querySelectorAll('.connector-line,.connector-hit').forEach(item => { try { return (item.setAttribute('d', path)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:operation.connector.querySelectorAll(\'.connector-line,.connector-hit\')@2443', __javascriptError); throw __javascriptError; } });
         updateConnectorControlAppearance(operation.connector, operation.source, operation.target, controls);
         event.preventDefault();
         return;
@@ -2461,7 +2468,7 @@ function pointerMove(state, event) {
         state.lastCanvasClick = null;
         cancelPendingComponentAction(state);
         state.suppressNextComponentClickUntil = performance.now() + 350;
-        try { state.stage.setPointerCapture(event.pointerId); } catch { }
+        try { state.stage.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2466', __caughtJavaScriptError);  }
     }
     if (!operation.moved && movementPixels < (operation.kind === 'resize' ? 1.5 : 3)) return;
     operation.moved = true;
@@ -2495,10 +2502,10 @@ function pointerMove(state, event) {
     const pageWidth = state.page.clientWidth / state.config.pxPerMm;
     const pageHeight = state.page.clientHeight / state.config.pxPerMm;
     const verticalGuides = state.config.snapToGuides
-        ? [...state.page.querySelectorAll('.guide-line.vertical:not(.guide-preview)')].map(line => number(line.style.left) / state.config.pxPerMm)
+        ? [...state.page.querySelectorAll('.guide-line.vertical:not(.guide-preview)')].map(line => { try { return (number(line.style.left) / state.config.pxPerMm); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...state.page.querySelectorAll(\'.guide-line.vertical:not(.guide-previ@2500', __javascriptError); throw __javascriptError; } })
         : [];
     const horizontalGuides = state.config.snapToGuides
-        ? [...state.page.querySelectorAll('.guide-line.horizontal:not(.guide-preview)')].map(line => number(line.style.top) / state.config.pxPerMm)
+        ? [...state.page.querySelectorAll('.guide-line.horizontal:not(.guide-preview)')].map(line => { try { return (number(line.style.top) / state.config.pxPerMm); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...state.page.querySelectorAll(\'.guide-line.horizontal:not(.guide-pre@2503', __javascriptError); throw __javascriptError; } })
         : [];
 
     let x = operation.x;
@@ -2554,9 +2561,9 @@ function pointerMove(state, event) {
     updateAttachedConnectors(state, operation.id);
     scheduleSelectionVisualFrame(state);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pointerMove@2390', __javascriptError); throw __javascriptError; }}
 
-function snapAxis(value, size, pageSize, guides, config) {
+function snapAxis(value, size, pageSize, guides, config) { try {
     let result = value;
     if (config.snapToGrid && config.gridSpacingMm > 0)
         result = Math.round(result / config.gridSpacingMm) * config.gridSpacingMm;
@@ -2567,21 +2574,21 @@ function snapAxis(value, size, pageSize, guides, config) {
         for (const guide of guides) candidates.push(guide, guide - size / 2, guide - size);
     }
     return nearestCandidate(result, candidates, 6 / config.pxPerMm);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapAxis@2561', __javascriptError); throw __javascriptError; }}
 
-function snapCoordinate(value, guides, config) {
+function snapCoordinate(value, guides, config) { try {
     let result = value;
     if (config.snapToGrid && config.gridSpacingMm > 0)
         result = Math.round(result / config.gridSpacingMm) * config.gridSpacingMm;
     return config.snapToGuides ? nearestCandidate(result, guides, 6 / config.pxPerMm) : result;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapCoordinate@2574', __javascriptError); throw __javascriptError; }}
 
-function snapSize(value, config) {
+function snapSize(value, config) { try {
     if (!config.snapToGrid || config.gridSpacingMm <= 0) return value;
     return Math.round(value / config.gridSpacingMm) * config.gridSpacingMm;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapSize@2581', __javascriptError); throw __javascriptError; }}
 
-function nearestCandidate(value, candidates, tolerance) {
+function nearestCandidate(value, candidates, tolerance) { try {
     let result = value;
     let distance = tolerance;
     for (const candidate of candidates) {
@@ -2592,15 +2599,15 @@ function nearestCandidate(value, candidates, tolerance) {
         }
     }
     return result;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:nearestCandidate@2586', __javascriptError); throw __javascriptError; }}
 
-function pointerUp(state, event) {
+function pointerUp(state, event) { try {
     const operation = state.operation;
     if (!operation || operation.pointerId !== event.pointerId) return;
     state.operation = null;
     clearObjectAlignmentFeedback(state);
     scheduleSelectionVisualFrame(state);
-    try { state.stage.releasePointerCapture(event.pointerId); } catch { }
+    try { state.stage.releasePointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2605', __caughtJavaScriptError);  }
 
     if (operation.kind === 'marquee') {
         operation.overlay?.remove?.();
@@ -2642,7 +2649,7 @@ function pointerUp(state, event) {
         // No drag occurred: let the native DevExtreme click finish before a Blazor
         // selection render can replace the widget DOM.
         if (operation.selectionCommitPending)
-            setTimeout(() => safeDotNet(state, 'SelectElement', operation.id, false), 0);
+            setTimeout(() => { try { return (safeDotNet(state, 'SelectElement', operation.id, false)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@2647', __javascriptError); throw __javascriptError; } }, 0);
         return;
     }
 
@@ -2696,18 +2703,18 @@ function pointerUp(state, event) {
         safeDotNet(state, 'CommitBounds', operation.id, value.x, value.y, value.width, value.height);
         const resized = state.page.querySelector(`[data-element-id="${CSS.escape(operation.id)}"]`);
         if (resized?.classList.contains('kind-datavisual')) {
-            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
-            setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
+            requestAnimationFrame(() => { try { return (window.dispatchEvent(new Event('resize'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@2701', __javascriptError); throw __javascriptError; } });
+            setTimeout(() => { try { return (window.dispatchEvent(new Event('resize'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@2702', __javascriptError); throw __javascriptError; } }, 120);
         }
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pointerUp@2599', __javascriptError); throw __javascriptError; }}
 
-function pointerCancel(state, event) {
+function pointerCancel(state, event) { try {
     if (state.operation?.pointerId !== event.pointerId) return;
     resetPointerOperation(state, true);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pointerCancel@2707', __javascriptError); throw __javascriptError; }}
 
-function cropWheel(state, event) {
+function cropWheel(state, event) { try {
     const mapOwner = event.target?.closest?.('[data-publication-element][data-element-id]');
     if (componentMapContentInteractionActive(state, mapOwner)) return;
     if (state.config.contentPanMode) {
@@ -2725,7 +2732,7 @@ function cropWheel(state, event) {
             const key = `content-${id}`;
             const previous = state.cropTimers.get(key);
             if (previous) clearTimeout(previous);
-            state.cropTimers.set(key, setTimeout(() => { state.cropTimers.delete(key); safeDotNet(state, 'CommitContentViewport', id, offsetX, offsetY, nextScale); }, 140));
+            state.cropTimers.set(key, setTimeout(() => { try { state.cropTimers.delete(key); safeDotNet(state, 'CommitContentViewport', id, offsetX, offsetY, nextScale);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@2730', __javascriptError); throw __javascriptError; }}, 140));
             return;
         }
     }
@@ -2750,43 +2757,43 @@ function cropWheel(state, event) {
 
     const previous = state.cropTimers.get(id);
     if (previous) clearTimeout(previous);
-    state.cropTimers.set(id, setTimeout(() => {
+    state.cropTimers.set(id, setTimeout(() => { try {
         state.cropTimers.delete(id);
         safeDotNet(state, 'CommitCrop', id, cropX, cropY, nextScale);
-    }, 140));
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@2755', __javascriptError); throw __javascriptError; }}, 140));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cropWheel@2712', __javascriptError); throw __javascriptError; }}
 
-function applyImageTransform(image, cropX, cropY, scale, rotation, flipX, flipY) {
+function applyImageTransform(image, cropX, cropY, scale, rotation, flipX, flipY) { try {
     image.dataset.cropX = String(cropX);
     image.dataset.cropY = String(cropY);
     image.dataset.cropScale = String(scale);
     image.style.transform = `translate(${cropX}%, ${cropY}%) rotate(${rotation}deg) scale(${scale * flipX}, ${scale * flipY})`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:applyImageTransform@2761', __javascriptError); throw __javascriptError; }}
 
-function drawRulers(state) {
+function drawRulers(state) { try {
     if (!state.config.rulersVisible || !state.horizontalRuler || !state.verticalRuler) return;
     drawRuler(state, state.horizontalRuler, true);
     drawRuler(state, state.verticalRuler, false);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:drawRulers@2768', __javascriptError); throw __javascriptError; }}
 
-function unitDefinition(unit) {
+function unitDefinition(unit) { try {
     switch (unit) {
         case 'Centimeter': return { mmPerUnit: 10, suffix: 'cm' };
         case 'Inch': return { mmPerUnit: 25.4, suffix: 'in' };
         case 'Pixel': return { mmPerUnit: 25.4 / 96, suffix: 'px' };
         default: return { mmPerUnit: 1, suffix: 'mm' };
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:unitDefinition@2774', __javascriptError); throw __javascriptError; }}
 
-function niceStep(minimum) {
+function niceStep(minimum) { try {
     if (!Number.isFinite(minimum) || minimum <= 0) return 1;
     const power = Math.pow(10, Math.floor(Math.log10(minimum)));
     const normalized = minimum / power;
     const factor = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
     return factor * power;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:niceStep@2783', __javascriptError); throw __javascriptError; }}
 
-function configureCanvas(canvas) {
+function configureCanvas(canvas) { try {
     const rect = canvas.getBoundingClientRect();
     const ratio = window.devicePixelRatio || 1;
     const width = Math.max(1, Math.round(rect.width * ratio));
@@ -2799,9 +2806,9 @@ function configureCanvas(canvas) {
     if (!context) return { context: null, rect };
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     return { context, rect };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:configureCanvas@2791', __javascriptError); throw __javascriptError; }}
 
-function drawRuler(state, canvas, horizontal) {
+function drawRuler(state, canvas, horizontal) { try {
     const { context, rect } = configureCanvas(canvas);
     if (!context) return;
     const pageRect = state.page.getBoundingClientRect();
@@ -2895,9 +2902,9 @@ function drawRuler(state, canvas, horizontal) {
         }
         context.stroke();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:drawRuler@2806', __javascriptError); throw __javascriptError; }}
 
-export function calculateFitZoom(stageId, widthMm, heightMm, rulersVisible) {
+export function calculateFitZoom(stageId, widthMm, heightMm, rulersVisible) { try {
     const stage = document.getElementById(stageId);
     if (!stage) return .8;
     const ruler = rulersVisible ? 28 : 0;
@@ -2907,9 +2914,9 @@ export function calculateFitZoom(stageId, widthMm, heightMm, rulersVisible) {
         availableWidth / (widthMm * PX_PER_MM_AT_96_DPI),
         availableHeight / (heightMm * PX_PER_MM_AT_96_DPI));
     return clamp(zoom, .2, 4);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:calculateFitZoom@2902', __javascriptError); throw __javascriptError; }}
 
-function collectExportCss() {
+function collectExportCss() { try {
     let css = '';
     for (const sheet of document.styleSheets) {
         try {
@@ -2917,31 +2924,31 @@ function collectExportCss() {
                 if (rule.type === CSSRule.PAGE_RULE) continue;
                 css += `${rule.cssText}\n`;
             }
-        } catch {
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@2922', __caughtJavaScriptError); 
             // Cross-origin component styles are not required for publication page export.
         }
     }
     return css;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:collectExportCss@2914', __javascriptError); throw __javascriptError; }}
 
-function waitForImages(root) {
-    return Promise.all([...root.querySelectorAll('img')].map(async image => {
+function waitForImages(root) { try {
+    return Promise.all([...root.querySelectorAll('img')].map(async image => { try {
         if (image.complete && image.naturalWidth > 0) return;
         try {
             if (typeof image.decode === 'function') await image.decode();
-            else await new Promise((resolve, reject) => {
+            else await new Promise((resolve, reject) => { try {
                 image.addEventListener('load', resolve, { once: true });
                 image.addEventListener('error', reject, { once: true });
-            });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@2934', __javascriptError); throw __javascriptError; }});
         } catch {
             throw new Error(`Picture '${image.alt || image.src.slice(0, 48)}' could not be decoded for export.`);
         }
-    }));
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...root.querySelectorAll(\'img\')].map@2930', __javascriptError); throw __javascriptError; }}));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForImages@2929', __javascriptError); throw __javascriptError; }}
 
 let cssColorProbeContext = null;
 
-function cssColorFunctionToRgba(value) {
+function cssColorFunctionToRgba(value) { try {
     try {
         if (!cssColorProbeContext) {
             const canvas = document.createElement('canvas');
@@ -2961,14 +2968,14 @@ function cssColorFunctionToRgba(value) {
     } catch {
         return value;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cssColorFunctionToRgba@2946', __javascriptError); throw __javascriptError; }}
 
-function normalizeCssColorFunctions(value) {
+function normalizeCssColorFunctions(value) { try {
     if (!value || !/(?:^|\W)(?:color|lab|lch|oklab|oklch)\(/i.test(value)) return value;
-    return String(value).replace(/(?:color|lab|lch|oklab|oklch)\([^()]*\)/gi, match => cssColorFunctionToRgba(match));
-}
+    return String(value).replace(/(?:color|lab|lch|oklab|oklch)\([^()]*\)/gi, match => { try { return (cssColorFunctionToRgba(match)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:String(value).replace@2970', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:normalizeCssColorFunctions@2968', __javascriptError); throw __javascriptError; }}
 
-function sanitizeInlineColorFunctions(root) {
+function sanitizeInlineColorFunctions(root) { try {
     const elements = [root, ...root.querySelectorAll('*')];
     for (const element of elements) {
         const style = element.getAttribute?.('style');
@@ -2978,9 +2985,9 @@ function sanitizeInlineColorFunctions(root) {
             if (value) element.setAttribute(attribute, normalizeCssColorFunctions(value));
         }
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:sanitizeInlineColorFunctions@2973', __javascriptError); throw __javascriptError; }}
 
-function copyComputedStyles(source, clone) {
+function copyComputedStyles(source, clone) { try {
     if (!(source instanceof Element) || !(clone instanceof Element)) return;
     const computed = getComputedStyle(source);
     const important = [
@@ -3008,9 +3015,9 @@ function copyComputedStyles(source, clone) {
     const cloneChildren = [...clone.children];
     for (let index = 0; index < Math.min(sourceChildren.length, cloneChildren.length); index++)
         copyComputedStyles(sourceChildren[index], cloneChildren[index]);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:copyComputedStyles@2985', __javascriptError); throw __javascriptError; }}
 
-function cleanPageClone(page) {
+function cleanPageClone(page) { try {
     const clone = page.cloneNode(true);
     copyComputedStyles(page, clone);
     clone.removeAttribute('id');
@@ -3018,16 +3025,16 @@ function cleanPageClone(page) {
     clone.style.margin = '0';
     clone.style.boxShadow = 'none';
     clone.style.backgroundImage = 'none';
-    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help,.connector-port,.connector-endpoint,.connector-control-point,.connector-route-handle,.connector-control-guide,.connector-hit,.connector-ghost,.spreadsheet-sheet-badge').forEach(item => item.remove());
-    clone.querySelectorAll('.selected').forEach(item => {
+    clone.querySelectorAll('.selection-handle,.guide-line,.crop-thirds,.crop-help,.connector-port,.connector-endpoint,.connector-control-point,.connector-route-handle,.connector-control-guide,.connector-hit,.connector-ghost,.spreadsheet-sheet-badge').forEach(item => { try { return (item.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:clone.querySelectorAll(\'.selection-handle,.guide-line,.crop-thirds,.cr@3023', __javascriptError); throw __javascriptError; } });
+    clone.querySelectorAll('.selected').forEach(item => { try {
         item.classList.remove('selected');
         item.style.outline = 'none';
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:clone.querySelectorAll(\'.selected\').forEach@3024', __javascriptError); throw __javascriptError; }});
     sanitizeInlineColorFunctions(clone);
     return clone;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cleanPageClone@3015', __javascriptError); throw __javascriptError; }}
 
-function normalizeObjectFitImages(root) {
+function normalizeObjectFitImages(root) { try {
     for (const image of root.querySelectorAll('.image-frame > img')) {
         const source = image.currentSrc || image.getAttribute('src') || '';
         if (!source) continue;
@@ -3067,9 +3074,9 @@ function normalizeObjectFitImages(root) {
         svg.appendChild(svgImage);
         image.replaceWith(svg);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:normalizeObjectFitImages@3032', __javascriptError); throw __javascriptError; }}
 
-function pageExportMetrics(page) {
+function pageExportMetrics(page) { try {
     const rect = page.getBoundingClientRect();
     const widthMm = number(page.dataset.pageWidthMm, 0);
     const heightMm = number(page.dataset.pageHeightMm, 0);
@@ -3084,9 +3091,9 @@ function pageExportMetrics(page) {
         width: Math.max(1, canonicalWidth),
         height: Math.max(1, canonicalHeight)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pageExportMetrics@3074', __javascriptError); throw __javascriptError; }}
 
-function canonicalizePageClone(clone, metrics) {
+function canonicalizePageClone(clone, metrics) { try {
     clone.style.position = 'absolute';
     clone.style.left = '0';
     clone.style.top = '0';
@@ -3097,9 +3104,9 @@ function canonicalizePageClone(clone, metrics) {
     clone.style.transform = `scale(${metrics.width / metrics.sourceWidth}, ${metrics.height / metrics.sourceHeight})`;
     clone.style.translate = 'none';
     return clone;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canonicalizePageClone@3091', __javascriptError); throw __javascriptError; }}
 
-function normalizePublicationPageSizes(publication) {
+function normalizePublicationPageSizes(publication) { try {
     for (const page of publication.querySelectorAll(':scope > .print-page')) {
         const widthMm = number(page.dataset.pageWidthMm, 0);
         const heightMm = number(page.dataset.pageHeightMm, 0);
@@ -3126,27 +3133,27 @@ function normalizePublicationPageSizes(publication) {
         page.style.transform = 'none';
         page.style.translate = 'none';
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:normalizePublicationPageSizes@3104', __javascriptError); throw __javascriptError; }}
 
-function waitForVideoFrame(video, timeoutMs = 8000) {
+function waitForVideoFrame(video, timeoutMs = 8000) { try {
     if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) return Promise.resolve();
-    return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => finish(new Error('Video frame loading timed out.')), timeoutMs);
-        const finish = error => {
+    return new Promise((resolve, reject) => { try {
+        const timer = setTimeout(() => { try { return (finish(new Error('Video frame loading timed out.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@3136', __javascriptError); throw __javascriptError; } }, timeoutMs);
+        const finish = error => { try {
             clearTimeout(timer);
             video.removeEventListener('loadeddata', loaded);
             video.removeEventListener('error', failed);
             error ? reject(error) : resolve();
-        };
-        const loaded = () => finish();
-        const failed = () => finish(new Error('The video frame could not be decoded.'));
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finish@3137', __javascriptError); throw __javascriptError; }};
+        const loaded = () => { try { return (finish()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:loaded@3143', __javascriptError); throw __javascriptError; } };
+        const failed = () => { try { return (finish(new Error('The video frame could not be decoded.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:failed@3144', __javascriptError); throw __javascriptError; } };
         video.addEventListener('loadeddata', loaded, { once: true });
         video.addEventListener('error', failed, { once: true });
         video.load();
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3135', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForVideoFrame@3133', __javascriptError); throw __javascriptError; }}
 
-function drawVideoFrameDataUrl(video) {
+function drawVideoFrameDataUrl(video) { try {
     if (!(video instanceof HTMLVideoElement) || video.videoWidth <= 0 || video.videoHeight <= 0) return '';
     try {
         const canvas = document.createElement('canvas');
@@ -3159,9 +3166,9 @@ function drawVideoFrameDataUrl(video) {
     } catch {
         return '';
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:drawVideoFrameDataUrl@3151', __javascriptError); throw __javascriptError; }}
 
-async function snapshotVideoForRaster(video, owner) {
+async function snapshotVideoForRaster(video, owner) { try {
     if (!(video instanceof HTMLVideoElement)) return '';
     if (video.readyState >= 2) {
         const current = drawVideoFrameDataUrl(video);
@@ -3181,16 +3188,16 @@ async function snapshotVideoForRaster(video, owner) {
         const requested = Number(owner?.dataset?.mediaTrimStart);
         const target = Number.isFinite(requested) ? Math.max(0, requested) : 0;
         if (target > .001 && Number.isFinite(temporary.duration) && target < temporary.duration) {
-            await new Promise(resolve => {
+            await new Promise(resolve => { try {
                 const timer = setTimeout(done, 3500);
-                function done() {
+                function done() { try {
                     clearTimeout(timer);
                     temporary.removeEventListener('seeked', done);
                     resolve();
-                }
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:done@3188', __javascriptError); throw __javascriptError; }}
                 temporary.addEventListener('seeked', done, { once: true });
                 temporary.currentTime = target;
-            });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3186', __javascriptError); throw __javascriptError; }});
         }
         return drawVideoFrameDataUrl(temporary) || poster;
     } catch {
@@ -3200,9 +3207,9 @@ async function snapshotVideoForRaster(video, owner) {
         temporary.removeAttribute('src');
         temporary.load();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapshotVideoForRaster@3166', __javascriptError); throw __javascriptError; }}
 
-function createFrozenRasterImage(source, clone, dataUrl, fallbackLabel) {
+function createFrozenRasterImage(source, clone, dataUrl, fallbackLabel) { try {
     const image = document.createElement('img');
     image.alt = source?.getAttribute?.('aria-label') || source?.getAttribute?.('title') || fallbackLabel;
     image.draggable = false;
@@ -3214,18 +3221,18 @@ function createFrozenRasterImage(source, clone, dataUrl, fallbackLabel) {
     image.style.objectFit = image.style.objectFit || 'contain';
     image.src = dataUrl;
     return image;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createFrozenRasterImage@3207', __javascriptError); throw __javascriptError; }}
 
-function snapshotCanvasForRaster(canvas) {
+function snapshotCanvasForRaster(canvas) { try {
     if (!(canvas instanceof HTMLCanvasElement) || canvas.width < 1 || canvas.height < 1) return '';
     try { return canvas.toDataURL('image/png'); }
     catch (error) {
         console.warn('PublisherStudio could not snapshot a canvas for render export.', error);
         return '';
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapshotCanvasForRaster@3221', __javascriptError); throw __javascriptError; }}
 
-async function snapshotIframeForRaster(frame) {
+async function snapshotIframeForRaster(frame) { try {
     if (!(frame instanceof HTMLIFrameElement)) return '';
     try {
         const body = frame.contentDocument?.body;
@@ -3235,9 +3242,9 @@ async function snapshotIframeForRaster(frame) {
     } catch {
         return '';
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapshotIframeForRaster@3230', __javascriptError); throw __javascriptError; }}
 
-async function freezeMediaForRaster(sourcePage, clonePage) {
+async function freezeMediaForRaster(sourcePage, clonePage) { try {
     // cloneNode() copies canvas elements but never their pixel buffers. Snapshot every source
     // canvas before rasterization so Video Studio effects, Mainframe 3D layers, charts and
     // plugin canvases remain visible in PNG/JPEG/SVG render exports.
@@ -3270,20 +3277,20 @@ async function freezeMediaForRaster(sourcePage, clonePage) {
         cloneFrames[index].replaceWith(createFrozenRasterImage(sourceFrames[index], cloneFrames[index], snapshot, 'Rendered embedded component'));
     }
 
-    clonePage.querySelectorAll('audio').forEach(audio => audio.remove());
-    clonePage.querySelectorAll('.media-object-badge').forEach(badge => badge.remove());
-}
+    clonePage.querySelectorAll('audio').forEach(audio => { try { return (audio.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:clonePage.querySelectorAll(\'audio\').forEach@3275', __javascriptError); throw __javascriptError; } });
+    clonePage.querySelectorAll('.media-object-badge').forEach(badge => { try { return (badge.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:clonePage.querySelectorAll(\'.media-object-badge\').forEach@3276', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:freezeMediaForRaster@3242', __javascriptError); throw __javascriptError; }}
 
-function blobAsDataUrl(blob) {
-    return new Promise((resolve, reject) => {
+function blobAsDataUrl(blob) { try {
+    return new Promise((resolve, reject) => { try {
         const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ''));
-        reader.onerror = () => reject(reader.error || new Error('The media asset could not be embedded.'));
+        reader.onload = () => { try { return (resolve(String(reader.result || ''))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reader.onload@3282', __javascriptError); throw __javascriptError; } };
+        reader.onerror = () => { try { return (reject(reader.error || new Error('The media asset could not be embedded.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reader.onerror@3283', __javascriptError); throw __javascriptError; } };
         reader.readAsDataURL(blob);
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3280', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:blobAsDataUrl@3279', __javascriptError); throw __javascriptError; }}
 
-async function inlineLocalMediaSources(root) {
+async function inlineLocalMediaSources(root) { try {
     const nodes = [...root.querySelectorAll('video[src],audio[src],source[src]')];
     for (const node of nodes) {
         const source = node.getAttribute('src') || '';
@@ -3295,9 +3302,9 @@ async function inlineLocalMediaSources(root) {
         if (!response.ok) throw new Error(`Media asset ${url.pathname} could not be embedded (${response.status}).`);
         node.setAttribute('src', await blobAsDataUrl(await response.blob()));
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:inlineLocalMediaSources@3288', __javascriptError); throw __javascriptError; }}
 
-async function pageSvg(page, options = {}) {
+async function pageSvg(page, options = {}) { try {
     await document.fonts?.ready;
     await waitForImages(page);
     const metrics = pageExportMetrics(page);
@@ -3334,9 +3341,9 @@ async function pageSvg(page, options = {}) {
     foreignObject.appendChild(host);
     svg.appendChild(foreignObject);
     return { text: new XMLSerializer().serializeToString(svg), width: metrics.width, height: metrics.height };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pageSvg@3302', __javascriptError); throw __javascriptError; }}
 
-async function loadSvgImage(svgText) {
+async function loadSvgImage(svgText) { try {
     const attempts = [];
     const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
 
@@ -3345,14 +3352,14 @@ async function loadSvgImage(svgText) {
     if (typeof createImageBitmap === 'function') {
         try {
             const bitmap = await createImageBitmap(blob);
-            return { image: bitmap, cleanup: () => bitmap.close() };
-        } catch {
+            return { image: bitmap, cleanup: () => { try { return (bitmap.close()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cleanup@3350', __javascriptError); throw __javascriptError; } } };
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@3351', __caughtJavaScriptError); 
             // Continue with object/data URL fallbacks.
         }
     }
 
     const objectUrl = URL.createObjectURL(blob);
-    attempts.push({ url: objectUrl, revoke: () => URL.revokeObjectURL(objectUrl) });
+    attempts.push({ url: objectUrl, revoke: () => { try { return (URL.revokeObjectURL(objectUrl)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:revoke@3357', __javascriptError); throw __javascriptError; } } });
     attempts.push({ url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`, revoke: null });
 
     let lastError = null;
@@ -3360,12 +3367,12 @@ async function loadSvgImage(svgText) {
         const image = new Image();
         image.decoding = 'sync';
         try {
-            await new Promise((resolve, reject) => {
-                const timer = setTimeout(() => reject(new Error('SVG rasterization timed out.')), 15000);
-                image.onload = () => { clearTimeout(timer); resolve(); };
-                image.onerror = () => { clearTimeout(timer); reject(new Error('The browser could not render the SVG export surface.')); };
+            await new Promise((resolve, reject) => { try {
+                const timer = setTimeout(() => { try { return (reject(new Error('SVG rasterization timed out.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@3366', __javascriptError); throw __javascriptError; } }, 15000);
+                image.onload = () => { try { clearTimeout(timer); resolve();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:image.onload@3367', __javascriptError); throw __javascriptError; }};
+                image.onerror = () => { try { clearTimeout(timer); reject(new Error('The browser could not render the SVG export surface.'));  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:image.onerror@3368', __javascriptError); throw __javascriptError; }};
                 image.src = attempt.url;
-            });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3365', __javascriptError); throw __javascriptError; }});
             return { image, cleanup: attempt.revoke };
         } catch (error) {
             lastError = error;
@@ -3373,9 +3380,9 @@ async function loadSvgImage(svgText) {
         }
     }
     throw lastError || new Error('The browser could not prepare the publication for raster export.');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:loadSvgImage@3341', __javascriptError); throw __javascriptError; }}
 
-function canvasLooksBlank(canvas) {
+function canvasLooksBlank(canvas) { try {
     if (!canvas || canvas.width < 1 || canvas.height < 1) return true;
     const probe = document.createElement('canvas');
     probe.width = Math.min(128, canvas.width);
@@ -3389,16 +3396,16 @@ function canvasLooksBlank(canvas) {
         if (pixels[index] > 4) return false;
     }
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasLooksBlank@3380', __javascriptError); throw __javascriptError; }}
 
-function cappedRasterScale(width, height, requestedScale) {
+function cappedRasterScale(width, height, requestedScale) { try {
     const scale = Math.max(.1, number(requestedScale, 1));
     const requestedPixels = Math.max(1, width * scale) * Math.max(1, height * scale);
     const maxPixels = 80_000_000;
     return requestedPixels > maxPixels ? scale * Math.sqrt(maxPixels / requestedPixels) : scale;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cappedRasterScale@3396', __javascriptError); throw __javascriptError; }}
 
-async function rasterizePageElement(page, scale) {
+async function rasterizePageElement(page, scale) { try {
     await document.fonts?.ready;
     await waitForImages(page);
     const metrics = pageExportMetrics(page);
@@ -3426,16 +3433,16 @@ async function rasterizePageElement(page, scale) {
         document.body.appendChild(stage);
         try {
             await waitForImages(frame);
-            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            await new Promise(resolve => { try { return (requestAnimationFrame(() => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@3431', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3431', __javascriptError); throw __javascriptError; } });
             const options = {
                 backgroundColor: null, scale: effectiveScale, logging: false, useCORS: true, allowTaint: false,
                 imageTimeout: 20000, removeContainer: true, width: metrics.width, height: metrics.height,
                 windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(metrics.width)),
                 windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(metrics.height)), scrollX: 0, scrollY: 0,
-                onclone: documentClone => {
+                onclone: documentClone => { try {
                     const root = documentClone.querySelector(`[data-publisher-raster-root="${rasterId}"]`);
                     if (root) sanitizeInlineColorFunctions(root);
-                }
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:onclone@3437', __javascriptError); throw __javascriptError; }}
             };
             let canvas = null;
             let firstError = null;
@@ -3471,9 +3478,9 @@ async function rasterizePageElement(page, scale) {
     } catch (svgError) {
         throw new Error(`Raster export failed. DOM renderer: ${domError?.message || 'not available'}. SVG renderer: ${svgError?.message || svgError}`);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:rasterizePageElement@3403', __javascriptError); throw __javascriptError; }}
 
-function prepareOutputCanvas(canvas, jpeg) {
+function prepareOutputCanvas(canvas, jpeg) { try {
     if (!jpeg) return canvas;
     const output = document.createElement('canvas');
     output.width = canvas.width;
@@ -3484,18 +3491,18 @@ function prepareOutputCanvas(canvas, jpeg) {
     context.fillRect(0, 0, output.width, output.height);
     context.drawImage(canvas, 0, 0);
     return output;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepareOutputCanvas@3478', __javascriptError); throw __javascriptError; }}
 
-function canvasToEmbeddedSvg(canvas, widthMm = 0, heightMm = 0) {
+function canvasToEmbeddedSvg(canvas, widthMm = 0, heightMm = 0) { try {
     const dataUrl = canvas.toDataURL('image/png');
     const width = Math.max(1, canvas.width);
     const height = Math.max(1, canvas.height);
     const widthAttribute = widthMm > 0 ? `${widthMm}mm` : String(width);
     const heightAttribute = heightMm > 0 ? `${heightMm}mm` : String(height);
     return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${widthAttribute}" height="${heightAttribute}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet"><image x="0" y="0" width="${width}" height="${height}" href="${dataUrl}" xlink:href="${dataUrl}"/></svg>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasToEmbeddedSvg@3491', __javascriptError); throw __javascriptError; }}
 
-async function rasterizeIsolatedPublicationElement(page, element, scale) {
+async function rasterizeIsolatedPublicationElement(page, element, scale) { try {
     const hidden = [];
     const pageStyle = page.getAttribute('style');
     for (const node of page.querySelectorAll('[data-publication-element]')) {
@@ -3520,9 +3527,9 @@ async function rasterizeIsolatedPublicationElement(page, element, scale) {
         if (pageStyle === null) page.removeAttribute('style');
         else page.setAttribute('style', pageStyle);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:rasterizeIsolatedPublicationElement@3500', __javascriptError); throw __javascriptError; }}
 
-function cropCanvasToElement(canvas, page, element, paddingPixels = 2) {
+function cropCanvasToElement(canvas, page, element, paddingPixels = 2) { try {
     const pageRect = page.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
     if (pageRect.width <= 0 || pageRect.height <= 0 || elementRect.width <= 0 || elementRect.height <= 0)
@@ -3542,9 +3549,9 @@ function cropCanvasToElement(canvas, page, element, paddingPixels = 2) {
     if (!context) throw new Error('The browser did not provide an object export canvas.');
     context.drawImage(canvas, left, top, output.width, output.height, 0, 0, output.width, output.height);
     return output;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cropCanvasToElement@3527', __javascriptError); throw __javascriptError; }}
 
-async function svgToCanvas(svgText, width, height, scale, jpeg) {
+async function svgToCanvas(svgText, width, height, scale, jpeg) { try {
     const loaded = await loadSvgImage(svgText);
     try {
         const requestedWidth = Math.max(1, Math.round(width * scale));
@@ -3571,10 +3578,10 @@ async function svgToCanvas(svgText, width, height, scale, jpeg) {
     } finally {
         if (loaded.cleanup) loaded.cleanup();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:svgToCanvas@3549', __javascriptError); throw __javascriptError; }}
 
-async function canvasBlob(canvas, mimeType, quality) {
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+async function canvasBlob(canvas, mimeType, quality) { try {
+    const blob = await new Promise(resolve => { try { return (canvas.toBlob(resolve, mimeType, quality)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3579', __javascriptError); throw __javascriptError; } });
     if (blob) return blob;
     try {
         const dataUrl = canvas.toDataURL(mimeType, quality);
@@ -3583,9 +3590,9 @@ async function canvasBlob(canvas, mimeType, quality) {
     } catch {
         throw new Error('The browser could not create the raster image. Try SVG export or a lower DPI.');
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasBlob@3578', __javascriptError); throw __javascriptError; }}
 
-function downloadBlob(fileName, blob) {
+function downloadBlob(fileName, blob) { try {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
@@ -3593,11 +3600,11 @@ function downloadBlob(fileName, blob) {
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
-}
+    setTimeout(() => { try { return (URL.revokeObjectURL(url)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@3598', __javascriptError); throw __javascriptError; } }, 1500);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:downloadBlob@3590', __javascriptError); throw __javascriptError; }}
 
 let zipCrcTable;
-function crc32(bytes) {
+function crc32(bytes) { try {
     if (!zipCrcTable) {
         zipCrcTable = new Uint32Array(256);
         for (let index = 0; index < 256; index++) {
@@ -3609,17 +3616,17 @@ function crc32(bytes) {
     let crc = 0xffffffff;
     for (const value of bytes) crc = zipCrcTable[(crc ^ value) & 0xff] ^ (crc >>> 8);
     return (crc ^ 0xffffffff) >>> 0;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:crc32@3602', __javascriptError); throw __javascriptError; }}
 
-function dosDateTime(date = new Date()) {
+function dosDateTime(date = new Date()) { try {
     const year = Math.max(1980, date.getFullYear());
     return {
         time: ((date.getHours() & 31) << 11) | ((date.getMinutes() & 63) << 5) | ((Math.floor(date.getSeconds() / 2)) & 31),
         date: (((year - 1980) & 127) << 9) | (((date.getMonth() + 1) & 15) << 5) | (date.getDate() & 31)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dosDateTime@3616', __javascriptError); throw __javascriptError; }}
 
-async function deflateRawZipBytes(bytes) {
+async function deflateRawZipBytes(bytes) { try {
     if (typeof CompressionStream !== 'function') return null;
     try {
         const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
@@ -3627,9 +3634,9 @@ async function deflateRawZipBytes(bytes) {
     } catch {
         return null;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:deflateRawZipBytes@3624', __javascriptError); throw __javascriptError; }}
 
-async function createZip(files, options = {}) {
+async function createZip(files, options = {}) { try {
     const encoder = new TextEncoder();
     const localParts = [];
     const centralParts = [];
@@ -3684,7 +3691,7 @@ async function createZip(files, options = {}) {
         offset += local.length + payload.length;
     }
     const centralOffset = offset;
-    const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+    const centralSize = centralParts.reduce((sum, part) => { try { return (sum + part.length); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:centralParts.reduce@3689', __javascriptError); throw __javascriptError; } }, 0);
     const end = new Uint8Array(22);
     const endView = new DataView(end.buffer);
     endView.setUint32(0, 0x06054b50, true);
@@ -3696,54 +3703,54 @@ async function createZip(files, options = {}) {
     endView.setUint32(16, centralOffset, true);
     endView.setUint16(20, 0, true);
     return new Blob([...localParts, ...centralParts, end], { type: 'application/zip' });
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createZip@3634', __javascriptError); throw __javascriptError; }}
 
-async function createStoredZip(files) {
+async function createStoredZip(files) { try {
     return createZip(files, { compress: false });
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createStoredZip@3703', __javascriptError); throw __javascriptError; }}
 
 
-function escapeHtml(value) {
+function escapeHtml(value) { try {
     return String(value ?? '')
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:escapeHtml@3708', __javascriptError); throw __javascriptError; }}
 
-function parseHexColor(value) {
+function parseHexColor(value) { try {
     const text = String(value || '#ffffff').trim().replace('#', '');
-    const normalized = text.length === 3 ? [...text].map(x => x + x).join('') : text.padEnd(6, 'f').slice(0, 6);
+    const normalized = text.length === 3 ? [...text].map(x => { try { return (x + x); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...text].map@3718', __javascriptError); throw __javascriptError; } }).join('') : text.padEnd(6, 'f').slice(0, 6);
     return {
         r: Number.parseInt(normalized.slice(0, 2), 16),
         g: Number.parseInt(normalized.slice(2, 4), 16),
         b: Number.parseInt(normalized.slice(4, 6), 16)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:parseHexColor@3716', __javascriptError); throw __javascriptError; }}
 
-async function imageFromDataUrl(dataUrl) {
+async function imageFromDataUrl(dataUrl) { try {
     const image = new Image();
     image.decoding = 'async';
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => { try {
         image.onload = resolve;
-        image.onerror = () => reject(new Error('The selected picture could not be decoded.'));
+        image.onerror = () => { try { return (reject(new Error('The selected picture could not be decoded.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:image.onerror@3731', __javascriptError); throw __javascriptError; } };
         image.src = dataUrl;
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3729', __javascriptError); throw __javascriptError; }});
     return image;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:imageFromDataUrl@3726', __javascriptError); throw __javascriptError; }}
 
 const workspaceStates = new WeakMap();
 
-function setWorkspaceColumns(workspace, state) {
+function setWorkspaceColumns(workspace, state) { try {
     workspace.style.setProperty('--pages-pane-width', state.leftCollapsed ? '0px' : `${state.left}px`);
     workspace.style.setProperty('--inspector-pane-width', state.rightCollapsed ? '0px' : `${state.right}px`);
     workspace.classList.toggle('pages-collapsed', state.leftCollapsed);
     workspace.classList.toggle('inspector-collapsed', state.rightCollapsed);
     localStorage.setItem('blazorPublisher.workspace', JSON.stringify(state));
     window.dispatchEvent(new Event('resize'));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setWorkspaceColumns@3739', __javascriptError); throw __javascriptError; }}
 
-function createWorkspaceState(workspace) {
+function createWorkspaceState(workspace) { try {
     let stored = {};
     try { stored = JSON.parse(localStorage.getItem('blazorPublisher.workspace') || '{}'); } catch { stored = {}; }
     const state = {
@@ -3759,20 +3766,20 @@ function createWorkspaceState(workspace) {
     workspaceStates.set(workspace, state);
     setWorkspaceColumns(workspace, state);
     return state;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createWorkspaceState@3748', __javascriptError); throw __javascriptError; }}
 
-function bindWorkspaceSplitter(workspace, splitter, side) {
+function bindWorkspaceSplitter(workspace, splitter, side) { try {
     if (!splitter || splitter.dataset.bound === 'true') return;
     splitter.dataset.bound = 'true';
-    splitter.addEventListener('dblclick', () => window.publisherStudio.toggleWorkspacePane(workspace.id, side));
-    splitter.addEventListener('pointerdown', event => {
+    splitter.addEventListener('dblclick', () => { try { return (window.publisherStudio.toggleWorkspacePane(workspace.id, side)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:splitter.addEventListener@3769', __javascriptError); throw __javascriptError; } });
+    splitter.addEventListener('pointerdown', event => { try {
         if (event.button !== 0) return;
         const state = workspaceStates.get(workspace) || createWorkspaceState(workspace);
         const startX = event.clientX;
         const initial = side === 'left' ? state.left : state.right;
         splitter.classList.add('dragging');
         splitter.setPointerCapture(event.pointerId);
-        const move = moveEvent => {
+        const move = moveEvent => { try {
             const delta = moveEvent.clientX - startX;
             if (side === 'left') {
                 state.leftCollapsed = false;
@@ -3782,33 +3789,33 @@ function bindWorkspaceSplitter(workspace, splitter, side) {
                 state.right = clamp(initial - delta, 220, Math.max(220, workspace.clientWidth * .48));
             }
             setWorkspaceColumns(workspace, state);
-        };
-        const up = upEvent => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:move@3777', __javascriptError); throw __javascriptError; }};
+        const up = upEvent => { try {
             splitter.classList.remove('dragging');
             splitter.removeEventListener('pointermove', move);
             splitter.removeEventListener('pointerup', up);
             splitter.removeEventListener('pointercancel', up);
-            try { splitter.releasePointerCapture(upEvent.pointerId); } catch { }
-        };
+            try { splitter.releasePointerCapture(upEvent.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@3793', __caughtJavaScriptError);  }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:up@3788', __javascriptError); throw __javascriptError; }};
         splitter.addEventListener('pointermove', move);
         splitter.addEventListener('pointerup', up);
         splitter.addEventListener('pointercancel', up);
         event.preventDefault();
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:splitter.addEventListener@3770', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bindWorkspaceSplitter@3766', __javascriptError); throw __javascriptError; }}
 
 
-function normalizeWordArtPoints(points) {
+function normalizeWordArtPoints(points) { try {
     const normalized = Array.isArray(points)
         ? points
-            .map(point => ({ x: clamp(number(point?.x ?? point?.X), 0, 1000), y: clamp(number(point?.y ?? point?.Y), 0, 300) }))
-            .filter(point => Number.isFinite(point.x) && Number.isFinite(point.y))
+            .map(point => { try { return (({ x: clamp(number(point?.x ?? point?.X), 0, 1000), y: clamp(number(point?.y ?? point?.Y), 0, 300) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:points .map@3806', __javascriptError); throw __javascriptError; } })
+            .filter(point => { try { return (Number.isFinite(point.x) && Number.isFinite(point.y)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:points .map(point => ({ x: clamp(number(point?.x ?? point?.X), 0, 1000@3807', __javascriptError); throw __javascriptError; } })
             .slice(0, 32)
         : [];
     return normalized.length >= 2 ? normalized : [{ x: 60, y: 150 }, { x: 940, y: 150 }];
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:normalizeWordArtPoints@3803', __javascriptError); throw __javascriptError; }}
 
-function wordArtPathFromPoints(points) {
+function wordArtPathFromPoints(points) { try {
     const safe = normalizeWordArtPoints(points);
     if (safe.length === 2)
         return `M ${safe[0].x} ${safe[0].y} L ${safe[1].x} ${safe[1].y}`;
@@ -3830,28 +3837,28 @@ function wordArtPathFromPoints(points) {
         path += ` C ${control1.x} ${control1.y} ${control2.x} ${control2.y} ${next.x} ${next.y}`;
     }
     return path;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:wordArtPathFromPoints@3813', __javascriptError); throw __javascriptError; }}
 
-function wordArtEditorPoint(svg, event) {
+function wordArtEditorPoint(svg, event) { try {
     const matrix = svg.getScreenCTM();
     if (!matrix) return { x: 0, y: 0 };
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return { x: clamp(point.x, 0, 1000), y: clamp(point.y, 0, 300) };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:wordArtEditorPoint@3837', __javascriptError); throw __javascriptError; }}
 
-function wordArtDistance(left, right) {
+function wordArtDistance(left, right) { try {
     return Math.hypot(left.x - right.x, left.y - right.y);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:wordArtDistance@3844', __javascriptError); throw __javascriptError; }}
 
-function perpendicularDistance(point, start, end) {
+function perpendicularDistance(point, start, end) { try {
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     if (dx === 0 && dy === 0) return wordArtDistance(point, start);
     const t = clamp(((point.x - start.x) * dx + (point.y - start.y) * dy) / (dx * dx + dy * dy), 0, 1);
     return wordArtDistance(point, { x: start.x + t * dx, y: start.y + t * dy });
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:perpendicularDistance@3848', __javascriptError); throw __javascriptError; }}
 
-function simplifyWordArtPoints(points, tolerance = 8) {
+function simplifyWordArtPoints(points, tolerance = 8) { try {
     if (points.length <= 2) return points.slice();
     let maximumDistance = 0;
     let splitIndex = 0;
@@ -3866,9 +3873,9 @@ function simplifyWordArtPoints(points, tolerance = 8) {
     const left = simplifyWordArtPoints(points.slice(0, splitIndex + 1), tolerance);
     const right = simplifyWordArtPoints(points.slice(splitIndex), tolerance);
     return [...left.slice(0, -1), ...right];
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:simplifyWordArtPoints@3856', __javascriptError); throw __javascriptError; }}
 
-function limitWordArtPoints(points, maximum = 18) {
+function limitWordArtPoints(points, maximum = 18) { try {
     if (points.length <= maximum) return points;
     const result = [points[0]];
     for (let index = 1; index < maximum - 1; index++) {
@@ -3877,13 +3884,13 @@ function limitWordArtPoints(points, maximum = 18) {
     }
     result.push(points[points.length - 1]);
     return result;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:limitWordArtPoints@3873', __javascriptError); throw __javascriptError; }}
 
-function renderWordArtPathEditor(state) {
+function renderWordArtPathEditor(state) { try {
     state.path?.setAttribute('d', wordArtPathFromPoints(state.points));
     if (!state.pointLayer) return;
     state.pointLayer.replaceChildren();
-    state.points.forEach((point, index) => {
+    state.points.forEach((point, index) => { try {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', String(point.x));
         circle.setAttribute('cy', String(point.y));
@@ -3893,14 +3900,14 @@ function renderWordArtPathEditor(state) {
         if (index === state.points.length - 1) circle.classList.add('end');
         circle.dataset.wordartPointIndex = String(index);
         state.pointLayer.appendChild(circle);
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state.points.forEach@3888', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:renderWordArtPathEditor@3884', __javascriptError); throw __javascriptError; }}
 
-function commitWordArtPath(state) {
-    return state.dotnet.invokeMethodAsync('CommitWordArtPath', state.points.map(point => ({ x: point.x, y: point.y })));
-}
+function commitWordArtPath(state) { try {
+    return state.dotnet.invokeMethodAsync('CommitWordArtPath', state.points.map(point => { try { return (({ x: point.x, y: point.y })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state.points.map@3902', __javascriptError); throw __javascriptError; } }));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:commitWordArtPath@3901', __javascriptError); throw __javascriptError; }}
 
-function wordArtPathPointerDown(state, event) {
+function wordArtPathPointerDown(state, event) { try {
     if (event.button !== 0) return;
     const pointIndex = event.target?.dataset?.wordartPointIndex;
     if (pointIndex !== undefined) {
@@ -3915,9 +3922,9 @@ function wordArtPathPointerDown(state, event) {
     state.svg.setPointerCapture(event.pointerId);
     event.preventDefault();
     event.stopPropagation();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:wordArtPathPointerDown@3905', __javascriptError); throw __javascriptError; }}
 
-function wordArtPathPointerMove(state, event) {
+function wordArtPathPointerMove(state, event) { try {
     if (!state.operation || state.operation.pointerId !== event.pointerId) return;
     const point = wordArtEditorPoint(state.svg, event);
     if (state.operation.kind === 'point') {
@@ -3928,9 +3935,9 @@ function wordArtPathPointerMove(state, event) {
     }
     renderWordArtPathEditor(state);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:wordArtPathPointerMove@3922', __javascriptError); throw __javascriptError; }}
 
-async function wordArtPathPointerUp(state, event) {
+async function wordArtPathPointerUp(state, event) { try {
     if (!state.operation || state.operation.pointerId !== event.pointerId) return;
     if (state.operation.kind === 'draw') {
         if (state.points.length < 2) {
@@ -3943,12 +3950,12 @@ async function wordArtPathPointerUp(state, event) {
     }
     state.operation = null;
     renderWordArtPathEditor(state);
-    try { state.svg.releasePointerCapture(event.pointerId); } catch { }
+    try { state.svg.releasePointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@3948', __caughtJavaScriptError);  }
     await commitWordArtPath(state);
     event.preventDefault();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:wordArtPathPointerUp@3935', __javascriptError); throw __javascriptError; }}
 
-export function initializeWordArtPathEditor(editorId, dotnet, points) {
+export function initializeWordArtPathEditor(editorId, dotnet, points) { try {
     const svg = document.getElementById(editorId);
     if (!svg) return;
     let state = wordArtPathStates.get(svg);
@@ -3962,9 +3969,9 @@ export function initializeWordArtPathEditor(editorId, dotnet, points) {
             drawMode: false,
             operation: null
         };
-        state.pointerDown = event => wordArtPathPointerDown(state, event);
-        state.pointerMove = event => wordArtPathPointerMove(state, event);
-        state.pointerUp = event => wordArtPathPointerUp(state, event);
+        state.pointerDown = event => { try { return (wordArtPathPointerDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:state.pointerDown@3967', __javascriptError); throw __javascriptError; } };
+        state.pointerMove = event => { try { return (wordArtPathPointerMove(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:state.pointerMove@3968', __javascriptError); throw __javascriptError; } };
+        state.pointerUp = event => { try { return (wordArtPathPointerUp(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:state.pointerUp@3969', __javascriptError); throw __javascriptError; } };
         svg.addEventListener('pointerdown', state.pointerDown);
         svg.addEventListener('pointermove', state.pointerMove);
         svg.addEventListener('pointerup', state.pointerUp);
@@ -3976,9 +3983,9 @@ export function initializeWordArtPathEditor(editorId, dotnet, points) {
     state.path = svg.querySelector('[data-wordart-editor-path]');
     state.pointLayer = svg.querySelector('[data-wordart-editor-points]');
     renderWordArtPathEditor(state);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeWordArtPathEditor@3953', __javascriptError); throw __javascriptError; }}
 
-export function updateWordArtPathEditor(editorId, points) {
+export function updateWordArtPathEditor(editorId, points) { try {
     const svg = document.getElementById(editorId);
     const state = svg ? wordArtPathStates.get(svg) : null;
     if (!state || state.operation) return;
@@ -3986,17 +3993,17 @@ export function updateWordArtPathEditor(editorId, points) {
     state.path = svg.querySelector('[data-wordart-editor-path]');
     state.pointLayer = svg.querySelector('[data-wordart-editor-points]');
     renderWordArtPathEditor(state);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateWordArtPathEditor@3983', __javascriptError); throw __javascriptError; }}
 
-export function setWordArtPathDrawMode(editorId, enabled) {
+export function setWordArtPathDrawMode(editorId, enabled) { try {
     const svg = document.getElementById(editorId);
     const state = svg ? wordArtPathStates.get(svg) : null;
     if (!state) return;
     state.drawMode = Boolean(enabled);
     svg.classList.toggle('drawing-armed', state.drawMode);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setWordArtPathDrawMode@3993', __javascriptError); throw __javascriptError; }}
 
-export function disposeWordArtPathEditor(editorId) {
+export function disposeWordArtPathEditor(editorId) { try {
     const svg = document.getElementById(editorId);
     const state = svg ? wordArtPathStates.get(svg) : null;
     if (!state) return;
@@ -4005,15 +4012,15 @@ export function disposeWordArtPathEditor(editorId) {
     svg.removeEventListener('pointerup', state.pointerUp);
     svg.removeEventListener('pointercancel', state.pointerUp);
     wordArtPathStates.delete(svg);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:disposeWordArtPathEditor@4001', __javascriptError); throw __javascriptError; }}
 
 
 const publicationAnimationPreviews = new Map();
 
-function publicationPreviewAttribute(node, name) {
+function publicationPreviewAttribute(node, name) { try {
     return node?.hasAttribute?.(name) ? node.getAttribute(name) : null;
-}
-function publicationPreviewSnapshot(node) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationPreviewAttribute@4015', __javascriptError); throw __javascriptError; }}
+function publicationPreviewSnapshot(node) { try {
     if (!node) return null;
     const media = node.matches?.('video,audio') ? node : null;
     return {
@@ -4032,12 +4039,12 @@ function publicationPreviewSnapshot(node) {
             timeHandler: media.__publisherTimeHandler || null
         } : null
     };
-}
-function restorePublicationPreviewAttribute(node, name, value) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationPreviewSnapshot@4018', __javascriptError); throw __javascriptError; }}
+function restorePublicationPreviewAttribute(node, name, value) { try {
     if (!node) return;
     if (value === null) node.removeAttribute(name); else node.setAttribute(name, value);
-}
-function restorePublicationPreviewSnapshot(snapshot) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:restorePublicationPreviewAttribute@4038', __javascriptError); throw __javascriptError; }}
+function restorePublicationPreviewSnapshot(snapshot) { try {
     const node = snapshot?.node;
     if (!node?.isConnected) return;
     restorePublicationPreviewAttribute(node, 'style', snapshot.style);
@@ -4054,37 +4061,37 @@ function restorePublicationPreviewSnapshot(snapshot) {
     node.playbackRate = snapshot.media.playbackRate;
     node.muted = snapshot.media.muted;
     node.loop = snapshot.media.loop;
-    try { node.currentTime = snapshot.media.currentTime; } catch { }
-    if (!snapshot.media.paused) node.play().catch(() => {});
-}
-function capturePublicationPreviewNode(state, node) {
+    try { node.currentTime = snapshot.media.currentTime; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4059', __caughtJavaScriptError);  }
+    if (!snapshot.media.paused) node.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4060', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:node.play().catch@4060', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:restorePublicationPreviewSnapshot@4042', __javascriptError); throw __javascriptError; }}
+function capturePublicationPreviewNode(state, node) { try {
     if (!state?.snapshots || !node || state.snapshots.has(node)) return;
     state.snapshots.set(node, publicationPreviewSnapshot(node));
     state.baseTransforms?.set?.(node, baseTransform(node));
     if (!node.matches?.('video,audio'))
-        node.querySelectorAll?.('video,audio').forEach(media => capturePublicationPreviewNode(state, media));
-}
+        node.querySelectorAll?.('video,audio').forEach(media => { try { return (capturePublicationPreviewNode(state, media)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:node.querySelectorAll?.(\'video,audio\').forEach@4067', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:capturePublicationPreviewNode@4062', __javascriptError); throw __javascriptError; }}
 
-function parsePublicationData(value, fallback) {
+function parsePublicationData(value, fallback) { try {
     if (!value) return fallback;
     try { return JSON.parse(value); } catch { return fallback; }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:parsePublicationData@4070', __javascriptError); throw __javascriptError; }}
 
-function animationName(value) { return String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase(); }
-function isMediaAnimationEffect(value) { return ['playmedia', 'pausemedia', 'stopmedia'].includes(animationName(value)); }
-function publicationReducedMotion() { return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches; }
-function publicationAnimationSpan(animation) {
+function animationName(value) { try { return String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animationName@4075', __javascriptError); throw __javascriptError; }}
+function isMediaAnimationEffect(value) { try { return ['playmedia', 'pausemedia', 'stopmedia'].includes(animationName(value));  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:isMediaAnimationEffect@4076', __javascriptError); throw __javascriptError; }}
+function publicationReducedMotion() { try { return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationReducedMotion@4077', __javascriptError); throw __javascriptError; }}
+function publicationAnimationSpan(animation) { try {
     if (publicationReducedMotion()) return .001;
     if (isMediaAnimationEffect(animation.effect)) return .05;
     return Math.max(.05, animationNumber(animation.durationSeconds, .6))
         * Math.max(1, animationNumber(animation.repeatCount, 1))
         * (animation.autoReverse ? 2 : 1);
-}
-function animationNumber(value, fallback) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationAnimationSpan@4078', __javascriptError); throw __javascriptError; }}
+function animationNumber(value, fallback) { try {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
-}
-function animationEasing(value) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animationNumber@4085', __javascriptError); throw __javascriptError; }}
+function animationEasing(value) { try {
     switch (animationName(value)) {
         case 'linear': return 'linear';
         case 'easein': return 'cubic-bezier(.42,0,1,1)';
@@ -4093,8 +4100,8 @@ function animationEasing(value) {
         case 'bounceout': return 'cubic-bezier(.22,1.3,.36,1)';
         default: return 'cubic-bezier(.4,0,.2,1)';
     }
-}
-function animationDirectionVector(direction, distance) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animationEasing@4089', __javascriptError); throw __javascriptError; }}
+function animationDirectionVector(direction, distance) { try {
     const amount = animationNumber(distance, 18);
     switch (animationName(direction)) {
         case 'right': return { x: amount, y: 0 };
@@ -4102,15 +4109,15 @@ function animationDirectionVector(direction, distance) {
         case 'down': return { x: 0, y: amount };
         default: return { x: -amount, y: 0 };
     }
-}
-function baseTransform(node) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animationDirectionVector@4099', __javascriptError); throw __javascriptError; }}
+function baseTransform(node) { try {
     const inline = String(node?.style?.transform || '').trim();
     if (inline) return inline === 'none' ? '' : inline;
     const value = getComputedStyle(node).transform;
     return !value || value === 'none' ? '' : value;
-}
-function withBase(base, transform) { return `${transform} ${base}`.trim(); }
-function publicationAnimationFrames(node, animation, baseOverride = null) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:baseTransform@4108', __javascriptError); throw __javascriptError; }}
+function withBase(base, transform) { try { return `${transform} ${base}`.trim();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:withBase@4114', __javascriptError); throw __javascriptError; }}
+function publicationAnimationFrames(node, animation, baseOverride = null) { try {
     const effect = animationName(animation.effect);
     const phase = animationName(animation.phase);
     const base = baseOverride ?? baseTransform(node);
@@ -4118,7 +4125,7 @@ function publicationAnimationFrames(node, animation, baseOverride = null) {
     const scaleAmount = Math.max(0.01, animationNumber(animation.scalePercent, 20) / 100);
     const rotation = animationNumber(animation.rotationDegrees, 360);
     const translated = withBase(base, `translate(${vector.x}%,${vector.y}%)`);
-    const reverse = frames => phase === 'exit' ? [...frames].reverse() : frames;
+    const reverse = frames => { try { return (phase === 'exit' ? [...frames].reverse() : frames); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reverse@4123', __javascriptError); throw __javascriptError; } };
 
     switch (effect) {
         case 'fade':
@@ -4154,78 +4161,78 @@ function publicationAnimationFrames(node, animation, baseOverride = null) {
             return [{ transform: base || 'none' }, { transform: withBase(base, `rotate(${rotation}deg)`) }];
         case 'shake': {
             const amount = Math.max(2, animationNumber(animation.distancePercent, 18) / 4);
-            return [0, -.2, .2, -.16, .16, -.08, .08, 0].map((factor, index, values) => ({
+            return [0, -.2, .2, -.16, .16, -.08, .08, 0].map((factor, index, values) => { try { return (({
                 offset: index / (values.length - 1), transform: withBase(base, `translateX(${amount * factor * 10}%)`)
-            }));
+            })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[0, -.2, .2, -.16, .16, -.08, .08, 0].map@4159', __javascriptError); throw __javascriptError; } });
         }
         case 'move':
             return [{ transform: base || 'none' }, { transform: translated }];
         default:
             return [{ opacity: 1 }, { opacity: 1 }];
     }
-}
-function runPublicationMediaAnimation(node, animation, delaySeconds = 0) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationAnimationFrames@4115', __javascriptError); throw __javascriptError; }}
+function runPublicationMediaAnimation(node, animation, delaySeconds = 0) { try {
     const effect = animationName(animation.effect);
     let timer = 0;
     let cancelled = false;
     let resolveFinished;
-    const finished = new Promise(resolve => { resolveFinished = resolve; });
-    const execute = () => {
+    const finished = new Promise(resolve => { try { resolveFinished = resolve;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@4174', __javascriptError); throw __javascriptError; }});
+    const execute = () => { try {
         if (cancelled) return;
         if (effect === 'playmedia') playPublicationMediaNode(node);
         else if (effect === 'pausemedia') pausePublicationMediaNode(node, false);
         else if (effect === 'stopmedia') pausePublicationMediaNode(node, true);
         resolveFinished();
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:execute@4175', __javascriptError); throw __javascriptError; }};
     timer = setTimeout(execute, Math.max(0, delaySeconds) * 1000);
     return {
         finished,
-        cancel() {
+        cancel() { try {
             cancelled = true;
             clearTimeout(timer);
             resolveFinished();
-        }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancel@4185', __javascriptError); throw __javascriptError; }}
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:runPublicationMediaAnimation@4169', __javascriptError); throw __javascriptError; }}
 
-function publicationAnimationGroupNodes(node) {
+function publicationAnimationGroupNodes(node) { try {
     const groupId = String(node?.dataset?.groupId || '').trim();
     const root = node?.closest?.('.publication-page,.print-page') || node?.parentElement;
     if (!groupId || !root) return [node];
     const peers = [...root.querySelectorAll('[data-publication-element][data-group-id]')]
-        .filter(candidate => String(candidate.dataset.groupId || '') === groupId);
+        .filter(candidate => { try { return (String(candidate.dataset.groupId || '') === groupId); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...root.querySelectorAll(\'[data-publication-element][data-group-id]\')@4198', __javascriptError); throw __javascriptError; } });
     return peers.length ? peers : [node];
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationAnimationGroupNodes@4193', __javascriptError); throw __javascriptError; }}
 
-function publicationGroupTransformOrigins(nodes) {
-    const rectangles = nodes.map(node => ({ node, rect: node.getBoundingClientRect(), previous: node.style.transformOrigin }));
-    const left = Math.min(...rectangles.map(item => item.rect.left));
-    const top = Math.min(...rectangles.map(item => item.rect.top));
-    const right = Math.max(...rectangles.map(item => item.rect.right));
-    const bottom = Math.max(...rectangles.map(item => item.rect.bottom));
+function publicationGroupTransformOrigins(nodes) { try {
+    const rectangles = nodes.map(node => { try { return (({ node, rect: node.getBoundingClientRect(), previous: node.style.transformOrigin })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:nodes.map@4203', __javascriptError); throw __javascriptError; } });
+    const left = Math.min(...rectangles.map(item => { try { return (item.rect.left); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:rectangles.map@4204', __javascriptError); throw __javascriptError; } }));
+    const top = Math.min(...rectangles.map(item => { try { return (item.rect.top); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:rectangles.map@4205', __javascriptError); throw __javascriptError; } }));
+    const right = Math.max(...rectangles.map(item => { try { return (item.rect.right); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:rectangles.map@4206', __javascriptError); throw __javascriptError; } }));
+    const bottom = Math.max(...rectangles.map(item => { try { return (item.rect.bottom); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:rectangles.map@4207', __javascriptError); throw __javascriptError; } }));
     const centerX = (left + right) / 2;
     const centerY = (top + bottom) / 2;
     for (const item of rectangles)
         item.node.style.transformOrigin = `${centerX - item.rect.left}px ${centerY - item.rect.top}px`;
-    return () => rectangles.forEach(item => item.node.style.transformOrigin = item.previous);
-}
+    return () => { try { return (rectangles.forEach(item => { try { return (item.node.style.transformOrigin = item.previous); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:rectangles.forEach@4212', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@4212', __javascriptError); throw __javascriptError; } };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationGroupTransformOrigins@4202', __javascriptError); throw __javascriptError; }}
 
-function publicationAnimationComposite(animations, restore) {
+function publicationAnimationComposite(animations, restore) { try {
     let restored = false;
-    const restoreOnce = () => {
+    const restoreOnce = () => { try {
         if (restored) return;
         restored = true;
         restore?.();
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:restoreOnce@4217', __javascriptError); throw __javascriptError; }};
     return {
-        finished: Promise.all(animations.map(animation => animation.finished.catch(() => undefined))),
-        cancel() { animations.forEach(animation => { try { animation.cancel(); } catch { } }); restoreOnce(); },
-        pause() { animations.forEach(animation => { try { animation.pause(); } catch { } }); },
-        play() { animations.forEach(animation => { try { animation.play(); } catch { } }); }
+        finished: Promise.all(animations.map(animation => { try { return (animation.finished.catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4223', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animation.finished.catch@4223', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.map@4223', __javascriptError); throw __javascriptError; } })),
+        cancel() { try { animations.forEach(animation => { try { try { animation.cancel(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4224', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.forEach@4224', __javascriptError); throw __javascriptError; }}); restoreOnce();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancel@4224', __javascriptError); throw __javascriptError; }},
+        pause() { try { animations.forEach(animation => { try { try { animation.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4225', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.forEach@4225', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pause@4225', __javascriptError); throw __javascriptError; }},
+        play() { try { animations.forEach(animation => { try { try { animation.play(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4226', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.forEach@4226', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:play@4226', __javascriptError); throw __javascriptError; }}
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationAnimationComposite@4215', __javascriptError); throw __javascriptError; }}
 
-function runPublicationAnimation(node, animation, delaySeconds = 0, baseTransforms = null) {
+function runPublicationAnimation(node, animation, delaySeconds = 0, baseTransforms = null) { try {
     if (isMediaAnimationEffect(animation.effect)) return runPublicationMediaAnimation(node, animation, delaySeconds);
     const reducedMotion = publicationReducedMotion();
     const duration = (reducedMotion ? .001 : Math.max(.05, animationNumber(animation.durationSeconds, .6))) * 1000;
@@ -4233,17 +4240,17 @@ function runPublicationAnimation(node, animation, delaySeconds = 0, baseTransfor
     const iterations = reducedMotion ? 1 : repeat * (animation.autoReverse ? 2 : 1);
     const nodes = publicationAnimationGroupNodes(node);
     const restore = nodes.length > 1 ? publicationGroupTransformOrigins(nodes) : null;
-    const animations = nodes.map(member => member.animate(publicationAnimationFrames(member, animation, baseTransforms?.get?.(member) ?? null), {
+    const animations = nodes.map(member => { try { return (member.animate(publicationAnimationFrames(member, animation, baseTransforms?.get?.(member) ?? null), {
             duration,
             delay: (reducedMotion ? 0 : Math.max(0, delaySeconds)) * 1000,
             easing: animationEasing(animation.easing),
             iterations,
             direction: animation.autoReverse ? 'alternate' : 'normal',
             fill: animationName(animation.phase) === 'entrance' ? 'both' : 'forwards'
-        }));
+        })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:nodes.map@4238', __javascriptError); throw __javascriptError; } });
     return animations.length === 1 ? animations[0] : publicationAnimationComposite(animations, restore);
-}
-function publicationPageTransitionFrames(page, entering = true) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:runPublicationAnimation@4230', __javascriptError); throw __javascriptError; }}
+function publicationPageTransitionFrames(page, entering = true) { try {
     const kind = animationName(page.dataset.transitionKind);
     const direction = animationName(page.dataset.transitionDirection);
     const vector = animationDirectionVector(direction, 12);
@@ -4266,27 +4273,27 @@ function publicationPageTransitionFrames(page, entering = true) {
         default: frames = [{ opacity: 0 }, { opacity: 1 }]; break;
     }
     return entering ? frames : [...frames].reverse();
-}
-function runPublicationPageTransition(page, entering = true, target = page) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationPageTransitionFrames@4248', __javascriptError); throw __javascriptError; }}
+function runPublicationPageTransition(page, entering = true, target = page) { try {
     const duration = (publicationReducedMotion() ? .001 : Math.max(.1, animationNumber(page.dataset.transitionDuration, .55))) * 1000;
     return target.animate(publicationPageTransitionFrames(page, entering), {
         duration,
         easing: animationEasing(page.dataset.transitionEasing),
         fill: 'both'
     });
-}
-function animationItems(root) {
-    return [...root.querySelectorAll('[data-publication-element]')].flatMap(node => {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:runPublicationPageTransition@4272', __javascriptError); throw __javascriptError; }}
+function animationItems(root) { try {
+    return [...root.querySelectorAll('[data-publication-element]')].flatMap(node => { try {
         const animations = parsePublicationData(node.dataset.animations, []);
-        return animations.map(animation => ({ node, animation }));
-    }).sort((left, right) => animationNumber(left.animation.order, 0) - animationNumber(right.animation.order, 0));
-}
-function clearPublicationPreview(key) {
+        return animations.map(animation => { try { return (({ node, animation })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.map@4283', __javascriptError); throw __javascriptError; } });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...root.querySelectorAll(\'[data-publication-element]\')].flatMap@4281', __javascriptError); throw __javascriptError; }}).sort((left, right) => { try { return (animationNumber(left.animation.order, 0) - animationNumber(right.animation.order, 0)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...root.querySelectorAll(\'[data-publication-element]\')].flatMap(node @4284', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animationItems@4280', __javascriptError); throw __javascriptError; }}
+function clearPublicationPreview(key) { try {
     const state = publicationAnimationPreviews.get(key);
     if (!state) return;
     if (state.cleanupTimer) clearTimeout(state.cleanupTimer);
     for (const animation of state.animations) {
-        try { animation.cancel(); } catch { }
+        try { animation.cancel(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4291', __caughtJavaScriptError);  }
     }
     for (const timer of state.mediaTimers || []) clearTimeout(timer);
     for (const node of state.mediaNodes || []) pausePublicationMediaNode(node, true);
@@ -4296,22 +4303,22 @@ function clearPublicationPreview(key) {
     state.snapshots?.clear?.();
     publicationAnimationPreviews.delete(key);
     if (state.root?.querySelector?.('.data-visual-view')) refreshDataVisualLayout(state.root.id || 'publisher-page');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clearPublicationPreview@4286', __javascriptError); throw __javascriptError; }}
 
-function armPublicationPreviewCleanup(state) {
+function armPublicationPreviewCleanup(state) { try {
     if (!state || state.clickGroups?.length || state.root?.classList?.contains('pub-animation-click-hint')) return;
     const key = state.root.id || state.root;
     const animations = [...state.animations];
-    Promise.all(animations.map(animation => animation.finished?.catch?.(() => undefined) ?? Promise.resolve()))
-        .then(() => {
+    Promise.all(animations.map(animation => { try { return (animation.finished?.catch?.((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4307', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animation.finished?.catch@4307', __javascriptError); throw __javascriptError; } }) ?? Promise.resolve()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.map@4307', __javascriptError); throw __javascriptError; } }))
+        .then(() => { try {
             if (publicationAnimationPreviews.get(key) !== state || state.clickGroups?.length) return;
             if (state.cleanupTimer) clearTimeout(state.cleanupTimer);
-            state.cleanupTimer = setTimeout(() => {
+            state.cleanupTimer = setTimeout(() => { try {
                 if (publicationAnimationPreviews.get(key) === state) clearPublicationPreview(key);
-            }, 120);
-        });
-}
-function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@4311', __javascriptError); throw __javascriptError; }}, 120);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:Promise.all(animations.map(animation => animation.finished?.catch?.(()@4308', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:armPublicationPreviewCleanup@4303', __javascriptError); throw __javascriptError; }}
+function schedulePublicationPreviewGroup(state, items, initialOffset = 0) { try {
     let previousStart = initialOffset;
     let previousEnd = initialOffset;
     for (const item of items) {
@@ -4322,14 +4329,14 @@ function schedulePublicationPreviewGroup(state, items, initialOffset = 0) {
         if (Number.isFinite(explicitStart)) start = Math.max(0, explicitStart);
         else if (trigger === 'withprevious') start = previousStart + ownDelay;
         else if (trigger === 'afterprevious') start = previousEnd + ownDelay;
-        publicationAnimationGroupNodes(item.node).forEach(node => capturePublicationPreviewNode(state, node));
+        publicationAnimationGroupNodes(item.node).forEach(node => { try { return (capturePublicationPreviewNode(state, node)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:publicationAnimationGroupNodes(item.node).forEach@4327', __javascriptError); throw __javascriptError; } });
         if (isMediaAnimationEffect(item.animation.effect)) state.mediaNodes.add(item.node);
         state.animations.push(runPublicationAnimation(item.node, item.animation, start, state.baseTransforms));
         previousStart = start;
         previousEnd = start + publicationAnimationSpan(item.animation);
     }
-}
-function previewPublicationItems(root, items, includeTransition, transitionTarget = root) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:schedulePublicationPreviewGroup@4316', __javascriptError); throw __javascriptError; }}
+function previewPublicationItems(root, items, includeTransition, transitionTarget = root) { try {
     clearPublicationPreview(root.id || root);
     const state = { root, animations: [], clickTarget: root, clickHandler: null, clickGroups: [], mediaTimers: [], mediaNodes: new Set(), cleanupTimer: 0, snapshots: new Map(), baseTransforms: new Map() };
     publicationAnimationPreviews.set(root.id || root, state);
@@ -4359,10 +4366,10 @@ function previewPublicationItems(root, items, includeTransition, transitionTarge
     if (includeTransition) schedulePublicationPreviewMedia(state, root, transitionOffset);
 
     const hasClickMedia = includeTransition && [...root.querySelectorAll('[data-media-kind]')]
-        .some(node => animationName(node.dataset.mediaTrigger) === 'onclick');
+        .some(node => { try { return (animationName(node.dataset.mediaTrigger) === 'onclick'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...root.querySelectorAll(\'[data-media-kind]\')] .some@4364', __javascriptError); throw __javascriptError; } });
     if (state.clickGroups.length || hasClickMedia) {
         root.classList.add('pub-animation-click-hint');
-        state.clickHandler = event => {
+        state.clickHandler = event => { try {
             const mediaNode = event.target.closest?.('[data-media-kind]');
             if (mediaNode && root.contains(mediaNode)) {
                 if (animationName(mediaNode.dataset.mediaTrigger) === 'onclick') {
@@ -4383,13 +4390,13 @@ function previewPublicationItems(root, items, includeTransition, transitionTarge
                 root.classList.remove('pub-animation-click-hint');
                 armPublicationPreviewCleanup(state);
             }
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:state.clickHandler@4367', __javascriptError); throw __javascriptError; }};
         root.addEventListener('click', state.clickHandler, true);
     }
     armPublicationPreviewCleanup(state);
     return state;
-}
-function previewPageAnimations(pageId) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previewPublicationItems@4334', __javascriptError); throw __javascriptError; }}
+function previewPageAnimations(pageId) { try {
     const page = document.getElementById(pageId);
     if (!page) return;
     if (!page.__publisherSignalRuntime)
@@ -4397,70 +4404,70 @@ function previewPageAnimations(pageId) {
     page.__publisherSignalRuntime?.reset?.();
     previewPublicationItems(page, animationItems(page), true);
     page.__publisherSignalRuntime?.startPage?.(page);
-}
-function previewElementAnimations(elementId) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previewPageAnimations@4394', __javascriptError); throw __javascriptError; }}
+function previewElementAnimations(elementId) { try {
     const node = document.getElementById(elementId);
     if (!node) return;
     const page = node.closest('.publication-page') || node;
     const animations = parsePublicationData(node.dataset.animations, []);
-    previewPublicationItems(page, animations.map(animation => ({ node, animation })), false);
-}
-function previewAnimationStep(pageId, animationId) {
+    previewPublicationItems(page, animations.map(animation => { try { return (({ node, animation })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.map@4408', __javascriptError); throw __javascriptError; } }), false);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previewElementAnimations@4403', __javascriptError); throw __javascriptError; }}
+function previewAnimationStep(pageId, animationId) { try {
     const page = document.getElementById(pageId);
     if (!page) return;
-    const item = animationItems(page).find(entry => String(entry.animation.id).toLowerCase() === String(animationId).toLowerCase());
+    const item = animationItems(page).find(entry => { try { return (String(entry.animation.id).toLowerCase() === String(animationId).toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animationItems(page).find@4413', __javascriptError); throw __javascriptError; } });
     if (item) previewPublicationItems(page, [item], false);
-}
-function stopAnimationPreview(pageId) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previewAnimationStep@4410', __javascriptError); throw __javascriptError; }}
+function stopAnimationPreview(pageId) { try {
     const page = document.getElementById(pageId);
     clearPublicationPreview(pageId);
     if (page) {
         clearPublicationPreview(page);
         page.__publisherSignalRuntime?.reset?.();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:stopAnimationPreview@4416', __javascriptError); throw __javascriptError; }}
 
 
-function publicationMediaElement(elementId) {
+function publicationMediaElement(elementId) { try {
     const node = document.getElementById(elementId);
     return node?.querySelector('video,audio') || null;
-}
-function publicationMediaSegments(node, media, number = animationNumber) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationMediaElement@4426', __javascriptError); throw __javascriptError; }}
+function publicationMediaSegments(node, media, number = animationNumber) { try {
     const sources = [...(media?.querySelectorAll?.('source[data-media-segment]') || [])]
-        .map(source => {
+        .map(source => { try {
             const src = source.getAttribute('src') || '';
             const start = Math.max(0, number(source.dataset.mediaTrimStart, 0));
             const end = Math.max(start + .01, number(source.dataset.mediaTrimEnd, start + 1));
             return { src, start, end, poster: source.dataset.mediaPoster || '', name: source.dataset.mediaName || '', originalSrc: source.dataset.publisherOriginalSrc || '' };
-        })
-        .filter(segment => segment.src);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(media?.querySelectorAll?.(\'source[data-media-segment]\') || [])] .@4432', __javascriptError); throw __javascriptError; }})
+        .filter(segment => { try { return (segment.src); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(media?.querySelectorAll?.(\'source[data-media-segment]\') || [])] .@4438', __javascriptError); throw __javascriptError; } });
     if (sources.length) return sources;
     if (!media) return [];
     const src = media.getAttribute('src') || media.currentSrc || '';
     const start = Math.max(0, number(node?.dataset?.mediaTrimStart, 0));
     const end = Math.max(start + .01, number(node?.dataset?.mediaTrimEnd, media.duration || start + 1));
     return src ? [{ src, start, end, poster: media.getAttribute('poster') || '', name: '', originalSrc: media.dataset.publisherOriginalSrc || '' }] : [];
-}
-function publicationMediaSourceEquals(media, source) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationMediaSegments@4430', __javascriptError); throw __javascriptError; }}
+function publicationMediaSourceEquals(media, source) { try {
     if (!media || !source) return false;
     try { return new URL(media.currentSrc || media.getAttribute('src') || '', location.href).href === new URL(source, location.href).href; }
     catch { return (media.currentSrc || media.getAttribute('src') || '') === source; }
-}
-function waitForPublicationMediaMetadata(media) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationMediaSourceEquals@4446', __javascriptError); throw __javascriptError; }}
+function waitForPublicationMediaMetadata(media) { try {
     if (!media || media.readyState >= 1) return Promise.resolve();
-    return new Promise(resolve => {
+    return new Promise(resolve => { try {
         const timer = setTimeout(done, 5000);
-        function done() {
+        function done() { try {
             clearTimeout(timer);
             media.removeEventListener('loadedmetadata', done);
             media.removeEventListener('error', done);
             resolve();
-        }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:done@4455', __javascriptError); throw __javascriptError; }}
         media.addEventListener('loadedmetadata', done, { once: true });
         media.addEventListener('error', done, { once: true });
-    });
-}
-function clearPublicationMediaSequence(media) {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@4453', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForPublicationMediaMetadata@4451', __javascriptError); throw __javascriptError; }}
+function clearPublicationMediaSequence(media) { try {
     if (!media) return;
     const state = media.__publisherSequenceState;
     if (media.__publisherTimeHandler) media.removeEventListener('timeupdate', media.__publisherTimeHandler);
@@ -4469,8 +4476,8 @@ function clearPublicationMediaSequence(media) {
         state.token = (state.token || 0) + 1;
         state.advancing = false;
     }
-}
-function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = false) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clearPublicationMediaSequence@4465', __javascriptError); throw __javascriptError; }}
+function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = false) { try {
     if (!node || !media) return null;
     clearPublicationMediaSequence(media);
     const segments = publicationMediaSegments(node, media);
@@ -4481,8 +4488,8 @@ function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = f
     const baseVolume = Math.max(0, Math.min(1, animationNumber(node.dataset.mediaVolume, 1)));
     const fadeIn = Math.max(0, animationNumber(node.dataset.mediaFadeIn, 0));
     const fadeOut = Math.max(0, animationNumber(node.dataset.mediaFadeOut, 0));
-    const elapsedBefore = segments.slice(0, index).reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
-    const totalDuration = segments.reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
+    const elapsedBefore = segments.slice(0, index).reduce((total, item) => { try { return (total + Math.max(.01, item.end - item.start) / rate); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:segments.slice(0, index).reduce@4486', __javascriptError); throw __javascriptError; } }, 0);
+    const totalDuration = segments.reduce((total, item) => { try { return (total + Math.max(.01, item.end - item.start) / rate); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:segments.reduce@4487', __javascriptError); throw __javascriptError; } }, 0);
     const state = media.__publisherSequenceState || { token: 0, index: 0, advancing: false };
     state.index = index;
     state.segments = segments;
@@ -4496,11 +4503,11 @@ function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = f
     media.volume = fadeIn > 0 && index === 0 ? 0 : baseVolume;
     if (media instanceof HTMLVideoElement && segment.poster) media.poster = segment.poster;
 
-    const prepare = async () => {
+    const prepare = async () => { try {
         if (media.__publisherFallbackHandler) media.removeEventListener('error', media.__publisherFallbackHandler);
         media.__publisherFallbackHandler = null;
         if (segment.originalSrc) {
-            const fallbackHandler = async () => {
+            const fallbackHandler = async () => { try {
                 if (state.token !== token || publicationMediaSourceEquals(media, segment.originalSrc)) return;
                 media.removeEventListener('error', fallbackHandler);
                 media.__publisherFallbackHandler = null;
@@ -4509,9 +4516,9 @@ function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = f
                 media.load();
                 await waitForPublicationMediaMetadata(media);
                 if (state.token !== token) return;
-                try { media.currentTime = segment.start; } catch { }
-                if (autoPlay) media.play().catch(() => {});
-            };
+                try { media.currentTime = segment.start; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4514', __caughtJavaScriptError);  }
+                if (autoPlay) media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4515', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@4515', __javascriptError); throw __javascriptError; }});
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fallbackHandler@4505', __javascriptError); throw __javascriptError; }};
             media.__publisherFallbackHandler = fallbackHandler;
             media.addEventListener('error', fallbackHandler, { once: true });
         }
@@ -4522,8 +4529,8 @@ function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = f
             await waitForPublicationMediaMetadata(media);
         }
         if (state.token !== token) return;
-        try { media.currentTime = segment.start; } catch { }
-        const handler = () => {
+        try { media.currentTime = segment.start; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4527', __caughtJavaScriptError);  }
+        const handler = () => { try {
             if (state.token !== token || state.advancing) return;
             const presentationPosition = elapsedBefore + Math.max(0, media.currentTime - segment.start) / rate;
             const presentationRemaining = Math.max(0, totalDuration - presentationPosition);
@@ -4539,35 +4546,35 @@ function configurePublicationMedia(node, media, requestedIndex = 0, autoPlay = f
                 media.pause();
                 state.advancing = false;
             }
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handler@4528', __javascriptError); throw __javascriptError; }};
         media.__publisherTimeHandler = handler;
         media.addEventListener('timeupdate', handler);
-        if (autoPlay) media.play().catch(() => {});
-    };
+        if (autoPlay) media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4547', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@4547', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepare@4501', __javascriptError); throw __javascriptError; }};
     void prepare();
     return { start: segment.start, end: segment.end, index, segments };
-}
-function playPublicationMediaNode(node) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:configurePublicationMedia@4475', __javascriptError); throw __javascriptError; }}
+function playPublicationMediaNode(node) { try {
     const media = node?.querySelector('video,audio');
     if (!node || !media) return;
     configurePublicationMedia(node, media, 0, true);
-}
-function pausePublicationMediaNode(node, rewind = false) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:playPublicationMediaNode@4552', __javascriptError); throw __javascriptError; }}
+function pausePublicationMediaNode(node, rewind = false) { try {
     const media = node?.querySelector('video,audio');
     if (!media) return;
     media.pause();
     if (rewind) configurePublicationMedia(node, media, 0, false);
-}
-function togglePublicationMediaNode(node) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pausePublicationMediaNode@4557', __javascriptError); throw __javascriptError; }}
+function togglePublicationMediaNode(node) { try {
     const media = node?.querySelector('video,audio');
     if (!media) return;
     if (media.paused) {
         const state = media.__publisherSequenceState;
-        if (state?.segments?.length) media.play().catch(() => {});
+        if (state?.segments?.length) media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4568', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@4568', __javascriptError); throw __javascriptError; }});
         else playPublicationMediaNode(node);
     } else media.pause();
-}
-function schedulePublicationPreviewMedia(state, root, initialOffset = 0) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:togglePublicationMediaNode@4563', __javascriptError); throw __javascriptError; }}
+function schedulePublicationPreviewMedia(state, root, initialOffset = 0) { try {
     for (const node of root.querySelectorAll('[data-media-kind]')) {
         const trigger = animationName(node.dataset.mediaTrigger);
         if (node.dataset.mediaAutoplay === 'false' || trigger === 'onclick') continue;
@@ -4575,26 +4582,26 @@ function schedulePublicationPreviewMedia(state, root, initialOffset = 0) {
         capturePublicationPreviewNode(state, node);
         state.mediaNodes.add(node);
         if (publicationReducedMotion() || delay <= 0) playPublicationMediaNode(node);
-        else state.mediaTimers.push(setTimeout(() => playPublicationMediaNode(node), delay * 1000));
+        else state.mediaTimers.push(setTimeout(() => { try { return (playPublicationMediaNode(node)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@4580', __javascriptError); throw __javascriptError; } }, delay * 1000));
     }
-}
-function playPublicationMedia(elementId) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:schedulePublicationPreviewMedia@4572', __javascriptError); throw __javascriptError; }}
+function playPublicationMedia(elementId) { try {
     playPublicationMediaNode(document.getElementById(elementId));
-}
-function pausePublicationMedia(elementId) {
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:playPublicationMedia@4583', __javascriptError); throw __javascriptError; }}
+function pausePublicationMedia(elementId) { try {
     pausePublicationMediaNode(document.getElementById(elementId));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pausePublicationMedia@4586', __javascriptError); throw __javascriptError; }}
 
-function signalConnectorRuntime(root = document, options = {}) {
+function signalConnectorRuntime(root = document, options = {}) { try {
     const host = typeof root === 'string' ? document.getElementById(root) : (root || document);
     if (!host) return null;
-    const lower = value => String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-    const num = (value, fallback = 0) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
-    const wait = milliseconds => new Promise(resolve => setTimeout(resolve, Math.max(0, milliseconds)));
-    const parse = value => { try { return JSON.parse(value || '{}'); } catch { return {}; } };
-    const bool = value => value === true || String(value).toLowerCase() === 'true';
-    const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const cssEscape = value => globalThis.CSS?.escape ? CSS.escape(String(value)) : String(value).replace(/["\\]/g, '\\$&');
+    const lower = value => { try { return (String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:lower@4593', __javascriptError); throw __javascriptError; } };
+    const num = (value, fallback = 0) => { try { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:num@4594', __javascriptError); throw __javascriptError; }};
+    const wait = milliseconds => { try { return (new Promise(resolve => { try { return (setTimeout(resolve, Math.max(0, milliseconds))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@4595', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:wait@4595', __javascriptError); throw __javascriptError; } };
+    const parse = value => { try { try { return JSON.parse(value || '{}'); } catch { return {}; }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:parse@4596', __javascriptError); throw __javascriptError; }};
+    const bool = value => { try { return (value === true || String(value).toLowerCase() === 'true'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bool@4597', __javascriptError); throw __javascriptError; } };
+    const reducedMotion = () => { try { return (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reducedMotion@4598', __javascriptError); throw __javascriptError; } };
+    const cssEscape = value => { try { return (globalThis.CSS?.escape ? CSS.escape(String(value)) : String(value).replace(/["\\]/g, '\\$&')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cssEscape@4599', __javascriptError); throw __javascriptError; } };
     const controllers = new Map();
     const bindings = [];
     const snapshots = new Map();
@@ -4604,14 +4611,14 @@ function signalConnectorRuntime(root = document, options = {}) {
     let observer = null;
     let disposed = false;
 
-    const pageFor = connector => connector?.closest?.('[data-page-id],.print-page,.publication-page') || host;
-    const connectorId = connector => String(connector?.dataset?.connectorId || connector?.dataset?.elementId || connector?.id || '').replace(/^element-/, '');
-    const elementById = (page, id) => id ? page.querySelector(`[data-element-id="${cssEscape(id)}"]`) || document.getElementById(`element-${id}`) : null;
-    const selectInside = (owner, selector) => {
+    const pageFor = connector => { try { return (connector?.closest?.('[data-page-id],.print-page,.publication-page') || host); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pageFor@4609', __javascriptError); throw __javascriptError; } };
+    const connectorId = connector => { try { return (String(connector?.dataset?.connectorId || connector?.dataset?.elementId || connector?.id || '').replace(/^element-/, '')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:connectorId@4610', __javascriptError); throw __javascriptError; } };
+    const elementById = (page, id) => { try { return (id ? page.querySelector(`[data-element-id="${cssEscape(id)}"]`) || document.getElementById(`element-${id}`) : null); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:elementById@4611', __javascriptError); throw __javascriptError; } };
+    const selectInside = (owner, selector) => { try {
         if (!owner || !String(selector || '').trim()) return owner;
         try { return owner.matches?.(selector) ? owner : owner.querySelector(selector); } catch { return owner; }
-    };
-    const pointTarget = (connector, prefix) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:selectInside@4612', __javascriptError); throw __javascriptError; }};
+    const pointTarget = (connector, prefix) => { try {
         const page = pageFor(connector);
         const kind = lower(connector.dataset[`${prefix}Kind`] || 'element');
         const selector = connector.dataset[`${prefix}Selector`] || '';
@@ -4633,8 +4640,8 @@ function signalConnectorRuntime(root = document, options = {}) {
         connector.style.pointerEvents = previous;
         if (target && !page.contains(target)) target = page;
         return selectInside(target || page, selector);
-    };
-    const configuredTarget = (connector, settings, mode) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pointTarget@4616', __javascriptError); throw __javascriptError; }};
+    const configuredTarget = (connector, settings, mode) => { try {
         const page = pageFor(connector);
         const id = mode === 'motion' ? settings.motionTargetElementId : settings.completionTargetElementId;
         const selector = mode === 'motion' ? settings.motionTargetSelector : settings.completionTargetSelector;
@@ -4645,8 +4652,8 @@ function signalConnectorRuntime(root = document, options = {}) {
             if (source) return source;
         }
         return selectInside(owner, selector);
-    };
-    const waitForTarget = async (resolve, signal, timeout = num(options.targetWaitMilliseconds, 2000)) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:configuredTarget@4639', __javascriptError); throw __javascriptError; }};
+    const waitForTarget = async (resolve, signal, timeout = num(options.targetWaitMilliseconds, 2000)) => { try {
         const started = performance.now();
         let target = resolve();
         while (!target && !signal?.aborted && performance.now() - started < Math.max(0, timeout)) {
@@ -4654,9 +4661,9 @@ function signalConnectorRuntime(root = document, options = {}) {
             target = resolve();
         }
         return target;
-    };
-    const attribute = (node, name) => node?.hasAttribute?.(name) ? node.getAttribute(name) : null;
-    const capture = node => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForTarget@4651', __javascriptError); throw __javascriptError; }};
+    const attribute = (node, name) => { try { return (node?.hasAttribute?.(name) ? node.getAttribute(name) : null); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:attribute@4660', __javascriptError); throw __javascriptError; } };
+    const capture = node => { try {
         if (!node || snapshots.has(node)) return;
         const media = node.matches?.('video,audio') ? node : null;
         snapshots.set(node, {
@@ -4674,11 +4681,11 @@ function signalConnectorRuntime(root = document, options = {}) {
                 loop: media.loop
             } : null
         });
-    };
-    const restoreAttribute = (node, name, value) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:capture@4661', __javascriptError); throw __javascriptError; }};
+    const restoreAttribute = (node, name, value) => { try {
         if (value === null) node.removeAttribute(name); else node.setAttribute(name, value);
-    };
-    const restoreSnapshot = snapshot => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:restoreAttribute@4680', __javascriptError); throw __javascriptError; }};
+    const restoreSnapshot = snapshot => { try {
         const node = snapshot?.node;
         if (!node?.isConnected) return;
         restoreAttribute(node, 'style', snapshot.style);
@@ -4691,67 +4698,67 @@ function signalConnectorRuntime(root = document, options = {}) {
         node.playbackRate = snapshot.media.playbackRate;
         node.muted = snapshot.media.muted;
         node.loop = snapshot.media.loop;
-        try { node.currentTime = snapshot.media.currentTime; } catch { }
-        if (!snapshot.media.paused) node.play().catch(() => {});
-    };
-    const trackEffect = (animation, target, persistent = false) => {
+        try { node.currentTime = snapshot.media.currentTime; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4696', __caughtJavaScriptError);  }
+        if (!snapshot.media.paused) node.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4697', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:node.play().catch@4697', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:restoreSnapshot@4683', __javascriptError); throw __javascriptError; }};
+    const trackEffect = (animation, target, persistent = false) => { try {
         if (!animation) return animation;
         effects.set(animation, target || null);
-        animation.finished?.catch?.(() => undefined).finally?.(() => {
+        animation.finished?.catch?.((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4702', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animation.finished?.catch@4702', __javascriptError); throw __javascriptError; } }).finally?.(() => { try {
             if (!persistent) effects.delete(animation);
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animation.finished?.catch?.(() => undefined).finally@4702', __javascriptError); throw __javascriptError; }});
         return animation;
-    };
-    const schedule = (callback, milliseconds) => {
-        const timer = setTimeout(() => { timers.delete(timer); callback(); }, Math.max(0, milliseconds));
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:trackEffect@4699', __javascriptError); throw __javascriptError; }};
+    const schedule = (callback, milliseconds) => { try {
+        const timer = setTimeout(() => { try { timers.delete(timer); callback();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@4708', __javascriptError); throw __javascriptError; }}, Math.max(0, milliseconds));
         timers.add(timer);
         return timer;
-    };
-    const dispatchGesture = (target, gesture) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:schedule@4707', __javascriptError); throw __javascriptError; }};
+    const dispatchGesture = (target, gesture) => { try {
         if (!target) return;
         capture(target);
         const kind = lower(gesture);
         const init = { bubbles: true, cancelable: true, composed: true, view: window };
-        const dispatch = type => {
+        const dispatch = type => { try {
             let event;
             try { event = type.startsWith('pointer') ? new PointerEvent(type, init) : new MouseEvent(type, init); }
             catch { event = new MouseEvent(type, init); }
-            try { Object.defineProperty(event, 'publisherSignalSynthetic', { value: true }); } catch { }
+            try { Object.defineProperty(event, 'publisherSignalSynthetic', { value: true }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4721', __caughtJavaScriptError);  }
             target.dispatchEvent(event);
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dispatch@4717', __javascriptError); throw __javascriptError; }};
         if (kind === 'click') {
             for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) dispatch(type);
         } else if (kind === 'hover') {
             for (const type of ['pointerover', 'mouseover', 'pointerenter', 'mouseenter']) dispatch(type);
             target.classList.add('ps-signal-hover');
-            schedule(() => {
+            schedule(() => { try {
                 for (const type of ['pointerout', 'mouseout', 'pointerleave', 'mouseleave']) dispatch(type);
                 target.classList.remove('ps-signal-hover');
-            }, 800);
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:schedule@4729', __javascriptError); throw __javascriptError; }}, 800);
         }
-    };
-    const replayAnimations = target => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dispatchGesture@4712', __javascriptError); throw __javascriptError; }};
+    const replayAnimations = target => { try {
         if (!target) return;
         capture(target);
         try {
-            target.getAnimations?.({ subtree: true }).forEach(animation => { animation.cancel(); animation.play(); });
+            target.getAnimations?.({ subtree: true }).forEach(animation => { try { animation.cancel(); animation.play();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:target.getAnimations?.({ subtree: true }).forEach@4739', __javascriptError); throw __javascriptError; }});
             target.dispatchEvent(new CustomEvent('publisher:replay-animation', { bubbles: true, detail: { target } }));
-        } catch { }
-    };
-    const animateOpacity = async (target, from, to, duration, signal) => {
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4741', __caughtJavaScriptError);  }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:replayAnimations@4735', __javascriptError); throw __javascriptError; }};
+    const animateOpacity = async (target, from, to, duration, signal) => { try {
         if (!target) return;
         capture(target);
         if (!target.animate || reducedMotion()) { target.style.opacity = String(to); return; }
         const animation = trackEffect(target.animate([{ opacity: from }, { opacity: to }], {
             duration: Math.max(10, duration * 1000), easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards'
         }), target, false);
-        signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
-        try { await animation.finished; } catch { }
+        signal?.addEventListener?.('abort', () => { try { return (animation.cancel()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signal?.addEventListener@4750', __javascriptError); throw __javascriptError; } }, { once: true });
+        try { await animation.finished; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4751', __caughtJavaScriptError);  }
         if (!signal?.aborted) target.style.opacity = String(to);
         animation.cancel();
         effects.delete(animation);
-    };
-    const setVisibility = async (target, visible, duration, signal) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animateOpacity@4743', __javascriptError); throw __javascriptError; }};
+    const setVisibility = async (target, visible, duration, signal) => { try {
         if (!target) return;
         capture(target);
         if (visible) {
@@ -4767,8 +4774,8 @@ function signalConnectorRuntime(root = document, options = {}) {
             await animateOpacity(target, start, 0, duration, signal);
             if (!signal?.aborted) target.classList.add('ps-action-hidden');
         }
-    };
-    const applyCompletion = async (connector, settings, signal, chain) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setVisibility@4756', __javascriptError); throw __javascriptError; }};
+    const applyCompletion = async (connector, settings, signal, chain) => { try {
         const action = lower(settings.completionAction);
         if (!action || action === 'none') return;
         if (action === 'runsignal') {
@@ -4776,7 +4783,7 @@ function signalConnectorRuntime(root = document, options = {}) {
             if (next) await run(next, { chained: true, signal, chain });
             return;
         }
-        const target = await waitForTarget(() => configuredTarget(connector, settings, 'completion'), signal);
+        const target = await waitForTarget(() => { try { return (configuredTarget(connector, settings, 'completion')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:waitForTarget@4781', __javascriptError); throw __javascriptError; } }, signal);
         if (!target) return;
         capture(target);
         const duration = Math.max(.01, num(settings.completionDurationSeconds, .8));
@@ -4793,7 +4800,7 @@ function signalConnectorRuntime(root = document, options = {}) {
         else if (action === 'replayanimation') replayAnimations(target);
         else if (action === 'playmedia') {
             const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
-            if (media) { capture(media); media.play?.().catch?.(() => {}); }
+            if (media) { capture(media); media.play?.().catch?.((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4798', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play?.().catch@4798', __javascriptError); throw __javascriptError; }}); }
         }
         else if (action === 'pausemedia') {
             const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
@@ -4801,7 +4808,7 @@ function signalConnectorRuntime(root = document, options = {}) {
         }
         else if (action === 'togglemediaplayback') {
             const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
-            if (media) { capture(media); media.paused ? media.play().catch(() => {}) : media.pause(); }
+            if (media) { capture(media); media.paused ? media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4806', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@4806', __javascriptError); throw __javascriptError; }}) : media.pause(); }
         } else if (action === 'highlight') {
             const color = value || '#facc15';
             const animation = trackEffect(target.animate?.([
@@ -4809,12 +4816,12 @@ function signalConnectorRuntime(root = document, options = {}) {
                 { outline: `4px solid ${color}`, boxShadow: `0 0 0 8px ${color}55`, offset: .35 },
                 { outline: `0 solid ${color}`, boxShadow: `0 0 0 0 ${color}00` }
             ], { duration: duration * 1000, easing: 'ease-in-out' }), target, false);
-            try { await animation?.finished; } catch { }
+            try { await animation?.finished; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4814', __caughtJavaScriptError);  }
         } else if (action === 'addcssclass' && value) target.classList.add(...value.split(/\s+/).filter(Boolean));
         else if (action === 'removecssclass' && value) target.classList.remove(...value.split(/\s+/).filter(Boolean));
-        else if (action === 'togglecssclass' && value) value.split(/\s+/).filter(Boolean).forEach(name => target.classList.toggle(name));
-    };
-    const animateMotion = (connector, settings, signal, resolvedTarget = null) => {
+        else if (action === 'togglecssclass' && value) value.split(/\s+/).filter(Boolean).forEach(name => { try { return (target.classList.toggle(name)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:value.split(/\\s+/).filter(Boolean).forEach@4817', __javascriptError); throw __javascriptError; } });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:applyCompletion@4773', __javascriptError); throw __javascriptError; }};
+    const animateMotion = (connector, settings, signal, resolvedTarget = null) => { try {
         const target = resolvedTarget || configuredTarget(connector, settings, 'motion');
         if (!target?.animate) return null;
         capture(target);
@@ -4853,10 +4860,10 @@ function signalConnectorRuntime(root = document, options = {}) {
             easing: 'cubic-bezier(.4,0,.2,1)',
             fill: restoreAfterRun ? 'none' : 'forwards'
         }), target, !restoreAfterRun);
-        signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
+        signal?.addEventListener?.('abort', () => { try { return (animation.cancel()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signal?.addEventListener@4858', __javascriptError); throw __javascriptError; } }, { once: true });
         return animation;
-    };
-    const animateVisual = async (connector, settings, signal) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animateMotion@4819', __javascriptError); throw __javascriptError; }};
+    const animateVisual = async (connector, settings, signal) => { try {
         const visible = settings.lineVisible !== false && connector.dataset.signalLineVisible !== 'false';
         const visual = lower(settings.visual || 'flyingarrow');
         const path = connector.querySelector('.connector-line');
@@ -4874,8 +4881,8 @@ function signalConnectorRuntime(root = document, options = {}) {
                 { strokeDasharray: `${length} ${length}`, strokeDashoffset: length },
                 { strokeDasharray: `${length} ${length}`, strokeDashoffset: 0 }
             ], { duration, iterations, direction, easing: 'linear' }), path, false);
-            signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
-            try { await animation.finished; } catch { }
+            signal?.addEventListener?.('abort', () => { try { return (animation.cancel()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signal?.addEventListener@4879', __javascriptError); throw __javascriptError; } }, { once: true });
+            try { await animation.finished; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4880', __caughtJavaScriptError);  }
             path.style.strokeDasharray = previousDash; path.style.strokeDashoffset = previousOffset;
             return;
         }
@@ -4886,8 +4893,8 @@ function signalConnectorRuntime(root = document, options = {}) {
                 { opacity: 1, filter: 'drop-shadow(0 0 5px currentColor)' },
                 { opacity: .3, filter: 'drop-shadow(0 0 0 currentColor)' }
             ], { duration, iterations, direction, easing: 'ease-in-out' }), path, false);
-            signal?.addEventListener?.('abort', () => animation.cancel(), { once: true });
-            try { await animation.finished; } catch { }
+            signal?.addEventListener?.('abort', () => { try { return (animation.cancel()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signal?.addEventListener@4891', __javascriptError); throw __javascriptError; } }, { once: true });
+            try { await animation.finished; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4892', __caughtJavaScriptError);  }
             return;
         }
         const ns = 'http://www.w3.org/2000/svg';
@@ -4899,8 +4906,8 @@ function signalConnectorRuntime(root = document, options = {}) {
         const length = Math.max(.001, path.getTotalLength?.() || 1);
         const started = performance.now();
         const finiteIterations = Number.isFinite(iterations) ? iterations : Number.MAX_SAFE_INTEGER;
-        await new Promise(resolve => {
-            const tick = now => {
+        await new Promise(resolve => { try {
+            const tick = now => { try {
                 if (signal?.aborted || disposed) { resolve(); return; }
                 const elapsed = now - started;
                 const iteration = Math.floor(elapsed / duration);
@@ -4912,12 +4919,12 @@ function signalConnectorRuntime(root = document, options = {}) {
                 const angle = Math.atan2(ahead.y - point.y, ahead.x - point.x) * 180 / Math.PI;
                 runner.setAttribute('transform', `translate(${point.x} ${point.y}) rotate(${angle})`);
                 requestAnimationFrame(tick);
-            };
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:tick@4905', __javascriptError); throw __javascriptError; }};
             requestAnimationFrame(tick);
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@4904', __javascriptError); throw __javascriptError; }});
         runner.remove();
-    };
-    async function run(idOrNode, runOptions = {}) {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animateVisual@4861', __javascriptError); throw __javascriptError; }};
+    async function run(idOrNode, runOptions = {}) { try {
         if (disposed) return false;
         const connector = typeof idOrNode === 'string'
             ? host.querySelector(`[data-connector-id="${cssEscape(String(idOrNode).replace(/^element-/, ''))}"]`) || document.getElementById(String(idOrNode))
@@ -4934,7 +4941,7 @@ function signalConnectorRuntime(root = document, options = {}) {
         chain.add(id);
         controllers.get(id)?.abort();
         const controller = new AbortController();
-        runOptions.signal?.addEventListener?.('abort', () => controller.abort(), { once: true });
+        runOptions.signal?.addEventListener?.('abort', () => { try { return (controller.abort()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:runOptions.signal?.addEventListener@4939', __javascriptError); throw __javascriptError; } }, { once: true });
         controllers.set(id, controller);
         const signal = controller.signal;
         capture(connector);
@@ -4943,18 +4950,18 @@ function signalConnectorRuntime(root = document, options = {}) {
             await wait(Math.max(0, num(settings.delaySeconds)) * 1000);
             if (signal.aborted) return false;
             const startTarget = lower(settings.startGesture) !== 'none'
-                ? await waitForTarget(() => pointTarget(connector, 'source'), signal)
+                ? await waitForTarget(() => { try { return (pointTarget(connector, 'source')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:waitForTarget@4948', __javascriptError); throw __javascriptError; } }, signal)
                 : null;
             dispatchGesture(startTarget, settings.startGesture);
             const motionTarget = settings.motionTargetElementId
-                ? await waitForTarget(() => configuredTarget(connector, settings, 'motion'), signal)
+                ? await waitForTarget(() => { try { return (configuredTarget(connector, settings, 'motion')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:waitForTarget@4952', __javascriptError); throw __javascriptError; } }, signal)
                 : null;
             const motion = animateMotion(connector, settings, signal, motionTarget);
             await animateVisual(connector, settings, signal);
-            try { await motion?.finished; } catch { }
+            try { await motion?.finished; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4956', __caughtJavaScriptError);  }
             if (signal.aborted) return false;
             const endTarget = lower(settings.endGesture) !== 'none'
-                ? await waitForTarget(() => pointTarget(connector, 'target'), signal)
+                ? await waitForTarget(() => { try { return (pointTarget(connector, 'target')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:waitForTarget@4959', __javascriptError); throw __javascriptError; } }, signal)
                 : null;
             dispatchGesture(endTarget, settings.endGesture);
             await applyCompletion(connector, settings, signal, chain);
@@ -4966,34 +4973,34 @@ function signalConnectorRuntime(root = document, options = {}) {
             connector.classList.remove('ps-signal-running');
             if (controllers.get(id) === controller) controllers.delete(id);
         }
-    }
-    const abort = id => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:run@4922', __javascriptError); throw __javascriptError; }}
+    const abort = id => { try {
         if (id) { controllers.get(String(id).replace(/^element-/, ''))?.abort(); return; }
-        controllers.forEach(controller => controller.abort());
+        controllers.forEach(controller => { try { return (controller.abort()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:controllers.forEach@4974', __javascriptError); throw __javascriptError; } });
         controllers.clear();
-    };
-    const reset = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:abort@4972', __javascriptError); throw __javascriptError; }};
+    const reset = () => { try {
         abort();
-        effects.forEach((_, animation) => { try { animation.cancel(); } catch { } });
+        effects.forEach((_, animation) => { try { try { animation.cancel(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@4979', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:effects.forEach@4979', __javascriptError); throw __javascriptError; }});
         effects.clear();
-        timers.forEach(timer => clearTimeout(timer));
+        timers.forEach(timer => { try { return (clearTimeout(timer)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:timers.forEach@4981', __javascriptError); throw __javascriptError; } });
         timers.clear();
-        host.querySelectorAll('.publisher-signal-runner').forEach(node => node.remove());
+        host.querySelectorAll('.publisher-signal-runner').forEach(node => { try { return (node.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:host.querySelectorAll(\'.publisher-signal-runner\').forEach@4983', __javascriptError); throw __javascriptError; } });
         [...snapshots.values()].reverse().forEach(restoreSnapshot);
         snapshots.clear();
-        host.querySelectorAll('.ps-signal-running,.ps-signal-hover').forEach(node => node.classList.remove('ps-signal-running', 'ps-signal-hover'));
-    };
-    const stop = id => { if (id) abort(id); else reset(); };
-    const signalsIn = page => [...(page || host).querySelectorAll('[data-signal-enabled="true"][data-connector-id]')];
-    const startPage = page => {
+        host.querySelectorAll('.ps-signal-running,.ps-signal-hover').forEach(node => { try { return (node.classList.remove('ps-signal-running', 'ps-signal-hover')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:host.querySelectorAll(\'.ps-signal-running,.ps-signal-hover\').forEach@4986', __javascriptError); throw __javascriptError; } });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reset@4977', __javascriptError); throw __javascriptError; }};
+    const stop = id => { try { if (id) abort(id); else reset();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:stop@4988', __javascriptError); throw __javascriptError; }};
+    const signalsIn = page => { try { return ([...(page || host).querySelectorAll('[data-signal-enabled="true"][data-connector-id]')]); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:signalsIn@4989', __javascriptError); throw __javascriptError; } };
+    const startPage = page => { try {
         const current = typeof page === 'string' ? host.querySelector(`[data-page-id="${cssEscape(page)}"]`) : page;
         reset();
-        signalsIn(current || host).forEach(connector => {
+        signalsIn(current || host).forEach(connector => { try {
             const settings = parse(connector.dataset.signal);
             if (lower(settings.trigger) === 'onpageenter') void run(connector);
-        });
-    };
-    const sourceContainsEvent = (connector, event) => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signalsIn(current || host).forEach@4993', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startPage@4990', __javascriptError); throw __javascriptError; }};
+    const sourceContainsEvent = (connector, event) => { try {
         const settings = parse(connector.dataset.signal);
         const source = pointTarget(connector, 'source') || connector;
         const path = event.composedPath?.() || [];
@@ -5001,21 +5008,21 @@ function signalConnectorRuntime(root = document, options = {}) {
         const onVisibleLine = settings.lineVisible !== false && connector.dataset.signalLineVisible !== 'false'
             && (connector === event.target || connector.contains?.(event.target) || path.includes(connector));
         return onSource || onVisibleLine ? source : null;
-    };
-    const handleTrigger = (event, trigger) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:sourceContainsEvent@4998', __javascriptError); throw __javascriptError; }};
+    const handleTrigger = (event, trigger) => { try {
         if (event?.publisherSignalSynthetic) return;
-        signalsIn(host).forEach(connector => {
+        signalsIn(host).forEach(connector => { try {
             const settings = parse(connector.dataset.signal);
             if (lower(settings.trigger) !== trigger) return;
             const source = sourceContainsEvent(connector, event);
             if (!source) return;
             if (trigger === 'onhover' && event.relatedTarget && source.contains?.(event.relatedTarget)) return;
             void run(connector);
-        });
-    };
-    const refreshConnectorHitTesting = () => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signalsIn(host).forEach@5009', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handleTrigger@5007', __javascriptError); throw __javascriptError; }};
+    const refreshConnectorHitTesting = () => { try {
         const current = new Set(signalsIn(host));
-        current.forEach(connector => {
+        current.forEach(connector => { try {
             const settings = parse(connector.dataset.signal);
             const needsPointerEvents = ['onclick', 'onhover'].includes(lower(settings.trigger))
                 && settings.lineVisible !== false && connector.dataset.signalLineVisible !== 'false';
@@ -5026,16 +5033,16 @@ function signalConnectorRuntime(root = document, options = {}) {
                 connector.style.pointerEvents = pointerStates.get(connector);
                 pointerStates.delete(connector);
             }
-        });
-        [...pointerStates.keys()].filter(connector => !current.has(connector) || !connector.isConnected).forEach(connector => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:current.forEach@5020', __javascriptError); throw __javascriptError; }});
+        [...pointerStates.keys()].filter(connector => { try { return (!current.has(connector) || !connector.isConnected); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...pointerStates.keys()].filter@5032', __javascriptError); throw __javascriptError; } }).forEach(connector => { try {
             if (connector.isConnected) connector.style.pointerEvents = pointerStates.get(connector);
             pointerStates.delete(connector);
-        });
-    };
-    const bind = () => {
-        const click = event => handleTrigger(event, 'onclick');
-        const hover = event => handleTrigger(event, 'onhover');
-        const pageEnter = event => startPage(event.target?.closest?.('[data-page-id]') || event.target);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...pointerStates.keys()].filter(connector => !current.has(connector) @5032', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refreshConnectorHitTesting@5018', __javascriptError); throw __javascriptError; }};
+    const bind = () => { try {
+        const click = event => { try { return (handleTrigger(event, 'onclick')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:click@5038', __javascriptError); throw __javascriptError; } };
+        const hover = event => { try { return (handleTrigger(event, 'onhover')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:hover@5039', __javascriptError); throw __javascriptError; } };
+        const pageEnter = event => { try { return (startPage(event.target?.closest?.('[data-page-id]') || event.target)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pageEnter@5040', __javascriptError); throw __javascriptError; } };
         host.addEventListener('click', click, true);
         host.addEventListener('pointerover', hover, true);
         host.addEventListener('publisher:page-enter', pageEnter);
@@ -5045,48 +5052,48 @@ function signalConnectorRuntime(root = document, options = {}) {
             observer = new MutationObserver(refreshConnectorHitTesting);
             observer.observe(host, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-signal', 'data-signal-enabled', 'data-signal-line-visible'] });
         }
-    };
-    const dispose = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bind@5037', __javascriptError); throw __javascriptError; }};
+    const dispose = () => { try {
         disposed = true;
         reset();
         observer?.disconnect();
         observer = null;
-        bindings.splice(0).forEach(([node, eventName, handler, capturePhase]) => node.removeEventListener(eventName, handler, capturePhase));
-        pointerStates.forEach((value, connector) => { if (connector.isConnected) connector.style.pointerEvents = value; });
+        bindings.splice(0).forEach(([node, eventName, handler, capturePhase]) => { try { return (node.removeEventListener(eventName, handler, capturePhase)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:bindings.splice(0).forEach@5056', __javascriptError); throw __javascriptError; } });
+        pointerStates.forEach((value, connector) => { try { if (connector.isConnected) connector.style.pointerEvents = value;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pointerStates.forEach@5057', __javascriptError); throw __javascriptError; }});
         pointerStates.clear();
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dispose@5051', __javascriptError); throw __javascriptError; }};
     bind();
     const api = { run, stop, reset, startPage, dispose, root: host };
     if (options.expose !== false) window.PublisherStudioSignals = api;
     if (options.autoStart !== false) {
-        queueMicrotask(() => {
-            const visiblePage = [...host.querySelectorAll('[data-page-id]')].find(page => !page.hidden && getComputedStyle(page).display !== 'none') || (host.matches?.('[data-page-id]') ? host : null);
+        queueMicrotask(() => { try {
+            const visiblePage = [...host.querySelectorAll('[data-page-id]')].find(page => { try { return (!page.hidden && getComputedStyle(page).display !== 'none'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...host.querySelectorAll(\'[data-page-id]\')].find@5065', __javascriptError); throw __javascriptError; } }) || (host.matches?.('[data-page-id]') ? host : null);
             startPage(visiblePage || host);
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:queueMicrotask@5064', __javascriptError); throw __javascriptError; }});
     }
     return api;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:signalConnectorRuntime@4590', __javascriptError); throw __javascriptError; }}
 
-function websitePresentationRuntime() {
+function websitePresentationRuntime() { try {
     const publication = document.querySelector('.website-publication');
     if (!publication) return;
     const pages = [...publication.querySelectorAll(':scope > .print-page')];
     if (!pages.length) return;
-    const lower = value => String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-    const num = (value, fallback) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
-    const pageSizes = pages.map(page => ({
+    const lower = value => { try { return (String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:lower@5077', __javascriptError); throw __javascriptError; } };
+    const num = (value, fallback) => { try { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:num@5078', __javascriptError); throw __javascriptError; }};
+    const pageSizes = pages.map(page => { try { return (({
         width: Math.max(1, num(page.dataset.exportWidthPx, page.offsetWidth || 1)),
         height: Math.max(1, num(page.dataset.exportHeightPx, page.offsetHeight || 1))
-    }));
-    const frameWidth = Math.max(1, num(publication.dataset.frameWidthPx, Math.max(...pageSizes.map(size => size.width))));
-    const frameHeight = Math.max(1, num(publication.dataset.frameHeightPx, Math.max(...pageSizes.map(size => size.height))));
-    const bool = value => String(value).toLowerCase() === 'true';
-    const parse = (value, fallback) => { try { return JSON.parse(value || ''); } catch { return fallback; } };
+    })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.map@5079', __javascriptError); throw __javascriptError; } });
+    const frameWidth = Math.max(1, num(publication.dataset.frameWidthPx, Math.max(...pageSizes.map(size => { try { return (size.width); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pageSizes.map@5083', __javascriptError); throw __javascriptError; } }))));
+    const frameHeight = Math.max(1, num(publication.dataset.frameHeightPx, Math.max(...pageSizes.map(size => { try { return (size.height); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pageSizes.map@5084', __javascriptError); throw __javascriptError; } }))));
+    const bool = value => { try { return (String(value).toLowerCase() === 'true'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bool@5085', __javascriptError); throw __javascriptError; } };
+    const parse = (value, fallback) => { try { try { return JSON.parse(value || ''); } catch { return fallback; }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:parse@5086', __javascriptError); throw __javascriptError; }};
     const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const animationSpan = animation => reducedMotion ? .001 : ['playmedia','pausemedia','stopmedia'].includes(lower(animation.effect))
+    const animationSpan = animation => { try { return (reducedMotion ? .001 : ['playmedia','pausemedia','stopmedia'].includes(lower(animation.effect))
         ? .05
-        : Math.max(.05, num(animation.durationSeconds, .6)) * Math.max(1, num(animation.repeatCount, 1)) * (animation.autoReverse ? 2 : 1);
-    const easing = value => {
+        : Math.max(.05, num(animation.durationSeconds, .6)) * Math.max(1, num(animation.repeatCount, 1)) * (animation.autoReverse ? 2 : 1)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:animationSpan@5088', __javascriptError); throw __javascriptError; } };
+    const easing = value => { try {
         switch (lower(value)) {
             case 'linear': return 'linear';
             case 'easein': return 'cubic-bezier(.42,0,1,1)';
@@ -5095,8 +5102,8 @@ function websitePresentationRuntime() {
             case 'bounceout': return 'cubic-bezier(.22,1.3,.36,1)';
             default: return 'cubic-bezier(.4,0,.2,1)';
         }
-    };
-    const vector = (direction, distance) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:easing@5091', __javascriptError); throw __javascriptError; }};
+    const vector = (direction, distance) => { try {
         const amount = num(distance, 18);
         switch (lower(direction)) {
             case 'right': return { x: amount, y: 0 };
@@ -5104,10 +5111,10 @@ function websitePresentationRuntime() {
             case 'down': return { x: 0, y: amount };
             default: return { x: -amount, y: 0 };
         }
-    };
-    const baseTransform = node => { const inline = String(node?.style?.transform || '').trim(); if (inline) return inline === 'none' ? '' : inline; const value = getComputedStyle(node).transform; return !value || value === 'none' ? '' : value; };
-    const compose = (base, extra) => `${extra} ${base}`.trim();
-    const frames = (node, animation) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:vector@5101', __javascriptError); throw __javascriptError; }};
+    const baseTransform = node => { try { const inline = String(node?.style?.transform || '').trim(); if (inline) return inline === 'none' ? '' : inline; const value = getComputedStyle(node).transform; return !value || value === 'none' ? '' : value;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:baseTransform@5110', __javascriptError); throw __javascriptError; }};
+    const compose = (base, extra) => { try { return (`${extra} ${base}`.trim()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:compose@5111', __javascriptError); throw __javascriptError; } };
+    const frames = (node, animation) => { try {
         const effect = lower(animation.effect);
         const phase = lower(animation.phase);
         const base = baseTransform(node);
@@ -5115,7 +5122,7 @@ function websitePresentationRuntime() {
         const scale = Math.max(.01, num(animation.scalePercent, 20) / 100);
         const rotation = num(animation.rotationDegrees, 360);
         const translated = compose(base, `translate(${move.x}%,${move.y}%)`);
-        const reverse = value => phase === 'exit' ? [...value].reverse() : value;
+        const reverse = value => { try { return (phase === 'exit' ? [...value].reverse() : value); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reverse@5120', __javascriptError); throw __javascriptError; } };
         switch (effect) {
             case 'fade': return reverse([{ opacity: 0 }, { opacity: 1 }]);
             case 'fly': return reverse([{ opacity: 0, transform: translated }, { opacity: 1, transform: base || 'none' }]);
@@ -5139,39 +5146,39 @@ function websitePresentationRuntime() {
             case 'shake': {
                 const amount = Math.max(2, num(animation.distancePercent, 18) / 4);
                 const positions = [0, -2, 2, -1.6, 1.6, -.8, .8, 0];
-                return positions.map((factor, index) => ({ offset: index / (positions.length - 1), transform: compose(base, `translateX(${amount * factor}%)`) }));
+                return positions.map((factor, index) => { try { return (({ offset: index / (positions.length - 1), transform: compose(base, `translateX(${amount * factor}%)`) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:positions.map@5144', __javascriptError); throw __javascriptError; } });
             }
             case 'move': return [{ transform: base || 'none' }, { transform: translated }];
             default: return [{ opacity: 1 }, { opacity: 1 }];
         }
-    };
-    const groupNodes = node => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:frames@5112', __javascriptError); throw __javascriptError; }};
+    const groupNodes = node => { try {
         const groupId = String(node?.dataset?.groupId || '').trim();
         const page = node?.closest?.('.print-page');
         if (!groupId || !page) return [node];
         const peers = [...page.querySelectorAll('[data-publication-element][data-group-id]')]
-            .filter(candidate => String(candidate.dataset.groupId || '') === groupId);
+            .filter(candidate => { try { return (String(candidate.dataset.groupId || '') === groupId); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...page.querySelectorAll(\'[data-publication-element][data-group-id]\')@5155', __javascriptError); throw __javascriptError; } });
         return peers.length ? peers : [node];
-    };
-    const setGroupOrigins = nodes => {
-        if (nodes.length < 2) return () => {};
-        const entries = nodes.map(node => ({ node, rect: node.getBoundingClientRect(), previous: node.style.transformOrigin }));
-        const left = Math.min(...entries.map(item => item.rect.left));
-        const top = Math.min(...entries.map(item => item.rect.top));
-        const right = Math.max(...entries.map(item => item.rect.right));
-        const bottom = Math.max(...entries.map(item => item.rect.bottom));
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:groupNodes@5150', __javascriptError); throw __javascriptError; }};
+    const setGroupOrigins = nodes => { try {
+        if (nodes.length < 2) return () => { try { } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@5159', __javascriptError); throw __javascriptError; }};
+        const entries = nodes.map(node => { try { return (({ node, rect: node.getBoundingClientRect(), previous: node.style.transformOrigin })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:nodes.map@5160', __javascriptError); throw __javascriptError; } });
+        const left = Math.min(...entries.map(item => { try { return (item.rect.left); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:entries.map@5161', __javascriptError); throw __javascriptError; } }));
+        const top = Math.min(...entries.map(item => { try { return (item.rect.top); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:entries.map@5162', __javascriptError); throw __javascriptError; } }));
+        const right = Math.max(...entries.map(item => { try { return (item.rect.right); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:entries.map@5163', __javascriptError); throw __javascriptError; } }));
+        const bottom = Math.max(...entries.map(item => { try { return (item.rect.bottom); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:entries.map@5164', __javascriptError); throw __javascriptError; } }));
         const centerX = (left + right) / 2;
         const centerY = (top + bottom) / 2;
-        entries.forEach(item => item.node.style.transformOrigin = `${centerX - item.rect.left}px ${centerY - item.rect.top}px`);
-        return () => entries.forEach(item => item.node.style.transformOrigin = item.previous);
-    };
-    const compositeAnimation = (animations, restore) => ({
-        finished: Promise.all(animations.map(animation => animation.finished.catch(() => undefined))),
-        cancel() { animations.forEach(animation => { try { animation.cancel(); } catch { } }); restore(); },
-        pause() { animations.forEach(animation => { try { animation.pause(); } catch { } }); },
-        play() { animations.forEach(animation => { try { animation.play(); } catch { } }); }
-    });
-    const playItem = (item, delay = 0) => {
+        entries.forEach(item => { try { return (item.node.style.transformOrigin = `${centerX - item.rect.left}px ${centerY - item.rect.top}px`); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:entries.forEach@5167', __javascriptError); throw __javascriptError; } });
+        return () => { try { return (entries.forEach(item => { try { return (item.node.style.transformOrigin = item.previous); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:entries.forEach@5168', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@5168', __javascriptError); throw __javascriptError; } };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setGroupOrigins@5158', __javascriptError); throw __javascriptError; }};
+    const compositeAnimation = (animations, restore) => { try { return (({
+        finished: Promise.all(animations.map(animation => { try { return (animation.finished.catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@5171', __promiseError);  return (undefined); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animation.finished.catch@5171', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.map@5171', __javascriptError); throw __javascriptError; } })),
+        cancel() { try { animations.forEach(animation => { try { try { animation.cancel(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5172', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.forEach@5172', __javascriptError); throw __javascriptError; }}); restore();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancel@5172', __javascriptError); throw __javascriptError; }},
+        pause() { try { animations.forEach(animation => { try { try { animation.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5173', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.forEach@5173', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pause@5173', __javascriptError); throw __javascriptError; }},
+        play() { try { animations.forEach(animation => { try { try { animation.play(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5174', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animations.forEach@5174', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:play@5174', __javascriptError); throw __javascriptError; }}
+    })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:compositeAnimation@5170', __javascriptError); throw __javascriptError; } };
+    const playItem = (item, delay = 0) => { try {
         item.prestate?.cancel();
         item.prestate = null;
         const effect = lower(item.animation.effect);
@@ -5179,37 +5186,37 @@ function websitePresentationRuntime() {
             let timer = 0;
             let cancelled = false;
             let resolveFinished;
-            const finished = new Promise(resolve => { resolveFinished = resolve; });
-            const execute = () => {
+            const finished = new Promise(resolve => { try { resolveFinished = resolve;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@5184', __javascriptError); throw __javascriptError; }});
+            const execute = () => { try {
                 if (cancelled) return;
                 if (effect === 'playmedia') playMediaNode(item.node);
                 else if (effect === 'pausemedia') pauseMediaNode(item.node);
                 else stopMediaNode(item.node, true);
                 resolveFinished();
-            };
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:execute@5185', __javascriptError); throw __javascriptError; }};
             timer = setTimeout(execute, Math.max(0, delay) * 1000);
             activeMediaTimers.push(timer);
-            const handle = { finished, cancel() { cancelled = true; clearTimeout(timer); resolveFinished(); } };
+            const handle = { finished, cancel() { try { cancelled = true; clearTimeout(timer); resolveFinished();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancel@5194', __javascriptError); throw __javascriptError; }} };
             activeAnimations.push(handle);
             return handle;
         }
         const nodes = groupNodes(item.node);
-        if (lower(item.animation.phase) === 'entrance') nodes.forEach(node => node.classList.remove('ps-action-hidden'));
+        if (lower(item.animation.phase) === 'entrance') nodes.forEach(node => { try { return (node.classList.remove('ps-action-hidden')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:nodes.forEach@5199', __javascriptError); throw __javascriptError; } });
         const repeat = Math.max(1, Math.round(num(item.animation.repeatCount, 1)));
         const restore = setGroupOrigins(nodes);
-        const members = nodes.map(node => node.animate(frames(node, item.animation), {
+        const members = nodes.map(node => { try { return (node.animate(frames(node, item.animation), {
             duration: (reducedMotion ? .001 : Math.max(.05, num(item.animation.durationSeconds, .6))) * 1000,
             delay: (reducedMotion ? 0 : Math.max(0, delay)) * 1000,
             easing: easing(item.animation.easing),
             iterations: reducedMotion ? 1 : repeat * (item.animation.autoReverse ? 2 : 1),
             direction: item.animation.autoReverse ? 'alternate' : 'normal',
             fill: lower(item.animation.phase) === 'entrance' ? 'both' : 'forwards'
-        }));
+        })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:nodes.map@5202', __javascriptError); throw __javascriptError; } });
         const animation = members.length === 1 ? members[0] : compositeAnimation(members, restore);
         activeAnimations.push(animation);
         return animation;
-    };
-    const transitionFrames = (page, entering) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:playItem@5176', __javascriptError); throw __javascriptError; }};
+    const transitionFrames = (page, entering) => { try {
         const kind = lower(page.dataset.transitionKind);
         const direction = lower(page.dataset.transitionDirection);
         const move = vector(direction, 12);
@@ -5232,9 +5239,9 @@ function websitePresentationRuntime() {
             default: value = [{ opacity: 0 }, { opacity: 1 }]; break;
         }
         return entering ? value : [...value].reverse();
-    };
-    const pageItems = page => [...page.querySelectorAll('[data-publication-element]')].flatMap(node => parse(node.dataset.animations, []).map(animation => ({ node, animation, prestate: null }))).sort((a, b) => num(a.animation.order, 0) - num(b.animation.order, 0));
-    const splitTimeline = items => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:transitionFrames@5214', __javascriptError); throw __javascriptError; }};
+    const pageItems = page => { try { return ([...page.querySelectorAll('[data-publication-element]')].flatMap(node => { try { return (parse(node.dataset.animations, []).map(animation => { try { return (({ node, animation, prestate: null })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:parse(node.dataset.animations, []).map@5238', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...page.querySelectorAll(\'[data-publication-element]\')].flatMap@5238', __javascriptError); throw __javascriptError; } }).sort((a, b) => { try { return (num(a.animation.order, 0) - num(b.animation.order, 0)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...page.querySelectorAll(\'[data-publication-element]\')].flatMap(node @5238', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pageItems@5238', __javascriptError); throw __javascriptError; } };
+    const splitTimeline = items => { try {
         const automatic = [];
         const clickGroups = [];
         let group = null;
@@ -5253,8 +5260,8 @@ function websitePresentationRuntime() {
             }
         }
         return { automatic, clickGroups };
-    };
-    const scheduleGroup = items => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:splitTimeline@5239', __javascriptError); throw __javascriptError; }};
+    const scheduleGroup = items => { try {
         let previousStart = 0;
         let previousEnd = 0;
         let groupEnd = 0;
@@ -5273,46 +5280,46 @@ function websitePresentationRuntime() {
             groupEnd = Math.max(groupEnd, end);
         }
         return groupEnd;
-    };
-    const primeClickEntrances = groups => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:scheduleGroup@5259', __javascriptError); throw __javascriptError; }};
+    const primeClickEntrances = groups => { try {
         for (const item of groups.flat()) {
             if (lower(item.animation.phase) !== 'entrance') continue;
-            const members = groupNodes(item.node).map(node => {
+            const members = groupNodes(item.node).map(node => { try {
                 const animation = node.animate(frames(node, item.animation), { duration: 1, fill: 'both' });
                 animation.pause();
                 animation.currentTime = 0;
                 return animation;
-            });
-            item.prestate = members.length === 1 ? members[0] : compositeAnimation(members, () => {});
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:groupNodes(item.node).map@5282', __javascriptError); throw __javascriptError; }});
+            item.prestate = members.length === 1 ? members[0] : compositeAnimation(members, () => { try { } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:compositeAnimation@5288', __javascriptError); throw __javascriptError; }});
             activeAnimations.push(item.prestate);
         }
-    };
-    const mediaFromNode = node => node?.querySelector('video,audio') || null;
-    const mediaSegments = (node, media) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:primeClickEntrances@5279', __javascriptError); throw __javascriptError; }};
+    const mediaFromNode = node => { try { return (node?.querySelector('video,audio') || null); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:mediaFromNode@5292', __javascriptError); throw __javascriptError; } };
+    const mediaSegments = (node, media) => { try {
         const sources = [...(media?.querySelectorAll?.('source[data-media-segment]') || [])]
-            .map(source => {
+            .map(source => { try {
                 const src = source.getAttribute('src') || '';
                 const start = Math.max(0, num(source.dataset.mediaTrimStart, 0));
                 const end = Math.max(start + .01, num(source.dataset.mediaTrimEnd, start + 1));
                 return { src, start, end, poster: source.dataset.mediaPoster || '', originalSrc: source.dataset.publisherOriginalSrc || '' };
-            }).filter(segment => segment.src);
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(media?.querySelectorAll?.(\'source[data-media-segment]\') || [])] .@5295', __javascriptError); throw __javascriptError; }}).filter(segment => { try { return (segment.src); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(media?.querySelectorAll?.(\'source[data-media-segment]\') || [])] .@5300', __javascriptError); throw __javascriptError; } });
         if (sources.length) return sources;
         const src = media?.getAttribute('src') || media?.currentSrc || '';
         const start = Math.max(0, num(node?.dataset?.mediaTrimStart, 0));
         const end = Math.max(start + .01, num(node?.dataset?.mediaTrimEnd, media?.duration || start + 1));
         return src ? [{ src, start, end, poster: media?.getAttribute('poster') || '', originalSrc: media?.dataset?.publisherOriginalSrc || '' }] : [];
-    };
-    const sameSource = (media, source) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:mediaSegments@5293', __javascriptError); throw __javascriptError; }};
+    const sameSource = (media, source) => { try {
         try { return new URL(media.currentSrc || media.getAttribute('src') || '', location.href).href === new URL(source, location.href).href; }
         catch { return (media.currentSrc || media.getAttribute('src') || '') === source; }
-    };
-    const waitMetadata = media => media.readyState >= 1 ? Promise.resolve() : new Promise(resolve => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:sameSource@5307', __javascriptError); throw __javascriptError; }};
+    const waitMetadata = media => { try { return (media.readyState >= 1 ? Promise.resolve() : new Promise(resolve => { try {
         const timer = setTimeout(done, 5000);
-        function done() { clearTimeout(timer); media.removeEventListener('loadedmetadata', done); media.removeEventListener('error', done); resolve(); }
+        function done() { try { clearTimeout(timer); media.removeEventListener('loadedmetadata', done); media.removeEventListener('error', done); resolve();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:done@5313', __javascriptError); throw __javascriptError; }}
         media.addEventListener('loadedmetadata', done, { once: true });
         media.addEventListener('error', done, { once: true });
-    });
-    const clearMediaSequence = media => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@5311', __javascriptError); throw __javascriptError; }})); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitMetadata@5311', __javascriptError); throw __javascriptError; } };
+    const clearMediaSequence = media => { try {
         if (!media) return;
         if (media.__psTimeHandler) media.removeEventListener('timeupdate', media.__psTimeHandler);
         media.__psTimeHandler = null;
@@ -5320,8 +5327,8 @@ function websitePresentationRuntime() {
             media.__psSequenceState.token = (media.__psSequenceState.token || 0) + 1;
             media.__psSequenceState.advancing = false;
         }
-    };
-    const configureMediaSegment = (node, media, requestedIndex = 0, autoPlay = false) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clearMediaSequence@5317', __javascriptError); throw __javascriptError; }};
+    const configureMediaSegment = (node, media, requestedIndex = 0, autoPlay = false) => { try {
         if (!node || !media) return;
         clearMediaSequence(media);
         const segments = mediaSegments(node, media);
@@ -5332,8 +5339,8 @@ function websitePresentationRuntime() {
         const baseVolume = Math.max(0, Math.min(1, num(node.dataset.mediaVolume, 1)));
         const fadeIn = Math.max(0, num(node.dataset.mediaFadeIn, 0));
         const fadeOut = Math.max(0, num(node.dataset.mediaFadeOut, 0));
-        const elapsedBefore = segments.slice(0, index).reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
-        const totalDuration = segments.reduce((total, item) => total + Math.max(.01, item.end - item.start) / rate, 0);
+        const elapsedBefore = segments.slice(0, index).reduce((total, item) => { try { return (total + Math.max(.01, item.end - item.start) / rate); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:segments.slice(0, index).reduce@5337', __javascriptError); throw __javascriptError; } }, 0);
+        const totalDuration = segments.reduce((total, item) => { try { return (total + Math.max(.01, item.end - item.start) / rate); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:segments.reduce@5338', __javascriptError); throw __javascriptError; } }, 0);
         const state = media.__psSequenceState || { token: 0, index: 0, advancing: false };
         state.index = index; state.segments = segments; state.token = (state.token || 0) + 1; state.advancing = false;
         media.__psSequenceState = state;
@@ -5343,19 +5350,19 @@ function websitePresentationRuntime() {
         media.loop = false;
         media.volume = fadeIn > 0 && index === 0 ? 0 : baseVolume;
         if (media instanceof HTMLVideoElement && segment.poster) media.poster = segment.poster;
-        const prepare = async () => {
+        const prepare = async () => { try {
             if (media.__psFallbackHandler) media.removeEventListener('error', media.__psFallbackHandler);
             media.__psFallbackHandler = null;
             if (segment.originalSrc) {
-                const fallbackHandler = async () => {
+                const fallbackHandler = async () => { try {
                     if (state.token !== token || sameSource(media, segment.originalSrc)) return;
                     media.removeEventListener('error', fallbackHandler);
                     media.__psFallbackHandler = null;
                     media.pause(); media.src = segment.originalSrc; media.load(); await waitMetadata(media);
                     if (state.token !== token) return;
-                    try { media.currentTime = segment.start; } catch { }
-                    if (autoPlay) media.play().catch(() => {});
-                };
+                    try { media.currentTime = segment.start; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5358', __caughtJavaScriptError);  }
+                    if (autoPlay) media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@5359', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@5359', __javascriptError); throw __javascriptError; }});
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fallbackHandler@5352', __javascriptError); throw __javascriptError; }};
                 media.__psFallbackHandler = fallbackHandler;
                 media.addEventListener('error', fallbackHandler, { once: true });
             }
@@ -5363,8 +5370,8 @@ function websitePresentationRuntime() {
                 media.pause(); media.src = segment.src; media.load(); await waitMetadata(media);
             }
             if (state.token !== token) return;
-            try { media.currentTime = segment.start; } catch { }
-            const onTime = () => {
+            try { media.currentTime = segment.start; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5368', __caughtJavaScriptError);  }
+            const onTime = () => { try {
                 if (state.token !== token || state.advancing) return;
                 const timelinePosition = elapsedBefore + Math.max(0, media.currentTime - segment.start) / rate;
                 const timelineRemaining = Math.max(0, totalDuration - timelinePosition);
@@ -5377,78 +5384,78 @@ function websitePresentationRuntime() {
                 if (index + 1 < segments.length) configureMediaSegment(node, media, index + 1, true);
                 else if (bool(node.dataset.mediaLoop)) configureMediaSegment(node, media, 0, true);
                 else { media.pause(); state.advancing = false; }
-            };
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:onTime@5369', __javascriptError); throw __javascriptError; }};
             media.__psTimeHandler = onTime;
             media.addEventListener('timeupdate', onTime);
-            if (autoPlay) media.play().catch(() => {});
-        };
+            if (autoPlay) media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@5385', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@5385', __javascriptError); throw __javascriptError; }});
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepare@5348', __javascriptError); throw __javascriptError; }};
         void prepare();
-    };
-    const pauseMediaNode = node => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:configureMediaSegment@5326', __javascriptError); throw __javascriptError; }};
+    const pauseMediaNode = node => { try {
         const media = mediaFromNode(node);
         if (media) media.pause();
-    };
-    const stopMediaNode = (node, rewind = false) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pauseMediaNode@5389', __javascriptError); throw __javascriptError; }};
+    const stopMediaNode = (node, rewind = false) => { try {
         const media = mediaFromNode(node);
         if (!media) return;
         media.pause();
         clearMediaSequence(media);
         if (rewind) configureMediaSegment(node, media, 0, false);
-    };
-    const playMediaNode = (node, delay = 0) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:stopMediaNode@5393', __javascriptError); throw __javascriptError; }};
+    const playMediaNode = (node, delay = 0) => { try {
         const media = mediaFromNode(node);
         if (!media) return;
-        const run = () => configureMediaSegment(node, media, 0, true);
+        const run = () => { try { return (configureMediaSegment(node, media, 0, true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:run@5403', __javascriptError); throw __javascriptError; } };
         if (delay > 0) activeMediaTimers.push(setTimeout(run, delay * 1000)); else run();
-    };
-    const toggleMediaNode = node => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:playMediaNode@5400', __javascriptError); throw __javascriptError; }};
+    const toggleMediaNode = node => { try {
         const media = mediaFromNode(node);
         if (!media) return;
         if (media.paused) {
-            if (media.__psSequenceState?.segments?.length) media.play().catch(() => {});
+            if (media.__psSequenceState?.segments?.length) media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@5410', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@5410', __javascriptError); throw __javascriptError; }});
             else playMediaNode(node);
         } else media.pause();
-    };
-    const startPageMedia = page => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:toggleMediaNode@5406', __javascriptError); throw __javascriptError; }};
+    const startPageMedia = page => { try {
         for (const node of page.querySelectorAll('[data-media-kind]')) {
             const trigger = lower(node.dataset.mediaTrigger);
             if (!bool(node.dataset.mediaAutoplay) || trigger === 'onclick') continue;
             playMediaNode(node, Math.max(0, num(node.dataset.mediaStart, 0)));
         }
-    };
-    const resetPageVisibility = page => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startPageMedia@5414', __javascriptError); throw __javascriptError; }};
+    const resetPageVisibility = page => { try {
         for (const node of page.querySelectorAll('[data-publication-element]'))
             node.classList.toggle('ps-action-hidden', bool(node.dataset.playbackHidden));
-    };
-    const cancelPlayback = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:resetPageVisibility@5421', __javascriptError); throw __javascriptError; }};
+    const cancelPlayback = () => { try {
         clearTimeout(autoTimer);
         autoTimer = 0;
-        for (const animation of activeAnimations) { try { animation.cancel(); } catch { } }
+        for (const animation of activeAnimations) { try { animation.cancel(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5428', __caughtJavaScriptError);  } }
         activeAnimations = [];
         for (const timer of activeMediaTimers) clearTimeout(timer);
         activeMediaTimers = [];
         for (const node of publication.querySelectorAll('[data-media-kind]')) stopMediaNode(node, true);
         clickGroups = [];
-    };
-    const fitPages = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelPlayback@5425', __javascriptError); throw __javascriptError; }};
+    const fitPages = () => { try {
         const controlsHeight = controls && !controls.hidden ? 62 : 18;
         const scale = Math.min(
             (innerWidth - 32) / frameWidth,
             (innerHeight - controlsHeight - 24) / frameHeight,
             1.75);
         stage.style.transform = `scale(${Math.max(.05, scale)})`;
-    };
-    const updateControls = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fitPages@5435', __javascriptError); throw __javascriptError; }};
+    const updateControls = () => { try {
         if (!counter) return;
         counter.textContent = `${current + 1} / ${pages.length}`;
         previousButton.disabled = current <= 0 && !loop;
         nextButton.disabled = current >= pages.length - 1 && !loop;
-    };
-    const normalizeIndex = value => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateControls@5443', __javascriptError); throw __javascriptError; }};
+    const normalizeIndex = value => { try {
         if (loop) return (value % pages.length + pages.length) % pages.length;
         return Math.max(0, Math.min(pages.length - 1, value));
-    };
-    const showPage = async (requested, direction = 1, animate = true) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:normalizeIndex@5449', __javascriptError); throw __javascriptError; }};
+    const showPage = async (requested, direction = 1, animate = true) => { try {
         const next = normalizeIndex(requested);
         if (next === current && shells[current].classList.contains('active')) return;
         cancelPlayback();
@@ -5464,18 +5471,18 @@ function websitePresentationRuntime() {
             if (previous && previous !== target && !previous.hidden) {
                 const outgoing = previous.animate(transitionFrames(page, false), { duration, easing: easing(page.dataset.transitionEasing), fill: 'both' });
                 activeAnimations.push(outgoing);
-                try { await Promise.allSettled([incoming.finished, outgoing.finished]); } catch { }
+                try { await Promise.allSettled([incoming.finished, outgoing.finished]); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5469', __caughtJavaScriptError);  }
             }
         }
-        shells.forEach((shell, index) => {
+        shells.forEach((shell, index) => { try {
             shell.hidden = index !== next;
             shell.classList.toggle('active', index === next);
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:shells.forEach@5472', __javascriptError); throw __javascriptError; }});
         current = next;
         updateControls();
         runCurrentPage(startAutomatically || animate);
-    };
-    const runCurrentPage = shouldRun => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:showPage@5453', __javascriptError); throw __javascriptError; }};
+    const runCurrentPage = shouldRun => { try {
         cancelPlayback();
         const page = pages[current];
         resetPageVisibility(page);
@@ -5489,18 +5496,18 @@ function websitePresentationRuntime() {
         primeClickEntrances(clickGroups);
         if (bool(page.dataset.autoAdvance)) {
             const seconds = Math.max(.25, num(page.dataset.autoAdvanceSeconds, 5));
-            autoTimer = setTimeout(() => showPage(current + 1, 1, true), seconds * 1000);
+            autoTimer = setTimeout(() => { try { return (showPage(current + 1, 1, true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@5494', __javascriptError); throw __javascriptError; } }, seconds * 1000);
         }
-    };
-    const runNextClickGroup = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:runCurrentPage@5480', __javascriptError); throw __javascriptError; }};
+    const runNextClickGroup = () => { try {
         const group = clickGroups.shift();
         if (!group) return false;
         scheduleGroup(group);
         return true;
-    };
-    const replayCurrent = () => runCurrentPage(true);
-    const goNext = () => showPage(current + 1, 1, true);
-    const goPrevious = () => showPage(current - 1, -1, true);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:runNextClickGroup@5497', __javascriptError); throw __javascriptError; }};
+    const replayCurrent = () => { try { return (runCurrentPage(true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:replayCurrent@5503', __javascriptError); throw __javascriptError; } };
+    const goNext = () => { try { return (showPage(current + 1, 1, true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:goNext@5504', __javascriptError); throw __javascriptError; } };
+    const goPrevious = () => { try { return (showPage(current - 1, -1, true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:goPrevious@5505', __javascriptError); throw __javascriptError; } };
 
     const stage = document.createElement('div');
     stage.className = 'ps-stage';
@@ -5508,7 +5515,7 @@ function websitePresentationRuntime() {
     stage.style.height = `${frameHeight}px`;
     publication.appendChild(stage);
 
-    const shells = pages.map((page, index) => {
+    const shells = pages.map((page, index) => { try {
         const shell = document.createElement('div');
         shell.className = 'ps-slide';
         const size = pageSizes[index];
@@ -5530,7 +5537,7 @@ function websitePresentationRuntime() {
         shell.appendChild(page);
         shell.hidden = true;
         return shell;
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.map@5513', __javascriptError); throw __javascriptError; }});
     const showControls = bool(publication.dataset.playbackControls);
     const loop = bool(publication.dataset.playbackLoop);
     const startAutomatically = publication.dataset.playbackStart !== 'false';
@@ -5548,26 +5555,26 @@ function websitePresentationRuntime() {
     const previousButton = controls.querySelector('[data-ps-previous]');
     const nextButton = controls.querySelector('[data-ps-next]');
     const counter = controls.querySelector('[data-ps-counter]');
-    previousButton.addEventListener('click', event => { event.stopPropagation(); goPrevious(); });
-    nextButton.addEventListener('click', event => { event.stopPropagation(); goNext(); });
-    controls.querySelector('[data-ps-replay]').addEventListener('click', event => { event.stopPropagation(); replayCurrent(); });
-    controls.querySelector('[data-ps-fullscreen]').addEventListener('click', async event => {
+    previousButton.addEventListener('click', event => { try { event.stopPropagation(); goPrevious();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:previousButton.addEventListener@5553', __javascriptError); throw __javascriptError; }});
+    nextButton.addEventListener('click', event => { try { event.stopPropagation(); goNext();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:nextButton.addEventListener@5554', __javascriptError); throw __javascriptError; }});
+    controls.querySelector('[data-ps-replay]').addEventListener('click', event => { try { event.stopPropagation(); replayCurrent();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:controls.querySelector(\'[data-ps-replay]\').addEventListener@5555', __javascriptError); throw __javascriptError; }});
+    controls.querySelector('[data-ps-fullscreen]').addEventListener('click', async event => { try {
         event.stopPropagation();
-        try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); } catch { }
-    });
+        try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5558', __caughtJavaScriptError);  }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:controls.querySelector(\'[data-ps-fullscreen]\').addEventListener@5556', __javascriptError); throw __javascriptError; }});
 
-    pages.forEach((page, pageIndex) => {
-        page.addEventListener('click', event => {
+    pages.forEach((page, pageIndex) => { try {
+        page.addEventListener('click', event => { try {
             if (event.defaultPrevented) return;
             if (runNextClickGroup()) return;
             if (bool(page.dataset.advanceOnClick)) goNext();
-        });
-        const signalSourceIds = new Set([...page.querySelectorAll('[data-signal-enabled="true"][data-connector-id]')].flatMap(connector => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:page.addEventListener@5562', __javascriptError); throw __javascriptError; }});
+        const signalSourceIds = new Set([...page.querySelectorAll('[data-signal-enabled="true"][data-connector-id]')].flatMap(connector => { try {
             const settings = parse(connector.dataset.signal, {});
             const trigger = lower(settings.trigger);
             const sourceId = String(connector.dataset.sourceElementId || '').trim();
             return sourceId && ['onclick', 'onhover'].includes(trigger) ? [sourceId] : [];
-        }));
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...page.querySelectorAll(\'[data-signal-enabled="true"][data-connector@5567', __javascriptError); throw __javascriptError; }}));
         for (const node of page.querySelectorAll('[data-publication-element]')) {
             const interaction = parse(node.dataset.interaction, {});
             const interactionAction = lower(interaction.action);
@@ -5582,23 +5589,23 @@ function websitePresentationRuntime() {
                 node.classList.add('ps-pointer-passive');
             if (node.dataset.mediaKind && lower(node.dataset.mediaTrigger) === 'onclick' && (!interactionAction || interactionAction === 'none')) {
                 node.classList.add('ps-interactive');
-                node.addEventListener('click', event => {
+                node.addEventListener('click', event => { try {
                     event.preventDefault();
                     event.stopPropagation();
                     toggleMediaNode(node);
-                });
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:node.addEventListener@5587', __javascriptError); throw __javascriptError; }});
             }
             if (interactionAction === 'none' || !interaction.action) continue;
             node.classList.add('ps-interactive', 'ps-pointer-owner');
             node.classList.remove('ps-pointer-passive');
-            node.addEventListener('click', event => {
+            node.addEventListener('click', event => { try {
                 event.preventDefault();
                 event.stopPropagation();
                 const action = lower(interaction.action);
                 if (action === 'nextpage') goNext();
                 else if (action === 'previouspage') goPrevious();
                 else if (action === 'gotopage') {
-                    const target = pages.findIndex(item => String(item.dataset.pageId).toLowerCase() === String(interaction.targetPageId || '').toLowerCase());
+                    const target = pages.findIndex(item => { try { return (String(item.dataset.pageId).toLowerCase() === String(interaction.targetPageId || '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.findIndex@5603', __javascriptError); throw __javascriptError; } });
                     if (target >= 0) showPage(target, target >= current ? 1 : -1, true);
                 } else if (action === 'openurl') {
                     const url = String(interaction.url || '').trim();
@@ -5611,46 +5618,46 @@ function websitePresentationRuntime() {
                     else if (action === 'show') target.classList.remove('ps-action-hidden');
                     else if (action === 'hide') target.classList.add('ps-action-hidden');
                     else if (action === 'replayanimation') {
-                        const items = parse(target.dataset.animations, []).map(animation => ({ node: target, animation, prestate: null }));
+                        const items = parse(target.dataset.animations, []).map(animation => { try { return (({ node: target, animation, prestate: null })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:parse(target.dataset.animations, []).map@5616', __javascriptError); throw __javascriptError; } });
                         scheduleGroup(items);
                     } else if (action === 'playmedia') playMediaNode(target);
                     else if (action === 'pausemedia') pauseMediaNode(target);
                     else if (action === 'togglemediaplayback') toggleMediaNode(target);
                 }
-            });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:node.addEventListener@5596', __javascriptError); throw __javascriptError; }});
         }
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.forEach@5561', __javascriptError); throw __javascriptError; }});
 
     window.PublisherStudioNavigation = window.PublisherStudioPresentation = {
         next: goNext,
         previous: goPrevious,
         replay: replayCurrent,
-        currentPageId: () => pages[current]?.dataset.pageId || null,
-        goToPage(target) {
+        currentPageId: () => { try { return (pages[current]?.dataset.pageId || null); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:currentPageId@5630', __javascriptError); throw __javascriptError; } },
+        goToPage(target) { try {
             const value = String(target ?? '').replace(/^#/, '').toLowerCase();
             const targetIndex = pages.findIndex((page, index) =>
-                String(page.dataset.pageId || '').toLowerCase() === value ||
+                { try { return (String(page.dataset.pageId || '').toLowerCase() === value ||
                 String(page.dataset.pageName || '').trim().toLowerCase() === value ||
-                String(index + 1) === value);
+                String(index + 1) === value); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.findIndex@5633', __javascriptError); throw __javascriptError; } });
             if (targetIndex >= 0) return showPage(targetIndex, targetIndex >= current ? 1 : -1, true);
             return false;
-        }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:goToPage@5631', __javascriptError); throw __javascriptError; }}
     };
 
     addEventListener('resize', fitPages);
-    addEventListener('keydown', event => {
+    addEventListener('keydown', event => { try {
         if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); if (!runNextClickGroup()) goNext(); }
         else if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); goPrevious(); }
         else if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); if (!runNextClickGroup()) goNext(); }
         else if (event.key.toLowerCase() === 'r') replayCurrent();
         else if (event.key === 'Home') showPage(0, -1, true);
         else if (event.key === 'End') showPage(pages.length - 1, 1, true);
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:addEventListener@5643', __javascriptError); throw __javascriptError; }});
     fitPages();
     shells[0].hidden = false;
     shells[0].classList.add('active');
     updateControls();
-    const startFirstPage = async () => {
+    const startFirstPage = async () => { try {
         if (startAutomatically && lower(pages[0].dataset.transitionKind) !== 'none') {
             const duration = (reducedMotion ? .001 : Math.max(.1, num(pages[0].dataset.transitionDuration, .55))) * 1000;
             const initial = shells[0].animate(transitionFrames(pages[0], true), {
@@ -5659,25 +5666,25 @@ function websitePresentationRuntime() {
                 fill: 'both'
             });
             activeAnimations.push(initial);
-            try { await initial.finished; } catch { }
+            try { await initial.finished; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5664', __caughtJavaScriptError);  }
         }
         runCurrentPage(startAutomatically);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startFirstPage@5655', __javascriptError); throw __javascriptError; }};
     startFirstPage();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:websitePresentationRuntime@5072', __javascriptError); throw __javascriptError; }}
 
-function websiteSiteRuntime() {
+function websiteSiteRuntime() { try {
     const publication = document.querySelector('.website-publication');
     if (!publication) return;
     const pages = [...publication.querySelectorAll(':scope > .print-page')];
     if (!pages.length) return;
-    const numberValue = (value, fallback = 0) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
-    const lower = value => String(value ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-    const slugify = (value, fallback) => String(value || fallback).trim().toLowerCase()
-        .normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || fallback;
+    const numberValue = (value, fallback = 0) => { try { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:numberValue@5676', __javascriptError); throw __javascriptError; }};
+    const lower = value => { try { return (String(value ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:lower@5677', __javascriptError); throw __javascriptError; } };
+    const slugify = (value, fallback) => { try { return (String(value || fallback).trim().toLowerCase()
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || fallback); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:slugify@5678', __javascriptError); throw __javascriptError; } };
     const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const usedSlugs = new Map();
-    const routes = pages.map((page, index) => {
+    const routes = pages.map((page, index) => { try {
         const baseSlug = slugify(page.dataset.pageName, `page-${index + 1}`);
         const occurrence = (usedSlugs.get(baseSlug) || 0) + 1;
         usedSlugs.set(baseSlug, occurrence);
@@ -5687,18 +5694,18 @@ function websiteSiteRuntime() {
             slug: occurrence === 1 ? baseSlug : `${baseSlug}-${occurrence}`,
             index
         };
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.map@5682', __javascriptError); throw __javascriptError; }});
     let current = 0;
     let activeTransition = null;
 
     publication.classList.add('ps-site');
-    pages.forEach((page, index) => {
+    pages.forEach((page, index) => { try {
         page.classList.add('ps-site-page');
         page.hidden = index !== 0;
         page.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.forEach@5697', __javascriptError); throw __javascriptError; }});
 
-    const easing = value => {
+    const easing = value => { try {
         switch (lower(value)) {
             case 'linear': return 'linear';
             case 'easein': return 'cubic-bezier(.42,0,1,1)';
@@ -5706,8 +5713,8 @@ function websiteSiteRuntime() {
             case 'backout': return 'cubic-bezier(.18,.89,.32,1.28)';
             default: return 'cubic-bezier(.4,0,.2,1)';
         }
-    };
-    const transitionFrames = (page, entering, direction) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:easing@5703', __javascriptError); throw __javascriptError; }};
+    const transitionFrames = (page, entering, direction) => { try {
         const kind = lower(page.dataset.transitionKind);
         const pageDirection = lower(page.dataset.transitionDirection);
         const sign = direction >= 0 ? 1 : -1;
@@ -5726,33 +5733,33 @@ function websiteSiteRuntime() {
             ? [{ opacity: .35, transform: `translate(${x}%,${y}%)` }, { opacity: 1, transform: 'translate(0,0)' }]
             : [{ opacity: 1, transform: 'translate(0,0)' }, { opacity: .25, transform: `translate(${-x / 2}%,${-y / 2}%)` }];
         return entering ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0 }];
-    };
-    const fitPage = page => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:transitionFrames@5712', __javascriptError); throw __javascriptError; }};
+    const fitPage = page => { try {
         const width = Math.max(1, numberValue(page.dataset.exportWidthPx, page.offsetWidth || 1));
         const height = Math.max(1, numberValue(page.dataset.exportHeightPx, page.offsetHeight || 1));
         const scale = Math.min(innerWidth / width, innerHeight / height);
         page.style.setProperty('--ps-site-scale', String(Math.max(.05, scale)));
-    };
-    const fit = () => pages.forEach(fitPage);
-    const pausePageMedia = page => page?.querySelectorAll?.('video,audio').forEach(media => { try { media.pause(); } catch { } });
-    const routeFor = value => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fitPage@5732', __javascriptError); throw __javascriptError; }};
+    const fit = () => { try { return (pages.forEach(fitPage)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fit@5738', __javascriptError); throw __javascriptError; } };
+    const pausePageMedia = page => { try { return (page?.querySelectorAll?.('video,audio').forEach(media => { try { try { media.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5739', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:page?.querySelectorAll?.(\'video,audio\').forEach@5739', __javascriptError); throw __javascriptError; }})); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pausePageMedia@5739', __javascriptError); throw __javascriptError; } };
+    const routeFor = value => { try {
         const normalized = decodeURIComponent(String(value || '').replace(/^#\/?/, '')).toLowerCase();
         if (!normalized) return routes[0];
-        return routes.find(route => route.slug === normalized || route.id.toLowerCase() === normalized || String(route.index + 1) === normalized) || routes[0];
-    };
-    const setHash = (route, replace) => {
+        return routes.find(route => { try { return (route.slug === normalized || route.id.toLowerCase() === normalized || String(route.index + 1) === normalized); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:routes.find@5743', __javascriptError); throw __javascriptError; } }) || routes[0];
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:routeFor@5740', __javascriptError); throw __javascriptError; }};
+    const setHash = (route, replace) => { try {
         const next = `#/${route.slug}`;
         if (location.hash === next) return;
         if (replace) history.replaceState({ publisherPage: route.id }, '', next);
         else history.pushState({ publisherPage: route.id }, '', next);
-    };
-    const showRoute = async (route, options = {}) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setHash@5745', __javascriptError); throw __javascriptError; }};
+    const showRoute = async (route, options = {}) => { try {
         if (!route) return false;
         const nextIndex = route.index;
         const previous = pages[current];
         const next = pages[nextIndex];
         if (!next) return false;
-        if (activeTransition) { try { activeTransition.cancel(); } catch { } activeTransition = null; }
+        if (activeTransition) { try { activeTransition.cancel(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5757', __caughtJavaScriptError);  } activeTransition = null; }
         if (nextIndex === current) {
             next.hidden = false;
             next.setAttribute('aria-hidden', 'false');
@@ -5771,44 +5778,44 @@ function websiteSiteRuntime() {
         const incoming = next.animate(transitionFrames(next, true, direction), { duration, easing: easing(next.dataset.transitionEasing), fill: 'both' });
         const outgoing = previous.animate(transitionFrames(next, false, direction), { duration, easing: easing(next.dataset.transitionEasing), fill: 'both' });
         activeTransition = incoming;
-        try { await Promise.all([incoming.finished, outgoing.finished]); } catch { }
+        try { await Promise.all([incoming.finished, outgoing.finished]); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5776', __caughtJavaScriptError);  }
         previous.hidden = true;
         previous.setAttribute('aria-hidden', 'true');
         previous.style.zIndex = '';
         next.style.zIndex = '';
-        try { incoming.cancel(); outgoing.cancel(); } catch { }
+        try { incoming.cancel(); outgoing.cancel(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@5781', __caughtJavaScriptError);  }
         activeTransition = null;
         current = nextIndex;
         document.title = next.dataset.pageName ? `${next.dataset.pageName} · ${publication.dataset.publicationTitle || document.title}` : document.title;
         if (options.updateHistory !== false) setHash(route, options.replace === true);
         next.dispatchEvent(new CustomEvent('publisher:page-enter', { bubbles: true, detail: { pageId: route.id, pageName: next.dataset.pageName || '' } }));
         return true;
-    };
-    const goToPage = (target, options = {}) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:showRoute@5751', __javascriptError); throw __javascriptError; }};
+    const goToPage = (target, options = {}) => { try {
         const value = String(target ?? '').toLowerCase();
-        const route = routes.find(item => item.id.toLowerCase() === value || item.slug === value.replace(/^#\/?/, '') || String(item.index + 1) === value) || routeFor(value);
+        const route = routes.find(item => { try { return (item.id.toLowerCase() === value || item.slug === value.replace(/^#\/?/, '') || String(item.index + 1) === value); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:routes.find@5791', __javascriptError); throw __javascriptError; } }) || routeFor(value);
         return showRoute(route, options);
-    };
-    const next = () => showRoute(routes[Math.min(routes.length - 1, current + 1)]);
-    const previous = () => showRoute(routes[Math.max(0, current - 1)]);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:goToPage@5789', __javascriptError); throw __javascriptError; }};
+    const next = () => { try { return (showRoute(routes[Math.min(routes.length - 1, current + 1)])); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:next@5794', __javascriptError); throw __javascriptError; } };
+    const previous = () => { try { return (showRoute(routes[Math.max(0, current - 1)])); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previous@5795', __javascriptError); throw __javascriptError; } };
 
     window.PublisherStudioNavigation = window.PublisherStudioSite = {
         goToPage,
         next,
         previous,
-        currentPageId: () => routes[current]?.id || null,
-        currentPageName: () => pages[current]?.dataset.pageName || '',
-        routes: routes.map(route => ({ id: route.id, slug: route.slug, name: route.page.dataset.pageName || `Page ${route.index + 1}` }))
+        currentPageId: () => { try { return (routes[current]?.id || null); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:currentPageId@5801', __javascriptError); throw __javascriptError; } },
+        currentPageName: () => { try { return (pages[current]?.dataset.pageName || ''); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:currentPageName@5802', __javascriptError); throw __javascriptError; } },
+        routes: routes.map(route => { try { return (({ id: route.id, slug: route.slug, name: route.page.dataset.pageName || `Page ${route.index + 1}` })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:routes.map@5803', __javascriptError); throw __javascriptError; } })
     };
 
     for (const page of pages) {
-        const signalSourceIds = new Set([...page.querySelectorAll('[data-signal-enabled="true"][data-connector-id]')].flatMap(connector => {
+        const signalSourceIds = new Set([...page.querySelectorAll('[data-signal-enabled="true"][data-connector-id]')].flatMap(connector => { try {
             let settings;
             try { settings = JSON.parse(connector.dataset.signal || '{}'); } catch { settings = {}; }
             const trigger = lower(settings.trigger);
             const sourceId = String(connector.dataset.sourceElementId || '').trim();
             return sourceId && ['onclick', 'onhover'].includes(trigger) ? [sourceId] : [];
-        }));
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...page.querySelectorAll(\'[data-signal-enabled="true"][data-connector@5807', __javascriptError); throw __javascriptError; }}));
         for (const node of page.querySelectorAll('[data-publication-element]')) {
             let interaction;
             try { interaction = JSON.parse(node.dataset.interaction || '{}'); } catch { interaction = {}; }
@@ -5825,7 +5832,7 @@ function websiteSiteRuntime() {
             if (!action || action === 'none') continue;
             node.classList.add('ps-interactive', 'ps-pointer-owner');
             node.classList.remove('ps-pointer-passive');
-            node.addEventListener('click', event => {
+            node.addEventListener('click', event => { try {
                 event.preventDefault();
                 event.stopPropagation();
                 if (action === 'nextpage') next();
@@ -5841,62 +5848,62 @@ function websiteSiteRuntime() {
                     if (action === 'togglevisibility') target.classList.toggle('ps-action-hidden');
                     else if (action === 'show') target.classList.remove('ps-action-hidden');
                     else if (action === 'hide') target.classList.add('ps-action-hidden');
-                    else if (action === 'playmedia') target.querySelector('video,audio')?.play?.().catch?.(() => {});
+                    else if (action === 'playmedia') target.querySelector('video,audio')?.play?.().catch?.((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@5846', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:target.querySelector(\'video,audio\')?.play?.().catch@5846', __javascriptError); throw __javascriptError; }});
                     else if (action === 'pausemedia') target.querySelector('video,audio')?.pause?.();
                 }
-            });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:node.addEventListener@5830', __javascriptError); throw __javascriptError; }});
         }
     }
 
     addEventListener('resize', fit);
-    addEventListener('hashchange', () => showRoute(routeFor(location.hash), { updateHistory: false }));
-    addEventListener('popstate', () => showRoute(routeFor(location.hash), { updateHistory: false }));
-    addEventListener('keydown', event => {
+    addEventListener('hashchange', () => { try { return (showRoute(routeFor(location.hash), { updateHistory: false })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:addEventListener@5854', __javascriptError); throw __javascriptError; } });
+    addEventListener('popstate', () => { try { return (showRoute(routeFor(location.hash), { updateHistory: false })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:addEventListener@5855', __javascriptError); throw __javascriptError; } });
+    addEventListener('keydown', event => { try {
         if (event.key === 'PageDown' || event.key === 'ArrowRight') next();
         else if (event.key === 'PageUp' || event.key === 'ArrowLeft') previous();
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:addEventListener@5856', __javascriptError); throw __javascriptError; }});
     fit();
     const initial = routeFor(location.hash);
     pages[0].hidden = initial.index !== 0;
     pages[0].setAttribute('aria-hidden', initial.index === 0 ? 'false' : 'true');
     current = initial.index;
-    pages.forEach((page, index) => { page.hidden = index !== current; page.setAttribute('aria-hidden', index === current ? 'false' : 'true'); });
+    pages.forEach((page, index) => { try { page.hidden = index !== current; page.setAttribute('aria-hidden', index === current ? 'false' : 'true');  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.forEach@5865', __javascriptError); throw __javascriptError; }});
     setHash(initial, true);
     fitPage(pages[current]);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:websiteSiteRuntime@5671', __javascriptError); throw __javascriptError; }}
 
 
-function barcodeColor(value, fallback) {
+function barcodeColor(value, fallback) { try {
     const text = String(value || '').trim();
     return /^#[0-9a-f]{3,8}$/i.test(text) || /^(rgb|hsl)a?\(/i.test(text) || /^[a-z]+$/i.test(text) ? text : fallback;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:barcodeColor@5871', __javascriptError); throw __javascriptError; }}
 
-function barcodeEnumName(value, names, fallback) {
+function barcodeEnumName(value, names, fallback) { try {
     if (Number.isInteger(value) && value >= 0 && value < names.length) return names[value];
     const numeric = Number(value);
     if (Number.isInteger(numeric) && String(value).trim() !== '' && numeric >= 0 && numeric < names.length) return names[numeric];
     const normalized = String(value ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-    return names.find(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase() === normalized) || fallback;
-}
+    return names.find(name => { try { return (name.replace(/[^a-z0-9]/gi, '').toLowerCase() === normalized); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:names.find@5881', __javascriptError); throw __javascriptError; } }) || fallback;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:barcodeEnumName@5876', __javascriptError); throw __javascriptError; }}
 
-function barcodeFormatToken(value) {
+function barcodeFormatToken(value) { try {
     return barcodeEnumName(value, ['QrCode', 'Code128', 'Code39', 'Ean13', 'UpcA', 'Itf14', 'Codabar'], 'Code128');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:barcodeFormatToken@5884', __javascriptError); throw __javascriptError; }}
 
-function barcodeFormatName(value) {
+function barcodeFormatName(value) { try {
     const normalized = barcodeFormatToken(value).toLowerCase();
     return ({ qrcode: 'QR', code128: 'CODE128', code39: 'CODE39', ean13: 'EAN13', upca: 'UPC', itf14: 'ITF14', codabar: 'codabar' })[normalized] || 'CODE128';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:barcodeFormatName@5888', __javascriptError); throw __javascriptError; }}
 
-function barcodeCorrectionName(value) {
+function barcodeCorrectionName(value) { try {
     return barcodeEnumName(value, ['L', 'M', 'Q', 'H'], 'M').toUpperCase();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:barcodeCorrectionName@5893', __javascriptError); throw __javascriptError; }}
 
-function barcodeShapeName(value) {
+function barcodeShapeName(value) { try {
     return barcodeEnumName(value, ['Square', 'Rounded', 'Dots'], 'Square').toLowerCase();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:barcodeShapeName@5897', __javascriptError); throw __javascriptError; }}
 
-function generateQrSvg(options) {
+function generateQrSvg(options) { try {
     if (typeof window.qrcode !== 'function') throw new Error('QR-code generator did not load.');
     const value = String(options?.value || '').trim();
     if (!value) throw new Error('Barcode value cannot be empty.');
@@ -5925,9 +5932,9 @@ function generateQrSvg(options) {
     const backgroundMarkup = transparent ? '' : `<rect width="100%" height="100%" fill="${background}"/>`;
     const rendering = shape === 'square' ? 'crispEdges' : 'geometricPrecision';
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet" shape-rendering="${rendering}" role="img" aria-label="QR code, ${correction} error correction" data-error-correction="${correction}" data-module-count="${count}" data-module-shape="${shape}" data-transparent-background="${transparent}" style="background:transparent"><title>QR code · correction ${correction} · ${shape} modules</title>${backgroundMarkup}<g fill="${foreground}">${cells.join('')}</g></svg>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:generateQrSvg@5901', __javascriptError); throw __javascriptError; }}
 
-function generateLinearBarcodeSvg(options) {
+function generateLinearBarcodeSvg(options) { try {
     if (typeof window.JsBarcode !== 'function') throw new Error('Barcode generator did not load.');
     const value = String(options?.value || '').trim();
     if (!value) throw new Error('Barcode value cannot be empty.');
@@ -5946,7 +5953,7 @@ function generateLinearBarcodeSvg(options) {
             height: Math.max(24, Math.min(400, Number(options?.barHeight) || 90)),
             fontSize: Math.max(8, Math.min(72, Number(options?.fontSize) || 16)),
             textMargin: 4,
-            valid: result => { valid = result; }
+            valid: result => { try { valid = result;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:valid@5951', __javascriptError); throw __javascriptError; }}
         });
     } catch (error) {
         throw new Error(`${formatToken} could not encode "${value}": ${error?.message || error}`);
@@ -5955,7 +5962,7 @@ function generateLinearBarcodeSvg(options) {
     const width = Number(svg.getAttribute('width')) || 320;
     const height = Number(svg.getAttribute('height')) || 120;
     if (transparent) {
-        svg.querySelectorAll('rect').forEach(rect => {
+        svg.querySelectorAll('rect').forEach(rect => { try {
             const fill = String(rect.getAttribute('fill') || rect.style.fill || '').replace(/\s/g,'').toLowerCase();
             const widthAttribute = rect.getAttribute('width') || '';
             const heightAttribute = rect.getAttribute('height') || '';
@@ -5966,7 +5973,7 @@ function generateLinearBarcodeSvg(options) {
             const percentageBackground = widthAttribute.includes('%') && heightAttribute.includes('%');
             const isCanvasBackground = x === 0 && y === 0 && (percentageBackground || (rectWidth >= width * .98 && rectHeight >= height * .98));
             if (isCanvasBackground || fill === 'transparent' || fill === 'rgba(0,0,0,0)' || fill === '#00000000') rect.remove();
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:svg.querySelectorAll(\'rect\').forEach@5960', __javascriptError); throw __javascriptError; }});
         svg.style.background = 'transparent';
     }
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -5977,30 +5984,30 @@ function generateLinearBarcodeSvg(options) {
     svg.setAttribute('aria-label', `${barcodeFormatToken(options?.format)}: ${value}`);
     svg.setAttribute('data-transparent-background', String(transparent));
     if (barcodeShapeName(options?.moduleShape) === 'rounded')
-        svg.querySelectorAll('rect').forEach(rect => {
+        svg.querySelectorAll('rect').forEach(rect => { try {
             const barWidth = number(rect.getAttribute('width'), 0);
             if (barWidth > 0 && barWidth < width * .5) {
                 const radius = Math.min(2, barWidth / 2);
                 rect.setAttribute('rx', String(radius));
                 rect.setAttribute('ry', String(radius));
             }
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:svg.querySelectorAll(\'rect\').forEach@5982', __javascriptError); throw __javascriptError; }});
     return svg.outerHTML;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:generateLinearBarcodeSvg@5932', __javascriptError); throw __javascriptError; }}
 
 const barcodeLibraryLoads = new Map();
 
-function loadBarcodeLibrary(src, available, errorMessage, timeoutMilliseconds = 5000) {
+function loadBarcodeLibrary(src, available, errorMessage, timeoutMilliseconds = 5000) { try {
     if (available()) return Promise.resolve();
     if (barcodeLibraryLoads.has(src)) return barcodeLibraryLoads.get(src);
 
-    const promise = new Promise((resolve, reject) => {
-        let script = [...document.scripts].find(item => {
+    const promise = new Promise((resolve, reject) => { try {
+        let script = [...document.scripts].find(item => { try {
             try { return new URL(item.src, document.baseURI).pathname.endsWith(src); }
             catch { return false; }
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...document.scripts].find@6000', __javascriptError); throw __javascriptError; }});
         let settled = false;
-        const finish = error => {
+        const finish = error => { try {
             if (settled) return;
             settled = true;
             clearTimeout(timer);
@@ -6008,10 +6015,10 @@ function loadBarcodeLibrary(src, available, errorMessage, timeoutMilliseconds = 
             script?.removeEventListener('error', failed);
             if (error || !available()) reject(error || new Error(errorMessage));
             else resolve();
-        };
-        const loaded = () => finish();
-        const failed = () => finish(new Error(errorMessage));
-        const timer = setTimeout(() => finish(new Error(errorMessage)), timeoutMilliseconds);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finish@6005', __javascriptError); throw __javascriptError; }};
+        const loaded = () => { try { return (finish()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:loaded@6014', __javascriptError); throw __javascriptError; } };
+        const failed = () => { try { return (finish(new Error(errorMessage))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:failed@6015', __javascriptError); throw __javascriptError; } };
+        const timer = setTimeout(() => { try { return (finish(new Error(errorMessage))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@6016', __javascriptError); throw __javascriptError; } }, timeoutMilliseconds);
 
         if (!script) {
             script = document.createElement('script');
@@ -6024,55 +6031,55 @@ function loadBarcodeLibrary(src, available, errorMessage, timeoutMilliseconds = 
 
         // The normal application path preloads the libraries before Blazor starts. Resolve
         // immediately in that case instead of waiting for a load event that already fired.
-        queueMicrotask(() => { if (available()) finish(); });
-    });
+        queueMicrotask(() => { try { if (available()) finish();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:queueMicrotask@6029', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@5999', __javascriptError); throw __javascriptError; }});
     barcodeLibraryLoads.set(src, promise);
-    promise.catch(() => barcodeLibraryLoads.delete(src));
+    promise.catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@6032', __promiseError);  return (barcodeLibraryLoads.delete(src)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:promise.catch@6032', __javascriptError); throw __javascriptError; } });
     return promise;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:loadBarcodeLibrary@5995', __javascriptError); throw __javascriptError; }}
 
-async function waitForBarcodeGenerator(format) {
+async function waitForBarcodeGenerator(format) { try {
     const qr = format === 'qrcode';
     if (qr) {
         await loadBarcodeLibrary('js/vendor/qrcode-generator.js',
-            () => typeof window.qrcode === 'function', 'QR-code generator did not load.');
+            () => { try { return (typeof window.qrcode === 'function'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:loadBarcodeLibrary@6040', __javascriptError); throw __javascriptError; } }, 'QR-code generator did not load.');
         return;
     }
     await loadBarcodeLibrary('js/vendor/JsBarcode.all.min.js',
-        () => typeof window.JsBarcode === 'function', 'Barcode generator did not load.');
-}
+        () => { try { return (typeof window.JsBarcode === 'function'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:loadBarcodeLibrary@6044', __javascriptError); throw __javascriptError; } }, 'Barcode generator did not load.');
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForBarcodeGenerator@6036', __javascriptError); throw __javascriptError; }}
 
-export async function generateBarcodeSvg(options) {
+export async function generateBarcodeSvg(options) { try {
     const format = barcodeFormatToken(options?.format).toLowerCase();
     await waitForBarcodeGenerator(format);
     return format === 'qrcode' ? generateQrSvg(options) : generateLinearBarcodeSvg(options);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:generateBarcodeSvg@6047', __javascriptError); throw __javascriptError; }}
 
-function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
+function sleep(milliseconds) { try { return new Promise(resolve => { try { return (setTimeout(resolve, milliseconds)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@6053', __javascriptError); throw __javascriptError; } });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:sleep@6053', __javascriptError); throw __javascriptError; }}
 
-function chooseVideoRecordingMimeType() {
+function chooseVideoRecordingMimeType() { try {
     if (typeof MediaRecorder === 'undefined') return '';
     const probe = document.createElement('video');
     const candidates = ['video/webm;codecs=vp8,opus', 'video/webm', 'video/webm;codecs=vp9,opus'];
-    return candidates.find(type => MediaRecorder.isTypeSupported(type) && probe.canPlayType(type) !== '')
-        || candidates.find(type => MediaRecorder.isTypeSupported(type))
+    return candidates.find(type => { try { return (MediaRecorder.isTypeSupported(type) && probe.canPlayType(type) !== ''); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:candidates.find@6059', __javascriptError); throw __javascriptError; } })
+        || candidates.find(type => { try { return (MediaRecorder.isTypeSupported(type)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:candidates.find@6060', __javascriptError); throw __javascriptError; } })
         || '';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:chooseVideoRecordingMimeType@6055', __javascriptError); throw __javascriptError; }}
 
-function exportedPageDuration(page) {
+function exportedPageDuration(page) { try {
     const transitionDuration = Math.max(.1, animationNumber(page.dataset.transitionDuration, .55));
     const signalNodes = [...page.querySelectorAll('[data-signal-enabled="true"][data-signal][data-connector-id]')];
-    const signalSettings = new Map(signalNodes.map(node => {
-        let settings = {}; try { settings = JSON.parse(node.dataset.signal || '{}'); } catch { }
+    const signalSettings = new Map(signalNodes.map(node => { try {
+        let settings = {}; try { settings = JSON.parse(node.dataset.signal || '{}'); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6068', __caughtJavaScriptError);  }
         return [String(node.dataset.connectorId || ''), settings];
-    }));
-    const signalOwnDuration = settings => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signalNodes.map@6067', __javascriptError); throw __javascriptError; }}));
+    const signalOwnDuration = settings => { try {
         const repeats = Math.max(1, animationNumber(settings?.repeatCount, 1)) * (settings?.autoReverse ? 2 : 1);
         return Math.max(0, animationNumber(settings?.delaySeconds, 0))
             + Math.max(.05, animationNumber(settings?.durationSeconds, 1.5)) * repeats
             + Math.max(0, animationNumber(settings?.completionDurationSeconds, 0));
-    };
-    const signalChainDuration = (id, seen = new Set()) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:signalOwnDuration@6071', __javascriptError); throw __javascriptError; }};
+    const signalChainDuration = (id, seen = new Set()) => { try {
         if (!id || seen.has(id)) return 0;
         const settings = signalSettings.get(String(id));
         if (!settings) return 0;
@@ -6080,11 +6087,11 @@ function exportedPageDuration(page) {
         const action = animationName(settings.completionAction);
         const next = action === 'runsignal' ? (settings.completionValue || settings.nextConnectorId) : settings.nextConnectorId;
         return signalOwnDuration(settings) + signalChainDuration(String(next || ''), nextSeen);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:signalChainDuration@6077', __javascriptError); throw __javascriptError; }};
     const autoSignalIds = signalNodes
-        .filter(node => { const settings = signalSettings.get(String(node.dataset.connectorId || '')); return animationName(settings?.trigger) === 'onpageenter'; })
-        .map(node => String(node.dataset.connectorId || ''));
-    const signalDuration = Math.max(0, ...(autoSignalIds.length ? autoSignalIds.map(id => signalChainDuration(id)) : [...signalSettings.values()].map(signalOwnDuration)));
+        .filter(node => { try { const settings = signalSettings.get(String(node.dataset.connectorId || '')); return animationName(settings?.trigger) === 'onpageenter';  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signalNodes .filter@6087', __javascriptError); throw __javascriptError; }})
+        .map(node => { try { return (String(node.dataset.connectorId || '')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:signalNodes .filter(node => { const settings = signalSettings.get(Stri@6088', __javascriptError); throw __javascriptError; } });
+    const signalDuration = Math.max(0, ...(autoSignalIds.length ? autoSignalIds.map(id => { try { return (signalChainDuration(id)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:autoSignalIds.map@6089', __javascriptError); throw __javascriptError; } }) : [...signalSettings.values()].map(signalOwnDuration)));
     let duration = Math.max(2.5, transitionDuration + .3, signalDuration + .3, animationNumber(page.dataset.timelineDuration, 0), animationNumber(page.dataset.autoAdvanceSeconds, 0));
     let cursor = 0;
     for (const item of animationItems(page)) {
@@ -6104,22 +6111,22 @@ function exportedPageDuration(page) {
         duration = Math.max(duration, start + (trimEnd - trimStart) / rate + .3);
     }
     return duration;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportedPageDuration@6064', __javascriptError); throw __javascriptError; }}
 
-function prepareVideoExportPage(page) {
-    page.querySelectorAll('[data-media-kind]').forEach(node => {
+function prepareVideoExportPage(page) { try {
+    page.querySelectorAll('[data-media-kind]').forEach(node => { try {
         if (animationName(node.dataset.mediaTrigger) === 'onclick') node.dataset.mediaTrigger = 'OnPageEnter';
         node.dataset.mediaAutoplay = 'true';
-    });
-    return animationItems(page).map(item => ({
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:page.querySelectorAll(\'[data-media-kind]\').forEach@6112', __javascriptError); throw __javascriptError; }});
+    return animationItems(page).map(item => { try { return (({
         node: item.node,
         animation: animationName(item.animation.trigger) === 'onclick'
             ? { ...item.animation, trigger: 'AfterPrevious', timelineStartSeconds: null }
             : item.animation
-    }));
-}
+    })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:animationItems(page).map@6116', __javascriptError); throw __javascriptError; } });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepareVideoExportPage@6111', __javascriptError); throw __javascriptError; }}
 
-async function requestPresentationCapture() {
+async function requestPresentationCapture() { try {
     if (!navigator.mediaDevices?.getDisplayMedia)
         throw new Error('This browser does not support tab/screen capture video export.');
     try {
@@ -6136,14 +6143,14 @@ async function requestPresentationCapture() {
             return await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
         throw error;
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:requestPresentationCapture@6124', __javascriptError); throw __javascriptError; }}
 
-function evenVideoDimension(value, fallback) {
+function evenVideoDimension(value, fallback) { try {
     const rounded = Math.max(2, Math.round(Number(value) || fallback || 2));
     return rounded % 2 === 0 ? rounded : rounded + 1;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:evenVideoDimension@6143', __javascriptError); throw __javascriptError; }}
 
-function pagePresentationSize(page) {
+function pagePresentationSize(page) { try {
     const widthMm = number(page.dataset.pageWidthMm, 0);
     const heightMm = number(page.dataset.pageHeightMm, 0);
     const exportWidth = number(page.dataset.exportWidthPx, 0);
@@ -6170,9 +6177,9 @@ function pagePresentationSize(page) {
     page.style.translate = previousTranslate;
     page.hidden = wasHidden;
     return { width, height, area: width * height };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pagePresentationSize@6148', __javascriptError); throw __javascriptError; }}
 
-function publicationFrameDefinition(pages, evenDimensions = false) {
+function publicationFrameDefinition(pages, evenDimensions = false) { try {
     const measured = pages.map(pagePresentationSize);
     const fallback = { width: 1280, height: 720, area: 1280 * 720 };
     if (!measured.length)
@@ -6182,13 +6189,13 @@ function publicationFrameDefinition(pages, evenDimensions = false) {
     // Every page still participates in the maximum-size calculation: mixed portrait
     // pages contribute their long side to frame width and their short side to frame
     // height. Portrait-only publications keep their native portrait orientation.
-    const landscape = measured.some(size => size.width > size.height + .5);
+    const landscape = measured.some(size => { try { return (size.width > size.height + .5); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:measured.some@6187', __javascriptError); throw __javascriptError; } });
     let width = landscape
-        ? Math.max(...measured.map(size => Math.max(size.width, size.height)))
-        : Math.max(...measured.map(size => size.width));
+        ? Math.max(...measured.map(size => { try { return (Math.max(size.width, size.height)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:measured.map@6189', __javascriptError); throw __javascriptError; } }))
+        : Math.max(...measured.map(size => { try { return (size.width); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:measured.map@6190', __javascriptError); throw __javascriptError; } }));
     let height = landscape
-        ? Math.max(...measured.map(size => Math.min(size.width, size.height)))
-        : Math.max(...measured.map(size => size.height));
+        ? Math.max(...measured.map(size => { try { return (Math.min(size.width, size.height)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:measured.map@6192', __javascriptError); throw __javascriptError; } }))
+        : Math.max(...measured.map(size => { try { return (size.height); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:measured.map@6193', __javascriptError); throw __javascriptError; } }));
     if (!(width > 0) || !(height > 0)) {
         width = fallback.width;
         height = fallback.height;
@@ -6200,9 +6207,9 @@ function publicationFrameDefinition(pages, evenDimensions = false) {
         pageSizes: measured,
         landscape
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publicationFrameDefinition@6177', __javascriptError); throw __javascriptError; }}
 
-async function restrictPresentationCapture(capture, target, targetWidth, targetHeight) {
+async function restrictPresentationCapture(capture, target, targetWidth, targetHeight) { try {
     const videoTrack = capture.getVideoTracks()[0];
     if (!videoTrack) throw new Error('The selected capture surface did not provide a video track.');
     let restricted = false;
@@ -6232,29 +6239,29 @@ async function restrictPresentationCapture(capture, target, targetWidth, targetH
         }
     }
     return restricted;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:restrictPresentationCapture@6207', __javascriptError); throw __javascriptError; }}
 
-function waitForVideoMetadata(video, timeoutMilliseconds = 12000) {
+function waitForVideoMetadata(video, timeoutMilliseconds = 12000) { try {
     if (video.readyState >= HTMLMediaElement.HAVE_METADATA && video.videoWidth > 0 && video.videoHeight > 0)
         return Promise.resolve();
-    return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => finish(new Error('The selected tab capture did not produce video frames.')), timeoutMilliseconds);
-        const finish = error => {
+    return new Promise((resolve, reject) => { try {
+        const timeout = setTimeout(() => { try { return (finish(new Error('The selected tab capture did not produce video frames.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@6243', __javascriptError); throw __javascriptError; } }, timeoutMilliseconds);
+        const finish = error => { try {
             clearTimeout(timeout);
             video.removeEventListener('loadedmetadata', loaded);
             video.removeEventListener('canplay', loaded);
             video.removeEventListener('error', failed);
             if (error) reject(error); else resolve();
-        };
-        const loaded = () => video.videoWidth > 0 && video.videoHeight > 0 && finish();
-        const failed = () => finish(video.error || new Error('The selected tab capture could not be decoded.'));
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finish@6244', __javascriptError); throw __javascriptError; }};
+        const loaded = () => { try { return (video.videoWidth > 0 && video.videoHeight > 0 && finish()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:loaded@6251', __javascriptError); throw __javascriptError; } };
+        const failed = () => { try { return (finish(video.error || new Error('The selected tab capture could not be decoded.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:failed@6252', __javascriptError); throw __javascriptError; } };
         video.addEventListener('loadedmetadata', loaded);
         video.addEventListener('canplay', loaded);
         video.addEventListener('error', failed);
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@6242', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForVideoMetadata@6239', __javascriptError); throw __javascriptError; }}
 
-async function createPageFrameRecordingStream(capture, frame, targetWidth, targetHeight) {
+async function createPageFrameRecordingStream(capture, frame, targetWidth, targetHeight) { try {
     const captureVideoTrack = capture.getVideoTracks()[0];
     if (!captureVideoTrack) throw new Error('The selected capture surface did not provide a video track.');
     const sourceVideo = document.createElement('video');
@@ -6275,11 +6282,11 @@ async function createPageFrameRecordingStream(capture, frame, targetWidth, targe
     const canvasTrack = canvasStream.getVideoTracks()[0];
     if (!canvasTrack) throw new Error('The browser could not create a page-sized video track.');
     output.addTrack(canvasTrack);
-    capture.getAudioTracks().forEach(track => output.addTrack(track));
+    capture.getAudioTracks().forEach(track => { try { return (output.addTrack(track)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:capture.getAudioTracks().forEach@6280', __javascriptError); throw __javascriptError; } });
 
     let animationFrame = 0;
     let stopped = false;
-    const draw = () => {
+    const draw = () => { try {
         if (stopped) return;
         const sourceWidth = sourceVideo.videoWidth;
         const sourceHeight = sourceVideo.videoHeight;
@@ -6305,23 +6312,23 @@ async function createPageFrameRecordingStream(capture, frame, targetWidth, targe
             console.warn('Publisher video compositor skipped one frame.', error);
         }
         animationFrame = requestAnimationFrame(draw);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:draw@6284', __javascriptError); throw __javascriptError; }};
     draw();
 
     return {
         stream: output,
         displaySurface: captureVideoTrack.getSettings?.().displaySurface || '',
-        stop() {
+        stop() { try {
             stopped = true;
             if (animationFrame) cancelAnimationFrame(animationFrame);
-            try { sourceVideo.pause(); } catch { }
+            try { sourceVideo.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6319', __caughtJavaScriptError);  }
             sourceVideo.srcObject = null;
             canvasTrack.stop();
-        }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:stop@6316', __javascriptError); throw __javascriptError; }}
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:createPageFrameRecordingStream@6259', __javascriptError); throw __javascriptError; }}
 
-async function exportPresentationVideo(containerSelector, fileName, title) {
+async function exportPresentationVideo(containerSelector, fileName, title) { try {
     let step = 'initializing';
     if (typeof MediaRecorder === 'undefined') throw new Error('This browser does not support MediaRecorder video export.');
     if (typeof HTMLCanvasElement.prototype.captureStream !== 'function')
@@ -6334,7 +6341,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         await window.PublisherStudioLiveDataRuntime.refreshAll(source, { polling: false });
     }
     refreshContentFit(source);
-    await new Promise(resolve => requestAnimationFrame(resolve));
+    await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@6339', __javascriptError); throw __javascriptError; } });
 
     const overlay = document.createElement('div');
     overlay.className = 'publisher-video-export-overlay';
@@ -6346,18 +6353,18 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     publication.removeAttribute('aria-hidden');
     publication.className = 'publisher-video-export-publication';
     const pages = [...publication.querySelectorAll(':scope > .print-page')];
-    pages.forEach((page, index) => {
+    pages.forEach((page, index) => { try {
         page.id = `publisher-video-export-page-${index}-${Date.now()}`;
-        page.querySelectorAll('video,audio').forEach(media => { media.controls = false; media.preload = 'auto'; });
-    });
-    const pageShells = pages.map(page => {
+        page.querySelectorAll('video,audio').forEach(media => { try { media.controls = false; media.preload = 'auto';  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:page.querySelectorAll(\'video,audio\').forEach@6353', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.forEach@6351', __javascriptError); throw __javascriptError; }});
+    const pageShells = pages.map(page => { try {
         const shell = document.createElement('div');
         shell.className = 'publisher-video-page-shell';
         page.before(shell);
         shell.appendChild(page);
         shell.hidden = true;
         return shell;
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pages.map@6355', __javascriptError); throw __javascriptError; }});
     frame.appendChild(publication);
 
     const countdown = document.createElement('div');
@@ -6368,20 +6375,20 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     cancelButton.className = 'publisher-video-export-cancel';
     cancelButton.textContent = 'Cancel export and return';
     let cancelled = false;
-    const cancelExport = () => {
+    const cancelExport = () => { try {
         cancelled = true;
-        if (recorder && recorder.state !== 'inactive') { try { recorder.stop(); } catch { } }
-        if (capture) capture.getTracks().forEach(track => { try { track.stop(); } catch { } });
-    };
-    const waitForExport = async milliseconds => {
+        if (recorder && recorder.state !== 'inactive') { try { recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6375', __caughtJavaScriptError);  } }
+        if (capture) capture.getTracks().forEach(track => { try { try { track.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6376', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:capture.getTracks().forEach@6376', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelExport@6373', __javascriptError); throw __javascriptError; }};
+    const waitForExport = async milliseconds => { try {
         const end = performance.now() + Math.max(0, milliseconds);
         while (performance.now() < end) {
             if (cancelled) throw new Error('Video export was cancelled.');
             await sleep(Math.min(120, Math.max(1, end - performance.now())));
         }
         if (cancelled) throw new Error('Video export was cancelled.');
-    };
-    const cancelOnEscape = event => { if (event.key === 'Escape') cancelExport(); };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForExport@6378', __javascriptError); throw __javascriptError; }};
+    const cancelOnEscape = event => { try { if (event.key === 'Escape') cancelExport();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelOnEscape@6386', __javascriptError); throw __javascriptError; }};
     cancelButton.addEventListener('click', cancelExport);
     window.addEventListener('keydown', cancelOnEscape, true);
     activeVideoExportCancel?.();
@@ -6390,7 +6397,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     document.body.appendChild(overlay);
 
     const frameDefinition = publicationFrameDefinition(pages, true);
-    pageShells.forEach((shell, index) => shell.hidden = index !== 0);
+    pageShells.forEach((shell, index) => { try { return (shell.hidden = index !== 0); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pageShells.forEach@6395', __javascriptError); throw __javascriptError; } });
     const frameWidth = frameDefinition.width;
     const frameHeight = frameDefinition.height;
     frame.style.width = `${frameWidth}px`;
@@ -6398,7 +6405,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
     frame.style.setProperty('--publisher-video-frame-width', `${frameWidth}px`);
     frame.style.setProperty('--publisher-video-frame-height', `${frameHeight}px`);
 
-    const fitPage = (page, pageIndex = pages.indexOf(page)) => {
+    const fitPage = (page, pageIndex = pages.indexOf(page)) => { try {
         const measured = frameDefinition.pageSizes[pageIndex] || pagePresentationSize(page);
         const scale = Math.min(frameWidth / measured.width, frameHeight / measured.height);
         page.style.width = `${measured.width}px`;
@@ -6406,13 +6413,13 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         page.style.transform = `translate(-50%, -50%) scale(${Math.max(.01, scale)})`;
         page.style.transformOrigin = 'center center';
         page.style.translate = 'none';
-    };
-    const fitFrameToViewport = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fitPage@6403', __javascriptError); throw __javascriptError; }};
+    const fitFrameToViewport = () => { try {
         const viewportWidth = window.visualViewport?.width || innerWidth;
         const viewportHeight = window.visualViewport?.height || innerHeight;
         const scale = Math.min((viewportWidth - 32) / frameWidth, (viewportHeight - 32) / frameHeight, 1);
         frame.style.transform = `scale(${Math.max(.05, scale)})`;
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fitFrameToViewport@6412', __javascriptError); throw __javascriptError; }};
     pages.forEach(fitPage);
     const videoSignals = signalConnectorRuntime(publication, { autoStart: false, expose: false, finiteLoops: true });
     refreshContentFit(publication);
@@ -6441,11 +6448,11 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         recorder = new MediaRecorder(compositor.stream, mimeType
             ? { mimeType, videoBitsPerSecond }
             : { videoBitsPerSecond });
-        recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
-        stopped = new Promise((resolve, reject) => {
+        recorder.addEventListener('dataavailable', event => { try { if (event.data?.size) chunks.push(event.data);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:recorder.addEventListener@6446', __javascriptError); throw __javascriptError; }});
+        stopped = new Promise((resolve, reject) => { try {
             recorder.addEventListener('stop', resolve, { once: true });
-            recorder.addEventListener('error', event => reject(event.error || new Error('Video recording failed.')), { once: true });
-        });
+            recorder.addEventListener('error', event => { try { return (reject(event.error || new Error('Video recording failed.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:recorder.addEventListener@6449', __javascriptError); throw __javascriptError; } }, { once: true });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@6447', __javascriptError); throw __javascriptError; }});
 
         for (let count = 3; count > 0; count--) {
             if (cancelled) throw new Error('Video export was cancelled.');
@@ -6462,7 +6469,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
             if (cancelled) throw new Error('Video export was cancelled.');
             const page = pages[index];
             const shell = pageShells[index];
-            pageShells.forEach((candidate, candidateIndex) => candidate.hidden = candidateIndex !== index);
+            pageShells.forEach((candidate, candidateIndex) => { try { return (candidate.hidden = candidateIndex !== index); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:pageShells.forEach@6467', __javascriptError); throw __javascriptError; } });
             fitPage(page, index);
             if (window.PublisherStudioLiveDataRuntime) {
                 await window.PublisherStudioLiveDataRuntime.refreshAll(page, { polling: false });
@@ -6480,21 +6487,21 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
             videoSignals?.stop();
             if (cancelled) throw new Error('Video export was cancelled.');
             clearPublicationPreview(page.id || page);
-            page.querySelectorAll('video,audio').forEach(media => {
-                try { media.pause(); } catch { }
-                try { media.currentTime = 0; } catch { }
-            });
+            page.querySelectorAll('video,audio').forEach(media => { try {
+                try { media.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6486', __caughtJavaScriptError);  }
+                try { media.currentTime = 0; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6487', __caughtJavaScriptError);  }
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:page.querySelectorAll(\'video,audio\').forEach@6485', __javascriptError); throw __javascriptError; }});
         }
 
         step = 'finalizing WebM';
         if (recorder.state === 'recording') {
-            try { recorder.requestData(); } catch { }
+            try { recorder.requestData(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6493', __caughtJavaScriptError);  }
             await waitForExport(120);
             recorder.stop();
         }
         await Promise.race([
             stopped,
-            new Promise((_, reject) => setTimeout(() => reject(new Error('MediaRecorder did not finish the WebM file.')), 15000))
+            new Promise((_, reject) => { try { return (setTimeout(() => { try { return (reject(new Error('MediaRecorder did not finish the WebM file.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@6499', __javascriptError); throw __javascriptError; } }, 15000)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@6499', __javascriptError); throw __javascriptError; } })
         ]);
         const blobType = String(recorder.mimeType || 'video/webm').split(';', 1)[0] || 'video/webm';
         const blob = new Blob(chunks, { type: blobType });
@@ -6529,21 +6536,21 @@ async function exportPresentationVideo(containerSelector, fileName, title) {
         console.error(`Publisher video export failed while ${step}.`, error);
         throw new Error(`Video export failed while ${step}: ${message}`);
     } finally {
-        if (recorder && recorder.state !== 'inactive') { try { recorder.stop(); } catch { } }
-        try { compositor?.stop(); } catch { }
-        if (capture) capture.getTracks().forEach(track => { try { track.stop(); } catch { } });
+        if (recorder && recorder.state !== 'inactive') { try { recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6534', __caughtJavaScriptError);  } }
+        try { compositor?.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6535', __caughtJavaScriptError);  }
+        if (capture) capture.getTracks().forEach(track => { try { try { track.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6536', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:capture.getTracks().forEach@6536', __javascriptError); throw __javascriptError; }});
         window.removeEventListener('resize', fitFrameToViewport);
         window.removeEventListener('keydown', cancelOnEscape, true);
         if (activeVideoExportCancel === cancelExport) activeVideoExportCancel = null;
-        try { window.PublisherStudioLiveDataRuntime?.dispose(overlay); } catch { }
-        try { videoSignals?.dispose(); } catch { }
+        try { window.PublisherStudioLiveDataRuntime?.dispose(overlay); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6540', __caughtJavaScriptError);  }
+        try { videoSignals?.dispose(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6541', __caughtJavaScriptError);  }
         overlay.remove();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPresentationVideo@6326', __javascriptError); throw __javascriptError; }}
 
 const storyEditorLayouts = new WeakMap();
 
-function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) {
+function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { try {
     const shell = document.getElementById(shellId);
     const host = document.getElementById(hostId);
     if (!shell || !host) return;
@@ -6555,7 +6562,7 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) {
         return;
     }
     let timer = 0;
-    const refresh = () => {
+    const refresh = () => { try {
         timer = 0;
         if (!shell.isConnected || !host.isConnected) return;
         host.style.maxWidth = `${Math.max(1, shell.clientWidth)}px`;
@@ -6567,27 +6574,27 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) {
             richRoot.style.minWidth = '0';
         }
         window.dispatchEvent(new Event('resize'));
-    };
-    const schedule = () => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refresh@6560', __javascriptError); throw __javascriptError; }};
+    const schedule = () => { try {
         if (timer) clearTimeout(timer);
         timer = window.setTimeout(refresh, 40);
-    };
-    const click = event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:schedule@6573', __javascriptError); throw __javascriptError; }};
+    const click = event => { try {
         const printCommand = reserveStoryPrintPreviewFromEvent(event, host);
         if (printCommand === 'rich-edit') {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
             state?.dotNet?.invokeMethodAsync('PrintStoryFromClient').catch(error =>
-                console.error('Story print preview could not be started.', error));
+                { try { return (console.error('Story print preview could not be started.', error)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state?.dotNet?.invokeMethodAsync(\'PrintStoryFromClient\').catch@6583', __javascriptError); throw __javascriptError; } });
             return;
         }
         if (!event.target.closest('button,[role="tab"],[role="button"]')) return;
         schedule();
         window.setTimeout(schedule, 120);
         window.setTimeout(schedule, 320);
-    };
-    const keydown = event => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:click@6577', __javascriptError); throw __javascriptError; }};
+    const keydown = event => { try {
         if (!(event.ctrlKey || event.metaKey) || event.altKey || String(event.key || '').toLowerCase() !== 'p') return;
         if (!host.contains(event.target)) return;
         const current = storyPrintPreviews.get(reservedStoryPrintPreviewId);
@@ -6597,8 +6604,8 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) {
         event.stopPropagation();
         event.stopImmediatePropagation();
         state?.dotNet?.invokeMethodAsync('PrintStoryFromClient').catch(error =>
-            console.error('Story print preview could not be started.', error));
-    };
+            { try { return (console.error('Story print preview could not be started.', error)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:state?.dotNet?.invokeMethodAsync(\'PrintStoryFromClient\').catch@6601', __javascriptError); throw __javascriptError; } });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:keydown@6592', __javascriptError); throw __javascriptError; }};
     shell.addEventListener('click', click, true);
     shell.addEventListener('keydown', keydown, true);
     const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
@@ -6607,33 +6614,33 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) {
     state = { host, schedule, resizeObserver, click, keydown, dotNet: dotNetReference };
     storyEditorLayouts.set(shell, state);
     schedule();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeStoryEditorLayout@6548', __javascriptError); throw __javascriptError; }}
 
 
 let dataVisualLayoutTimer = 0;
-export function refreshDataVisualLayout(pageId = 'publisher-page') {
+export function refreshDataVisualLayout(pageId = 'publisher-page') { try {
     const page = document.getElementById(pageId);
     if (!page?.querySelector?.('.data-visual-view')) return;
     if (dataVisualLayoutTimer) clearTimeout(dataVisualLayoutTimer);
-    requestAnimationFrame(() => {
+    requestAnimationFrame(() => { try {
         window.dispatchEvent(new Event('resize'));
-        dataVisualLayoutTimer = window.setTimeout(() => {
+        dataVisualLayoutTimer = window.setTimeout(() => { try {
             dataVisualLayoutTimer = 0;
             if (page.isConnected) window.dispatchEvent(new Event('resize'));
-        }, 120);
-    });
-}
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:window.setTimeout@6622', __javascriptError); throw __javascriptError; }}, 120);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@6620', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refreshDataVisualLayout@6616', __javascriptError); throw __javascriptError; }}
 
-export function cancelCanvasInteraction(stageId = 'publisher-stage') {
+export function cancelCanvasInteraction(stageId = 'publisher-stage') { try {
     const stage = document.getElementById(stageId);
     const state = stage ? canvasStates.get(stage) : null;
     if (!state) return;
     resetCanvasTransientState(state, true);
     state.lastCanvasClick = null;
-    try { state.stage.focus({ preventScroll: true }); } catch { }
-}
+    try { state.stage.focus({ preventScroll: true }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6635', __caughtJavaScriptError);  }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelCanvasInteraction@6629', __javascriptError); throw __javascriptError; }}
 
-export function panelStudioPoint(element, clientX, clientY) {
+export function panelStudioPoint(element, clientX, clientY) { try {
     if (!(element instanceof HTMLElement)) return { x: 0.5, y: 0.5 };
     const bounds = element.getBoundingClientRect();
     const width = Math.max(1, bounds.width);
@@ -6642,60 +6649,72 @@ export function panelStudioPoint(element, clientX, clientY) {
         x: clamp((Number(clientX) - bounds.left) / width, 0, 1),
         y: clamp((Number(clientY) - bounds.top) / height, 0, 1)
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioPoint@6638', __javascriptError); throw __javascriptError; }}
 
 const panelStudioDropBindings = new WeakMap();
 
-function panelStudioExpectedShutdown(error) {
+function panelStudioExpectedShutdown(error) { try {
     const message = error instanceof Error ? error.message : String(error || '');
     return /cancel(?:led|ed)?|disposed|disconnect|no longer|cannot send data|circuit|abort/i.test(message);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioExpectedShutdown@6651', __javascriptError); throw __javascriptError; }}
 
-function reportPanelStudioError(binding, error) {
-    if (binding?.disposed || panelStudioExpectedShutdown(error)) return;
+function reportPanelStudioError(binding, error, operation = 'unknown') { try {
+    if (binding?.disposed) return;
     const message = error instanceof Error ? error.message : String(error || 'Unknown panel interaction error.');
-    console.warn('Panel Studio interaction failed.', error);
+    const detail = `operation=${operation}; binding=${binding?.bindingId || 'unknown'}; reason=${message}`;
+    if (panelStudioExpectedShutdown(error)) {
+        console.debug('Panel Studio interaction was cancelled or ended.', detail, error);
+        if (!binding?.dotNetReference || binding.reportingCancellation) return;
+        binding.reportingCancellation = true;
+        binding.dotNetReference.invokeMethodAsync('ReportPanelInteractionError', detail)
+            .catch(reportError => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@6664', reportError); 
+                if (!panelStudioExpectedShutdown(reportError)) console.debug('Panel Studio cancellation reporting ended.', reportError);
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:binding.dotNetReference.invokeMethodAsync(\'ReportPanelInteractionError@6665', __javascriptError); throw __javascriptError; }})
+            .finally(() => { try { binding.reportingCancellation = false;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:binding.dotNetReference.invokeMethodAsync(\'ReportPanelInteractionError@6668', __javascriptError); throw __javascriptError; }});
+        return;
+    }
+    console.warn('Panel Studio interaction failed.', detail, error);
     if (!binding?.dotNetReference || binding.reportingError) return;
     binding.reportingError = true;
-    binding.dotNetReference.invokeMethodAsync('ReportPanelInteractionError', message)
-        .catch(reportError => {
+    binding.dotNetReference.invokeMethodAsync('ReportPanelInteractionError', detail)
+        .catch(reportError => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@6674', reportError); 
             if (!panelStudioExpectedShutdown(reportError)) console.debug('Panel Studio error reporting ended.', reportError);
-        })
-        .finally(() => { binding.reportingError = false; });
-}
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:binding.dotNetReference.invokeMethodAsync(\'ReportPanelInteractionError@6675', __javascriptError); throw __javascriptError; }})
+        .finally(() => { try { binding.reportingError = false;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:binding.dotNetReference.invokeMethodAsync(\'ReportPanelInteractionError@6678', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reportPanelStudioError@6656', __javascriptError); throw __javascriptError; }}
 
-function panelStudioQueueInvoke(binding, method, ...args) {
+function panelStudioQueueInvoke(binding, method, ...args) { try {
     if (!binding || binding.disposed || !binding.element?.isConnected) return Promise.resolve();
     binding.invokeQueue = (binding.invokeQueue || Promise.resolve())
-        .catch(() => {})
-        .then(() => {
+        .catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@6683', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:(binding.invokeQueue || Promise.resolve()) .catch@6684', __javascriptError); throw __javascriptError; }})
+        .then(() => { try {
             if (binding.disposed || !binding.element?.isConnected) return;
             if (!binding.dotNetReference) throw new Error('Panel Studio .NET interaction reference is unavailable.');
             return binding.dotNetReference.invokeMethodAsync(method, ...args);
-        })
-        .catch(error => reportPanelStudioError(binding, error));
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:(binding.invokeQueue || Promise.resolve()) .catch(() => {}) .then@6685', __javascriptError); throw __javascriptError; }})
+        .catch(error => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@6683', error);  return (reportPanelStudioError(binding, error, method)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:(binding.invokeQueue || Promise.resolve()) .catch(() => {}) .then(() =@6690', __javascriptError); throw __javascriptError; } });
     return binding.invokeQueue;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioQueueInvoke@6681', __javascriptError); throw __javascriptError; }}
 
-function panelStudioEditableTarget(target) {
+function panelStudioEditableTarget(target) { try {
     return Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"],[role="textbox"]'));
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioEditableTarget@6694', __javascriptError); throw __javascriptError; }}
 
-function panelStudioInvoke(binding, command, amount = 1) {
+function panelStudioInvoke(binding, command, amount = 1) { try {
     return panelStudioQueueInvoke(binding, 'PanelStudioCommand', command, amount);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioInvoke@6698', __javascriptError); throw __javascriptError; }}
 
-function startPanelStudioGamepad(binding) {
+function startPanelStudioGamepad(binding) { try {
     if (typeof navigator.getGamepads !== 'function') return;
     const state = { frame: 0, buttons: [], nextRepeat: 0, axisX: 0, axisY: 0 };
-    const pressed = (gamepad, index) => Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55);
-    const edge = (gamepad, index) => {
+    const pressed = (gamepad, index) => { try { return (Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pressed@6705', __javascriptError); throw __javascriptError; } };
+    const edge = (gamepad, index) => { try {
         const value = pressed(gamepad, index);
         const previous = Boolean(state.buttons[index]);
         state.buttons[index] = value;
         return value && !previous;
-    };
-    const tick = time => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:edge@6706', __javascriptError); throw __javascriptError; }};
+    const tick = time => { try {
         if (binding.disposed || !binding.element?.isConnected) return;
         state.frame = requestAnimationFrame(tick);
         if (document.hidden || binding.element.dataset.panelStudioArrange !== 'true') return;
@@ -6724,47 +6743,57 @@ function startPanelStudioGamepad(binding) {
         state.axisY = y;
 
         // Steam Deck / standard gamepad: bumpers move one layer, triggers move to edge,
-        // X duplicates and Y switches to interaction preview. Destructive delete remains
+        // X duplicates. Interaction mode remains an explicit UI choice. Destructive delete remains
         // keyboard/context-menu only to avoid accidental controller data loss.
         if (edge(gamepad, 4)) panelStudioInvoke(binding, 'backward');
         if (edge(gamepad, 5)) panelStudioInvoke(binding, 'forward');
         if (edge(gamepad, 6)) panelStudioInvoke(binding, 'back');
         if (edge(gamepad, 7)) panelStudioInvoke(binding, 'front');
         if (edge(gamepad, 2)) panelStudioInvoke(binding, 'duplicate');
-        if (edge(gamepad, 3)) panelStudioInvoke(binding, 'interact');
-    };
+        // Interaction mode is intentionally changed only by explicit UI controls.
+        // A connected or noisy gamepad must never switch the editor out of arrange mode.
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:tick@6712', __javascriptError); throw __javascriptError; }};
     state.frame = requestAnimationFrame(tick);
     binding.gamepad = state;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startPanelStudioGamepad@6702', __javascriptError); throw __javascriptError; }}
 
-export function unbindPanelStudioDropSurface(element) {
+export function unbindPanelStudioDropSurface(element) { try {
     if (!(element instanceof HTMLElement)) return;
     const binding = panelStudioDropBindings.get(element);
     if (!binding) return;
     binding.disposed = true;
+    element.dataset.panelStudioBindingState = 'disposed';
     binding.cancelPointer?.();
     binding.controller?.abort?.();
     if (binding.gamepad?.frame) cancelAnimationFrame(binding.gamepad.frame);
     panelStudioDropBindings.delete(element);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:unbindPanelStudioDropSurface@6755', __javascriptError); throw __javascriptError; }}
 
-export function cancelPanelStudioPointer(element, restore = true) {
+export function cancelPanelStudioPointer(element, restore = true) { try {
     if (!(element instanceof HTMLElement)) return;
     const binding = panelStudioDropBindings.get(element);
     binding?.cancelPointer?.(restore !== false);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelPanelStudioPointer@6767', __javascriptError); throw __javascriptError; }}
 
-export function bindPanelStudioDropSurface(element, dotNetReference) {
+export function bindPanelStudioDropSurface(element, dotNetReference, bindingId = '') { try {
     if (!(element instanceof HTMLElement)) return false;
+    const normalizedBindingId = String(bindingId || element.dataset.panelStudioBindingId || '').trim();
+    const existing = panelStudioDropBindings.get(element);
+    if (existing && !existing.disposed && existing.bindingId === normalizedBindingId) {
+        existing.dotNetReference = dotNetReference || existing.dotNetReference;
+        element.dataset.panelStudioBindingState = 'active';
+        return true;
+    }
     unbindPanelStudioDropSurface(element);
     const controller = new AbortController();
-    const binding = { element, dotNetReference, controller, disposed: false, pointer: null, gamepad: null, reportingError: false, invokeQueue: Promise.resolve() };
+    const binding = { element, dotNetReference, bindingId: normalizedBindingId, controller, disposed: false, pointer: null, gamepad: null, reportingError: false, reportingCancellation: false, invokeQueue: Promise.resolve() };
     const options = { signal: controller.signal };
     const activeOptions = { signal: controller.signal, passive: false };
     panelStudioDropBindings.set(element, binding);
+    element.dataset.panelStudioBindingState = 'active';
 
-    const setActive = active => element.querySelector('.panel-studio-drop-layer')?.classList.toggle('active', active);
-    const updateGhost = event => {
+    const setActive = active => { try { return (element.querySelector('.panel-studio-drop-layer')?.classList.toggle('active', active)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setActive@6790', __javascriptError); throw __javascriptError; } };
+    const updateGhost = event => { try {
         event.preventDefault();
         const ghost = element.querySelector('.panel-studio-drag-ghost');
         if (!(ghost instanceof HTMLElement)) return;
@@ -6773,16 +6802,16 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         ghost.style.top = `${point.y * 100}%`;
         ghost.style.transform = 'translate(-50%, -50%)';
         setActive(true);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:updateGhost@6791', __javascriptError); throw __javascriptError; }};
     element.addEventListener('dragenter', updateGhost, activeOptions);
     element.addEventListener('dragover', updateGhost, activeOptions);
-    element.addEventListener('dragleave', event => {
+    element.addEventListener('dragleave', event => { try {
         if (event.relatedTarget instanceof Node && element.contains(event.relatedTarget)) return;
         setActive(false);
-    }, options);
-    element.addEventListener('drop', () => setActive(false), options);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:element.addEventListener@6803', __javascriptError); throw __javascriptError; }}, options);
+    element.addEventListener('drop', () => { try { return (setActive(false)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:element.addEventListener@6807', __javascriptError); throw __javascriptError; } }, options);
 
-    const applyPanelBounds = (operation, bounds) => {
+    const applyPanelBounds = (operation, bounds) => { try {
         if (!operation || !bounds) return;
         operation.hitbox.style.left = `${bounds.x * 100}%`;
         operation.hitbox.style.top = `${bounds.y * 100}%`;
@@ -6794,26 +6823,26 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
             operation.liveElement.style.width = `${bounds.width * 100}%`;
             operation.liveElement.style.height = `${bounds.height * 100}%`;
         }
-    };
-    const cancelPointer = (restore = true) => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:applyPanelBounds@6809', __javascriptError); throw __javascriptError; }};
+    const cancelPointer = (restore = true) => { try {
         const operation = binding.pointer;
         if (!operation) return;
-        try { operation.hitbox.releasePointerCapture(operation.pointerId); } catch { }
+        try { operation.hitbox.releasePointerCapture(operation.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6825', __caughtJavaScriptError);  }
         if (restore && operation.moved) applyPanelBounds(operation, operation.initial);
         binding.pointer = null;
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelPointer@6822', __javascriptError); throw __javascriptError; }};
     binding.cancelPointer = cancelPointer;
 
-    const commit = operation => {
+    const commit = operation => { try {
         const bounds = operation.current || operation.initial;
         operation.hitbox.dataset.panelElementX = String(bounds.x);
         operation.hitbox.dataset.panelElementY = String(bounds.y);
         operation.hitbox.dataset.panelElementWidth = String(bounds.width);
         operation.hitbox.dataset.panelElementHeight = String(bounds.height);
         panelStudioQueueInvoke(binding, 'CommitPanelElementBounds', operation.id, bounds.x, bounds.y, bounds.width, bounds.height);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:commit@6831', __javascriptError); throw __javascriptError; }};
 
-    element.addEventListener('pointerdown', event => {
+    element.addEventListener('pointerdown', event => { try {
         if (event.button !== 0 || element.dataset.panelStudioArrange !== 'true') return;
         const target = event.target instanceof Element ? event.target : null;
         const hitbox = target?.closest?.('.panel-studio-hitbox[data-panel-element-id]');
@@ -6821,15 +6850,15 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         const handle = target.closest('i[data-resize]');
         event.preventDefault();
         event.stopPropagation();
-        try { element.focus({ preventScroll: true }); } catch { }
+        try { element.focus({ preventScroll: true }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6848', __caughtJavaScriptError);  }
         cancelPointer();
 
         const coordinateSurface = hitbox.closest('.panel-studio-hit-layer') || element;
         const canvasBounds = coordinateSurface.getBoundingClientRect();
-        const readNormalized = (name, fallback) => {
+        const readNormalized = (name, fallback) => { try {
             const value = Number.parseFloat(hitbox.dataset[name] || '');
             return Number.isFinite(value) ? value : fallback;
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:readNormalized@6853', __javascriptError); throw __javascriptError; }};
         const boxBounds = hitbox.getBoundingClientRect();
         const fallback = {
             x: clamp((boxBounds.left - canvasBounds.left) / Math.max(1, canvasBounds.width), 0, 1),
@@ -6845,17 +6874,17 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         };
         const elementId = hitbox.dataset.panelElementId || '';
         const liveElement = Array.from(element.querySelectorAll('.publication-panel-element[data-element-id]'))
-            .find(node => node instanceof HTMLElement && node.dataset.elementId === elementId) || null;
+            .find(node => { try { return (node instanceof HTMLElement && node.dataset.elementId === elementId); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:Array.from(element.querySelectorAll(\'.publication-panel-element[data-e@6872', __javascriptError); throw __javascriptError; } }) || null;
         const operation = {
             id: elementId, hitbox, liveElement, handle: handle?.dataset?.resize || '',
             pointerId: event.pointerId, originX: event.clientX, originY: event.clientY,
             canvasBounds, initial, current: initial, moved: false
         };
         binding.pointer = operation;
-        try { hitbox.setPointerCapture(event.pointerId); } catch { }
-    }, activeOptions);
+        try { hitbox.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6879', __caughtJavaScriptError);  }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:element.addEventListener@6840', __javascriptError); throw __javascriptError; }}, activeOptions);
 
-    element.addEventListener('pointermove', event => {
+    element.addEventListener('pointermove', event => { try {
         const operation = binding.pointer;
         if (!operation || operation.pointerId !== event.pointerId) return;
         event.preventDefault();
@@ -6885,20 +6914,20 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         // Keep the preview attached to its selection rectangle while dragging.
         // The final normalized values are committed through the C# layout service on pointer-up.
         applyPanelBounds(operation, operation.current);
-    }, activeOptions);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:element.addEventListener@6882', __javascriptError); throw __javascriptError; }}, activeOptions);
 
-    const finishPointer = event => {
+    const finishPointer = event => { try {
         const operation = binding.pointer;
         if (!operation || operation.pointerId !== event.pointerId) return;
         event.preventDefault();
         cancelPointer(false);
         if (operation.moved) commit(operation);
         else panelStudioQueueInvoke(binding, 'SelectPanelElement', operation.id);
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finishPointer@6914', __javascriptError); throw __javascriptError; }};
     element.addEventListener('pointerup', finishPointer, activeOptions);
     element.addEventListener('pointercancel', cancelPointer, options);
 
-    element.addEventListener('dblclick', event => {
+    element.addEventListener('dblclick', event => { try {
         if (element.dataset.panelStudioArrange !== 'true') return;
         const target = event.target instanceof Element ? event.target : null;
         const hitbox = target?.closest?.('.panel-studio-hitbox[data-panel-element-id]');
@@ -6907,14 +6936,14 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         event.stopPropagation();
         cancelPointer(true);
         panelStudioQueueInvoke(binding, 'ActivatePanelElement', hitbox.dataset.panelElementId || '');
-    }, activeOptions);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:element.addEventListener@6925', __javascriptError); throw __javascriptError; }}, activeOptions);
 
-    element.addEventListener('contextmenu', event => {
+    element.addEventListener('contextmenu', event => { try {
         const target = event.target instanceof Element ? event.target : null;
         if (target?.closest?.('.panel-studio-hitbox[data-panel-element-id]')) cancelPointer(true);
-    }, options);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:element.addEventListener@6936', __javascriptError); throw __javascriptError; }}, options);
 
-    element.addEventListener('keydown', event => {
+    element.addEventListener('keydown', event => { try {
         if (event.defaultPrevented || panelStudioEditableTarget(event.target) || element.dataset.panelStudioArrange !== 'true') return;
         const key = String(event.key || '').toLowerCase();
         const command = event.ctrlKey || event.metaKey;
@@ -6930,16 +6959,16 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
         else if (event.altKey && key === 'pagedown') panelStudioInvoke(binding, 'backward');
         else if (event.altKey && key === 'home') panelStudioInvoke(binding, 'front');
         else if (event.altKey && key === 'end') panelStudioInvoke(binding, 'back');
-        else if (key === 'enter') panelStudioInvoke(binding, 'interact');
+        else if (key === 'enter') handled = false;
         else handled = false;
         if (handled) { event.preventDefault(); event.stopPropagation(); }
-    }, options);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:element.addEventListener@6941', __javascriptError); throw __javascriptError; }}, options);
 
     startPanelStudioGamepad(binding);
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bindPanelStudioDropSurface@6773', __javascriptError); throw __javascriptError; }}
 
-export function clickElementById(id) {
+export function clickElementById(id) { try {
     const element = document.getElementById(id);
     if (!element) throw new Error(`Element '${id}' is not available.`);
     if (element instanceof HTMLInputElement && element.type === 'file') {
@@ -6948,9 +6977,9 @@ export function clickElementById(id) {
         delete element.dataset.publisherDropY;
     }
     element.click();
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clickElementById@6966', __javascriptError); throw __javascriptError; }}
 
-export function consumeCanvasInsertPlacement(id) {
+export function consumeCanvasInsertPlacement(id) { try {
     const element = document.getElementById(id);
     if (!(element instanceof HTMLInputElement)) return null;
     const x = Number.parseFloat(element.dataset.publisherDropX || '');
@@ -6958,25 +6987,25 @@ export function consumeCanvasInsertPlacement(id) {
     delete element.dataset.publisherDropX;
     delete element.dataset.publisherDropY;
     return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : null;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:consumeCanvasInsertPlacement@6977', __javascriptError); throw __javascriptError; }}
 
 
-function storyBackgroundIsVisible(value) {
+function storyBackgroundIsVisible(value) { try {
     const normalized = String(value || '').trim().toLowerCase();
     if (!normalized || normalized === 'transparent' || normalized === 'none') return false;
     if (normalized === 'rgba(0, 0, 0, 0)' || normalized === 'rgba(0,0,0,0)') return false;
     if (/^rgba?\([^)]*,\s*0(?:\.0+)?\s*\)$/.test(normalized)) return false;
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:storyBackgroundIsVisible@6988', __javascriptError); throw __javascriptError; }}
 
-function storyStyleBackgroundColor(style) {
+function storyStyleBackgroundColor(style) { try {
     if (!style) return '';
     const color = style.getPropertyValue?.('background-color') || style.backgroundColor || '';
     return storyBackgroundIsVisible(color) ? color.trim() : '';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:storyStyleBackgroundColor@6996', __javascriptError); throw __javascriptError; }}
 
-function storyPageRuleBackground(doc) {
-    const visit = rules => {
+function storyPageRuleBackground(doc) { try {
+    const visit = rules => { try {
         for (const rule of rules || []) {
             try {
                 const text = String(rule.cssText || '').trim().toLowerCase();
@@ -6988,20 +7017,20 @@ function storyPageRuleBackground(doc) {
                     const nested = visit(rule.cssRules);
                     if (nested) return nested;
                 }
-            } catch { }
+            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7015', __caughtJavaScriptError);  }
         }
         return '';
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:visit@7003', __javascriptError); throw __javascriptError; }};
     for (const sheet of doc.styleSheets || []) {
         try {
             const color = visit(sheet.cssRules);
             if (color) return color;
-        } catch { }
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7023', __caughtJavaScriptError);  }
     }
     return '';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:storyPageRuleBackground@7002', __javascriptError); throw __javascriptError; }}
 
-function storyDocumentBackground(doc, view) {
+function storyDocumentBackground(doc, view) { try {
     const pageRule = storyPageRuleBackground(doc);
     if (pageRule) return pageRule;
 
@@ -7026,23 +7055,23 @@ function storyDocumentBackground(doc, view) {
         if (!best || area > best.area) best = { color, area };
     }
     return best?.color || 'transparent';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:storyDocumentBackground@7028', __javascriptError); throw __javascriptError; }}
 
-async function waitForStoryImages(doc) {
+async function waitForStoryImages(doc) { try {
     const images = [...(doc?.images || [])];
     if (!images.length) return;
-    await Promise.all(images.map(image => {
+    await Promise.all(images.map(image => { try {
         if (image.complete) return Promise.resolve();
-        return new Promise(resolve => {
-            const finish = () => resolve();
+        return new Promise(resolve => { try {
+            const finish = () => { try { return (resolve()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:finish@7061', __javascriptError); throw __javascriptError; } };
             image.addEventListener('load', finish, { once: true });
             image.addEventListener('error', finish, { once: true });
             setTimeout(finish, 4000);
-        });
-    }));
-}
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7060', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:images.map@7058', __javascriptError); throw __javascriptError; }}));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForStoryImages@7055', __javascriptError); throw __javascriptError; }}
 
-async function prepareStoryPreviewHtml(html, preferredBackground = '') {
+async function prepareStoryPreviewHtml(html, preferredBackground = '') { try {
     const source = String(html || '');
     if (!source.trim()) return {
         html: '<div class="publisher-story-document"><p></p></div>',
@@ -7050,14 +7079,14 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
     };
 
     const parsed = new DOMParser().parseFromString(source, 'text/html');
-    parsed.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => node.remove());
-    parsed.querySelectorAll('*').forEach(node => {
+    parsed.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => { try { return (node.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:parsed.querySelectorAll(\'script,iframe,object,embed,form,input,button,@7077', __javascriptError); throw __javascriptError; } });
+    parsed.querySelectorAll('*').forEach(node => { try {
         for (const attribute of [...node.attributes]) {
             if (/^on/i.test(attribute.name)) node.removeAttribute(attribute.name);
             else if ((attribute.name === 'href' || attribute.name === 'src') && /^\s*javascript:/i.test(attribute.value))
                 node.setAttribute(attribute.name, '#');
         }
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:parsed.querySelectorAll(\'*\').forEach@7078', __javascriptError); throw __javascriptError; }});
 
     const frame = document.createElement('iframe');
     frame.setAttribute('aria-hidden', 'true');
@@ -7066,19 +7095,19 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
     document.body.appendChild(frame);
 
     try {
-        const loaded = new Promise(resolve => {
+        const loaded = new Promise(resolve => { try {
             const timeout = setTimeout(resolve, 2500);
-            frame.addEventListener('load', () => {
+            frame.addEventListener('load', () => { try {
                 clearTimeout(timeout);
                 resolve();
-            }, { once: true });
-        });
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:frame.addEventListener@7095', __javascriptError); throw __javascriptError; }}, { once: true });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7093', __javascriptError); throw __javascriptError; }});
         frame.srcdoc = '<!doctype html>' + parsed.documentElement.outerHTML;
         await loaded;
         const doc = frame.contentDocument;
         const view = frame.contentWindow;
         if (!doc?.body || !view) throw new Error('The story HTML preview document could not be created.');
-        try { await doc.fonts?.ready; } catch { }
+        try { await doc.fonts?.ready; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7105', __caughtJavaScriptError);  }
         await waitForStoryImages(doc);
 
         const documentBackground = storyBackgroundIsVisible(preferredBackground)
@@ -7138,7 +7167,7 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
             clone.removeAttribute?.('id');
         }
 
-        cloneBody.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => node.remove());
+        cloneBody.querySelectorAll('script,iframe,object,embed,form,input,button,meta,link').forEach(node => { try { return (node.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:cloneBody.querySelectorAll(\'script,iframe,object,embed,form,input,butt@7165', __javascriptError); throw __javascriptError; } });
         const bodyStyle = cloneBody.getAttribute('style') || '';
         const wrapper = document.createElement('div');
         wrapper.className = 'publisher-story-document';
@@ -7155,11 +7184,11 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') {
     } finally {
         frame.remove();
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepareStoryPreviewHtml@7069', __javascriptError); throw __javascriptError; }}
 
 const STORY_PREVIEW_TRANSFER_CHUNK_SIZE = 6 * 1024;
 
-async function prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference) {
+async function prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference) { try {
     if (!htmlStream?.arrayBuffer || !dotNetReference)
         throw new Error('The story preview stream could not be initialized.');
     const buffer = await htmlStream.arrayBuffer();
@@ -7183,22 +7212,22 @@ async function prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, 
 
     const completed = await dotNetReference.invokeMethodAsync('CompleteStoryPreviewTransfer', transferId);
     if (!completed) throw new Error('The formatted story preview transfer did not complete.');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepareStoryPreviewHtmlInChunks@7186', __javascriptError); throw __javascriptError; }}
 
 
 const storyPrintPreviews = new Map();
 let reservedStoryPrintPreviewId = '';
 
-function storyPrintPreviewLoadingHtml(title) {
+function storyPrintPreviewLoadingHtml(title) { try {
     const safeTitle = String(title || 'Story print preview')
         .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
     return `<!doctype html><html><head><meta charset="utf-8"><title>${safeTitle}</title>
         <style>body{margin:0;display:grid;place-items:center;min-height:100vh;font:14px Segoe UI,Arial,sans-serif;background:#f3f4f6;color:#172033}.card{padding:22px 28px;border:1px solid #d5d9de;border-radius:6px;background:white;box-shadow:0 8px 28px #0002}</style>
         </head><body><div class="card"><strong>Preparing print preview…</strong><div>${safeTitle}</div></div></body></html>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:storyPrintPreviewLoadingHtml@7216', __javascriptError); throw __javascriptError; }}
 
-function openStoryPrintPreview(title) {
+function openStoryPrintPreview(title) { try {
     const id = globalThis.crypto?.randomUUID?.() || `story-print-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const previewWindow = window.open('', `_publisher_story_print_${id}`);
     if (!previewWindow) return '';
@@ -7208,20 +7237,20 @@ function openStoryPrintPreview(title) {
         previewWindow.document.close();
         previewWindow.focus();
     } catch {
-        try { previewWindow.close(); } catch { }
+        try { previewWindow.close(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7235', __caughtJavaScriptError);  }
         return '';
     }
     storyPrintPreviews.set(id, { previewWindow, objectUrl: '' });
     return id;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:openStoryPrintPreview@7225', __javascriptError); throw __javascriptError; }}
 
 
-function storyPrintCommandFromEvent(event, richEditHost = null) {
+function storyPrintCommandFromEvent(event, richEditHost = null) { try {
     const target = event?.target;
     const command = target?.closest?.('button,[role="button"],[role="menuitem"],.dxbl-btn,.dxbl-ribbon-item,.dxbl-ribbon-item-content');
     if (!command) return '';
     const pathHasPrintIcon = [...(event?.composedPath?.() || [])]
-        .some(node => node?.classList?.contains?.('pub-icon-print'));
+        .some(node => { try { return (node?.classList?.contains?.('pub-icon-print')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...(event?.composedPath?.() || [])] .some@7248', __javascriptError); throw __javascriptError; } });
     const commandLabel = [command.textContent, command.getAttribute?.('aria-label'), command.getAttribute?.('title')]
         .filter(Boolean).join(' ').trim().toLowerCase();
     const publisherPrint = pathHasPrintIcon
@@ -7231,18 +7260,18 @@ function storyPrintCommandFromEvent(event, richEditHost = null) {
     if (publisherPrint) return 'publisher';
     if (richEditHost?.contains?.(command) && /(^|\s)print(\s|$)/.test(commandLabel)) return 'rich-edit';
     return '';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:storyPrintCommandFromEvent@7243', __javascriptError); throw __javascriptError; }}
 
-function reserveStoryPrintPreviewFromEvent(event, richEditHost = null) {
+function reserveStoryPrintPreviewFromEvent(event, richEditHost = null) { try {
     const commandKind = storyPrintCommandFromEvent(event, richEditHost);
     if (!commandKind) return '';
     const current = storyPrintPreviews.get(reservedStoryPrintPreviewId);
     if (!current?.previewWindow || current.previewWindow.closed)
         reservedStoryPrintPreviewId = openStoryPrintPreview('Story print preview');
     return commandKind;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reserveStoryPrintPreviewFromEvent@7260', __javascriptError); throw __javascriptError; }}
 
-function claimStoryPrintPreview(title) {
+function claimStoryPrintPreview(title) { try {
     const reservedId = reservedStoryPrintPreviewId;
     reservedStoryPrintPreviewId = '';
     const entry = storyPrintPreviews.get(reservedId);
@@ -7250,19 +7279,19 @@ function claimStoryPrintPreview(title) {
         try {
             entry.previewWindow.document.title = String(title || 'Story print preview');
             entry.previewWindow.focus();
-        } catch { }
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7277', __caughtJavaScriptError);  }
         return reservedId;
     }
     return openStoryPrintPreview(title);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:claimStoryPrintPreview@7269', __javascriptError); throw __javascriptError; }}
 
-function completeStoryPrintPreview(id, html) {
+function completeStoryPrintPreview(id, html) { try {
     const entry = storyPrintPreviews.get(String(id || ''));
     if (!entry?.previewWindow || entry.previewWindow.closed)
         throw new Error('The story print-preview window is no longer available.');
 
     if (entry.objectUrl) {
-        try { URL.revokeObjectURL(entry.objectUrl); } catch { }
+        try { URL.revokeObjectURL(entry.objectUrl); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7289', __caughtJavaScriptError);  }
     }
     const rendererUrl = new URL('js/vendor/html2canvas.min.js', document.baseURI).href
         .replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
@@ -7270,21 +7299,21 @@ function completeStoryPrintPreview(id, html) {
     const objectUrl = URL.createObjectURL(new Blob([hydratedHtml], { type: 'text/html;charset=utf-8' }));
     entry.objectUrl = objectUrl;
     entry.previewWindow.location.replace(objectUrl);
-    try { entry.previewWindow.focus(); } catch { }
+    try { entry.previewWindow.focus(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7297', __caughtJavaScriptError);  }
 
     // The loaded blob is independent from the Blazor circuit. Revoking the URL later
     // does not close the already-loaded preview, but avoids keeping the export forever.
-    setTimeout(() => {
+    setTimeout(() => { try {
         const current = storyPrintPreviews.get(String(id || ''));
         if (current?.objectUrl !== objectUrl) return;
-        try { URL.revokeObjectURL(objectUrl); } catch { }
+        try { URL.revokeObjectURL(objectUrl); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7304', __caughtJavaScriptError);  }
         current.objectUrl = '';
         if (current.previewWindow?.closed) storyPrintPreviews.delete(String(id || ''));
-    }, 10 * 60 * 1000);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@7301', __javascriptError); throw __javascriptError; }}, 10 * 60 * 1000);
     return true;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:completeStoryPrintPreview@7283', __javascriptError); throw __javascriptError; }}
 
-function failStoryPrintPreview(id, message) {
+function failStoryPrintPreview(id, message) { try {
     const key = String(id || '');
     const entry = storyPrintPreviews.get(key);
     if (!entry?.previewWindow || entry.previewWindow.closed) {
@@ -7298,10 +7327,10 @@ function failStoryPrintPreview(id, message) {
         entry.previewWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Print preview error</title></head><body style="font:14px Segoe UI,Arial,sans-serif;padding:32px"><h1>Print preview could not be prepared</h1><p>${safeMessage}</p><button onclick="window.close()">Close</button></body></html>`);
         entry.previewWindow.document.close();
         entry.previewWindow.focus();
-    } catch { }
-}
+    } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7325', __caughtJavaScriptError);  }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:failStoryPrintPreview@7311', __javascriptError); throw __javascriptError; }}
 
-async function buildPublisherSingleHtml(mode, title) {
+async function buildPublisherSingleHtml(mode, title) { try {
     const source = document.querySelector('.print-publication');
     if (!source) throw new Error('The publication export surface is not available.');
     if (window.PublisherStudioLiveDataRuntime) {
@@ -7310,13 +7339,13 @@ async function buildPublisherSingleHtml(mode, title) {
     if (window.PublisherStudioComponentRuntime) {
         await window.PublisherStudioComponentRuntime.refreshAll(source, { polling: false, fetchNow: true });
     }
-    const fetchExportAsset = async (url, description = 'offline export asset') => {
+    const fetchExportAsset = async (url, description = 'offline export asset') => { try {
         const response = await fetch(url, { cache: 'force-cache' });
         if (!response.ok) {
             throw new Error(`The ${description} ${url} is missing (${response.status}). Run Prepare-DevExpressAssets.cmd on the licensed build machine before building or publishing PublisherStudio.`);
         }
         return await response.text();
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fetchExportAsset@7337', __javascriptError); throw __javascriptError; }};
     const [devExtremeCss, jquerySource, devExtremeSource, worldMapSource, europeMapSource, eurasiaMapSource, africaMapSource, usaMapSource, canadaMapSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource, componentRuntimeSource, tooltipRuntimeSource] = await Promise.all([
         fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
         fetchExportAsset('vendor/jquery/jquery.min.js'),
@@ -7341,11 +7370,11 @@ async function buildPublisherSingleHtml(mode, title) {
     if (!bundledDevExtremeVersion || licensedDevExtremeVersion !== bundledDevExtremeVersion) {
         throw new Error(`The DevExtreme runtime license targets ${licensedDevExtremeVersion || 'an unknown version'}, but the bundled browser runtime is ${bundledDevExtremeVersion || 'unknown'}. Run Prepare-DevExpressAssets.cmd again.`);
     }
-    const safeScript = value => String(value).replace(/<\/script/gi, '<\\/script');
+    const safeScript = value => { try { return (String(value).replace(/<\/script/gi, '<\\/script')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:safeScript@7368', __javascriptError); throw __javascriptError; } };
     await document.fonts?.ready;
     await waitForImages(source);
     refreshContentFit(source);
-    await new Promise(resolve => requestAnimationFrame(resolve));
+    await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7372', __javascriptError); throw __javascriptError; } });
     const publication = source.cloneNode(true);
     copyComputedStyles(source, publication);
     publication.removeAttribute('aria-hidden');
@@ -7358,10 +7387,10 @@ async function buildPublisherSingleHtml(mode, title) {
     publication.dataset.frameWidthPx = String(websiteFrame.width);
     publication.dataset.frameHeightPx = String(websiteFrame.height);
     await inlineLocalMediaSources(publication);
-    publication.querySelectorAll('img').forEach(image => {
+    publication.querySelectorAll('img').forEach(image => { try {
         image.draggable = true;
         image.removeAttribute('aria-hidden');
-    });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:publication.querySelectorAll(\'img\').forEach@7385', __javascriptError); throw __javascriptError; }});
     const css = collectExportCss();
     const defaultPublisherApi = /^https?:$/.test(location.protocol) ? location.origin : '';
     const isSite = mode === 'site';
@@ -7423,7 +7452,7 @@ ${modeCss}
 </head>
 <body>${publication.outerHTML}<script>${safeScript(jquerySource)}</script><script>${safeScript(devExtremeSource)}</script><script>${safeScript(worldMapSource)}</script><script>${safeScript(europeMapSource)}</script><script>${safeScript(eurasiaMapSource)}</script><script>${safeScript(africaMapSource)}</script><script>${safeScript(usaMapSource)}</script><script>${safeScript(canadaMapSource)}</script><script>${safeScript(devExtremeLicenseSource)}</script><script>${safeScript(liveDataSource)}</script><script>${safeScript(componentRuntimeSource)}</script><script>${safeScript(tooltipRuntimeSource)}</script><script>${safeScript(runtime)}</script></body>
 </html>`;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:buildPublisherSingleHtml@7328', __javascriptError); throw __javascriptError; }}
 
 const structuredExportScriptPaths = [
     'js/vendor/jquery.min.js',
@@ -7440,7 +7469,7 @@ const structuredExportScriptPaths = [
     'js/publisher-runtime.js'
 ];
 
-function structuredWebsiteOptions(options = {}) {
+function structuredWebsiteOptions(options = {}) { try {
     const imageMode = ['preserve', 'png', 'webp', 'avif'].includes(String(options.imageMode || '').toLowerCase())
         ? String(options.imageMode).toLowerCase()
         : 'preserve';
@@ -7454,9 +7483,9 @@ function structuredWebsiteOptions(options = {}) {
         keepVideoFallback: options.keepVideoFallback !== false,
         compressArchive: options.compressArchive !== false
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredWebsiteOptions@7467', __javascriptError); throw __javascriptError; }}
 
-function structuredMimeExtension(mimeType) {
+function structuredMimeExtension(mimeType) { try {
     const mime = String(mimeType || '').split(';', 1)[0].trim().toLowerCase();
     return ({
         'image/png': 'png', 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/webp': 'webp',
@@ -7466,37 +7495,37 @@ function structuredMimeExtension(mimeType) {
         'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/flac': 'flac',
         'font/woff2': 'woff2', 'font/woff': 'woff', 'application/json': 'json'
     })[mime] || 'bin';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredMimeExtension@7483', __javascriptError); throw __javascriptError; }}
 
-function structuredAssetFolder(mimeType) {
+function structuredAssetFolder(mimeType) { try {
     const mime = String(mimeType || '').toLowerCase();
     if (mime.startsWith('image/')) return 'assets/images';
     if (mime.startsWith('video/')) return 'assets/video';
     if (mime.startsWith('audio/')) return 'assets/audio';
     if (mime.startsWith('font/')) return 'assets/fonts';
     return 'assets/files';
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredAssetFolder@7495', __javascriptError); throw __javascriptError; }}
 
-async function structuredBlobHash(blob) {
+async function structuredBlobHash(blob) { try {
     const bytes = await blob.arrayBuffer();
     if (globalThis.crypto?.subtle) {
         const digest = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', bytes));
-        return [...digest.slice(0, 10)].map(value => value.toString(16).padStart(2, '0')).join('');
+        return [...digest.slice(0, 10)].map(value => { try { return (value.toString(16).padStart(2, '0')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...digest.slice(0, 10)].map@7508', __javascriptError); throw __javascriptError; } }).join('');
     }
     return crc32(new Uint8Array(bytes)).toString(16).padStart(8, '0');
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredBlobHash@7504', __javascriptError); throw __javascriptError; }}
 
-async function structuredImageCanvas(blob) {
+async function structuredImageCanvas(blob) { try {
     const url = URL.createObjectURL(blob);
     try {
         const image = new Image();
         image.decoding = 'async';
-        await new Promise((resolve, reject) => {
-            const timer = setTimeout(() => reject(new Error('Image decoding timed out.')), 20000);
-            image.onload = () => { clearTimeout(timer); resolve(); };
-            image.onerror = () => { clearTimeout(timer); reject(new Error('The browser could not decode the image.')); };
+        await new Promise((resolve, reject) => { try {
+            const timer = setTimeout(() => { try { return (reject(new Error('Image decoding timed out.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@7519', __javascriptError); throw __javascriptError; } }, 20000);
+            image.onload = () => { try { clearTimeout(timer); resolve();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:image.onload@7520', __javascriptError); throw __javascriptError; }};
+            image.onerror = () => { try { clearTimeout(timer); reject(new Error('The browser could not decode the image.'));  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:image.onerror@7521', __javascriptError); throw __javascriptError; }};
             image.src = url;
-        });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7518', __javascriptError); throw __javascriptError; }});
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, image.naturalWidth);
         canvas.height = Math.max(1, image.naturalHeight);
@@ -7507,41 +7536,41 @@ async function structuredImageCanvas(blob) {
     } finally {
         URL.revokeObjectURL(url);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredImageCanvas@7513', __javascriptError); throw __javascriptError; }}
 
-async function structuredEncodeImage(blob, mimeType, quality) {
+async function structuredEncodeImage(blob, mimeType, quality) { try {
     const canvas = await structuredImageCanvas(blob);
-    const encoded = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+    const encoded = await new Promise(resolve => { try { return (canvas.toBlob(resolve, mimeType, quality)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7538', __javascriptError); throw __javascriptError; } });
     if (!encoded || encoded.type.toLowerCase() !== mimeType.toLowerCase()) return null;
     return encoded;
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredEncodeImage@7536', __javascriptError); throw __javascriptError; }}
 
-function structuredRecorderMimeType() {
+function structuredRecorderMimeType() { try {
     if (typeof MediaRecorder !== 'function' || typeof MediaRecorder.isTypeSupported !== 'function') return '';
     return [
         'video/webm;codecs=vp9,opus',
         'video/webm;codecs=vp8,opus',
         'video/webm'
-    ].find(type => MediaRecorder.isTypeSupported(type)) || '';
-}
+    ].find(type => { try { return (MediaRecorder.isTypeSupported(type)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[ \'video/webm;codecs=vp9,opus\', \'video/webm;codecs=vp8,opus\', \'video/w@7549', __javascriptError); throw __javascriptError; } }) || '';
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredRecorderMimeType@7543', __javascriptError); throw __javascriptError; }}
 
-function waitForStructuredMedia(media, eventName, timeoutMs) {
-    return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => done(new Error(`Media ${eventName} timed out.`)), timeoutMs);
-        const onSuccess = () => done();
-        const onError = () => done(new Error('The browser could not decode this media source.'));
-        function done(error) {
+function waitForStructuredMedia(media, eventName, timeoutMs) { try {
+    return new Promise((resolve, reject) => { try {
+        const timer = setTimeout(() => { try { return (done(new Error(`Media ${eventName} timed out.`))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@7554', __javascriptError); throw __javascriptError; } }, timeoutMs);
+        const onSuccess = () => { try { return (done()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:onSuccess@7555', __javascriptError); throw __javascriptError; } };
+        const onError = () => { try { return (done(new Error('The browser could not decode this media source.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:onError@7556', __javascriptError); throw __javascriptError; } };
+        function done(error) { try {
             clearTimeout(timer);
             media.removeEventListener(eventName, onSuccess);
             media.removeEventListener('error', onError);
             error ? reject(error) : resolve();
-        }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:done@7557', __javascriptError); throw __javascriptError; }}
         media.addEventListener(eventName, onSuccess, { once: true });
         media.addEventListener('error', onError, { once: true });
-    });
-}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7553', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForStructuredMedia@7552', __javascriptError); throw __javascriptError; }}
 
-async function structuredTranscodeVideo(blob, quality) {
+async function structuredTranscodeVideo(blob, quality) { try {
     const mimeType = structuredRecorderMimeType();
     if (!mimeType) return null;
     const video = document.createElement('video');
@@ -7564,11 +7593,11 @@ async function structuredTranscodeVideo(blob, quality) {
         const videoBitsPerSecond = Math.round((900_000 + quality * 5_600_000) * sizeFactor);
         const chunks = [];
         const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond });
-        recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
-        const stopped = new Promise((resolve, reject) => {
+        recorder.addEventListener('dataavailable', event => { try { if (event.data?.size) chunks.push(event.data);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:recorder.addEventListener@7591', __javascriptError); throw __javascriptError; }});
+        const stopped = new Promise((resolve, reject) => { try {
             recorder.addEventListener('stop', resolve, { once: true });
-            recorder.addEventListener('error', event => reject(event.error || new Error('WebM recording failed.')), { once: true });
-        });
+            recorder.addEventListener('error', event => { try { return (reject(event.error || new Error('WebM recording failed.'))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:recorder.addEventListener@7594', __javascriptError); throw __javascriptError; } }, { once: true });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7592', __javascriptError); throw __javascriptError; }});
         recorder.start(1000);
         await video.play();
         await waitForStructuredMedia(video, 'ended', Math.max(30000, Math.ceil(video.duration * 2000 + 30000)));
@@ -7577,19 +7606,19 @@ async function structuredTranscodeVideo(blob, quality) {
         const output = new Blob(chunks, { type: mimeType.split(';', 1)[0] });
         return output.size > 0 ? output : null;
     } finally {
-        try { video.pause(); } catch { }
-        try { stream?.getTracks?.().forEach(track => track.stop()); } catch { }
+        try { video.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7604', __caughtJavaScriptError);  }
+        try { stream?.getTracks?.().forEach(track => { try { return (track.stop()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:stream?.getTracks?.().forEach@7605', __javascriptError); throw __javascriptError; } }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7605', __caughtJavaScriptError);  }
         video.removeAttribute('src');
-        try { video.load(); } catch { }
+        try { video.load(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7607', __caughtJavaScriptError);  }
         URL.revokeObjectURL(url);
     }
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredTranscodeVideo@7568', __javascriptError); throw __javascriptError; }}
 
-function structuredDataUrlMatches(value) {
+function structuredDataUrlMatches(value) { try {
     return [...String(value || '').matchAll(/data:[a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+(?:;[^,"'\s<>)]*)?,[^"'\s<>)]*/g)];
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredDataUrlMatches@7612', __javascriptError); throw __javascriptError; }}
 
-async function replaceStructuredDataUrls(value, prefix, resolveAsset) {
+async function replaceStructuredDataUrls(value, prefix, resolveAsset) { try {
     const text = String(value || '');
     const matches = structuredDataUrlMatches(text);
     if (!matches.length) return text;
@@ -7602,9 +7631,9 @@ async function replaceStructuredDataUrls(value, prefix, resolveAsset) {
         cursor = match.index + match[0].length;
     }
     return output + text.slice(cursor);
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:replaceStructuredDataUrls@7616', __javascriptError); throw __javascriptError; }}
 
-async function buildPublisherStructuredSite(title, rawOptions = {}) {
+async function buildPublisherStructuredSite(title, rawOptions = {}) { try {
     const options = structuredWebsiteOptions(rawOptions);
     const standaloneHtml = await buildPublisherSingleHtml(options.mode, title);
     const parser = new DOMParser();
@@ -7618,11 +7647,11 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
     const pathCache = new Map();
     let assetCount = 0;
 
-    const addFile = (name, blob, compress = true) => {
+    const addFile = (name, blob, compress = true) => { try {
         files.push({ name, blob, compress });
         return name;
-    };
-    const storeAsset = async blob => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:addFile@7645', __javascriptError); throw __javascriptError; }};
+    const storeAsset = async blob => { try {
         const mimeType = blob.type || 'application/octet-stream';
         const hash = await structuredBlobHash(blob);
         const extension = structuredMimeExtension(mimeType);
@@ -7633,10 +7662,10 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
         pathCache.set(key, path);
         assetCount++;
         return path;
-    };
-    const resolveAsset = async dataUrl => {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:storeAsset@7649', __javascriptError); throw __javascriptError; }};
+    const resolveAsset = async dataUrl => { try {
         if (assetCache.has(dataUrl)) return assetCache.get(dataUrl);
-        const task = (async () => {
+        const task = (async () => { try {
             let original;
             try { original = await (await fetch(dataUrl)).blob(); }
             catch { throw new Error('An embedded media asset could not be decoded for structured export.'); }
@@ -7692,10 +7721,10 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
             const selectedPath = await storeAsset(selected);
             const fallbackPath = keepOriginalFallback && selected !== original ? await storeAsset(original) : '';
             return { path: selectedPath, originalPath: fallbackPath, mimeType: selectedMime, sourceMimeType: original.type || '' };
-        })();
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7663', __javascriptError); throw __javascriptError; }})();
         assetCache.set(dataUrl, task);
         return task;
-    };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:resolveAsset@7661', __javascriptError); throw __javascriptError; }};
 
     for (const node of exportedDocument.querySelectorAll('video[src],audio[src],source[src]')) {
         const value = node.getAttribute('src') || '';
@@ -7760,13 +7789,13 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
         warnings: uniqueWarnings,
         options
     };
-}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:buildPublisherStructuredSite@7631', __javascriptError); throw __javascriptError; }}
 
 
 
     const mediaConverterDropBindings = new WeakMap();
 
-    function unbindMediaConverterDrop(element) {
+    function unbindMediaConverterDrop(element) { try {
         if (!element) return;
         const binding = mediaConverterDropBindings.get(element);
         if (!binding) return;
@@ -7776,30 +7805,30 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
         element.removeEventListener("drop", binding.drop);
         element.classList.remove("drag-active");
         mediaConverterDropBindings.delete(element);
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:unbindMediaConverterDrop@7793', __javascriptError); throw __javascriptError; }}
 
-    function bindMediaConverterDrop(element, dotNetReference) {
+    function bindMediaConverterDrop(element, dotNetReference) { try {
         if (!element || !dotNetReference) return false;
         unbindMediaConverterDrop(element);
         let depth = 0;
-        const dragenter = event => {
+        const dragenter = event => { try {
             if (!event.dataTransfer?.types?.includes("Files")) return;
             event.preventDefault();
             depth += 1;
             element.classList.add("drag-active");
-        };
-        const dragover = event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dragenter@7809', __javascriptError); throw __javascriptError; }};
+        const dragover = event => { try {
             if (!event.dataTransfer?.types?.includes("Files")) return;
             event.preventDefault();
             event.dataTransfer.dropEffect = "copy";
             element.classList.add("drag-active");
-        };
-        const dragleave = event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dragover@7815', __javascriptError); throw __javascriptError; }};
+        const dragleave = event => { try {
             event.preventDefault();
             depth = Math.max(0, depth - 1);
             if (depth === 0) element.classList.remove("drag-active");
-        };
-        const drop = async event => {
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:dragleave@7821', __javascriptError); throw __javascriptError; }};
+        const drop = async event => { try {
             event.preventDefault();
             depth = 0;
             element.classList.remove("drag-active");
@@ -7815,9 +7844,9 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
                 if (!response.ok) throw new Error(await response.text() || `Media upload failed (${response.status}).`);
                 await dotNetReference.invokeMethodAsync("ReceiveDroppedMedia", assetId, file.name || "dropped-media", file.type || "application/octet-stream");
             } catch (error) {
-                await dotNetReference.invokeMethodAsync("ReceiveMediaDropError", String(error?.message || error || "The dropped media could not be loaded.")).catch(() => {});
+                await dotNetReference.invokeMethodAsync("ReceiveMediaDropError", String(error?.message || error || "The dropped media could not be loaded.")).catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@7842', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:dotNetReference.invokeMethodAsync("ReceiveMediaDropError", String(erro@7842', __javascriptError); throw __javascriptError; }});
             }
-        };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:drop@7826', __javascriptError); throw __javascriptError; }};
         const binding = { dragenter, dragover, dragleave, drop };
         mediaConverterDropBindings.set(element, binding);
         element.addEventListener("dragenter", dragenter);
@@ -7825,108 +7854,108 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) {
         element.addEventListener("dragleave", dragleave);
         element.addEventListener("drop", drop);
         return true;
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bindMediaConverterDrop@7805', __javascriptError); throw __javascriptError; }}
 
 window.publisherStudio = {
-    setDocumentDirty(value) { publisherDocumentDirty = Boolean(value); },
-    restorePublisherWorkspaceAfterExport(stageId = 'publisher-stage') {
+    setDocumentDirty(value) { try { publisherDocumentDirty = Boolean(value);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setDocumentDirty@7855', __javascriptError); throw __javascriptError; }},
+    restorePublisherWorkspaceAfterExport(stageId = 'publisher-stage') { try {
         activeVideoExportCancel?.();
-        document.querySelectorAll('.publisher-video-export-overlay').forEach(element => element.remove());
+        document.querySelectorAll('.publisher-video-export-overlay').forEach(element => { try { return (element.remove()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:document.querySelectorAll(\'.publisher-video-export-overlay\').forEach@7858', __javascriptError); throw __javascriptError; } });
         const stage = document.getElementById(stageId);
         if (stage) {
-            try { stage.focus({ preventScroll: true }); } catch { }
+            try { stage.focus({ preventScroll: true }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7861', __caughtJavaScriptError);  }
         }
-    },
-    cancelCanvasInteraction(stageId = 'publisher-stage') { cancelCanvasInteraction(stageId); },
-    initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { initializeStoryEditorLayout(shellId, hostId, dotNetReference); },
-    prepareStoryPreviewHtml(html, preferredBackground = '') { return prepareStoryPreviewHtml(html, preferredBackground); },
-    prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground = '', dotNetReference) { return prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference); },
-    generateBarcodeSvg(options) { return generateBarcodeSvg(options); },
-    exportPresentationVideo(containerSelector, fileName, title) { return exportPresentationVideo(containerSelector, fileName, title); },
-    initializeSignalConnectors(rootId, options = {}) {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:restorePublisherWorkspaceAfterExport@7856', __javascriptError); throw __javascriptError; }},
+    cancelCanvasInteraction(stageId = 'publisher-stage') { try { cancelCanvasInteraction(stageId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelCanvasInteraction@7864', __javascriptError); throw __javascriptError; }},
+    initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { try { initializeStoryEditorLayout(shellId, hostId, dotNetReference);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeStoryEditorLayout@7865', __javascriptError); throw __javascriptError; }},
+    prepareStoryPreviewHtml(html, preferredBackground = '') { try { return prepareStoryPreviewHtml(html, preferredBackground);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepareStoryPreviewHtml@7866', __javascriptError); throw __javascriptError; }},
+    prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground = '', dotNetReference) { try { return prepareStoryPreviewHtmlInChunks(htmlStream, preferredBackground, dotNetReference);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepareStoryPreviewHtmlInChunks@7867', __javascriptError); throw __javascriptError; }},
+    generateBarcodeSvg(options) { try { return generateBarcodeSvg(options);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:generateBarcodeSvg@7868', __javascriptError); throw __javascriptError; }},
+    exportPresentationVideo(containerSelector, fileName, title) { try { return exportPresentationVideo(containerSelector, fileName, title);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPresentationVideo@7869', __javascriptError); throw __javascriptError; }},
+    initializeSignalConnectors(rootId, options = {}) { try {
         const root = typeof rootId === 'string' ? document.getElementById(rootId) : rootId;
         if (!root) return false;
         root.__publisherSignalRuntime?.dispose?.();
         root.__publisherSignalRuntime = signalConnectorRuntime(root, options);
         return Boolean(root.__publisherSignalRuntime);
-    },
-    runSignalConnector(elementId) {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeSignalConnectors@7870', __javascriptError); throw __javascriptError; }},
+    runSignalConnector(elementId) { try {
         const id = String(elementId || '').replace(/^element-/, '');
         const root = document.getElementById('publisher-page') || document;
         if (!root.__publisherSignalRuntime) root.__publisherSignalRuntime = signalConnectorRuntime(root, { autoStart: false, editor: true });
         return root.__publisherSignalRuntime?.run(id);
-    },
-    stopSignalConnectors(rootId) {
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:runSignalConnector@7877', __javascriptError); throw __javascriptError; }},
+    stopSignalConnectors(rootId) { try {
         const root = typeof rootId === 'string' ? document.getElementById(rootId) : rootId;
         root?.__publisherSignalRuntime?.reset?.();
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:stopSignalConnectors@7883', __javascriptError); throw __javascriptError; }},
 
-    panelStudioPoint(element, clientX, clientY) { return panelStudioPoint(element, clientX, clientY); },
-    bindPanelStudioDropSurface(element, dotNetReference) { return bindPanelStudioDropSurface(element, dotNetReference); },
-    cancelPanelStudioPointer(element, restore = true) { cancelPanelStudioPointer(element, restore); },
-    unbindPanelStudioDropSurface(element) { unbindPanelStudioDropSurface(element); },
-    clickElement(id) { clickElementById(id); },
-    focusElement(id) {
+    panelStudioPoint(element, clientX, clientY) { try { return panelStudioPoint(element, clientX, clientY);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioPoint@7888', __javascriptError); throw __javascriptError; }},
+    bindPanelStudioDropSurface(element, dotNetReference, bindingId = '') { try { return bindPanelStudioDropSurface(element, dotNetReference, bindingId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bindPanelStudioDropSurface@7889', __javascriptError); throw __javascriptError; }},
+    cancelPanelStudioPointer(element, restore = true) { try { cancelPanelStudioPointer(element, restore);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelPanelStudioPointer@7890', __javascriptError); throw __javascriptError; }},
+    unbindPanelStudioDropSurface(element) { try { unbindPanelStudioDropSurface(element);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:unbindPanelStudioDropSurface@7891', __javascriptError); throw __javascriptError; }},
+    clickElement(id) { try { clickElementById(id);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clickElement@7892', __javascriptError); throw __javascriptError; }},
+    focusElement(id) { try {
         const element = document.getElementById(id);
         if (!element) return;
         element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
         const focusable = element.querySelector('input,select,textarea,button,[tabindex]:not([tabindex="-1"])');
-        setTimeout(() => { try { focusable?.focus({ preventScroll: true }); } catch { } }, 180);
-    },
-    reserveStoryPrintPreviewFromEvent(event) { reserveStoryPrintPreviewFromEvent(event); },
-    claimStoryPrintPreview(title) { return claimStoryPrintPreview(title); },
-    openStoryPrintPreview(title) { return openStoryPrintPreview(title); },
-    completeStoryPrintPreview(id, html) { return completeStoryPrintPreview(id, html); },
-    failStoryPrintPreview(id, message) { failStoryPrintPreview(id, message); },
-    printStoryHtml(html) {
+        setTimeout(() => { try { try { focusable?.focus({ preventScroll: true }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7898', __caughtJavaScriptError);  }  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:setTimeout@7898', __javascriptError); throw __javascriptError; }}, 180);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:focusElement@7893', __javascriptError); throw __javascriptError; }},
+    reserveStoryPrintPreviewFromEvent(event) { try { reserveStoryPrintPreviewFromEvent(event);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reserveStoryPrintPreviewFromEvent@7900', __javascriptError); throw __javascriptError; }},
+    claimStoryPrintPreview(title) { try { return claimStoryPrintPreview(title);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:claimStoryPrintPreview@7901', __javascriptError); throw __javascriptError; }},
+    openStoryPrintPreview(title) { try { return openStoryPrintPreview(title);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:openStoryPrintPreview@7902', __javascriptError); throw __javascriptError; }},
+    completeStoryPrintPreview(id, html) { try { return completeStoryPrintPreview(id, html);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:completeStoryPrintPreview@7903', __javascriptError); throw __javascriptError; }},
+    failStoryPrintPreview(id, message) { try { failStoryPrintPreview(id, message);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:failStoryPrintPreview@7904', __javascriptError); throw __javascriptError; }},
+    printStoryHtml(html) { try {
         const id = openStoryPrintPreview('Story print preview');
         if (!id) throw new Error('The browser blocked the story print-preview window.');
         return completeStoryPrintPreview(id, html);
-    },
-    consumeCanvasInsertPlacement(id) { return consumeCanvasInsertPlacement(id); },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:printStoryHtml@7905', __javascriptError); throw __javascriptError; }},
+    consumeCanvasInsertPlacement(id) { try { return consumeCanvasInsertPlacement(id);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:consumeCanvasInsertPlacement@7910', __javascriptError); throw __javascriptError; }},
 
-    initializeWorkspace(id) {
+    initializeWorkspace(id) { try {
         const workspace = document.getElementById(id);
         if (!workspace) return;
         if (!workspaceStates.has(workspace)) createWorkspaceState(workspace);
         bindWorkspaceSplitter(workspace, workspace.querySelector('[data-workspace-splitter="left"]'), 'left');
         bindWorkspaceSplitter(workspace, workspace.querySelector('[data-workspace-splitter="right"]'), 'right');
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeWorkspace@7912', __javascriptError); throw __javascriptError; }},
 
-    toggleWorkspacePane(id, side) {
+    toggleWorkspacePane(id, side) { try {
         const workspace = document.getElementById(id);
         if (!workspace) return;
         const state = workspaceStates.get(workspace) || createWorkspaceState(workspace);
         if (side === 'left') state.leftCollapsed = !state.leftCollapsed;
         else state.rightCollapsed = !state.rightCollapsed;
         setWorkspaceColumns(workspace, state);
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:toggleWorkspacePane@7920', __javascriptError); throw __javascriptError; }},
 
-    resetWorkspaceLayout(id) {
+    resetWorkspaceLayout(id) { try {
         const workspace = document.getElementById(id);
         if (!workspace) return;
         const state = { left: 172, right: 292, leftCollapsed: false, rightCollapsed: false };
         workspaceStates.set(workspace, state);
         setWorkspaceColumns(workspace, state);
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:resetWorkspaceLayout@7929', __javascriptError); throw __javascriptError; }},
 
-    previewPageAnimations(pageId) { previewPageAnimations(pageId); },
-    previewElementAnimations(elementId) { previewElementAnimations(elementId); },
-    previewAnimationStep(pageId, animationId) { previewAnimationStep(pageId, animationId); },
-    stopAnimationPreview(pageId) { stopAnimationPreview(pageId); },
-    playPublicationMedia(elementId) { playPublicationMedia(elementId); },
-    pausePublicationMedia(elementId) { pausePublicationMedia(elementId); },
+    previewPageAnimations(pageId) { try { previewPageAnimations(pageId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previewPageAnimations@7937', __javascriptError); throw __javascriptError; }},
+    previewElementAnimations(elementId) { try { previewElementAnimations(elementId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previewElementAnimations@7938', __javascriptError); throw __javascriptError; }},
+    previewAnimationStep(pageId, animationId) { try { previewAnimationStep(pageId, animationId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:previewAnimationStep@7939', __javascriptError); throw __javascriptError; }},
+    stopAnimationPreview(pageId) { try { stopAnimationPreview(pageId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:stopAnimationPreview@7940', __javascriptError); throw __javascriptError; }},
+    playPublicationMedia(elementId) { try { playPublicationMedia(elementId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:playPublicationMedia@7941', __javascriptError); throw __javascriptError; }},
+    pausePublicationMedia(elementId) { try { pausePublicationMedia(elementId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pausePublicationMedia@7942', __javascriptError); throw __javascriptError; }},
 
-    async downloadStream(fileName, streamReference, mimeType) {
+    async downloadStream(fileName, streamReference, mimeType) { try {
         const buffer = await streamReference.arrayBuffer();
         downloadBlob(fileName, new Blob([buffer], { type: mimeType || 'application/octet-stream' }));
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:downloadStream@7944', __javascriptError); throw __javascriptError; }},
 
-    downloadTextFile(fileName, text, mimeType = 'text/plain;charset=utf-8') {
+    downloadTextFile(fileName, text, mimeType = 'text/plain;charset=utf-8') { try {
         downloadBlob(fileName || 'publisherstudio.txt', new Blob([String(text ?? '')], { type: mimeType }));
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:downloadTextFile@7949', __javascriptError); throw __javascriptError; }},
 
-    async exportPage(pageId, fileName, format, dpi, zoom) {
+    async exportPage(pageId, fileName, format, dpi, zoom) { try {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
         const pageKey = page.dataset.pageId || '';
@@ -7934,7 +7963,7 @@ window.publisherStudio = {
             ? document.querySelector(`.print-publication > .print-page[data-page-id="${CSS.escape(pageKey)}"]`) || page
             : page;
         refreshContentFit(exportSource);
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7961', __javascriptError); throw __javascriptError; } });
         const normalized = String(format).toLowerCase();
         const scale = clamp(number(dpi, 150) / 96, .5, 12);
         const canvas = await rasterizePageElement(exportSource, scale);
@@ -7950,9 +7979,9 @@ window.publisherStudio = {
         const output = prepareOutputCanvas(canvas, jpeg);
         const blob = await canvasBlob(output, jpeg ? 'image/jpeg' : 'image/png', jpeg ? .92 : undefined);
         downloadBlob(fileName, blob);
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPage@7953', __javascriptError); throw __javascriptError; }},
 
-    async exportPublicationElement(elementId, fileName, format, dpi) {
+    async exportPublicationElement(elementId, fileName, format, dpi) { try {
         const id = String(elementId || '');
         if (!id) throw new Error('No publication object was selected.');
         const element = document.querySelector(`.print-publication [data-element-id="${CSS.escape(id)}"]`);
@@ -7961,7 +7990,7 @@ window.publisherStudio = {
         const page = element.closest('.print-page');
         if (!page) throw new Error('The selected object is not attached to a publication page.');
         refreshContentFit(page);
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7988', __javascriptError); throw __javascriptError; } });
         const scale = clamp(number(dpi, 150) / 96, .5, 12);
         const pageCanvas = await rasterizeIsolatedPublicationElement(page, element, scale);
         const objectCanvas = cropCanvasToElement(pageCanvas, page, element, Math.max(2, Math.ceil(scale * 1.5)));
@@ -7973,15 +8002,15 @@ window.publisherStudio = {
         }
         if (normalized !== 'png') throw new Error('Selected objects can be exported as PNG or SVG.');
         downloadBlob(fileName, await canvasBlob(objectCanvas, 'image/png'));
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPublicationElement@7979', __javascriptError); throw __javascriptError; }},
 
-    async exportPublicationPages(containerSelector, baseName, format, dpi) {
+    async exportPublicationPages(containerSelector, baseName, format, dpi) { try {
         const container = document.querySelector(containerSelector);
         if (!container) throw new Error('The publication export surface is not available.');
         const pages = [...container.querySelectorAll(':scope > .print-page')];
         if (!pages.length) throw new Error('The publication does not contain any pages.');
         refreshContentFit(container);
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8008', __javascriptError); throw __javascriptError; } });
         const normalized = String(format).toLowerCase();
         const jpeg = normalized === 'jpeg' || normalized === 'jpg';
         if (!jpeg && normalized !== 'png') throw new Error('Only PNG and JPEG page export are supported here.');
@@ -7992,7 +8021,7 @@ window.publisherStudio = {
         const files = [];
         for (let index = 0; index < pages.length; index++) {
             try {
-                if (index > 0) await new Promise(resolve => requestAnimationFrame(resolve));
+                if (index > 0) await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8019', __javascriptError); throw __javascriptError; } });
                 const canvas = await rasterizePageElement(pages[index], scale);
                 const output = prepareOutputCanvas(canvas, jpeg);
                 const blob = await canvasBlob(output, mimeType, jpeg ? .92 : undefined);
@@ -8009,16 +8038,16 @@ window.publisherStudio = {
         const archiveName = `${safeBase}-${extension}-pages.zip`;
         downloadBlob(archiveName, await createStoredZip(files));
         return { count: files.length, fileName: archiveName };
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPublicationPages@8002', __javascriptError); throw __javascriptError; }},
 
-    async verifyPageRaster(pageId) {
+    async verifyPageRaster(pageId) { try {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
         const canvas = await rasterizePageElement(page, 1, false);
         return { width: canvas.width, height: canvas.height, prefix: canvas.toDataURL('image/png').slice(0, 22) };
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPageRaster@8038', __javascriptError); throw __javascriptError; }},
 
-    async makeColorTransparent(dataUrl, color, tolerance) {
+    async makeColorTransparent(dataUrl, color, tolerance) { try {
         const image = await imageFromDataUrl(dataUrl);
         const canvas = document.createElement('canvas');
         canvas.width = image.naturalWidth;
@@ -8038,19 +8067,19 @@ window.publisherStudio = {
         }
         context.putImageData(pixels, 0, 0);
         return canvas.toDataURL('image/png');
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:makeColorTransparent@8045', __javascriptError); throw __javascriptError; }},
 
-    async exportWebsite(fileName, title) {
+    async exportWebsite(fileName, title) { try {
         const html = await buildPublisherSingleHtml('presentation', title);
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportWebsite@8067', __javascriptError); throw __javascriptError; }},
 
-    async exportSite(fileName, title) {
+    async exportSite(fileName, title) { try {
         const html = await buildPublisherSingleHtml('site', title);
         downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportSite@8072', __javascriptError); throw __javascriptError; }},
 
-    async exportStructuredWebsite(fileName, title, options = {}) {
+    async exportStructuredWebsite(fileName, title, options = {}) { try {
         const result = await buildPublisherStructuredSite(title, options);
         const archive = await createZip(result.files, { compress: result.options.compressArchive });
         downloadBlob(fileName, archive);
@@ -8061,21 +8090,27 @@ window.publisherStudio = {
             archiveBytes: archive.size,
             warnings: result.warnings
         };
-    },
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportStructuredWebsite@8077', __javascriptError); throw __javascriptError; }},
 
-    async printPublication() {
+    async printPublication() { try {
         const active = document.activeElement;
-        try { active?.blur?.(); } catch { }
+        try { active?.blur?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@8092', __caughtJavaScriptError);  }
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
         document.body.classList.add('publisher-printing');
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await new Promise(resolve => { try { return (requestAnimationFrame(() => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@8095', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8095', __javascriptError); throw __javascriptError; } });
         refreshContentFit(document.querySelector('.print-publication') || document);
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        const cleanup = () => document.body.classList.remove('publisher-printing');
+        await new Promise(resolve => { try { return (requestAnimationFrame(() => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@8097', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8097', __javascriptError); throw __javascriptError; } });
+        const cleanup = () => { try { return (document.body.classList.remove('publisher-printing')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cleanup@8098', __javascriptError); throw __javascriptError; } };
         window.addEventListener('afterprint', cleanup, { once: true });
         try { window.print(); } finally { setTimeout(cleanup, 1500); }
-    }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:printPublication@8090', __javascriptError); throw __javascriptError; }}
 };
 
 window.publisherStudio.bindMediaConverterDrop = bindMediaConverterDrop;
 window.publisherStudio.unbindMediaConverterDrop = unbindMediaConverterDrop;
+
+// Guard exported browser namespaces after the file has initialized.
+publisherStudioDiagnostics.guardObject("publisherStudio", window.publisherStudio);
+publisherStudioDiagnostics.guardObject("PublisherStudioNavigation", window.PublisherStudioNavigation);
+publisherStudioDiagnostics.guardObject("PublisherStudioPresentation", window.PublisherStudioPresentation);
+publisherStudioDiagnostics.guardObject("PublisherStudioSite", window.PublisherStudioSite);

@@ -14,8 +14,13 @@ foreach ($entry in $expected.GetEnumerator()) {
     $path = Join-Path $appRoot ($relative.Replace([char]'/', [System.IO.Path]::DirectorySeparatorChar))
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { Fail "Required interactive page is missing: $relative" }
     $text = [System.IO.File]::ReadAllText($path, $utf8)
-    $first = @($text -split '\r?\n' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })[0].Trim()
-    if ($first -cne [string]$entry.Value) { Fail "Render mode changed in $relative. Expected '$($entry.Value)' but found '$first'." }
+    $expectedDirective = [string]$entry.Value
+    $escapedDirective = [System.Text.RegularExpressions.Regex]::Escape($expectedDirective)
+    if ($text -notmatch "(?m)^\s*$escapedDirective\s*$") {
+        $directives = @($text -split '\r?\n' | Where-Object { $_ -match '^\s*@(?:page|rendermode)\b' } | ForEach-Object { $_.Trim() })
+        $found = if ($directives.Count -eq 0) { '<no page or render-mode directives>' } else { $directives -join ', ' }
+        Fail "Render mode changed in $relative. Expected directive '$expectedDirective'; found $found."
+    }
 }
 $programPath = Join-Path $appRoot 'Program.cs'
 $appPath = Join-Path $appRoot 'Components\App.razor'

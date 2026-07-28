@@ -42,6 +42,8 @@ test('PublisherStudio direct builds enforce render, async, and component diagnos
   const renderGuard = read('build/Assert-InteractiveServerRenderModes.ps1');
   assert.match(renderGuard, /Components\/Pages\/Editor\.razor/);
   assert.match(renderGuard, /AddInteractiveServerRenderMode\(\)/);
+  assert.match(renderGuard, /\(\?m\)\^\\s\*\$escapedDirective\\s\*\$/);
+  assert.doesNotMatch(renderGuard, /\$first\s+-cne/);
   const asyncGuard = read('build/Assert-AsyncContinuationPolicy.ps1');
   assert.match(asyncGuard, /Renderer\/component continuations must use ConfigureAwait\(true\)/);
   assert.doesNotMatch(asyncGuard, /"[^"\r\n]*\$[A-Za-z_][A-Za-z0-9_]*:/);

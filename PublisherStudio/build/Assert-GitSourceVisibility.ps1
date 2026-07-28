@@ -23,6 +23,7 @@ $protectedPaths = @(
     'build/security-rules-final19.sha256',
     'build/Assert-IteratorExceptionPolicy.ps1',
     'build/Assert-SystemVariableInitialization.ps1',
+    'build/Assert-PublishConfiguration.ps1',
     'build/Assert-PanelStudioInteractionLifecycle.ps1',
     'build/method-diagnostics-baseline.json',
     'build/application-static-baseline.json',

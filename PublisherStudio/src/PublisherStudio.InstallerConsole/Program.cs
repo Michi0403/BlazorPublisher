@@ -30,7 +30,7 @@ internal static class Program
         Console.WriteLine("PublisherStudio Setup 2.0.1");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
-            Console.WriteLine("No command-line action was supplied. The setup help will be shown.");
+            Console.WriteLine("No command-line action was supplied. Running the default preservation-first install and update routine.");
         else
             Console.WriteLine($"Requested setup actions:{Environment.NewLine}{options}");
         try
@@ -363,35 +363,36 @@ internal static class Program
     {
         try
         {
-            var shortcuts = new List<ShortcutDefinition>();
+            var shortcuts = new List<ShortcutDefinition>
+            {
+                new(
+                    ShortcutName: "BlazorPublisher Folder.lnk",
+                    TargetPath: blazorPublisherRoot,
+                    Arguments: string.Empty,
+                    WorkingDirectory: blazorPublisherRoot)
+            };
 
-            AddCmdShortcutIfExists(
-                shortcuts,
-                blazorPublisherRoot,
-                "Install.cmd",
-                "BlazorPublisher Install.url",
-                logger);
+            var launchers = new (string FileName, string ShortcutName)[]
+            {
+                ("Default.cmd", "BlazorPublisher Default Install and Update.url"),
+                ("Install.cmd", "BlazorPublisher Install.url"),
+                ("Update.cmd", "BlazorPublisher Update.url"),
+                ("Start.cmd", "BlazorPublisher Start.url"),
+                ("Start-NoBrowser.cmd", "BlazorPublisher Start without Browser.url"),
+                ("Check-FFmpeg.cmd", "BlazorPublisher Check FFmpeg.url"),
+                ("Install-FFmpeg.cmd", "BlazorPublisher Install FFmpeg.url"),
+                ("Uninstall.cmd", "BlazorPublisher Uninstall.url")
+            };
 
-            AddCmdShortcutIfExists(
-                shortcuts,
-                blazorPublisherRoot,
-                "Update.cmd",
-                "BlazorPublisher Update.url",
-                logger);
-
-            AddCmdShortcutIfExists(
-                shortcuts,
-                blazorPublisherRoot,
-                "Start.cmd",
-                "BlazorPublisher Start.url",
-                logger);
-
-            AddCmdShortcutIfExists(
-                shortcuts,
-                blazorPublisherRoot,
-                "Uninstall.cmd",
-                "BlazorPublisher Uninstall.url",
-                logger);
+            foreach (var launcher in launchers)
+            {
+                AddCmdShortcutIfExists(
+                    shortcuts,
+                    blazorPublisherRoot,
+                    launcher.FileName,
+                    launcher.ShortcutName,
+                    logger);
+            }
 
             return shortcuts;
         }
@@ -1701,11 +1702,17 @@ internal sealed class CliOptions
         var options = new CliOptions();
         if (argsList.Count == 0)
         {
-            argsList.Add("--install-blazorpublisher");
-            argsList.Add("--force-delete");
-            argsList.Add("--start-blazorpublisher");
-            argsList.Add("--shortcuts");
-            argsList.Add("--install-ffmpeg");
+            options.UpdateBlazorPublisher = true;
+            options.StartBlazorPublisher = true;
+            options.InstallFfmpeg = true;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                options.DesktopShortcuts = true;
+                options.StartMenuShortcuts = true;
+            }
+
+            return options;
         }
         for (var i = 0; i < argsList.Count; i++)
         {

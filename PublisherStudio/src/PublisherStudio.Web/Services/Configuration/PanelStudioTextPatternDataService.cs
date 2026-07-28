@@ -13,14 +13,15 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
 {
     private readonly IReadOnlyDictionary<string, Regex> _patterns;
     private readonly ILogger<PanelStudioTextPatternDataService> logger;
+
     public PanelStudioTextPatternDataService(
         IWebHostEnvironment environment,
         IOptions<PanelTextPatternStoreOptions> options,
         ILogger<PanelStudioTextPatternDataService> logger)
     {
+        this.logger = logger;
         try
         {
-            this.logger = logger;
             var settings = options.Value;
             ValidateOptions(settings);
             var seedPath = Path.GetFullPath(Path.Combine(environment.ContentRootPath, settings.SeedPath));

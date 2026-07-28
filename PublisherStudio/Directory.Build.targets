@@ -63,13 +63,13 @@
     <RuntimeValueOwnershipScript>$(MSBuildThisFileDirectory)build\Assert-RuntimeValueOwnership.ps1</RuntimeValueOwnershipScript>
   </PropertyGroup>
 
-  <!--<Target Name="AssertPublisherProtectedArchitectureFiles"
+  <Target Name="AssertPublisherProtectedArchitectureFiles"
           BeforeTargets="BeforeBuild"
           AfterTargets="AssertPublisherOneWireArchitecture"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipProtectedArchitectureFilesGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(ProtectedArchitectureFilesScript)')" Text="Protected architecture-file guard script is missing: $(ProtectedArchitectureFilesScript)" />
     <Exec Condition="Exists('$(ProtectedArchitectureFilesScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ProtectedArchitectureFilesScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>-->
+  </Target>
 
   <Target Name="AssertPublisherSecurityRulePreservation"
           BeforeTargets="BeforeBuild"
@@ -240,6 +240,41 @@
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipJavaScriptDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(JavaScriptDiagnosticsScript)')" Text="JavaScript diagnostics guard script is missing: $(JavaScriptDiagnosticsScript)" />
     <Exec Condition="Exists('$(JavaScriptDiagnosticsScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+
+  <PropertyGroup>
+    <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
+  </PropertyGroup>
+
+  <Target Name="AssertPublisherPublishConfiguration"
+          BeforeTargets="BeforeBuild"
+          AfterTargets="AssertPublisherJavaScriptDiagnostics"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(PublishConfigurationScript)')" Text="Publish configuration guard script is missing: $(PublishConfigurationScript)" />
+    <Exec Condition="Exists('$(PublishConfigurationScript)')"
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublishConfigurationScript)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="High"
+          StandardErrorImportance="High" />
+  </Target>
+
+  <PropertyGroup>
+    <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
+  </PropertyGroup>
+
+  <Target Name="AssertPublisherInstallerWorkflow"
+          BeforeTargets="BeforeBuild"
+          AfterTargets="AssertPublisherPublishConfiguration"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipInstallerWorkflowGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(InstallerWorkflowScript)')" Text="Installer workflow guard script is missing: $(InstallerWorkflowScript)" />
+    <Exec Condition="Exists('$(InstallerWorkflowScript)')"
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InstallerWorkflowScript)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="High"
+          StandardErrorImportance="High" />
   </Target>
 
 </Project>

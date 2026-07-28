@@ -1,0 +1,17 @@
+PublisherStudio 2.0.1 final26 verified patch manifest
+
+Changed runtime source:
+  src/PublisherStudio.Web/Components/Layout/JavaScriptDiagnosticsBridge.razor
+  SHA-256: 38280256f15af0e1304e5d322e4ebbf24f583c9e4a7ba76c35f5996a39cfe0ec
+
+Required source markers verified:
+  catch (Exception exception)
+  Logger.LogError(exception, $"PublisherStudio browser diagnostics could not attach.");
+  OperationalNotifications.Error(
+
+Build-guard behavior:
+  Assert-ComponentDiagnostics.ps1 detects catch, structured log calls, and
+  OperationalNotifications.Error(...) without adding an exemption or growing debt.
+
+This final26 archive has a new root directory and filename to prevent stale archive
+or extraction-cache confusion.

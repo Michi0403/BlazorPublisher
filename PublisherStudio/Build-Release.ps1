@@ -26,9 +26,49 @@ function Invoke-DotNet {
     if ($LASTEXITCODE -ne 0) { throw $FailureMessage }
 }
 
+$multiFileSelfContainedProperties = @(
+    "--self-contained", "true",
+    "-p:PublishTrimmed=false",
+    "-p:PublishSingleFile=false",
+    "-p:PublishReadyToRun=false",
+    "-p:DeleteExistingFiles=true"
+)
+
+function Assert-PublishedConfigurationFiles {
+    param(
+        [Parameter(Mandatory)][string]$SourceRoot,
+        [Parameter(Mandatory)][string]$PublishRoot
+    )
+
+    $configurationSources = New-Object 'System.Collections.Generic.List[System.IO.FileInfo]'
+    foreach ($file in Get-ChildItem -LiteralPath $SourceRoot -File -Filter 'appsettings*.json') { $configurationSources.Add($file) }
+    foreach ($directory in @('Configuration', 'Localization')) {
+        $sourceDirectory = Join-Path $SourceRoot $directory
+        if (-not (Test-Path -LiteralPath $sourceDirectory -PathType Container)) {
+            throw "Required PublisherStudio configuration directory is unavailable: $sourceDirectory"
+        }
+        foreach ($file in Get-ChildItem -LiteralPath $sourceDirectory -File -Recurse) { $configurationSources.Add($file) }
+    }
+
+    if ($configurationSources.Count -eq 0) { throw 'No PublisherStudio configuration files were discovered for publish validation.' }
+
+    $missing = New-Object 'System.Collections.Generic.List[string]'
+    foreach ($source in $configurationSources) {
+        $relative = $source.FullName.Substring($SourceRoot.Length).TrimStart([char[]]"\/")
+        $published = Join-Path $PublishRoot $relative
+        if (-not (Test-Path -LiteralPath $published -PathType Leaf)) { $missing.Add($relative) }
+    }
+    if ($missing.Count -gt 0) { throw "PublisherStudio publish output is missing configuration files: $($missing -join ', ')" }
+
+    Write-Host "Published configuration validation passed for $($configurationSources.Count) files." -ForegroundColor Green
+}
+
 & (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
 & (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
+& (Join-Path $root "build\Assert-ProtectedArchitectureFiles.ps1")
 & (Join-Path $root "build\Assert-JavaScriptDiagnostics.ps1")
+& (Join-Path $root "build\Assert-PublishConfiguration.ps1")
+& (Join-Path $root "build\Assert-InstallerWorkflow.ps1")
 & (Join-Path $root "build\Assert-SecurityRulePreservation.ps1")
 & (Join-Path $root "build\Assert-RuntimeValueOwnership.ps1")
 & (Join-Path $root "build\Assert-LocalizationIntegrity.ps1")
@@ -109,15 +149,11 @@ Invoke-DotNet -Arguments (@(
     "-c", $Configuration,
     "-f", "net10.0",
     "-r", $Runtime,
-    "--self-contained", "true",
     "--no-restore",
     "-maxcpucount:1",
-    "-p:PublishTrimmed=false",
-    "-p:PublishSingleFile=false",
-    "-p:PublishReadyToRun=false",
-    "-p:DeleteExistingFiles=true",
     "-o", $appFolder
-) + $wireProperties) -FailureMessage "BlazorPublisher application publish failed."
+) + $multiFileSelfContainedProperties + $wireProperties) -FailureMessage "BlazorPublisher application publish failed."
+Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $appFolder
 
 Write-Host "Restoring BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
 Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true",
@@ -130,19 +166,15 @@ Invoke-DotNet -Arguments @(
     "-c", $Configuration,
     "-f", "net10.0",
     "-r", $Runtime,
-    "--self-contained", "true",
     "--no-restore",
     "-maxcpucount:1",
-    "-p:PublishSingleFile=true",
-    "-p:IncludeNativeLibrariesForSelfExtract=true",
     "-p:DebugType=None",
     "-p:DebugSymbols=false",
-    "-p:DeleteExistingFiles=true",
     "-o", $setupFolder,
     "-p:SkipLoggingIntegrityGuard=true",
     "-p:SkipLocalizationIntegrityGuard=true",
     "-p:SkipGitSourceVisibilityGuard=true"
-) -FailureMessage "BlazorPublisher setup publish failed."
+) + $multiFileSelfContainedProperties) -FailureMessage "BlazorPublisher setup publish failed."
 
 $appExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Web.exe" } else { "PublisherStudio.Web" }
 $setupExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Setup.exe" } else { "PublisherStudio.Setup" }
@@ -156,9 +188,8 @@ Copy-Item $wireProtocolPackage (Join-Path $protocolAppDirectory $wireProtocolPac
 Copy-Item $wireProtocolPackage (Join-Path $protocolSetupDirectory $wireProtocolPackageName) -Force
 Copy-Item $wireProtocolPackage (Join-Path $artifacts $wireProtocolPackageName) -Force
 
-# Single-file setup publishing does not reliably copy linked Content items on every SDK/RID.
-# Copy the repository-owned icon explicitly so desktop and Start-menu shortcuts never depend
-# on an accidental MSBuild Content-item behavior.
+# Keep the repository-owned icon explicit in both publish outputs so desktop and Start-menu
+# shortcuts never depend on incidental SDK Content-item behavior.
 $publisherIcon = Join-Path $root "assets\PublisherStudio.ico"
 if (-not (Test-Path -LiteralPath $publisherIcon -PathType Leaf)) {
     throw "PublisherStudio release icon is unavailable: $publisherIcon"
@@ -166,18 +197,13 @@ if (-not (Test-Path -LiteralPath $publisherIcon -PathType Leaf)) {
 Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $setupFolder "PublisherStudio.ico") -Force
 Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $appFolder "PublisherStudio.ico") -Force
 
-$requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "Uninstall.cmd", "PublisherStudio.ico")
+$requiredSetupFiles = @("Default.cmd", "Install.cmd", "Update.cmd", "Start.cmd", "Start-NoBrowser.cmd", "Check-FFmpeg.cmd", "Install-FFmpeg.cmd", "Uninstall.cmd", "PublisherStudio.ico")
 $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path (Join-Path $setupFolder $_)) })
 if ($missingSetupFiles.Count -gt 0) { throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')" }
 
 Compress-Archive -Path $appFolder -DestinationPath $appZip -CompressionLevel Optimal -Force
 Compress-Archive -Path $setupFolder -DestinationPath $setupZip -CompressionLevel Optimal -Force
-if ($Runtime -eq "win-x64") {
-    Copy-Item (Join-Path $setupFolder "PublisherStudio.Setup.exe") (Join-Path $artifacts "PublisherStudio.Setup.exe") -Force
-}
-
 Write-Host "Release assets:" -ForegroundColor Green
 Write-Host "  $appZip"
 Write-Host "  $setupZip"
 Write-Host "  $(Join-Path $artifacts $wireProtocolPackageName)"
-if ($Runtime -eq "win-x64") { Write-Host "  $(Join-Path $artifacts 'PublisherStudio.Setup.exe')" }

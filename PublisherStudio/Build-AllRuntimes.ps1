@@ -14,6 +14,9 @@ $releaseScript = Join-Path $root "Build-Release.ps1"
 $packageDirectory = Join-Path $root "packages"
 $runtimes = @("win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")
 
+& (Join-Path $root "build\Assert-PublishConfiguration.ps1")
+& (Join-Path $root "build\Assert-InstallerWorkflow.ps1")
+
 if (-not $UseBundledWireProtocolPackage) {
     $ensureArguments = @{
         Version = $WireProtocolVersion

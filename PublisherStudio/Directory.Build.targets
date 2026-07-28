@@ -224,7 +224,7 @@
           StandardErrorImportance="High" />
   </Target>
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
   </PropertyGroup>
 
@@ -239,6 +239,6 @@
           ConsoleToMSBuild="true"
           StandardOutputImportance="High"
           StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
 </Project>

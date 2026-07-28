@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using PublisherStudio.Services.UserExperience;
 
 namespace PublisherStudio.Components.Shared;
@@ -15,6 +16,12 @@ public sealed class OperationalErrorBoundary : ErrorBoundary
 
     protected override Task OnErrorAsync(Exception exception)
     {
+        if (exception is OperationCanceledException or TaskCanceledException or JSDisconnectedException)
+        {
+            Logger.LogDebug(exception, "PublisherStudio interactive work ended during normal cancellation or circuit shutdown.");
+            return Task.CompletedTask;
+        }
+
         Logger.LogError(exception, "Unhandled PublisherStudio component failure in the active interactive circuit.");
         Notifications.Error(
             "The current view encountered an error. Review the local application log for the full exception.",

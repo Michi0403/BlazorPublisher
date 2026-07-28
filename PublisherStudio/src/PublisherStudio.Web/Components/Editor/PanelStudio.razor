@@ -198,9 +198,6 @@
                                                 data-panel-element-height="@NormalizedHeight(element)"
                                                 data-panel-element-z="@element.ZIndex"
                                                 title="Move @element.Name. Double-click to interact with its live content."
-                                                @onclick="() => SelectElement(element.Id)"
-                                                @ondblclick="() => ActivateElementInteraction(element.Id)"
-                                                @ondblclick:stopPropagation
                                                 @oncontextmenu="args => ShowElementContextMenu(element.Id, args)"
                                                 @oncontextmenu:preventDefault
                                                 @oncontextmenu:stopPropagation>
@@ -523,8 +520,10 @@
         try
         {
             _self ??= DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self);
-            _dropSurfaceBound = true;
+            _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self).ConfigureAwait(true);
+            if (!_dropSurfaceBound)
+                throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding.");
+            Logger.LogInformation("Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active.");
         }
         catch (JSDisconnectedException exception)
         {
@@ -662,7 +661,7 @@
 
         try
         {
-            var point = await ResolveCanvasPoint(args);
+            var point = await ResolveCanvasPoint(args).ConfigureAwait(true);
             if (_disposed || !ReferenceEquals(_draft, draft) || !draft.Views.Contains(view)) return;
 
             var canvasWidth = Math.Max(1, draft.CanvasWidth);
@@ -715,74 +714,125 @@
     }
 
     [JSInvokable]
-    public Task CommitPanelElementBounds(string elementId, double x, double y, double width, double height)
-    {
-        var draft = _draft;
-        var view = CurrentView;
-        if (_disposed || draft is null || view is null || !Guid.TryParse(elementId, out var id)) return Task.CompletedTask;
-        var element = view.Elements.FirstOrDefault(candidate => candidate.Id == id);
-        if (element is null) return Task.CompletedTask;
-        Layout.ApplyBounds(element, new PublicationCanvasBounds
+    public Task CommitPanelElementBounds(string elementId, double x, double y, double width, double height) =>
+        RunPanelInteropAsync("CommitBounds", () =>
         {
-            X = x * Math.Max(1, draft.CanvasWidth),
-            Y = y * Math.Max(1, draft.CanvasHeight),
-            Width = width * Math.Max(1, draft.CanvasWidth),
-            Height = height * Math.Max(1, draft.CanvasHeight)
-        }, draft.CanvasWidth, draft.CanvasHeight);
-        _selectedElementId = element.Id;
-        RefreshAdvancedJson();
-        return InvokeAsync(StateHasChanged);
-    }
+            var draft = _draft;
+            var view = CurrentView;
+            if (_disposed || draft is null || view is null || !Guid.TryParse(elementId, out var id))
+                return;
+            var element = view.Elements.FirstOrDefault(candidate => candidate.Id == id);
+            if (element is null)
+                return;
+            Layout.ApplyBounds(element, new PublicationCanvasBounds
+            {
+                X = x * Math.Max(1, draft.CanvasWidth),
+                Y = y * Math.Max(1, draft.CanvasHeight),
+                Width = width * Math.Max(1, draft.CanvasWidth),
+                Height = height * Math.Max(1, draft.CanvasHeight)
+            }, draft.CanvasWidth, draft.CanvasHeight);
+            _selectedElementId = element.Id;
+            RefreshAdvancedJson();
+        });
 
     [JSInvokable]
-    public Task SelectPanelElement(string elementId)
-    {
-        if (Guid.TryParse(elementId, out var id)) SelectElement(id);
-        return InvokeAsync(StateHasChanged);
-    }
+    public Task SelectPanelElement(string elementId) =>
+        RunPanelInteropAsync("SelectElement", () =>
+        {
+            if (Guid.TryParse(elementId, out var id))
+                SelectElement(id);
+        });
 
     [JSInvokable]
     public Task ActivatePanelElement(string elementId)
     {
-        if (!Guid.TryParse(elementId, out var id)) return Task.CompletedTask;
-        return InvokeAsync(() => ActivateElementInteraction(id));
+        if (!Guid.TryParse(elementId, out var id))
+            return Task.CompletedTask;
+        return RunPanelInteropAsync("ActivateElement", () => ActivateElementInteraction(id));
     }
 
     [JSInvokable]
-    public Task PanelStudioCommand(string command, double amount = 1)
-    {
-        if (_disposed || _interactionPreview) return Task.CompletedTask;
-        switch ((command ?? string.Empty).Trim().ToLowerInvariant())
+    public Task PanelStudioCommand(string command, double amount = 1) =>
+        RunPanelInteropAsync("Command", () =>
         {
-            case "left": NudgeSelected(-amount, 0); break;
-            case "right": NudgeSelected(amount, 0); break;
-            case "up": NudgeSelected(0, -amount); break;
-            case "down": NudgeSelected(0, amount); break;
-            case "delete": DeleteElement(); break;
-            case "duplicate": DuplicateElement(); break;
-            case "front": BringElementToFront(); break;
-            case "forward": MoveElementUp(); break;
-            case "backward": MoveElementDown(); break;
-            case "back": SendElementToBack(); break;
-            case "interact": EnableInteractionPreview(); break;
+            if (_disposed || _interactionPreview)
+                return;
+            switch ((command ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "left": NudgeSelected(-amount, 0); break;
+                case "right": NudgeSelected(amount, 0); break;
+                case "up": NudgeSelected(0, -amount); break;
+                case "down": NudgeSelected(0, amount); break;
+                case "delete": DeleteElement(); break;
+                case "duplicate": DuplicateElement(); break;
+                case "front": BringElementToFront(); break;
+                case "forward": MoveElementUp(); break;
+                case "backward": MoveElementDown(); break;
+                case "back": SendElementToBack(); break;
+                case "interact": EnableInteractionPreview(); break;
+            }
+        });
+
+    private async Task RunPanelInteropAsync(string operation, Action action)
+    {
+        try
+        {
+            action();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            Logger.LogDebug("Panel Studio browser operation {Operation} completed.", operation);
         }
-        return InvokeAsync(StateHasChanged);
+        catch (OperationCanceledException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio browser operation {Operation} was cancelled.", operation);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio browser operation {Operation} failed.", operation);
+            Notifications.Error("The panel interaction failed. Existing component data was kept unchanged.", "Panel Studio interaction", nameof(PanelStudio));
+        }
+    }
+
+    private async Task RunPanelInteropAsync(string operation, Func<Task> action)
+    {
+        try
+        {
+            await action().ConfigureAwait(true);
+            Logger.LogDebug("Panel Studio browser operation {Operation} completed.", operation);
+        }
+        catch (OperationCanceledException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio browser operation {Operation} was cancelled.", operation);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio browser operation {Operation} failed.", operation);
+            Notifications.Error("The panel interaction failed. Existing component data was kept unchanged.", "Panel Studio interaction", nameof(PanelStudio));
+        }
     }
 
     [JSInvokable]
     public Task ReportPanelInteractionError(string message)
     {
         var detail = string.IsNullOrWhiteSpace(message) ? "Unknown browser interaction error." : message.Trim();
+        if (_disposed || IsExpectedInteractionShutdown(detail))
+        {
+            Logger.LogDebug("Panel Studio browser interaction ended normally: {Message}", detail);
+            return Task.CompletedTask;
+        }
+
         Logger.LogWarning("Panel Studio browser interaction failed: {Message}", detail);
         Notifications.Warning(detail, "Panel Studio interaction", nameof(PanelStudio));
         return Task.CompletedTask;
     }
 
+    private static bool IsExpectedInteractionShutdown(string message) =>
+        Regex.IsMatch(message, "cancel(?:led|ed)?|disposed|disconnect|no longer|cannot send data|circuit|abort", RegexOptions.IgnoreCase);
+
     private async Task<PanelCanvasPoint> ResolveCanvasPoint(DragEventArgs args)
     {
         try
         {
-            return await JS.InvokeAsync<PanelCanvasPoint>("publisherStudio.panelStudioPoint", _canvasElement, args.ClientX, args.ClientY);
+            return await JS.InvokeAsync<PanelCanvasPoint>("publisherStudio.panelStudioPoint", _canvasElement, args.ClientX, args.ClientY).ConfigureAwait(true);
         }
         catch (JSException)
         {
@@ -831,7 +881,7 @@
         try
         {
             var fileName = SafeFileName(_draft.Name, "panel") + ".publisher-panel.json";
-            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", fileName, Files.SerializeElement(_draft), "application/json;charset=utf-8");
+            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", fileName, Files.SerializeElement(_draft), "application/json;charset=utf-8").ConfigureAwait(true);
             Notifications.Success("The complete reusable panel project was exported.", "Panel project exported", nameof(PanelStudio));
         }
         catch (Exception exception)
@@ -883,7 +933,7 @@
                 }
             };
             var json = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
-            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", SafeFileName(CurrentView.Name, "panel-view") + ".canvas", json, "application/json;charset=utf-8");
+            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", SafeFileName(CurrentView.Name, "panel-view") + ".canvas", json, "application/json;charset=utf-8").ConfigureAwait(true);
             Notifications.Success("The active view was exported using the open JSON Canvas format while preserving PublisherStudio element data.", "JSON Canvas exported", nameof(PanelStudio));
         }
         catch (Exception exception)
@@ -901,7 +951,7 @@
             var file = args.File;
             await using var source = file.OpenReadStream(long.MaxValue);
             using var reader = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-            var json = await reader.ReadToEndAsync();
+            var json = await reader.ReadToEndAsync().ConfigureAwait(true);
             using var document = JsonDocument.Parse(json);
             if (document.RootElement.ValueKind != JsonValueKind.Object)
                 throw new InvalidDataException("The selected file does not contain a JSON object.");
@@ -1032,7 +1082,7 @@
             var file = args.File;
             await using var source = file.OpenReadStream(long.MaxValue);
             using var reader = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-            var markup = await reader.ReadToEndAsync();
+            var markup = await reader.ReadToEndAsync().ConfigureAwait(true);
             AddElement(new HtmlEmbedElement
             {
                 Name = Path.GetFileNameWithoutExtension(file.Name), Html = markup,
@@ -1057,7 +1107,7 @@
             var file = args.File;
             await using var source = file.OpenReadStream(long.MaxValue);
             using var memory = new MemoryStream();
-            await source.CopyToAsync(memory);
+            await source.CopyToAsync(memory).ConfigureAwait(true);
             var mime = PublicationMediaData.NormalizeMimeType(file.ContentType, "application/octet-stream");
             var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(memory.ToArray())}";
             switch (selected)
@@ -1159,10 +1209,10 @@
 
     private async Task ShowElementContextMenu(Guid id, MouseEventArgs args)
     {
-        await CancelPanelPointerAsync();
+        await CancelPanelPointerAsync().ConfigureAwait(true);
         SelectElement(id);
-        await InvokeAsync(StateHasChanged);
-        await _elementContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _elementContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     private void EnableInteractionPreview() => _interactionPreview = true;
@@ -1174,7 +1224,7 @@
 
     private async Task ActivateElementInteraction(Guid id)
     {
-        await CancelPanelPointerAsync();
+        await CancelPanelPointerAsync().ConfigureAwait(true);
         SelectElement(id);
         if (SelectedElement is ImageFrameElement)
         {
@@ -1182,19 +1232,26 @@
             _pictureEditorTargetId = id;
             _pictureEditorSessionId = Guid.NewGuid();
             _pictureEditorVisible = true;
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             return;
         }
         _interactionPreview = true;
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private async Task CancelPanelPointerAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherStudio.cancelPanelStudioPointer", _canvasElement, true); }
+        try
+        {
+            await JS.InvokeVoidAsync("publisherStudio.cancelPanelStudioPointer", _canvasElement, true).ConfigureAwait(true);
+        }
         catch (JSDisconnectedException) { }
         catch (OperationCanceledException) { }
         catch (InvalidOperationException) { }
+        catch (JSException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio pointer cancellation was unavailable while the interaction surface was changing.");
+        }
     }
 
     private async Task SavePanelPicture(PictureEditorResult result)
@@ -1208,7 +1265,7 @@
             SelectElement(image.Id);
         }
         ClosePanelPictureEditor();
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private void ClosePanelPictureEditor()
@@ -1348,7 +1405,7 @@
             // not mutate the object that was just committed to the Mainframe.
             var committed = (PanelElement)Files.CloneElement(_draft);
             Panels.Normalize(Document, committed);
-            await Saved.InvokeAsync(committed);
+            await Saved.InvokeAsync(committed).ConfigureAwait(true);
             Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio));
         }
         catch (OperationCanceledException exception)
@@ -1370,10 +1427,11 @@
     {
         _disposed = true;
         ClosePanelPictureEditor();
-        try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement); }
+        try { await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement).ConfigureAwait(true); }
         catch (JSDisconnectedException) { }
         catch (OperationCanceledException) { }
         catch (InvalidOperationException) { }
+        catch (JSException) { }
         _dropSurfaceBound = false;
         _self?.Dispose();
         _self = null;

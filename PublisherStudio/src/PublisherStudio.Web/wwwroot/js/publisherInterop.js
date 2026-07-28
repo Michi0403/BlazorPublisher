@@ -6655,7 +6655,13 @@ function reportPanelStudioError(binding, error) {
     if (binding?.disposed || panelStudioExpectedShutdown(error)) return;
     const message = error instanceof Error ? error.message : String(error || 'Unknown panel interaction error.');
     console.warn('Panel Studio interaction failed.', error);
-    binding?.dotNetReference?.invokeMethodAsync?.('ReportPanelInteractionError', message).catch(() => {});
+    if (!binding?.dotNetReference || binding.reportingError) return;
+    binding.reportingError = true;
+    binding.dotNetReference.invokeMethodAsync('ReportPanelInteractionError', message)
+        .catch(reportError => {
+            if (!panelStudioExpectedShutdown(reportError)) console.debug('Panel Studio error reporting ended.', reportError);
+        })
+        .finally(() => { binding.reportingError = false; });
 }
 
 function panelStudioQueueInvoke(binding, method, ...args) {
@@ -6664,7 +6670,8 @@ function panelStudioQueueInvoke(binding, method, ...args) {
         .catch(() => {})
         .then(() => {
             if (binding.disposed || !binding.element?.isConnected) return;
-            return binding.dotNetReference?.invokeMethodAsync?.(method, ...args);
+            if (!binding.dotNetReference) throw new Error('Panel Studio .NET interaction reference is unavailable.');
+            return binding.dotNetReference.invokeMethodAsync(method, ...args);
         })
         .catch(error => reportPanelStudioError(binding, error));
     return binding.invokeQueue;
@@ -6751,7 +6758,7 @@ export function bindPanelStudioDropSurface(element, dotNetReference) {
     if (!(element instanceof HTMLElement)) return false;
     unbindPanelStudioDropSurface(element);
     const controller = new AbortController();
-    const binding = { element, dotNetReference, controller, disposed: false, pointer: null, gamepad: null, invokeQueue: Promise.resolve() };
+    const binding = { element, dotNetReference, controller, disposed: false, pointer: null, gamepad: null, reportingError: false, invokeQueue: Promise.resolve() };
     const options = { signal: controller.signal };
     const activeOptions = { signal: controller.signal, passive: false };
     panelStudioDropBindings.set(element, binding);
@@ -7855,7 +7862,8 @@ window.publisherStudio = {
     },
 
     panelStudioPoint(element, clientX, clientY) { return panelStudioPoint(element, clientX, clientY); },
-    bindPanelStudioDropSurface(element) { return bindPanelStudioDropSurface(element); },
+    bindPanelStudioDropSurface(element, dotNetReference) { return bindPanelStudioDropSurface(element, dotNetReference); },
+    cancelPanelStudioPointer(element, restore = true) { cancelPanelStudioPointer(element, restore); },
     unbindPanelStudioDropSurface(element) { unbindPanelStudioDropSurface(element); },
     clickElement(id) { clickElementById(id); },
     focusElement(id) {

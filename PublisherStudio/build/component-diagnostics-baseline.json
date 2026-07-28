@@ -1,0 +1,241 @@
+{
+  "files": {
+    "Components/App.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/AnimationPanel.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/BarcodeEditor.razor": {
+      "minCatchBlocks": 5,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/BarcodeView.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/DataManager.razor": {
+      "minCatchBlocks": 4,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/DataVisualClientHost.razor": {
+      "minCatchBlocks": 4,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/DataVisualEditor.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/DataVisualView.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/DevExtremeComponentEditor.razor": {
+      "minCatchBlocks": 5,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/DevExtremeComponentView.razor": {
+      "minCatchBlocks": 4,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/HtmlEmbedView.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/InspectorPanel.razor": {
+      "minCatchBlocks": 3,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/LiveSourceView.razor": {
+      "minCatchBlocks": 3,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaConverterStudio.razor": {
+      "minCatchBlocks": 10,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudio.razor": {
+      "minCatchBlocks": 61,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PageNavigator.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PageSurface.razor": {
+      "minCatchBlocks": 15,
+      "minLogCalls": 1,
+      "minNotificationCalls": 1
+    },
+    "Components/Editor/PanelElementPreview.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PanelLibrary.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PanelStudio.razor": {
+      "minCatchBlocks": 29,
+      "minLogCalls": 26,
+      "minNotificationCalls": 18
+    },
+    "Components/Editor/PanelView.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PictureEditor.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PictureEditor.razor.cs": {
+      "minCatchBlocks": 21,
+      "minLogCalls": 3,
+      "minNotificationCalls": 3
+    },
+    "Components/Editor/PrintPublication.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PublicationRibbon.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/PublicationTimeline.razor": {
+      "minCatchBlocks": 4,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/SpreadsheetEditor.razor": {
+      "minCatchBlocks": 8,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/SpreadsheetEditorResult.cs": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/StoryEditor.razor": {
+      "minCatchBlocks": 28,
+      "minLogCalls": 5,
+      "minNotificationCalls": 4
+    },
+    "Components/Editor/StreamingStudio.razor": {
+      "minCatchBlocks": 7,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/SvgWordArtText.cs": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/SystemFontPicker.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/VideoMediaView.razor": {
+      "minCatchBlocks": 2,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/WebDataRefreshHost.razor": {
+      "minCatchBlocks": 4,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/WordArtPathEditor.razor": {
+      "minCatchBlocks": 3,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/WordArtView.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Layout/MainLayout.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/OrganicPlugins/OrganicApprovalBar.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 2
+    },
+    "Components/OrganicPlugins/OrganicSecurityPanel.razor": {
+      "minCatchBlocks": 6,
+      "minLogCalls": 1,
+      "minNotificationCalls": 7
+    },
+    "Components/Pages/Editor.razor": {
+      "minCatchBlocks": 42,
+      "minLogCalls": 2,
+      "minNotificationCalls": 1
+    },
+    "Components/Pages/Error.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 1,
+      "minNotificationCalls": 1
+    },
+    "Components/Pages/Localization.razor": {
+      "minCatchBlocks": 2,
+      "minLogCalls": 4,
+      "minNotificationCalls": 3
+    },
+    "Components/Pages/OrganicPlugins.razor": {
+      "minCatchBlocks": 7,
+      "minLogCalls": 6,
+      "minNotificationCalls": 15
+    },
+    "Components/Routes.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Shared/OperationalErrorBoundary.cs": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 2,
+      "minNotificationCalls": 1
+    },
+    "Components/Shared/UserNotificationHost.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/_Imports.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    }
+  },
+  "schemaVersion": 1,
+  "sourceRoot": "src/PublisherStudio.Web"
+}

@@ -9,7 +9,7 @@ namespace PublisherStudio.Controllers.Streaming.UseCases;
 [Route("api/mediahost/sessions/{sessionId:guid}")]
 public sealed class StreamingIngestController(StreamingIngestUseCases useCases, WebRtcSignalingHub webRtcHub) : ControllerBase
 {
-    private static readonly JsonSerializerOptions IngestJson = new() { PropertyNameCaseInsensitive = true };
+    private readonly JsonSerializerOptions IngestJson = new() { PropertyNameCaseInsensitive = true };
     private readonly StreamingIngestUseCases _useCases = useCases;
     private readonly WebRtcSignalingHub _webRtcHub = webRtcHub;
 

@@ -83,7 +83,7 @@ public sealed class OrganicCapabilityCatalog(
             }
         ]);
 
-    private static OrganicCapabilityDescriptor Capability(string key, string name, string description, string organ, bool readOnly, bool confirmation, bool scheduling) => new()
+    private OrganicCapabilityDescriptor Capability(string key, string name, string description, string organ, bool readOnly, bool confirmation, bool scheduling) => new()
     {
         Key = key, DisplayName = name, Description = description, Controller = "OrganicPlugins", Method = "POST",
         Route = $"/api/organic/capabilities/{key}", Organs = [organ], Skills = Skills(key), RequiredSkillKeys = Skills(key),
@@ -110,7 +110,7 @@ public sealed class OrganicCapabilityCatalog(
         Source = "PublisherStudio"
     };
 
-    private static List<string> UiActivationKeys(string key) => key switch
+    private List<string> UiActivationKeys(string key) => key switch
     {
         "publisher.screen.capture" => ["publisherstudio.screenreader.recurring"],
         "publisher.screenreader.start" => ["publisherstudio.screenreader.recurring"],
@@ -120,7 +120,7 @@ public sealed class OrganicCapabilityCatalog(
         _ => []
     };
 
-    private static List<string> Skills(string key) => key switch
+    private List<string> Skills(string key) => key switch
     {
         "publisher.screen.capture" => ["vision", "screen", "screenshot"],
         "publisher.screen.capture.result" => ["vision", "screen", "screenshot", "evidence"],
@@ -138,7 +138,7 @@ public sealed class OrganicCapabilityCatalog(
         _ => ["publisherstudio", "project-context"]
     };
 
-    private static string Schema(string key) => key switch
+    private string Schema(string key) => key switch
     {
         "publisher.screen.capture" => "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"format\":{\"type\":\"string\"},\"quality\":{\"type\":\"number\"}}}",
         "publisher.screen.capture.result" => "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"},\"includeData\":{\"type\":\"boolean\"}}}",
@@ -155,7 +155,7 @@ public sealed class OrganicCapabilityCatalog(
         _ => "{\"type\":\"object\",\"properties\":{}}"
     };
 
-    private static string InputContract(string key) => key switch
+    private string InputContract(string key) => key switch
     {
         "publisher.screen.capture" => "No image path. The PublisherStudio user selects a screen/window in a fresh browser prompt.",
         "publisher.screen.record" => "maximumSeconds 1..15 and optional audio flag; the user selects the capture source in the browser.",
@@ -164,7 +164,7 @@ public sealed class OrganicCapabilityCatalog(
         _ => $"Parameters matching: {Schema(key)}"
     };
 
-    private static string OutputContract(string key) => key switch
+    private string OutputContract(string key) => key switch
     {
         "publisher.screen.capture" => "A bounded PNG data URL and pixel metadata returned in the current WorkResult.",
         "publisher.screen.record" => "A bounded WebM data URL, duration and MIME type returned in the current WorkResult.",
@@ -173,14 +173,14 @@ public sealed class OrganicCapabilityCatalog(
         _ => "A bounded JSON WorkResult associated with the original CorrelationId."
     };
 
-    private static string SecurityContract(string key) => key switch
+    private string SecurityContract(string key) => key switch
     {
         "publisher.screen.capture" or "publisher.screen.record" => "Always asks in LocalGPT, always asks in PublisherStudio, and always invokes the browser's current getDisplayMedia permission prompt. Saved permission cannot bypass it.",
         "publisher.text.edit.request" or "publisher.website.content.request" => "Requires the receiving PublisherStudio frontend for every current request. Content is encrypted after MFA trust is established.",
         _ => "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix."
     };
 
-    private static string OrganicUseCase(string key) => key switch
+    private string OrganicUseCase(string key) => key switch
     {
         "publisher.screen.capture" or "publisher.screen.record" => "Eyes organ for current visual evidence.",
         "publisher.text.edit.request" => "Human feedback organ for Council questions and reviewed text.",
@@ -188,7 +188,7 @@ public sealed class OrganicCapabilityCatalog(
         _ => "PublisherStudio organic capability."
     };
 
-    private static List<string> SuggestedCouncilRoles(string key) => key switch
+    private List<string> SuggestedCouncilRoles(string key) => key switch
     {
         "publisher.screen.capture" or "publisher.screen.record" => ["vision member", "evidence verifier"],
         "publisher.text.edit.request" => ["council leader", "human collaboration coordinator"],
@@ -198,6 +198,7 @@ public sealed class OrganicCapabilityCatalog(
 }
 
 public sealed class OrganicWorkExecutor(
+    IOrganicPluginProtocolCodec codec,
     IUserInputAutomationService input,
     IScreenshotCaptureService screenshots,
     IOpenScadDocumentService openScad,
@@ -248,7 +249,7 @@ public sealed class OrganicWorkExecutor(
             };
         }
         logger.LogInformation("Executed organic capability {CapabilityKey} for correlation {CorrelationId}.", envelope.CapabilityKey, envelope.CorrelationId);
-        return JsonSerializer.Serialize(result, OrganicPluginProtocolCodec.JsonOptions);
+        return JsonSerializer.Serialize(result, codec.JsonOptions);
     }
 
     private object QueueScreenshot(JsonElement parameters)
@@ -274,7 +275,7 @@ public sealed class OrganicWorkExecutor(
         };
     }
 
-    private static object ReadSecureCapture(OrganicWireEnvelope envelope, string expectedKind)
+    private object ReadSecureCapture(OrganicWireEnvelope envelope, string expectedKind)
     {
         if (string.IsNullOrWhiteSpace(envelope.InteractionValueJson))
             throw new InvalidOperationException("The PublisherStudio browser did not return current capture data after approval.");
@@ -297,7 +298,7 @@ public sealed class OrganicWorkExecutor(
         };
     }
 
-    private static object ReturnReviewedText(OrganicWireEnvelope envelope, JsonElement parameters)
+    private object ReturnReviewedText(OrganicWireEnvelope envelope, JsonElement parameters)
     {
         var text = envelope.InteractionValueJson ?? string.Empty;
         if (string.IsNullOrWhiteSpace(text))
@@ -314,7 +315,7 @@ public sealed class OrganicWorkExecutor(
         };
     }
 
-    private static object ReturnApprovedWebContent(OrganicWireEnvelope envelope, JsonElement parameters)
+    private object ReturnApprovedWebContent(OrganicWireEnvelope envelope, JsonElement parameters)
     {
         var content = envelope.InteractionValueJson ?? string.Empty;
         var maximum = Math.Clamp(GetInt(parameters, "maximumCharacters", 120000), 1000, 200000);
@@ -385,7 +386,7 @@ public sealed class OrganicWorkExecutor(
     private object GenerateOpenScad(JsonElement parameters)
     {
         if (!parameters.TryGetProperty("document", out var documentElement)) throw new ArgumentException("document is required.");
-        var document = documentElement.Deserialize<OpenScadDocument>(OrganicPluginProtocolCodec.JsonOptions) ?? throw new ArgumentException("document is invalid.");
+        var document = documentElement.Deserialize<OpenScadDocument>(codec.JsonOptions) ?? throw new ArgumentException("document is invalid.");
         return openScad.Generate(document);
     }
 
@@ -416,15 +417,15 @@ public sealed class OrganicWorkExecutor(
         return new { proposal.Id, proposal.Target, proposal.Text, proposal.Reason, RequiresUserAcceptance = true };
     }
 
-    private static JsonElement ReadParameters(OrganicWireEnvelope envelope)
+    private JsonElement ReadParameters(OrganicWireEnvelope envelope)
     {
         if (envelope.Properties is not null && envelope.Properties.TryGetValue("Parameters", out var parameters)) return parameters;
-        return JsonSerializer.SerializeToElement(new { }, OrganicPluginProtocolCodec.JsonOptions);
+        return JsonSerializer.SerializeToElement(new { }, codec.JsonOptions);
     }
-    private static string GetString(JsonElement root, string name, string fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() ?? fallback : fallback;
-    private static double GetDouble(JsonElement root, string name, double fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.TryGetDouble(out var result) ? result : fallback;
-    private static int GetInt(JsonElement root, string name, int fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.TryGetInt32(out var result) ? result : fallback;
-    private static bool GetBoolean(JsonElement root, string name, bool fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False ? value.GetBoolean() : fallback;
+    private string GetString(JsonElement root, string name, string fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() ?? fallback : fallback;
+    private double GetDouble(JsonElement root, string name, double fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.TryGetDouble(out var result) ? result : fallback;
+    private int GetInt(JsonElement root, string name, int fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.TryGetInt32(out var result) ? result : fallback;
+    private bool GetBoolean(JsonElement root, string name, bool fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False ? value.GetBoolean() : fallback;
 }
 
 public sealed class OrganicWorkCoordinator(
@@ -456,9 +457,9 @@ public sealed class OrganicWorkCoordinator(
                 || advertised.RequiresHumanConfirmation;
             envelope.Properties ??= new Dictionary<string, JsonElement>(StringComparer.Ordinal);
             envelope.Properties["InteractionEditor"] = JsonSerializer.SerializeToElement(
-                (permission?.InteractionEditor ?? advertised.InteractionEditor).ToString(), OrganicPluginProtocolCodec.JsonOptions);
+                (permission?.InteractionEditor ?? advertised.InteractionEditor).ToString(), codec.JsonOptions);
             envelope.Properties["ConfigurationKey"] = JsonSerializer.SerializeToElement(
-                advertised.ConfigurationKey, OrganicPluginProtocolCodec.JsonOptions);
+                advertised.ConfigurationKey, codec.JsonOptions);
         }
         var requiresFreshCaptureConsent = envelope.CapabilityKey is "publisher.screen.capture" or "publisher.screen.record";
         if (requiresFreshCaptureConsent)
@@ -523,7 +524,7 @@ public sealed class OrganicWorkCoordinator(
         return true;
     }
 
-    private static OrganicInteractionEditor ReadInteractionEditor(OrganicWireEnvelope envelope)
+    private OrganicInteractionEditor ReadInteractionEditor(OrganicWireEnvelope envelope)
     {
         if (envelope.Properties is not null && envelope.Properties.TryGetValue("InteractionEditor", out var value))
         {

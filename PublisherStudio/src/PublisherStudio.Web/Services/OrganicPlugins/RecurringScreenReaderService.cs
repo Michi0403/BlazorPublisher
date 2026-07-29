@@ -153,7 +153,7 @@ public sealed class RecurringScreenReaderService(
             CapturedUtc = completed.CompletedUtc,
             Debounce = new { MinimumIntervalSeconds = session.IntervalSeconds, MaximumPendingExecutions = 1 }
         };
-        var interactionJson = JsonSerializer.Serialize(interaction, OrganicPluginProtocolCodec.JsonOptions);
+        var interactionJson = JsonSerializer.Serialize(interaction, codec.JsonOptions);
         var envelope = new OrganicWireEnvelope
         {
             MessageType = OrganicWireMessageType.Invoke,
@@ -172,13 +172,13 @@ public sealed class RecurringScreenReaderService(
             InteractionValueContentType = "application/json",
             Properties = new Dictionary<string, JsonElement>
             {
-                ["Parameters"] = JsonSerializer.SerializeToElement(interaction, OrganicPluginProtocolCodec.JsonOptions),
+                ["Parameters"] = JsonSerializer.SerializeToElement(interaction, codec.JsonOptions),
                 ["Recurring"] = JsonSerializer.SerializeToElement(new OrganicRecurringExecution
                 {
                     IntervalSeconds = session.IntervalSeconds,
                     DebounceMilliseconds = 750,
                     MaximumPendingExecutions = 1
-                }, OrganicPluginProtocolCodec.JsonOptions)
+                }, codec.JsonOptions)
             }
         };
         session.CorrelationId = envelope.CorrelationId;
@@ -189,7 +189,7 @@ public sealed class RecurringScreenReaderService(
         var response = await connection.WaitForResultAsync(envelope.CorrelationId, TimeSpan.FromMinutes(3), cancellationToken).ConfigureAwait(false);
         session.LastResultJson = response.Properties is null
             ? response.InteractionValueJson ?? string.Empty
-            : JsonSerializer.Serialize(response.Properties, OrganicPluginProtocolCodec.JsonOptions);
+            : JsonSerializer.Serialize(response.Properties, codec.JsonOptions);
         session.LastError = response.Error;
         session.LastCompletedUtc = DateTimeOffset.UtcNow;
         session.ActiveScreenshotRequestId = null;

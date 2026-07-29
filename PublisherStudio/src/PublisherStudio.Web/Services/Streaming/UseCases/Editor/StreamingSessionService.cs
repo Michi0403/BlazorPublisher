@@ -214,7 +214,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
         }, cancellationToken);
     }
 
-    private static Guid? ResolveProgramPage(PublicationDocument document) =>
+    private Guid? ResolveProgramPage(PublicationDocument document) =>
         document.Streaming.ProgramPageId is { } configured && document.Pages.Any(page => page.Id == configured)
             ? configured
             : document.Pages.FirstOrDefault()?.Id;

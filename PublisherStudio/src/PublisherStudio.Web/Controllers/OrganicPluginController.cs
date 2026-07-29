@@ -13,10 +13,46 @@ public sealed class OrganicPluginController(
     IOrganicWorkCoordinator work,
     IOrganicResultStore results,
     ILocalGptConnectionService connection,
+    IOrganicConnectionRuntimeState runtimeState,
+    IOrganicReplayPolicyDataService replayPolicy,
     ILogger<OrganicPluginController> logger) : ControllerBase
 {
     [HttpGet("status")]
     public ActionResult<OrganicConnectionState> Status() => Ok(connection.State);
+
+
+    [HttpGet("transport")]
+    public ActionResult<OrganicConnectionRuntimeSnapshot> Transport()
+    {
+        try
+        {
+            var snapshot = runtimeState.GetSnapshot();
+            logger.LogDebug($"Returned organic transport state for connection {snapshot.ConnectionId}.");
+            return Ok(snapshot);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not return the organic transport state.");
+            return Problem(ex.Message);
+        }
+    }
+
+
+    [HttpGet("replay-policy")]
+    public ActionResult<OrganicReplayPolicySnapshot> ReplayPolicy()
+    {
+        try
+        {
+            var snapshot = replayPolicy.GetSnapshot();
+            logger.LogDebug($"Returned the configured organic replay policy.");
+            return Ok(snapshot);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not return the configured organic replay policy.");
+            return Problem(ex.Message);
+        }
+    }
 
     [HttpGet("peers")]
     public ActionResult<IReadOnlyList<OrganicPeerAdvertisement>> Peers() => Ok(discovery.GetPeers());

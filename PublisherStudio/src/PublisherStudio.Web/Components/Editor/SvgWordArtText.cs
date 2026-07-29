@@ -70,7 +70,7 @@ public sealed class SvgWordArtText : ComponentBase
         builder.CloseElement();
     }
 
-    private static void AddAttribute(RenderTreeBuilder builder, int sequence, string name, string? value)
+    private void AddAttribute(RenderTreeBuilder builder, int sequence, string name, string? value)
     {
         if (!string.IsNullOrWhiteSpace(value)) builder.AddAttribute(sequence, name, value);
     }

@@ -15,5 +15,7 @@ const required = [
 ];
 for (const rel of required) assert.ok(fs.existsSync(path.join(root, rel)), `Required maintained source missing: ${rel}`);
 assert.equal(fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion')), false);
-assert.equal(fs.readdirSync(path.join(root, 'packages')).some(name => name.endsWith('.nupkg')), false, 'Generated protocol packages must not be committed.');
+const packageFiles = fs.readdirSync(path.join(root, 'packages')).filter(name => name.endsWith('.nupkg')).sort();
+assert.deepEqual(packageFiles, ['LocalGPT.WireProtocolVersion.2.1.0.nupkg'], 'Only the authoritative protocol package required for an offline source build may be shipped.');
+assert.ok(fs.statSync(path.join(root, 'packages', packageFiles[0])).size > 0, 'The authoritative protocol package must not be empty.');
 console.log('PASS current PublisherStudio maintained-source preservation contract.');

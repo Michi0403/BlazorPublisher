@@ -29,6 +29,7 @@ public static class PublisherStudioServiceCollectionExtensions
         services.Configure<PanelTextPatternStoreOptions>(configuration.GetSection(PanelTextPatternStoreOptions.SectionName));
 
         AddSingleton<IPanelStudioTextPatternDataService, PanelStudioTextPatternDataService>(services);
+        AddSingleton<IPublisherRuntimePolicyDataService, PublisherRuntimePolicyDataService>(services);
         AddSingleton<PanelStudioTextService, PanelStudioTextService>(services);
         AddSingleton<IApplicationPortResolver, ApplicationPortResolver>(services);
         AddSingleton<IRuntimeEndpointWriter, RuntimeEndpointWriter>(services);
@@ -88,6 +89,9 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IBusinessObjectContextService, BusinessObjectContextService>(services);
 
         AddSingleton<IOrganicPluginProtocolCodec, OrganicPluginProtocolCodec>(services);
+        AddSingleton<IOrganicTransportSecurityPolicy, OrganicTransportSecurityPolicy>(services);
+        AddSingleton<IOrganicConnectionRuntimeState, OrganicConnectionRuntimeStateService>(services);
+        AddSingleton<IOrganicWireEnvelopeFactory, OrganicWireEnvelopeFactory>(services);
         AddSingleton<IOrganicRuntimeSecurityService, OrganicRuntimeSecurityService>(services);
         AddSingleton<ILocalGptDiscoveryRegistry, LocalGptDiscoveryRegistry>(services);
         AddSingleton<IPublisherDxFunctionCatalogDataService, PublisherDxFunctionCatalogDataService>(services);
@@ -97,6 +101,7 @@ public static class PublisherStudioServiceCollectionExtensions
             provider.GetRequiredService<IOrganicCapabilityCatalog>());
         AddSingleton<IOrganicPermissionStore, OrganicPermissionStore>(services);
         AddSingleton<IOrganicResultStore, OrganicResultStore>(services);
+        AddSingleton<IOrganicReplayPolicyDataService, OrganicReplayPolicyDataService>(services);
         AddSingleton<IOrganicReplayGuard, OrganicReplayGuard>(services);
         AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);
         AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);

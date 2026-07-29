@@ -8,7 +8,7 @@ namespace PublisherStudio.Controllers;
 [Route("api/assets")]
 public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : ControllerBase
 {
-    private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
+    private readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"
     };

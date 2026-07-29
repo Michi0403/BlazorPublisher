@@ -8,12 +8,14 @@ namespace PublisherStudio.Services.OrganicPlugins;
 
 public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 {
-    internal static readonly JsonSerializerOptions JsonOptions = new()
+    private readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter() }
     };
+
+    public JsonSerializerOptions JsonOptions => jsonOptions;
 
     public string Serialize(OrganicWireEnvelope envelope, bool seal = true)
     {
@@ -70,7 +72,7 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
         }
     }
 
-    private static void ValidatePayloadShape(OrganicWireEnvelope envelope)
+    private void ValidatePayloadShape(OrganicWireEnvelope envelope)
     {
         if (!string.IsNullOrWhiteSpace(envelope.EncryptedPayload) && envelope.Properties is not null)
             throw new InvalidDataException("EncryptedPayload and public Properties are mutually exclusive.");
@@ -78,7 +80,7 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
             throw new InvalidDataException("The organic 1-Wire property count exceeds the supported limit.");
     }
 
-    private static byte[] BuildIntegrityBytes(OrganicWireEnvelope envelope)
+    private byte[] BuildIntegrityBytes(OrganicWireEnvelope envelope)
     {
         var orderedProperties = envelope.Properties is null ? null : new SortedDictionary<string, JsonElement>(envelope.Properties, StringComparer.Ordinal);
         var view = new
@@ -99,7 +101,7 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
         return JsonSerializer.SerializeToUtf8Bytes(view, JsonOptions);
     }
 
-    private static uint ComputeCrc32(ReadOnlySpan<byte> data)
+    private uint ComputeCrc32(ReadOnlySpan<byte> data)
     {
         var crc = 0xFFFFFFFFu;
         foreach (var value in data)

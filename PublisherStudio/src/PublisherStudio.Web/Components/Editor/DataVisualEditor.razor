@@ -448,9 +448,9 @@
         _draft.AggregationMode = DataVisualAggregationMode.Auto;
         _draft.SortMode = DataVisualSortMode.DataOrder;
     }
-    private static string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
+    private string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
 
-    private static DataVisualElement Clone(DataVisualElement source)
+    private DataVisualElement Clone(DataVisualElement source)
     {
         var result = new DataVisualElement();
         CopySettings(source, result);
@@ -461,7 +461,7 @@
         return result;
     }
 
-    private static void CopySettings(DataVisualElement source, DataVisualElement target)
+    private void CopySettings(DataVisualElement source, DataVisualElement target)
     {
         target.DataObjectId = source.DataObjectId; target.VisualKind = source.VisualKind;
         target.CartesianStyle = source.CartesianStyle; target.PieStyle = source.PieStyle; target.PolarStyle = source.PolarStyle; target.SparklineStyle = source.SparklineStyle;
@@ -475,7 +475,7 @@
         target.Background = source.Background; target.BorderColor = source.BorderColor; target.BorderWidthMm = source.BorderWidthMm;
     }
 
-    private static string KindIcon(DataVisualKind kind) => kind switch
+    private string KindIcon(DataVisualKind kind) => kind switch
     {
         DataVisualKind.CartesianChart => "▥", DataVisualKind.PieChart => "◕", DataVisualKind.PolarChart => "✥",
         DataVisualKind.Sparkline => "⌁", DataVisualKind.BarGauge => "◔", DataVisualKind.CircularGauge => "◴",
@@ -483,8 +483,8 @@
         DataVisualKind.Funnel => "▽", DataVisualKind.Pyramid => "△", DataVisualKind.TreeMap => "▦",
         DataVisualKind.DataTable => "▤", _ => "%"
     };
-    private static string KindName(DataVisualKind kind) => Friendly(kind.ToString());
-    private static string KindDescription(DataVisualKind kind) => kind switch
+    private string KindName(DataVisualKind kind) => Friendly(kind.ToString());
+    private string KindDescription(DataVisualKind kind) => kind switch
     {
         DataVisualKind.CartesianChart => "All 23 DevExtreme XY, range, bubble, stock, and candlestick series",
         DataVisualKind.PieChart => "Pie or doughnut composition",
@@ -601,7 +601,7 @@
             : "Typed arguments, repeated-category aggregation, and sorting are applied in the browser and export runtime.";
     }
 
-    private static string AggregationLabel(DataVisualAggregationMode mode) => mode switch
+    private string AggregationLabel(DataVisualAggregationMode mode) => mode switch
     {
         DataVisualAggregationMode.Auto => "Auto (sum duplicates)",
         DataVisualAggregationMode.None => "Keep every row",
@@ -624,7 +624,7 @@
         if (string.IsNullOrWhiteSpace(_draft.TargetField)) _draft.TargetField = all.FirstOrDefault(field => !string.Equals(field, _draft.ArgumentField, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
     }
 
-    private static bool ValidateFields(DataVisualElement item)
+    private bool ValidateFields(DataVisualElement item)
     {
         if (item.VisualKind == DataVisualKind.DataTable) return true;
         if (item.ValueFields.Count == 0) return false;
@@ -639,8 +639,8 @@
                 && !string.IsNullOrWhiteSpace(item.LowValueField) && !string.IsNullOrWhiteSpace(item.CloseValueField);
         return true;
     }
-    private static string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
-    private static bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
-    private static bool TryDouble(object? value, out double result) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out result) || double.TryParse(value?.ToString(), out result);
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
+    private bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
+    private bool TryDouble(object? value, out double result) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out result) || double.TryParse(value?.ToString(), out result);
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 }

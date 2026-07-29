@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using PublisherStudio.Domain;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.OAuth;
 
@@ -17,10 +18,9 @@ public sealed class TwitchOAuthService
     private const string StreamKeyUrl = "https://api.twitch.tv/helix/streams/key";
     private const string IngestUrl = "https://ingest.twitch.tv/ingests";
     private const string GlobalEndpoint = "rtmp://ingest.global-contribute.live-video.net/app/{streamKey}";
-    private static readonly TimeSpan ValidationInterval = TimeSpan.FromMinutes(55);
-    private static readonly TimeSpan RefreshSafetyWindow = TimeSpan.FromMinutes(5);
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
+    private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly StreamingProfileStore _profiles;
     private readonly IConfiguration _configuration;
@@ -29,8 +29,10 @@ public sealed class TwitchOAuthService
     public TwitchOAuthService(
         IHttpClientFactory httpClientFactory,
         StreamingProfileStore profiles,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IPublisherRuntimePolicyDataService runtimePolicy)
     {
+        _runtimePolicy = runtimePolicy;
         _httpClientFactory = httpClientFactory;
         _profiles = profiles;
         _configuration = configuration;
@@ -242,15 +244,15 @@ public sealed class TwitchOAuthService
             var now = DateTimeOffset.UtcNow;
             if (!forceValidation
                 && credentials.LastValidatedUtc is { } lastValidated
-                && now - lastValidated < ValidationInterval
+                && now - lastValidated < _runtimePolicy.TwitchValidationInterval
                 && credentials.AccessTokenExpiresUtc is { } expiresUtc
-                && expiresUtc - now > RefreshSafetyWindow)
+                && expiresUtc - now > _runtimePolicy.TwitchRefreshSafetyWindow)
                 return credentials.AccessToken;
 
             var validation = await ValidateTokenAsync(credentials.AccessToken, cancellationToken);
             if (validation is not null
                 && string.Equals(validation.ClientId, credentials.ClientId, StringComparison.Ordinal)
-                && validation.ExpiresIn > (int)RefreshSafetyWindow.TotalSeconds)
+                && validation.ExpiresIn > (int)_runtimePolicy.TwitchRefreshSafetyWindow.TotalSeconds)
             {
                 await _profiles.MarkOAuthValidatedAsync(
                     profileId,
@@ -412,7 +414,7 @@ public sealed class TwitchOAuthService
             .ToList();
     }
 
-    private static async Task<double?> MeasureTcpLatencyAsync(string host, int port, CancellationToken cancellationToken)
+    private async Task<double?> MeasureTcpLatencyAsync(string host, int port, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(host)) return null;
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -441,7 +443,7 @@ public sealed class TwitchOAuthService
         return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 
-    private static async Task<T?> ReadJsonAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+    private async Task<T?> ReadJsonAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         try
         {
@@ -454,7 +456,7 @@ public sealed class TwitchOAuthService
         }
     }
 
-    private static async Task<string> ReadTwitchErrorAsync(
+    private async Task<string> ReadTwitchErrorAsync(
         HttpResponseMessage response,
         string? parsedMessage,
         CancellationToken cancellationToken)
@@ -465,13 +467,13 @@ public sealed class TwitchOAuthService
         return NormalizeTwitchError(message);
     }
 
-    private static async Task<string> ReadResponseTextAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    private async Task<string> ReadResponseTextAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         try { return await response.Content.ReadAsStringAsync(cancellationToken); }
         catch { return string.Empty; }
     }
 
-    private static string NormalizeTwitchError(string message)
+    private string NormalizeTwitchError(string message)
     {
         message = message.Trim();
         if (message.StartsWith('{'))
@@ -486,11 +488,11 @@ public sealed class TwitchOAuthService
         return string.IsNullOrWhiteSpace(message) ? "Twitch authorization failed." : message;
     }
 
-    private static string BuildScopes(bool includeChat) => includeChat
+    private string BuildScopes(bool includeChat) => includeChat
         ? "channel:read:stream_key chat:read chat:edit"
         : "channel:read:stream_key";
 
-    private static TwitchIngestCandidate CreateGlobalCandidate() => new()
+    private TwitchIngestCandidate CreateGlobalCandidate() => new()
     {
         Name = "Twitch Global (automatic routing)",
         Endpoint = GlobalEndpoint,
@@ -498,7 +500,7 @@ public sealed class TwitchOAuthService
         IsGlobal = true
     };
 
-    private static string NormalizeEndpoint(string? endpoint)
+    private string NormalizeEndpoint(string? endpoint)
     {
         var value = endpoint?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(value)) return string.Empty;
@@ -508,7 +510,7 @@ public sealed class TwitchOAuthService
         return value;
     }
 
-    private static string TryReadHost(string? endpoint)
+    private string TryReadHost(string? endpoint)
     {
         if (Uri.TryCreate(endpoint, UriKind.Absolute, out var uri)) return uri.Host;
         return string.Empty;

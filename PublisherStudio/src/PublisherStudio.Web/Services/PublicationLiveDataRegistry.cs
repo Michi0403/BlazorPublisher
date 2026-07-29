@@ -87,7 +87,7 @@ public sealed class PublicationLiveDataRegistry
     }
 
 
-    private static bool CanReuseDataSnapshot(LivePublicationSnapshot? previous, PublicationDataObject item)
+    private bool CanReuseDataSnapshot(LivePublicationSnapshot? previous, PublicationDataObject item)
         => (item.SourceKind is not PublicationDataSourceKind.DocumentObjects
             and not PublicationDataSourceKind.PublicationPages
             and not PublicationDataSourceKind.PublicationDocument

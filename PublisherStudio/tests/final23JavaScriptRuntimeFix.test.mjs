@@ -43,5 +43,8 @@ test('final23 preserves stable Panel Studio binding and guards every reviewed br
     assert.doesNotMatch(text, /catch\s*(?:\([^)]*\))?\s*\{\s*\}/, relative);
   }
   const guard = read('build/Assert-JavaScriptDiagnostics.ps1');
+  const targets = read('Directory.Build.targets');
   assert.match(guard, /javascript-diagnostics-files\.sha256/);
-  assert.match(targets, /Assert-JavaScriptDiagnostics\.ps1/);});
+  assert.match(targets, /Assert-JavaScriptDiagnostics\.ps1/);
+  assert.match(targets, /AssertPublisherJavaScriptDiagnostics/);
+});

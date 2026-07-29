@@ -56,7 +56,7 @@
         _ => false
     };
     private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor};{Item.CustomCss}";
-    private static string Inv(double value) => value.ToString("0.####", CultureInfo.InvariantCulture);
+    private string Inv(double value) => value.ToString("0.####", CultureInfo.InvariantCulture);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

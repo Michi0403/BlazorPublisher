@@ -9,7 +9,7 @@ namespace PublisherStudio.Controllers;
 [Route("api/media-conversion")]
 public sealed class MediaConversionController(IMediaConversionService conversions) : ControllerBase
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly IMediaConversionService _conversions = conversions;
 
     [HttpGet("capabilities")]

@@ -165,7 +165,7 @@ public sealed class RtspLanServer : IAsyncDisposable
         }
     }
 
-    private static string RequestBase(string requestUri)
+    private string RequestBase(string requestUri)
     {
         var separator = requestUri.IndexOf('?');
         return (separator >= 0 ? requestUri[..separator] : requestUri).TrimEnd('/');
@@ -184,7 +184,7 @@ public sealed class RtspLanServer : IAsyncDisposable
         return suppliedBytes.Length == expectedBytes.Length && CryptographicOperations.FixedTimeEquals(suppliedBytes, expectedBytes);
     }
 
-    private static int ParseInterleavedChannel(string transport)
+    private int ParseInterleavedChannel(string transport)
     {
         var marker = "interleaved=";
         var index = transport.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
@@ -193,7 +193,7 @@ public sealed class RtspLanServer : IAsyncDisposable
         return int.TryParse(value, out var channel) ? Math.Clamp(channel, 0, 254) : 0;
     }
 
-    private static async Task<RtspRequest?> ReadRequestAsync(NetworkStream stream, CancellationToken cancellationToken)
+    private async Task<RtspRequest?> ReadRequestAsync(NetworkStream stream, CancellationToken cancellationToken)
     {
         var buffer = new List<byte>(2048);
         var one = new byte[1];
@@ -219,7 +219,7 @@ public sealed class RtspLanServer : IAsyncDisposable
         return new RtspRequest(first[0].ToUpperInvariant(), first[1], headers);
     }
 
-    private static byte[] Response(int status, string cseq, IReadOnlyList<string>? headers = null, string body = "")
+    private byte[] Response(int status, string cseq, IReadOnlyList<string>? headers = null, string body = "")
     {
         var reason = status switch { 200 => "OK", 401 => "Unauthorized", 405 => "Method Not Allowed", 461 => "Unsupported Transport", _ => "Error" };
         var builder = new StringBuilder($"RTSP/1.0 {status} {reason}\r\nCSeq: {cseq}\r\nServer: PublisherStudio\r\n");

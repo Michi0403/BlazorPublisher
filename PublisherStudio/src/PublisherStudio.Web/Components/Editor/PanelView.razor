@@ -116,7 +116,7 @@
         var height = element.Height / Math.Max(1, Item.CanvasHeight) * 100;
         return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
     }
-    private static string ResponsiveElementClass(PublicationElement element) => element switch
+    private string ResponsiveElementClass(PublicationElement element) => element switch
     {
         TextFrameElement => "panel-responsive-title",
         DataVisualElement visual when visual.VisualKind == DataVisualKind.DataTable => "panel-responsive-wide",
@@ -124,16 +124,16 @@
         HtmlEmbedElement or PanelElement or LiveSourceElement or VideoElement => "panel-responsive-wide",
         _ => "panel-responsive-card"
     };
-    private static string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
+    private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{Mm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";
-    private static string ImageFrameStyle(ImageFrameElement image) => $"border-radius:{(image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(image.CornerRadiusMm) : "0")};border:{Mm(image.BorderWidthMm)} solid {image.BorderColor};overflow:hidden";
-    private static string ImageStyle(ImageFrameElement image)
+    private string ImageFrameStyle(ImageFrameElement image) => $"border-radius:{(image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(image.CornerRadiusMm) : "0")};border:{Mm(image.BorderWidthMm)} solid {image.BorderColor};overflow:hidden";
+    private string ImageStyle(ImageFrameElement image)
     {
         var sx = image.FlipHorizontal ? -image.CropScale : image.CropScale;
         var sy = image.FlipVertical ? -image.CropScale : image.CropScale;
         return $"width:100%;height:100%;object-fit:{(image.FitInsideFrame ? "contain" : "cover")};transform:translate({Inv(image.CropX)}%,{Inv(image.CropY)}%) rotate({Inv(image.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(image.Opacity)};filter:brightness({Inv(image.Brightness)}) contrast({Inv(image.Contrast)}) saturate({Inv(image.Saturation)}) hue-rotate({Inv(image.HueRotation)}deg) invert({Inv(image.Invert)}) grayscale({Inv(image.Grayscale)}) sepia({Inv(image.Sepia)}) blur({Inv(image.Blur)}px)";
     }
-    private static string Mm(double value) => $"{Inv(value)}mm";
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Mm(double value) => $"{Inv(value)}mm";
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 }

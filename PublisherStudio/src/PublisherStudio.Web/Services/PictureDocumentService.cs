@@ -147,7 +147,7 @@ public sealed class PictureDocumentService
         }
     }
 
-    private static string NormalizeSvgMarkup(string? markup)
+    private string NormalizeSvgMarkup(string? markup)
     {
         if (string.IsNullOrWhiteSpace(markup)) return string.Empty;
         var trimmed = markup.Trim();
@@ -159,7 +159,7 @@ public sealed class PictureDocumentService
         return trimmed;
     }
 
-    private static (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
+    private (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
     {
         width = Math.Max(1, width);
         height = Math.Max(1, height);
@@ -168,7 +168,7 @@ public sealed class PictureDocumentService
         return (Math.Max(1, width * scale), Math.Max(1, height * scale));
     }
 
-    private static string NextLayerName(PictureDocument document, string requested)
+    private string NextLayerName(PictureDocument document, string requested)
     {
         requested = string.IsNullOrWhiteSpace(requested) ? "Layer" : requested.Trim();
         if (document.Layers.All(layer => !string.Equals(layer.Name, requested, StringComparison.OrdinalIgnoreCase)))
@@ -182,5 +182,5 @@ public sealed class PictureDocumentService
         return $"{requested} {Guid.NewGuid():N}";
     }
 
-    private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;
+    private double NormalizeAngle(double value) => (value % 360 + 360) % 360;
 }

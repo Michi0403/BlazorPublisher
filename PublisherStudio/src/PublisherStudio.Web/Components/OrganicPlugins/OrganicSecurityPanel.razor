@@ -90,7 +90,7 @@
 </section>
 
 @code {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
+    private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private OneWireRuntimeSecurityStatus _status = new();
     private IReadOnlyList<OneWireTrustedPeerDescriptor> _trustedPeers = [];
     private string _otpUri = string.Empty;

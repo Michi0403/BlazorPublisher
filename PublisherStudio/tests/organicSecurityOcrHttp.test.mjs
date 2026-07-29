@@ -56,8 +56,11 @@ assert.ok(pictureRazor.includes('CanUseLocalGptOcr'));
 assert.ok(pictureRazor.includes('LocalGPT AI'));
 
 const http = read('src/PublisherStudio.Web/Controllers/OrganicWireHttpController.cs');
+const envelopeFactory = read('src/PublisherStudio.Web/Services/OrganicPlugins/OrganicWireEnvelopeFactory.cs');
 assert.ok(http.includes('api/organic/onewire/http-json'));
-assert.ok(http.includes('ApprovalRequired'));
+assert.ok(http.includes('CreateWorkEnvelope'));
+assert.ok(envelopeFactory.includes('OrganicWireMessageType.ApprovalRequired'));
+assert.ok(envelopeFactory.includes('OrganicWorkStatus.PendingApproval'));
 assert.ok(http.includes('MaximumMessageBytes'));
 assert.ok(http.includes('PollWork'));
 assert.ok(coordinator.includes('publisher.website.content.request'));

@@ -86,3 +86,21 @@ public sealed class RecurringScreenReaderSession
     public int SkippedBusyTicks { get; set; }
     public int CompletedExecutions { get; set; }
 }
+
+
+
+public sealed class OrganicReplayPolicySnapshot
+{
+    public TimeSpan Retention { get; init; }
+    public TimeSpan AllowedFutureSkew { get; init; }
+    public int CleanupInterval { get; init; }
+    public int MaximumTrackedMessages { get; init; }
+}
+
+public sealed class OrganicConnectionRuntimeSnapshot
+{
+    public Guid ConnectionId { get; init; }
+    public string PeerId { get; init; } = string.Empty;
+    public bool IsLoopback { get; init; } = true;
+    public bool IsConnected { get; init; }
+}

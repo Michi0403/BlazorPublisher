@@ -26,7 +26,7 @@ public partial class PictureEditor
     private const string LayerDropInputId = "picture-studio-layer-drop-input";
     private const double MinDrawWidth = .25;
     private const double MaxDrawWidth = 512;
-    private static readonly string[] PictureColors =
+    private readonly string[] PictureColors =
     [
         "#000000", "#ffffff", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b", "#92400e"
     ];
@@ -826,7 +826,7 @@ public partial class PictureEditor
         _ocrStatus = string.Empty;
     }
 
-    private static string ReadWireString(OrganicWireEnvelope envelope, string key)
+    private string ReadWireString(OrganicWireEnvelope envelope, string key)
     {
         if (envelope.Properties is null || !envelope.Properties.TryGetValue(key, out var value)) return string.Empty;
         return value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : value.GetRawText();
@@ -900,7 +900,7 @@ public partial class PictureEditor
         catch (JSException) { return null; }
     }
 
-    private static List<PicturePoint> SelectionPolygon(PictureAreaSelection selection)
+    private List<PicturePoint> SelectionPolygon(PictureAreaSelection selection)
     {
         var points = selection.Points
             .Where(point => double.IsFinite(point.X) && double.IsFinite(point.Y))
@@ -1006,7 +1006,7 @@ public partial class PictureEditor
         if (State.ClearSelectedClip()) _notice = "The layer cut was cleared.";
     }
 
-    private static double Distance(PicturePoint first, PicturePoint second)
+    private double Distance(PicturePoint first, PicturePoint second)
     {
         var x = first.X - second.X;
         var y = first.Y - second.Y;
@@ -1058,12 +1058,12 @@ public partial class PictureEditor
         _drawWidth = Math.Clamp(value, MinDrawWidth, MaxDrawWidth);
         _renderRequested = true;
     }
-    private static double WidthToSlider(double width)
+    private double WidthToSlider(double width)
     {
         var clamped = Math.Clamp(width, MinDrawWidth, MaxDrawWidth);
         return Math.Log(clamped / MinDrawWidth) / Math.Log(MaxDrawWidth / MinDrawWidth) * 100;
     }
-    private static double SliderToWidth(double slider)
+    private double SliderToWidth(double slider)
     {
         var normalized = Math.Clamp(slider, 0, 100) / 100;
         var width = MinDrawWidth * Math.Pow(MaxDrawWidth / MinDrawWidth, normalized);
@@ -1211,7 +1211,7 @@ public partial class PictureEditor
     {
         if (State.SelectedLayer is PictureLayer layer) State.ToggleVisibility(layer.Id);
     }
-    private static string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
+    private string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
 
     private void ChangeDocumentName(ChangeEventArgs args) => State.SetDocumentName(Text(args));
     private void ChangeCanvasWidth(ChangeEventArgs args) => State.SetDocumentSize(Int(args, State.Document.WidthPx), State.Document.HeightPx);
@@ -1463,17 +1463,17 @@ public partial class PictureEditor
     }
 
 
-    private static async Task<string> ReadSvgTextAsync(Stream input)
+    private async Task<string> ReadSvgTextAsync(Stream input)
     {
         using var buffer = new MemoryStream();
         await input.CopyToAsync(buffer);
         return new UTF8Encoding(false, true).GetString(buffer.ToArray());
     }
 
-    private static bool IsSupportedImageDataUrl(string value) =>
+    private bool IsSupportedImageDataUrl(string value) =>
         value.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) && value.Contains(",", StringComparison.Ordinal);
 
-    private static PictureImageSize FitRasterCanvasSize(int width, int height)
+    private PictureImageSize FitRasterCanvasSize(int width, int height)
     {
         if (width <= 0 || height <= 0) return new PictureImageSize { Width = 1200, Height = 800 };
         var scale = Math.Min(1d, 8192d / Math.Max(width, height));
@@ -1484,7 +1484,7 @@ public partial class PictureEditor
         };
     }
 
-    private static string LayerIcon(PictureLayer layer) => layer.Kind switch
+    private string LayerIcon(PictureLayer layer) => layer.Kind switch
     {
         PictureLayerKind.Raster => "▧",
         PictureLayerKind.Text => "T",
@@ -1496,28 +1496,28 @@ public partial class PictureEditor
         _ => "•"
     };
 
-    private static string PictureTextFontSizeMenuText(TextPictureLayer text) =>
+    private string PictureTextFontSizeMenuText(TextPictureLayer text) =>
         $"Font size · {Math.Round(text.FontSizePx).ToString(CultureInfo.InvariantCulture)} px";
 
-    private static string RenderScaleMenuText(RenderPictureLayer render) =>
+    private string RenderScaleMenuText(RenderPictureLayer render) =>
         $"Scale · {Math.Round(render.Scale).ToString(CultureInfo.InvariantCulture)} px";
 
-    private static string RenderDetailMenuText(RenderPictureLayer render) =>
+    private string RenderDetailMenuText(RenderPictureLayer render) =>
         $"Detail · {render.Detail.ToString(CultureInfo.InvariantCulture)}";
 
-    private static string RenderSoftnessMenuText(RenderPictureLayer render) =>
+    private string RenderSoftnessMenuText(RenderPictureLayer render) =>
         $"Softness · {Math.Round(render.Softness * 100).ToString(CultureInfo.InvariantCulture)}%";
 
-    private static string RenderContrastMenuText(RenderPictureLayer render) =>
+    private string RenderContrastMenuText(RenderPictureLayer render) =>
         $"Contrast · {render.RenderContrast.ToString("0.0", CultureInfo.InvariantCulture)}×";
 
-    private static string RenderAngleMenuText(RenderPictureLayer render) =>
+    private string RenderAngleMenuText(RenderPictureLayer render) =>
         $"Angle · {Math.Round(render.AngleDegrees).ToString(CultureInfo.InvariantCulture)}°";
 
-    private static string RenderStripeWidthMenuText(RenderPictureLayer render) =>
+    private string RenderStripeWidthMenuText(RenderPictureLayer render) =>
         $"Stripe width · {Math.Round(render.StripeWidthPx).ToString(CultureInfo.InvariantCulture)} px";
 
-    private static string LayerDescription(PictureLayer layer) => layer switch
+    private string LayerDescription(PictureLayer layer) => layer switch
     {
         RasterPictureLayer raster => raster.FitMode.ToString(),
         SvgPictureLayer svg => string.IsNullOrWhiteSpace(svg.GroupPath) ? svg.SourceFormat : $"{svg.SourceFormat} · {svg.GroupPath}",
@@ -1529,16 +1529,16 @@ public partial class PictureEditor
         _ => layer.Kind.ToString()
     };
 
-    private static string Truncate(string value, int length) => string.IsNullOrWhiteSpace(value)
+    private string Truncate(string value, int length) => string.IsNullOrWhiteSpace(value)
         ? "Empty"
         : value.Length <= length ? value : value[..length] + "…";
 
-    private static string Text(ChangeEventArgs args) => Convert.ToString(args.Value, CultureInfo.InvariantCulture)?.Trim() ?? string.Empty;
-    private static bool Bool(ChangeEventArgs args) => args.Value is bool value && value;
-    private static double Number(ChangeEventArgs args, double fallback) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ? value : fallback;
-    private static int Int(ChangeEventArgs args, int fallback) => int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : fallback;
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static string SafeColor(string value) => value.StartsWith('#') && value.Length is 4 or 7 ? value : "#000000";
+    private string Text(ChangeEventArgs args) => Convert.ToString(args.Value, CultureInfo.InvariantCulture)?.Trim() ?? string.Empty;
+    private bool Bool(ChangeEventArgs args) => args.Value is bool value && value;
+    private double Number(ChangeEventArgs args, double fallback) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ? value : fallback;
+    private int Int(ChangeEventArgs args, int fallback) => int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : fallback;
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string SafeColor(string value) => value.StartsWith('#') && value.Length is 4 or 7 ? value : "#000000";
 
     public void Dispose()
     {

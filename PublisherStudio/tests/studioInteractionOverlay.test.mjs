@@ -51,7 +51,8 @@ assert.match(pictureInterop, /updatePictureGesturePointer/);
 assert.match(pictureInterop, /selectionMode:\s*isAreaSelectionTool/);
 
 // Recording finalization cannot create an invalid clamp interval.
-assert.match(mediaStudio, /private static \(double Start, double End\) NormalizeTrimRange/);
+assert.match(mediaStudio, /private \(double Start, double End\) NormalizeTrimRange/);
+assert.doesNotMatch(mediaStudio, /private static \(double Start, double End\) NormalizeTrimRange/);
 assert.match(mediaStudio, /var minimumSpan = Math\.Min\(\.01, safeDuration\)/);
 assert.match(mediaStudio, /var maximumStart = Math\.Max\(0, safeDuration - minimumSpan\)/);
 assert.match(mediaStudio, /var minimumEnd = Math\.Min\(safeDuration, safeStart \+ minimumSpan\)/);

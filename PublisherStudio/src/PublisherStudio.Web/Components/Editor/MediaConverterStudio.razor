@@ -672,25 +672,25 @@
         }
     }
 
-    private static string ResolveMimeType(string? mimeType, string fileName) =>
+    private string ResolveMimeType(string? mimeType, string fileName) =>
         string.IsNullOrWhiteSpace(mimeType) || string.Equals(mimeType, "application/octet-stream", StringComparison.OrdinalIgnoreCase)
             ? MimeFromName(fileName)
             : mimeType;
 
-    private static bool CanOpenInStudio(string? mimeType) =>
+    private bool CanOpenInStudio(string? mimeType) =>
         mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true
         || mimeType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true
         || mimeType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true;
 
-    private static string StudioName(string? mimeType) =>
+    private string StudioName(string? mimeType) =>
         mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true ? "Picture Studio"
         : mimeType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true ? "Audio Studio"
         : mimeType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true ? "Video Studio"
         : "Studio";
 
-    private static string StudioTooltip(string? mimeType) => $"Open the converted output in {StudioName(mimeType)}";
+    private string StudioTooltip(string? mimeType) => $"Open the converted output in {StudioName(mimeType)}";
 
-    private static string MimeFromName(string fileName) => Path.GetExtension(fileName).ToLowerInvariant() switch
+    private string MimeFromName(string fileName) => Path.GetExtension(fileName).ToLowerInvariant() switch
     {
         ".webm" => "video/webm",
         ".mov" => "video/quicktime",
@@ -710,15 +710,15 @@
     };
 
     private string PresetName(string id) => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == id)?.Name ?? id;
-    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
-    private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
-    private static int? NullableInt(ChangeEventArgs args) => int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0 ? value : null;
-    private static double? NullableDouble(ChangeEventArgs args) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && value >= 0 && double.IsFinite(value) ? value : null;
-    private static double Double(ChangeEventArgs args, double fallback) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && double.IsFinite(value) ? value : fallback;
-    private static string NullableNumber(double? value) => value?.ToString("0.###", CultureInfo.InvariantCulture) ?? string.Empty;
-    private static string NullableNumber(int? value) => value?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
-    private static string Number(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static string FormatBytes(long bytes) => bytes switch { >= 1024L * 1024 * 1024 => $"{bytes / 1024d / 1024 / 1024:0.##} GB", >= 1024L * 1024 => $"{bytes / 1024d / 1024:0.##} MB", >= 1024 => $"{bytes / 1024d:0.##} KB", _ => $"{bytes} B" };
+    private string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+    private int? NullableInt(ChangeEventArgs args) => int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0 ? value : null;
+    private double? NullableDouble(ChangeEventArgs args) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && value >= 0 && double.IsFinite(value) ? value : null;
+    private double Double(ChangeEventArgs args, double fallback) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && double.IsFinite(value) ? value : fallback;
+    private string NullableNumber(double? value) => value?.ToString("0.###", CultureInfo.InvariantCulture) ?? string.Empty;
+    private string NullableNumber(int? value) => value?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+    private string Number(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string FormatBytes(long bytes) => bytes switch { >= 1024L * 1024 * 1024 => $"{bytes / 1024d / 1024 / 1024:0.##} GB", >= 1024L * 1024 => $"{bytes / 1024d / 1024:0.##} MB", >= 1024 => $"{bytes / 1024d:0.##} KB", _ => $"{bytes} B" };
 
     private Task Close() => Closed.InvokeAsync();
     public async ValueTask DisposeAsync()

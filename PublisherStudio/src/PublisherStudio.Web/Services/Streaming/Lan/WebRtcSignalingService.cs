@@ -110,7 +110,7 @@ public sealed class WebRtcSignalingService
         finally { _publisherSend.Release(); }
     }
 
-    private static async Task ReceiveJsonAsync(WebSocket socket, Func<JsonDocument, Task> onMessage, CancellationToken cancellationToken)
+    private async Task ReceiveJsonAsync(WebSocket socket, Func<JsonDocument, Task> onMessage, CancellationToken cancellationToken)
     {
         var buffer = new byte[64 * 1024];
         using var message = new MemoryStream();
@@ -137,7 +137,7 @@ public sealed class WebRtcSignalingService
         catch (WebSocketException) { }
     }
 
-    private static byte[] CopyWithViewer(JsonElement root, string type, Guid viewerId)
+    private byte[] CopyWithViewer(JsonElement root, string type, Guid viewerId)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
@@ -155,7 +155,7 @@ public sealed class WebRtcSignalingService
         return stream.ToArray();
     }
 
-    private static byte[] CopyWithType(JsonElement root, string type, bool includeViewerId)
+    private byte[] CopyWithType(JsonElement root, string type, bool includeViewerId)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
@@ -172,10 +172,10 @@ public sealed class WebRtcSignalingService
         return stream.ToArray();
     }
 
-    private static string ReadString(JsonElement root, string property) =>
+    private string ReadString(JsonElement root, string property) =>
         root.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : string.Empty;
 
-    private static bool TryReadViewerId(JsonElement root, out Guid viewerId)
+    private bool TryReadViewerId(JsonElement root, out Guid viewerId)
     {
         viewerId = Guid.Empty;
         return root.TryGetProperty("viewerId", out var value)
@@ -183,7 +183,7 @@ public sealed class WebRtcSignalingService
             && Guid.TryParse(value.GetString(), out viewerId);
     }
 
-    private static async Task CloseQuietlyAsync(WebSocket socket, string reason)
+    private async Task CloseQuietlyAsync(WebSocket socket, string reason)
     {
         try
         {

@@ -776,7 +776,7 @@
     private DotNetObjectReference<DevExtremeComponentEditor>? _self;
     private bool _designerAttached;
 
-    private static readonly PublicationComponentKind[] PanelComponentKinds =
+    private readonly PublicationComponentKind[] PanelComponentKinds =
     [
         PublicationComponentKind.DataGrid, PublicationComponentKind.TreeList, PublicationComponentKind.Form,
         PublicationComponentKind.Scheduler, PublicationComponentKind.Gallery, PublicationComponentKind.TileView,
@@ -807,7 +807,7 @@
         && (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
         && _draft.MenuSourceMode == PublicationMenuSourceMode.ManualItems;
     private bool UsesDataConnection => !IsManualMenu;
-    private static readonly HashSet<string> SupportedMapProviders = new(StringComparer.OrdinalIgnoreCase) { "google", "googleStatic", "azure", "bing" };
+    private readonly HashSet<string> SupportedMapProviders = new(StringComparer.OrdinalIgnoreCase) { "google", "googleStatic", "azure", "bing" };
     private bool UsesGoogleMapProvider => _draft?.MapProvider is "google" or "googleStatic";
     private bool MapConfigurationValid => _draft?.ComponentKind != PublicationComponentKind.Map
         || (SupportedMapProviders.Contains(_draft.MapProvider ?? string.Empty) && !string.IsNullOrWhiteSpace(_draft.MapApiKey));
@@ -842,7 +842,7 @@
     private void ShowLayout() => _section = "layout";
     private void ShowActions() => _section = "actions";
     private void ShowAdvanced() => _section = "advanced";
-    private static string ComponentIcon(PublicationComponentKind kind) => kind switch
+    private string ComponentIcon(PublicationComponentKind kind) => kind switch
     {
         PublicationComponentKind.DataGrid => "▦", PublicationComponentKind.TreeList => "⌘", PublicationComponentKind.Scheduler => "▣",
         PublicationComponentKind.Form => "≣", PublicationComponentKind.Gallery => "▧", PublicationComponentKind.TileView => "▥",
@@ -850,7 +850,7 @@
         PublicationComponentKind.MultiView => "▱", PublicationComponentKind.Splitter => "◫", PublicationComponentKind.ScrollView => "↕",
         PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Map => "⌖", PublicationComponentKind.VectorMap => "◈", PublicationComponentKind.Chat => "◉", PublicationComponentKind.Button => "▰", _ => "⌨"
     };
-    private static string Friendly(string value) => PublicationComponentService.Friendly(value);
+    private string Friendly(string value) => PublicationComponentService.Friendly(value);
 
     private void ChangeKind(PublicationComponentKind kind)
     {
@@ -948,7 +948,7 @@
         catch (Exception error) { _geoJsonStatus = $"GeoJSON import failed: {error.Message}"; }
     }
 
-    private static IEnumerable<PublicationVectorMapFeature> ParseGeoGeometry(string type, System.Text.Json.JsonElement coordinates, string name)
+    private IEnumerable<PublicationVectorMapFeature> ParseGeoGeometry(string type, System.Text.Json.JsonElement coordinates, string name)
     {
         PublicationVectorMapFeature Feature(PublicationVectorFeatureKind kind, IEnumerable<System.Text.Json.JsonElement> points) => new()
         {
@@ -1145,10 +1145,10 @@
         finally { _testingConnection = false; }
     }
 
-    private static List<PublicationWebHeader> ParseHeaders(string value) => value.Replace("\r", string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries)
+    private List<PublicationWebHeader> ParseHeaders(string value) => value.Replace("\r", string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries)
         .Select(line => line.Split(':', 2)).Where(parts => parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
         .Select(parts => new PublicationWebHeader { Name = parts[0].Trim(), Value = parts[1].Trim() }).ToList();
-    private static string FormatHeaders(IEnumerable<PublicationWebHeader> headers) => string.Join(Environment.NewLine, headers.Select(header => $"{header.Name}: {header.Value}"));
+    private string FormatHeaders(IEnumerable<PublicationWebHeader> headers) => string.Join(Environment.NewLine, headers.Select(header => $"{header.Name}: {header.Value}"));
 
     private IReadOnlyList<PublicationDataColumn> SourceColumns
     {

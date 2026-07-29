@@ -1,9 +1,11 @@
 using PublisherStudio.Domain;
+using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
 public interface IOrganicPluginProtocolCodec
 {
+    JsonSerializerOptions JsonOptions { get; }
     string Serialize(OrganicWireEnvelope envelope, bool seal = true);
     OrganicWireEnvelope DeserializeAndValidate(string json);
     bool Validate(OrganicWireEnvelope envelope, out string error);
@@ -19,6 +21,25 @@ public interface ILocalGptDiscoveryRegistry
     void RemoveExpired(TimeSpan maximumAge);
 }
 
+
+
+public interface IOrganicTransportSecurityPolicy
+{
+    bool RequiresProtectedTransport(OrganicWireMessageType messageType);
+    bool IsProtected(OrganicWireEnvelope envelope);
+}
+
+public interface IOrganicConnectionRuntimeState
+{
+    OrganicConnectionRuntimeSnapshot GetSnapshot();
+    void SetConnected(Guid connectionId, string peerId, bool isLoopback);
+    void Reset(Guid connectionId);
+}
+
+public interface IOrganicWireEnvelopeFactory
+{
+    OrganicWireEnvelope CreateWorkEnvelope(OrganicPluginWorkItem item, string sourcePeerId);
+}
 
 public interface IOrganicRuntimeSecurityService
 {
@@ -69,6 +90,12 @@ public interface IOrganicWorkCoordinator
 public interface IOrganicWorkExecutor
 {
     Task<string> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
+}
+
+
+public interface IOrganicReplayPolicyDataService
+{
+    OrganicReplayPolicySnapshot GetSnapshot();
 }
 
 public interface IOrganicReplayGuard

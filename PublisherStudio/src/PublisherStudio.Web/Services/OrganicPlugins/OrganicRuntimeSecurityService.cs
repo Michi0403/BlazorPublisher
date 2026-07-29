@@ -373,7 +373,7 @@ public sealed class OrganicRuntimeSecurityService(
         TryRestrictSecretPermissions(path);
     }
 
-    private static void TryRestrictSecretPermissions(string path)
+    private void TryRestrictSecretPermissions(string path)
     {
         if (OperatingSystem.IsWindows()) return;
         try
@@ -398,7 +398,7 @@ public sealed class OrganicRuntimeSecurityService(
         return resolvedPath = fallback;
     }
 
-    private static bool CanWriteDirectory(string directory)
+    private bool CanWriteDirectory(string directory)
     {
         try
         {
@@ -411,7 +411,7 @@ public sealed class OrganicRuntimeSecurityService(
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
     }
 
-    private static RuntimeSecretFile CreateSecret(DateTimeOffset createdUtc, DateTimeOffset? rotatedUtc)
+    private RuntimeSecretFile CreateSecret(DateTimeOffset createdUtc, DateTimeOffset? rotatedUtc)
     {
         using var agreement = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         using var signing = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -435,7 +435,7 @@ public sealed class OrganicRuntimeSecurityService(
         };
     }
 
-    private static void ValidateSecret(RuntimeSecretFile file)
+    private void ValidateSecret(RuntimeSecretFile file)
     {
         if (file.SchemaVersion != SchemaVersion || string.IsNullOrWhiteSpace(file.RootSecret) ||
             string.IsNullOrWhiteSpace(file.KeyAgreementPrivateKey) || string.IsNullOrWhiteSpace(file.SigningPrivateKey) ||
@@ -464,7 +464,7 @@ public sealed class OrganicRuntimeSecurityService(
         SigningPublicKey = file.SigningPublicKey
     };
 
-    private static void ValidatePairingTicket(OneWirePairingTicket ticket)
+    private void ValidatePairingTicket(OneWirePairingTicket ticket)
     {
         ArgumentNullException.ThrowIfNull(ticket);
         if (!string.Equals(ticket.Scheme, "onewire-pair-v1", StringComparison.Ordinal) || ticket.ExpiresUtc <= DateTimeOffset.UtcNow ||
@@ -482,13 +482,13 @@ public sealed class OrganicRuntimeSecurityService(
             throw new CryptographicException("The pairing ticket signature is invalid.");
     }
 
-    private static byte[] BuildTicketBytes(OneWirePairingTicket ticket) => JsonSerializer.SerializeToUtf8Bytes(new
+    private byte[] BuildTicketBytes(OneWirePairingTicket ticket) => JsonSerializer.SerializeToUtf8Bytes(new
     {
         ticket.Scheme, ticket.PeerId, ticket.DisplayName, ticket.Application, ticket.ProtocolVersion, ticket.KeyId,
         ticket.Fingerprint, ticket.KeyAgreementPublicKey, ticket.SigningPublicKey, ticket.CreatedUtc, ticket.ExpiresUtc, ticket.Nonce
     });
 
-    private static byte[] BuildSignatureBytes(OrganicWireEnvelope envelope) => JsonSerializer.SerializeToUtf8Bytes(new
+    private byte[] BuildSignatureBytes(OrganicWireEnvelope envelope) => JsonSerializer.SerializeToUtf8Bytes(new
     {
         envelope.ProtocolVersion, envelope.MessageId, envelope.CorrelationId, envelope.ReplyToMessageId, envelope.MessageType,
         envelope.SourcePeerId, envelope.TargetPeerId, envelope.CreatedUtc, envelope.ExpiresUtc, envelope.Sequence,
@@ -500,10 +500,10 @@ public sealed class OrganicRuntimeSecurityService(
         envelope.RequiresHumanInteractionOnTargetSystem, envelope.RequiresAutomatedInteractionOnTargetSystem, envelope.InteractionKind
     });
 
-    private static byte[] BuildAssociatedData(OrganicWireEnvelope envelope) => Encoding.UTF8.GetBytes(
+    private byte[] BuildAssociatedData(OrganicWireEnvelope envelope) => Encoding.UTF8.GetBytes(
         $"{envelope.ProtocolVersion}|{envelope.MessageId:N}|{envelope.CorrelationId:N}|{envelope.SourcePeerId}|{envelope.TargetPeerId}|{envelope.MessageType}|{envelope.CapabilityKey}");
 
-    private static byte[] DerivePeerKey(RuntimeSecretFile file, OneWireTrustedPeerDescriptor peer, string sourcePeerId, string targetPeerId)
+    private byte[] DerivePeerKey(RuntimeSecretFile file, OneWireTrustedPeerDescriptor peer, string sourcePeerId, string targetPeerId)
     {
         using var local = ECDiffieHellman.Create();
         local.ImportPkcs8PrivateKey(Convert.FromBase64String(file.KeyAgreementPrivateKey), out _);
@@ -521,7 +521,7 @@ public sealed class OrganicRuntimeSecurityService(
         return HkdfSha256(shared, salt, Encoding.UTF8.GetBytes(context), 32);
     }
 
-    private static byte[] HkdfSha256(ReadOnlySpan<byte> inputKeyMaterial, ReadOnlySpan<byte> salt, ReadOnlySpan<byte> info, int outputLength)
+    private byte[] HkdfSha256(ReadOnlySpan<byte> inputKeyMaterial, ReadOnlySpan<byte> salt, ReadOnlySpan<byte> info, int outputLength)
     {
         if (outputLength <= 0 || outputLength > 255 * 32) throw new ArgumentOutOfRangeException(nameof(outputLength));
         byte[] pseudoRandomKey;
@@ -549,7 +549,7 @@ public sealed class OrganicRuntimeSecurityService(
         return output;
     }
 
-    private static bool VerifyTotp(string seedBase64, string code)
+    private bool VerifyTotp(string seedBase64, string code)
     {
         var normalized = new string((code ?? string.Empty).Where(char.IsDigit).ToArray());
         if (normalized.Length != 6) return false;
@@ -569,7 +569,7 @@ public sealed class OrganicRuntimeSecurityService(
         return false;
     }
 
-    private static string Base32Encode(ReadOnlySpan<byte> data)
+    private string Base32Encode(ReadOnlySpan<byte> data)
     {
         const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
         var output = new StringBuilder((data.Length * 8 + 4) / 5);
@@ -589,20 +589,20 @@ public sealed class OrganicRuntimeSecurityService(
         return output.ToString();
     }
 
-    private static bool IsCurrentTrust(OneWireTrustedPeerDescriptor peer, string peerId) =>
+    private bool IsCurrentTrust(OneWireTrustedPeerDescriptor peer, string peerId) =>
         string.Equals(peer.PeerId, peerId, StringComparison.OrdinalIgnoreCase) &&
         peer.TrustLevel >= OneWireTrustLevel.MfaVerified &&
         (peer.ValidUntilUtc is null || peer.ValidUntilUtc > DateTimeOffset.UtcNow) &&
         (peer.MfaVerifiedUntilUtc is null || peer.MfaVerifiedUntilUtc > DateTimeOffset.UtcNow);
 
-    private static bool IsSecurityBootstrap(OrganicWireMessageType type) => type is
+    private bool IsSecurityBootstrap(OrganicWireMessageType type) => type is
         OrganicWireMessageType.Hello or OrganicWireMessageType.HelloAck or OrganicWireMessageType.LinkRequest or OrganicWireMessageType.LinkStatus or
         OrganicWireMessageType.SecurityProfileRequest or OrganicWireMessageType.SecurityProfileResponse or OrganicWireMessageType.MfaChallenge or
         OrganicWireMessageType.MfaProof or OrganicWireMessageType.TrustEstablished or OrganicWireMessageType.TrustRevoked;
 
-    private static TimeSpan Clamp(TimeSpan value, TimeSpan minimum, TimeSpan maximum) => value < minimum ? minimum : value > maximum ? maximum : value;
+    private TimeSpan Clamp(TimeSpan value, TimeSpan minimum, TimeSpan maximum) => value < minimum ? minimum : value > maximum ? maximum : value;
 
-    private static OneWireTrustedPeerDescriptor CloneTrustedPeer(OneWireTrustedPeerDescriptor peer) => new()
+    private OneWireTrustedPeerDescriptor CloneTrustedPeer(OneWireTrustedPeerDescriptor peer) => new()
     {
         PeerId = peer.PeerId, DisplayName = peer.DisplayName, Fingerprint = peer.Fingerprint,
         KeyAgreementPublicKey = peer.KeyAgreementPublicKey, SigningPublicKey = peer.SigningPublicKey,

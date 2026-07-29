@@ -707,7 +707,7 @@
         : "Rendering: compact transform";
     private string CssZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout, "Sharp CSS layout (default)");
     private string TransformZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform, "Compact transform");
-    private static string CheckText(bool value, string text) => value ? $"✓ {text}" : text;
+    private string CheckText(bool value, string text) => value ? $"✓ {text}" : text;
 
     private Task RequestNew() => OnNew.InvokeAsync();
     private Task RequestOpen() => OnOpen.InvokeAsync();
@@ -808,7 +808,7 @@
     private string ShapeStroke => (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
     private string ConnectorStroke => (State.SelectedElement as ConnectorElement)?.Stroke ?? "#245b85";
     private string PagePaletteColor => State.CurrentPage.Background.StartsWith('#') ? State.CurrentPage.Background : "#ffffff";
-    private static readonly string[] PageColors = ["#ffffff", "#f8fafc", "#fef3c7", "#fee2e2", "#dcfce7", "#dbeafe", "#ede9fe", "#111827"];
+    private readonly string[] PageColors = ["#ffffff", "#f8fafc", "#fef3c7", "#fee2e2", "#dcfce7", "#dbeafe", "#ede9fe", "#111827"];
 
     private void UpdateSelectedMedia(Action<PublicationMediaElement> update)
     {
@@ -1037,7 +1037,7 @@
 
     private void SetPage(double width, double height) => State.SetPageSize(width, height);
     private void Rotate(double amount) => State.UpdateSelected(element => element.Rotation = NormalizeAngle(element.Rotation + amount));
-    private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;
+    private double NormalizeAngle(double value) => (value % 360 + 360) % 360;
     private void SetImage(Action<ImageFrameElement> update) { if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); }
     private void SetImageRatio(double ratio) => SetImage(image => image.Height = Math.Max(2, image.Width / ratio));
     private void SetText(Action<TextFrameElement> update) { if (State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => update(text)); }

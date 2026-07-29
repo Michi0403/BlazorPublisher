@@ -67,7 +67,7 @@
 @code {
     [Parameter, EditorRequired] public PublicationElement Item { get; set; } = default!;
 
-    private static string Icon(PublicationComponentKind kind) => kind switch
+    private string Icon(PublicationComponentKind kind) => kind switch
     {
         PublicationComponentKind.Chat => "pub-icon pub-icon-chat",
         PublicationComponentKind.Map or PublicationComponentKind.VectorMap => "pub-icon pub-icon-map",

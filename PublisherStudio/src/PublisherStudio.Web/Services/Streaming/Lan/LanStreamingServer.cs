@@ -315,14 +315,14 @@ public sealed class LanStreamingServer : IAsyncDisposable
         return $"{uri}{separator}token={Uri.EscapeDataString(AccessToken)}";
     }
 
-    private static IPAddress ResolveAddress(string value)
+    private IPAddress ResolveAddress(string value)
     {
         if (IPAddress.TryParse(value, out var address)) return address;
         if (string.Equals(value, "localhost", StringComparison.OrdinalIgnoreCase)) return IPAddress.Loopback;
         throw new InvalidOperationException("LAN bind address must be an explicit IPv4 or IPv6 address.");
     }
 
-    private static string? SafeAssetPath(string rootDirectory, string? asset)
+    private string? SafeAssetPath(string rootDirectory, string? asset)
     {
         var root = Path.GetFullPath(rootDirectory);
         var rootWithSeparator = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;

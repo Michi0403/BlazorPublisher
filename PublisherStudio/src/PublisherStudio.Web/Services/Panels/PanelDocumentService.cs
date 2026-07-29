@@ -13,7 +13,7 @@ public sealed class PanelDocumentService(
     private readonly PublicationComponentService _components = components;
     private readonly ILogger<PanelDocumentService> _logger = logger ?? NullLogger<PanelDocumentService>.Instance;
 
-    private static readonly PublicationPanelPresetDescriptor[] Presets =
+    private readonly PublicationPanelPresetDescriptor[] Presets =
     [
         new("blank", "Blank panel", "An empty reusable view with local navigation ready for nested PublisherStudio components.", "Base", false, "pub-icon pub-icon-panel"),
         new("kpi-dashboard", "Live KPI dashboard", "Four live data views sharing the publication data model: KPI, chart, pie and table.", "Dashboard", true, "pub-icon pub-icon-chart"),
@@ -36,7 +36,7 @@ public sealed class PanelDocumentService(
         }
     }
 
-    private static readonly PanelComponentToolDescriptor[] ComponentTools =
+    private readonly PanelComponentToolDescriptor[] ComponentTools =
     [
         new("text", "Text", "Rich text frame shared with the Mainframe.", "Content", "pub-icon pub-icon-text", "text"),
         new("picture", "Picture", "Picture frame that can later open in Picture Studio.", "Content", "pub-icon pub-icon-picture", "picture"),
@@ -322,7 +322,7 @@ public sealed class PanelDocumentService(
         for (var index = 0; index < elements.Count; index++) elements[index].ZIndex = index + 1;
     }
 
-    private static Guid EnsureUniqueId(Guid candidate, HashSet<Guid> usedIds)
+    private Guid EnsureUniqueId(Guid candidate, HashSet<Guid> usedIds)
     {
         if (candidate != Guid.Empty && usedIds.Add(candidate)) return candidate;
         Guid generated;
@@ -425,7 +425,7 @@ public sealed class PanelDocumentService(
         };
     }
 
-    private static PanelElement CreateWebExperience()
+    private PanelElement CreateWebExperience()
     {
         var first = WebView("Welcome", "welcome", "#172554", "Interactive web experience", "This isolated view can contain authored HTML, CSS and opt-in JavaScript.");
         var second = WebView("Experience 2", "experience-2", "#064e3b", "Second experience", "Use the panel menu to combine multiple standalone HTML experiences.");
@@ -436,7 +436,7 @@ public sealed class PanelDocumentService(
         };
     }
 
-    private static PublicationPanelView WebView(string name, string slug, string background, string heading, string copy)
+    private PublicationPanelView WebView(string name, string slug, string background, string heading, string copy)
     {
         var view = new PublicationPanelView { Name = name, Slug = slug, Background = background };
         view.Elements.Add(new HtmlEmbedElement
@@ -458,7 +458,7 @@ public sealed class PanelDocumentService(
         return created;
     }
 
-    private static DataVisualElement Visual(Guid dataObjectId, DataVisualKind kind, string title, string argument, string value, string target, double x, double y, double width, double height) => new()
+    private DataVisualElement Visual(Guid dataObjectId, DataVisualKind kind, string title, string argument, string value, string target, double x, double y, double width, double height) => new()
     {
         Name = title,
         Title = title,
@@ -476,7 +476,7 @@ public sealed class PanelDocumentService(
         BorderColor = "#cbd5e1"
     };
 
-    private static string Slug(string? value, string fallback)
+    private string Slug(string? value, string fallback)
     {
         var source = string.IsNullOrWhiteSpace(value) ? fallback : value;
         var slug = Regex.Replace(source.Trim().ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');

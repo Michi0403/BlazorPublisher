@@ -319,7 +319,7 @@
     private string WarpPath => WordArtPathGeometry.Build(Item);
     private string PathStartOffset => $"{Math.Clamp(Item.PathStartOffsetPercent, 0, 100).ToString("0.##", CultureInfo.InvariantCulture)}%";
 
-    private static string SafeColor(string? value, string fallback)
+    private string SafeColor(string? value, string fallback)
     {
         if (string.IsNullOrWhiteSpace(value)) return fallback;
         var color = value.Trim();
@@ -327,5 +327,5 @@
         return color;
     }
 
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 }

@@ -362,7 +362,7 @@ public sealed class StreamingProfileStore
         };
     }
 
-    private static StreamingProviderProfile ToPublic(StoredProviderProfile profile) => new()
+    private StreamingProviderProfile ToPublic(StoredProviderProfile profile) => new()
     {
         Id = profile.Id,
         Name = profile.Name,

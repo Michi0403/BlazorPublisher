@@ -807,7 +807,7 @@
         _pictureEditorVisible = true;
     }
 
-    private static PictureDocument CreateManagedPictureDocument(ImageFrameElement image)
+    private PictureDocument CreateManagedPictureDocument(ImageFrameElement image)
     {
         const int width = 1200;
         var frameAspect = image.Width > .01 ? image.Height / image.Width : 2d / 3d;
@@ -821,7 +821,7 @@
         return Task.CompletedTask;
     }
 
-    private static string DecodeText(byte[] bytes)
+    private string DecodeText(byte[] bytes)
     {
         if (bytes.Length >= 3 && bytes[0] == 0xef && bytes[1] == 0xbb && bytes[2] == 0xbf)
             return Encoding.UTF8.GetString(bytes, 3, bytes.Length - 3);
@@ -832,7 +832,7 @@
         return Encoding.UTF8.GetString(bytes);
     }
 
-    private static string ResolveDroppedMimeType(string name, string requested, string stored, string kind)
+    private string ResolveDroppedMimeType(string name, string requested, string stored, string kind)
     {
         var declared = PublicationMediaData.NormalizeMimeType(requested, stored);
         if ((kind == "picture" && declared.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) ||
@@ -871,10 +871,10 @@
         };
     }
 
-    private static string PlainTextToHtml(string text) =>
+    private string PlainTextToHtml(string text) =>
         $"<p style=\"margin:0;white-space:pre-wrap;font:12pt Segoe UI\">{System.Net.WebUtility.HtmlEncode(text)}</p>";
 
-    private static string MarkdownToHtml(string markdown)
+    private string MarkdownToHtml(string markdown)
     {
         var builder = new StringBuilder();
         var inList = false;
@@ -900,7 +900,7 @@
         return builder.Length == 0 ? "<p><br></p>" : builder.ToString();
     }
 
-    private static string MarkdownInline(string value)
+    private string MarkdownInline(string value)
     {
         var encoded = System.Net.WebUtility.HtmlEncode(value);
         encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
@@ -1481,7 +1481,7 @@
         ShowNotice($"Downloaded {spreadsheet.WorkbookFileName}");
     }
 
-    private static string SpreadsheetMimeType(SpreadsheetStorageFormat format) => format switch
+    private string SpreadsheetMimeType(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => "application/vnd.ms-excel.sheet.macroEnabled.12",
         SpreadsheetStorageFormat.Xls => "application/vnd.ms-excel",
@@ -1583,7 +1583,7 @@
         }
     }
 
-    private static string ResolveMediaMimeType(IBrowserFile file, PublicationElementKind kind)
+    private string ResolveMediaMimeType(IBrowserFile file, PublicationElementKind kind)
     {
         var fallback = kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg";
         var declared = PublicationMediaData.NormalizeMimeType(file.ContentType, string.Empty);
@@ -2292,7 +2292,7 @@
         return Task.CompletedTask;
     }
 
-    private static PublicationStreamingSettings CloneStreaming(PublicationStreamingSettings settings) =>
+    private PublicationStreamingSettings CloneStreaming(PublicationStreamingSettings settings) =>
         System.Text.Json.JsonSerializer.Deserialize<PublicationStreamingSettings>(
             System.Text.Json.JsonSerializer.Serialize(settings)) ?? new PublicationStreamingSettings();
 

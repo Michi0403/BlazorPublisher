@@ -32,7 +32,7 @@ if (Test-Path -LiteralPath (Join-Path $root 'src\LocalGPT.WireProtocolVersion'))
 if ($globalUsing -and $globalUsing -notmatch 'global using LocalGPT\.WireProtocol;') { Add-Finding 'The application-wide protocol namespace import is missing.' }
 if ($interfaces -and $interfaces -notmatch 'IOrganicReplayGuard') { Add-Finding 'The replay-guard contract is missing.' }
 if ($state -and $state -notmatch 'class OrganicReplayGuard') { Add-Finding 'The replay-guard implementation is missing.' }
-if ($connection -and $connection -notmatch 'connectionIsLoopback') { Add-Finding 'Connection transport locality is no longer tracked.' }
+if ($connection -and $connection -notmatch 'IOrganicConnectionRuntimeState') { Add-Finding 'Connection transport locality is no longer owned by the runtime-state service.' }
 if ($connection -and $connection -notmatch 'SourcePeerId does not match the peer identity owned by this connection') { Add-Finding 'The TCP connection no longer pins SourcePeerId to its discovered peer.' }
 if ($discovery -and $discovery -notmatch 'automaticallyAttemptedPeers\.Remove') { Add-Finding 'Failed automatic connections will not become retryable.' }
 if ($applicationHost -and $applicationHost -notmatch 'systemVariables\.DefaultPort') { Add-Finding 'PublisherStudio port resolution no longer uses systemVariables.DefaultPort.' }

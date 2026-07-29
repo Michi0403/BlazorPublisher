@@ -408,9 +408,9 @@
     }
     private double Percent(double seconds) => Math.Clamp((seconds - _viewStart) / VisibleDuration * 100, 0, 100);
     private string TickStyle(double seconds) => $"left:{Percent(seconds).ToString("0.###", CultureInfo.InvariantCulture)}%";
-    private static double AnimationSpan(PublicationAnimation item) => Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1);
-    private static string TrackSummary(TimelineRow row) => row.Element is PublicationMediaElement media ? Time(media.TimelineLengthSeconds) : $"{row.Animations.Count} animation{(row.Animations.Count == 1 ? string.Empty : "s")}";
-    private static string KindGlyph(PublicationElement item) => item.Kind switch
+    private double AnimationSpan(PublicationAnimation item) => Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1);
+    private string TrackSummary(TimelineRow row) => row.Element is PublicationMediaElement media ? Time(media.TimelineLengthSeconds) : $"{row.Animations.Count} animation{(row.Animations.Count == 1 ? string.Empty : "s")}";
+    private string KindGlyph(PublicationElement item) => item.Kind switch
     {
         PublicationElementKind.Text => "T",
         PublicationElementKind.Image => "▧",
@@ -425,21 +425,21 @@
         PublicationElementKind.LiveSource => "●",
         _ => "•"
     };
-    private static string TriggerGlyph(PublicationAnimationTrigger value) => value switch
+    private string TriggerGlyph(PublicationAnimationTrigger value) => value switch
     {
         PublicationAnimationTrigger.OnPageEnter => "▶",
         PublicationAnimationTrigger.WithPrevious => "⇉",
         PublicationAnimationTrigger.AfterPrevious => "→",
         _ => "☝"
     };
-    private static IEnumerable<double> TimelineSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
+    private IEnumerable<double> TimelineSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
         ? audio.WaveformSamples.Take(28)
         : Enumerable.Range(0, 20).Select(index => .18 + Math.Abs(Math.Sin(index * .67)) * .72);
-    private static string WaveHeight(double value) => $"{Math.Clamp(value, .05, 1) * 100:0.#}%";
-    private static string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
-    private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static bool TryDouble(ChangeEventArgs args, out double value) =>
+    private string WaveHeight(double value) => $"{Math.Clamp(value, .05, 1) * 100:0.#}%";
+    private string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+    private string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private bool TryDouble(ChangeEventArgs args, out double value) =>
         double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value) && double.IsFinite(value);
 
     private sealed record TimelineRow(PublicationElement Element, List<PublicationAnimation> Animations);

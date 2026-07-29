@@ -656,7 +656,7 @@ public sealed class PictureEditorStateService
         return name;
     }
 
-    private static (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
+    private (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
     {
         width = Math.Max(1, width);
         height = Math.Max(1, height);
@@ -665,7 +665,7 @@ public sealed class PictureEditorStateService
         return (Math.Max(1, width * scale), Math.Max(1, height * scale));
     }
 
-    private static void NormalizeLayer(PictureLayer layer)
+    private void NormalizeLayer(PictureLayer layer)
     {
         layer.Width = Math.Clamp(layer.Width, 1, 16384);
         layer.Height = Math.Clamp(layer.Height, 1, 16384);
@@ -712,7 +712,7 @@ public sealed class PictureEditorStateService
         }
     }
 
-    private static List<PicturePoint> NormalizeClipPolygon(IEnumerable<PicturePoint>? points)
+    private List<PicturePoint> NormalizeClipPolygon(IEnumerable<PicturePoint>? points)
     {
         var normalized = (points ?? [])
             .Where(point => double.IsFinite(point.X) && double.IsFinite(point.Y))
@@ -729,7 +729,7 @@ public sealed class PictureEditorStateService
         return normalized.Count >= 3 ? normalized : [];
     }
 
-    private static bool NearlyEqual(double first, double second) => Math.Abs(first - second) < .0001;
-    private static double NormalizeAngle(double value) => (value % 360 + 360) % 360;
+    private bool NearlyEqual(double first, double second) => Math.Abs(first - second) < .0001;
+    private double NormalizeAngle(double value) => (value % 360 + 360) % 360;
     private void Notify(bool markChanged = true) => Changed?.Invoke();
 }

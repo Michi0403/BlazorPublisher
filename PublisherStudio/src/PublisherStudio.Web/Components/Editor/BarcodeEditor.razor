@@ -175,13 +175,13 @@
         }
     }
 
-    private static string FirstJsonScalar(string source)
+    private string FirstJsonScalar(string source)
     {
         using var document = JsonDocument.Parse(source, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
         return FindJsonScalar(document.RootElement) ?? string.Empty;
     }
 
-    private static string? FindJsonScalar(JsonElement value)
+    private string? FindJsonScalar(JsonElement value)
     {
         return value.ValueKind switch
         {
@@ -193,20 +193,20 @@
         };
     }
 
-    private static string FirstXmlScalar(string source)
+    private string FirstXmlScalar(string source)
     {
         var document = XDocument.Parse(source);
         var leaf = document.Root?.DescendantsAndSelf().FirstOrDefault(element => !element.HasElements && !string.IsNullOrWhiteSpace(element.Value));
         return leaf?.Value.Trim() ?? document.Root?.Attributes().FirstOrDefault()?.Value?.Trim() ?? string.Empty;
     }
 
-    private static char GuessDelimiter(string source)
+    private char GuessDelimiter(string source)
     {
         var firstLine = source.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
         return new[] { ',', ';', '\t', '|' }.OrderByDescending(candidate => firstLine.Count(character => character == candidate)).First();
     }
 
-    private static string FirstDelimitedValue(string source, char delimiter)
+    private string FirstDelimitedValue(string source, char delimiter)
     {
         var rows = source.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
             .Select(line => ParseDelimitedLine(line, delimiter))
@@ -224,7 +224,7 @@
         return headers.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim() ?? string.Empty;
     }
 
-    private static List<string> ParseDelimitedLine(string line, char delimiter)
+    private List<string> ParseDelimitedLine(string line, char delimiter)
     {
         var values = new List<string>();
         var value = new StringBuilder();
@@ -285,7 +285,7 @@
     private void SetSquare() { _draft.ModuleShape = PublicationBarcodeModuleShape.Square; Queue(); }
     private void SetRounded() { _draft.ModuleShape = PublicationBarcodeModuleShape.Rounded; Queue(); }
     private void SetDots() { _draft.ModuleShape = PublicationBarcodeModuleShape.Dots; Queue(); }
-    private static string NormalizeValueForFormat(PublicationBarcodeFormat format, string? source, out bool adjusted)
+    private string NormalizeValueForFormat(PublicationBarcodeFormat format, string? source, out bool adjusted)
     {
         var original = source?.Trim() ?? string.Empty;
         string value;
@@ -321,8 +321,8 @@
         adjusted = !string.Equals(original, value, StringComparison.Ordinal);
         return value;
     }
-    private static string Digits(string value) => new(value.Where(char.IsAsciiDigit).ToArray());
-    private static bool HasValidUpcAChecksum(string value)
+    private string Digits(string value) => new(value.Where(char.IsAsciiDigit).ToArray());
+    private bool HasValidUpcAChecksum(string value)
     {
         if (value.Length != 12 || value.Any(character => !char.IsAsciiDigit(character))) return false;
         var sum = 0;
@@ -334,8 +334,8 @@
         var check = (10 - sum % 10) % 10;
         return check == value[11] - '0';
     }
-    private static int Int(ChangeEventArgs e, int fallback) => int.TryParse(e.Value?.ToString(), out var v) ? v : fallback;
-    private static string FormatName(PublicationBarcodeFormat f) => f switch { PublicationBarcodeFormat.QrCode => "QR Code", PublicationBarcodeFormat.Code128 => "Code 128", PublicationBarcodeFormat.Code39 => "Code 39", PublicationBarcodeFormat.Ean13 => "EAN-13", PublicationBarcodeFormat.UpcA => "UPC-A", PublicationBarcodeFormat.Itf14 => "ITF-14", _ => "Codabar" };
+    private int Int(ChangeEventArgs e, int fallback) => int.TryParse(e.Value?.ToString(), out var v) ? v : fallback;
+    private string FormatName(PublicationBarcodeFormat f) => f switch { PublicationBarcodeFormat.QrCode => "QR Code", PublicationBarcodeFormat.Code128 => "Code 128", PublicationBarcodeFormat.Code39 => "Code 39", PublicationBarcodeFormat.Ean13 => "EAN-13", PublicationBarcodeFormat.UpcA => "UPC-A", PublicationBarcodeFormat.Itf14 => "ITF-14", _ => "Codabar" };
     public async ValueTask DisposeAsync()
     {
         if (_module is null) return;
@@ -344,6 +344,6 @@
         catch (TaskCanceledException) { }
         catch (ObjectDisposedException) { }
     }
-    private static BarcodeElement Clone(BarcodeElement source) { var target = new BarcodeElement(); Copy(source, target); target.Id = source.Id; return target; }
-    private static void Copy(BarcodeElement s, BarcodeElement t) { t.Id=s.Id;t.Name=s.Name;t.X=s.X;t.Y=s.Y;t.Width=s.Width;t.Height=s.Height;t.Rotation=s.Rotation;t.ZIndex=s.ZIndex;t.Visible=s.Visible;t.Locked=s.Locked;t.Format=s.Format;t.Value=s.Value;t.ForegroundColor=s.ForegroundColor;t.BackgroundColor=s.BackgroundColor;t.TransparentBackground=s.TransparentBackground;t.ShowText=s.ShowText;t.Margin=s.Margin;t.LineWidth=s.LineWidth;t.BarHeight=s.BarHeight;t.FontSize=s.FontSize;t.ErrorCorrection=s.ErrorCorrection;t.ModuleShape=s.ModuleShape;t.SvgMarkup=s.SvgMarkup; }
+    private BarcodeElement Clone(BarcodeElement source) { var target = new BarcodeElement(); Copy(source, target); target.Id = source.Id; return target; }
+    private void Copy(BarcodeElement s, BarcodeElement t) { t.Id=s.Id;t.Name=s.Name;t.X=s.X;t.Y=s.Y;t.Width=s.Width;t.Height=s.Height;t.Rotation=s.Rotation;t.ZIndex=s.ZIndex;t.Visible=s.Visible;t.Locked=s.Locked;t.Format=s.Format;t.Value=s.Value;t.ForegroundColor=s.ForegroundColor;t.BackgroundColor=s.BackgroundColor;t.TransparentBackground=s.TransparentBackground;t.ShowText=s.ShowText;t.Margin=s.Margin;t.LineWidth=s.LineWidth;t.BarHeight=s.BarHeight;t.FontSize=s.FontSize;t.ErrorCorrection=s.ErrorCorrection;t.ModuleShape=s.ModuleShape;t.SvgMarkup=s.SvgMarkup; }
 }

@@ -13,9 +13,9 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class SpreadsheetDocumentService
 {
-    private static readonly XNamespace Main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
-    private static readonly XNamespace Relationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
-    private static readonly XNamespace PackageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships";
+    private readonly XNamespace Main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+    private readonly XNamespace Relationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+    private readonly XNamespace PackageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships";
 
     public byte[] CreateBlankXlsx(string sheetName = "Sheet1")
     {
@@ -344,7 +344,7 @@ public sealed class SpreadsheetDocumentService
         return html.ToString();
     }
 
-    private static char DetectDelimiter(byte[] content, char fallback)
+    private char DetectDelimiter(byte[] content, char fallback)
     {
         var text = DecodeText(content);
         var line = text.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n').FirstOrDefault(item => !string.IsNullOrWhiteSpace(item));
@@ -355,7 +355,7 @@ public sealed class SpreadsheetDocumentService
         return best.Count > 0 ? best.Delimiter : fallback;
     }
 
-    private static int CountDelimiter(string line, char delimiter)
+    private int CountDelimiter(string line, char delimiter)
     {
         var count = 0;
         var quoted = false;
@@ -371,7 +371,7 @@ public sealed class SpreadsheetDocumentService
         return count;
     }
 
-    private static List<List<string>> ParseDelimited(string text, char delimiter)
+    private List<List<string>> ParseDelimited(string text, char delimiter)
     {
         var rows = new List<List<string>>();
         var row = new List<string>();
@@ -399,7 +399,7 @@ public sealed class SpreadsheetDocumentService
         return rows;
     }
 
-    private static string ReadCellValue(XElement cell, IReadOnlyList<string> sharedStrings, CellStyle? style)
+    private string ReadCellValue(XElement cell, IReadOnlyList<string> sharedStrings, CellStyle? style)
     {
         var type = cell.Attribute("t")?.Value;
         if (string.Equals(type, "inlineStr", StringComparison.OrdinalIgnoreCase))
@@ -418,7 +418,7 @@ public sealed class SpreadsheetDocumentService
         return raw;
     }
 
-    private static IReadOnlyList<string> ReadSharedStrings(ZipArchive archive)
+    private IReadOnlyList<string> ReadSharedStrings(ZipArchive archive)
     {
         var entry = archive.GetEntry("xl/sharedStrings.xml");
         if (entry is null) return [];
@@ -429,7 +429,7 @@ public sealed class SpreadsheetDocumentService
             .ToList() ?? [];
     }
 
-    private static IReadOnlyList<CellStyle> ReadStyles(ZipArchive archive)
+    private IReadOnlyList<CellStyle> ReadStyles(ZipArchive archive)
     {
         var entry = archive.GetEntry("xl/styles.xml");
         if (entry is null) return [CellStyle.Default];
@@ -461,7 +461,7 @@ public sealed class SpreadsheetDocumentService
         return result.Count == 0 ? [CellStyle.Default] : result;
     }
 
-    private static FontStyle ReadFont(XElement font)
+    private FontStyle ReadFont(XElement font)
     {
         return new FontStyle(
             NormalizeFontFamily(font.Element(Main + "name")?.Attribute("val")?.Value),
@@ -472,14 +472,14 @@ public sealed class SpreadsheetDocumentService
             ReadColor(font.Element(Main + "color")));
     }
 
-    private static string ReadFill(XElement fill)
+    private string ReadFill(XElement fill)
     {
         var pattern = fill.Element(Main + "patternFill");
         if (pattern is null || string.Equals(pattern.Attribute("patternType")?.Value, "none", StringComparison.OrdinalIgnoreCase)) return string.Empty;
         return ReadColor(pattern.Element(Main + "fgColor"));
     }
 
-    private static string ReadBorder(XElement border)
+    private string ReadBorder(XElement border)
     {
         var parts = new List<string>();
         foreach (var name in new[] { "top", "right", "bottom", "left" })
@@ -492,7 +492,7 @@ public sealed class SpreadsheetDocumentService
         return string.Join(';', parts);
     }
 
-    private static string ReadColor(XElement? color)
+    private string ReadColor(XElement? color)
     {
         var rgb = color?.Attribute("rgb")?.Value;
         if (!string.IsNullOrWhiteSpace(rgb))
@@ -504,7 +504,7 @@ public sealed class SpreadsheetDocumentService
         return string.Empty;
     }
 
-    private static bool IsDateFormat(int numberFormatId, string? custom)
+    private bool IsDateFormat(int numberFormatId, string? custom)
     {
         if (numberFormatId is >= 14 and <= 22 or 45 or 46 or 47) return true;
         if (string.IsNullOrWhiteSpace(custom)) return false;
@@ -513,7 +513,7 @@ public sealed class SpreadsheetDocumentService
             || cleaned.Contains("h", StringComparison.OrdinalIgnoreCase) || cleaned.Contains("s", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static IReadOnlyList<MergedRange> ReadMergedRanges(XDocument worksheet)
+    private IReadOnlyList<MergedRange> ReadMergedRanges(XDocument worksheet)
     {
         return worksheet.Root?.Element(Main + "mergeCells")?.Elements(Main + "mergeCell")
             .Select(item => ParseRange(item.Attribute("ref")?.Value))
@@ -522,7 +522,7 @@ public sealed class SpreadsheetDocumentService
             .ToList() ?? [];
     }
 
-    private static Dictionary<int, double> ReadColumnWidths(XDocument worksheet)
+    private Dictionary<int, double> ReadColumnWidths(XDocument worksheet)
     {
         var result = new Dictionary<int, double>();
         foreach (var column in worksheet.Root?.Element(Main + "cols")?.Elements(Main + "col") ?? [])
@@ -535,7 +535,7 @@ public sealed class SpreadsheetDocumentService
         return result;
     }
 
-    private static MergedRange? ParseRange(string? value)
+    private MergedRange? ParseRange(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         var pieces = value.Split(':', 2);
@@ -544,7 +544,7 @@ public sealed class SpreadsheetDocumentService
         return new MergedRange(start.Row, start.Column, end.Row, end.Column);
     }
 
-    private static string ColumnName(int column)
+    private string ColumnName(int column)
     {
         column = Math.Max(1, column);
         var name = new StringBuilder(4);
@@ -557,7 +557,7 @@ public sealed class SpreadsheetDocumentService
         return name.ToString();
     }
 
-    private static (int Row, int Column) ParseCellReference(string? reference, int fallbackRow)
+    private (int Row, int Column) ParseCellReference(string? reference, int fallbackRow)
     {
         if (string.IsNullOrWhiteSpace(reference)) return (fallbackRow, 1);
         var column = 0;
@@ -571,14 +571,14 @@ public sealed class SpreadsheetDocumentService
         return (Math.Max(1, row), Math.Max(1, column));
     }
 
-    private static XDocument LoadEntry(ZipArchive archive, string path)
+    private XDocument LoadEntry(ZipArchive archive, string path)
     {
         var entry = archive.GetEntry(path) ?? throw new InvalidDataException($"Workbook part '{path}' is missing.");
         using var input = entry.Open();
         return XDocument.Load(input, LoadOptions.None);
     }
 
-    private static string NormalizeArchivePath(string baseFolder, string target)
+    private string NormalizeArchivePath(string baseFolder, string target)
     {
         var combined = target.StartsWith('/') ? target.TrimStart('/') : baseFolder.TrimEnd('/') + "/" + target;
         var parts = new Stack<string>();
@@ -591,7 +591,7 @@ public sealed class SpreadsheetDocumentService
         return string.Join('/', parts.Reverse());
     }
 
-    private static string DecodeText(byte[] content)
+    private string DecodeText(byte[] content)
     {
         if (content.Length >= 3 && content[0] == 0xef && content[1] == 0xbb && content[2] == 0xbf)
             return Encoding.UTF8.GetString(content, 3, content.Length - 3);
@@ -600,17 +600,17 @@ public sealed class SpreadsheetDocumentService
         return Encoding.UTF8.GetString(content);
     }
 
-    private static string EmptyPreview(string sheetName, string message) =>
+    private string EmptyPreview(string sheetName, string message) =>
         $"<div class=\"spreadsheet-preview-document spreadsheet-preview-empty\"><div><b>{WebUtility.HtmlEncode(sheetName)}</b><span>{WebUtility.HtmlEncode(message)}</span></div><span class=\"spreadsheet-preview-sheet\">{WebUtility.HtmlEncode(sheetName)}</span></div>";
 
-    private static void WriteEntry(ZipArchive archive, string path, string content)
+    private void WriteEntry(ZipArchive archive, string path, string content)
     {
         var entry = archive.CreateEntry(path, CompressionLevel.SmallestSize);
         using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(false));
         writer.Write(content.Trim());
     }
 
-    private static string NormalizeFontFamily(string? value)
+    private string NormalizeFontFamily(string? value)
     {
         var normalized = new string((value ?? string.Empty)
             .Where(character => char.IsLetterOrDigit(character) || character is ' ' or '-' or '_' or '.')
@@ -620,17 +620,17 @@ public sealed class SpreadsheetDocumentService
         return string.IsNullOrWhiteSpace(normalized) ? "Calibri" : normalized;
     }
 
-    private static string NormalizeSheetName(string value)
+    private string NormalizeSheetName(string value)
     {
         var invalid = new HashSet<char>(['\\', '/', '?', ':', '*', '[', ']']);
         var result = new string((value ?? string.Empty).Where(character => !invalid.Contains(character)).Take(31).ToArray()).Trim('\'');
         return string.IsNullOrWhiteSpace(result) ? "Sheet1" : result;
     }
 
-    private static string SecurityElementEscape(string value) => System.Security.SecurityElement.Escape(value) ?? string.Empty;
-    private static int ParseInt(string? value, int fallback) => int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
-    private static double ParseDouble(string? value, double fallback) => double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
-    private static bool ParseBool(string? value) => value is "1" || string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+    private string SecurityElementEscape(string value) => System.Security.SecurityElement.Escape(value) ?? string.Empty;
+    private int ParseInt(string? value, int fallback) => int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
+    private double ParseDouble(string? value, double fallback) => double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
+    private bool ParseBool(string? value) => value is "1" || string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
 
     private sealed record CellPreview(string Value, int StyleIndex);
     private sealed record MergedRange(int StartRow, int StartColumn, int EndRow, int EndColumn);

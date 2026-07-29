@@ -1465,24 +1465,24 @@
         _playhead = Math.Clamp(_playhead, 0, SequenceDuration);
     }
 
-    private static double Distance(MediaFramePoint first, MediaFramePoint second)
+    private double Distance(MediaFramePoint first, MediaFramePoint second)
     {
         var x = first.X - second.X;
         var y = first.Y - second.Y;
         return Math.Sqrt(x * x + y * y);
     }
 
-    private static List<MediaFramePoint> CloneFramePoints(IEnumerable<MediaFramePoint>? points) =>
+    private List<MediaFramePoint> CloneFramePoints(IEnumerable<MediaFramePoint>? points) =>
         (points ?? []).Select(point => new MediaFramePoint
         {
             X = Math.Clamp(point.X, 0, 1),
             Y = Math.Clamp(point.Y, 0, 1)
         }).ToList();
 
-    private static string FrameClipCss(IReadOnlyList<MediaFramePoint> points) =>
+    private string FrameClipCss(IReadOnlyList<MediaFramePoint> points) =>
         $"polygon({string.Join(',', points.Select(point => $"{point.X * 100:0.###}% {point.Y * 100:0.###}%"))})";
 
-    private static string Percent(double value) => $"{Math.Clamp(value, 0, 1) * 100:0.###}%";
+    private string Percent(double value) => $"{Math.Clamp(value, 0, 1) * 100:0.###}%";
 
     private string SegmentStyle(PublicationMediaSegment segment)
     {
@@ -1509,7 +1509,7 @@
         return $"{segment.Name} · {Time(length)}";
     }
 
-    private static bool IsPlayableSegment(PublicationMediaSegment segment) =>
+    private bool IsPlayableSegment(PublicationMediaSegment segment) =>
         !segment.IsGap && !string.IsNullOrWhiteSpace(segment.DataUrl);
 
     private string MouseModeText(MediaStudioMouseMode mode, string label) => _mouseMode == mode ? $"✓ {label}" : label;
@@ -1965,7 +1965,7 @@
         }
     }
 
-    private static MediaTemporalSection CloneTemporalSection(MediaTemporalSection section) => new()
+    private MediaTemporalSection CloneTemporalSection(MediaTemporalSection section) => new()
     {
         Id = section.Id == Guid.Empty ? Guid.NewGuid() : section.Id,
         Name = string.IsNullOrWhiteSpace(section.Name) ? "Cut section" : section.Name.Trim(),
@@ -2282,7 +2282,7 @@
         _warning = $"Converted {layer.Name} to an animated 3D blob. Draw source and morph regions, then reuse it in Mainframe or HTML export.";
     }
 
-    private static List<MediaFramePoint> DefaultBlobRegion() =>
+    private List<MediaFramePoint> DefaultBlobRegion() =>
     [
         new() { X = .28, Y = .22 }, new() { X = .65, Y = .18 }, new() { X = .82, Y = .43 },
         new() { X = .72, Y = .76 }, new() { X = .35, Y = .82 }, new() { X = .18, Y = .52 }
@@ -2476,28 +2476,28 @@
         CommitSelectedSegment(refreshVideoEffects: true);
     }
 
-    private static string VideoLayerKindName(VideoEffectLayerKind kind) => kind switch
+    private string VideoLayerKindName(VideoEffectLayerKind kind) => kind switch
     {
         VideoEffectLayerKind.Selection2D => "Selection effect layer",
         VideoEffectLayerKind.Blob3D => "Interactive 3D blob",
         _ => "Base video layer"
     };
 
-    private static string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
+    private string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
     {
         PublicationHtmlExportSupport.CanvasRuntime => "HTML · canvas runtime",
         PublicationHtmlExportSupport.RenderBeforeExport => "Render before HTML export",
         _ => "HTML native"
     };
 
-    private static string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
+    private string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
     {
         PublicationHtmlExportSupport.CanvasRuntime => "canvas",
         PublicationHtmlExportSupport.RenderBeforeExport => "render",
         _ => "native"
     };
 
-    private static string VideoFilterKindName(VideoEffectFilterKind kind) => kind switch
+    private string VideoFilterKindName(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.HueRotation => "Hue rotation",
         VideoEffectFilterKind.ChromaKey => "Chroma key",
@@ -2505,7 +2505,7 @@
         _ => kind.ToString()
     };
 
-    private static string VideoFilterSummary(VideoEffectFilter filter) => filter.Kind switch
+    private string VideoFilterSummary(VideoEffectFilter filter) => filter.Kind switch
     {
         VideoEffectFilterKind.ChromaKey => $"{filter.Color} · similarity {filter.Amount:0.##}",
         VideoEffectFilterKind.ColorWash => $"{filter.Color} · {filter.Amount:P0}",
@@ -2514,7 +2514,7 @@
         _ => $"{filter.Amount:0.##}"
     };
 
-    private static string VideoFilterAmountLabel(VideoEffectFilterKind kind) => kind switch
+    private string VideoFilterAmountLabel(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.HueRotation => "Rotation",
         VideoEffectFilterKind.Blur => "Radius",
@@ -2523,15 +2523,15 @@
         _ => "Amount"
     };
 
-    private static double VideoFilterMinimum(VideoEffectFilterKind kind) => kind == VideoEffectFilterKind.HueRotation ? -360 : 0;
-    private static double VideoFilterMaximum(VideoEffectFilterKind kind) => kind switch
+    private double VideoFilterMinimum(VideoEffectFilterKind kind) => kind == VideoEffectFilterKind.HueRotation ? -360 : 0;
+    private double VideoFilterMaximum(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.Brightness or VideoEffectFilterKind.Contrast or VideoEffectFilterKind.Saturation => 4,
         VideoEffectFilterKind.HueRotation => 360,
         VideoEffectFilterKind.Blur => 64,
         _ => 1
     };
-    private static double VideoFilterStep(VideoEffectFilterKind kind) => kind switch
+    private double VideoFilterStep(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.HueRotation => 1,
         VideoEffectFilterKind.Blur => .1,
@@ -2804,7 +2804,7 @@
         TimelineEdits.ReplaceTrackProjection(_videoProject, _activeProjectTrackId, _segments);
     }
 
-    private static Guid ResolveActiveProjectTrackId(VideoProjectDocument project)
+    private Guid ResolveActiveProjectTrackId(VideoProjectDocument project)
     {
         var active = project.Tracks.FirstOrDefault(track => track.Id == project.ActiveTrackId && track.Kind == MediaTimelineTrackKind.Video);
         return active?.Id
@@ -2813,7 +2813,7 @@
             ?? Guid.Empty;
     }
 
-    private static bool MatchesProjectMedia(PublicationMediaSegment segment, string selectedFileName)
+    private bool MatchesProjectMedia(PublicationMediaSegment segment, string selectedFileName)
     {
         var targetName = Path.GetFileName(selectedFileName);
         var targetStem = Path.GetFileNameWithoutExtension(targetName);
@@ -2833,7 +2833,7 @@
                 || string.Equals(value, targetStem, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static string ProjectReferenceFileName(string value)
+    private string ProjectReferenceFileName(string value)
     {
         var clean = value.Trim().Replace('\\', '/');
         if (Uri.TryCreate(clean, UriKind.Absolute, out var uri) && uri.IsFile)
@@ -2843,7 +2843,7 @@
         return Path.GetFileName(clean);
     }
 
-    private static string ResolveProjectMediaMimeType(string fileName, string? declaredMimeType)
+    private string ResolveProjectMediaMimeType(string fileName, string? declaredMimeType)
     {
         var declared = NormalizeMimeType(declaredMimeType, string.Empty);
         if (!string.IsNullOrWhiteSpace(declared)) return declared;
@@ -3255,7 +3255,7 @@
         ApplyTrimRange(Math.Min(values[0], values[1]), Math.Max(values[0], values[1]));
     }
 
-    private static bool TryRangeValue(object? value, out double number)
+    private bool TryRangeValue(object? value, out double number)
     {
         try
         {
@@ -3268,7 +3268,7 @@
         return double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out number) && double.IsFinite(number);
     }
 
-    private static (double Start, double End) NormalizeTrimRange(double start, double end, double duration)
+    private (double Start, double End) NormalizeTrimRange(double start, double end, double duration)
     {
         var safeDuration = double.IsFinite(duration) ? Math.Max(0, duration) : 0;
         if (safeDuration <= 0) return (0, 0);
@@ -3282,7 +3282,7 @@
         return (safeStart, safeEnd);
     }
 
-    private static bool SegmentHasExplicitTemporalSelection(PublicationMediaSegment segment)
+    private bool SegmentHasExplicitTemporalSelection(PublicationMediaSegment segment)
     {
         if (!segment.HasTemporalSelection) return false;
         if (segment.TemporalSelectionIsPoint) return true;
@@ -3324,7 +3324,7 @@
         return true;
     }
 
-    private static bool IsInterruptedPlaybackException(JSException exception)
+    private bool IsInterruptedPlaybackException(JSException exception)
     {
         var message = exception.Message ?? string.Empty;
         return message.Contains("play() request was interrupted", StringComparison.OrdinalIgnoreCase)
@@ -3451,7 +3451,7 @@
     }
 
     private string VideoFitModeText(PublicationVideoFitMode mode, string label) => _videoFitMode == mode ? $"✓ {label}" : label;
-    private static string VideoFitModeName(PublicationVideoFitMode mode) => mode switch
+    private string VideoFitModeName(PublicationVideoFitMode mode) => mode switch
     {
         PublicationVideoFitMode.Cover => "Fill canvas (crop)",
         PublicationVideoFitMode.Stretch => "Stretch to canvas",
@@ -3685,7 +3685,7 @@
         await Cancelled.InvokeAsync();
     }
 
-    private static string CreateToneDataUrl(double durationSeconds, double frequency, double volume)
+    private string CreateToneDataUrl(double durationSeconds, double frequency, double volume)
     {
         const int sampleRate = 44_100;
         var frames = Math.Max(1, (int)Math.Floor(sampleRate * Math.Max(.1, durationSeconds)));
@@ -3718,7 +3718,7 @@
         return $"data:audio/wav;base64,{Convert.ToBase64String(stream.ToArray())}";
     }
 
-    private static string ResolveImportedMimeType(string fileName, string? declaredMimeType, bool video)
+    private string ResolveImportedMimeType(string fileName, string? declaredMimeType, bool video)
     {
         var fallback = video ? "video/mp4" : "audio/mpeg";
         var declared = NormalizeMimeType(declaredMimeType, string.Empty);
@@ -3741,7 +3741,7 @@
         };
     }
 
-    private static string NormalizeMimeType(string? mimeType, string fallback)
+    private string NormalizeMimeType(string? mimeType, string fallback)
     {
         var value = mimeType?.Trim() ?? string.Empty;
         var separator = value.IndexOf(';');
@@ -3749,7 +3749,7 @@
         return value.Contains('/') ? value.ToLowerInvariant() : fallback;
     }
 
-    private static string NormalizeMediaDataUrl(string? dataUrl, string fallbackMimeType)
+    private string NormalizeMediaDataUrl(string? dataUrl, string fallbackMimeType)
     {
         if (string.IsNullOrWhiteSpace(dataUrl) || !dataUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
             return dataUrl ?? string.Empty;
@@ -3760,7 +3760,7 @@
         return $"data:{mimeType};base64,{dataUrl[(marker + 8)..]}";
     }
 
-    private static string RecordingName(string mimeType, bool isVideo)
+    private string RecordingName(string mimeType, bool isVideo)
     {
         var extension = mimeType.ToLowerInvariant() switch
         {
@@ -3772,20 +3772,20 @@
         return $"Recorded {(isVideo ? "Video" : "Audio")}.{extension}";
     }
 
-    private static string PlaybackTriggerName(PublicationMediaPlaybackTrigger value) => value switch
+    private string PlaybackTriggerName(PublicationMediaPlaybackTrigger value) => value switch
     {
         PublicationMediaPlaybackTrigger.OnPageEnter => "When the page opens",
         PublicationMediaPlaybackTrigger.OnClick => "When the media object is clicked",
         _ => "With the object animation"
     };
-    private static string WaveHeight(double value) => $"{Math.Clamp(value, .05, 1) * 100:0.#}%";
-    private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
-    private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
-    private static bool TryDouble(ChangeEventArgs args, out double value) =>
+    private string WaveHeight(double value) => $"{Math.Clamp(value, .05, 1) * 100:0.#}%";
+    private string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+    private bool TryDouble(ChangeEventArgs args, out double value) =>
         double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value) && double.IsFinite(value);
-    private static string FormatBytes(long bytes)
+    private string FormatBytes(long bytes)
     {
         string[] units = ["B", "KB", "MB", "GB", "TB"];
         var value = Math.Max(0, bytes);

@@ -351,7 +351,7 @@
             ? _selectionColumnNames[index]
             : $"Column {index + 1}";
 
-    private static bool LooksLikeHeaders(IReadOnlyList<List<string>> rows)
+    private bool LooksLikeHeaders(IReadOnlyList<List<string>> rows)
     {
         if (rows.Count < 2 || rows[0].Count == 0) return false;
         var first = rows[0].Select(value => value?.Trim() ?? string.Empty).ToArray();

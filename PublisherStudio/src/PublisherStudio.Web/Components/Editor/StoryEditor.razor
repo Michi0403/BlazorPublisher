@@ -851,7 +851,7 @@ Required result contract:
         _storyPreviewTransferError = null;
     }
 
-    private static string StandaloneStoryHtml(
+    private string StandaloneStoryHtml(
         StoryPreviewResult prepared,
         string title,
         StoryPageLayout pageLayout,
@@ -1143,12 +1143,12 @@ Required result contract:
             """;
     }
 
-    private static string CssMillimeters(double value) => FormatMeasurement(value) + "mm";
+    private string CssMillimeters(double value) => FormatMeasurement(value) + "mm";
 
-    private static string FormatMeasurement(double value) =>
+    private string FormatMeasurement(double value) =>
         value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
 
-    private static bool IsVisibleBackground(string? value)
+    private bool IsVisibleBackground(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return false;
         var normalized = value.Trim();

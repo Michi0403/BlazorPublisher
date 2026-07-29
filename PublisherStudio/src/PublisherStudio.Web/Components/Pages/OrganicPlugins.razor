@@ -624,7 +624,7 @@ Required result contract:
         Refresh();
     }
 
-    private static OrganicPermissionRule NewPermission(string peerId) => new()
+    private OrganicPermissionRule NewPermission(string peerId) => new()
     {
         PeerId = peerId,
         IsExposed = true,
@@ -635,7 +635,7 @@ Required result contract:
         ApprovalMode = OrganicApprovalMode.AskEveryTime
     };
 
-    private static OrganicCouncilPromptRequest NewCouncilRequest(string team) => new()
+    private OrganicCouncilPromptRequest NewCouncilRequest(string team) => new()
     {
         TeamKey = team,
         ExternalProjectContextJson = "{}",

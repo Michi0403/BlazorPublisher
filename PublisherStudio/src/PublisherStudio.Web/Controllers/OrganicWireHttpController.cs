@@ -18,6 +18,8 @@ public sealed class OrganicWireHttpController(
     IOrganicCapabilityCatalog capabilities,
     IOrganicWorkCoordinator work,
     IOrganicReplayGuard replayGuard,
+    IOrganicTransportSecurityPolicy transportSecurityPolicy,
+    IOrganicWireEnvelopeFactory envelopeFactory,
     ILogger<OrganicWireHttpController> logger) : ControllerBase
 {
     [HttpGet("profile")]
@@ -60,16 +62,16 @@ public sealed class OrganicWireHttpController(
             await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
             if (envelope.MessageType is not OrganicWireMessageType.Invoke)
                 return BadRequest(new { Error = "The PublisherStudio HTTP/JSON adapter currently accepts Invoke envelopes; use profile for catalog discovery." });
-            if (!OrganicTransportSecurityPolicy.IsProtected(envelope))
+            if (!transportSecurityPolicy.IsProtected(envelope))
                 throw new CryptographicException("PublisherStudio HTTP/JSON Invoke requests require an MFA-verified signed and encrypted peer.");
             if (!replayGuard.TryAccept(envelope.SourcePeerId, envelope.MessageId, envelope.CreatedUtc))
                 throw new InvalidDataException("This organic 1-Wire message id has already been processed or is outside the accepted replay window.");
 
             var item = await work.ReceiveAsync(envelope, cancellationToken).ConfigureAwait(false);
-            var response = CreateWorkEnvelope(item);
+            var response = envelopeFactory.CreateWorkEnvelope(item, $"publisherstudio:{Environment.MachineName}");
             await security.ProtectOutgoingAsync(response, cancellationToken).ConfigureAwait(false);
-            if (OrganicTransportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
-                !OrganicTransportSecurityPolicy.IsProtected(response))
+            if (transportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
+                !transportSecurityPolicy.IsProtected(response))
                 throw new CryptographicException("The PublisherStudio HTTP/JSON response requires an MFA-verified peer before application data can be returned.");
             return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
         }
@@ -98,10 +100,10 @@ public sealed class OrganicWireHttpController(
             var item = work.GetWork().FirstOrDefault(candidate => candidate.CorrelationId == correlationId);
             if (item is null)
                 return NotFound(new { CorrelationId = correlationId, Status = "NotFoundOrNotQueuedYet" });
-            var response = CreateWorkEnvelope(item);
+            var response = envelopeFactory.CreateWorkEnvelope(item, $"publisherstudio:{Environment.MachineName}");
             await security.ProtectOutgoingAsync(response, cancellationToken).ConfigureAwait(false);
-            if (OrganicTransportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
-                !OrganicTransportSecurityPolicy.IsProtected(response))
+            if (transportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
+                !transportSecurityPolicy.IsProtected(response))
                 throw new CryptographicException("The PublisherStudio HTTP/JSON work response requires an MFA-verified peer before application data can be returned.");
             return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
         }
@@ -112,28 +114,4 @@ public sealed class OrganicWireHttpController(
         }
     }
 
-    private static OrganicWireEnvelope CreateWorkEnvelope(PublisherStudio.Domain.OrganicPluginWorkItem item) => new()
-    {
-        MessageType = item.Status == OrganicWorkStatus.PendingApproval
-            ? OrganicWireMessageType.ApprovalRequired
-            : item.Status is OrganicWorkStatus.Queued or OrganicWorkStatus.Running
-                ? OrganicWireMessageType.WorkAccepted
-                : OrganicWireMessageType.WorkResult,
-        CorrelationId = item.CorrelationId,
-        ReplyToMessageId = item.MessageId,
-        SourcePeerId = $"publisherstudio:{Environment.MachineName}",
-        TargetPeerId = item.PeerId,
-        CapabilityKey = item.CapabilityKey,
-        Error = item.Error,
-        InteractionValueJson = item.Request.InteractionValueJson,
-        InteractionValueContentType = item.Request.InteractionValueContentType,
-        Properties = new Dictionary<string, JsonElement>
-        {
-            ["WorkItemId"] = JsonSerializer.SerializeToElement(item.Id),
-            ["Status"] = JsonSerializer.SerializeToElement(item.Status.ToString()),
-            ["ResultJson"] = JsonSerializer.SerializeToElement(item.ResultJson),
-            ["InteractionValueJson"] = JsonSerializer.SerializeToElement(item.Request.InteractionValueJson),
-            ["InteractionValueContentType"] = JsonSerializer.SerializeToElement(item.Request.InteractionValueContentType)
-        }
-    };
 }

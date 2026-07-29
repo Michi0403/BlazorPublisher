@@ -255,7 +255,7 @@
 
     private Guid? _selectedAnimationId;
     private Guid? _lastElementId;
-    private static readonly PublicationAnimationDirection[] DirectionValues =
+    private readonly PublicationAnimationDirection[] DirectionValues =
     [PublicationAnimationDirection.Left, PublicationAnimationDirection.Right, PublicationAnimationDirection.Up, PublicationAnimationDirection.Down];
 
     private List<(PublicationElement Element, PublicationAnimation Animation)> Timeline => State.CurrentPage.Elements
@@ -389,7 +389,7 @@
     private void Update(Action<PublicationAnimation> change) { if (_selectedAnimationId is { } id) State.UpdateAnimation(id, change); }
     private void UpdateLive(string key, Action<PublicationAnimation> change) { if (_selectedAnimationId is { } id) State.UpdateAnimationLive(id, key, change); }
 
-    private static PublicationPlaybackSettings BoolCopy(PublicationPlaybackSettings value) => new()
+    private PublicationPlaybackSettings BoolCopy(PublicationPlaybackSettings value) => new()
     {
         LoopPresentation = value.LoopPresentation,
         StartAutomatically = value.StartAutomatically,
@@ -410,19 +410,19 @@
         };
     }
 
-    private static bool UsesDirection(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move;
-    private static bool UsesDistance(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Move or PublicationAnimationEffect.Shake;
-    private static bool UsesScale(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Zoom or PublicationAnimationEffect.Pulse or PublicationAnimationEffect.GrowShrink or PublicationAnimationEffect.Bounce;
-    private static bool UsesRotation(PublicationAnimationEffect value) => value == PublicationAnimationEffect.Spin;
-    private static bool IsMediaAnimationEffect(PublicationAnimationEffect value) => value is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia;
-    private static string TriggerName(PublicationAnimationTrigger value) => value switch
+    private bool UsesDirection(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move;
+    private bool UsesDistance(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Move or PublicationAnimationEffect.Shake;
+    private bool UsesScale(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Zoom or PublicationAnimationEffect.Pulse or PublicationAnimationEffect.GrowShrink or PublicationAnimationEffect.Bounce;
+    private bool UsesRotation(PublicationAnimationEffect value) => value == PublicationAnimationEffect.Spin;
+    private bool IsMediaAnimationEffect(PublicationAnimationEffect value) => value is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia;
+    private string TriggerName(PublicationAnimationTrigger value) => value switch
     {
         PublicationAnimationTrigger.OnPageEnter => "When page opens",
         PublicationAnimationTrigger.WithPrevious => "With previous",
         PublicationAnimationTrigger.AfterPrevious => "After previous",
         _ => "On click"
     };
-    private static string TriggerGlyph(PublicationAnimationTrigger value) => value switch
+    private string TriggerGlyph(PublicationAnimationTrigger value) => value switch
     {
         PublicationAnimationTrigger.OnPageEnter => "▶",
         PublicationAnimationTrigger.WithPrevious => "⇉",
@@ -434,10 +434,10 @@
         var items = State.CurrentPage.Elements.Where(item => item.Id != selected.Id);
         return IsMediaInteraction(selected.Interaction.Action) ? items.OfType<PublicationMediaElement>() : items;
     }
-    private static bool IsMediaInteraction(PublicationInteractionAction value) => value is
+    private bool IsMediaInteraction(PublicationInteractionAction value) => value is
         PublicationInteractionAction.PlayMedia or PublicationInteractionAction.PauseMedia or PublicationInteractionAction.ToggleMediaPlayback;
 
-    private static string InteractionName(PublicationInteractionAction value) => value switch
+    private string InteractionName(PublicationInteractionAction value) => value switch
     {
         PublicationInteractionAction.None => "Nothing",
         PublicationInteractionAction.NextPage => "Go to next page",
@@ -452,7 +452,7 @@
         PublicationInteractionAction.PauseMedia => "Pause audio or video",
         _ => "Toggle media playback"
     };
-    private static string KindGlyph(PublicationElement item) => item.Kind switch
+    private string KindGlyph(PublicationElement item) => item.Kind switch
     {
         PublicationElementKind.Text => "T",
         PublicationElementKind.Image => "▧",
@@ -467,10 +467,10 @@
         PublicationElementKind.LiveSource => "●",
         _ => "•"
     };
-    private static string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
-    private static string Seconds(double value) => $"{value:0.##} s";
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
-    private static bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
-    private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+    private string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+    private string Seconds(double value) => $"{value:0.##} s";
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+    private bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 }

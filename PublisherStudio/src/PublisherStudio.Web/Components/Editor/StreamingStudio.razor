@@ -646,7 +646,7 @@
 
     private const string DefaultTwitchEndpoint = "rtmp://ingest.global-contribute.live-video.net/app/{streamKey}";
 
-    private static readonly PublicationStreamTransport[] ProviderTransports =
+    private readonly PublicationStreamTransport[] ProviderTransports =
     [
         PublicationStreamTransport.Rtmp,
         PublicationStreamTransport.Rtmps,
@@ -1012,7 +1012,7 @@
         _providerDraft.IngestLastTestedUtc = DateTimeOffset.UtcNow;
     }
 
-    private static string TwitchIngestOption(TwitchIngestCandidate candidate) =>
+    private string TwitchIngestOption(TwitchIngestCandidate candidate) =>
         candidate.Reachable && candidate.LatencyMilliseconds is { } milliseconds
             ? $"{candidate.Name} — {milliseconds:0} ms"
             : candidate.Reachable
@@ -1141,13 +1141,13 @@
         _selectedOutputId = output.Id;
     }
 
-    private static void ApplyRecommendedDefaults(PublicationStreamOutput output)
+    private void ApplyRecommendedDefaults(PublicationStreamOutput output)
     {
         output.QualityPreset = PublicationStreamQualityPreset.Recommended;
         ApplyQualityPreset(output);
     }
 
-    private static void ApplyQualityPreset(PublicationStreamOutput output)
+    private void ApplyQualityPreset(PublicationStreamOutput output)
     {
         if (output.QualityPreset == PublicationStreamQualityPreset.Custom) return;
 
@@ -1327,7 +1327,7 @@
         _status = $"Duplicated {profile.Name}.";
     }
 
-    private static bool CanSaveBrowserDevice(BrowserMediaDeviceInfo device) =>
+    private bool CanSaveBrowserDevice(BrowserMediaDeviceInfo device) =>
         !string.IsNullOrWhiteSpace(device.DeviceId)
         && (string.Equals(device.Kind, "videoinput", StringComparison.OrdinalIgnoreCase)
             || string.Equals(device.Kind, "audioinput", StringComparison.OrdinalIgnoreCase));
@@ -1526,7 +1526,7 @@
         }
     }
 
-    private static string RecordingVariantName(PublicationStreamRecordingVariant value) => value switch
+    private string RecordingVariantName(PublicationStreamRecordingVariant value) => value switch
     {
         PublicationStreamRecordingVariant.CleanMaster => "Clean master",
         PublicationStreamRecordingVariant.EachEnabledOutput => "Each enabled output",
@@ -1547,8 +1547,8 @@
         await CloseTwitchAuthorizationWindowAsync();
         await Cancelled.InvokeAsync();
     }
-    private static T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
-    private static string ShortId(string value) => string.IsNullOrWhiteSpace(value) ? "default" : value.Length <= 16 ? value : value[..16] + "…";
+    private T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
+    private string ShortId(string value) => string.IsNullOrWhiteSpace(value) ? "default" : value.Length <= 16 ? value : value[..16] + "…";
 
     private sealed record WorkflowStep(int Number, string Title, string Text);
 }

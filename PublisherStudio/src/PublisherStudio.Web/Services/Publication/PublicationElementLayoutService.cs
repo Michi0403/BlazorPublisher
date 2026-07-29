@@ -145,5 +145,5 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
         return ordered.AsReadOnly();
     }
 
-    private static double Safe(double value, double fallback = 0) => double.IsFinite(value) ? value : fallback;
+    private double Safe(double value, double fallback = 0) => double.IsFinite(value) ? value : fallback;
 }

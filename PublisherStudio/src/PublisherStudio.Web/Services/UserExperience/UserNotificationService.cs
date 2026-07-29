@@ -67,7 +67,7 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
         Changed?.Invoke();
     }
 
-    private static UserNotificationMessage Create(UserNotificationSeverity severity, string title, string message, string source) => new()
+    private UserNotificationMessage Create(UserNotificationSeverity severity, string title, string message, string source) => new()
     {
         Severity = severity,
         Title = title,

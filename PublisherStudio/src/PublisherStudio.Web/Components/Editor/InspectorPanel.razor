@@ -1095,9 +1095,9 @@
     private void ToggleContextLock() { if (ContextLayer is { } item) ToggleLayerLock(item); }
     private void ToggleContextMediaMuted() { if (ContextLayer is PublicationMediaElement media) State.UpdateMedia(media.Id, item => item.Muted = !item.Muted); }
     private void ToggleContextMediaLoop() { if (ContextLayer is PublicationMediaElement media) State.UpdateMedia(media.Id, item => item.Loop = !item.Loop); }
-    private static string CheckedText(bool checkedValue, string text) => checkedValue ? $"✓ {text}" : text;
+    private string CheckedText(bool checkedValue, string text) => checkedValue ? $"✓ {text}" : text;
 
-    private static string KindGlyph(PublicationElement item) => item.Kind switch
+    private string KindGlyph(PublicationElement item) => item.Kind switch
     {
         PublicationElementKind.Text => "T",
         PublicationElementKind.Image => "▧",
@@ -1208,7 +1208,7 @@
     private void ToggleLiveDeviceTimestamp(ChangeEventArgs _) => UpdateLiveSource(source => { source.DeviceProfileId = null; source.UseDeviceTimestamp = !source.UseDeviceTimestamp; });
     private void ToggleLiveChroma(ChangeEventArgs _) => UpdateLiveSource(source => source.ChromaKeyEnabled = !source.ChromaKeyEnabled);
 
-    private static List<VideoEffectLayer> LiveEffectLayers(LiveSourceElement source) => (source.VideoLayers ?? [])
+    private List<VideoEffectLayer> LiveEffectLayers(LiveSourceElement source) => (source.VideoLayers ?? [])
         .Where(layer => !string.Equals(layer.Name, "Live input controls", StringComparison.OrdinalIgnoreCase))
         .ToList();
 
@@ -1450,7 +1450,7 @@
         });
     }
 
-    private static string LiveFilterKindName(VideoEffectFilterKind kind) => kind switch
+    private string LiveFilterKindName(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.HueRotation => "Hue rotation",
         VideoEffectFilterKind.ChromaKey => "Chroma key",
@@ -1458,7 +1458,7 @@
         _ => kind.ToString()
     };
 
-    private static string LiveFilterSummary(VideoEffectFilter filter) => filter.Kind switch
+    private string LiveFilterSummary(VideoEffectFilter filter) => filter.Kind switch
     {
         VideoEffectFilterKind.ChromaKey => $"{filter.Color} · similarity {filter.Amount:0.##}",
         VideoEffectFilterKind.ColorWash => $"{filter.Color} · {filter.Amount:P0}",
@@ -1467,7 +1467,7 @@
         _ => $"{filter.Amount:0.##}"
     };
 
-    private static string LiveFilterAmountLabel(VideoEffectFilterKind kind) => kind switch
+    private string LiveFilterAmountLabel(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.HueRotation => "Rotation",
         VideoEffectFilterKind.Blur => "Radius",
@@ -1475,15 +1475,15 @@
         _ => "Amount"
     };
 
-    private static double LiveFilterMinimum(VideoEffectFilterKind kind) => kind == VideoEffectFilterKind.HueRotation ? -360 : 0;
-    private static double LiveFilterMaximum(VideoEffectFilterKind kind) => kind switch
+    private double LiveFilterMinimum(VideoEffectFilterKind kind) => kind == VideoEffectFilterKind.HueRotation ? -360 : 0;
+    private double LiveFilterMaximum(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.Brightness or VideoEffectFilterKind.Contrast or VideoEffectFilterKind.Saturation => 4,
         VideoEffectFilterKind.HueRotation => 360,
         VideoEffectFilterKind.Blur => 64,
         _ => 1
     };
-    private static double LiveFilterStep(VideoEffectFilterKind kind) => kind switch
+    private double LiveFilterStep(VideoEffectFilterKind kind) => kind switch
     {
         VideoEffectFilterKind.HueRotation => 1,
         VideoEffectFilterKind.Blur => .1,
@@ -1501,8 +1501,8 @@
     private IEnumerable<PublicationElement> SignalTargetElements(ConnectorElement connector) =>
         State.CurrentPage.Elements.Where(item => item is not ConnectorElement).OrderBy(item => item.Name);
 
-    private static string GuidText(Guid? value) => value?.ToString("D") ?? string.Empty;
-    private static Guid? ParseGuid(ChangeEventArgs args) => Guid.TryParse(args.Value?.ToString(), out var value) ? value : null;
+    private string GuidText(Guid? value) => value?.ToString("D") ?? string.Empty;
+    private Guid? ParseGuid(ChangeEventArgs args) => Guid.TryParse(args.Value?.ToString(), out var value) ? value : null;
 
     private void UpdateSignal(Action<SignalConnectorSettings> update)
     {
@@ -1681,7 +1681,7 @@
     private void ToggleSpreadsheetGridLines(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); }
     private void ToggleSpreadsheetSheetName(ChangeEventArgs _) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName); }
     private string DataObjectName(Guid id) => State.Document.DataObjects.FirstOrDefault(data => data.Id == id)?.Name ?? "Missing source";
-    private static string DataVisualDescription(DataVisualElement item) => item.VisualKind switch
+    private string DataVisualDescription(DataVisualElement item) => item.VisualKind switch
     {
         DataVisualKind.CartesianChart => "DevExpress Cartesian chart",
         DataVisualKind.PieChart => "DevExpress pie / doughnut chart",
@@ -1698,7 +1698,7 @@
         DataVisualKind.DataTable => "DevExpress data grid",
         _ => "DevExpress KPI progress"
     };
-    private static string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
+    private string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
 
     private void ChangeConnectorPath(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector && Enum.TryParse<ConnectorPathKind>(args.Value?.ToString(), out var value)) State.UpdateSelected(_ => connector.PathKind = value); }
     private void ChangeConnectorDash(ChangeEventArgs args) { if (State.SelectedElement is ConnectorElement connector && Enum.TryParse<ConnectorDashStyle>(args.Value?.ToString(), out var value)) State.UpdateSelected(_ => connector.DashStyle = value); }
@@ -1901,10 +1901,10 @@
         });
     }
 
-    private static bool IsMediaNumberField(string field) => field is "mediaVolume" or "mediaFadeIn" or "mediaFadeOut";
+    private bool IsMediaNumberField(string field) => field is "mediaVolume" or "mediaFadeIn" or "mediaFadeOut";
     private void EndLiveEdit(ChangeEventArgs _) => State.EndLiveEdit();
 
-    private static void ApplyNumber(PublicationElement element, string field, double value)
+    private void ApplyNumber(PublicationElement element, string field, double value)
     {
         switch (field)
         {
@@ -2010,7 +2010,7 @@
         });
     }
 
-    private static string PictureMimeType(string fileName, string? declared) => Path.GetExtension(fileName).ToLowerInvariant() switch
+    private string PictureMimeType(string fileName, string? declared) => Path.GetExtension(fileName).ToLowerInvariant() switch
     {
         ".png" => "image/png",
         ".jpg" or ".jpeg" => "image/jpeg",
@@ -2021,7 +2021,7 @@
         _ => string.Empty
     };
 
-    private static string VideoMimeType(string fileName, string? declared) => Path.GetExtension(fileName).ToLowerInvariant() switch
+    private string VideoMimeType(string fileName, string? declared) => Path.GetExtension(fileName).ToLowerInvariant() switch
     {
         ".mp4" or ".m4v" => "video/mp4",
         ".webm" => "video/webm",
@@ -2053,7 +2053,7 @@
 
     private void OpenTranslationEditor() => Navigation.NavigateTo("/localization");
 
-    private static string CultureLabel(string culture)
+    private string CultureLabel(string culture)
     {
         try
         {
@@ -2063,24 +2063,24 @@
         catch (CultureNotFoundException) { return culture; }
     }
 
-    private static bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
-    private static bool ReadBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
-    private static bool Nearly(double left, double right) => Math.Abs(left - right) < .05;
-    private static string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
+    private bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+    private bool ReadBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
+    private bool Nearly(double left, double right) => Math.Abs(left - right) < .05;
+    private string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
     {
         PublicationHtmlExportSupport.CanvasRuntime => "HTML · canvas runtime",
         PublicationHtmlExportSupport.RenderBeforeExport => "Render before HTML export",
         _ => "HTML · native"
     };
-    private static string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
+    private string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
     {
         PublicationHtmlExportSupport.CanvasRuntime => "canvas",
         PublicationHtmlExportSupport.RenderBeforeExport => "render",
         _ => "native"
     };
-    private static string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
-    private static string Inv(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
-    private static string UsableColor(string value) => value.StartsWith('#') && value.Length >= 7 ? value[..7] : "#ffffff";
+    private string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
+    private string Inv(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+    private string UsableColor(string value) => value.StartsWith('#') && value.Length >= 7 ? value[..7] : "#ffffff";
 
     public async ValueTask DisposeAsync()
     {

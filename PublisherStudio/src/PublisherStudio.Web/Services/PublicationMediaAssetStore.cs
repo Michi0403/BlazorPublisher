@@ -91,10 +91,10 @@ public sealed class PublicationMediaAssetStore
 
     public void Remove(Guid id) => _assets.TryRemove(id, out _);
 
-    private static string BuildUrl(Guid id, string version)
+    private string BuildUrl(Guid id, string version)
         => $"/api/assets/media/{id:D}?v={Uri.EscapeDataString(version)}";
 
-    private static string CreateSourceKey(string source, string? mimeType)
+    private string CreateSourceKey(string source, string? mimeType)
     {
         var firstLength = Math.Min(192, source.Length);
         var lastLength = Math.Min(192, Math.Max(0, source.Length - firstLength));
@@ -104,7 +104,7 @@ public sealed class PublicationMediaAssetStore
         return Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(sample)))[..16].ToLowerInvariant();
     }
 
-    private static string CreateVersion(byte[] bytes, string mimeType)
+    private string CreateVersion(byte[] bytes, string mimeType)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         hash.AppendData(bytes.AsSpan(0, Math.Min(bytes.Length, 64 * 1024)));
@@ -114,7 +114,7 @@ public sealed class PublicationMediaAssetStore
         return Convert.ToHexString(hash.GetHashAndReset())[..16].ToLowerInvariant();
     }
 
-    private static bool TryDecodeDataUrl(string source, string? declaredMimeType, out byte[] bytes, out string mimeType)
+    private bool TryDecodeDataUrl(string source, string? declaredMimeType, out byte[] bytes, out string mimeType)
     {
         bytes = [];
         mimeType = PublicationMediaData.NormalizeMimeType(declaredMimeType, "application/octet-stream");

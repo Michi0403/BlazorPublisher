@@ -241,7 +241,7 @@
         builder.CloseElement();
     };
 
-    private static void AddWordArtText(RenderTreeBuilder builder, ref int sequence, WordArtElement item, string pathId, string fill, double dx, double dy, double outline, bool main)
+    private void AddWordArtText(RenderTreeBuilder builder, ref int sequence, WordArtElement item, string pathId, string fill, double dx, double dy, double outline, bool main)
     {
         builder.OpenElement(sequence++, "text");
         builder.AddAttribute(sequence++, "x", "500");
@@ -301,39 +301,39 @@
         builder.CloseElement();
     };
 
-    private static string MarkerId(ConnectorElement connector, bool start) => $"print-connector-{connector.Id:N}-{(start ? "start" : "end")}";
-    private static string MarkerUrl(ConnectorElement connector, bool start)
+    private string MarkerId(ConnectorElement connector, bool start) => $"print-connector-{connector.Id:N}-{(start ? "start" : "end")}";
+    private string MarkerUrl(ConnectorElement connector, bool start)
     {
         var marker = start ? connector.StartMarker : connector.EndMarker;
         return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
     }
 
-    private static string VideoFit(PublicationVideoFitMode mode) => mode switch
+    private string VideoFit(PublicationVideoFitMode mode) => mode switch
     {
         PublicationVideoFitMode.Cover => "cover",
         PublicationVideoFitMode.Stretch => "fill",
         _ => "contain"
     };
-    private static IEnumerable<double> AudioSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
+    private IEnumerable<double> AudioSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
         ? audio.WaveformSamples.Take(96)
         : Enumerable.Range(0, 64).Select(index => .22 + Math.Abs(Math.Sin(index * .41)) * .68);
-    private static string WaveHeight(double sample) => $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
-    private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+    private string WaveHeight(double sample) => $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
+    private string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
 
-    private static string PageStyle(PublicationPage p) => $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background};--publisher-print-fill:{p.Background}";
-    private static string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({Inv(e.Rotation)}deg)";
-    private static string ShapeStyle(ShapeElement s) => s.Shape == PublicationShape.Line
+    private string PageStyle(PublicationPage p) => $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background};--publisher-print-fill:{p.Background}";
+    private string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({Inv(e.Rotation)}deg)";
+    private string ShapeStyle(ShapeElement s) => s.Shape == PublicationShape.Line
         ? $"background:{s.Stroke};height:{Mm(Math.Max(s.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{s.Fill};border:{Mm(s.StrokeWidth)} solid {s.Stroke};border-radius:{(s.Shape == PublicationShape.Ellipse ? "50%" : s.Shape == PublicationShape.RoundedRectangle ? Mm(s.CornerRadiusMm) : "0")}";
 
-    private static string ImageFrameStyle(ImageFrameElement i)
+    private string ImageFrameStyle(ImageFrameElement i)
     {
         var radius = i.MaskShape == ImageMaskShape.Ellipse ? "50%" : i.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(i.CornerRadiusMm) : "0";
         var shadow = i.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
         return $"border-radius:{radius};border:{Mm(i.BorderWidthMm)} solid {i.BorderColor};box-shadow:{shadow}";
     }
 
-    private static string ImageStyle(ImageFrameElement i)
+    private string ImageStyle(ImageFrameElement i)
     {
         var fit = i.FitInsideFrame ? "contain" : "cover";
         var sx = i.FlipHorizontal ? -i.CropScale : i.CropScale;
@@ -342,34 +342,34 @@
         return $"object-fit:{fit};transform:translate({Inv(i.CropX)}%,{Inv(i.CropY)}%) rotate({Inv(i.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(i.Opacity)};filter:{tint}brightness({Inv(i.Brightness)}) contrast({Inv(i.Contrast)}) saturate({Inv(i.Saturation)}) hue-rotate({Inv(i.HueRotation)}deg) invert({Inv(i.Invert)}) grayscale({Inv(i.Grayscale)}) sepia({Inv(i.Sepia)}) blur({Inv(i.Blur)}px)";
     }
 
-    private static string PictureFilterId(ImageFrameElement image) => $"print-picture-filter-{image.Id:N}";
-    private static string BlendMode(ImageBlendMode mode) => mode.ToString().ToLowerInvariant();
-    private static string WordArtPath(WordArtWarp warp) => warp switch
+    private string PictureFilterId(ImageFrameElement image) => $"print-picture-filter-{image.Id:N}";
+    private string BlendMode(ImageBlendMode mode) => mode.ToString().ToLowerInvariant();
+    private string WordArtPath(WordArtWarp warp) => warp switch
     {
         WordArtWarp.ArchUp => "M 80 225 Q 500 5 920 225",
         WordArtWarp.ArchDown => "M 80 75 Q 500 295 920 75",
         WordArtWarp.Wave => "M 40 165 C 220 20 350 290 520 145 C 690 0 810 280 960 125",
         _ => "M 50 170 L 950 170"
     };
-    private static string Mm(double value) => $"{Inv(value)}mm";
+    private string Mm(double value) => $"{Inv(value)}mm";
     private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
     private string MediaSegmentSource(PublicationMediaSegment segment) => MediaAssets.GetOrRegister(segment);
-    private static string MediaPoster(VideoElement video) => video.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster
+    private string MediaPoster(VideoElement video) => video.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster
         ? poster
         : video.PosterDataUrl;
-    private static string VideoMediaStyle(VideoElement video)
+    private string VideoMediaStyle(VideoElement video)
     {
         var clip = video.FrameClipPolygon is { Count: >= 3 }
             ? $";clip-path:{FrameClipPath(video.FrameClipPolygon)}"
             : string.Empty;
         return $"object-fit:{VideoFit(video.FitMode)}{clip}";
     }
-    private static string FrameClipPath(IEnumerable<MediaFramePoint> points) =>
+    private string FrameClipPath(IEnumerable<MediaFramePoint> points) =>
         $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private static string NullableInv(double? value) => value is { } actual ? Inv(actual) : string.Empty;
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string NullableInv(double? value) => value is { } actual ? Inv(actual) : string.Empty;
 
-    private static string StoryBackground(TextFrameElement text) =>
+    private string StoryBackground(TextFrameElement text) =>
         string.IsNullOrWhiteSpace(text.DocumentBackground) || string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase)
             ? text.Background
             : text.DocumentBackground;

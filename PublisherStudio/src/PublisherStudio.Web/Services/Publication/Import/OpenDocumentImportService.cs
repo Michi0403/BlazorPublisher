@@ -18,13 +18,13 @@ namespace PublisherStudio.Services.Publication.Import;
 /// </summary>
 public sealed partial class OpenDocumentImportService
 {
-    private static readonly XNamespace Office = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
-    private static readonly XNamespace Draw = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
-    private static readonly XNamespace Style = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
-    private static readonly XNamespace Text = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
-    private static readonly XNamespace Svg = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
-    private static readonly XNamespace XLink = "http://www.w3.org/1999/xlink";
-    private static readonly XNamespace Presentation = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0";
+    private readonly XNamespace Office = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
+    private readonly XNamespace Draw = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
+    private readonly XNamespace Style = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+    private readonly XNamespace Text = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+    private readonly XNamespace Svg = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+    private readonly XNamespace XLink = "http://www.w3.org/1999/xlink";
+    private readonly XNamespace Presentation = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0";
 
     public async Task<PublicationImportResult> ImportAsync(Stream source, string fileName, CancellationToken cancellationToken = default)
     {
@@ -63,7 +63,7 @@ public sealed partial class OpenDocumentImportService
         return ImportDocuments(content, null, fileName, _ => null);
     }
 
-    private static PublicationImportResult ImportDocuments(
+    private PublicationImportResult ImportDocuments(
         XDocument content,
         XDocument? styles,
         string fileName,
@@ -110,7 +110,7 @@ public sealed partial class OpenDocumentImportService
         return new PublicationImportResult { Document = document, Issues = issues };
     }
 
-    private static void ImportElement(
+    private void ImportElement(
         XElement element,
         PublicationPage page,
         StyleCatalog styles,
@@ -303,7 +303,7 @@ public sealed partial class OpenDocumentImportService
         issues.Add(new(InterchangeIssueSeverity.Warning, "ODF_ELEMENT_SKIPPED", $"Unsupported OpenDocument element '{local}' was skipped.", groupPath));
     }
 
-    private static void AddTextFrame(
+    private void AddTextFrame(
         XElement textBox,
         PublicationPage page,
         ResolvedStyle style,
@@ -334,7 +334,7 @@ public sealed partial class OpenDocumentImportService
         });
     }
 
-    private static List<string> ExtractTextLines(XElement textBox)
+    private List<string> ExtractTextLines(XElement textBox)
     {
         var lines = new List<string>();
         foreach (var paragraph in textBox.Descendants().Where(node => node.Name == Text + "p" || node.Name == Text + "h"))
@@ -346,7 +346,7 @@ public sealed partial class OpenDocumentImportService
         return lines;
     }
 
-    private static void AppendText(XNode node, StringBuilder builder)
+    private void AppendText(XNode node, StringBuilder builder)
     {
         if (node is XText textNode) { builder.Append(textNode.Value); return; }
         if (node is not XElement element) return;
@@ -361,7 +361,7 @@ public sealed partial class OpenDocumentImportService
         foreach (var child in element.Nodes()) AppendText(child, builder);
     }
 
-    private static string BuildShapeSvg(XElement element, Bounds bounds, ResolvedStyle style)
+    private string BuildShapeSvg(XElement element, Bounds bounds, ResolvedStyle style)
     {
         var widthPx = Math.Max(1, bounds.Width * 96 / 25.4);
         var heightPx = Math.Max(1, bounds.Height * 96 / 25.4);
@@ -387,7 +387,7 @@ public sealed partial class OpenDocumentImportService
         return $"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{widthPx.ToString(CultureInfo.InvariantCulture)}\" height=\"{heightPx.ToString(CultureInfo.InvariantCulture)}\" viewBox=\"{SecurityElement.Escape(viewBox)}\"><g fill=\"{SecurityElement.Escape(fill)}\" stroke=\"{SecurityElement.Escape(stroke)}\" stroke-width=\"{strokeWidthPx}\">{body}</g></svg>";
     }
 
-    private static StyleCatalog BuildStyleCatalog(XDocument content, XDocument? stylesDocument)
+    private StyleCatalog BuildStyleCatalog(XDocument content, XDocument? stylesDocument)
     {
         var all = content.Descendants().Concat(stylesDocument?.Descendants() ?? Enumerable.Empty<XElement>());
         var catalog = new StyleCatalog();
@@ -403,7 +403,7 @@ public sealed partial class OpenDocumentImportService
         return catalog;
     }
 
-    private static (double Width, double Height) ResolvePageSize(XElement page, StyleCatalog styles)
+    private (double Width, double Height) ResolvePageSize(XElement page, StyleCatalog styles)
     {
         var masterName = (string?)page.Attribute(Draw + "master-page-name");
         XElement? layout = null;
@@ -418,13 +418,13 @@ public sealed partial class OpenDocumentImportService
         return (Math.Clamp(width, 10, 5000), Math.Clamp(height, 10, 5000));
     }
 
-    private static string ResolvePageBackground(XElement page, StyleCatalog styles)
+    private string ResolvePageBackground(XElement page, StyleCatalog styles)
     {
         var resolved = styles.Resolve((string?)page.Attribute(Draw + "style-name") ?? (string?)page.Attribute(Presentation + "style-name"));
         return resolved.Fill == "transparent" ? "#ffffff" : resolved.Fill;
     }
 
-    private static Bounds ReadBounds(XElement element, PublicationPage page)
+    private Bounds ReadBounds(XElement element, PublicationPage page)
     {
         var x = ReadLengthMm((string?)element.Attribute(Svg + "x"), 0);
         var y = ReadLengthMm((string?)element.Attribute(Svg + "y"), 0);
@@ -448,7 +448,7 @@ public sealed partial class OpenDocumentImportService
             Math.Clamp(height, .1, page.HeightMm * 10));
     }
 
-    private static double ReadRotation(XElement element)
+    private double ReadRotation(XElement element)
     {
         var transform = (string?)element.Attribute(Draw + "transform") ?? string.Empty;
         var match = RotateRegex().Match(transform);
@@ -457,7 +457,7 @@ public sealed partial class OpenDocumentImportService
         return Math.Clamp(angle, -3600, 3600);
     }
 
-    private static double ReadLengthMm(string? value, double fallback)
+    private double ReadLengthMm(string? value, double fallback)
     {
         if (string.IsNullOrWhiteSpace(value)) return fallback;
         var match = LengthRegex().Match(value.Trim());
@@ -474,7 +474,7 @@ public sealed partial class OpenDocumentImportService
         };
     }
 
-    private static byte[]? ReadArchiveEntry(ZipArchive archive, string path)
+    private byte[]? ReadArchiveEntry(ZipArchive archive, string path)
     {
         var normalized = NormalizePackagePath(path);
         if (string.IsNullOrWhiteSpace(normalized)) return null;
@@ -487,7 +487,7 @@ public sealed partial class OpenDocumentImportService
     }
 
 
-    private static string NormalizePackagePath(string? path)
+    private string NormalizePackagePath(string? path)
     {
         var normalized = (path ?? string.Empty).Replace('\\', '/').Trim();
         while (normalized.StartsWith("./", StringComparison.Ordinal)) normalized = normalized[2..];
@@ -498,7 +498,7 @@ public sealed partial class OpenDocumentImportService
         return string.Join('/', parts);
     }
 
-    private static string ResolveImageMime(string? declared, string path, byte[] bytes)
+    private string ResolveImageMime(string? declared, string path, byte[] bytes)
     {
         var normalized = (declared ?? string.Empty).Trim().ToLowerInvariant();
         if (normalized is "image/png" or "image/jpeg" or "image/gif" or "image/webp" or "image/bmp" or "image/svg+xml")
@@ -522,7 +522,7 @@ public sealed partial class OpenDocumentImportService
         return string.Empty;
     }
 
-    private static async Task<XDocument> LoadXmlAsync(Stream source, CancellationToken cancellationToken)
+    private async Task<XDocument> LoadXmlAsync(Stream source, CancellationToken cancellationToken)
     {
         var settings = new XmlReaderSettings
         {
@@ -536,9 +536,9 @@ public sealed partial class OpenDocumentImportService
         return await XDocument.LoadAsync(reader, LoadOptions.PreserveWhitespace, cancellationToken);
     }
 
-    private static string DecorateGroupName(string name, string groupPath) => string.IsNullOrWhiteSpace(groupPath) ? name : $"{groupPath} / {name}";
-    private static string CleanName(string? value, string fallback) => string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
-    private static XName Fo(string localName) => XName.Get(localName, "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0");
+    private string DecorateGroupName(string name, string groupPath) => string.IsNullOrWhiteSpace(groupPath) ? name : $"{groupPath} / {name}";
+    private string CleanName(string? value, string fallback) => string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+    private XName Fo(string localName) => XName.Get(localName, "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0");
 
     private sealed class StyleCatalog
     {
@@ -583,7 +583,7 @@ public sealed partial class OpenDocumentImportService
         }
     }
 
-    private static string NormalizeColor(string? value, string fallback)
+    private string NormalizeColor(string? value, string fallback)
     {
         if (string.IsNullOrWhiteSpace(value)) return fallback;
         var color = value.Trim();

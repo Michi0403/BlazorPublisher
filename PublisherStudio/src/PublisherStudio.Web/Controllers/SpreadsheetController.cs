@@ -148,7 +148,7 @@ public sealed class SpreadsheetController : Controller
         return File(session.Content, ContentType(session.SourceFormat), session.FileName);
     }
 
-    private static string ContentType(SpreadsheetStorageFormat format) => format switch
+    private string ContentType(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => "application/vnd.ms-excel.sheet.macroEnabled.12",
         SpreadsheetStorageFormat.Xls => "application/vnd.ms-excel",
@@ -157,7 +157,7 @@ public sealed class SpreadsheetController : Controller
         _ => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     };
 
-    private static DocumentFormat ToDevExpressFormat(SpreadsheetStorageFormat format) => format switch
+    private DocumentFormat ToDevExpressFormat(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => DocumentFormat.Xlsm,
         SpreadsheetStorageFormat.Xls => DocumentFormat.Xls,

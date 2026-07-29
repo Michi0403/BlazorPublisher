@@ -61,11 +61,11 @@
         catch { }
     }
 
-    private static bool LayerNeedsCanvas(VideoEffectLayer layer) =>
+    private bool LayerNeedsCanvas(VideoEffectLayer layer) =>
         layer.Kind == VideoEffectLayerKind.Blob3D || !layer.Visible || layer.Opacity < .999 || layer.BlendMode != VideoEffectBlendMode.Normal ||
         layer.HasTemporalRange || layer.Region.Points.Count >= 3 || layer.Filters.Any(filter => filter.Enabled);
 
-    private static object LayerPayload(VideoEffectLayer layer) => new
+    private object LayerPayload(VideoEffectLayer layer) => new
     {
         id = layer.Id.ToString("D"),
         layer.Name,
@@ -113,6 +113,6 @@
         catch { }
     }
 
-    private static string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
-    private static string Inv(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    private string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+    private string Inv(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
 }

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using PublisherStudio.Domain;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
@@ -7,9 +8,15 @@ public sealed class SpreadsheetSessionStore
 {
     private readonly ConcurrentDictionary<Guid, SpreadsheetEditorSession> _sessions = new();
     private readonly SpreadsheetDocumentService _documents;
-    private static readonly TimeSpan SessionLifetime = TimeSpan.FromHours(4);
+    private readonly IPublisherRuntimePolicyDataService runtimePolicy;
 
-    public SpreadsheetSessionStore(SpreadsheetDocumentService documents) => _documents = documents;
+    public SpreadsheetSessionStore(
+        SpreadsheetDocumentService documents,
+        IPublisherRuntimePolicyDataService runtimePolicy)
+    {
+        _documents = documents;
+        this.runtimePolicy = runtimePolicy;
+    }
 
     public SpreadsheetEditorSession Create(Guid elementId, string fileName, SpreadsheetStorageFormat format, byte[] content)
     {
@@ -82,7 +89,7 @@ public sealed class SpreadsheetSessionStore
 
     private void CleanupExpired()
     {
-        var cutoff = DateTimeOffset.UtcNow - SessionLifetime;
+        var cutoff = DateTimeOffset.UtcNow - runtimePolicy.SpreadsheetSessionLifetime;
         foreach (var session in _sessions.Where(item => item.Value.UpdatedUtc < cutoff).Select(item => item.Key).ToArray())
             _sessions.TryRemove(session, out _);
     }

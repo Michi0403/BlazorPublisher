@@ -32,5 +32,5 @@
         }
     }
 
-    private static string SafeScript(string value) => value.Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
+    private string SafeScript(string value) => value.Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
 }

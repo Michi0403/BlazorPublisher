@@ -25,7 +25,7 @@ public sealed record PlatformChatMessage(
 
 public sealed class PlatformChatService : IAsyncDisposable
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly MediaSession _session;
     private readonly ConcurrentDictionary<Guid, IPlatformChatAdapter> _adapters = new();
     private readonly ConcurrentDictionary<Guid, ConcurrentQueue<PlatformChatMessage>> _history = new();
@@ -97,7 +97,7 @@ public sealed class PlatformChatService : IAsyncDisposable
         }
     }
 
-    private static bool HasChatConfiguration(MediaOutputDefinition output) =>
+    private bool HasChatConfiguration(MediaOutputDefinition output) =>
         !string.IsNullOrWhiteSpace(output.ChannelId)
         && !string.IsNullOrWhiteSpace(output.ChatSecret)
         && (output.Provider != 0 || !string.IsNullOrWhiteSpace(output.AccountName));
@@ -253,10 +253,10 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
         return true;
     }
 
-    private static string NormalizeAccount(string value) => new(value.Trim().ToLowerInvariant().Where(ch => char.IsLetterOrDigit(ch) || ch == '_').ToArray());
-    private static string NormalizeChannel(string value) => NormalizeAccount(value.TrimStart('#'));
-    private static string SanitizeMessage(string value) => value.Replace('\r', ' ').Replace('\n', ' ').Trim();
-    private static string DecodeTag(string value) => value.Replace("\\s", " ").Replace("\\:", ";").Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\\", "\\");
+    private string NormalizeAccount(string value) => new(value.Trim().ToLowerInvariant().Where(ch => char.IsLetterOrDigit(ch) || ch == '_').ToArray());
+    private string NormalizeChannel(string value) => NormalizeAccount(value.TrimStart('#'));
+    private string SanitizeMessage(string value) => value.Replace('\r', ' ').Replace('\n', ' ').Trim();
+    private string DecodeTag(string value) => value.Replace("\\s", " ").Replace("\\:", ";").Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\\", "\\");
 
     public async ValueTask DisposeAsync()
     {
@@ -269,7 +269,7 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 
 internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly MediaOutputDefinition _output;
     private readonly Action<PlatformChatMessage> _publish;
     private readonly CancellationTokenSource _lifetime;

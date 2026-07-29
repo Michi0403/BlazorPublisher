@@ -146,17 +146,17 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
-    private static bool NeedsEditor(OrganicWireEnvelope request) => ReadEditor(request) is
+    private bool NeedsEditor(OrganicWireEnvelope request) => ReadEditor(request) is
         OrganicInteractionEditor.PlainText or OrganicInteractionEditor.RichText or OrganicInteractionEditor.Json;
 
-    private static string EditorLabel(OrganicWireEnvelope request) => ReadEditor(request) switch
+    private string EditorLabel(OrganicWireEnvelope request) => ReadEditor(request) switch
     {
         OrganicInteractionEditor.RichText => "Text or formatted story content requested by LocalGPT",
         OrganicInteractionEditor.Json => "Structured JSON requested by LocalGPT",
         _ => "Information requested by LocalGPT"
     };
 
-    private static OrganicInteractionEditor ReadEditor(OrganicWireEnvelope request)
+    private OrganicInteractionEditor ReadEditor(OrganicWireEnvelope request)
     {
         if (request.Properties is not null && request.Properties.TryGetValue("InteractionEditor", out var value))
         {
@@ -168,7 +168,7 @@ else if (!_visible && _pending.Count > 0)
         return request.RequiresHumanInteractionOnTargetSystem ? OrganicInteractionEditor.ConfirmationOnly : OrganicInteractionEditor.None;
     }
 
-    private static string DescribeInteraction(OrganicWireEnvelope request) => request.InteractionKind switch
+    private string DescribeInteraction(OrganicWireEnvelope request) => request.InteractionKind switch
     {
         OrganicInteractionKind.HumanAndAutomated => "Needs human confirmation and automated interaction on PublisherStudio.",
         OrganicInteractionKind.Human => "Needs human interaction on PublisherStudio.",
@@ -176,7 +176,7 @@ else if (!_visible && _pending.Count > 0)
         _ => "Requests a bounded PublisherStudio function."
     };
 
-    private static string ApproveButtonText(OrganicWireEnvelope request) => request.CapabilityKey switch
+    private string ApproveButtonText(OrganicWireEnvelope request) => request.CapabilityKey switch
     {
         "publisher.text.edit.request" => "Save & return to LocalGPT",
         "publisher.website.content.request" => "Return approved content",
@@ -185,7 +185,7 @@ else if (!_visible && _pending.Count > 0)
         _ => "Approve once"
     };
 
-    private static bool TryReadParameter(OrganicWireEnvelope request, string name, out string value)
+    private bool TryReadParameter(OrganicWireEnvelope request, string name, out string value)
     {
         value = string.Empty;
         if (request.Properties is null || !request.Properties.TryGetValue("Parameters", out var parameters) ||
@@ -195,7 +195,7 @@ else if (!_visible && _pending.Count > 0)
         return true;
     }
 
-    private static int TryReadIntParameter(OrganicWireEnvelope request, string name, int fallback)
+    private int TryReadIntParameter(OrganicWireEnvelope request, string name, int fallback)
     {
         if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
             parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) && property.TryGetInt32(out var value))
@@ -203,7 +203,7 @@ else if (!_visible && _pending.Count > 0)
         return fallback;
     }
 
-    private static bool TryReadBooleanParameter(OrganicWireEnvelope request, string name, bool fallback)
+    private bool TryReadBooleanParameter(OrganicWireEnvelope request, string name, bool fallback)
     {
         if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
             parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) &&

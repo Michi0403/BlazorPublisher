@@ -18,6 +18,9 @@ public sealed class LocalGptConnectionService(
     IOrganicWorkCoordinator work,
     IOrganicResultStore results,
     IOrganicReplayGuard replayGuard,
+    IOrganicTransportSecurityPolicy transportSecurityPolicy,
+    IOrganicConnectionRuntimeState runtimeState,
+    IOrganicWireEnvelopeFactory envelopeFactory,
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
 {
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
@@ -32,7 +35,6 @@ public sealed class LocalGptConnectionService(
     private Task? readLoop;
     private string peerId = string.Empty;
     private Guid connectionId;
-    private bool connectionIsLoopback = true;
     private readonly string localPeerId = $"publisherstudio:{Environment.MachineName}";
 
     public event Action? Changed;
@@ -60,7 +62,7 @@ public sealed class LocalGptConnectionService(
             writer = connectedWriter;
             connectionCancellation = new CancellationTokenSource();
             connectionId = connectedId;
-            connectionIsLoopback = isLoopback;
+            runtimeState.SetConnected(connectedId, requestedPeerId, isLoopback);
             peerId = requestedPeerId;
             State.IsConnected = true;
             State.IsLinked = false;
@@ -106,7 +108,7 @@ public sealed class LocalGptConnectionService(
                         Skills = localSkills.ToList(),
                         UiFeatures = localUiFeatures.ToList(),
                         Hardware = localHardware.ToList()
-                    }, OrganicPluginProtocolCodec.JsonOptions)
+                    }, codec.JsonOptions)
                 }
             };
             await SendEnvelopeAsync(hello, cancellationToken).ConfigureAwait(false);
@@ -155,7 +157,7 @@ public sealed class LocalGptConnectionService(
             UserConfirmed = true,
             Properties = new Dictionary<string, JsonElement>
             {
-                ["CouncilRequest"] = JsonSerializer.SerializeToElement(request, OrganicPluginProtocolCodec.JsonOptions)
+                ["CouncilRequest"] = JsonSerializer.SerializeToElement(request, codec.JsonOptions)
             }
         };
         return await SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
@@ -168,7 +170,7 @@ public sealed class LocalGptConnectionService(
         if (connectedWriter is null || !State.IsConnected) throw new InvalidOperationException("PublisherStudio is not connected to LocalGPT.");
         if (!State.IsLinked && envelope.MessageType != OrganicWireMessageType.Hello)
             throw new InvalidOperationException("The 1-Wire transport is waiting for LocalGPT frontend link approval.");
-        return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, connectionIsLoopback, cancellationToken);
+        return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, runtimeState.GetSnapshot().IsLoopback, cancellationToken);
     }
 
     public async Task<OrganicWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default)
@@ -196,7 +198,7 @@ public sealed class LocalGptConnectionService(
     public async Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(item);
-        await SendEnvelopeAsync(CreateWorkResultEnvelope(item), cancellationToken).ConfigureAwait(false);
+        await SendEnvelopeAsync(envelopeFactory.CreateWorkEnvelope(item, localPeerId), cancellationToken).ConfigureAwait(false);
     }
 
     private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
@@ -213,8 +215,8 @@ public sealed class LocalGptConnectionService(
                     throw new InvalidDataException("The organic 1-Wire SourcePeerId does not match the peer identity owned by this connection.");
                 if (string.Equals(envelope.SourcePeerId, localPeerId, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException("A remote connection cannot claim PublisherStudio's local peer identity.");
-                if (!isLoopback && OrganicTransportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
-                    !OrganicTransportSecurityPolicy.IsProtected(envelope))
+                if (!isLoopback && transportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
+                    !transportSecurityPolicy.IsProtected(envelope))
                     throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be received.");
                 if (!replayGuard.TryAccept(connectedPeerId, envelope.MessageId, envelope.CreatedUtc))
                     throw new InvalidDataException("This organic 1-Wire message id has already been processed or is outside the accepted replay window.");
@@ -226,7 +228,7 @@ public sealed class LocalGptConnectionService(
         {
             if (connectionId == connectedId)
                 State.LastError = ex.Message;
-            logger.LogWarning(ex, "PublisherStudio LocalGPT 1-Wire read loop stopped.");
+            logger.LogWarning(ex, $"PublisherStudio LocalGPT 1-Wire read loop stopped for peer {connectedPeerId}.");
         }
         finally
         {
@@ -242,89 +244,111 @@ public sealed class LocalGptConnectionService(
 
     private async Task HandleIncomingAsync(OrganicWireEnvelope envelope, Guid connectedId, string connectedPeerId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
-        if (envelope.MessageType is OrganicWireMessageType.WorkResult or OrganicWireMessageType.Error or OrganicWireMessageType.ApprovalRequired)
+        try
         {
-            // A live waiter owns the response exclusively. Caching the same ApprovalRequired envelope
-            // as well caused the next wait cycle to consume that stale intermediate response instead of
-            // waiting for the final WorkResult on the same correlation id.
-            if (responseWaiters.TryGetValue(envelope.CorrelationId, out var waiter))
-                waiter.TrySetResult(envelope);
-            else
-                recentResponses[envelope.CorrelationId] = envelope;
+            if (envelope.MessageType is OrganicWireMessageType.WorkResult or OrganicWireMessageType.Error or OrganicWireMessageType.ApprovalRequired)
+            {
+                // A live waiter owns the response exclusively. Caching the same ApprovalRequired envelope
+                // as well caused the next wait cycle to consume that stale intermediate response instead of
+                // waiting for the final WorkResult on the same correlation id.
+                if (responseWaiters.TryGetValue(envelope.CorrelationId, out var waiter))
+                    waiter.TrySetResult(envelope);
+                else
+                    recentResponses[envelope.CorrelationId] = envelope;
 
-            foreach (var stale in recentResponses.Where(pair => pair.Value.CreatedUtc < DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10)).Select(pair => pair.Key).ToArray())
-                recentResponses.TryRemove(stale, out _);
-        }
+                foreach (var stale in recentResponses.Where(pair => pair.Value.CreatedUtc < DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10)).Select(pair => pair.Key).ToArray())
+                    recentResponses.TryRemove(stale, out _);
+            }
 
-        if (envelope.MessageType == OrganicWireMessageType.ApprovalRequired &&
-            envelope.Properties is not null &&
-            envelope.Properties.TryGetValue("LinkApproval", out var linkApproval) &&
-            linkApproval.ValueKind is JsonValueKind.True)
-        {
-            State.IsLinked = false;
-            State.LastError = "Waiting for LocalGPT frontend link approval.";
-            Changed?.Invoke();
-        }
+            if (envelope.MessageType == OrganicWireMessageType.ApprovalRequired &&
+                envelope.Properties is not null &&
+                envelope.Properties.TryGetValue("LinkApproval", out var linkApproval) &&
+                linkApproval.ValueKind is JsonValueKind.True)
+            {
+                State.IsLinked = false;
+                State.LastError = "Waiting for LocalGPT frontend link approval.";
+                Changed?.Invoke();
+            }
 
-        switch (envelope.MessageType)
-        {
-            case OrganicWireMessageType.HelloAck:
-                State.IsLinked = true;
-                State.LastError = string.Empty;
-                await SendEnvelopeCoreAsync(new OrganicWireEnvelope
-                {
-                    MessageType = OrganicWireMessageType.CapabilityRequest,
-                    CorrelationId = envelope.CorrelationId,
-                    SourcePeerId = localPeerId,
-                    TargetPeerId = connectedPeerId
-                }, connectedWriter, connectedPeerId, isLoopback, cancellationToken).ConfigureAwait(false);
-                goto case OrganicWireMessageType.CapabilityResponse;
-            case OrganicWireMessageType.CapabilityResponse:
-            case OrganicWireMessageType.SkillResponse:
-            case OrganicWireMessageType.SkillStateUpdate:
-                if (discovery.GetPeer(connectedPeerId) is { } peer)
-                {
-                    if (TryRead<OrganicPeerAdvertisement>(envelope, "Peer", out var advertisedPeer) && advertisedPeer is not null)
+            switch (envelope.MessageType)
+            {
+                case OrganicWireMessageType.HelloAck:
+                    State.IsLinked = true;
+                    State.LastError = string.Empty;
+                    await SendEnvelopeCoreAsync(new OrganicWireEnvelope
                     {
-                        advertisedPeer.Address = string.IsNullOrWhiteSpace(advertisedPeer.Address) ? peer.Address : advertisedPeer.Address;
-                        advertisedPeer.ServicePort = advertisedPeer.ServicePort <= 0 ? peer.ServicePort : advertisedPeer.ServicePort;
-                        advertisedPeer.DiscoveryPort = advertisedPeer.DiscoveryPort <= 0 ? peer.DiscoveryPort : advertisedPeer.DiscoveryPort;
-                        peer = advertisedPeer;
+                        MessageType = OrganicWireMessageType.CapabilityRequest,
+                        CorrelationId = envelope.CorrelationId,
+                        SourcePeerId = localPeerId,
+                        TargetPeerId = connectedPeerId
+                    }, connectedWriter, connectedPeerId, isLoopback, cancellationToken).ConfigureAwait(false);
+                    goto case OrganicWireMessageType.CapabilityResponse;
+                case OrganicWireMessageType.CapabilityResponse:
+                case OrganicWireMessageType.SkillResponse:
+                case OrganicWireMessageType.SkillStateUpdate:
+                    if (discovery.GetPeer(connectedPeerId) is { } peer)
+                    {
+                        if (TryRead<OrganicPeerAdvertisement>(envelope, "Peer", out var advertisedPeer) && advertisedPeer is not null)
+                        {
+                            advertisedPeer.Address = string.IsNullOrWhiteSpace(advertisedPeer.Address) ? peer.Address : advertisedPeer.Address;
+                            advertisedPeer.ServicePort = advertisedPeer.ServicePort <= 0 ? peer.ServicePort : advertisedPeer.ServicePort;
+                            advertisedPeer.DiscoveryPort = advertisedPeer.DiscoveryPort <= 0 ? peer.DiscoveryPort : advertisedPeer.DiscoveryPort;
+                            peer = advertisedPeer;
+                        }
+                        if (TryRead<List<OrganicCapabilityDescriptor>>(envelope, "Capabilities", out var remoteCapabilities))
+                            peer.Capabilities = remoteCapabilities ?? [];
+                        if (TryRead<List<OrganicSkillDescriptor>>(envelope, "Skills", out var remoteSkills))
+                            peer.Skills = remoteSkills ?? [];
+                        if (TryRead<List<OrganicUiFeatureDescriptor>>(envelope, "UiFeatures", out var remoteUiFeatures))
+                            peer.UiFeatures = remoteUiFeatures ?? [];
+                        if (TryRead<List<OrganicHardwareDescriptor>>(envelope, "Hardware", out var remoteHardware))
+                            peer.Hardware = remoteHardware ?? [];
+                        peer.IsConnected = true;
+                        discovery.Upsert(peer);
+                        State.RemoteCapabilities = peer.Capabilities.ToList();
+                        State.RemoteSkills = peer.Skills.ToList();
+                        State.RemoteUiFeatures = peer.UiFeatures.ToList();
+                        State.RemoteHardware = peer.Hardware.ToList();
+                        Changed?.Invoke();
                     }
-                    if (TryRead<List<OrganicCapabilityDescriptor>>(envelope, "Capabilities", out var remoteCapabilities))
-                        peer.Capabilities = remoteCapabilities ?? [];
-                    if (TryRead<List<OrganicSkillDescriptor>>(envelope, "Skills", out var remoteSkills))
-                        peer.Skills = remoteSkills ?? [];
-                    if (TryRead<List<OrganicUiFeatureDescriptor>>(envelope, "UiFeatures", out var remoteUiFeatures))
-                        peer.UiFeatures = remoteUiFeatures ?? [];
-                    if (TryRead<List<OrganicHardwareDescriptor>>(envelope, "Hardware", out var remoteHardware))
-                        peer.Hardware = remoteHardware ?? [];
-                    peer.IsConnected = true;
-                    discovery.Upsert(peer);
-                    State.RemoteCapabilities = peer.Capabilities.ToList();
-                    State.RemoteSkills = peer.Skills.ToList();
-                    State.RemoteUiFeatures = peer.UiFeatures.ToList();
-                    State.RemoteHardware = peer.Hardware.ToList();
-                    Changed?.Invoke();
-                }
-                results.RecordEnvelope(envelope);
-                break;
-            case OrganicWireMessageType.Invoke:
-                StartInvoke(envelope, connectedId, connectedWriter, isLoopback, cancellationToken);
-                break;
-            default:
-                results.RecordEnvelope(envelope);
-                break;
+                    results.RecordEnvelope(envelope);
+                    break;
+                case OrganicWireMessageType.Invoke:
+                    StartInvoke(envelope, connectedId, connectedWriter, isLoopback, cancellationToken);
+                    break;
+                default:
+                    results.RecordEnvelope(envelope);
+                    break;
+            }
+
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not handle organic message {envelope.MessageId} from {connectedPeerId}.");
+            throw;
         }
     }
 
     private void StartInvoke(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
-        var task = ProcessInvokeAsync(envelope, connectedId, connectedWriter, isLoopback, cancellationToken);
-        if (!activeInvocations.TryAdd(envelope.MessageId, task))
-            throw new InvalidOperationException($"Organic work message {envelope.MessageId} is already being processed.");
+        try
+        {
+            var task = ProcessInvokeAsync(envelope, connectedId, connectedWriter, isLoopback, cancellationToken);
+            if (!activeInvocations.TryAdd(envelope.MessageId, task))
+                throw new InvalidOperationException($"Organic work message {envelope.MessageId} is already being processed.");
 
-        task.GetAwaiter().OnCompleted(() => activeInvocations.TryRemove(envelope.MessageId, out _));
+            task.GetAwaiter().OnCompleted(() => activeInvocations.TryRemove(envelope.MessageId, out _));
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not start organic work message {envelope.MessageId}.");
+            throw;
+        }
     }
 
     private async Task ProcessInvokeAsync(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
@@ -334,61 +358,51 @@ public sealed class LocalGptConnectionService(
             var item = await work.ReceiveAsync(envelope, cancellationToken).ConfigureAwait(false);
             if (connectionId != connectedId || !State.IsConnected)
             {
-                logger.LogDebug("Organic work {WorkItemId} completed after its LocalGPT connection ended; the result remains available in PublisherStudio.", item.Id);
+                logger.LogDebug($"Organic work {item.Id} completed after its LocalGPT connection ended; the result remains available in PublisherStudio.");
                 return;
             }
-            await SendEnvelopeCoreAsync(CreateWorkResultEnvelope(item), connectedWriter, item.PeerId, isLoopback, cancellationToken).ConfigureAwait(false);
+            await SendEnvelopeCoreAsync(envelopeFactory.CreateWorkEnvelope(item, localPeerId), connectedWriter, item.PeerId, isLoopback, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Could not process or return organic work for {CapabilityKey}.", envelope.CapabilityKey);
+            logger.LogError(ex, $"Could not process or return organic work for {envelope.CapabilityKey}.");
         }
     }
 
     private async Task<Guid> SendEnvelopeCoreAsync(OrganicWireEnvelope envelope, StreamWriter connectedWriter, string targetPeerId, bool isLoopback, CancellationToken cancellationToken)
     {
-        envelope.SourcePeerId = string.IsNullOrWhiteSpace(envelope.SourcePeerId) ? localPeerId : envelope.SourcePeerId;
-        envelope.TargetPeerId = string.IsNullOrWhiteSpace(envelope.TargetPeerId) ? targetPeerId : envelope.TargetPeerId;
-        await security.ProtectOutgoingAsync(envelope, cancellationToken).ConfigureAwait(false);
-        if (!isLoopback && OrganicTransportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
-            !OrganicTransportSecurityPolicy.IsProtected(envelope))
-            throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be sent.");
-        var json = codec.Serialize(envelope);
-        await writeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try { await connectedWriter.WriteLineAsync(json.AsMemory(), cancellationToken).ConfigureAwait(false); }
-        finally { writeGate.Release(); }
-        return envelope.CorrelationId;
+        try
+        {
+            envelope.SourcePeerId = string.IsNullOrWhiteSpace(envelope.SourcePeerId) ? localPeerId : envelope.SourcePeerId;
+            envelope.TargetPeerId = string.IsNullOrWhiteSpace(envelope.TargetPeerId) ? targetPeerId : envelope.TargetPeerId;
+            await security.ProtectOutgoingAsync(envelope, cancellationToken).ConfigureAwait(false);
+            if (!isLoopback && transportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
+                !transportSecurityPolicy.IsProtected(envelope))
+                throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be sent.");
+            var json = codec.Serialize(envelope);
+            await writeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try { await connectedWriter.WriteLineAsync(json.AsMemory(), cancellationToken).ConfigureAwait(false); }
+            finally { writeGate.Release(); }
+            return envelope.CorrelationId;
+
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not send organic message {envelope.MessageId} to {targetPeerId}.");
+            throw;
+        }
     }
 
-    private OrganicWireEnvelope CreateWorkResultEnvelope(OrganicPluginWorkItem item)
-    {
-        var type = item.Status == OrganicWorkStatus.PendingApproval ? OrganicWireMessageType.ApprovalRequired : OrganicWireMessageType.WorkResult;
-        return new OrganicWireEnvelope
-        {
-            MessageType = type,
-            CorrelationId = item.CorrelationId,
-            ReplyToMessageId = item.MessageId,
-            SourcePeerId = localPeerId,
-            TargetPeerId = item.PeerId,
-            CapabilityKey = item.CapabilityKey,
-            Error = item.Error,
-            InteractionValueJson = item.Request.InteractionValueJson,
-            InteractionValueContentType = item.Request.InteractionValueContentType,
-            Properties = new Dictionary<string, JsonElement>
-            {
-                ["WorkItemId"] = JsonSerializer.SerializeToElement(item.Id),
-                ["Status"] = JsonSerializer.SerializeToElement(item.Status.ToString()),
-                ["ResultJson"] = JsonSerializer.SerializeToElement(item.ResultJson),
-                ["InteractionValueJson"] = JsonSerializer.SerializeToElement(item.Request.InteractionValueJson),
-                ["InteractionValueContentType"] = JsonSerializer.SerializeToElement(item.Request.InteractionValueContentType)
-            }
-        };
-    }
 
     private async Task DisconnectCoreAsync()
     {
         var oldPeerId = peerId;
+        var oldConnectionId = connectionId;
         connectionId = Guid.Empty;
         connectionCancellation?.Cancel();
         try
@@ -403,7 +417,8 @@ public sealed class LocalGptConnectionService(
         writer?.Dispose();
         client?.Dispose();
         connectionCancellation?.Dispose();
-        client = null; reader = null; writer = null; connectionCancellation = null; readLoop = null; peerId = string.Empty; connectionIsLoopback = true;
+        client = null; reader = null; writer = null; connectionCancellation = null; readLoop = null; peerId = string.Empty;
+        runtimeState.Reset(oldConnectionId);
         State.IsConnected = false;
         State.IsLinked = false;
         State.PeerId = string.Empty;
@@ -421,11 +436,11 @@ public sealed class LocalGptConnectionService(
         Changed?.Invoke();
     }
 
-    private static bool TryRead<T>(OrganicWireEnvelope envelope, string key, out T? value)
+    private bool TryRead<T>(OrganicWireEnvelope envelope, string key, out T? value)
     {
         value = default;
         if (envelope.Properties is null || !envelope.Properties.TryGetValue(key, out var element)) return false;
-        try { value = element.Deserialize<T>(OrganicPluginProtocolCodec.JsonOptions); return true; }
+        try { value = element.Deserialize<T>(codec.JsonOptions); return true; }
         catch (JsonException) { return false; }
     }
 
@@ -444,7 +459,7 @@ public sealed class LocalGptConnectionService(
         return capability;
     }
 
-    private static string NormalizeAddress(string address, string hostName)
+    private string NormalizeAddress(string address, string hostName)
     {
         if (string.IsNullOrWhiteSpace(address) || address is "0.0.0.0" or "::")
             return string.Equals(hostName, Environment.MachineName, StringComparison.OrdinalIgnoreCase) ? "127.0.0.1" : hostName;

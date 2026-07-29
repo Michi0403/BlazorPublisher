@@ -22,7 +22,7 @@ public sealed class PublisherDxFunctionCatalogDataService(
     IWebHostEnvironment environment,
     ILogger<PublisherDxFunctionCatalogDataService> logger) : IPublisherDxFunctionCatalogDataService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         PropertyNameCaseInsensitive = true,
         WriteIndented = true
@@ -30,109 +30,187 @@ public sealed class PublisherDxFunctionCatalogDataService(
 
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetFunctionsAsync(CancellationToken cancellationToken = default)
     {
-        var seedPath = Path.Combine(environment.ContentRootPath, "Configuration", "publisher-dx-functions.json");
-        var seed = await ReadRequiredDocumentAsync(seedPath, "deployed", cancellationToken).ConfigureAwait(false);
-        ValidateDocument(seed, "deployed");
-
-        var merged = seed.Functions.ToDictionary(GetStorageKey, StringComparer.OrdinalIgnoreCase);
-        var userPath = GetUserCatalogPath();
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(userPath)!);
-            if (!File.Exists(userPath))
-                await WriteInitialUserCatalogAsync(userPath, seed, cancellationToken).ConfigureAwait(false);
+            var seedPath = Path.Combine(environment.ContentRootPath, "Configuration", "publisher-dx-functions.json");
+            var seed = await ReadRequiredDocumentAsync(seedPath, "deployed", cancellationToken).ConfigureAwait(false);
+            ValidateDocument(seed, "deployed");
 
-            var user = await ReadOptionalDocumentAsync(userPath, cancellationToken).ConfigureAwait(false);
-            if (user is not null)
+            var merged = seed.Functions.ToDictionary(GetStorageKey, StringComparer.OrdinalIgnoreCase);
+            var userPath = GetUserCatalogPath();
+            try
             {
-                ValidateDocument(user, "user-local");
-                foreach (var item in user.Functions)
-                    merged[GetStorageKey(item)] = item;
+                Directory.CreateDirectory(Path.GetDirectoryName(userPath)!);
+                if (!File.Exists(userPath))
+                    await WriteInitialUserCatalogAsync(userPath, seed, cancellationToken).ConfigureAwait(false);
+
+                var user = await ReadOptionalDocumentAsync(userPath, cancellationToken).ConfigureAwait(false);
+                if (user is not null)
+                {
+                    ValidateDocument(user, "user-local");
+                    foreach (var item in user.Functions)
+                        merged[GetStorageKey(item)] = item;
+                }
             }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(
+                    exception,
+                    $"The user-local PublisherStudio DX function catalog could not be used. The deployed catalog remains active; paths and catalog content were omitted from logs.");
+            }
+
+            var result = merged.Values
+                .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            ValidateFunctions(result, "merged");
+            logger.LogInformation(
+                $"Loaded {result.Count} PublisherStudio DX function descriptors from the serializable catalog; schemas and paths were omitted from logs.");
+            return result;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            logger.LogWarning(
-                exception,
-                "The user-local PublisherStudio DX function catalog could not be used. The deployed catalog remains active; paths and catalog content were omitted from logs.");
+            logger.LogError(ex, $"Could not load the PublisherStudio DX function catalog.");
+            throw;
         }
-
-        var result = merged.Values
-            .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-        ValidateFunctions(result, "merged");
-        logger.LogInformation(
-            "Loaded {Count} PublisherStudio DX function descriptors from the serializable catalog; schemas and paths were omitted from logs.",
-            result.Count);
-        return result;
     }
 
-    private static async Task<PublisherDxFunctionCatalogDocument> ReadRequiredDocumentAsync(
+    private async Task<PublisherDxFunctionCatalogDocument> ReadRequiredDocumentAsync(
         string path,
         string source,
         CancellationToken cancellationToken)
     {
-        if (!File.Exists(path))
-            throw new FileNotFoundException($"The {source} PublisherStudio DX function catalog is missing.", path);
-
-        var document = await ReadOptionalDocumentAsync(path, cancellationToken).ConfigureAwait(false);
-        return document ?? throw new InvalidDataException($"The {source} PublisherStudio DX function catalog is empty.");
-    }
-
-    private static async Task<PublisherDxFunctionCatalogDocument?> ReadOptionalDocumentAsync(
-        string path,
-        CancellationToken cancellationToken)
-    {
-        var json = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
-        return JsonSerializer.Deserialize<PublisherDxFunctionCatalogDocument>(json, JsonOptions);
-    }
-
-    private static void ValidateDocument(PublisherDxFunctionCatalogDocument document, string source)
-    {
-        if (document.SchemaVersion <= 0)
-            throw new InvalidDataException($"The {source} PublisherStudio DX function catalog has no valid schema version.");
-        if (document.Functions.Count == 0)
-            throw new InvalidDataException($"The {source} PublisherStudio DX function catalog contains no functions.");
-        ValidateFunctions(document.Functions, source);
-    }
-
-    private static void ValidateFunctions(IEnumerable<OrganicCapabilityDescriptor> functions, string source)
-    {
-        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var configurationKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var item in functions)
+        try
         {
-            if (string.IsNullOrWhiteSpace(item.Key) || !keys.Add(item.Key))
-                throw new InvalidDataException($"The {source} catalog contains a missing or duplicate function key.");
-            if (string.IsNullOrWhiteSpace(item.ConfigurationKey) || !configurationKeys.Add(item.ConfigurationKey))
-                throw new InvalidDataException($"The {source} catalog contains a missing or duplicate configuration key.");
-            if (string.IsNullOrWhiteSpace(item.Controller) || string.IsNullOrWhiteSpace(item.Method) || string.IsNullOrWhiteSpace(item.Route))
-                throw new InvalidDataException($"DX function {item.Key} has no executable controller, method, or route contract.");
+            if (!File.Exists(path))
+                throw new FileNotFoundException($"The {source} PublisherStudio DX function catalog is missing.", path);
 
-            using var parameterSchema = JsonDocument.Parse(item.ParameterSchemaJson);
-            using var interactionSchema = JsonDocument.Parse(item.InteractionValueSchemaJson);
+            var document = await ReadOptionalDocumentAsync(path, cancellationToken).ConfigureAwait(false);
+            logger.LogTrace($"Read the required {source} PublisherStudio DX function catalog.");
+            return document ?? throw new InvalidDataException($"The {source} PublisherStudio DX function catalog is empty.");
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not read the required {source} PublisherStudio DX function catalog.");
+            throw;
         }
     }
 
-    private static string GetStorageKey(OrganicCapabilityDescriptor item)
+    private async Task<PublisherDxFunctionCatalogDocument?> ReadOptionalDocumentAsync(
+        string path,
+        CancellationToken cancellationToken)
     {
-        var key = string.IsNullOrWhiteSpace(item.ConfigurationKey) ? item.Key : item.ConfigurationKey;
-        if (string.IsNullOrWhiteSpace(key))
-            throw new InvalidDataException("A PublisherStudio DX function has no storage key.");
-        return key;
+        try
+        {
+            var json = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
+            var document = JsonSerializer.Deserialize<PublisherDxFunctionCatalogDocument>(json, JsonOptions);
+            logger.LogTrace($"Read an optional PublisherStudio DX function catalog document.");
+            return document;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not read an optional PublisherStudio DX function catalog document.");
+            throw;
+        }
     }
 
-    private static string GetUserCatalogPath() => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "PublisherStudio",
-        "Configuration",
-        "publisher-dx-functions.json");
+    private void ValidateDocument(PublisherDxFunctionCatalogDocument document, string source)
+    {
+        try
+        {
+            if (document.SchemaVersion <= 0)
+                throw new InvalidDataException($"The {source} PublisherStudio DX function catalog has no valid schema version.");
+            if (document.Functions.Count == 0)
+                throw new InvalidDataException($"The {source} PublisherStudio DX function catalog contains no functions.");
+            ValidateFunctions(document.Functions, source);
+            logger.LogTrace($"Validated the {source} PublisherStudio DX function catalog document.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not validate the {source} PublisherStudio DX function catalog document.");
+            throw;
+        }
+    }
 
-    private static async Task WriteInitialUserCatalogAsync(
+    private void ValidateFunctions(IEnumerable<OrganicCapabilityDescriptor> functions, string source)
+    {
+        try
+        {
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var configurationKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in functions)
+            {
+                if (string.IsNullOrWhiteSpace(item.Key) || !keys.Add(item.Key))
+                    throw new InvalidDataException($"The {source} catalog contains a missing or duplicate function key.");
+                if (string.IsNullOrWhiteSpace(item.ConfigurationKey) || !configurationKeys.Add(item.ConfigurationKey))
+                    throw new InvalidDataException($"The {source} catalog contains a missing or duplicate configuration key.");
+                if (string.IsNullOrWhiteSpace(item.Controller) || string.IsNullOrWhiteSpace(item.Method) || string.IsNullOrWhiteSpace(item.Route))
+                    throw new InvalidDataException($"DX function {item.Key} has no executable controller, method, or route contract.");
+
+                using var parameterSchema = JsonDocument.Parse(item.ParameterSchemaJson);
+                using var interactionSchema = JsonDocument.Parse(item.InteractionValueSchemaJson);
+            }
+            logger.LogTrace($"Validated PublisherStudio DX function descriptors from the {source} catalog.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not validate PublisherStudio DX function descriptors from the {source} catalog.");
+            throw;
+        }
+    }
+
+    private string GetStorageKey(OrganicCapabilityDescriptor item)
+    {
+        try
+        {
+            var key = string.IsNullOrWhiteSpace(item.ConfigurationKey) ? item.Key : item.ConfigurationKey;
+            if (string.IsNullOrWhiteSpace(key))
+                throw new InvalidDataException("A PublisherStudio DX function has no storage key.");
+            logger.LogTrace($"Resolved the storage key for PublisherStudio DX function {item.Key}.");
+            return key;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not resolve the storage key for PublisherStudio DX function {item?.Key}.");
+            throw;
+        }
+    }
+
+    private string GetUserCatalogPath()
+    {
+        try
+        {
+            var path = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "PublisherStudio",
+                "Configuration",
+                "publisher-dx-functions.json");
+            logger.LogTrace($"Resolved the user-local PublisherStudio DX function catalog path; path content omitted from logs.");
+            return path;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not resolve the user-local PublisherStudio DX function catalog path.");
+            throw;
+        }
+    }
+
+    private async Task WriteInitialUserCatalogAsync(
         string userPath,
         PublisherDxFunctionCatalogDocument seed,
         CancellationToken cancellationToken)
@@ -143,10 +221,20 @@ public sealed class PublisherDxFunctionCatalogDataService(
             var json = JsonSerializer.Serialize(seed, JsonOptions);
             await File.WriteAllTextAsync(temporaryPath, json, cancellationToken).ConfigureAwait(false);
             File.Move(temporaryPath, userPath, overwrite: false);
+            logger.LogInformation($"Created the initial user-local PublisherStudio DX function catalog; path content omitted from logs.");
         }
         catch (IOException) when (File.Exists(userPath))
         {
-            // Another process created the initial catalog first.
+            logger.LogDebug($"Another process created the initial user-local PublisherStudio DX function catalog first.");
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not create the initial user-local PublisherStudio DX function catalog.");
+            throw;
         }
         finally
         {

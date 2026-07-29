@@ -11,6 +11,7 @@ public sealed class LocalGptDiscoveryHostedService(
     IOptions<OrganicPluginOptions> options,
     ILocalGptDiscoveryRegistry registry,
     ILocalGptConnectionService connection,
+    IOrganicPluginProtocolCodec codec,
     ILogger<LocalGptDiscoveryHostedService> logger) : BackgroundService
 {
     private int autoConnectInProgress;
@@ -71,7 +72,7 @@ public sealed class LocalGptDiscoveryHostedService(
 
             try
             {
-                var peer = JsonSerializer.Deserialize<OrganicPeerAdvertisement>(received.Buffer, OrganicPluginProtocolCodec.JsonOptions);
+                var peer = JsonSerializer.Deserialize<OrganicPeerAdvertisement>(received.Buffer, codec.JsonOptions);
                 if (peer is null || !string.Equals(peer.Application, "LocalGPT", StringComparison.OrdinalIgnoreCase)) continue;
                 if (string.IsNullOrWhiteSpace(peer.Address) || peer.Address is "0.0.0.0" or "::")
                     peer.Address = received.RemoteEndPoint.Address.ToString();

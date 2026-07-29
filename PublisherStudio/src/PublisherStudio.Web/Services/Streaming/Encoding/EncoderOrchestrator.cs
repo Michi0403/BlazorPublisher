@@ -307,7 +307,7 @@ public sealed class EncoderSessionService : IDisposable
         ]);
     }
 
-    private static void AddWebmVideoEncoding(List<string> args, int width, int height, int frameRate, int bitrateKbps, int keyframeSeconds)
+    private void AddWebmVideoEncoding(List<string> args, int width, int height, int frameRate, int bitrateKbps, int keyframeSeconds)
     {
         args.AddRange([
             "-vf", $"scale={Math.Max(2, width)}:{Math.Max(2, height)}:force_original_aspect_ratio=decrease,pad={Math.Max(2, width)}:{Math.Max(2, height)}:(ow-iw)/2:(oh-ih)/2",
@@ -324,13 +324,13 @@ public sealed class EncoderSessionService : IDisposable
         ]);
     }
 
-    private static int RecommendedRecordingBitrateKbps(int width, int height, int frameRate)
+    private int RecommendedRecordingBitrateKbps(int width, int height, int frameRate)
     {
         var bitsPerSecond = (long)Math.Round(Math.Max(2, width) * (double)Math.Max(2, height) * Math.Clamp(frameRate, 15, 120) * 0.16, MidpointRounding.AwayFromZero);
         return (int)Math.Clamp(bitsPerSecond / 1000L, 12_000L, 120_000L);
     }
 
-    private static void AddAudioEncoding(List<string> args, int bitrateKbps, int codec) =>
+    private void AddAudioEncoding(List<string> args, int bitrateKbps, int codec) =>
         args.AddRange(["-c:a", codec == 1 ? "libopus" : "aac", "-b:a", $"{Math.Max(32, bitrateKbps)}k", "-ar", "48000"]);
 
     private string BuildDestination(MediaOutputDefinition output)
@@ -529,7 +529,7 @@ public sealed class EncoderSessionService : IDisposable
         });
     }
 
-    private static IEnumerable<string> ResolveRecordingFiles(string pattern)
+    private IEnumerable<string> ResolveRecordingFiles(string pattern)
     {
         var directory = Path.GetDirectoryName(pattern);
         var fileName = Path.GetFileName(pattern);
@@ -554,10 +554,10 @@ public sealed class EncoderSessionService : IDisposable
     private bool IsPipedInput(Guid? inputId) =>
         string.Equals(_session.GetIngest(inputId)?.Kind, "webm-websocket", StringComparison.OrdinalIgnoreCase);
 
-    private static string InputKey(Guid? id) => id?.ToString("N") ?? "master";
-    private static string OutputKey(Guid id) => $"output:{id:N}";
-    private static string NormalizeContainer(string value) => value.Trim().ToLowerInvariant() switch { "mp4" => "mp4", "webm" => "webm", _ => "mkv" };
-    private static string SafeFileName(string value)
+    private string InputKey(Guid? id) => id?.ToString("N") ?? "master";
+    private string OutputKey(Guid id) => $"output:{id:N}";
+    private string NormalizeContainer(string value) => value.Trim().ToLowerInvariant() switch { "mp4" => "mp4", "webm" => "webm", _ => "mkv" };
+    private string SafeFileName(string value)
     {
         var invalid = Path.GetInvalidFileNameChars();
         var clean = new string(value.Select(character => invalid.Contains(character) ? '-' : character).ToArray()).Trim();

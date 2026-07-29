@@ -6,7 +6,7 @@ namespace PublisherStudio.Services.Configuration;
 
 public sealed class FileLocalizationService(IWebHostEnvironment environment) : IFileLocalizationService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> _cache = new(StringComparer.OrdinalIgnoreCase);
     private string LocalizationPath => Path.Combine(environment.ContentRootPath, "Localization");
     private string OverridePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "LocalizationOverrides");
@@ -69,7 +69,7 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment) : I
     }
 
 
-    private static Dictionary<string, string> LoadFile(string path)
+    private Dictionary<string, string> LoadFile(string path)
     {
         if (!File.Exists(path)) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         using var stream = File.OpenRead(path);
@@ -79,7 +79,7 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment) : I
             .ToDictionary(pair => pair.Key, pair => pair.Value ?? string.Empty, StringComparer.OrdinalIgnoreCase);
     }
 
-    private static void MergeFile(string path, IDictionary<string, string> result)
+    private void MergeFile(string path, IDictionary<string, string> result)
     {
         if (!File.Exists(path)) return;
         using var stream = File.OpenRead(path);
@@ -88,7 +88,7 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment) : I
         foreach (var pair in data.Where(pair => !string.IsNullOrWhiteSpace(pair.Key))) result[pair.Key] = pair.Value ?? string.Empty;
     }
 
-    private static void AddCultures(string path, ISet<string> values)
+    private void AddCultures(string path, ISet<string> values)
     {
         if (!Directory.Exists(path)) return;
         foreach (var file in Directory.EnumerateFiles(path, "*.json", SearchOption.TopDirectoryOnly))
@@ -98,7 +98,7 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment) : I
         }
     }
 
-    private static string NormalizeCulture(string? culture)
+    private string NormalizeCulture(string? culture)
     {
         var requested = string.IsNullOrWhiteSpace(culture) ? CultureInfo.CurrentUICulture.Name : culture.Trim();
         try { return CultureInfo.GetCultureInfo(requested).Name; }

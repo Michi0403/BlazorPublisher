@@ -104,7 +104,7 @@ public sealed class PublicationWebDataService
         return dataObject.Web.LastSuccessUtc is null || now - dataObject.Web.LastSuccessUtc.Value >= TimeSpan.FromSeconds(dataObject.Web.RefreshIntervalSeconds);
     }
 
-    private static Uri ResolveUri(string value, PublicationWebTransportKind transport)
+    private Uri ResolveUri(string value, PublicationWebTransportKind transport)
     {
         if (Uri.TryCreate(value, UriKind.Absolute, out var absolute)) return absolute;
         if (transport != PublicationWebTransportKind.MonolithApi)
@@ -114,7 +114,7 @@ public sealed class PublicationWebDataService
         return new Uri(new Uri(baseUrl.TrimEnd('/') + "/"), value.TrimStart('/'));
     }
 
-    private static HttpMethod ToHttpMethod(PublicationWebHttpMethod method) => method switch
+    private HttpMethod ToHttpMethod(PublicationWebHttpMethod method) => method switch
     {
         PublicationWebHttpMethod.Post => HttpMethod.Post,
         PublicationWebHttpMethod.Put => HttpMethod.Put,
@@ -123,7 +123,7 @@ public sealed class PublicationWebDataService
         _ => HttpMethod.Get
     };
 
-    private static string TrimForError(string value)
+    private string TrimForError(string value)
     {
         value = (value ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ').Trim();
         return value.Length <= 300 ? value : value[..300] + "…";

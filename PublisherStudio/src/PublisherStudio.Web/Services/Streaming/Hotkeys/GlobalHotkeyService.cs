@@ -108,7 +108,7 @@ public sealed class GlobalHotkeyService : IDisposable
         }
     }
 
-    private static bool TryParseGesture(string gesture, out uint modifiers, out uint virtualKey)
+    private bool TryParseGesture(string gesture, out uint modifiers, out uint virtualKey)
     {
         modifiers = 0;
         virtualKey = 0;
@@ -175,21 +175,21 @@ public sealed class GlobalHotkeyService : IDisposable
     private struct NativePoint { public int X; public int Y; }
 
     [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint modifiers, uint virtualKey);
+    private extern bool RegisterHotKey(IntPtr hWnd, int id, uint modifiers, uint virtualKey);
 
     [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+    private extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
     [DllImport("user32.dll")]
-    private static extern int GetMessage(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter);
+    private extern int GetMessage(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter);
 
     [DllImport("user32.dll")]
-    private static extern bool PeekMessage(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter, uint removeMessage);
+    private extern bool PeekMessage(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter, uint removeMessage);
 
     [DllImport("user32.dll")]
-    private static extern bool PostThreadMessage(uint threadId, uint message, UIntPtr wParam, IntPtr lParam);
+    private extern bool PostThreadMessage(uint threadId, uint message, UIntPtr wParam, IntPtr lParam);
 
     [DllImport("kernel32.dll")]
-    private static extern uint GetCurrentThreadId();
+    private extern uint GetCurrentThreadId();
 }
 

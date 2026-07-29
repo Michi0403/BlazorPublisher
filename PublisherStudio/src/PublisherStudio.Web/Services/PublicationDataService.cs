@@ -140,7 +140,7 @@ public sealed class PublicationDataService
         EnsureBuiltIn(document, PublicationDataSourceKind.PublicationMedia, "Publication media");
     }
 
-    private static void EnsureBuiltIn(PublicationDocument document, PublicationDataSourceKind kind, string name)
+    private void EnsureBuiltIn(PublicationDocument document, PublicationDataSourceKind kind, string name)
     {
         if (document.DataObjects.Any(data => data.SourceKind == kind)) return;
         document.DataObjects.Add(new PublicationDataObject
@@ -343,7 +343,7 @@ public sealed class PublicationDataService
             .ToArray();
     }
 
-    private static void ParseWebSnapshot(PublicationDataObject data)
+    private void ParseWebSnapshot(PublicationDataObject data)
     {
         if (string.IsNullOrWhiteSpace(data.RawSource))
         {
@@ -385,7 +385,7 @@ public sealed class PublicationDataService
         }
     }
 
-    private static PublicationWebResponseFormat DetectWebResponseFormat(PublicationDataObject data)
+    private PublicationWebResponseFormat DetectWebResponseFormat(PublicationDataObject data)
     {
         var mediaType = data.Web.LastContentType?.Trim() ?? string.Empty;
         if (mediaType.Contains("json", StringComparison.OrdinalIgnoreCase)) return PublicationWebResponseFormat.Json;
@@ -413,7 +413,7 @@ public sealed class PublicationDataService
         return PublicationWebResponseFormat.DelimitedText;
     }
 
-    private static string SelectJsonPath(string source, string path)
+    private string SelectJsonPath(string source, string path)
     {
         if (string.IsNullOrWhiteSpace(path)) return source;
         using var document = JsonDocument.Parse(source, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
@@ -444,7 +444,7 @@ public sealed class PublicationDataService
         }
     }
 
-    private static void ParseJson(PublicationDataObject data)
+    private void ParseJson(PublicationDataObject data)
     {
         using var document = JsonDocument.Parse(data.RawSource, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
         JsonDocument? encodedDocument = null;
@@ -496,7 +496,7 @@ public sealed class PublicationDataService
         }
     }
 
-    private static JsonElement[] SelectJsonRows(JsonElement root)
+    private JsonElement[] SelectJsonRows(JsonElement root)
     {
         if (root.ValueKind == JsonValueKind.Array) return root.EnumerateArray().ToArray();
         if (root.ValueKind != JsonValueKind.Object)
@@ -504,7 +504,7 @@ public sealed class PublicationDataService
         return TryFindJsonRowArray(root, 0, out var rows) ? rows : [root];
     }
 
-    private static bool TryFindJsonRowArray(JsonElement root, int depth, out JsonElement[] rows)
+    private bool TryFindJsonRowArray(JsonElement root, int depth, out JsonElement[] rows)
     {
         rows = [];
         if (depth > 4 || root.ValueKind != JsonValueKind.Object) return false;
@@ -533,7 +533,7 @@ public sealed class PublicationDataService
         return objects.Length == 1 && TryFindJsonRowArray(objects[0], depth + 1, out rows);
     }
 
-    private static void FlattenJsonObject(JsonElement source, string prefix, Dictionary<string, string> values, List<string> names)
+    private void FlattenJsonObject(JsonElement source, string prefix, Dictionary<string, string> values, List<string> names)
     {
         foreach (var property in source.EnumerateObject())
         {
@@ -549,7 +549,7 @@ public sealed class PublicationDataService
         }
     }
 
-    private static string JsonText(JsonElement value) => value.ValueKind switch
+    private string JsonText(JsonElement value) => value.ValueKind switch
     {
         JsonValueKind.String => value.GetString() ?? string.Empty,
         JsonValueKind.Number => value.GetRawText(),
@@ -559,7 +559,7 @@ public sealed class PublicationDataService
         _ => value.GetRawText()
     };
 
-    private static void ParseXml(PublicationDataObject data)
+    private void ParseXml(PublicationDataObject data)
     {
         var document = XDocument.Parse(data.RawSource ?? string.Empty, LoadOptions.None);
         var root = document.Root ?? throw new InvalidDataException("XML must contain a root element.");
@@ -620,7 +620,7 @@ public sealed class PublicationDataService
         }).ToList();
     }
 
-    private static void AddXmlValue(Dictionary<string, string> values, List<string> names, string name, string value, bool attribute)
+    private void AddXmlValue(Dictionary<string, string> values, List<string> names, string name, string value, bool attribute)
     {
         var basis = string.IsNullOrWhiteSpace(name) ? (attribute ? "Attribute" : "Value") : name.Trim();
         var candidate = basis;
@@ -631,7 +631,7 @@ public sealed class PublicationDataService
         if (!names.Contains(candidate, StringComparer.OrdinalIgnoreCase)) names.Add(candidate);
     }
 
-    private static void ParseDelimited(PublicationDataObject data)
+    private void ParseDelimited(PublicationDataObject data)
     {
         var delimiter = string.IsNullOrEmpty(data.Delimiter) ? ',' : data.Delimiter[0];
         var rows = ParseDelimitedRows(data.RawSource, delimiter);
@@ -658,7 +658,7 @@ public sealed class PublicationDataService
         }).ToList();
     }
 
-    private static List<List<string>> ParseDelimitedRows(string source, char delimiter)
+    private List<List<string>> ParseDelimitedRows(string source, char delimiter)
     {
         source ??= string.Empty;
         var result = new List<List<string>>();
@@ -686,7 +686,7 @@ public sealed class PublicationDataService
         return result;
     }
 
-    private static List<string> MakeUnique(List<string> names)
+    private List<string> MakeUnique(List<string> names)
     {
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var index = 0; index < names.Count; index++)
@@ -700,7 +700,7 @@ public sealed class PublicationDataService
         return names;
     }
 
-    private static PublicationDataValueKind InferKind(IEnumerable<string> values)
+    private PublicationDataValueKind InferKind(IEnumerable<string> values)
     {
         var materialized = values.Where(value => !string.IsNullOrWhiteSpace(value)).Take(100).ToArray();
         if (materialized.Length == 0) return PublicationDataValueKind.Text;
@@ -710,7 +710,7 @@ public sealed class PublicationDataService
         return PublicationDataValueKind.Text;
     }
 
-    private static List<PublicationDataColumn> DocumentObjectColumns() =>
+    private List<PublicationDataColumn> DocumentObjectColumns() =>
     [
         new() { Name = "pageId", ValueKind = PublicationDataValueKind.Text },
         new() { Name = "pageName", ValueKind = PublicationDataValueKind.Text },
@@ -732,7 +732,7 @@ public sealed class PublicationDataService
         new() { Name = "Object", ValueKind = PublicationDataValueKind.Text }
     ];
 
-    private static List<PublicationDataColumn> PublicationPageColumns() =>
+    private List<PublicationDataColumn> PublicationPageColumns() =>
     [
         new() { Name = "id", ValueKind = PublicationDataValueKind.Text },
         new() { Name = "text", ValueKind = PublicationDataValueKind.Text },
@@ -747,7 +747,7 @@ public sealed class PublicationDataService
         new() { Name = "elementCount", ValueKind = PublicationDataValueKind.Number }
     ];
 
-    private static List<PublicationDataColumn> PublicationDocumentColumns() =>
+    private List<PublicationDataColumn> PublicationDocumentColumns() =>
     [
         new() { Name = "id", ValueKind = PublicationDataValueKind.Text },
         new() { Name = "name", ValueKind = PublicationDataValueKind.Text },
@@ -762,7 +762,7 @@ public sealed class PublicationDataService
         new() { Name = "currentPageOrientation", ValueKind = PublicationDataValueKind.Text }
     ];
 
-    private static List<PublicationDataColumn> PublicationMediaColumns() =>
+    private List<PublicationDataColumn> PublicationMediaColumns() =>
     [
         new() { Name = "id", ValueKind = PublicationDataValueKind.Text },
         new() { Name = "pageId", ValueKind = PublicationDataValueKind.Text },
@@ -782,7 +782,7 @@ public sealed class PublicationDataService
         new() { Name = "visible", ValueKind = PublicationDataValueKind.Boolean }
     ];
 
-    private static string MimeFromDataUrl(string dataUrl, string fallback)
+    private string MimeFromDataUrl(string dataUrl, string fallback)
     {
         if (!dataUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return fallback;
         var start = 5;
@@ -792,7 +792,7 @@ public sealed class PublicationDataService
         return PublicationMediaData.NormalizeMimeType(value, fallback);
     }
 
-    private static IReadOnlyList<PublicationDataRow> BuildPublicationMediaRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
+    private IReadOnlyList<PublicationDataRow> BuildPublicationMediaRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
     {
         var pages = scope == DocumentObjectDataScope.CurrentPage
             ? document.Pages.Where(page => page.Id == currentPageId)
@@ -859,7 +859,7 @@ public sealed class PublicationDataService
             }).ToArray();
     }
 
-    private static IReadOnlyList<PublicationDataRow> BuildDocumentRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
+    private IReadOnlyList<PublicationDataRow> BuildDocumentRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
     {
         var pages = scope == DocumentObjectDataScope.CurrentPage
             ? document.Pages.Where(page => page.Id == currentPageId)
@@ -888,7 +888,7 @@ public sealed class PublicationDataService
         })).ToArray();
     }
 
-    private static IReadOnlyList<PublicationDataRow> BuildPublicationPageRows(PublicationDocument document)
+    private IReadOnlyList<PublicationDataRow> BuildPublicationPageRows(PublicationDocument document)
         => document.Pages.Select((page, index) => new PublicationDataRow
         {
             Values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -907,7 +907,7 @@ public sealed class PublicationDataService
             }
         }).ToArray();
 
-    private static IReadOnlyList<PublicationDataRow> BuildPublicationDocumentRows(PublicationDocument document, Guid currentPageId)
+    private IReadOnlyList<PublicationDataRow> BuildPublicationDocumentRows(PublicationDocument document, Guid currentPageId)
     {
         var page = document.Pages.FirstOrDefault(candidate => candidate.Id == currentPageId) ?? document.Pages.FirstOrDefault();
         var index = page is null ? -1 : document.Pages.IndexOf(page);
@@ -933,7 +933,7 @@ public sealed class PublicationDataService
         ];
     }
 
-    private static string Slug(string value, int fallback)
+    private string Slug(string value, int fallback)
     {
         var text = new string((value ?? string.Empty).Trim().ToLowerInvariant()
             .Select(character => char.IsLetterOrDigit(character) ? character : '-')

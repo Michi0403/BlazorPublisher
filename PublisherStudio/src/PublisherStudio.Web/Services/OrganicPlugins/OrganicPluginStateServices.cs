@@ -47,7 +47,7 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
         if (changed) Changed?.Invoke();
     }
 
-    private static OrganicPeerAdvertisement Clone(OrganicPeerAdvertisement peer) => new()
+    private OrganicPeerAdvertisement Clone(OrganicPeerAdvertisement peer) => new()
     {
         PeerId = peer.PeerId, DisplayName = peer.DisplayName, Application = peer.Application,
         ApplicationVersion = peer.ApplicationVersion, HostName = peer.HostName, Address = peer.Address,
@@ -74,13 +74,15 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 public sealed class OrganicPermissionStore : IOrganicPermissionStore
 {
     private readonly ILogger<OrganicPermissionStore> logger;
+    private readonly IOrganicPluginProtocolCodec codec;
     private readonly object gate = new();
     private readonly string filePath;
     private List<OrganicPermissionRule>? rules;
 
-    public OrganicPermissionStore(ILogger<OrganicPermissionStore> logger)
+    public OrganicPermissionStore(ILogger<OrganicPermissionStore> logger, IOrganicPluginProtocolCodec codec)
     {
         this.logger = logger;
+        this.codec = codec;
         filePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "PublisherStudio", "OrganicPlugins", "permissions.json");
@@ -185,7 +187,7 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         string.Equals(rule.PeerId, envelope.SourcePeerId, StringComparison.OrdinalIgnoreCase) &&
         string.Equals(rule.CapabilityKey, envelope.CapabilityKey, StringComparison.OrdinalIgnoreCase)).ToList();
 
-    private static OrganicPermissionRule? ResolveRule(IReadOnlyList<OrganicPermissionRule> candidates, string organ) =>
+    private OrganicPermissionRule? ResolveRule(IReadOnlyList<OrganicPermissionRule> candidates, string organ) =>
         candidates.FirstOrDefault(candidate => string.Equals(candidate.Organ, organ, StringComparison.OrdinalIgnoreCase))
         ?? candidates.FirstOrDefault(candidate => string.IsNullOrWhiteSpace(candidate.Organ));
 
@@ -194,7 +196,7 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         try
         {
             if (!File.Exists(filePath)) return [];
-            return JsonSerializer.Deserialize<List<OrganicPermissionRule>>(File.ReadAllText(filePath), OrganicPluginProtocolCodec.JsonOptions) ?? [];
+            return JsonSerializer.Deserialize<List<OrganicPermissionRule>>(File.ReadAllText(filePath), codec.JsonOptions) ?? [];
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
@@ -208,16 +210,16 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         var directory = Path.GetDirectoryName(filePath)!;
         Directory.CreateDirectory(directory);
         var temporary = filePath + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(Rules, new JsonSerializerOptions(OrganicPluginProtocolCodec.JsonOptions) { WriteIndented = true }));
+        File.WriteAllText(temporary, JsonSerializer.Serialize(Rules, new JsonSerializerOptions(codec.JsonOptions) { WriteIndented = true }));
         File.Move(temporary, filePath, overwrite: true);
     }
 
-    private static bool SameKey(OrganicPermissionRule left, OrganicPermissionRule right) =>
+    private bool SameKey(OrganicPermissionRule left, OrganicPermissionRule right) =>
         string.Equals(left.PeerId, right.PeerId, StringComparison.OrdinalIgnoreCase) &&
         string.Equals(left.CapabilityKey, right.CapabilityKey, StringComparison.OrdinalIgnoreCase) &&
         string.Equals(left.Organ, right.Organ, StringComparison.OrdinalIgnoreCase);
 
-    private static OrganicPermissionRule Clone(OrganicPermissionRule rule) => new()
+    private OrganicPermissionRule Clone(OrganicPermissionRule rule) => new()
     {
         PeerId = rule.PeerId,
         CapabilityKey = rule.CapabilityKey,
@@ -234,44 +236,53 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     };
 }
 
-public sealed class OrganicReplayGuard(ILogger<OrganicReplayGuard> logger) : IOrganicReplayGuard
+public sealed class OrganicReplayGuard(
+    IOrganicReplayPolicyDataService policyData,
+    ILogger<OrganicReplayGuard> logger) : IOrganicReplayGuard
 {
-    private static readonly TimeSpan Retention = TimeSpan.FromMinutes(15);
-    private static readonly TimeSpan AllowedFutureSkew = TimeSpan.FromMinutes(2);
     private readonly ConcurrentDictionary<string, DateTimeOffset> accepted = new(StringComparer.OrdinalIgnoreCase);
     private int cleanupCounter;
 
     public bool TryAccept(string peerId, Guid messageId, DateTimeOffset createdUtc)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(peerId);
-        if (messageId == Guid.Empty)
-            return false;
-
-        var now = DateTimeOffset.UtcNow;
-        if (createdUtc < now - Retention || createdUtc > now + AllowedFutureSkew)
+        try
         {
-            logger.LogWarning("Rejected organic 1-Wire message {MessageId} from {PeerId} because its timestamp is outside the accepted replay window.", messageId, peerId);
+            ArgumentException.ThrowIfNullOrWhiteSpace(peerId);
+            if (messageId == Guid.Empty)
+                return false;
+
+            var now = DateTimeOffset.UtcNow;
+            var policy = policyData.GetSnapshot();
+            if (createdUtc < now - policy.Retention || createdUtc > now + policy.AllowedFutureSkew)
+            {
+                logger.LogWarning($"Rejected organic 1-Wire message {messageId} from {peerId} because its timestamp is outside the accepted replay window.");
+                return false;
+            }
+
+            var key = $"{peerId}\n{messageId:N}";
+            if (!accepted.TryAdd(key, now.Add(policy.Retention)))
+            {
+                logger.LogWarning($"Rejected replayed organic 1-Wire message {messageId} from {peerId}.");
+                return false;
+            }
+
+            if (Interlocked.Increment(ref cleanupCounter) % policy.CleanupInterval == 0 || accepted.Count > policy.MaximumTrackedMessages)
+            {
+                foreach (var stale in accepted.Where(pair => pair.Value <= now).Select(pair => pair.Key).ToArray())
+                    accepted.TryRemove(stale, out _);
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Could not evaluate replay protection for organic message {messageId} from {peerId}.");
             return false;
         }
-
-        var key = $"{peerId}\n{messageId:N}";
-        if (!accepted.TryAdd(key, now.Add(Retention)))
-        {
-            logger.LogWarning("Rejected replayed organic 1-Wire message {MessageId} from {PeerId}.", messageId, peerId);
-            return false;
-        }
-
-        if (Interlocked.Increment(ref cleanupCounter) % 64 == 0 || accepted.Count > 4096)
-        {
-            foreach (var stale in accepted.Where(pair => pair.Value <= now).Select(pair => pair.Key).ToArray())
-                accepted.TryRemove(stale, out _);
-        }
-
-        return true;
     }
 }
 
-public sealed class OrganicResultStore : IOrganicResultStore
+public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrganicResultStore
 {
     private readonly ConcurrentQueue<OrganicPluginWorkItem> results = new();
     private readonly ConcurrentDictionary<Guid, OrganicTextInsertionProposal> textProposals = new();
@@ -284,7 +295,7 @@ public sealed class OrganicResultStore : IOrganicResultStore
         {
             MessageId = envelope.MessageId, CorrelationId = envelope.CorrelationId, PeerId = envelope.SourcePeerId,
             CapabilityKey = envelope.CapabilityKey, Status = ResolveStatus(envelope),
-            Request = envelope, ResultJson = envelope.Properties is null ? string.Empty : JsonSerializer.Serialize(envelope.Properties, OrganicPluginProtocolCodec.JsonOptions), Error = envelope.Error
+            Request = envelope, ResultJson = envelope.Properties is null ? string.Empty : JsonSerializer.Serialize(envelope.Properties, codec.JsonOptions), Error = envelope.Error
         });
         while (results.Count > 200) results.TryDequeue(out _);
         Changed?.Invoke();
@@ -302,7 +313,7 @@ public sealed class OrganicResultStore : IOrganicResultStore
         return removed;
     }
 
-    private static OrganicWorkStatus ResolveStatus(OrganicWireEnvelope envelope)
+    private OrganicWorkStatus ResolveStatus(OrganicWireEnvelope envelope)
     {
         if (envelope.MessageType == OrganicWireMessageType.WorkResult &&
             envelope.Properties is not null &&

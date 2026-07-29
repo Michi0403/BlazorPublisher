@@ -19,9 +19,9 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
     private const uint AudclntBufferflagsSilent = 0x00000002;
     private const ushort VtBlob = 65;
     private const uint CoinitMultithreaded = 0x0;
-    private static readonly Guid IidAudioClient = new("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2");
-    private static readonly Guid IidAudioCaptureClient = new("C8ADBD64-E71E-48A0-A4DE-185C395CD317");
 
+    private readonly Guid _audioClientInterfaceId;
+    private readonly Guid _audioCaptureClientInterfaceId;
     private readonly uint _processId;
     private readonly Stream _destination;
     private readonly CancellationTokenSource _cancellation;
@@ -30,10 +30,17 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
     private Exception? _startupError;
     private bool _disposed;
 
-    public WindowsProcessLoopbackCapture(uint processId, Stream destination, CancellationToken cancellationToken)
+    public WindowsProcessLoopbackCapture(
+        uint processId,
+        Stream destination,
+        CancellationToken cancellationToken,
+        Guid audioClientInterfaceId,
+        Guid audioCaptureClientInterfaceId)
     {
         if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Process audio loopback is available only on Windows.");
         _processId = processId;
+        _audioClientInterfaceId = audioClientInterfaceId;
+        _audioCaptureClientInterfaceId = audioCaptureClientInterfaceId;
         _destination = destination;
         _cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _thread = new Thread(CaptureThread)
@@ -87,7 +94,7 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
 
             sampleReady = new EventWaitHandle(false, EventResetMode.AutoReset);
             ThrowIfFailed(audioClient.SetEventHandle(sampleReady.SafeWaitHandle.DangerousGetHandle()));
-            var captureClientId = IidAudioCaptureClient;
+            var captureClientId = _audioCaptureClientInterfaceId;
             ThrowIfFailed(audioClient.GetService(ref captureClientId, out var service));
             captureClient = (IAudioCaptureClient)service;
             ThrowIfFailed(audioClient.Start());
@@ -139,7 +146,7 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         }
     }
 
-    private static IAudioClient ActivateAudioClient(uint processId)
+    private IAudioClient ActivateAudioClient(uint processId)
     {
         var parameters = new AudioClientActivationParams
         {
@@ -166,7 +173,7 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
             };
             Marshal.StructureToPtr(property, propertyPointer, false);
             var completion = new AudioActivationCompletionHandler();
-            var audioClientId = IidAudioClient;
+            var audioClientId = _audioClientInterfaceId;
             ThrowIfFailed(ActivateAudioInterfaceAsync(
                 VirtualAudioDeviceProcessLoopback,
                 ref audioClientId,
@@ -183,12 +190,12 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         }
     }
 
-    private static void ThrowIfFailed(int hresult)
+    private void ThrowIfFailed(int hresult)
     {
         if (hresult < 0) Marshal.ThrowExceptionForHR(hresult);
     }
 
-    private static void ReleaseComObject(object? value)
+    private void ReleaseComObject(object? value)
     {
         if (value is null || !Marshal.IsComObject(value)) return;
         try { Marshal.FinalReleaseComObject(value); } catch { }
@@ -228,7 +235,7 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
     }
 
     [DllImport("Mmdevapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-    private static extern int ActivateAudioInterfaceAsync(
+    private extern int ActivateAudioInterfaceAsync(
         string deviceInterfacePath,
         ref Guid riid,
         IntPtr activationParams,
@@ -236,10 +243,10 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         [MarshalAs(UnmanagedType.Interface)] out IActivateAudioInterfaceAsyncOperation activationOperation);
 
     [DllImport("ole32.dll")]
-    private static extern int CoInitializeEx(IntPtr reserved, uint coInit);
+    private extern int CoInitializeEx(IntPtr reserved, uint coInit);
 
     [DllImport("ole32.dll")]
-    private static extern void CoUninitialize();
+    private extern void CoUninitialize();
 
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientActivationParams

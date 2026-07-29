@@ -14,7 +14,7 @@ public sealed class StreamingMediaHostClient(
     StreamingRuntimeUseCases runtime,
     StreamingSessionUseCases sessions)
 {
-    private static readonly JsonSerializerOptions WebJson = new(JsonSerializerDefaults.Web);
+    private readonly JsonSerializerOptions WebJson = new(JsonSerializerDefaults.Web);
     private readonly StreamingProfileStore _profiles = profiles;
     private readonly TwitchOAuthService _twitchOAuth = twitchOAuth;
     private readonly StreamingRuntimeUseCases _runtime = runtime;

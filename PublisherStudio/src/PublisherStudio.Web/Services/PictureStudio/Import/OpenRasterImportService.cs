@@ -9,8 +9,8 @@ namespace PublisherStudio.Services.PictureStudio.Import;
 
 public sealed class OpenRasterImportService
 {
-    private static readonly XName LayerName = "layer";
-    private static readonly XName StackName = "stack";
+    private readonly XName LayerName = "layer";
+    private readonly XName StackName = "stack";
 
     public async Task<PictureImportResult> ImportAsync(Stream input, string fileName, CancellationToken cancellationToken = default)
     {
@@ -70,7 +70,7 @@ public sealed class OpenRasterImportService
         return new PictureImportResult { Document = document, Issues = issues };
     }
 
-    private static async Task ReadStackAsync(
+    private async Task ReadStackAsync(
         ZipArchive archive,
         XElement stack,
         List<PictureLayer> layers,
@@ -196,7 +196,7 @@ public sealed class OpenRasterImportService
         }
     }
 
-    private static (int Width, int Height) ReadImageSize(byte[] bytes, string extension)
+    private (int Width, int Height) ReadImageSize(byte[] bytes, string extension)
     {
         if (extension == ".png" && bytes.Length >= 24 && bytes.AsSpan(0, 8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
         {
@@ -206,15 +206,15 @@ public sealed class OpenRasterImportService
     }
 
 
-    private static int ReadInt(string? value, int fallback) =>
+    private int ReadInt(string? value, int fallback) =>
         int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
 
-    private static double ReadDouble(string? value, double fallback) =>
+    private double ReadDouble(string? value, double fallback) =>
         double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) && double.IsFinite(parsed)
             ? parsed
             : fallback;
 
-    private static PictureBlendMode MapBlendMode(string? value)
+    private PictureBlendMode MapBlendMode(string? value)
     {
         var operation = value?.Trim();
         if (string.IsNullOrWhiteSpace(operation)) return PictureBlendMode.Normal;
@@ -231,14 +231,14 @@ public sealed class OpenRasterImportService
         };
     }
 
-    private static string DecodeSvg(byte[] bytes)
+    private string DecodeSvg(byte[] bytes)
     {
         using var input = new MemoryStream(bytes, writable: false);
         using var reader = new StreamReader(input, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
         return reader.ReadToEnd();
     }
 
-    private static string DecompressSvg(byte[] bytes)
+    private string DecompressSvg(byte[] bytes)
     {
         try
         {
@@ -258,7 +258,7 @@ public sealed class OpenRasterImportService
         }
     }
 
-    private static int ReadBigEndianInt(byte[] bytes, int offset)
+    private int ReadBigEndianInt(byte[] bytes, int offset)
     {
         if (offset < 0 || offset > bytes.Length - 4) return 0;
         var value = ((uint)bytes[offset] << 24)
@@ -269,7 +269,7 @@ public sealed class OpenRasterImportService
     }
 
 
-    private static string CleanName(string? value, string fallback) => string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
-    private static bool IsTrue(string? value) => value is not null && (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1");
-    private static bool Nearly(double left, double right) => Math.Abs(left - right) < .0001;
+    private string CleanName(string? value, string fallback) => string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+    private bool IsTrue(string? value) => value is not null && (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1");
+    private bool Nearly(double left, double right) => Math.Abs(left - right) < .0001;
 }

@@ -3,16 +3,17 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net.WebSockets;
 using System.Threading.Channels;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
-public sealed class NativeCaptureRegistry : IDisposable
+public sealed class NativeCaptureRegistry(IPublisherRuntimePolicyDataService runtimePolicy) : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, NativeCaptureSession> _captures = new();
 
     public NativeCaptureSession Create(NativeCaptureRequest request)
     {
-        var session = new NativeCaptureSession(request);
+        var session = new NativeCaptureSession(request, runtimePolicy);
         if (!_captures.TryAdd(session.Id, session)) throw new InvalidOperationException("Could not register native capture.");
         try { session.Start(); }
         catch { _captures.TryRemove(session.Id, out _); session.Dispose(); throw; }
@@ -36,6 +37,7 @@ public sealed class NativeCaptureRegistry : IDisposable
 
 public sealed class NativeCaptureSession : IDisposable
 {
+    private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
     private readonly NativeCaptureRequest _request;
     private readonly object _sync = new();
     private readonly Dictionary<Guid, Channel<byte[]>> _subscribers = [];
@@ -45,9 +47,10 @@ public sealed class NativeCaptureSession : IDisposable
     private byte[] _initialization = [];
     private bool _disposed;
 
-    public NativeCaptureSession(NativeCaptureRequest request)
+    public NativeCaptureSession(NativeCaptureRequest request, IPublisherRuntimePolicyDataService runtimePolicy)
     {
         _request = request;
+        _runtimePolicy = runtimePolicy;
         Id = Guid.NewGuid();
         IsAudioOnly = request.Kind.Equals("Microphone", StringComparison.OrdinalIgnoreCase)
             || request.Kind.Equals("SystemAudio", StringComparison.OrdinalIgnoreCase)
@@ -93,7 +96,12 @@ public sealed class NativeCaptureSession : IDisposable
             var processText = string.IsNullOrWhiteSpace(_request.ApplicationId) ? _request.DeviceId : _request.ApplicationId;
             if (!uint.TryParse(processText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var processId) || processId <= 4)
                 throw new InvalidOperationException("Select a valid Windows process for application audio capture.");
-            _processLoopback = new WindowsProcessLoopbackCapture(processId, process.StandardInput.BaseStream, _cancellation.Token);
+            _processLoopback = new WindowsProcessLoopbackCapture(
+                processId,
+                process.StandardInput.BaseStream,
+                _cancellation.Token,
+                _runtimePolicy.AudioClientInterfaceId,
+                _runtimePolicy.AudioCaptureClientInterfaceId);
             _processLoopback.Start();
         }
     }
@@ -232,7 +240,7 @@ public sealed class NativeCaptureSession : IDisposable
         return "unknown";
     }
 
-    private static int ClampEven(int value)
+    private int ClampEven(int value)
     {
         var clamped = Math.Clamp(value, 2, 7680);
         return clamped % 2 == 0 ? clamped : clamped - 1;

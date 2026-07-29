@@ -366,7 +366,7 @@ public sealed class MediaTimelineEditService
         ImportMetadata = new Dictionary<string, string>(segment.ImportMetadata ?? [])
     };
 
-    private static double SegmentTimelineLength(PublicationMediaSegment segment, double playbackRate)
+    private double SegmentTimelineLength(PublicationMediaSegment segment, double playbackRate)
     {
         var sourceLength = segment.TimelineDurationSeconds > 0
             ? segment.TimelineDurationSeconds
@@ -374,7 +374,7 @@ public sealed class MediaTimelineEditService
         return Math.Max(MinimumSourceLength, sourceLength) / Math.Max(.1, playbackRate);
     }
 
-    private static MediaSourceReference CloneSourceReference(MediaSourceReference? source) => new()
+    private MediaSourceReference CloneSourceReference(MediaSourceReference? source) => new()
     {
         Id = source?.Id ?? string.Empty,
         Uri = source?.Uri ?? string.Empty,
@@ -522,7 +522,7 @@ public sealed class MediaTimelineEditService
         NormalizeFilter(filter);
     }
 
-    private static List<MediaTemporalSection> CloneTemporalSections(IEnumerable<MediaTemporalSection>? sections) => (sections ?? [])
+    private List<MediaTemporalSection> CloneTemporalSections(IEnumerable<MediaTemporalSection>? sections) => (sections ?? [])
         .Where(section => section is not null)
         .Take(128)
         .Select(section => new MediaTemporalSection
@@ -541,7 +541,7 @@ public sealed class MediaTimelineEditService
         .Select(CloneVideoLayer)
         .ToList();
 
-    private static VideoFrameRegion CloneVideoRegion(VideoFrameRegion? region) => new()
+    private VideoFrameRegion CloneVideoRegion(VideoFrameRegion? region) => new()
     {
         Id = region?.Id is Guid id && id != Guid.Empty ? id : Guid.NewGuid(),
         Name = string.IsNullOrWhiteSpace(region?.Name) ? "Full frame" : region.Name.Trim(),
@@ -553,7 +553,7 @@ public sealed class MediaTimelineEditService
             .ToList()
     };
 
-    private static List<VideoEffectFilter> CloneVideoFilters(IEnumerable<VideoEffectFilter>? filters) => (filters ?? [])
+    private List<VideoEffectFilter> CloneVideoFilters(IEnumerable<VideoEffectFilter>? filters) => (filters ?? [])
         .Where(filter => filter is not null)
         .Take(64)
         .Select(filter => new VideoEffectFilter
@@ -572,7 +572,7 @@ public sealed class MediaTimelineEditService
         })
         .ToList();
 
-    private static VideoEffectLayer NormalizeVideoLayer(VideoEffectLayer layer, double minimum, double maximum, int index)
+    private VideoEffectLayer NormalizeVideoLayer(VideoEffectLayer layer, double minimum, double maximum, int index)
     {
         layer.Id = layer.Id == Guid.Empty ? Guid.NewGuid() : layer.Id;
         layer.Name = string.IsNullOrWhiteSpace(layer.Name) ? $"Video layer {index + 1}" : layer.Name.Trim();
@@ -639,7 +639,7 @@ public sealed class MediaTimelineEditService
         return layer;
     }
 
-    private static void NormalizeFilter(VideoEffectFilter filter)
+    private void NormalizeFilter(VideoEffectFilter filter)
     {
         filter.Id = filter.Id == Guid.Empty ? Guid.NewGuid() : filter.Id;
         filter.Name = string.IsNullOrWhiteSpace(filter.Name) ? filter.Kind.ToString() : filter.Name.Trim();
@@ -682,20 +682,20 @@ public sealed class MediaTimelineEditService
             : "HTML compatible through native browser filters.";
     }
 
-    private static string NormalizeColor(string? value, string fallback)
+    private string NormalizeColor(string? value, string fallback)
     {
         var color = value?.Trim() ?? string.Empty;
         if (color.Length == 7 && color[0] == '#' && color.Skip(1).All(Uri.IsHexDigit)) return color.ToLowerInvariant();
         return fallback;
     }
 
-    private static string Suffix(string name, string suffix)
+    private string Suffix(string name, string suffix)
     {
         var value = string.IsNullOrWhiteSpace(name) ? "Clip" : name.Trim();
         return value.EndsWith($" ({suffix})", StringComparison.OrdinalIgnoreCase) ? value : $"{value} ({suffix})";
     }
 
-    private static void NormalizeTemporalSelection(PublicationMediaSegment segment)
+    private void NormalizeTemporalSelection(PublicationMediaSegment segment)
     {
         var minimum = segment.TrimStartSeconds;
         var maximum = segment.EffectiveTrimEndSeconds;
@@ -737,7 +737,7 @@ public sealed class MediaTimelineEditService
         segment.TemporalSelectionEndSeconds = end;
     }
 
-    private static void NormalizeCutSections(PublicationMediaSegment segment)
+    private void NormalizeCutSections(PublicationMediaSegment segment)
     {
         var minimum = segment.TrimStartSeconds;
         var maximum = segment.EffectiveTrimEndSeconds;
@@ -757,7 +757,7 @@ public sealed class MediaTimelineEditService
             .ToList();
     }
 
-    private static string MergeName(string left, string right)
+    private string MergeName(string left, string right)
     {
         var leftBase = left.Replace(" (left)", string.Empty, StringComparison.OrdinalIgnoreCase).Trim();
         var rightBase = right.Replace(" (right)", string.Empty, StringComparison.OrdinalIgnoreCase).Trim();

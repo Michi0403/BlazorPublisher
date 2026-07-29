@@ -390,7 +390,7 @@ public sealed partial class OpenDocumentImportService
     private StyleCatalog BuildStyleCatalog(XDocument content, XDocument? stylesDocument)
     {
         var all = content.Descendants().Concat(stylesDocument?.Descendants() ?? Enumerable.Empty<XElement>());
-        var catalog = new StyleCatalog();
+        var catalog = new StyleCatalog(this);
         foreach (var node in all)
         {
             if (node.Name == Style + "style" && node.Attribute(Style + "name") is { } styleName)
@@ -542,6 +542,13 @@ public sealed partial class OpenDocumentImportService
 
     private sealed class StyleCatalog
     {
+        private readonly OpenDocumentImportService owner;
+
+        public StyleCatalog(OpenDocumentImportService owner)
+        {
+            this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
         public Dictionary<string, XElement> Styles { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, XElement> PageLayouts { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, XElement> MasterPages { get; } = new(StringComparer.Ordinal);
@@ -554,7 +561,7 @@ public sealed partial class OpenDocumentImportService
             while (!string.IsNullOrWhiteSpace(currentName) && visited.Add(currentName) && Styles.TryGetValue(currentName, out var style))
             {
                 chain.Add(style);
-                currentName = (string?)style.Attribute(Style + "parent-style-name");
+                currentName = (string?)style.Attribute(owner.Style + "parent-style-name");
             }
 
             // ODF child styles override their parent. Apply the chain from the oldest parent
@@ -567,16 +574,16 @@ public sealed partial class OpenDocumentImportService
             {
                 foreach (var properties in style.Elements().Where(node => node.Name.LocalName.EndsWith("properties", StringComparison.Ordinal)))
                 {
-                    var fillMode = (string?)properties.Attribute(Draw + "fill");
-                    var fillColor = (string?)properties.Attribute(Draw + "fill-color");
+                    var fillMode = (string?)properties.Attribute(owner.Draw + "fill");
+                    var fillColor = (string?)properties.Attribute(owner.Draw + "fill-color");
                     if (string.Equals(fillMode, "none", StringComparison.OrdinalIgnoreCase)) fill = "transparent";
-                    else if (!string.IsNullOrWhiteSpace(fillColor)) fill = NormalizeColor(fillColor, fill);
-                    var strokeMode = (string?)properties.Attribute(Draw + "stroke");
-                    var strokeColor = (string?)properties.Attribute(Svg + "stroke-color");
+                    else if (!string.IsNullOrWhiteSpace(fillColor)) fill = owner.NormalizeColor(fillColor, fill);
+                    var strokeMode = (string?)properties.Attribute(owner.Draw + "stroke");
+                    var strokeColor = (string?)properties.Attribute(owner.Svg + "stroke-color");
                     if (string.Equals(strokeMode, "none", StringComparison.OrdinalIgnoreCase)) stroke = "transparent";
-                    else if (!string.IsNullOrWhiteSpace(strokeColor)) stroke = NormalizeColor(strokeColor, stroke);
-                    var width = (string?)properties.Attribute(Svg + "stroke-width");
-                    if (!string.IsNullOrWhiteSpace(width)) strokeWidth = ReadLengthMm(width, strokeWidth);
+                    else if (!string.IsNullOrWhiteSpace(strokeColor)) stroke = owner.NormalizeColor(strokeColor, stroke);
+                    var width = (string?)properties.Attribute(owner.Svg + "stroke-width");
+                    if (!string.IsNullOrWhiteSpace(width)) strokeWidth = owner.ReadLengthMm(width, strokeWidth);
                 }
             }
             return new ResolvedStyle(fill, stroke, Math.Clamp(strokeWidth, 0, 20));

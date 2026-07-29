@@ -429,6 +429,7 @@ public sealed class OrganicWorkExecutor(
 }
 
 public sealed class OrganicWorkCoordinator(
+    IOrganicPluginProtocolCodec codec,
     IOrganicPermissionStore permissions,
     IOrganicCapabilityCatalog capabilityCatalog,
     IOrganicWorkExecutor executor,

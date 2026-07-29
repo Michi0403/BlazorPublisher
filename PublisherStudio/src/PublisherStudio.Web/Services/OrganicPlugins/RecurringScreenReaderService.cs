@@ -11,6 +11,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// request while the previous evidence package is still pending, which prevents timer pile-ups and race conditions.
 /// </summary>
 public sealed class RecurringScreenReaderService(
+    IOrganicPluginProtocolCodec codec,
     IScreenshotCaptureService screenshots,
     IServiceProvider services,
     IOptions<OrganicPluginOptions> options,

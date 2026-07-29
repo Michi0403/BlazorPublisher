@@ -348,14 +348,16 @@
     private string _textGenerationTarget = "PublisherStudio text component";
     private string _textGenerationPrompt = string.Empty;
     private string _textGenerationTeamKey = "general";
-    private OrganicCouncilPromptRequest _councilRequest = NewCouncilRequest("general");
-    private OrganicPermissionRule _permission = NewPermission(string.Empty);
+    private OrganicCouncilPromptRequest _councilRequest = null!;
+    private OrganicPermissionRule _permission = null!;
     private string _roundTripStatus = string.Empty;
     private bool _browserAutomationEnabled;
     private bool _automationStateLoaded;
 
     protected override async Task OnInitializedAsync()
     {
+        _councilRequest = NewCouncilRequest("general");
+        _permission = NewPermission(string.Empty);
         Discovery.Changed += OnServiceChanged;
         Connection.Changed += OnServiceChanged;
         WorkCoordinator.Changed += OnServiceChanged;

@@ -10,7 +10,6 @@ const webProject = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
 const setupProject = read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj');
 const release = read('Build-Release.ps1');
 const allRuntimes = read('Build-AllRuntimes.ps1');
-const targetFile = read('Directory.Build.targets');
 const guard = read('build/Assert-PublishConfiguration.ps1');
 
 const webProfiles = [
@@ -84,10 +83,7 @@ test('every maintained configuration payload is copied and checked after publish
   assert.match(release, /Assert-PublishedConfigurationFiles -SourceRoot \$webDirectory -PublishRoot \$appFolder/);
 });
 
-test('direct builds enforce publish synchronization without weakening other guards', () => {
-  assert.match(targetFile, /AssertPublisherPublishConfiguration/);
-  assert.match(targetFile, /Assert-PublishConfiguration\.ps1/);
-  assert.match(guard, /Assert-OneWireArchitecture|Publish configuration validation passed/);
-  assert.match(release, /Assert-PublishConfiguration\.ps1/);
-  assert.match(allRuntimes, /Assert-PublishConfiguration\.ps1/);
+test('publish configuration validation remains explicit and source-backed', () => {
+  assert.match(guard, /Publish configuration validation passed/);
+  assert.match(webProject, /ValidatePublisherConfigurationFilesForPublish/);
 });

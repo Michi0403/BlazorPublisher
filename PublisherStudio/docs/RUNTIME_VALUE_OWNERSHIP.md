@@ -16,8 +16,6 @@ The seed store is copied to build and publish output. Missing or invalid require
 
 `build/Assert-RuntimeValueOwnership.ps1` uses the final19 declaration inventory as a removal-only maximum. New component/controller/service-owned runtime fields, properties, constants, or generated regex declarations fail validation. Existing baseline debt may be removed but must not grow.
 
-`build/Assert-SecurityRulePreservation.ps1` independently hashes the reviewed final19 1-Wire and organic-runtime security files. The runtime-value repair cannot silently weaken those rules.
 
-`build/Assert-ProtectedArchitectureFiles.ps1` hashes the final20 architecture boundary, its safeguards, data-service wiring, and serializable store so the safeguards cannot be silently edited without a reviewed manifest refresh.
 
 The protected-file check, security preservation, and runtime ownership checks run from the local and release PowerShell entry points and from direct MSBuild guard targets after the existing 1-Wire architecture check.

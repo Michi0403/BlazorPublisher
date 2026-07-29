@@ -90,7 +90,11 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicPluginProtocolCodec, OrganicPluginProtocolCodec>(services);
         AddSingleton<IOrganicRuntimeSecurityService, OrganicRuntimeSecurityService>(services);
         AddSingleton<ILocalGptDiscoveryRegistry, LocalGptDiscoveryRegistry>(services);
-        AddSingleton<IOrganicCapabilityCatalog, OrganicCapabilityCatalog>(services);
+        AddSingleton<IPublisherDxFunctionCatalogDataService, PublisherDxFunctionCatalogDataService>(services);
+        AddSingleton<OrganicCapabilityCatalog, OrganicCapabilityCatalog>(services);
+        AddSingleton<IOrganicCapabilityCatalog, ObjectStoreOrganicCapabilityCatalog>(services);
+        services.AddSingleton<LocalGPT.WireProtocol.IOneWireCapabilityProvider>(provider =>
+            provider.GetRequiredService<IOrganicCapabilityCatalog>());
         AddSingleton<IOrganicPermissionStore, OrganicPermissionStore>(services);
         AddSingleton<IOrganicResultStore, OrganicResultStore>(services);
         AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);

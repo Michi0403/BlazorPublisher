@@ -1,0 +1,691 @@
+{
+  "schemaVersion": 1,
+  "functions": [
+    {
+      "key": "publisher.screen.capture",
+      "displayName": "Eyes: screen capture",
+      "description": "Captures one user-selected screen or window only after PublisherStudio confirmation and the browser's current getDisplayMedia prompt.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.screen.capture",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"format\":{\"type\":\"string\"},\"quality\":{\"type\":\"number\"}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "vision",
+        "screen",
+        "screenshot"
+      ],
+      "requiredSkillKeys": [
+        "vision",
+        "screen",
+        "screenshot"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.screenreader.recurring"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "No image path. The PublisherStudio user selects a screen/window in a fresh browser prompt.",
+      "outputContract": "A bounded PNG data URL and pixel metadata returned in the current WorkResult.",
+      "securityContract": "Always asks in LocalGPT, always asks in PublisherStudio, and always invokes the browser's current getDisplayMedia permission prompt. Saved permission cannot bypass it.",
+      "organicUseCase": "Eyes organ for current visual evidence.",
+      "suggestedCouncilRoles": [
+        "vision member",
+        "evidence verifier"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.screen.capture",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.screen.record",
+      "displayName": "Eyes: screen recording",
+      "description": "Records a user-selected screen or window for up to 15 seconds after PublisherStudio confirmation and a fresh browser prompt.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.screen.record",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"maximumSeconds\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":15},\"includeAudio\":{\"type\":\"boolean\"}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "vision",
+        "screen",
+        "video",
+        "evidence"
+      ],
+      "requiredSkillKeys": [
+        "vision",
+        "screen",
+        "video",
+        "evidence"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "maximumSeconds 1..15 and optional audio flag; the user selects the capture source in the browser.",
+      "outputContract": "A bounded WebM data URL, duration and MIME type returned in the current WorkResult.",
+      "securityContract": "Always asks in LocalGPT, always asks in PublisherStudio, and always invokes the browser's current getDisplayMedia permission prompt. Saved permission cannot bypass it.",
+      "organicUseCase": "Eyes organ for current visual evidence.",
+      "suggestedCouncilRoles": [
+        "vision member",
+        "evidence verifier"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.screen.record",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.screen.capture.result",
+      "displayName": "Eyes: screen capture result",
+      "description": "Reads the bounded status and result of a previously queued browser screenshot for the next council heartbeat.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.screen.capture.result",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"},\"includeData\":{\"type\":\"boolean\"}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "vision",
+        "screen",
+        "screenshot",
+        "evidence"
+      ],
+      "requiredSkillKeys": [
+        "vision",
+        "screen",
+        "screenshot",
+        "evidence"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": true,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"},\"includeData\":{\"type\":\"boolean\"}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "vision",
+        "screen",
+        "screenshot",
+        "evidence"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.screen.capture.result",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.screenreader.start",
+      "displayName": "Start recurring screen-reader help",
+      "description": "Starts one debounced single-flight screen-reader session. The interval is clamped to at least 15 seconds.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.screenreader.start",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"prompt\":{\"type\":\"string\"},\"intervalSeconds\":{\"type\":\"integer\",\"minimum\":15}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "vision",
+        "screen",
+        "screenreader",
+        "recurring"
+      ],
+      "requiredSkillKeys": [
+        "vision",
+        "screen",
+        "screenreader",
+        "recurring"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.screenreader.recurring"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": true,
+      "supportsRecurringExecution": true,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"prompt\":{\"type\":\"string\"},\"intervalSeconds\":{\"type\":\"integer\",\"minimum\":15}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "vision",
+        "screen",
+        "screenreader",
+        "recurring"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.screenreader.start",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.screenreader.stop",
+      "displayName": "Stop recurring screen-reader help",
+      "description": "Stops a recurring screen-reader session by id.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.screenreader.stop",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "vision",
+        "screen",
+        "screenreader",
+        "recurring"
+      ],
+      "requiredSkillKeys": [
+        "vision",
+        "screen",
+        "screenreader",
+        "recurring"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.screenreader.recurring"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": true,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "vision",
+        "screen",
+        "screenreader",
+        "recurring"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.screenreader.stop",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.input.execute",
+      "displayName": "Hands: browser input",
+      "description": "Queues one bounded mouse, keyboard, hover, focus or gesture command through the existing automation service.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.input.execute",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "mouse",
+        "keyboard",
+        "gesture",
+        "navigation"
+      ],
+      "requiredSkillKeys": [
+        "mouse",
+        "keyboard",
+        "gesture",
+        "navigation"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": true,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "mouse",
+        "keyboard",
+        "gesture",
+        "navigation"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.input.execute",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.input.result",
+      "displayName": "Hands: browser input result",
+      "description": "Reads the status and bounded result of a previously queued browser input command.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.input.result",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "mouse",
+        "keyboard",
+        "gesture",
+        "verification"
+      ],
+      "requiredSkillKeys": [
+        "mouse",
+        "keyboard",
+        "gesture",
+        "verification"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": true,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "mouse",
+        "keyboard",
+        "gesture",
+        "verification"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.input.result",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.openscad.generate",
+      "displayName": "OpenSCAD canonical project generation",
+      "description": "Validates and renders a canonical OpenScadDocument/OpenScadNode graph through the existing registered renderer path.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.openscad.generate",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"document\"],\"properties\":{\"document\":{\"type\":\"object\"}}}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "openscad",
+        "3d",
+        "geometry",
+        "render"
+      ],
+      "requiredSkillKeys": [
+        "openscad",
+        "3d",
+        "geometry",
+        "render"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.openscad.ai"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"document\"],\"properties\":{\"document\":{\"type\":\"object\"}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "openscad",
+        "3d",
+        "geometry",
+        "render"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.openscad.generate",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.spreadsheet.inspect",
+      "displayName": "Spreadsheet session inspection",
+      "description": "Returns bounded metadata and preview evidence for an existing workbook session without mutation.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.spreadsheet.inspect",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "spreadsheet",
+        "workbook",
+        "analysis"
+      ],
+      "requiredSkillKeys": [
+        "spreadsheet",
+        "workbook",
+        "analysis"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.spreadsheet.ai"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": true,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "spreadsheet",
+        "workbook",
+        "analysis"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.spreadsheet.inspect",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.text.insert.propose",
+      "displayName": "Propose text insertion",
+      "description": "Creates a reviewable text insertion proposal. It never mutates a publication automatically.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.text.insert.propose",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"text\"],\"properties\":{\"target\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}}}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "text",
+        "editing",
+        "proposal"
+      ],
+      "requiredSkillKeys": [
+        "text",
+        "editing",
+        "proposal"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": true,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"text\"],\"properties\":{\"target\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "text",
+        "editing",
+        "proposal"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 3,
+      "configurationKey": "publisher:publisher.text.insert.propose",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.text.edit.request",
+      "displayName": "Request reviewed text",
+      "description": "Opens a bounded PublisherStudio text editor after approval, returns the user's saved text through the same CorrelationId, then closes the editor automatically.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.text.edit.request",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"question\":{\"type\":\"string\"},\"initialText\":{\"type\":\"string\"}}}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "text",
+        "editing",
+        "human-feedback"
+      ],
+      "requiredSkillKeys": [
+        "text",
+        "editing",
+        "human-feedback"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "A title, question and optional initial text. The human edits the value in PublisherStudio.",
+      "outputContract": "The exact user-saved text, ContentType and CorrelationId; the editor closes after Save & return.",
+      "securityContract": "Requires the receiving PublisherStudio frontend for every current request. Content is encrypted after MFA trust is established.",
+      "organicUseCase": "Human feedback organ for Council questions and reviewed text.",
+      "suggestedCouncilRoles": [
+        "council leader",
+        "human collaboration coordinator"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 3,
+      "configurationKey": "publisher:publisher.text.edit.request",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.website.content.request",
+      "displayName": "Request approved web/document content",
+      "description": "Returns user-approved bounded HTML, DIV or document content plus an optional source URL for LocalGPT chat and other organic clients.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.website.content.request",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"format\":{\"enum\":[\"html\",\"div\",\"document\"]},\"sourceUrl\":{\"type\":\"string\"},\"maximumCharacters\":{\"type\":\"integer\",\"maximum\":200000}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "html",
+        "document",
+        "website",
+        "approved-content"
+      ],
+      "requiredSkillKeys": [
+        "html",
+        "document",
+        "website",
+        "approved-content"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Requested html/div/document format, optional source URL and maximum character count.",
+      "outputContract": "Approved bounded content, format, optional source URL and truncation metadata.",
+      "securityContract": "Requires the receiving PublisherStudio frontend for every current request. Content is encrypted after MFA trust is established.",
+      "organicUseCase": "Approved document/web-content organ usable by LocalGPT and other 1-Wire clients.",
+      "suggestedCouncilRoles": [
+        "web/document specialist",
+        "content reviewer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 3,
+      "configurationKey": "publisher:publisher.website.content.request",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.business-context",
+      "displayName": "PublisherStudio project/API context",
+      "description": "Returns the current domain, service and controller context for grounded council planning.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.business-context",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "publisherstudio",
+        "project-context"
+      ],
+      "requiredSkillKeys": [
+        "publisherstudio",
+        "project-context"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"properties\":{}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "publisherstudio",
+        "project-context"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.business-context",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.media.capabilities",
+      "displayName": "FFmpeg/media capabilities",
+      "description": "Returns the installed PublisherStudio media conversion capability map. Runtime availability is appended by the media capability service.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.capabilities",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"properties\":{}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.media.capabilities",
+      "source": "PublisherStudio object store"
+    }
+  ]
+}

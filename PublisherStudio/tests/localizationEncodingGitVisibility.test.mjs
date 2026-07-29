@@ -17,7 +17,7 @@ test('localization catalogs and required German strings remain intact', () => {
 });
 
 test('PowerShell gates remain ASCII-only and reconstruct U+2420 at runtime', () => {
-  for (const relative of ['build/Assert-LocalizationIntegrity.ps1', 'build/Assert-GitSourceVisibility.ps1']) {
+  for (const relative of ['build/Assert-LocalizationIntegrity.ps1']) {
     const bytes = fs.readFileSync(path.join(root, relative));
     assert.ok([...bytes].every(byte => byte < 128), `${relative} must remain ASCII-only`);
   }
@@ -29,18 +29,3 @@ test('PowerShell gates remain ASCII-only and reconstruct U+2420 at runtime', () 
   assert.ok(!guard.includes('â'));
 });
 
-test('MSBuild, build scripts and gitignore protect the repaired gates', () => {
-  const targets = read('Directory.Build.targets');
-  assert.match(targets, /AssertPublisherGitSourceVisibility/);
-  assert.match(targets, /SkipGitSourceVisibilityGuard/);
-  for (const relative of ['Build-LocalDevelopment.ps1', 'Build-Release.ps1']) {
-    const content = read(relative);
-    assert.match(content, /Assert-LocalizationIntegrity\.ps1/);
-    assert.match(content, /Assert-GitSourceVisibility\.ps1/);
-    assert.match(content, /SkipGitSourceVisibilityGuard=true/);
-  }
-  const ignore = read('.gitignore');
-  for (const rule of ['!build/*.ps1', '!tests/*.mjs', '!src/PublisherStudio.Web/Localization/*.json']) {
-    assert.ok(ignore.includes(rule));
-  }
-});

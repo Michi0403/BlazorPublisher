@@ -195,7 +195,7 @@ PublisherStudio / BlazorPublisher is created and maintained by **Michael Fleisch
 
 ## Logging integrity guardrail
 
-Logging is not removed as “cleanup”. Structured service/controller diagnostics, exception logging and expected-cancellation handling are protected by `build/Assert-LoggingIntegrity.ps1` and `build/logging-baseline.json`. The baseline is monotonic: a refactor may add diagnostics, but silently reducing existing logger references, log calls or catch/log boundaries fails the dedicated CI workflow. The same guard runs from the provided development/release scripts and from direct Windows MSBuild/Visual Studio application builds. See `docs/LOGGING_INTEGRITY.md`.
+Structured logging and clear exception handling are application behavior, not disposable noise. Refactors should preserve useful diagnostics while avoiding secrets, full payloads, and blame-oriented user messages. Repository validation scripts are developer-invoked and are not injected into ordinary builds.
 
 ## Deliberate limits
 

@@ -18,7 +18,7 @@ public sealed class EditorStateService : IDisposable
     private readonly ISystemVariableStoreService _systemVariables;
     private readonly PublicationMediaData _mediaData;
     private readonly PublicationElementTraversal _elementTraversal;
-    private readonly ILogger<EditorStateService> _logger;
+    private readonly ILogger<EditorStateService> logger;
     private readonly RichTextDocumentFactory _richTextFactory;
     private readonly IPublisherDocumentFactory _documentFactory;
     private readonly Stack<string> _undo = new();
@@ -58,7 +58,7 @@ public sealed class EditorStateService : IDisposable
         _systemVariables = systemVariables;
         _mediaData = mediaData;
         _elementTraversal = elementTraversal;
-        _logger = logger;
+        this.logger = logger;
         _richTextFactory = richTextFactory;
         _documentFactory = documentFactory;
         Document = _documentFactory.CreatePublication();

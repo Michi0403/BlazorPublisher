@@ -1,3 +1,4 @@
+using PublisherStudio.Domain;
 using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Text.Json;
@@ -75,7 +76,7 @@ public sealed class MediaSession
             LanDefinition.RtspPort = defaults.RtspPort;
             LanDefinition.RequireAccessToken = defaults.RequireAccessToken;
             LanDefinition.ViewerLimit = defaults.ViewerLimit;
-            WebRtc = new WebRtcSignalingService(webRtcLogger);
+            WebRtc = new WebRtcSignalingService();
             logger.LogTrace($"Initialized media session {Id} with policy-owned defaults.");
         }
         catch (Exception exception)

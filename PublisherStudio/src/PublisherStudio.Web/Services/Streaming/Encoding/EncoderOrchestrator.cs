@@ -1,3 +1,4 @@
+using PublisherStudio.Domain;
 using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -13,13 +14,11 @@ public sealed class EncoderOrchestrator(
     ILoggerFactory loggerFactory,
     ILogger<EncoderOrchestrator> logger)
 {
-    private readonly ILogger<EncoderOrchestrator> _logger = logger;
-
     public void Attach(MediaSession session, Guid? inputId)
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderOrchestrator.Attach.");
+            logger.LogTrace($"Entering EncoderOrchestrator.Attach.");
                     session.Encoder ??= new EncoderSessionService(
                         session,
                         ffmpegLocator,
@@ -31,7 +30,7 @@ public sealed class EncoderOrchestrator(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderOrchestrator.Attach failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderOrchestrator.Attach failed: {exception.Message}");
             throw;
         }
     }
@@ -40,14 +39,14 @@ public sealed class EncoderOrchestrator(
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderOrchestrator.Stop.");
+            logger.LogTrace($"Entering EncoderOrchestrator.Stop.");
                     session.Encoder?.Dispose();
                     session.Encoder = null;
     
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderOrchestrator.Stop failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderOrchestrator.Stop failed: {exception.Message}");
             throw;
         }
     }
@@ -56,7 +55,7 @@ public sealed class EncoderOrchestrator(
 public sealed class EncoderSessionService : IDisposable
 {
     private readonly MediaSession _session;
-    private readonly ILogger<EncoderSessionService> _logger;
+    private readonly ILogger<EncoderSessionService> logger;
     private readonly FfmpegLocator _ffmpegLocator;
     private readonly FfmpegEncoderResolver _encoderResolver;
     private readonly PublisherMediaSessionDefaultsPolicy _defaults;
@@ -83,7 +82,7 @@ public sealed class EncoderSessionService : IDisposable
         _ffmpegLocator = ffmpegLocator;
         _encoderResolver = encoderResolver;
         _defaults = defaults;
-        _logger = logger;
+        this.logger = logger;
         _videoEncoders = _encoderResolver.Resolve(session.FfmpegPath, session.HardwareEncoder);
     }
 
@@ -94,14 +93,14 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.Start.");
+            logger.LogTrace($"Entering EncoderSessionService.Start.");
                     if (_session.HasIngest(null)) NotifyIngest(null);
                     foreach (var outputId in _session.OutputIngests.Keys) NotifyIngest(outputId);
     
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.Start failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.Start failed: {exception.Message}");
             throw;
         }
     }
@@ -110,7 +109,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.NotifyIngest.");
+            logger.LogTrace($"Entering EncoderSessionService.NotifyIngest.");
                     lock (_sync)
                     {
                         if (_disposed || !_session.HasIngest(inputId)) return;
@@ -137,7 +136,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.NotifyIngest failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.NotifyIngest failed: {exception.Message}");
             throw;
         }
     }
@@ -146,7 +145,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.PushChunk.");
+            logger.LogTrace($"Entering EncoderSessionService.PushChunk.");
                     if (chunk.IsEmpty) return;
                     var inputKey = InputKey(inputId);
                     var payload = chunk.ToArray();
@@ -167,7 +166,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.PushChunk failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.PushChunk failed: {exception.Message}");
             throw;
         }
     }
@@ -176,7 +175,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.SetOutput.");
+            logger.LogTrace($"Entering EncoderSessionService.SetOutput.");
                     lock (_sync)
                     {
                         if (_disposed || _session.DryRun) return;
@@ -189,7 +188,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.SetOutput failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.SetOutput failed: {exception.Message}");
             throw;
         }
     }
@@ -198,7 +197,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.SetRecording.");
+            logger.LogTrace($"Entering EncoderSessionService.SetRecording.");
                     lock (_sync)
                     {
                         if (_disposed) return;
@@ -217,7 +216,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.SetRecording failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.SetRecording failed: {exception.Message}");
             throw;
         }
     }
@@ -226,7 +225,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StartValidation.");
+            logger.LogTrace($"Entering EncoderSessionService.StartValidation.");
                     var suffix = inputId?.ToString("N") ?? "master";
                     var output = inputId is { } id ? _session.OutputDefinitions.FirstOrDefault(item => item.OutputId == id) : null;
                     var width = output?.Width ?? _session.MasterWidth;
@@ -238,7 +237,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StartValidation failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StartValidation failed: {exception.Message}");
             throw;
         }
     }
@@ -247,7 +246,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StartOutput.");
+            logger.LogTrace($"Entering EncoderSessionService.StartOutput.");
                     if (!_session.HasIngest(output.OutputId) || string.IsNullOrWhiteSpace(output.Endpoint)) return;
                     var destination = BuildDestination(output);
                     if (string.IsNullOrWhiteSpace(destination)) return;
@@ -256,7 +255,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StartOutput failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StartOutput failed: {exception.Message}");
             throw;
         }
     }
@@ -265,14 +264,14 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StartRecordingForInput.");
+            logger.LogTrace($"Entering EncoderSessionService.StartRecordingForInput.");
                     foreach (var variant in ResolveRecordingVariants().Where(item => item.InputOutputId == inputId))
                         StartRecordingVariant(variant);
     
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StartRecordingForInput failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StartRecordingForInput failed: {exception.Message}");
             throw;
         }
     }
@@ -281,7 +280,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StartRecordingVariant.");
+            logger.LogTrace($"Entering EncoderSessionService.StartRecordingVariant.");
                     if (!_session.HasIngest(variant.InputOutputId)) return;
                     var directory = string.IsNullOrWhiteSpace(_session.RecordingDefinition.DestinationDirectory)
                         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "PublisherStudio")
@@ -301,7 +300,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StartRecordingVariant failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StartRecordingVariant failed: {exception.Message}");
             throw;
         }
     }
@@ -310,7 +309,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.ResolveRecordingVariants.");
+            logger.LogTrace($"Entering EncoderSessionService.ResolveRecordingVariants.");
                     if (_session.RecordingDefinition.Variant == 0)
                         return
                         [
@@ -344,7 +343,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.ResolveRecordingVariants failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.ResolveRecordingVariants failed: {exception.Message}");
             throw;
         }
     }
@@ -353,7 +352,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StartLanHls.");
+            logger.LogTrace($"Entering EncoderSessionService.StartLanHls.");
                     if (!_session.HasIngest(null)) return;
                     var directory = Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -370,7 +369,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StartLanHls failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StartLanHls failed: {exception.Message}");
             throw;
         }
     }
@@ -379,7 +378,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StartLanRtsp.");
+            logger.LogTrace($"Entering EncoderSessionService.StartLanRtsp.");
                     if (!_session.HasIngest(null)) return;
                     if (_session.RtspRelayPort <= 0) return;
                     var args = BaseInputArguments(null);
@@ -391,7 +390,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StartLanRtsp failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StartLanRtsp failed: {exception.Message}");
             throw;
         }
     }
@@ -400,7 +399,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.BuildValidationArguments.");
+            logger.LogTrace($"Entering EncoderSessionService.BuildValidationArguments.");
                     var args = BaseInputArguments(inputId);
                     AddVideoEncoding(args, width, height, frameRate, bitrateKbps, 2, 0);
                     AddAudioEncoding(args, 160, 0);
@@ -410,7 +409,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.BuildValidationArguments failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.BuildValidationArguments failed: {exception.Message}");
             throw;
         }
     }
@@ -419,7 +418,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.BuildOutputArguments.");
+            logger.LogTrace($"Entering EncoderSessionService.BuildOutputArguments.");
                     var args = BaseInputArguments(output.OutputId);
                     AddVideoEncoding(args, output.Width, output.Height, output.FrameRate, output.VideoBitrateKbps, output.KeyFrameIntervalSeconds, output.VideoCodec);
                     AddAudioEncoding(args, output.AudioBitrateKbps, output.AudioCodec);
@@ -434,7 +433,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.BuildOutputArguments failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.BuildOutputArguments failed: {exception.Message}");
             throw;
         }
     }
@@ -443,7 +442,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.BuildRecordingArguments.");
+            logger.LogTrace($"Entering EncoderSessionService.BuildRecordingArguments.");
                     var args = BaseInputArguments(variant.InputOutputId);
                     var container = NormalizeContainer(_session.RecordingDefinition.Container);
                     if (container == "webm")
@@ -465,7 +464,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.BuildRecordingArguments failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.BuildRecordingArguments failed: {exception.Message}");
             throw;
         }
     }
@@ -474,7 +473,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.BaseInputArguments.");
+            logger.LogTrace($"Entering EncoderSessionService.BaseInputArguments.");
                     var ingest = _session.GetIngest(inputId) ?? throw new InvalidOperationException("The requested ingest stream is not available.");
                     var args = new List<string> { "-hide_banner", "-loglevel", "warning", "-fflags", "+genpts" };
                     if (_session.PreferDeviceTimestamps) args.AddRange(["-copyts", "-start_at_zero"]);
@@ -486,7 +485,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.BaseInputArguments failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.BaseInputArguments failed: {exception.Message}");
             throw;
         }
     }
@@ -495,7 +494,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.AddVideoEncoding.");
+            logger.LogTrace($"Entering EncoderSessionService.AddVideoEncoding.");
                     var encoder = _videoEncoders.ForCodec(codec);
                     args.AddRange([
                         "-vf", $"scale={Math.Max(2, width)}:{Math.Max(2, height)}:force_original_aspect_ratio=decrease,pad={Math.Max(2, width)}:{Math.Max(2, height)}:(ow-iw)/2:(oh-ih)/2",
@@ -514,7 +513,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.AddVideoEncoding failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.AddVideoEncoding failed: {exception.Message}");
             throw;
         }
     }
@@ -523,7 +522,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.AddWebmVideoEncoding.");
+            logger.LogTrace($"Entering EncoderSessionService.AddWebmVideoEncoding.");
                     args.AddRange([
                         "-vf", $"scale={Math.Max(2, width)}:{Math.Max(2, height)}:force_original_aspect_ratio=decrease,pad={Math.Max(2, width)}:{Math.Max(2, height)}:(ow-iw)/2:(oh-ih)/2",
                         "-r", Math.Clamp(frameRate, 15, 120).ToString(CultureInfo.InvariantCulture),
@@ -541,7 +540,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.AddWebmVideoEncoding failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.AddWebmVideoEncoding failed: {exception.Message}");
             throw;
         }
     }
@@ -550,14 +549,14 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.RecommendedRecordingBitrateKbps.");
+            logger.LogTrace($"Entering EncoderSessionService.RecommendedRecordingBitrateKbps.");
                     var bitsPerSecond = (long)Math.Round(Math.Max(2, width) * (double)Math.Max(2, height) * Math.Clamp(frameRate, 15, 120) * 0.16, MidpointRounding.AwayFromZero);
                     return (int)Math.Clamp(bitsPerSecond / 1000L, 12_000L, 120_000L);
     
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.RecommendedRecordingBitrateKbps failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.RecommendedRecordingBitrateKbps failed: {exception.Message}");
             throw;
         }
     }
@@ -565,12 +564,12 @@ public sealed class EncoderSessionService : IDisposable
     private void AddAudioEncoding(List<string> args, int bitrateKbps, int codec) {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.AddAudioEncoding.");
+            logger.LogTrace($"Entering EncoderSessionService.AddAudioEncoding.");
             args.AddRange(["-c:a", codec == 1 ? "libopus" : "aac", "-b:a", $"{Math.Max(32, bitrateKbps)}k", "-ar", "48000"]);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.AddAudioEncoding failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.AddAudioEncoding failed: {exception.Message}");
             throw;
         }
     }
@@ -579,7 +578,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.BuildDestination.");
+            logger.LogTrace($"Entering EncoderSessionService.BuildDestination.");
                     var destination = output.Endpoint.Trim();
                     if (!string.IsNullOrWhiteSpace(output.Secret))
                     {
@@ -598,7 +597,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.BuildDestination failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.BuildDestination failed: {exception.Message}");
             throw;
         }
     }
@@ -607,7 +606,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Starting FFmpeg pipeline {key} for input {inputId}.");
+            logger.LogTrace($"Starting FFmpeg pipeline {key} for input {inputId}.");
             if (!_session.HasIngest(inputId) || _processes.ContainsKey(key)) return;
             var executable = _ffmpegLocator.Resolve(_session.FfmpegPath) ?? "ffmpeg";
             var argumentCopy = arguments.ToArray();
@@ -626,7 +625,7 @@ public sealed class EncoderSessionService : IDisposable
             {
                 if (string.IsNullOrWhiteSpace(eventArgs.Data)) return;
                 LastError = eventArgs.Data;
-                _logger.LogWarning("FFmpeg {Pipeline}: {Line}", key, eventArgs.Data);
+                logger.LogWarning("FFmpeg {Pipeline}: {Line}", key, eventArgs.Data);
             };
             process.Exited += (_, _) => HandleProcessExit(key, inputId, process, argumentCopy);
             if (!process.Start()) return;
@@ -635,7 +634,7 @@ public sealed class EncoderSessionService : IDisposable
             lock (_sync) _manualStops.Remove(key);
             if (!restart) _restartAttempts.TryRemove(key, out _);
             _processes[key] = process;
-            var inputWriter = new PipelineInputWriter(process, key, message => LastError = message, _defaults, _logger);
+            var inputWriter = new PipelineInputWriter(process, key, message => LastError = message, _defaults, logger);
             _inputWriters[key] = inputWriter;
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
@@ -646,7 +645,7 @@ public sealed class EncoderSessionService : IDisposable
         {
             LastError = exception.Message;
             Status = "ffmpeg-unavailable";
-            _logger.LogError(exception, "Could not start FFmpeg pipeline {Pipeline}.", key);
+            logger.LogError(exception, "Could not start FFmpeg pipeline {Pipeline}.", key);
             ScheduleRestart(key, inputId, arguments.ToArray());
         }
     }
@@ -655,7 +654,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.HandleProcessExit.");
+            logger.LogTrace($"Entering EncoderSessionService.HandleProcessExit.");
                     int exitCode;
                     try { exitCode = process.ExitCode; }
                     catch { exitCode = -1; }
@@ -680,7 +679,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.HandleProcessExit failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.HandleProcessExit failed: {exception.Message}");
             throw;
         }
     }
@@ -689,7 +688,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.ScheduleRestart.");
+            logger.LogTrace($"Entering EncoderSessionService.ScheduleRestart.");
                     if (_disposed || !ShouldRun(key, inputId)) return;
                     var attempt = _restartAttempts.AddOrUpdate(key, 1, (_, value) => Math.Min(20, value + 1));
                     var delay = TimeSpan.FromSeconds(Math.Min(30, Math.Pow(2, Math.Min(5, attempt))));
@@ -708,7 +707,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.ScheduleRestart failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.ScheduleRestart failed: {exception.Message}");
             throw;
         }
     }
@@ -717,7 +716,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.ShouldRun.");
+            logger.LogTrace($"Entering EncoderSessionService.ShouldRun.");
                     if (_disposed || !_session.HasIngest(inputId)) return false;
                     if (key.StartsWith("output:", StringComparison.OrdinalIgnoreCase)
                         && Guid.TryParseExact(key[7..], "N", out var outputId))
@@ -730,7 +729,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.ShouldRun failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.ShouldRun failed: {exception.Message}");
             throw;
         }
     }
@@ -739,13 +738,13 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StopProcessesWithPrefix.");
+            logger.LogTrace($"Entering EncoderSessionService.StopProcessesWithPrefix.");
                     foreach (var key in _processes.Keys.Where(key => key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).ToArray()) StopProcess(key);
     
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StopProcessesWithPrefix failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StopProcessesWithPrefix failed: {exception.Message}");
             throw;
         }
     }
@@ -754,7 +753,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.StopProcess.");
+            logger.LogTrace($"Entering EncoderSessionService.StopProcess.");
                     lock (_sync) _manualStops.Add(key);
                     _processArguments.TryRemove(key, out _);
                     _processInputs.TryRemove(key, out _);
@@ -776,7 +775,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.StopProcess failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.StopProcess failed: {exception.Message}");
             throw;
         }
     }
@@ -785,7 +784,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Scheduling recording remux work for media session {_session.Id}.");
+            logger.LogTrace($"Scheduling recording remux work for media session {_session.Id}.");
             if (!_session.RecordingDefinition.RemuxToMp4AfterStop
                 || !string.Equals(NormalizeContainer(_session.RecordingDefinition.Container), "mkv", StringComparison.OrdinalIgnoreCase)
                 || _recordingPatterns.Count == 0)
@@ -841,29 +840,29 @@ public sealed class EncoderSessionService : IDisposable
                                 var error = await stderr.ConfigureAwait(false);
                                 if (process.ExitCode == _defaults.SuccessExitCode)
                                 {
-                                    _logger.LogInformation("Remuxed recording {Input} to {Output}.", input, output);
+                                    logger.LogInformation("Remuxed recording {Input} to {Output}.", input, output);
                                 }
                                 else
                                 {
-                                    _logger.LogWarning("Could not remux recording {Input}: {Error}", input, error);
+                                    logger.LogWarning("Could not remux recording {Input}: {Error}", input, error);
                                 }
                             }
                             catch (Exception exception)
                             {
-                                _logger.LogWarning(exception, "Could not remux recording {Input}.", input);
+                                logger.LogWarning(exception, "Could not remux recording {Input}.", input);
                             }
                         }
                     }
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogError(exception, $"Recording remux background work failed for media session {_session.Id}.");
+                    logger.LogError(exception, $"Recording remux background work failed for media session {_session.Id}.");
                 }
             });
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"Could not schedule recording remux work for media session {_session.Id}.");
+            logger.LogError(exception, $"Could not schedule recording remux work for media session {_session.Id}.");
             throw;
         }
     }
@@ -872,7 +871,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.ResolveRecordingFiles.");
+            logger.LogTrace($"Entering EncoderSessionService.ResolveRecordingFiles.");
                     var directory = Path.GetDirectoryName(pattern);
                     var fileName = Path.GetFileName(pattern);
                     if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory) || string.IsNullOrWhiteSpace(fileName)) return [];
@@ -883,7 +882,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.ResolveRecordingFiles failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.ResolveRecordingFiles failed: {exception.Message}");
             throw;
         }
     }
@@ -892,7 +891,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.Dispose.");
+            logger.LogTrace($"Entering EncoderSessionService.Dispose.");
                     lock (_sync)
                     {
                         if (_disposed) return;
@@ -905,7 +904,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.Dispose failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.Dispose failed: {exception.Message}");
             throw;
         }
     }
@@ -913,12 +912,12 @@ public sealed class EncoderSessionService : IDisposable
     private bool IsPipedInput(Guid? inputId) {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.IsPipedInput.");
+            logger.LogTrace($"Entering EncoderSessionService.IsPipedInput.");
             return string.Equals(_session.GetIngest(inputId)?.Kind, "webm-websocket", StringComparison.OrdinalIgnoreCase);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.IsPipedInput failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.IsPipedInput failed: {exception.Message}");
             throw;
         }
     }
@@ -926,36 +925,36 @@ public sealed class EncoderSessionService : IDisposable
     private string InputKey(Guid? id) {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.InputKey.");
+            logger.LogTrace($"Entering EncoderSessionService.InputKey.");
             return id?.ToString("N") ?? "master";
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.InputKey failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.InputKey failed: {exception.Message}");
             throw;
         }
     }
     private string OutputKey(Guid id) {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.OutputKey.");
+            logger.LogTrace($"Entering EncoderSessionService.OutputKey.");
             return $"output:{id:N}";
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.OutputKey failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.OutputKey failed: {exception.Message}");
             throw;
         }
     }
     private string NormalizeContainer(string value) {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.NormalizeContainer.");
+            logger.LogTrace($"Entering EncoderSessionService.NormalizeContainer.");
             return value.Trim().ToLowerInvariant() switch { "mp4" => "mp4", "webm" => "webm", _ => "mkv" };
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.NormalizeContainer failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.NormalizeContainer failed: {exception.Message}");
             throw;
         }
     }
@@ -963,7 +962,7 @@ public sealed class EncoderSessionService : IDisposable
     {
         try
         {
-            _logger.LogTrace($"Entering EncoderSessionService.SafeFileName.");
+            logger.LogTrace($"Entering EncoderSessionService.SafeFileName.");
                     var invalid = Path.GetInvalidFileNameChars();
                     var clean = new string(value.Select(character => invalid.Contains(character) ? '-' : character).ToArray()).Trim();
                     return string.IsNullOrWhiteSpace(clean) ? "PublisherStudio" : clean;
@@ -971,7 +970,7 @@ public sealed class EncoderSessionService : IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"EncoderSessionService.SafeFileName failed: {exception.Message}");
+            logger.LogError(exception, $"EncoderSessionService.SafeFileName failed: {exception.Message}");
             throw;
         }
     }
@@ -1176,9 +1175,9 @@ public sealed class EncoderSessionService : IDisposable
         int AudioCodec);
 }
 
-internal sealed record FfmpegVideoEncoder(string Name, IReadOnlyList<string> Options);
+public sealed record FfmpegVideoEncoder(string Name, IReadOnlyList<string> Options);
 
-internal sealed class FfmpegEncoderSet(
+public sealed class FfmpegEncoderSet(
     FfmpegVideoEncoder h264,
     FfmpegVideoEncoder hevc,
     FfmpegVideoEncoder av1,
@@ -1208,11 +1207,10 @@ internal sealed class FfmpegEncoderSet(
     }
 }
 
-internal sealed class FfmpegEncoderResolver(
+public sealed class FfmpegEncoderResolver(
     FfmpegLocator ffmpegLocator,
     ILogger<FfmpegEncoderResolver> logger)
 {
-    private readonly ILogger<FfmpegEncoderResolver> _logger = logger;
     private readonly ConcurrentDictionary<string, HashSet<string>> Cache = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, bool> HardwareProbeCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -1220,24 +1218,24 @@ internal sealed class FfmpegEncoderResolver(
     {
         try
         {
-            _logger.LogTrace($"Entering FfmpegEncoderResolver.Resolve.");
+            logger.LogTrace($"Entering FfmpegEncoderResolver.Resolve.");
                     var executable = ffmpegLocator.Resolve(configuredPath) ?? "ffmpeg";
                     var available = Cache.GetOrAdd(executable, Probe);
                     var h264 = Choose(0, preference, available, executable);
                     var hevc = Choose(1, preference, available, executable);
                     var av1 = Choose(2, preference, available, executable);
-                    _logger.LogInformation(
+                    logger.LogInformation(
                         "PublisherStudio encoder selection: H.264={H264}, HEVC={Hevc}, AV1={Av1} (preference {Preference}).",
                         h264.Name,
                         hevc.Name,
                         av1.Name,
                         preference);
-                    return new FfmpegEncoderSet(h264, hevc, av1, _logger);
+                    return new FfmpegEncoderSet(h264, hevc, av1, logger);
     
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"FfmpegEncoderResolver.Resolve failed: {exception.Message}");
+            logger.LogError(exception, $"FfmpegEncoderResolver.Resolve failed: {exception.Message}");
             throw;
         }
     }
@@ -1246,7 +1244,7 @@ internal sealed class FfmpegEncoderResolver(
     {
         try
         {
-            _logger.LogTrace($"Entering FfmpegEncoderResolver.Choose.");
+            logger.LogTrace($"Entering FfmpegEncoderResolver.Choose.");
                     if (preference == 0 && codec != 0) return SoftwareFallback(codec, available);
                     var families = preference switch
                     {
@@ -1269,7 +1267,7 @@ internal sealed class FfmpegEncoderResolver(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"FfmpegEncoderResolver.Choose failed: {exception.Message}");
+            logger.LogError(exception, $"FfmpegEncoderResolver.Choose failed: {exception.Message}");
             throw;
         }
     }
@@ -1278,7 +1276,7 @@ internal sealed class FfmpegEncoderResolver(
     {
         try
         {
-            _logger.LogTrace($"Entering FfmpegEncoderResolver.Candidate.");
+            logger.LogTrace($"Entering FfmpegEncoderResolver.Candidate.");
                     var name = (codec, family) switch
                     {
                         (0, "nvenc") => "h264_nvenc",
@@ -1302,7 +1300,7 @@ internal sealed class FfmpegEncoderResolver(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"FfmpegEncoderResolver.Candidate failed: {exception.Message}");
+            logger.LogError(exception, $"FfmpegEncoderResolver.Candidate failed: {exception.Message}");
             throw;
         }
     }
@@ -1311,7 +1309,7 @@ internal sealed class FfmpegEncoderResolver(
     {
         try
         {
-            _logger.LogTrace($"Entering FfmpegEncoderResolver.SoftwareFallback.");
+            logger.LogTrace($"Entering FfmpegEncoderResolver.SoftwareFallback.");
                     var candidates = codec switch
                     {
                         1 => new[] { "libx265", "hevc_videotoolbox", "hevc_qsv", "hevc_nvenc" },
@@ -1324,7 +1322,7 @@ internal sealed class FfmpegEncoderResolver(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"FfmpegEncoderResolver.SoftwareFallback failed: {exception.Message}");
+            logger.LogError(exception, $"FfmpegEncoderResolver.SoftwareFallback failed: {exception.Message}");
             throw;
         }
     }
@@ -1333,7 +1331,7 @@ internal sealed class FfmpegEncoderResolver(
     {
         try
         {
-            _logger.LogTrace($"Entering FfmpegEncoderResolver.CanInitializeHardwareEncoder.");
+            logger.LogTrace($"Entering FfmpegEncoderResolver.CanInitializeHardwareEncoder.");
                     var cacheKey = $"{executable}|{encoder}";
                     return HardwareProbeCache.GetOrAdd(cacheKey, _ =>
                     {
@@ -1376,7 +1374,7 @@ internal sealed class FfmpegEncoderResolver(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"FfmpegEncoderResolver.CanInitializeHardwareEncoder failed: {exception.Message}");
+            logger.LogError(exception, $"FfmpegEncoderResolver.CanInitializeHardwareEncoder failed: {exception.Message}");
             throw;
         }
     }
@@ -1384,7 +1382,7 @@ internal sealed class FfmpegEncoderResolver(
     private IReadOnlyList<string> OptionsFor(string encoder) {
         try
         {
-            _logger.LogTrace($"Entering FfmpegEncoderResolver.OptionsFor.");
+            logger.LogTrace($"Entering FfmpegEncoderResolver.OptionsFor.");
             return encoder switch
     {
         "libsvtav1" => ["-preset", "8", "-svtav1-params", "tune=0"],
@@ -1398,7 +1396,7 @@ internal sealed class FfmpegEncoderResolver(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"FfmpegEncoderResolver.OptionsFor failed: {exception.Message}");
+            logger.LogError(exception, $"FfmpegEncoderResolver.OptionsFor failed: {exception.Message}");
             throw;
         }
     }
@@ -1407,7 +1405,7 @@ internal sealed class FfmpegEncoderResolver(
     {
         try
         {
-            _logger.LogTrace($"Entering FfmpegEncoderResolver.Probe.");
+            logger.LogTrace($"Entering FfmpegEncoderResolver.Probe.");
                     var known = new[]
                     {
                         "libx264", "libx265", "libsvtav1", "libaom-av1", "libvpx-vp9",
@@ -1448,7 +1446,7 @@ internal sealed class FfmpegEncoderResolver(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"FfmpegEncoderResolver.Probe failed: {exception.Message}");
+            logger.LogError(exception, $"FfmpegEncoderResolver.Probe failed: {exception.Message}");
             throw;
         }
     }

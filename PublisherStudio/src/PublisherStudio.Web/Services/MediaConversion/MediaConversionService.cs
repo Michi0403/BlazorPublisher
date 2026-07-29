@@ -35,7 +35,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
 
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private readonly ConcurrentDictionary<Guid, JobState> _jobs = new();
-    private readonly ILogger<MediaConversionService> _logger;
+    private readonly ILogger<MediaConversionService> logger;
     private readonly FfmpegLocator _ffmpegLocator;
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
     private readonly IPublisherRuntimePatternService _runtimePatterns;
@@ -55,7 +55,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         PublisherStudioConfigurationNode publisherConfiguration,
         ILogger<MediaConversionService> logger)
     {
-        _logger = logger;
+        this.logger = logger;
         _ffmpegLocator = ffmpegLocator;
         _runtimePolicy = runtimePolicy;
         _runtimePatterns = runtimePatterns;
@@ -382,7 +382,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
 
             var stdoutTask = Task.Run(async () =>
             {
-                while (await process.StandardOutput.ReadLineAsync(job.Cancellation.Token) is { } line.ConfigureAwait(false))
+                while (await process.StandardOutput.ReadLineAsync(job.Cancellation.Token) is { } line)
                 {
                     if (line.StartsWith("out_time_us=", StringComparison.Ordinal)
                         && long.TryParse(line.AsSpan("out_time_us=".Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out var microseconds)
@@ -404,7 +404,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
             var stderr = new StringBuilder();
             var stderrTask = Task.Run(async () =>
             {
-                while (await process.StandardError.ReadLineAsync(job.Cancellation.Token) is { } line.ConfigureAwait(false))
+                while (await process.StandardError.ReadLineAsync(job.Cancellation.Token) is { } line)
                 {
                     if (stderr.Length < 16_384) stderr.AppendLine(line);
                     if (durationSeconds <= 0)
@@ -452,7 +452,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "Media conversion {JobId} failed.", job.Id);
+            logger.LogWarning(exception, "Media conversion {JobId} failed.", job.Id);
             lock (job.Sync)
             {
                 job.Status = MediaConversionJobStatus.Failed;
@@ -855,7 +855,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "Media conversion profiles could not be loaded.");
+            logger.LogWarning(exception, "Media conversion profiles could not be loaded.");
             _userProfiles = [];
         }
         foreach (var profile in _userProfiles)

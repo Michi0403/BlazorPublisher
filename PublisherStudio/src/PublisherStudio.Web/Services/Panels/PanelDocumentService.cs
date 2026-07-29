@@ -11,7 +11,7 @@ public sealed class PanelDocumentService(
 {
     private readonly PublicationDataService _data = data;
     private readonly PublicationComponentService _components = components;
-    private readonly ILogger<PanelDocumentService> _logger = logger ?? NullLogger<PanelDocumentService>.Instance;
+    private readonly ILogger<PanelDocumentService> logger = logger ?? NullLogger<PanelDocumentService>.Instance;
 
     private readonly PublicationPanelPresetDescriptor[] Presets =
     [
@@ -26,12 +26,12 @@ public sealed class PanelDocumentService(
     {
         try
         {
-            _logger.LogDebug("Returning {PresetCount} Panel Studio presets.", Presets.Length);
+            logger.LogDebug("Returning {PresetCount} Panel Studio presets.", Presets.Length);
             return Presets;
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Panel Studio preset discovery failed.");
+            logger.LogError(exception, "Panel Studio preset discovery failed.");
             throw;
         }
     }
@@ -73,12 +73,12 @@ public sealed class PanelDocumentService(
                     template.Prototype.Kind.ToString().ToLowerInvariant(),
                     template.Id));
             }
-            _logger.LogDebug("Returning {ToolCount} Panel Studio component tools.", result.Count);
+            logger.LogDebug("Returning {ToolCount} Panel Studio component tools.", result.Count);
             return result;
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Panel Studio component-tool discovery failed.");
+            logger.LogError(exception, "Panel Studio component-tool discovery failed.");
             throw;
         }
     }
@@ -121,7 +121,7 @@ public sealed class PanelDocumentService(
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Panel Studio could not create component tool {ToolId}.", toolId);
+            logger.LogError(exception, "Panel Studio could not create component tool {ToolId}.", toolId);
             throw;
         }
     }
@@ -166,12 +166,12 @@ public sealed class PanelDocumentService(
                 _ => CreateBlank()
             };
             Normalize(document, panel);
-            _logger.LogInformation("Created Panel Studio preset {PresetId} with {ViewCount} views.", id, panel.Views.Count);
+            logger.LogInformation("Created Panel Studio preset {PresetId} with {ViewCount} views.", id, panel.Views.Count);
             return panel;
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Panel Studio preset {PresetId} could not be created.", presetId);
+            logger.LogError(exception, "Panel Studio preset {PresetId} could not be created.", presetId);
             throw;
         }
     }
@@ -189,12 +189,12 @@ public sealed class PanelDocumentService(
                 ActiveViewId = view.Id,
                 Views = [view]
             };
-            _logger.LogDebug("Created blank Panel Studio panel {PanelName}.", panel.Name);
+            logger.LogDebug("Created blank Panel Studio panel {PanelName}.", panel.Name);
             return panel;
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Blank Panel Studio panel {PanelName} could not be created.", name);
+            logger.LogError(exception, "Blank Panel Studio panel {PanelName} could not be created.", name);
             throw;
         }
     }
@@ -204,11 +204,11 @@ public sealed class PanelDocumentService(
         try
         {
             NormalizePanel(document, panel, 0, new HashSet<Guid>(), panelIdRegistered: false);
-            _logger.LogDebug("Normalized Panel Studio panel {PanelId} with {ViewCount} views.", panel.Id, panel.Views.Count);
+            logger.LogDebug("Normalized Panel Studio panel {PanelId} with {ViewCount} views.", panel.Id, panel.Views.Count);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Panel Studio panel {PanelId} normalization failed.", panel.Id);
+            logger.LogError(exception, "Panel Studio panel {PanelId} normalization failed.", panel.Id);
             throw;
         }
     }
@@ -229,11 +229,11 @@ public sealed class PanelDocumentService(
             holder.Views[0].Elements.Add(template.Prototype);
             NormalizePanel(document, holder, 0, new HashSet<Guid>(), panelIdRegistered: false);
             template.Prototype = holder.Views[0].Elements[0];
-            _logger.LogDebug("Normalized reusable Panel Studio template {TemplateId}.", template.Id);
+            logger.LogDebug("Normalized reusable Panel Studio template {TemplateId}.", template.Id);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Reusable Panel Studio template {TemplateId} normalization failed.", template.Id);
+            logger.LogError(exception, "Reusable Panel Studio template {TemplateId} normalization failed.", template.Id);
             throw;
         }
     }

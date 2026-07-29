@@ -13,7 +13,7 @@ namespace PublisherStudio.Helper
     public sealed class ColorConsoleLoggerProvider : ILoggerProvider
     {
         private ColorConsoleLoggerConfiguration _currentConfig;
-        private readonly ConcurrentDictionary<string, ColorConsoleLogger> _loggers =
+        private readonly ConcurrentDictionary<string, ColorConsoleLogger> loggers =
             new(StringComparer.OrdinalIgnoreCase);
 
         public ColorConsoleLoggerProvider(
@@ -23,13 +23,13 @@ namespace PublisherStudio.Helper
         }
 
         public ILogger CreateLogger(string categoryName) =>
-            _loggers.GetOrAdd(categoryName, name => new ColorConsoleLogger(name, GetCurrentConfig));
+            loggers.GetOrAdd(categoryName, name => new ColorConsoleLogger(name, GetCurrentConfig));
 
         private ColorConsoleLoggerConfiguration GetCurrentConfig() => _currentConfig;
 
         public void Dispose()
         {
-            _loggers.Clear();
+            loggers.Clear();
         }
     }
 }

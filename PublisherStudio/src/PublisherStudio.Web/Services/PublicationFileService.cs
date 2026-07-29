@@ -73,7 +73,7 @@ public sealed partial class PublicationFileService
     private readonly IPublisherRuntimePatternService _runtimePatterns;
     private readonly IPublisherDocumentFactory _documentFactory;
     private readonly IPublicationMarkupService _markup;
-    private readonly ILogger<PublicationFileService> _logger;
+    private readonly ILogger<PublicationFileService> logger;
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -111,14 +111,14 @@ public sealed partial class PublicationFileService
         _runtimePatterns = runtimePatterns;
         _documentFactory = documentFactory;
         _markup = markup;
-        _logger = logger;
+        this.logger = logger;
     }
 
     public string Serialize(PublicationDocument document)
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.Serialize.");
+            logger.LogTrace($"Entering PublicationFileService.Serialize.");
                     document.ModifiedUtc = DateTimeOffset.UtcNow;
                     var root = JsonSerializer.SerializeToNode(document, _options) as JsonObject
                         ?? throw new InvalidDataException("The publication could not be serialized.");
@@ -130,7 +130,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.Serialize failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.Serialize failed: {exception.Message}");
             throw;
         }
     }
@@ -139,7 +139,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.HasEmbeddedStreamingSettings.");
+            logger.LogTrace($"Entering PublicationFileService.HasEmbeddedStreamingSettings.");
                     if (string.IsNullOrWhiteSpace(json)) return false;
                     try
                     {
@@ -156,7 +156,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.HasEmbeddedStreamingSettings failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.HasEmbeddedStreamingSettings failed: {exception.Message}");
             throw;
         }
     }
@@ -164,12 +164,12 @@ public sealed partial class PublicationFileService
     public void NormalizeStreamingSettings(PublicationDocument document) {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.NormalizeStreamingSettings.");
+            logger.LogTrace($"Entering PublicationFileService.NormalizeStreamingSettings.");
             NormalizeStreaming(document);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.NormalizeStreamingSettings failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.NormalizeStreamingSettings failed: {exception.Message}");
             throw;
         }
     }
@@ -177,13 +177,13 @@ public sealed partial class PublicationFileService
     public PublicationElement CloneElement(PublicationElement element) {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.CloneElement.");
+            logger.LogTrace($"Entering PublicationFileService.CloneElement.");
             return JsonSerializer.Deserialize<PublicationElement>(JsonSerializer.Serialize<PublicationElement>(element, _options), _options)
         ?? throw new InvalidDataException("The publication element could not be cloned.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.CloneElement failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.CloneElement failed: {exception.Message}");
             throw;
         }
     }
@@ -192,12 +192,12 @@ public sealed partial class PublicationFileService
     public string SerializeElement(PublicationElement element) {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.SerializeElement.");
+            logger.LogTrace($"Entering PublicationFileService.SerializeElement.");
             return JsonSerializer.Serialize<PublicationElement>(element, _options);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.SerializeElement failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.SerializeElement failed: {exception.Message}");
             throw;
         }
     }
@@ -205,13 +205,13 @@ public sealed partial class PublicationFileService
     public PublicationElement DeserializeElement(string json) {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.DeserializeElement.");
+            logger.LogTrace($"Entering PublicationFileService.DeserializeElement.");
             return JsonSerializer.Deserialize<PublicationElement>(json, _options)
         ?? throw new InvalidDataException("The component configuration is empty or invalid.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.DeserializeElement failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.DeserializeElement failed: {exception.Message}");
             throw;
         }
     }
@@ -219,13 +219,13 @@ public sealed partial class PublicationFileService
     public PublicationPage ClonePage(PublicationPage publicationPage) {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.ClonePage.");
+            logger.LogTrace($"Entering PublicationFileService.ClonePage.");
             return JsonSerializer.Deserialize<PublicationPage>(JsonSerializer.Serialize(publicationPage, _options), _options)
         ?? throw new InvalidDataException("The publication page could not be cloned.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.ClonePage failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.ClonePage failed: {exception.Message}");
             throw;
         }
     }
@@ -234,7 +234,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.Deserialize.");
+            logger.LogTrace($"Entering PublicationFileService.Deserialize.");
                     var document = JsonSerializer.Deserialize<PublicationDocument>(json, _options)
                         ?? throw new InvalidDataException("The publication file is empty or invalid.");
                     document.View ??= new PublicationViewSettings();
@@ -620,7 +620,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.Deserialize failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.Deserialize failed: {exception.Message}");
             throw;
         }
     }
@@ -629,7 +629,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.LooksLikeHtml.");
+            logger.LogTrace($"Entering PublicationFileService.LooksLikeHtml.");
                     var prefix = System.Text.Encoding.UTF8.GetString(content, 0, Math.Min(content.Length, 128)).TrimStart();
                     return prefix.StartsWith("<!DOCTYPE", StringComparison.OrdinalIgnoreCase)
                         || prefix.StartsWith("<html", StringComparison.OrdinalIgnoreCase)
@@ -640,7 +640,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.LooksLikeHtml failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.LooksLikeHtml failed: {exception.Message}");
             throw;
         }
     }
@@ -649,7 +649,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.SanitizeSpreadsheetPreview.");
+            logger.LogTrace($"Entering PublicationFileService.SanitizeSpreadsheetPreview.");
                     if (string.IsNullOrWhiteSpace(html)) return string.Empty;
                     // Spreadsheet previews are generated by SpreadsheetDocumentService. This rejects scriptable
                     // content if a publication file was edited outside PublisherStudio.
@@ -661,7 +661,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.SanitizeSpreadsheetPreview failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.SanitizeSpreadsheetPreview failed: {exception.Message}");
             throw;
         }
     }
@@ -670,12 +670,12 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Delegating publication file-name sanitization.");
+            logger.LogTrace($"Delegating publication file-name sanitization.");
             return _markup.SafeFileName(value);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"Could not sanitize a publication file name: {exception.Message}");
+            logger.LogError(exception, $"Could not sanitize a publication file name: {exception.Message}");
             throw;
         }
     }
@@ -684,7 +684,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.ExtractHtmlBody.");
+            logger.LogTrace($"Entering PublicationFileService.ExtractHtmlBody.");
                     var html = System.Text.Encoding.UTF8.GetString(htmlBytes);
                     var match = _runtimePatterns.GetRegex(PublisherRuntimePattern.PublicationBody).Match(html);
                     var styles = string.Concat(_runtimePatterns.GetRegex(PublisherRuntimePattern.PublicationStyle).Matches(html).Cast<Match>().Select(item => item.Value));
@@ -694,7 +694,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.ExtractHtmlBody failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.ExtractHtmlBody failed: {exception.Message}");
             throw;
         }
     }
@@ -703,7 +703,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.ExtractOpenXmlPageLayout.");
+            logger.LogTrace($"Entering PublicationFileService.ExtractOpenXmlPageLayout.");
                     var fallback = StoryPageLayout.Default;
                     if (openXml is null || openXml.Length < 4 || openXml[0] != (byte)'P' || openXml[1] != (byte)'K')
                         return fallback;
@@ -779,7 +779,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.ExtractOpenXmlPageLayout failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.ExtractOpenXmlPageLayout failed: {exception.Message}");
             throw;
         }
     }
@@ -788,7 +788,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.ReadOpenXmlTwips.");
+            logger.LogTrace($"Entering PublicationFileService.ReadOpenXmlTwips.");
                     var value = element?.Attribute(attributeName)?.Value;
                     return long.TryParse(value, out var twips)
                         ? twips * 25.4d / 1440d
@@ -797,7 +797,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.ReadOpenXmlTwips failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.ReadOpenXmlTwips failed: {exception.Message}");
             throw;
         }
     }
@@ -806,7 +806,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.ExtractOpenXmlDocumentBackground.");
+            logger.LogTrace($"Entering PublicationFileService.ExtractOpenXmlDocumentBackground.");
                     if (openXml is null || openXml.Length < 4 || openXml[0] != (byte)'P' || openXml[1] != (byte)'K')
                         return "transparent";
 
@@ -849,7 +849,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.ExtractOpenXmlDocumentBackground failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.ExtractOpenXmlDocumentBackground failed: {exception.Message}");
             throw;
         }
     }
@@ -860,7 +860,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.IsOpenXmlDocument.");
+            logger.LogTrace($"Entering PublicationFileService.IsOpenXmlDocument.");
                     if (content is null || content.Length < 4 || content[0] != (byte)'P' || content[1] != (byte)'K')
                         return false;
                     try
@@ -876,7 +876,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.IsOpenXmlDocument failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.IsOpenXmlDocument failed: {exception.Message}");
             throw;
         }
     }
@@ -885,7 +885,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.CreateOpenXmlPreviewHtml.");
+            logger.LogTrace($"Entering PublicationFileService.CreateOpenXmlPreviewHtml.");
                     var safeTitle = System.Net.WebUtility.HtmlEncode(
                         string.IsNullOrWhiteSpace(fallbackTitle) ? "Imported Word document" : fallbackTitle);
                     if (!IsOpenXmlDocument(openXml))
@@ -937,7 +937,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.CreateOpenXmlPreviewHtml failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.CreateOpenXmlPreviewHtml failed: {exception.Message}");
             throw;
         }
     }
@@ -946,7 +946,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.RenderOpenXmlTable.");
+            logger.LogTrace($"Entering PublicationFileService.RenderOpenXmlTable.");
                     var builder = new System.Text.StringBuilder("<table style=\"width:100%;border-collapse:collapse;margin:4px 0 10px\"><tbody>");
                     foreach (var row in table.Elements(word + "tr"))
                     {
@@ -966,7 +966,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.RenderOpenXmlTable failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.RenderOpenXmlTable failed: {exception.Message}");
             throw;
         }
     }
@@ -975,7 +975,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.RenderOpenXmlParagraph.");
+            logger.LogTrace($"Entering PublicationFileService.RenderOpenXmlParagraph.");
                     var properties = paragraph.Element(word + "pPr");
                     var styleName = properties?.Element(word + "pStyle")?.Attribute(word + "val")?.Value ?? string.Empty;
                     var headingLevel = Regex.Match(styleName, @"(?:heading|überschrift)\s*([1-6])", RegexOptions.IgnoreCase);
@@ -1010,7 +1010,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.RenderOpenXmlParagraph failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.RenderOpenXmlParagraph failed: {exception.Message}");
             throw;
         }
     }
@@ -1019,7 +1019,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.RenderOpenXmlRun.");
+            logger.LogTrace($"Entering PublicationFileService.RenderOpenXmlRun.");
                     var text = new System.Text.StringBuilder();
                     foreach (var child in run.Elements())
                     {
@@ -1068,7 +1068,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.RenderOpenXmlRun failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.RenderOpenXmlRun failed: {exception.Message}");
             throw;
         }
     }
@@ -1077,7 +1077,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.NormalizeOpenXmlColor.");
+            logger.LogTrace($"Entering PublicationFileService.NormalizeOpenXmlColor.");
                     if (string.IsNullOrWhiteSpace(value) || string.Equals(value, "auto", StringComparison.OrdinalIgnoreCase)) return null;
                     var normalized = value.Trim();
                     return Regex.IsMatch(normalized, "^[0-9a-fA-F]{6}$") ? "#" + normalized : null;
@@ -1085,7 +1085,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.NormalizeOpenXmlColor failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.NormalizeOpenXmlColor failed: {exception.Message}");
             throw;
         }
     }
@@ -1093,7 +1093,7 @@ public sealed partial class PublicationFileService
     private string? OpenXmlHighlightColor(string? value) {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.OpenXmlHighlightColor.");
+            logger.LogTrace($"Entering PublicationFileService.OpenXmlHighlightColor.");
             return value?.Trim().ToLowerInvariant() switch
     {
         "black" => "#000000", "blue" => "#0000ff", "cyan" => "#00ffff", "green" => "#008000",
@@ -1105,7 +1105,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.OpenXmlHighlightColor failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.OpenXmlHighlightColor failed: {exception.Message}");
             throw;
         }
     }
@@ -1113,14 +1113,14 @@ public sealed partial class PublicationFileService
     private bool IsVisibleCssBackground(string? value) {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.IsVisibleCssBackground.");
+            logger.LogTrace($"Entering PublicationFileService.IsVisibleCssBackground.");
             return !string.IsNullOrWhiteSpace(value)
         && !string.Equals(value, "transparent", StringComparison.OrdinalIgnoreCase)
         && !string.Equals(value, "none", StringComparison.OrdinalIgnoreCase);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.IsVisibleCssBackground failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.IsVisibleCssBackground failed: {exception.Message}");
             throw;
         }
     }
@@ -1129,12 +1129,12 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Delegating publication CSS background normalization.");
+            logger.LogTrace($"Delegating publication CSS background normalization.");
             return _markup.NormalizeCssBackground(value);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"Could not normalize a publication CSS background: {exception.Message}");
+            logger.LogError(exception, $"Could not normalize a publication CSS background: {exception.Message}");
             throw;
         }
     }
@@ -1143,12 +1143,12 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Delegating publication preview sanitization.");
+            logger.LogTrace($"Delegating publication preview sanitization.");
             return _markup.SanitizePreviewHtml(html);
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"Could not sanitize publication preview HTML: {exception.Message}");
+            logger.LogError(exception, $"Could not sanitize publication preview HTML: {exception.Message}");
             throw;
         }
     }
@@ -1157,7 +1157,7 @@ public sealed partial class PublicationFileService
     {
         try
         {
-            _logger.LogTrace($"Entering PublicationFileService.NormalizeStreaming.");
+            logger.LogTrace($"Entering PublicationFileService.NormalizeStreaming.");
                     var streaming = document.Streaming;
                     streaming.Outputs ??= [];
                     streaming.Recording ??= new PublicationRecordingSettings();
@@ -1224,7 +1224,7 @@ public sealed partial class PublicationFileService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublicationFileService.NormalizeStreaming failed: {exception.Message}");
+            logger.LogError(exception, $"PublicationFileService.NormalizeStreaming failed: {exception.Message}");
             throw;
         }
     }

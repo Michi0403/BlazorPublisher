@@ -16,7 +16,7 @@ public sealed class PublicationWebDataService
     private readonly PublicationWebhookStore _webhooks;
     private readonly PublicationDataService _data;
     private readonly IRuntimeEndpointState _runtimeEndpointState;
-    private readonly ILogger<PublicationWebDataService> _logger;
+    private readonly ILogger<PublicationWebDataService> logger;
     private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _bindingLocks = new();
 
     public PublicationWebDataService(
@@ -32,8 +32,8 @@ public sealed class PublicationWebDataService
             _webhooks = webhooks;
             _data = data;
             _runtimeEndpointState = runtimeEndpointState;
-            _logger = logger;
-            _logger.LogInformation($"Initialized publication web data service.");
+            this.logger = logger;
+            logger.LogInformation($"Initialized publication web data service.");
         }
         catch (Exception exception)
         {

@@ -1,36 +1,36 @@
 @using System.Globalization
 @using System.Text
-@using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Components.Web
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.AspNetCore.Components.Web
-@using Microsoft.AspNetCore.Components.Rendering
-@using Microsoft.JSInterop
 @using DevExpress.Blazor
 @using DevExpress.Blazor.Office
 @using DevExpress.Blazor.RichEdit
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
 @using PublisherStudio
 @using PublisherStudio.Components
-@using PublisherStudio.Components.Layout
 @using PublisherStudio.Components.Editor
+@using PublisherStudio.Components.Layout
+@using PublisherStudio.Components.OrganicPlugins
+@using PublisherStudio.Components.Shared
 @using PublisherStudio.Domain
 @using PublisherStudio.Services
+@using PublisherStudio.Services.Configuration
+@using PublisherStudio.Services.MediaConversion
+@using PublisherStudio.Services.MediaStudio.UseCases
+@using PublisherStudio.Services.OrganicPlugins
+@using PublisherStudio.Services.Panels
+@using PublisherStudio.Services.PictureStudio.Import
+@using PublisherStudio.Services.Publication
 @using PublisherStudio.Services.Streaming.MediaHost
 @using PublisherStudio.Services.Streaming.Profiles
 @using PublisherStudio.Services.Streaming.UseCases.Editor
-
-@using PublisherStudio.Services.MediaStudio.UseCases
-
-@using PublisherStudio.Services.VideoStudio.Import
-@using PublisherStudio.Services.VideoStudio.Export
-@using PublisherStudio.Services.Panels
-@using PublisherStudio.Services.MediaConversion
-@using PublisherStudio.Components.Shared
-@using PublisherStudio.Services.Publication
 @using PublisherStudio.Services.UserExperience
-@using PublisherStudio.Services.OrganicPlugins
-@using PublisherStudio.Components.OrganicPlugins
+@using PublisherStudio.Services.VideoStudio.Export
+@using PublisherStudio.Services.VideoStudio.Import
 
 @inject ILoggerFactory OperationalLoggerFactory
 @inject IUserNotificationService OperationalNotifications

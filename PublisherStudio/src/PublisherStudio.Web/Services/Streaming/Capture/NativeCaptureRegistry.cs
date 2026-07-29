@@ -93,8 +93,8 @@ public sealed class NativeCaptureSession : IDisposable
     private readonly NativeCaptureRequest _request;
     private readonly IWindowsProcessLoopbackNativeService _processLoopbackNativeService;
     private readonly FfmpegLocator _ffmpegLocator;
-    private readonly ILogger<NativeCaptureSession> _logger;
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly ILogger<NativeCaptureSession> logger;
+    private readonly ILoggerFactory loggerFactory;
     private readonly object _sync = new();
     private readonly Dictionary<Guid, Channel<byte[]>> _subscribers = [];
     private readonly CancellationTokenSource _cancellation = new();
@@ -115,8 +115,8 @@ public sealed class NativeCaptureSession : IDisposable
         _runtimePolicy = runtimePolicy;
         _processLoopbackNativeService = processLoopbackNativeService;
         _ffmpegLocator = ffmpegLocator;
-        _loggerFactory = loggerFactory;
-        _logger = logger;
+        loggerFactory = loggerFactory;
+        this.logger = logger;
         Id = Guid.NewGuid();
         IsAudioOnly = request.Kind.Equals("Microphone", StringComparison.OrdinalIgnoreCase)
             || request.Kind.Equals("SystemAudio", StringComparison.OrdinalIgnoreCase)
@@ -173,7 +173,7 @@ public sealed class NativeCaptureSession : IDisposable
                             _runtimePolicy.NativeInterop,
                             _runtimePolicy.AudioClientInterfaceId,
                             _runtimePolicy.AudioCaptureClientInterfaceId,
-                            _loggerFactory.CreateLogger<WindowsProcessLoopbackCapture>());
+                            loggerFactory.CreateLogger<WindowsProcessLoopbackCapture>());
                         _processLoopback.Start();
                     }
     

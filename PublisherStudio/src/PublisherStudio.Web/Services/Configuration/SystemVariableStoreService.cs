@@ -9,7 +9,7 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     private readonly object _sync = new();
     private readonly Dictionary<string, string> _values = new(StringComparer.OrdinalIgnoreCase);
     private readonly string _storagePath;
-    private ILogger<SystemVariableStoreService> _logger = NullLogger<SystemVariableStoreService>.Instance;
+    private ILogger<SystemVariableStoreService> logger = NullLogger<SystemVariableStoreService>.Instance;
 
     private readonly string _defaultPortName = "Application.DefaultPort";
     private readonly string _portEnvironmentVariableName = "Application.PortEnvironmentVariable";
@@ -69,12 +69,12 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     {
         try
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _logger.LogInformation($"PublisherStudio system-variable store attached logging with {_values.Count} collected values.");
+            logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            logger.LogInformation($"PublisherStudio system-variable store attached logging with {_values.Count} collected values.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublisherStudio system-variable logger attachment failed: {exception.Message}");
+            logger.LogError(exception, $"PublisherStudio system-variable logger attachment failed: {exception.Message}");
             throw;
         }
     }
@@ -89,13 +89,13 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
                 var value = _values.TryGetValue(name, out var configured) && !string.IsNullOrWhiteSpace(configured)
                     ? configured
                     : fallback;
-                _logger.LogDebug($"Resolved PublisherStudio system variable {name}; value omitted from logs.");
+                logger.LogDebug($"Resolved PublisherStudio system variable {name}; value omitted from logs.");
                 return value;
             }
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublisherStudio system variable {name} could not be resolved: {exception.Message}");
+            logger.LogError(exception, $"PublisherStudio system variable {name} could not be resolved: {exception.Message}");
             throw;
         }
     }
@@ -106,12 +106,12 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         {
             var raw = GetString(name, fallback.ToString(CultureInfo.InvariantCulture));
             var value = int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
-            _logger.LogDebug($"Resolved integer PublisherStudio system variable {name}; value omitted from logs.");
+            logger.LogDebug($"Resolved integer PublisherStudio system variable {name}; value omitted from logs.");
             return value;
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"Integer PublisherStudio system variable {name} could not be resolved: {exception.Message}");
+            logger.LogError(exception, $"Integer PublisherStudio system variable {name} could not be resolved: {exception.Message}");
             throw;
         }
     }
@@ -126,12 +126,12 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
             var value = name.Equals(_spreadsheetDocumentsDisposeHoursName, StringComparison.OrdinalIgnoreCase)
                 ? TimeSpan.FromHours(numeric)
                 : TimeSpan.FromMinutes(numeric);
-            _logger.LogDebug($"Resolved duration PublisherStudio system variable {name}; value omitted from logs.");
+            logger.LogDebug($"Resolved duration PublisherStudio system variable {name}; value omitted from logs.");
             return value;
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"Duration PublisherStudio system variable {name} could not be resolved: {exception.Message}");
+            logger.LogError(exception, $"Duration PublisherStudio system variable {name} could not be resolved: {exception.Message}");
             throw;
         }
     }
@@ -147,11 +147,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
                 _values[name] = serialized;
                 Persist();
             }
-            _logger.LogInformation($"Stored PublisherStudio system variable {name}; value omitted from logs.");
+            logger.LogInformation($"Stored PublisherStudio system variable {name}; value omitted from logs.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublisherStudio system variable {name} could not be stored: {exception.Message}");
+            logger.LogError(exception, $"PublisherStudio system variable {name} could not be stored: {exception.Message}");
             throw;
         }
     }
@@ -162,13 +162,13 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         {
             lock (_sync)
             {
-                _logger.LogDebug($"Created PublisherStudio system-variable snapshot with {_values.Count} values.");
+                logger.LogDebug($"Created PublisherStudio system-variable snapshot with {_values.Count} values.");
                 return new Dictionary<string, string>(_values, StringComparer.OrdinalIgnoreCase);
             }
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublisherStudio system-variable snapshot failed: {exception.Message}");
+            logger.LogError(exception, $"PublisherStudio system-variable snapshot failed: {exception.Message}");
             throw;
         }
     }
@@ -182,11 +182,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
                 if (!string.IsNullOrWhiteSpace(child.Value))
                     _values[child.Key] = child.Value;
             }
-            _logger.LogDebug($"Loaded PublisherStudio system variables from application configuration.");
+            logger.LogDebug($"Loaded PublisherStudio system variables from application configuration.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublisherStudio configured system variables could not be loaded: {exception.Message}");
+            logger.LogError(exception, $"PublisherStudio configured system variables could not be loaded: {exception.Message}");
             throw;
         }
     }
@@ -202,11 +202,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
                 return;
             foreach (var item in persisted)
                 _values[item.Key] = item.Value;
-            _logger.LogDebug($"Loaded {persisted.Count} persisted PublisherStudio system variables.");
+            logger.LogDebug($"Loaded {persisted.Count} persisted PublisherStudio system variables.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"Persisted PublisherStudio system variables could not be loaded: {exception.Message}");
+            logger.LogError(exception, $"Persisted PublisherStudio system variables could not be loaded: {exception.Message}");
             throw;
         }
     }
@@ -220,11 +220,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
             var temporaryPath = _storagePath + ".tmp";
             File.WriteAllText(temporaryPath, JsonSerializer.Serialize(_values, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temporaryPath, _storagePath, true);
-            _logger.LogDebug($"Persisted {_values.Count} PublisherStudio system variables.");
+            logger.LogDebug($"Persisted {_values.Count} PublisherStudio system variables.");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, $"PublisherStudio system variables could not be persisted: {exception.Message}");
+            logger.LogError(exception, $"PublisherStudio system variables could not be persisted: {exception.Message}");
             throw;
         }
     }

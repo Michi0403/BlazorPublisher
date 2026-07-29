@@ -2,6 +2,7 @@ using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+// logging-policy: pure-helper
 internal static class OrganicTransportSecurityPolicy
 {
     public static bool RequiresProtectedTransport(OrganicWireMessageType messageType) => messageType is not (

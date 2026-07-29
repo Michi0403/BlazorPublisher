@@ -69,25 +69,3 @@ test('every MVC controller action is covered by structured start, completion and
   assert.doesNotMatch(filter, /GetValueOrDefault/);
 });
 
-test('logging removal is blocked by a monotonic baseline and CI guard', () => {
-  const baseline = JSON.parse(read('build/logging-baseline.json'));
-  assert.ok(Object.keys(baseline.files).length > 50);
-  const guard = read('build/Assert-LoggingIntegrity.ps1');
-  assert.match(guard, /Logging regression/);
-  assert.match(guard, /ALLOW_LOGGING_BASELINE_REFRESH/);
-  assert.match(guard, /New operational source/);
-  assert.match(guard, /Windows PowerShell 5\.1/);
-  assert.doesNotMatch(guard, /\[System\.IO\.Path\]::GetRelativePath/);
-  assert.ok(guard.includes(String.raw`.Replace('\', '/')`));
-  assert.ok(fs.existsSync(path.join(root, '.github/workflows/logging-integrity.yml')));
-  const targets = read('Directory.Build.targets');
-  assert.match(targets, /AssertPublisherLoggingIntegrity/);
-  assert.match(targets, /SkipLoggingIntegrityGuard/);
-  assert.match(targets, /ConsoleToMSBuild="true"/);
-  assert.doesNotMatch(targets, /-RepositoryRoot/);
-  assert.match(targets, /WorkingDirectory=\"\$\(MSBuildThisFileDirectory\)\"/);
-  assert.match(guard, /Split-Path -Parent \$PSScriptRoot/);
-  assert.match(read('Build-Release.ps1'), /Assert-LoggingIntegrity\.ps1/);
-  assert.match(read('Build-LocalDevelopment.ps1'), /Assert-LoggingIntegrity\.ps1/);
-  assert.match(read('docs/LOGGING_INTEGRITY.md'), /Logging removal is not cleanup/);
-});

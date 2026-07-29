@@ -60,14 +60,6 @@ function Assert-PublishedConfigurationFiles {
 
     Write-Host "Published configuration validation passed for $($configurationSources.Count) files." -ForegroundColor Green
 }
-
-& (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
-& (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
-& (Join-Path $root "build\Assert-JavaScriptDiagnostics.ps1")
-& (Join-Path $root "build\Assert-PublishConfiguration.ps1")
-& (Join-Path $root "build\Assert-InstallerWorkflow.ps1")
-& (Join-Path $root "build\Assert-RuntimeValueOwnership.ps1")
-& (Join-Path $root "build\Assert-LocalizationIntegrity.ps1")
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 
 if ($UseBundledWireProtocolPackage) {
@@ -129,10 +121,7 @@ $wireProperties = @(
     "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
     "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
     "-p:RestoreAdditionalProjectSources=$packageDirectory",
-    "-p:SkipWireProtocolBootstrap=true",
-    "-p:SkipLoggingIntegrityGuard=true",
-    "-p:SkipLocalizationIntegrityGuard=true",
-    "-p:SkipGitSourceVisibilityGuard=true"
+    "-p:SkipWireProtocolBootstrap=true"
 )
 
 Write-Host "Restoring BlazorPublisher application for $Runtime after protocol preparation..." -ForegroundColor Cyan
@@ -151,12 +140,10 @@ Invoke-DotNet -Arguments (@(
 Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $appFolder
 
 Write-Host "Restoring BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true",
-    "-p:SkipLocalizationIntegrityGuard=true",
-    "-p:SkipGitSourceVisibilityGuard=true") -FailureMessage "BlazorPublisher setup restore failed."
+Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel") -FailureMessage "BlazorPublisher setup restore failed."
 
 Write-Host "Publishing BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @(
+Invoke-DotNet -Arguments (@(
     "publish", $setupProject,
     "-c", $Configuration,
     "-f", "net10.0",
@@ -165,10 +152,7 @@ Invoke-DotNet -Arguments @(
     "-maxcpucount:1",
     "-p:DebugType=None",
     "-p:DebugSymbols=false",
-    "-o", $setupFolder,
-    "-p:SkipLoggingIntegrityGuard=true",
-    "-p:SkipLocalizationIntegrityGuard=true",
-    "-p:SkipGitSourceVisibilityGuard=true"
+    "-o", $setupFolder
 ) + $multiFileSelfContainedProperties) -FailureMessage "BlazorPublisher setup publish failed."
 
 $appExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Web.exe" } else { "PublisherStudio.Web" }

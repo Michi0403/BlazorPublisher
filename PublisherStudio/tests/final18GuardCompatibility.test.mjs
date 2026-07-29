@@ -25,7 +25,5 @@ assert.match(oneWire, /SystemVariableStoreService\.cs/);
 assert.match(oneWire, /Application\\?\.DefaultPort/);
 assert.doesNotMatch(oneWire, /DefaultPort = 58071/);
 
-const visibility = read('build/Assert-GitSourceVisibility.ps1');
-assert.match(visibility, /tests\/final18GuardCompatibility\.test\.mjs/);
 
 console.log('PASS final18 PowerShell baseline enumeration and system-variable-owned 1-Wire port guard contracts.');

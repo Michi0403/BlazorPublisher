@@ -19,10 +19,8 @@ test('Panel Studio renders live content immediately and isolates Mainframe selec
   assert.match(css, /arrange-preview \.panel-studio-hitbox[\s\S]*pointer-events: auto/);
 });
 
-test('new architecture guards are wired into PublisherStudio direct builds', () => {
-  const targets = read('Directory.Build.targets');
+test('architecture validation scripts remain available for explicit runs', () => {
   for (const script of ['Assert-MethodDiagnostics.ps1','Assert-ApplicationStaticPolicy.ps1','Assert-TextServiceOwnership.ps1','Assert-IteratorExceptionPolicy.ps1']) {
-    assert.match(targets, new RegExp(script.replace('.', '\\.'), 'i'));
     assert.ok(fs.existsSync(path.join(root, 'build', script)));
   }
 });

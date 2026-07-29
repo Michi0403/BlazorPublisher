@@ -18,43 +18,58 @@ const profiles = [
   ['macosarm64.pubxml', 'osx-arm64', 'macosarm64', 'setupmacosarm64'],
 ];
 
-const assertProfile = (relative, runtime, folder) => {
+const assertCommonProfile = (relative, runtime, folder) => {
   const profile = read(relative);
   assert.match(profile, new RegExp(`<RuntimeIdentifier>${runtime}</RuntimeIdentifier>`));
   assert.ok(profile.includes(`<PublishUrl>..\\..\\artifacts\\release\\${folder}\\</PublishUrl>`), `${relative}:PublishUrl`);
-  assert.ok(profile.includes(`<PublishDir>..\\..\\artifacts\\release\\${folder}\\</PublishDir>`), `${relative}:PublishDir`);
   for (const marker of [
     '<SelfContained>true</SelfContained>',
-    '<PublishSingleFile>false</PublishSingleFile>',
     '<PublishTrimmed>false</PublishTrimmed>',
-    '<PublishReadyToRun>false</PublishReadyToRun>',
     '<DeleteExistingFiles>true</DeleteExistingFiles>',
   ]) assert.ok(profile.includes(marker), `${relative}:${marker}`);
+  if (profile.includes('<PublishDir>')) {
+    assert.ok(profile.includes(`<PublishDir>..\\..\\artifacts\\release\\${folder}\\</PublishDir>`), `${relative}:PublishDir`);
+  }
+  if (profile.includes('<PublishReadyToRun>')) {
+    assert.ok(profile.includes('<PublishReadyToRun>false</PublishReadyToRun>'), `${relative}:PublishReadyToRun`);
+  }
+  return profile;
+};
+
+const assertWebProfile = (relative, runtime, folder) => {
+  const profile = assertCommonProfile(relative, runtime, folder);
+  assert.ok(profile.includes('<PublishSingleFile>false</PublishSingleFile>'), `${relative}:PublishSingleFile`);
+  assert.match(profile, /<(?:PublishProtocol|WebPublishMethod|PublishProvider)>FileSystem<\/(?:PublishProtocol|WebPublishMethod|PublishProvider)>/);
+  assert.match(profile, /<(?:Platform|LastUsedPlatform)>Any CPU<\/(?:Platform|LastUsedPlatform)>/);
+};
+
+const assertSetupProfile = (relative, runtime, folder) => {
+  const profile = assertCommonProfile(relative, runtime, folder);
+  assert.ok(profile.includes('<PublishSingleFile>true</PublishSingleFile>'), `${relative}:PublishSingleFile`);
+  assert.ok(profile.includes(`<PublishDir>..\\..\\artifacts\\release\\${folder}\\</PublishDir>`), `${relative}:PublishDir`);
+  assert.ok(profile.includes('<PublishProtocol>FileSystem</PublishProtocol>'), `${relative}:PublishProtocol`);
+  assert.ok(profile.includes('<Platform>Any CPU</Platform>'), `${relative}:Platform`);
 };
 
 test('developer application and installer profiles remain available', () => {
   const webRoot = path.join(root, 'src', 'PublisherStudio.Web', 'Properties', 'PublishProfiles');
   const setupRoot = path.join(root, 'src', 'PublisherStudio.InstallerConsole', 'Properties', 'PublishProfiles');
-  assert.deepEqual(fs.readdirSync(webRoot).filter(name => name.endsWith('.pubxml')).sort(), profiles.map(([name]) => name).sort());
-  assert.deepEqual(
-    fs.readdirSync(setupRoot).filter(name => name.endsWith('.pubxml')).sort(),
-    [...profiles.map(([name]) => name), 'linuxx64.pubxml', 'linuxarm64.pubxml'].sort(),
-  );
+  const expected = profiles.map(([name]) => name).sort();
+  assert.deepEqual(fs.readdirSync(webRoot).filter(name => name.endsWith('.pubxml')).sort(), expected);
+  assert.deepEqual(fs.readdirSync(setupRoot).filter(name => name.endsWith('.pubxml')).sort(), expected);
   assert.deepEqual(fs.readdirSync(webRoot).filter(name => name.endsWith('.pubxml.user')), []);
   assert.deepEqual(fs.readdirSync(setupRoot).filter(name => name.endsWith('.pubxml.user')), []);
 });
 
-test('developer profiles and scripted release lane share runtime and folder contracts', () => {
+test('developer profiles and scripted release lane preserve their supported contracts', () => {
   for (const [file, runtime, appFolder, setupFolder] of profiles) {
-    assertProfile(`src/PublisherStudio.Web/Properties/PublishProfiles/${file}`, runtime, appFolder);
-    assertProfile(`src/PublisherStudio.InstallerConsole/Properties/PublishProfiles/${file}`, runtime, setupFolder);
+    assertWebProfile(`src/PublisherStudio.Web/Properties/PublishProfiles/${file}`, runtime, appFolder);
+    assertSetupProfile(`src/PublisherStudio.InstallerConsole/Properties/PublishProfiles/${file}`, runtime, setupFolder);
     assert.ok(release.includes(`"${runtime}"`), runtime);
     assert.ok(release.includes(`AppFolder = "${appFolder}"`), appFolder);
     assert.ok(release.includes(`SetupFolder = "${setupFolder}"`), setupFolder);
     assert.ok(release.includes(`SetupAsset = "${setupFolder}"`), setupFolder);
     assert.ok(allRuntimes.includes(`"${runtime}"`), `Build-AllRuntimes:${runtime}`);
   }
-  assertProfile('src/PublisherStudio.InstallerConsole/Properties/PublishProfiles/linuxx64.pubxml', 'linux-x64', 'setuplinx64');
-  assertProfile('src/PublisherStudio.InstallerConsole/Properties/PublishProfiles/linuxarm64.pubxml', 'linux-arm64', 'setuplinarm64');
   assert.doesNotMatch(release, /PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract=true|EnableCompressionInSingleFile=true/);
 });

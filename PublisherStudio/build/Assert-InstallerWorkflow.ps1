@@ -71,11 +71,23 @@ if (-not $defaultLauncher.Contains('call "%~dp0PublisherStudio.Setup.exe"')) {
 
 $launchSettingsPath = Join-Path $installerRoot 'Properties\launchSettings.json'
 $launchSettings = Get-Content -LiteralPath $launchSettingsPath -Raw | ConvertFrom-Json
-if ($launchSettings.profiles.PSObject.Properties.Count -lt $launchers.Count) {
+if ($null -eq $launchSettings -or $null -eq $launchSettings.profiles) {
+    Fail 'Visual Studio launch settings do not define a profiles object.'
+}
+
+# Windows PowerShell exposes PSObject.Properties as a collection view whose Count
+# member is not guaranteed under StrictMode. Materialize the view before counting
+# or querying it so this maintenance rule behaves the same in Windows PowerShell 5.1
+# and newer PowerShell versions.
+$launchProfileProperties = @($launchSettings.profiles.PSObject.Properties)
+if ($launchProfileProperties.Count -lt $launchers.Count) {
     Fail 'Visual Studio launch profiles do not cover the maintained setup workflows.'
 }
-if (-not $launchSettings.profiles.'BlazorPublisher Default Install and Update') {
-    Fail 'The no-command Visual Studio profile is missing.'
+$defaultLaunchProfile = @($launchProfileProperties | Where-Object {
+    [string]::Equals($_.Name, 'BlazorPublisher Default Install and Update', [StringComparison]::Ordinal)
+})
+if ($defaultLaunchProfile.Count -ne 1) {
+    Fail 'The no-command Visual Studio profile is missing or duplicated.'
 }
 
 $project = Get-Content -LiteralPath (Join-Path $installerRoot 'PublisherStudio.InstallerConsole.csproj') -Raw

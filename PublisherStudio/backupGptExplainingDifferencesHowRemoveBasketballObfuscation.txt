@@ -1748,13 +1748,7 @@ Fertig
 
 …
 Ist das Archiv noch von anderem betroffen außer 天天中彩票篮球?
-
-Ich prüfe die beiden zurückgegebenen ZIPs noch einmal gezielt auf weitere unerwartete Änderungen, Unicode-/Textartefakte und nicht offensichtliche Eingriffe. Das fremde Zeichen in deiner Frage behandle ich vorsichtshalber als möglichen Tipp- oder Darstellungsfehler.
-
-Ich prüfe zunächst, worauf sich „Archiv“ und der unklare Ausdruck beziehen. Ohne den genauen Dateinamen oder die gemeinte Änderung kann ich nicht zuverlässig beurteilen, ob weitere Inhalte betroffen sind.
-
-bash -lc set -e
-for f in /mnt/data/*.zip; do echo "=== $(basename "$f")"; unzip -l "$f" | sed -n '1,25p'; done
+2m 42s nachgedacht
 
 Falls du mit భ das fremde Zeichen meinst: Das ist der Telugu-Buchstabe „Bha“ (U+0C2D). Er kommt in keinem der beiden zurückgegebenen Archive vor.
 
@@ -1777,3 +1771,168 @@ Zero-Width-Spaces in mitgelieferten DevExtreme-CSS-Dateien; sie waren bereits in
 Wichtig: Beide Projekte enthalten weiterhin sicherheitsrelevante, aber grundsätzlich funktional erklärbare Mechanismen wie Downloads, Prozessstarts, Dateilöschungen, FFmpeg-Aufrufe und kryptografische Schlüsselverwaltung. Diese stammen überwiegend aus der vorhandenen Anwendung und wurden nicht komplett sicherheitsauditiert.
 
 Daher die ehrliche Antwort: Keine erkennbare weitere Text-/Unicode-Korruption, aber die zurückgegebenen ZIPs sind deutlich umfassender verändert worden als nur an einer einzelnen Stelle. Eine Kompilier- oder Laufzeitgarantie kann ich ohne .NET-Ausführung nicht geben.
+
+Ich prüfe zunächst, worauf sich „Archiv“ und der unklare Ausdruck beziehen. Ohne den genauen Dateinamen oder die gemeinte Änderung kann ich nicht zuverlässig beurteilen, ob weitere Inhalte betroffen sind.
+
+for f in /mnt/data/*.zip; do echo "=== $(basename "$f")"; unzip -l "$f" | sed -n '1,25p'; done
+
+Ich überprüfe, ob neben der genannten Änderung noch andere Dateien oder Metadaten verändert wurden. Dabei unterscheide ich zwischen beabsichtigten Anpassungen, unveränderten Altlasten und möglichen verdächtigen Rückständen, damit die Aussage zum Archiv nicht zu pauschal ausfällt.
+
+bash -lc set -e
+for root in /mnt/data/recheck/LocalGPT-2.0.1-static-reviewed-clean/LocalGPT /mnt/data/recheck/PublisherStudio-2.0.1-static-reviewed-clean/PublisherStudio; do
+  echo "=== $root"
+  rg -n -i --hidden --glob '!**/node_modules/**' --glob '!**/wwwroot/vendor/**' --glob '!**/bin/**' --glob '!**/obj/**' \
+    '(Invoke-WebRequest|Invoke-RestMethod|DownloadString|WebClient|EncodedCommand|FromBase64String|Process\.Start|Start-Process|cmd\.exe|powershell\.exe|bash\s+-c|eval\s*\(|new Function\s*\(|Assembly\.Load|DllImport|Environment\.Exit|File\.Delete|Directory\.Delete|Remove-Item|git\s+reset|git\s+clean|git\s+checkout|git\s+restore|curl\s|wget\s)' "$root" | head -n 240 || true
+  echo
+ done
+
+Also Dangerous:
+https://www.unicode.org/charts/nameslist/n_0C00.html
+
+what https://www.unicode.org/charts/nameslist/n_0C00.html it does?
+
+That page is just an official Unicode reference table for the Telugu character block, covering code points roughly U+0C00 through U+0C7F. It lists each character, its visual glyph, code point, and official name. For example, భ is listed there as U+0C2D — TELUGU LETTER BHA.
+
+It does not:
+
+scan your archive,
+execute code,
+modify files,
+identify malware,
+prove where the character came from.
+
+I linked it only to identify the strange character that appeared in your message. The archive claim came from a separate file inspection, not from that website. I should have stated that distinction more clearly.
+
+Überprüfung der Archive auf Telugu-Zeichen
+
+bash -lc ls -l /mnt/data && python - <<'PY'
+import zipfile, os, re, json
+paths=[
+'/mnt/data/PublisherStudioCleanedByCorruption.zip',
+'/mnt/data/BlazorPublisher-2.0.1-final30-source(1).zip',
+'/mnt/data/LocalGPT-2.0.1-final30-source(1).zip',
+'/mnt/data/LocalGPTCleanedByCorruption.zip',
+'/mnt/data/LocalGPT-2.0.1-static-reviewed-clean.zip',
+'/mnt/data/PublisherStudio-2.0.1-static-reviewed-clean.zip',
+]
+needle='భ'
+patterns=[needle,'\\u0c2d','\\U00000c2d','U+0C2D','TELUGU LETTER BHA']
+for p in paths:
+    print('\nARCHIVE', os.path.basename(p))
+    if not os.path.exists(p):
+        print('MISSING')
+        continue
+    hits=[]
+    with zipfile.ZipFile(p) as z:
+        for info in z.infolist():
+            if info.is_dir(): continue
+            try:
+                b=z.read(info)
+            except Exception:
+                continue
+            # raw utf-8 bytes
+            if needle.encode('utf-8') in b:
+                hits.append((info.filename,'raw_utf8'))
+            # decode several likely encodings
+            for enc in ('utf-8-sig','utf-16','utf-16le','utf-16be','cp1252'):
+                try:
+                    s=b.decode(enc)
+                except Exception:
+                    continue
+                for pat in patterns[1:]:
+                    if pat.lower() in s.lower():
+                        hits.append((info.filename,f'{enc}:{pat}'))
+                if needle in s:
+                    hits.append((info.filename,f'{enc}:char'))
+    if hits:
+        for h in sorted(set(hits)):
+            print(h)
+    else:
+        print('NO HITS')
+PY
+
+Untersuchen von Git-Objekten auf Zeichenfund
+
+bash -lc set -e
+rm -rf /mnt/data/inspect_localgpt_git
+mkdir -p /mnt/data/inspect_localgpt_git
+cd /mnt/data/inspect_localgpt_git
+unzip -q /mnt/data/LocalGPTCleanedByCorruption.zip
+find . -maxdepth 3 -type d -name .git -print
+REPO=$(find . -maxdepth 3 -type d -name .git -printf '%h\n' | head -n1)
+echo REPO=$REPO
+cd "$REPO"
+git rev-parse --is-inside-work-tree
+git status --short | head -50
+python - <<'PY'
+import subprocess, os
+needle='భ'.encode('utf-8')
+objs=subprocess.check_output(['git','rev-list','--objects','--all']).decode().splitlines()
+print('object refs',len(objs))
+hits=[]
+for i,line in enumerate(objs):
+    parts=line.split(' ',1)
+    oid=parts[0]; path=parts[1] if len(parts)>1 else ''
+    try:
+        typ=subprocess.check_output(['git','cat-file','-t',oid],stderr=subprocess.DEVNULL).strip().decode()
+        if typ not in ('blob','commit','tag','tree'): continue
+        data=subprocess.check_output(['git','cat-file',typ,oid],stderr=subprocess.DEVNULL)
+    except Exception:
+        continue
+    if needle in data or b'\\u0c2d' in data.lower() or b'U+0C2D' in data.upper():
+        hits.append((oid,typ,path,len(data)))
+print('hits',hits)
+for oid,typ,path,n in hits:
+    print('\nHIT',oid,typ,path,n)
+    data=subprocess.check_output(['git','cat-file',typ,oid])
+    # print surrounding bytes safely
+    idx=data.find(needle)
+    print('idx',idx)
+    start=max(0,idx-300); end=min(len(data),idx+500)
+    print(data[start:end].decode('utf-8','replace'))
+PY
+
+Ich korrigiere meine frühere Aussage: In den bereitgestellten Archiven taucht die Bytefolge tatsächlich auf, aber nur innerhalb komprimierter Binärdaten der Git-Historie. Beim Entpacken erscheint sie nicht als Telugu-Zeichen in einer Quelldatei; eine reine Byte-Suche erzeugt hier einen Fehlalarm.
+
+bash -lc python - <<'PY'
+import zipfile, os, re
+paths=[
+'/mnt/data/PublisherStudioCleanedByCorruption.zip',
+'/mnt/data/BlazorPublisher-2.0.1-final30-source(1).zip',
+'/mnt/data/LocalGPT-2.0.1-final30-source(1).zip',
+'/mnt/data/LocalGPTCleanedByCorruption.zip',
+'/mnt/data/LocalGPT-2.0.1-static-reviewed-clean.zip',
+'/mnt/data/PublisherStudio-2.0.1-static-reviewed-clean.zip',
+]
+# likely text extensions
+text_exts={'.cs','.csproj','.sln','.json','.xml','.xaml','.razor','.html','.css','.js','.ts','.tsx','.md','.txt','.yml','.yaml','.props','.targets','.config','.resx','.sh','.ps1','.cmd','.bat','.gitignore','.gitattributes'}
+pat=re.compile('[\u0c00-\u0c7f]')
+for p in paths:
+    hits=[]
+    with zipfile.ZipFile(p) as z:
+        for i in z.infolist():
+            if i.is_dir(): continue
+            ext=os.path.splitext(i.filename)[1].lower()
+            base=os.path.basename(i.filename).lower()
+            if ext not in text_exts and base not in {'.gitignore','.gitattributes'}: continue
+            b=z.read(i)
+            for enc in ('utf-8-sig','utf-16','utf-16le','utf-16be'):
+                try:s=b.decode(enc)
+                except: continue
+                m=pat.search(s)
+                if m:
+                    hits.append((i.filename,enc,hex(ord(m.group())),m.group()))
+                    break
+    print(os.path.basename(p), 'text Telugu hits:', hits[:20], 'count',len(hits))
+PY
+
+PublisherStudioCleanedByCorruption.zip text Telugu hits: [] count 0
+BlazorPublisher-2.0.1-final30-source(1).zip text Telugu hits: [] count 0
+LocalGPT-2.0.1-final30-source(1).zip text Telugu hits: [] count 0
+LocalGPTCleanedByCorruption.zip text Telugu hits: [] count 0
+LocalGPT-2.0.1-static-reviewed-clean.zip text Telugu hits: [] count 0
+PublisherStudio-2.0.1-static-reviewed-clean.zip text Telugu hits: [] count 0
+
+---
+
+Michi0403: Conclusion, BasketBall game ended and whatever Telugo is, if that means something. It's not there anymore or wasn't but there is how you find it in python!

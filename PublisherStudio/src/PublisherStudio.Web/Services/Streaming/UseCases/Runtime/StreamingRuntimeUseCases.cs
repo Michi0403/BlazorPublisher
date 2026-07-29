@@ -6,6 +6,16 @@ namespace PublisherStudio.Services.Streaming.UseCases.Runtime;
 /// </summary>
 public sealed class StreamingRuntimeUseCases
 {
+    private readonly IWindowsHotkeyNativeService hotkeyNativeService;
+    private readonly IWindowsProcessLoopbackNativeService processLoopbackNativeService;
+
+    public StreamingRuntimeUseCases(
+        IWindowsHotkeyNativeService hotkeyNativeService,
+        IWindowsProcessLoopbackNativeService processLoopbackNativeService)
+    {
+        this.hotkeyNativeService = hotkeyNativeService;
+        this.processLoopbackNativeService = processLoopbackNativeService;
+    }
     public StreamingRuntimeCapabilities GetCapabilities() => new()
     {
         Version = "2.0.1",
@@ -13,10 +23,10 @@ public sealed class StreamingRuntimeUseCases
         BrowserAudioMix = true,
         NativeDeviceDiscovery = true,
         NativeCameraCapture = true,
-        ProcessAudioLoopback = OperatingSystem.IsWindows(),
+        ProcessAudioLoopback = processLoopbackNativeService.IsAvailable,
         BrowserWindowAudioFallback = true,
         DeviceTimestamps = true,
-        GlobalHotkeys = OperatingSystem.IsWindows(),
+        GlobalHotkeys = hotkeyNativeService.IsAvailable,
         Recording = true,
         Transports = ["rtmp", "rtmps", "srt", "hls", "rtsp", "webrtc", "browser-webm"],
         HardwareEncoderProbe = true,

@@ -13,6 +13,8 @@ public static class StreamingServiceCollectionExtensions
 {
     public static IServiceCollection AddPublisherStreaming(this IServiceCollection services)
     {
+        services.AddSingleton<IWindowsHotkeyNativeService, WindowsHotkeyNativeService>();
+        services.AddSingleton<IWindowsProcessLoopbackNativeService, WindowsProcessLoopbackNativeService>();
         services.AddSingleton<GlobalHotkeyService>();
         services.AddHostedService<GlobalHotkeyHostedService>();
         services.AddSingleton<EncoderOrchestrator>();

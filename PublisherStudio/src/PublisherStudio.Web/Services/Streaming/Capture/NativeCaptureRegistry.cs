@@ -7,13 +7,15 @@ using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
-public sealed class NativeCaptureRegistry(IPublisherRuntimePolicyDataService runtimePolicy) : IDisposable
+public sealed class NativeCaptureRegistry(
+    IPublisherRuntimePolicyDataService runtimePolicy,
+    IWindowsProcessLoopbackNativeService processLoopbackNativeService) : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, NativeCaptureSession> _captures = new();
 
     public NativeCaptureSession Create(NativeCaptureRequest request)
     {
-        var session = new NativeCaptureSession(request, runtimePolicy);
+        var session = new NativeCaptureSession(request, runtimePolicy, processLoopbackNativeService);
         if (!_captures.TryAdd(session.Id, session)) throw new InvalidOperationException("Could not register native capture.");
         try { session.Start(); }
         catch { _captures.TryRemove(session.Id, out _); session.Dispose(); throw; }
@@ -39,6 +41,7 @@ public sealed class NativeCaptureSession : IDisposable
 {
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
     private readonly NativeCaptureRequest _request;
+    private readonly IWindowsProcessLoopbackNativeService _processLoopbackNativeService;
     private readonly object _sync = new();
     private readonly Dictionary<Guid, Channel<byte[]>> _subscribers = [];
     private readonly CancellationTokenSource _cancellation = new();
@@ -47,10 +50,14 @@ public sealed class NativeCaptureSession : IDisposable
     private byte[] _initialization = [];
     private bool _disposed;
 
-    public NativeCaptureSession(NativeCaptureRequest request, IPublisherRuntimePolicyDataService runtimePolicy)
+    public NativeCaptureSession(
+        NativeCaptureRequest request,
+        IPublisherRuntimePolicyDataService runtimePolicy,
+        IWindowsProcessLoopbackNativeService processLoopbackNativeService)
     {
         _request = request;
         _runtimePolicy = runtimePolicy;
+        _processLoopbackNativeService = processLoopbackNativeService;
         Id = Guid.NewGuid();
         IsAudioOnly = request.Kind.Equals("Microphone", StringComparison.OrdinalIgnoreCase)
             || request.Kind.Equals("SystemAudio", StringComparison.OrdinalIgnoreCase)
@@ -100,6 +107,7 @@ public sealed class NativeCaptureSession : IDisposable
                 processId,
                 process.StandardInput.BaseStream,
                 _cancellation.Token,
+                _processLoopbackNativeService,
                 _runtimePolicy.AudioClientInterfaceId,
                 _runtimePolicy.AudioCaptureClientInterfaceId);
             _processLoopback.Start();

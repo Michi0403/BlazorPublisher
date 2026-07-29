@@ -12,7 +12,7 @@ Set-StrictMode -Version Latest
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $releaseScript = Join-Path $root "Build-Release.ps1"
 $packageDirectory = Join-Path $root "packages"
-$runtimes = @("win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")
+$runtimes = @("win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")
 if (-not $UseBundledWireProtocolPackage) {
     $ensureArguments = @{
         Version = $WireProtocolVersion

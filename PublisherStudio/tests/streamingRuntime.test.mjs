@@ -32,6 +32,7 @@ const platformChatHub = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.
 const webRtcEntryHub = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Hubs', 'Streaming', 'Lan', 'WebRtcSignalingHub.cs'), 'utf8');
 const hotkeyHostedService = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'HostedServices', 'Streaming', 'GlobalHotkeyHostedService.cs'), 'utf8');
 const processLoopback = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'Streaming', 'Capture', 'WindowsProcessLoopbackCapture.cs'), 'utf8');
+const processLoopbackNative = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'Streaming', 'Capture', 'WindowsProcessLoopbackNativeService.cs'), 'utf8');
 const webProgram = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Program.cs'), 'utf8');
 const applicationComposition = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'PublisherStudioServiceCollectionExtensions.cs'), 'utf8');
 const inspector = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'InspectorPanel.razor'), 'utf8');
@@ -122,7 +123,8 @@ assert.doesNotMatch(nativeDevices, /record NativeMediaDeviceInfo/);
 assert.match(streamingClient, /Task<List<PublisherStudio\.Domain\.NativeMediaDeviceInfo>>/);
 assert.match(runtimeUseCases, /new PublisherStudio\.Domain\.NativeMediaDeviceInfo/);
 assert.doesNotMatch(streamingClient, /NativeDeviceDiscovery/);
-assert.match(processLoopback, /ActivateAudioInterfaceAsync/);
+assert.match(processLoopbackNative, /ActivateAudioInterfaceAsync/);
+assert.doesNotMatch(processLoopback, /DllImport|static extern/);
 assert.ok(processLoopback.includes('VAD\\\\Process_Loopback'));
 assert.match(rtspServer, /RTP\/AVP\/TCP/);
 assert.match(rtspServer, /rtpmap:33 MP2T\/90000/);

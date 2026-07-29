@@ -18,19 +18,14 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
     private const uint AudclntStreamflagsAutoConvertPcm = 0x80000000;
     private const uint AudclntBufferflagsSilent = 0x00000002;
     private const ushort VtBlob = 65;
-    private const uint CoinitMultithreaded = 0x0;
 
     private readonly Guid _audioClientInterfaceId;
     private readonly Guid _audioCaptureClientInterfaceId;
+    private readonly IWindowsProcessLoopbackNativeService _nativeService;
     private readonly uint _processId;
     private readonly Stream _destination;
     private readonly CancellationTokenSource _cancellation;
     private readonly ManualResetEventSlim _started = new(false);
-    private readonly IntPtr _mmDevApiLibrary;
-    private readonly IntPtr _ole32Library;
-    private readonly ActivateAudioInterfaceAsyncDelegate _activateAudioInterfaceAsync;
-    private readonly CoInitializeExDelegate _coInitializeEx;
-    private readonly CoUninitializeDelegate _coUninitialize;
     private readonly Thread _thread;
     private Exception? _startupError;
     private bool _disposed;
@@ -39,39 +34,22 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         uint processId,
         Stream destination,
         CancellationToken cancellationToken,
+        IWindowsProcessLoopbackNativeService nativeService,
         Guid audioClientInterfaceId,
         Guid audioCaptureClientInterfaceId)
     {
         if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Process audio loopback is available only on Windows.");
-
-        var mmDevApiLibrary = NativeLibrary.Load("Mmdevapi.dll");
-        var ole32Library = IntPtr.Zero;
-        try
+        _processId = processId;
+        _nativeService = nativeService;
+        _audioClientInterfaceId = audioClientInterfaceId;
+        _audioCaptureClientInterfaceId = audioCaptureClientInterfaceId;
+        _destination = destination;
+        _cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _thread = new Thread(CaptureThread)
         {
-            ole32Library = NativeLibrary.Load("ole32.dll");
-            _activateAudioInterfaceAsync = Marshal.GetDelegateForFunctionPointer<ActivateAudioInterfaceAsyncDelegate>(NativeLibrary.GetExport(mmDevApiLibrary, "ActivateAudioInterfaceAsync"));
-            _coInitializeEx = Marshal.GetDelegateForFunctionPointer<CoInitializeExDelegate>(NativeLibrary.GetExport(ole32Library, "CoInitializeEx"));
-            _coUninitialize = Marshal.GetDelegateForFunctionPointer<CoUninitializeDelegate>(NativeLibrary.GetExport(ole32Library, "CoUninitialize"));
-            _mmDevApiLibrary = mmDevApiLibrary;
-            _ole32Library = ole32Library;
-
-            _processId = processId;
-            _audioClientInterfaceId = audioClientInterfaceId;
-            _audioCaptureClientInterfaceId = audioCaptureClientInterfaceId;
-            _destination = destination;
-            _cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            _thread = new Thread(CaptureThread)
-            {
-                IsBackground = true,
-                Name = $"PublisherStudio process audio {_processId}"
-            };
-        }
-        catch
-        {
-            if (ole32Library != IntPtr.Zero) NativeLibrary.Free(ole32Library);
-            NativeLibrary.Free(mmDevApiLibrary);
-            throw;
-        }
+            IsBackground = true,
+            Name = $"PublisherStudio process audio {_processId}"
+        };
     }
 
     public void Start()
@@ -88,9 +66,12 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         IAudioClient? audioClient = null;
         IAudioCaptureClient? captureClient = null;
         EventWaitHandle? sampleReady = null;
-        var coInitialized = _coInitializeEx(IntPtr.Zero, CoinitMultithreaded) >= 0;
+        var coInitialized = false;
         try
         {
+            var initializationResult = _nativeService.InitializeMultithreadedApartment();
+            ThrowIfFailed(initializationResult);
+            coInitialized = true;
             audioClient = ActivateAudioClient(_processId);
             var format = new WaveFormatEx
             {
@@ -165,7 +146,7 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
             sampleReady?.Dispose();
             ReleaseComObject(captureClient);
             ReleaseComObject(audioClient);
-            if (coInitialized) _coUninitialize();
+            if (coInitialized) _nativeService.UninitializeApartment();
             try { _destination.Flush(); } catch { }
         }
     }
@@ -198,14 +179,14 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
             Marshal.StructureToPtr(property, propertyPointer, false);
             var completion = new AudioActivationCompletionHandler(this);
             var audioClientId = _audioClientInterfaceId;
-            ThrowIfFailed(_activateAudioInterfaceAsync(
+            ThrowIfFailed(_nativeService.ActivateAudioInterface(
                 VirtualAudioDeviceProcessLoopback,
                 ref audioClientId,
                 propertyPointer,
                 completion,
-                out var operation));
+                out var activationOperation));
             try { return completion.Wait(TimeSpan.FromSeconds(12)); }
-            finally { ReleaseComObject(operation); }
+            finally { ReleaseComObject(activationOperation); }
         }
         finally
         {
@@ -233,29 +214,19 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         if (_thread.IsAlive) _thread.Join(TimeSpan.FromSeconds(3));
         _started.Dispose();
         _cancellation.Dispose();
-        if (!_thread.IsAlive)
-        {
-            NativeLibrary.Free(_ole32Library);
-            NativeLibrary.Free(_mmDevApiLibrary);
-        }
     }
 
-    private sealed class AudioActivationCompletionHandler : IActivateAudioInterfaceCompletionHandler
+    private sealed class AudioActivationCompletionHandler(WindowsProcessLoopbackCapture owner)
+        : IActivateAudioInterfaceCompletionHandler
     {
-        private readonly WindowsProcessLoopbackCapture _owner;
         private readonly TaskCompletionSource<IAudioClient> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        public AudioActivationCompletionHandler(WindowsProcessLoopbackCapture owner)
-        {
-            _owner = owner;
-        }
 
         public int ActivateCompleted(IActivateAudioInterfaceAsyncOperation operation)
         {
             try
             {
-                _owner.ThrowIfFailed(operation.GetActivateResult(out var activationResult, out var activated));
-                _owner.ThrowIfFailed(activationResult);
+                owner.ThrowIfFailed(operation.GetActivateResult(out var activationResult, out var activated));
+                owner.ThrowIfFailed(activationResult);
                 _completion.TrySetResult((IAudioClient)activated);
             }
             catch (Exception exception) { _completion.TrySetException(exception); }
@@ -268,20 +239,6 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
             return _completion.Task.GetAwaiter().GetResult();
         }
     }
-
-    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    private delegate int ActivateAudioInterfaceAsyncDelegate(
-        [MarshalAs(UnmanagedType.LPWStr)] string deviceInterfacePath,
-        ref Guid riid,
-        IntPtr activationParams,
-        [MarshalAs(UnmanagedType.Interface)] IActivateAudioInterfaceCompletionHandler completionHandler,
-        [MarshalAs(UnmanagedType.Interface)] out IActivateAudioInterfaceAsyncOperation activationOperation);
-
-    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-    private delegate int CoInitializeExDelegate(IntPtr reserved, uint coInit);
-
-    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-    private delegate void CoUninitializeDelegate();
 
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientActivationParams

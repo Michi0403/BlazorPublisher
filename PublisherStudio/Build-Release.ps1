@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
+    [ValidateSet("win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
     [string]$Runtime = "win-x64",
     [string]$Configuration = "Release",
     [string]$WireProtocolVersion = "2.1.0",
@@ -83,6 +83,7 @@ if (-not (Test-Path -LiteralPath $wireProtocolPackage -PathType Leaf)) {
 
 $profile = switch ($Runtime) {
     "win-x64"     { @{ Asset = "winx64";     SetupAsset = "setupwinx64";     AppFolder = "winx64";     SetupFolder = "setupwinx64" } }
+    "win-x86"     { @{ Asset = "winx86";     SetupAsset = "setupwinx86";     AppFolder = "winx86";     SetupFolder = "setupwinx86" } }
     "win-arm64"   { @{ Asset = "winarm64";   SetupAsset = "setupwinarm64";   AppFolder = "winarm64";   SetupFolder = "setupwinarm64" } }
     "linux-x64"   { @{ Asset = "linx64";     SetupAsset = "setuplinx64";     AppFolder = "linx64";     SetupFolder = "setuplinx64" } }
     "linux-arm64" { @{ Asset = "linarm64";   SetupAsset = "setuplinarm64";   AppFolder = "linarm64";   SetupFolder = "setuplinarm64" } }

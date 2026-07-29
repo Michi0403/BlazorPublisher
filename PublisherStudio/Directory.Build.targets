@@ -207,7 +207,7 @@
   </Target>
 
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
   </PropertyGroup>
 
@@ -222,7 +222,7 @@
           ConsoleToMSBuild="true"
           StandardOutputImportance="High"
           StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <!--<PropertyGroup>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>

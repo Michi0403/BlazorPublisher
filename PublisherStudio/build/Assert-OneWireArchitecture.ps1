@@ -22,7 +22,7 @@ $interfaces = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins
 $connection = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\LocalGptConnectionService.cs'
 $state = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\OrganicPluginStateServices.cs'
 $discovery = Read-OptionalText 'src\PublisherStudio.Web\HostedServices\OrganicPlugins\LocalGptDiscoveryHostedService.cs'
-$host = Read-OptionalText 'src\PublisherStudio.Web\Services\ApplicationHostServices.cs'
+$applicationHost = Read-OptionalText 'src\PublisherStudio.Web\Services\ApplicationHostServices.cs'
 $systemVariableStore = Read-OptionalText 'src\PublisherStudio.Web\Services\Configuration\SystemVariableStoreService.cs'
 $settingsPath = Join-Path $root 'src\PublisherStudio.Web\appsettings.json'
 
@@ -35,7 +35,7 @@ if ($state -and $state -notmatch 'class OrganicReplayGuard') { Add-Finding 'The 
 if ($connection -and $connection -notmatch 'connectionIsLoopback') { Add-Finding 'Connection transport locality is no longer tracked.' }
 if ($connection -and $connection -notmatch 'SourcePeerId does not match the peer identity owned by this connection') { Add-Finding 'The TCP connection no longer pins SourcePeerId to its discovered peer.' }
 if ($discovery -and $discovery -notmatch 'automaticallyAttemptedPeers\.Remove') { Add-Finding 'Failed automatic connections will not become retryable.' }
-if ($host -and $host -notmatch 'systemVariables\.DefaultPort') { Add-Finding 'PublisherStudio port resolution no longer uses systemVariables.DefaultPort.' }
+if ($applicationHost -and $applicationHost -notmatch 'systemVariables\.DefaultPort') { Add-Finding 'PublisherStudio port resolution no longer uses systemVariables.DefaultPort.' }
 if ($systemVariableStore -and $systemVariableStore -notmatch 'Application\.DefaultPort') { Add-Finding 'SystemVariableStoreService.cs no longer owns Application.DefaultPort.' }
 
 if (-not (Test-Path -LiteralPath $settingsPath -PathType Leaf)) {

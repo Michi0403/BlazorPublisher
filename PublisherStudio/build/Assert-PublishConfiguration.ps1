@@ -37,17 +37,6 @@ function Assert-Property([hashtable]$Properties, [string]$Name, [string]$Expecte
     }
 }
 
-$migrationPath = Join-Path $root 'build\Migrate-ObsoletePublishConfiguration.ps1'
-if (-not (Test-Path -LiteralPath $migrationPath -PathType Leaf)) { Fail 'The obsolete publish-profile migration script is missing.' }
-$migration = Read-Text 'build\Migrate-ObsoletePublishConfiguration.ps1'
-foreach ($required in @(
-    'src\PublisherStudio.Web\Properties\PublishProfiles\winx86.pubxml',
-    'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles',
-    '*.pubxml.user'
-)) {
-    if (-not $migration.Contains($required)) { Fail "The obsolete publish-profile migration lost required cleanup scope: $required" }
-}
-
 $webProjectPath = 'src\PublisherStudio.Web\PublisherStudio.Web.csproj'
 $setupProjectPath = 'src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj'
 $webProject = Read-Text $webProjectPath

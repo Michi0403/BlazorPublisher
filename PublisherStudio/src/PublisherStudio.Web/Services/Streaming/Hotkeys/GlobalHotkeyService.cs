@@ -18,9 +18,44 @@ public sealed class GlobalHotkeyService : IDisposable
     private readonly ConcurrentDictionary<Guid, ConcurrentQueue<MediaHostHotkeyEvent>> _events = new();
     private readonly Dictionary<int, RegisteredHotkey> _registered = [];
     private readonly ManualResetEventSlim _started = new(false);
+    private readonly IntPtr _user32Library;
+    private readonly IntPtr _kernel32Library;
+    private readonly RegisterHotKeyDelegate? _registerHotKey;
+    private readonly UnregisterHotKeyDelegate? _unregisterHotKey;
+    private readonly GetMessageDelegate? _getMessage;
+    private readonly PeekMessageDelegate? _peekMessage;
+    private readonly PostThreadMessageDelegate? _postThreadMessage;
+    private readonly GetCurrentThreadIdDelegate? _getCurrentThreadId;
     private Thread? _thread;
     private uint _threadId;
     private int _nextNativeId = 100;
+    private bool _disposed;
+
+    public GlobalHotkeyService()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var user32Library = NativeLibrary.Load("user32.dll");
+        var kernel32Library = IntPtr.Zero;
+        try
+        {
+            kernel32Library = NativeLibrary.Load("kernel32.dll");
+            _registerHotKey = Marshal.GetDelegateForFunctionPointer<RegisterHotKeyDelegate>(NativeLibrary.GetExport(user32Library, "RegisterHotKey"));
+            _unregisterHotKey = Marshal.GetDelegateForFunctionPointer<UnregisterHotKeyDelegate>(NativeLibrary.GetExport(user32Library, "UnregisterHotKey"));
+            _getMessage = Marshal.GetDelegateForFunctionPointer<GetMessageDelegate>(NativeLibrary.GetExport(user32Library, "GetMessageW"));
+            _peekMessage = Marshal.GetDelegateForFunctionPointer<PeekMessageDelegate>(NativeLibrary.GetExport(user32Library, "PeekMessageW"));
+            _postThreadMessage = Marshal.GetDelegateForFunctionPointer<PostThreadMessageDelegate>(NativeLibrary.GetExport(user32Library, "PostThreadMessageW"));
+            _getCurrentThreadId = Marshal.GetDelegateForFunctionPointer<GetCurrentThreadIdDelegate>(NativeLibrary.GetExport(kernel32Library, "GetCurrentThreadId"));
+            _user32Library = user32Library;
+            _kernel32Library = kernel32Library;
+        }
+        catch
+        {
+            if (kernel32Library != IntPtr.Zero) NativeLibrary.Free(kernel32Library);
+            NativeLibrary.Free(user32Library);
+            throw;
+        }
+    }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -34,7 +69,7 @@ public sealed class GlobalHotkeyService : IDisposable
     public Task StopAsync(CancellationToken cancellationToken)
     {
         if (_thread is null) return Task.CompletedTask;
-        PostThreadMessage(_threadId, WmQuit, UIntPtr.Zero, IntPtr.Zero);
+        _postThreadMessage!(_threadId, WmQuit, UIntPtr.Zero, IntPtr.Zero);
         _thread.Join(TimeSpan.FromSeconds(2));
         return Task.CompletedTask;
     }
@@ -49,7 +84,7 @@ public sealed class GlobalHotkeyService : IDisposable
             {
                 if (!TryParseGesture(hotkey.Gesture, out var modifiers, out var virtualKey)) continue;
                 var nativeId = Interlocked.Increment(ref _nextNativeId);
-                if (!RegisterHotKey(IntPtr.Zero, nativeId, modifiers | ModNoRepeat, virtualKey)) continue;
+                if (!_registerHotKey!(IntPtr.Zero, nativeId, modifiers | ModNoRepeat, virtualKey)) continue;
                 _registered[nativeId] = new RegisteredHotkey(sessionId, hotkey.Command, hotkey.TargetId);
                 _events.TryAdd(sessionId, new ConcurrentQueue<MediaHostHotkeyEvent>());
             }
@@ -74,15 +109,15 @@ public sealed class GlobalHotkeyService : IDisposable
     private void Enqueue(Action command)
     {
         _commands.Enqueue(command);
-        if (_threadId != 0) PostThreadMessage(_threadId, WmCommand, UIntPtr.Zero, IntPtr.Zero);
+        if (_threadId != 0) _postThreadMessage!(_threadId, WmCommand, UIntPtr.Zero, IntPtr.Zero);
     }
 
     private void MessageLoop()
     {
-        _threadId = GetCurrentThreadId();
-        PeekMessage(out _, IntPtr.Zero, 0, 0, 0);
+        _threadId = _getCurrentThreadId!();
+        _peekMessage!(out _, IntPtr.Zero, 0, 0, 0);
         _started.Set();
-        while (GetMessage(out var message, IntPtr.Zero, 0, 0) > 0)
+        while (_getMessage!(out var message, IntPtr.Zero, 0, 0) > 0)
         {
             if (message.Message == WmCommand)
             {
@@ -95,7 +130,7 @@ public sealed class GlobalHotkeyService : IDisposable
             var queue = _events.GetOrAdd(hotkey.SessionId, _ => new ConcurrentQueue<MediaHostHotkeyEvent>());
             queue.Enqueue(new MediaHostHotkeyEvent(hotkey.Command, hotkey.TargetId, DateTimeOffset.UtcNow));
         }
-        foreach (var nativeId in _registered.Keys.ToArray()) UnregisterHotKey(IntPtr.Zero, nativeId);
+        foreach (var nativeId in _registered.Keys.ToArray()) _unregisterHotKey!(IntPtr.Zero, nativeId);
         _registered.Clear();
     }
 
@@ -103,7 +138,7 @@ public sealed class GlobalHotkeyService : IDisposable
     {
         foreach (var pair in _registered.Where(pair => pair.Value.SessionId == sessionId).ToArray())
         {
-            UnregisterHotKey(IntPtr.Zero, pair.Key);
+            _unregisterHotKey!(IntPtr.Zero, pair.Key);
             _registered.Remove(pair.Key);
         }
     }
@@ -153,8 +188,15 @@ public sealed class GlobalHotkeyService : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         try { StopAsync(CancellationToken.None).GetAwaiter().GetResult(); } catch { }
         _started.Dispose();
+        if (_thread is null || !_thread.IsAlive)
+        {
+            if (_kernel32Library != IntPtr.Zero) NativeLibrary.Free(_kernel32Library);
+            if (_user32Library != IntPtr.Zero) NativeLibrary.Free(_user32Library);
+        }
     }
 
     private sealed record RegisteredHotkey(Guid SessionId, string Command, Guid? TargetId);
@@ -174,22 +216,26 @@ public sealed class GlobalHotkeyService : IDisposable
     [StructLayout(LayoutKind.Sequential)]
     private struct NativePoint { public int X; public int Y; }
 
-    [DllImport("user32.dll", SetLastError = true)]
-    private extern bool RegisterHotKey(IntPtr hWnd, int id, uint modifiers, uint virtualKey);
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private delegate bool RegisterHotKeyDelegate(IntPtr hWnd, int id, uint modifiers, uint virtualKey);
 
-    [DllImport("user32.dll", SetLastError = true)]
-    private extern bool UnregisterHotKey(IntPtr hWnd, int id);
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private delegate bool UnregisterHotKeyDelegate(IntPtr hWnd, int id);
 
-    [DllImport("user32.dll")]
-    private extern int GetMessage(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter);
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    private delegate int GetMessageDelegate(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter);
 
-    [DllImport("user32.dll")]
-    private extern bool PeekMessage(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter, uint removeMessage);
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private delegate bool PeekMessageDelegate(out NativeMessage message, IntPtr hWnd, uint minFilter, uint maxFilter, uint removeMessage);
 
-    [DllImport("user32.dll")]
-    private extern bool PostThreadMessage(uint threadId, uint message, UIntPtr wParam, IntPtr lParam);
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private delegate bool PostThreadMessageDelegate(uint threadId, uint message, UIntPtr wParam, IntPtr lParam);
 
-    [DllImport("kernel32.dll")]
-    private extern uint GetCurrentThreadId();
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    private delegate uint GetCurrentThreadIdDelegate();
 }
 

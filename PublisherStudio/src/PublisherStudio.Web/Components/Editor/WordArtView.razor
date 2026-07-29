@@ -316,7 +316,7 @@
         _ => "cover"
     };
 
-    private string WarpPath => WordArtPathGeometry.Build(Item);
+    private string WarpPath => WordArtGeometry.Build(Item);
     private string PathStartOffset => $"{Math.Clamp(Item.PathStartOffsetPercent, 0, 100).ToString("0.##", CultureInfo.InvariantCulture)}%";
 
     private string SafeColor(string? value, string fallback)

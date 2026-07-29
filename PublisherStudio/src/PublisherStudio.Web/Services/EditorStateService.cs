@@ -16,6 +16,11 @@ public sealed class EditorStateService : IDisposable
     private readonly PublicationStreamingSettingsStore _streamingSettings;
     private readonly PanelDocumentService _panels;
     private readonly ISystemVariableStoreService _systemVariables;
+    private readonly PublicationMediaData _mediaData;
+    private readonly PublicationElementTraversal _elementTraversal;
+    private readonly ILogger<EditorStateService> _logger;
+    private readonly RichTextDocumentFactory _richTextFactory;
+    private readonly IPublisherDocumentFactory _documentFactory;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private readonly List<PublicationElement> _clipboard = [];
@@ -34,7 +39,12 @@ public sealed class EditorStateService : IDisposable
         PublicationWebDataService webData,
         PublicationStreamingSettingsStore streamingSettings,
         PanelDocumentService panels,
-        ISystemVariableStoreService systemVariables)
+        ISystemVariableStoreService systemVariables,
+        PublicationMediaData mediaData,
+        PublicationElementTraversal elementTraversal,
+        RichTextDocumentFactory richTextFactory,
+        IPublisherDocumentFactory documentFactory,
+        ILogger<EditorStateService> logger)
     {
         _files = files;
         _data = data;
@@ -46,7 +56,12 @@ public sealed class EditorStateService : IDisposable
         _streamingSettings = streamingSettings;
         _panels = panels;
         _systemVariables = systemVariables;
-        Document = PublicationDocument.CreateDefault();
+        _mediaData = mediaData;
+        _elementTraversal = elementTraversal;
+        _logger = logger;
+        _richTextFactory = richTextFactory;
+        _documentFactory = documentFactory;
+        Document = _documentFactory.CreatePublication();
         Document.Streaming = _streamingSettings.LoadOrDefault(Document.Id);
         _files.NormalizeStreamingSettings(Document);
         SelectedPageId = Document.Pages[0].Id;
@@ -76,362 +91,583 @@ public sealed class EditorStateService : IDisposable
     public bool HasMultipleSelection => _selectedElementIds.Count > 1;
     public bool CanGroupSelection => SelectedElements.Count(element => element is not ConnectorElement && !element.Locked) > 1;
     public bool CanUngroupSelection => SelectedElements.Any(element => element.GroupId is not null);
-    public bool IsSelected(Guid id) => _selectedElementIds.Contains(id);
+    public bool IsSelected(Guid id) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.IsSelected.");
+            return _selectedElementIds.Contains(id);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.IsSelected failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public void NewDocument()
     {
-        PersistStreamingSettings();
-        RemoveMediaAssets(Document);
-        _liveData.Unregister(Document.Id);
-        Document = PublicationDocument.CreateDefault();
-        Document.Streaming = _streamingSettings.LoadOrDefault(Document.Id);
-        _files.NormalizeStreamingSettings(Document);
-        SelectedPageId = Document.Pages[0].Id;
-        ClearSelectionCore();
-        CropMode = false;
-        ContentPanMode = false;
-        ConnectorTool = ConnectorToolKind.None;
-        _undo.Clear();
-        _redo.Clear();
-        _liveEditKey = null;
-        _lastInsertionX = null;
-        _lastInsertionY = null;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.NewDocument.");
+                    PersistStreamingSettings();
+                    RemoveMediaAssets(Document);
+                    _liveData.Unregister(Document.Id);
+                    Document = _documentFactory.CreatePublication();
+                    Document.Streaming = _streamingSettings.LoadOrDefault(Document.Id);
+                    _files.NormalizeStreamingSettings(Document);
+                    SelectedPageId = Document.Pages[0].Id;
+                    ClearSelectionCore();
+                    CropMode = false;
+                    ContentPanMode = false;
+                    ConnectorTool = ConnectorToolKind.None;
+                    _undo.Clear();
+                    _redo.Clear();
+                    _liveEditKey = null;
+                    _lastInsertionX = null;
+                    _lastInsertionY = null;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NewDocument failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void Load(string json)
     {
-        PersistStreamingSettings();
-        RemoveMediaAssets(Document);
-        _liveData.Unregister(Document.Id);
-        var hasEmbeddedStreaming = _files.HasEmbeddedStreamingSettings(json);
-        var loaded = _files.Deserialize(json);
-        if (_streamingSettings.TryLoad(loaded.Id, out var localStreaming))
-            loaded.Streaming = localStreaming;
-        else if (hasEmbeddedStreaming)
+        try
         {
-            try { _streamingSettings.Save(loaded.Id, loaded.Streaming); }
-            catch { }
+            logger.LogTrace($"Entering EditorStateService.Load.");
+                    PersistStreamingSettings();
+                    RemoveMediaAssets(Document);
+                    _liveData.Unregister(Document.Id);
+                    var hasEmbeddedStreaming = _files.HasEmbeddedStreamingSettings(json);
+                    var loaded = _files.Deserialize(json);
+                    if (_streamingSettings.TryLoad(loaded.Id, out var localStreaming))
+                        loaded.Streaming = localStreaming;
+                    else if (hasEmbeddedStreaming)
+                    {
+                        try { _streamingSettings.Save(loaded.Id, loaded.Streaming); }
+                        catch { }
+                    }
+                    else
+                        loaded.Streaming = new PublicationStreamingSettings();
+                    _files.NormalizeStreamingSettings(loaded);
+                    Document = loaded;
+                    _mediaAssets.RegisterDocument(Document);
+                    SelectedPageId = Document.Pages[0].Id;
+                    ClearSelectionCore();
+                    CropMode = false;
+                    ContentPanMode = false;
+                    ConnectorTool = ConnectorToolKind.None;
+                    _undo.Clear();
+                    _redo.Clear();
+                    _liveEditKey = null;
+                    _lastInsertionX = null;
+                    _lastInsertionY = null;
+                    IsDirty = false;
+                    Revision++;
+                    Notify(false);
+    
         }
-        else
-            loaded.Streaming = new PublicationStreamingSettings();
-        _files.NormalizeStreamingSettings(loaded);
-        Document = loaded;
-        _mediaAssets.RegisterDocument(Document);
-        SelectedPageId = Document.Pages[0].Id;
-        ClearSelectionCore();
-        CropMode = false;
-        ContentPanMode = false;
-        ConnectorTool = ConnectorToolKind.None;
-        _undo.Clear();
-        _redo.Clear();
-        _liveEditKey = null;
-        _lastInsertionX = null;
-        _lastInsertionY = null;
-        IsDirty = false;
-        Revision++;
-        Notify(false);
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Load failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void LoadRecovery(string json)
     {
-        Load(json);
-        IsDirty = true;
-        Revision++;
-        Changed?.Invoke();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.LoadRecovery.");
+                    Load(json);
+                    IsDirty = true;
+                    Revision++;
+                    Changed?.Invoke();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.LoadRecovery failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void MarkSaved()
     {
-        IsDirty = false;
-        Revision++;
-        Changed?.Invoke();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.MarkSaved.");
+                    IsDirty = false;
+                    Revision++;
+                    Changed?.Invoke();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.MarkSaved failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void RenameDocument(string value)
     {
-        value = string.IsNullOrWhiteSpace(value) ? _systemVariables.DefaultDocumentName : value.Trim();
-        if (string.Equals(Document.Name, value, StringComparison.Ordinal)) return;
-        Capture();
-        Document.Name = value;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.RenameDocument.");
+                    value = string.IsNullOrWhiteSpace(value) ? _systemVariables.DefaultDocumentName : value.Trim();
+                    if (string.Equals(Document.Name, value, StringComparison.Ordinal)) return;
+                    Capture();
+                    Document.Name = value;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.RenameDocument failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetPublicationCulture(string culture)
     {
-        culture = string.IsNullOrWhiteSpace(culture) ? _systemVariables.DefaultCulture : culture.Trim();
-        if (string.Equals(Document.ProjectSettings.Culture, culture, StringComparison.OrdinalIgnoreCase)) return;
-        Capture();
-        Document.ProjectSettings.Culture = culture;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetPublicationCulture.");
+                    culture = string.IsNullOrWhiteSpace(culture) ? _systemVariables.DefaultCulture : culture.Trim();
+                    if (string.Equals(Document.ProjectSettings.Culture, culture, StringComparison.OrdinalIgnoreCase)) return;
+                    Capture();
+                    Document.ProjectSettings.Culture = culture;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetPublicationCulture failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetInsertionPoint(double x, double y)
     {
-        _lastInsertionX = Math.Clamp(x, 0, CurrentPage.WidthMm);
-        _lastInsertionY = Math.Clamp(y, 0, CurrentPage.HeightMm);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetInsertionPoint.");
+                    _lastInsertionX = Math.Clamp(x, 0, CurrentPage.WidthMm);
+                    _lastInsertionY = Math.Clamp(y, 0, CurrentPage.HeightMm);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetInsertionPoint failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SelectPage(Guid id)
     {
-        if (Document.Pages.All(p => p.Id != id)) return;
-        SelectedPageId = id;
-        ClearSelectionCore();
-        CropMode = false;
-        ContentPanMode = false;
-        ConnectorTool = ConnectorToolKind.None;
-        EndLiveEdit();
-        _lastInsertionX = null;
-        _lastInsertionY = null;
-        Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SelectPage.");
+                    if (Document.Pages.All(p => p.Id != id)) return;
+                    SelectedPageId = id;
+                    ClearSelectionCore();
+                    CropMode = false;
+                    ContentPanMode = false;
+                    ConnectorTool = ConnectorToolKind.None;
+                    EndLiveEdit();
+                    _lastInsertionX = null;
+                    _lastInsertionY = null;
+                    Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SelectPage failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SelectElement(Guid? id, bool additive = false)
     {
-        if (id is null)
+        try
         {
-            if (_selectedElementIds.Count == 0 && SelectedElementId is null) return;
-            ClearSelectionCore();
-            CropMode = false;
-            ContentPanMode = false;
-            EndLiveEdit();
-            Notify(false);
-            return;
+            logger.LogTrace($"Entering EditorStateService.SelectElement.");
+                    if (id is null)
+                    {
+                        if (_selectedElementIds.Count == 0 && SelectedElementId is null) return;
+                        ClearSelectionCore();
+                        CropMode = false;
+                        ContentPanMode = false;
+                        EndLiveEdit();
+                        Notify(false);
+                        return;
+                    }
+
+                    var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == id.Value);
+                    if (element is null) return;
+                    var selection = SelectionUnit(element).Select(item => item.Id).ToHashSet();
+                    var previousPrimary = SelectedElementId;
+                    var previousSelection = _selectedElementIds.ToHashSet();
+
+                    if (additive)
+                    {
+                        if (selection.All(_selectedElementIds.Contains))
+                            _selectedElementIds.ExceptWith(selection);
+                        else
+                            _selectedElementIds.UnionWith(selection);
+                    }
+                    else
+                    {
+                        _selectedElementIds.Clear();
+                        _selectedElementIds.UnionWith(selection);
+                    }
+
+                    if (_selectedElementIds.Contains(id.Value)) SelectedElementId = id.Value;
+                    else if (previousPrimary is { } previous && _selectedElementIds.Contains(previous)) SelectedElementId = previous;
+                    else SelectedElementId = _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
+
+                    var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
+                    var contentPanChanged = ContentPanMode && (previousPrimary != SelectedElementId || _selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
+                    if (cropChanged) CropMode = false;
+                    if (contentPanChanged) ContentPanMode = false;
+                    EndLiveEdit();
+                    if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged || contentPanChanged) Notify(false);
+    
         }
-
-        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == id.Value);
-        if (element is null) return;
-        var selection = SelectionUnit(element).Select(item => item.Id).ToHashSet();
-        var previousPrimary = SelectedElementId;
-        var previousSelection = _selectedElementIds.ToHashSet();
-
-        if (additive)
+        catch (Exception exception)
         {
-            if (selection.All(_selectedElementIds.Contains))
-                _selectedElementIds.ExceptWith(selection);
-            else
-                _selectedElementIds.UnionWith(selection);
+            logger.LogError(exception, $"EditorStateService.SelectElement failed: {exception.Message}");
+            throw;
         }
-        else
-        {
-            _selectedElementIds.Clear();
-            _selectedElementIds.UnionWith(selection);
-        }
-
-        if (_selectedElementIds.Contains(id.Value)) SelectedElementId = id.Value;
-        else if (previousPrimary is { } previous && _selectedElementIds.Contains(previous)) SelectedElementId = previous;
-        else SelectedElementId = _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
-
-        var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
-        var contentPanChanged = ContentPanMode && (previousPrimary != SelectedElementId || _selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
-        if (cropChanged) CropMode = false;
-        if (contentPanChanged) ContentPanMode = false;
-        EndLiveEdit();
-        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged || contentPanChanged) Notify(false);
     }
 
     public void SetSelection(IEnumerable<Guid> ids)
     {
-        var requested = ids
-            .Distinct()
-            .Select(id => CurrentPage.Elements.FirstOrDefault(element => element.Id == id))
-            .Where(element => element is not null)
-            .Cast<PublicationElement>()
-            .ToList();
-        var expanded = requested
-            .SelectMany(SelectionUnit)
-            .DistinctBy(element => element.Id)
-            .ToList();
-        var previousPrimary = SelectedElementId;
-        var previousSelection = _selectedElementIds.ToHashSet();
-        SetSelectionCore(expanded.Select(element => element.Id), requested.LastOrDefault()?.Id);
-        var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
-        var contentPanChanged = ContentPanMode && (previousPrimary != SelectedElementId || _selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
-        if (cropChanged) CropMode = false;
-        if (contentPanChanged) ContentPanMode = false;
-        EndLiveEdit();
-        if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged || contentPanChanged)
-            Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetSelection.");
+                    var requested = ids
+                        .Distinct()
+                        .Select(id => CurrentPage.Elements.FirstOrDefault(element => element.Id == id))
+                        .Where(element => element is not null)
+                        .Cast<PublicationElement>()
+                        .ToList();
+                    var expanded = requested
+                        .SelectMany(SelectionUnit)
+                        .DistinctBy(element => element.Id)
+                        .ToList();
+                    var previousPrimary = SelectedElementId;
+                    var previousSelection = _selectedElementIds.ToHashSet();
+                    SetSelectionCore(expanded.Select(element => element.Id), requested.LastOrDefault()?.Id);
+                    var cropChanged = CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement);
+                    var contentPanChanged = ContentPanMode && (previousPrimary != SelectedElementId || _selectedElementIds.Count != 1 || !CanPanContent(SelectedElement));
+                    if (cropChanged) CropMode = false;
+                    if (contentPanChanged) ContentPanMode = false;
+                    EndLiveEdit();
+                    if (!previousSelection.SetEquals(_selectedElementIds) || previousPrimary != SelectedElementId || cropChanged || contentPanChanged)
+                        Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetSelection failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetPrimarySelection(Guid id)
     {
-        if (!_selectedElementIds.Contains(id))
+        try
         {
-            SelectElement(id);
-            return;
+            logger.LogTrace($"Entering EditorStateService.SetPrimarySelection.");
+                    if (!_selectedElementIds.Contains(id))
+                    {
+                        SelectElement(id);
+                        return;
+                    }
+                    if (SelectedElementId == id) return;
+                    SelectedElementId = id;
+                    if (CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement)) CropMode = false;
+                    if (ContentPanMode) ContentPanMode = false;
+                    EndLiveEdit();
+                    Notify(false);
+    
         }
-        if (SelectedElementId == id) return;
-        SelectedElementId = id;
-        if (CropMode && (_selectedElementIds.Count != 1 || SelectedElement is not ImageFrameElement)) CropMode = false;
-        if (ContentPanMode) ContentPanMode = false;
-        EndLiveEdit();
-        Notify(false);
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetPrimarySelection failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void GroupSelected()
     {
-        var elements = SelectedElements.Where(element => element is not ConnectorElement && !element.Locked).ToList();
-        if (elements.Count < 2) return;
-        Capture();
-        var groupId = Guid.NewGuid();
-        foreach (var element in elements) element.GroupId = groupId;
-        SetSelectionCore(elements.Select(element => element.Id), SelectedElementId);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.GroupSelected.");
+                    var elements = SelectedElements.Where(element => element is not ConnectorElement && !element.Locked).ToList();
+                    if (elements.Count < 2) return;
+                    Capture();
+                    var groupId = Guid.NewGuid();
+                    foreach (var element in elements) element.GroupId = groupId;
+                    SetSelectionCore(elements.Select(element => element.Id), SelectedElementId);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.GroupSelected failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UngroupSelected()
     {
-        var selectedIds = _selectedElementIds.ToArray();
-        var groupIds = SelectedElements.Where(element => element.GroupId is not null).Select(element => element.GroupId!.Value).ToHashSet();
-        if (groupIds.Count == 0) return;
-        Capture();
-        var affected = CurrentPage.Elements.Where(element => element.GroupId is { } groupId && groupIds.Contains(groupId)).ToList();
-        foreach (var element in affected) element.GroupId = null;
-        SetSelectionCore(selectedIds, SelectedElementId);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UngroupSelected.");
+                    var selectedIds = _selectedElementIds.ToArray();
+                    var groupIds = SelectedElements.Where(element => element.GroupId is not null).Select(element => element.GroupId!.Value).ToHashSet();
+                    if (groupIds.Count == 0) return;
+                    Capture();
+                    var affected = CurrentPage.Elements.Where(element => element.GroupId is { } groupId && groupIds.Contains(groupId)).ToList();
+                    foreach (var element in affected) element.GroupId = null;
+                    SetSelectionCore(selectedIds, SelectedElementId);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UngroupSelected failed: {exception.Message}");
+            throw;
+        }
     }
 
     public TextFrameElement AddText(double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var element = new TextFrameElement
+        try
         {
-            Name = NextName("Text Box"),
-            X = 25,
-            Y = 25,
-            Width = 90,
-            Height = 45,
-            ZIndex = NextZ(),
-            PreviewHtml = "<p style=\"margin:0;font:12pt Segoe UI\">New text box</p>",
-            DocumentContent = RichTextDocumentFactory.CreateOpenXml("New text box"),
-            StoryFormat = StoryStorageFormat.OpenXml
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddText.");
+                    Capture();
+                    var element = new TextFrameElement
+                    {
+                        Name = NextName("Text Box"),
+                        X = 25,
+                        Y = 25,
+                        Width = 90,
+                        Height = 45,
+                        ZIndex = NextZ(),
+                        PreviewHtml = "<p style=\"margin:0;font:12pt Segoe UI\">New text box</p>",
+                        DocumentContent = _richTextFactory.CreateOpenXml("New text box"),
+                        StoryFormat = StoryStorageFormat.OpenXml
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddText failed: {exception.Message}");
+            throw;
+        }
     }
 
     public SpreadsheetElement AddSpreadsheet(byte[] content, string fileName, SpreadsheetStorageFormat format, double? centerX = null, double? centerY = null)
     {
-        _spreadsheets.ValidateWorkbookContent(content, format);
-        Capture();
-        var preview = _spreadsheets.RenderPreviewHtml(content, format, out var activeSheetName);
-        var element = new SpreadsheetElement
+        try
         {
-            Name = NextName(string.IsNullOrWhiteSpace(fileName) ? "Spreadsheet" : Path.GetFileNameWithoutExtension(fileName)),
-            WorkbookContent = content.ToArray(),
-            WorkbookFileName = _spreadsheets.NormalizeWorkbookFileName(fileName, format),
-            StorageFormat = format,
-            PreviewHtml = preview,
-            ActiveSheetName = activeSheetName,
-            X = 28,
-            Y = 35,
-            Width = 125,
-            Height = 78,
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddSpreadsheet.");
+                    _spreadsheets.ValidateWorkbookContent(content, format);
+                    Capture();
+                    var preview = _spreadsheets.RenderPreviewHtml(content, format, out var activeSheetName);
+                    var element = new SpreadsheetElement
+                    {
+                        Name = NextName(string.IsNullOrWhiteSpace(fileName) ? "Spreadsheet" : Path.GetFileNameWithoutExtension(fileName)),
+                        WorkbookContent = content.ToArray(),
+                        WorkbookFileName = _spreadsheets.NormalizeWorkbookFileName(fileName, format),
+                        StorageFormat = format,
+                        PreviewHtml = preview,
+                        ActiveSheetName = activeSheetName,
+                        X = 28,
+                        Y = 35,
+                        Width = 125,
+                        Height = 78,
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddSpreadsheet failed: {exception.Message}");
+            throw;
+        }
     }
 
     public PanelElement AddPanel(string presetId = "blank", double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var element = _panels.CreatePreset(Document, presetId);
-        element.Name = NextName(element.Name);
-        element.ZIndex = NextZ();
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.AddPanel.");
+                    Capture();
+                    var element = _panels.CreatePreset(Document, presetId);
+                    element.Name = NextName(element.Name);
+                    element.ZIndex = NextZ();
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddPanel failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public HtmlEmbedElement AddHtmlEmbed(double? centerX = null, double? centerY = null) =>
-        AddHtmlEmbed(_ => { }, centerX, centerY);
+    public HtmlEmbedElement AddHtmlEmbed(double? centerX = null, double? centerY = null) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.AddHtmlEmbed.");
+            return AddHtmlEmbed(_ => { }, centerX, centerY);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddHtmlEmbed failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public HtmlEmbedElement AddHtmlEmbed(Action<HtmlEmbedElement> configure, double? centerX = null, double? centerY = null)
     {
-        ArgumentNullException.ThrowIfNull(configure);
-        Capture();
-        var element = new HtmlEmbedElement
+        try
         {
-            Name = NextName("Web Content"),
-            X = 30,
-            Y = 35,
-            Width = 120,
-            Height = 72,
-            ZIndex = NextZ()
-        };
-        configure(element);
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddHtmlEmbed.");
+                    ArgumentNullException.ThrowIfNull(configure);
+                    Capture();
+                    var element = new HtmlEmbedElement
+                    {
+                        Name = NextName("Web Content"),
+                        X = 30,
+                        Y = 35,
+                        Width = 120,
+                        Height = 72,
+                        ZIndex = NextZ()
+                    };
+                    configure(element);
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddHtmlEmbed failed: {exception.Message}");
+            throw;
+        }
     }
 
     public bool ApplySelectedPanel(PanelElement draft)
     {
-        if (SelectedElement is not PanelElement selected || selected.Locked) return false;
-        Capture();
-        var replacement = (PanelElement)_files.CloneElement(draft);
-        replacement.Id = selected.Id;
-        replacement.X = selected.X;
-        replacement.Y = selected.Y;
-        replacement.Width = selected.Width;
-        replacement.Height = selected.Height;
-        replacement.Rotation = selected.Rotation;
-        replacement.ZIndex = selected.ZIndex;
-        replacement.Visible = selected.Visible;
-        replacement.Locked = selected.Locked;
-        replacement.HiddenAtPresentationStart = selected.HiddenAtPresentationStart;
-        replacement.GroupId = selected.GroupId;
-        replacement.Animations = selected.Animations;
-        replacement.Interaction = selected.Interaction;
-        replacement.ConnectorPorts = selected.ConnectorPorts;
-        _panels.Normalize(Document, replacement);
-        var index = CurrentPage.Elements.FindIndex(element => element.Id == selected.Id);
-        if (index < 0) return false;
-        CurrentPage.Elements[index] = replacement;
-        SetSelectionCore([replacement.Id], replacement.Id);
-        Notify();
-        return true;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ApplySelectedPanel.");
+                    if (SelectedElement is not PanelElement selected || selected.Locked) return false;
+                    Capture();
+                    var replacement = (PanelElement)_files.CloneElement(draft);
+                    replacement.Id = selected.Id;
+                    replacement.X = selected.X;
+                    replacement.Y = selected.Y;
+                    replacement.Width = selected.Width;
+                    replacement.Height = selected.Height;
+                    replacement.Rotation = selected.Rotation;
+                    replacement.ZIndex = selected.ZIndex;
+                    replacement.Visible = selected.Visible;
+                    replacement.Locked = selected.Locked;
+                    replacement.HiddenAtPresentationStart = selected.HiddenAtPresentationStart;
+                    replacement.GroupId = selected.GroupId;
+                    replacement.Animations = selected.Animations;
+                    replacement.Interaction = selected.Interaction;
+                    replacement.ConnectorPorts = selected.ConnectorPorts;
+                    _panels.Normalize(Document, replacement);
+                    var index = CurrentPage.Elements.FindIndex(element => element.Id == selected.Id);
+                    if (index < 0) return false;
+                    CurrentPage.Elements[index] = replacement;
+                    SetSelectionCore([replacement.Id], replacement.Id);
+                    Notify();
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ApplySelectedPanel failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetPanelLibraryVisible(bool visible)
     {
-        if (Document.View.PanelLibraryVisible == visible) return;
-        Capture();
-        Document.View.PanelLibraryVisible = visible;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetPanelLibraryVisible.");
+                    if (Document.View.PanelLibraryVisible == visible) return;
+                    Capture();
+                    Document.View.PanelLibraryVisible = visible;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetPanelLibraryVisible failed: {exception.Message}");
+            throw;
+        }
     }
 
     public bool ApplySelectedHtmlEmbed(HtmlEmbedElement draft)
     {
-        if (SelectedElement is not HtmlEmbedElement selected || selected.Locked) return false;
-        Capture();
-        selected.Name = draft.Name;
-        selected.Html = draft.Html;
-        selected.Css = draft.Css;
-        selected.JavaScript = draft.JavaScript;
-        selected.AllowScripts = draft.AllowScripts;
-        selected.AllowForms = draft.AllowForms;
-        selected.AllowPopups = draft.AllowPopups;
-        selected.AllowSameOrigin = draft.AllowSameOrigin;
-        selected.AllowTopNavigation = draft.AllowTopNavigation;
-        selected.Background = draft.Background;
-        selected.HtmlExportSupport = draft.HtmlExportSupport;
-        selected.HtmlExportNote = draft.HtmlExportNote;
-        selected.InterchangeFormat = draft.InterchangeFormat;
-        Notify();
-        return true;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ApplySelectedHtmlEmbed.");
+                    if (SelectedElement is not HtmlEmbedElement selected || selected.Locked) return false;
+                    Capture();
+                    selected.Name = draft.Name;
+                    selected.Html = draft.Html;
+                    selected.Css = draft.Css;
+                    selected.JavaScript = draft.JavaScript;
+                    selected.AllowScripts = draft.AllowScripts;
+                    selected.AllowForms = draft.AllowForms;
+                    selected.AllowPopups = draft.AllowPopups;
+                    selected.AllowSameOrigin = draft.AllowSameOrigin;
+                    selected.AllowTopNavigation = draft.AllowTopNavigation;
+                    selected.Background = draft.Background;
+                    selected.HtmlExportSupport = draft.HtmlExportSupport;
+                    selected.HtmlExportNote = draft.HtmlExportNote;
+                    selected.InterchangeFormat = draft.InterchangeFormat;
+                    Notify();
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ApplySelectedHtmlEmbed failed: {exception.Message}");
+            throw;
+        }
     }
 
     /// <summary>
@@ -441,436 +677,662 @@ public sealed class EditorStateService : IDisposable
     /// </summary>
     public bool PromoteSelectedHtmlEmbedToPanel(PanelElement draft)
     {
-        if (SelectedElement is not HtmlEmbedElement selected || selected.Locked) return false;
-        Capture();
-        var replacement = (PanelElement)_files.CloneElement(draft);
-        replacement.Id = selected.Id;
-        replacement.Name = string.IsNullOrWhiteSpace(draft.Name) ? selected.Name : draft.Name;
-        replacement.X = selected.X;
-        replacement.Y = selected.Y;
-        replacement.Width = selected.Width;
-        replacement.Height = selected.Height;
-        replacement.Rotation = selected.Rotation;
-        replacement.ZIndex = selected.ZIndex;
-        replacement.Visible = selected.Visible;
-        replacement.Locked = selected.Locked;
-        replacement.HiddenAtPresentationStart = selected.HiddenAtPresentationStart;
-        replacement.GroupId = selected.GroupId;
-        replacement.Animations = selected.Animations;
-        replacement.Interaction = selected.Interaction;
-        replacement.ConnectorPorts = selected.ConnectorPorts;
-        _panels.Normalize(Document, replacement);
-        var index = CurrentPage.Elements.FindIndex(element => element.Id == selected.Id);
-        if (index < 0) return false;
-        CurrentPage.Elements[index] = replacement;
-        SetSelectionCore([replacement.Id], replacement.Id);
-        Notify();
-        return true;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.PromoteSelectedHtmlEmbedToPanel.");
+                    if (SelectedElement is not HtmlEmbedElement selected || selected.Locked) return false;
+                    Capture();
+                    var replacement = (PanelElement)_files.CloneElement(draft);
+                    replacement.Id = selected.Id;
+                    replacement.Name = string.IsNullOrWhiteSpace(draft.Name) ? selected.Name : draft.Name;
+                    replacement.X = selected.X;
+                    replacement.Y = selected.Y;
+                    replacement.Width = selected.Width;
+                    replacement.Height = selected.Height;
+                    replacement.Rotation = selected.Rotation;
+                    replacement.ZIndex = selected.ZIndex;
+                    replacement.Visible = selected.Visible;
+                    replacement.Locked = selected.Locked;
+                    replacement.HiddenAtPresentationStart = selected.HiddenAtPresentationStart;
+                    replacement.GroupId = selected.GroupId;
+                    replacement.Animations = selected.Animations;
+                    replacement.Interaction = selected.Interaction;
+                    replacement.ConnectorPorts = selected.ConnectorPorts;
+                    _panels.Normalize(Document, replacement);
+                    var index = CurrentPage.Elements.FindIndex(element => element.Id == selected.Id);
+                    if (index < 0) return false;
+                    CurrentPage.Elements[index] = replacement;
+                    SetSelectionCore([replacement.Id], replacement.Id);
+                    Notify();
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.PromoteSelectedHtmlEmbedToPanel failed: {exception.Message}");
+            throw;
+        }
     }
 
     public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null, double? centerX = null, double? centerY = null, int pixelWidth = 0, int pixelHeight = 0)
     {
-        Capture();
-        var element = new ImageFrameElement
+        try
         {
-            Name = NextName(name),
-            DataUrl = dataUrl,
-            OriginalDataUrl = dataUrl,
-            PictureSource = pictureSource,
-            AltText = name,
-            X = 30,
-            Y = 35,
-            Width = 90,
-            Height = pictureSource is { WidthPx: > 0, HeightPx: > 0 }
-                ? Math.Clamp(90d * pictureSource.HeightPx / pictureSource.WidthPx, 20, 140)
-                : pixelWidth > 0 && pixelHeight > 0
-                    ? Math.Clamp(90d * pixelHeight / pixelWidth, 20, 140)
-                    : 65,
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddImage.");
+                    Capture();
+                    var element = new ImageFrameElement
+                    {
+                        Name = NextName(name),
+                        DataUrl = dataUrl,
+                        OriginalDataUrl = dataUrl,
+                        PictureSource = pictureSource,
+                        AltText = name,
+                        X = 30,
+                        Y = 35,
+                        Width = 90,
+                        Height = pictureSource is { WidthPx: > 0, HeightPx: > 0 }
+                            ? Math.Clamp(90d * pictureSource.HeightPx / pictureSource.WidthPx, 20, 140)
+                            : pixelWidth > 0 && pixelHeight > 0
+                                ? Math.Clamp(90d * pixelHeight / pixelWidth, 20, 140)
+                                : 65,
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddImage failed: {exception.Message}");
+            throw;
+        }
     }
 
     public VideoElement AddVideo(string dataUrl, string mimeType, string name, double durationSeconds, string posterDataUrl = "", double? centerX = null, double? centerY = null)
     {
-        Capture();
-        mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "video/webm");
-        dataUrl = PublicationMediaData.NormalizeDataUrl(dataUrl, mimeType);
-        var element = new VideoElement
+        try
         {
-            Name = NextName(string.IsNullOrWhiteSpace(name) ? "Video" : name),
-            DataUrl = dataUrl,
-            MimeType = mimeType,
-            DurationSeconds = Math.Max(0, durationSeconds),
-            TrimEndSeconds = Math.Max(0, durationSeconds),
-            PosterDataUrl = posterDataUrl,
-            AltText = string.IsNullOrWhiteSpace(name) ? "Video" : name,
-            X = 28,
-            Y = 32,
-            Width = 120,
-            Height = 67.5,
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        EnsureTimelineDuration();
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddVideo.");
+                    Capture();
+                    mimeType = _mediaData.NormalizeMimeType(mimeType, "video/webm");
+                    dataUrl = _mediaData.NormalizeDataUrl(dataUrl, mimeType);
+                    var element = new VideoElement
+                    {
+                        Name = NextName(string.IsNullOrWhiteSpace(name) ? "Video" : name),
+                        DataUrl = dataUrl,
+                        MimeType = mimeType,
+                        DurationSeconds = Math.Max(0, durationSeconds),
+                        TrimEndSeconds = Math.Max(0, durationSeconds),
+                        PosterDataUrl = posterDataUrl,
+                        AltText = string.IsNullOrWhiteSpace(name) ? "Video" : name,
+                        X = 28,
+                        Y = 32,
+                        Width = 120,
+                        Height = 67.5,
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    EnsureTimelineDuration();
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddVideo failed: {exception.Message}");
+            throw;
+        }
     }
 
     public AudioElement AddAudio(string dataUrl, string mimeType, string name, double durationSeconds, IReadOnlyList<double>? waveformSamples = null, double? centerX = null, double? centerY = null)
     {
-        Capture();
-        mimeType = PublicationMediaData.NormalizeMimeType(mimeType, "audio/webm");
-        dataUrl = PublicationMediaData.NormalizeDataUrl(dataUrl, mimeType);
-        var element = new AudioElement
+        try
         {
-            Name = NextName(string.IsNullOrWhiteSpace(name) ? "Audio" : name),
-            DataUrl = dataUrl,
-            MimeType = mimeType,
-            DurationSeconds = Math.Max(0, durationSeconds),
-            TrimEndSeconds = Math.Max(0, durationSeconds),
-            WaveformSamples = waveformSamples?.Select(value => Math.Clamp(value, 0, 1)).Take(256).ToList() ?? [],
-            X = 28,
-            Y = 42,
-            Width = 120,
-            Height = 28,
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        EnsureTimelineDuration();
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddAudio.");
+                    Capture();
+                    mimeType = _mediaData.NormalizeMimeType(mimeType, "audio/webm");
+                    dataUrl = _mediaData.NormalizeDataUrl(dataUrl, mimeType);
+                    var element = new AudioElement
+                    {
+                        Name = NextName(string.IsNullOrWhiteSpace(name) ? "Audio" : name),
+                        DataUrl = dataUrl,
+                        MimeType = mimeType,
+                        DurationSeconds = Math.Max(0, durationSeconds),
+                        TrimEndSeconds = Math.Max(0, durationSeconds),
+                        WaveformSamples = waveformSamples?.Select(value => Math.Clamp(value, 0, 1)).Take(256).ToList() ?? [],
+                        X = 28,
+                        Y = 42,
+                        Width = 120,
+                        Height = 28,
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    EnsureTimelineDuration();
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddAudio failed: {exception.Message}");
+            throw;
+        }
     }
 
     public LiveSourceElement AddLiveSource(PublicationLiveSourceKind kind, double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var visual = kind is PublicationLiveSourceKind.Camera or PublicationLiveSourceKind.Screen or PublicationLiveSourceKind.Window
-            or PublicationLiveSourceKind.BrowserTab or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.NetworkMedia;
-        var element = new LiveSourceElement
+        try
         {
-            Name = NextName(kind switch
-            {
-                PublicationLiveSourceKind.BrowserTab => "Browser Tab",
-                PublicationLiveSourceKind.CaptureDevice => "Capture Device",
-                PublicationLiveSourceKind.ApplicationAudio => "Application Audio",
-                PublicationLiveSourceKind.SystemAudio => "System Audio",
-                PublicationLiveSourceKind.NetworkMedia => "Network Media",
-                PublicationLiveSourceKind.NowPlaying => "Now Playing",
-                _ => kind.ToString()
-            }),
-            SourceKind = kind,
-            IncludeAudio = kind is PublicationLiveSourceKind.Screen or PublicationLiveSourceKind.Window or PublicationLiveSourceKind.BrowserTab
-                or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.NetworkMedia,
-            Muted = visual,
-            X = 28,
-            Y = 32,
-            Width = visual ? 120 : 90,
-            Height = visual ? 67.5 : 20,
-            ZIndex = NextZ(),
-            UseDeviceTimestamp = Document.Streaming.PreferDeviceTimestamps,
-            CaptureWidth = Document.Streaming.MasterWidth,
-            CaptureHeight = Document.Streaming.MasterHeight,
-            CaptureFrameRate = Document.Streaming.MasterFrameRate
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddLiveSource.");
+                    Capture();
+                    var visual = kind is PublicationLiveSourceKind.Camera or PublicationLiveSourceKind.Screen or PublicationLiveSourceKind.Window
+                        or PublicationLiveSourceKind.BrowserTab or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.NetworkMedia;
+                    var element = new LiveSourceElement
+                    {
+                        Name = NextName(kind switch
+                        {
+                            PublicationLiveSourceKind.BrowserTab => "Browser Tab",
+                            PublicationLiveSourceKind.CaptureDevice => "Capture Device",
+                            PublicationLiveSourceKind.ApplicationAudio => "Application Audio",
+                            PublicationLiveSourceKind.SystemAudio => "System Audio",
+                            PublicationLiveSourceKind.NetworkMedia => "Network Media",
+                            PublicationLiveSourceKind.NowPlaying => "Now Playing",
+                            _ => kind.ToString()
+                        }),
+                        SourceKind = kind,
+                        IncludeAudio = kind is PublicationLiveSourceKind.Screen or PublicationLiveSourceKind.Window or PublicationLiveSourceKind.BrowserTab
+                            or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.NetworkMedia,
+                        Muted = visual,
+                        X = 28,
+                        Y = 32,
+                        Width = visual ? 120 : 90,
+                        Height = visual ? 67.5 : 20,
+                        ZIndex = NextZ(),
+                        UseDeviceTimestamp = Document.Streaming.PreferDeviceTimestamps,
+                        CaptureWidth = Document.Streaming.MasterWidth,
+                        CaptureHeight = Document.Streaming.MasterHeight,
+                        CaptureFrameRate = Document.Streaming.MasterFrameRate
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddLiveSource failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateLiveSource(Guid id, Action<LiveSourceElement> update, bool capture = true)
     {
-        var source = CurrentPage.Elements.OfType<LiveSourceElement>().FirstOrDefault(item => item.Id == id);
-        if (source is null || source.Locked) return;
-        if (capture) Capture();
-        update(source);
-        source.CaptureWidth = Math.Clamp(source.CaptureWidth, 320, 7680);
-        source.CaptureHeight = Math.Clamp(source.CaptureHeight, 180, 4320);
-        source.CaptureFrameRate = Math.Clamp(source.CaptureFrameRate, 15, 120);
-        source.Volume = Math.Clamp(source.Volume, 0, 1);
-        source.AudioDelayMilliseconds = Math.Clamp(source.AudioDelayMilliseconds, -10000, 10000);
-        source.Brightness = Math.Clamp(source.Brightness, 0, 4);
-        source.Contrast = Math.Clamp(source.Contrast, 0, 4);
-        source.Saturation = Math.Clamp(source.Saturation, 0, 4);
-        source.HueRotation = Math.Clamp(source.HueRotation, -360, 360);
-        source.Blur = Math.Clamp(source.Blur, 0, 64);
-        source.ChromaSimilarity = Math.Clamp(source.ChromaSimilarity, 0, 1);
-        source.ChromaSmoothness = Math.Clamp(source.ChromaSmoothness, 0, 1);
-        source.ChromaSpill = Math.Clamp(source.ChromaSpill, 0, 1);
-        source.ChromaResidualOpacity = Math.Clamp(source.ChromaResidualOpacity, 0, 1);
-        SetSelectionCore([source.Id], source.Id);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdateLiveSource.");
+                    var source = CurrentPage.Elements.OfType<LiveSourceElement>().FirstOrDefault(item => item.Id == id);
+                    if (source is null || source.Locked) return;
+                    if (capture) Capture();
+                    update(source);
+                    source.CaptureWidth = Math.Clamp(source.CaptureWidth, 320, 7680);
+                    source.CaptureHeight = Math.Clamp(source.CaptureHeight, 180, 4320);
+                    source.CaptureFrameRate = Math.Clamp(source.CaptureFrameRate, 15, 120);
+                    source.Volume = Math.Clamp(source.Volume, 0, 1);
+                    source.AudioDelayMilliseconds = Math.Clamp(source.AudioDelayMilliseconds, -10000, 10000);
+                    source.Brightness = Math.Clamp(source.Brightness, 0, 4);
+                    source.Contrast = Math.Clamp(source.Contrast, 0, 4);
+                    source.Saturation = Math.Clamp(source.Saturation, 0, 4);
+                    source.HueRotation = Math.Clamp(source.HueRotation, -360, 360);
+                    source.Blur = Math.Clamp(source.Blur, 0, 64);
+                    source.ChromaSimilarity = Math.Clamp(source.ChromaSimilarity, 0, 1);
+                    source.ChromaSmoothness = Math.Clamp(source.ChromaSmoothness, 0, 1);
+                    source.ChromaSpill = Math.Clamp(source.ChromaSpill, 0, 1);
+                    source.ChromaResidualOpacity = Math.Clamp(source.ChromaResidualOpacity, 0, 1);
+                    SetSelectionCore([source.Id], source.Id);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateLiveSource failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ApplyStreamingSettings(PublicationStreamingSettings settings)
     {
-        ArgumentNullException.ThrowIfNull(settings);
-        Document.Streaming = settings;
-        _files.NormalizeStreamingSettings(Document);
-        PersistStreamingSettings();
-        Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ApplyStreamingSettings.");
+                    ArgumentNullException.ThrowIfNull(settings);
+                    Document.Streaming = settings;
+                    _files.NormalizeStreamingSettings(Document);
+                    PersistStreamingSettings();
+                    Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ApplyStreamingSettings failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateMedia(Guid id, Action<PublicationMediaElement> update, bool capture = true)
     {
-        var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == id);
-        if (media is null || media.Locked) return;
-        if (capture) Capture();
-        update(media);
-        NormalizeMedia(media);
-        EnsureTimelineDuration();
-        SetSelectionCore([media.Id], media.Id);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdateMedia.");
+                    var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == id);
+                    if (media is null || media.Locked) return;
+                    if (capture) Capture();
+                    update(media);
+                    NormalizeMedia(media);
+                    EnsureTimelineDuration();
+                    SetSelectionCore([media.Id], media.Id);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateMedia failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateMediaLive(Guid id, string key, Action<PublicationMediaElement> update)
     {
-        var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == id);
-        if (media is null || media.Locked) return;
-        var liveKey = $"media:{id}:{key}";
-        if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+        try
         {
-            Capture();
-            _liveEditKey = liveKey;
+            logger.LogTrace($"Entering EditorStateService.UpdateMediaLive.");
+                    var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == id);
+                    if (media is null || media.Locked) return;
+                    var liveKey = $"media:{id}:{key}";
+                    if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+                    {
+                        Capture();
+                        _liveEditKey = liveKey;
+                    }
+                    update(media);
+                    NormalizeMedia(media);
+                    EnsureTimelineDuration();
+                    Notify();
+    
         }
-        update(media);
-        NormalizeMedia(media);
-        EnsureTimelineDuration();
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateMediaLive failed: {exception.Message}");
+            throw;
+        }
     }
 
 
 
     public WordArtElement AddWordArt(double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var element = new WordArtElement
+        try
         {
-            Name = NextName("WordArt"),
-            Text = "Your headline",
-            X = 25,
-            Y = 28,
-            Width = 120,
-            Height = 35,
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddWordArt.");
+                    Capture();
+                    var element = new WordArtElement
+                    {
+                        Name = NextName("WordArt"),
+                        Text = "Your headline",
+                        X = 25,
+                        Y = 28,
+                        Width = 120,
+                        Height = 35,
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddWordArt failed: {exception.Message}");
+            throw;
+        }
     }
 
     public PublicationDataObject EnsureDataObject()
     {
-        if (Document.DataObjects.Count > 0) return Document.DataObjects[0];
-        var data = _data.CreateSample();
-        Document.DataObjects.Add(data);
-        return data;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.EnsureDataObject.");
+                    if (Document.DataObjects.Count > 0) return Document.DataObjects[0];
+                    var data = _data.CreateSample();
+                    Document.DataObjects.Add(data);
+                    return data;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.EnsureDataObject failed: {exception.Message}");
+            throw;
+        }
     }
 
     public BarcodeElement AddBarcode(double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var element = new BarcodeElement
+        try
         {
-            Name = NextName("Barcode"),
-            X = 42,
-            Y = 42,
-            Width = 70,
-            Height = 70,
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddBarcode.");
+                    Capture();
+                    var element = new BarcodeElement
+                    {
+                        Name = NextName("Barcode"),
+                        X = 42,
+                        Y = 42,
+                        Width = 70,
+                        Height = 70,
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddBarcode failed: {exception.Message}");
+            throw;
+        }
     }
 
     public DataVisualElement AddDataVisual(DataVisualKind kind, double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var data = EnsureDataObject();
-        var columns = _data.ResolveColumns(data);
-        var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
-        var numericColumns = columns.Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean).Select(column => column.Name).ToArray();
-        var numeric = numericColumns.FirstOrDefault()
-            ?? columns.Skip(1).FirstOrDefault()?.Name
-            ?? argument;
-        var element = new DataVisualElement
+        try
         {
-            Name = NextName(DataVisualName(kind)),
-            Title = DataVisualName(kind),
-            VisualKind = kind,
-            DataObjectId = data.Id,
-            ArgumentField = argument,
-            TargetField = columns.Skip(1).FirstOrDefault()?.Name ?? argument,
-            ValueFields = string.IsNullOrWhiteSpace(numeric) ? [] : [numeric],
-            OpenValueField = numericColumns.ElementAtOrDefault(0) ?? numeric,
-            HighValueField = numericColumns.ElementAtOrDefault(1) ?? numeric,
-            LowValueField = numericColumns.ElementAtOrDefault(2) ?? numeric,
-            CloseValueField = numericColumns.ElementAtOrDefault(3) ?? numeric,
-            SizeField = numericColumns.ElementAtOrDefault(1) ?? numeric,
-            X = 28,
-            Y = 30,
-            Width = kind switch
-            {
-                DataVisualKind.Sparkline => 120,
-                DataVisualKind.KpiProgress => 120,
-                DataVisualKind.LinearGauge => 145,
-                DataVisualKind.DataTable => 150,
-                _ => 145
-            },
-            Height = kind switch
-            {
-                DataVisualKind.Sparkline => 34,
-                DataVisualKind.KpiProgress => 40,
-                DataVisualKind.LinearGauge => 42,
-                DataVisualKind.DataTable => 90,
-                _ => 95
-            },
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddDataVisual.");
+                    Capture();
+                    var data = EnsureDataObject();
+                    var columns = _data.ResolveColumns(data);
+                    var argument = columns.FirstOrDefault()?.Name ?? string.Empty;
+                    var numericColumns = columns.Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean).Select(column => column.Name).ToArray();
+                    var numeric = numericColumns.FirstOrDefault()
+                        ?? columns.Skip(1).FirstOrDefault()?.Name
+                        ?? argument;
+                    var element = new DataVisualElement
+                    {
+                        Name = NextName(DataVisualName(kind)),
+                        Title = DataVisualName(kind),
+                        VisualKind = kind,
+                        DataObjectId = data.Id,
+                        ArgumentField = argument,
+                        TargetField = columns.Skip(1).FirstOrDefault()?.Name ?? argument,
+                        ValueFields = string.IsNullOrWhiteSpace(numeric) ? [] : [numeric],
+                        OpenValueField = numericColumns.ElementAtOrDefault(0) ?? numeric,
+                        HighValueField = numericColumns.ElementAtOrDefault(1) ?? numeric,
+                        LowValueField = numericColumns.ElementAtOrDefault(2) ?? numeric,
+                        CloseValueField = numericColumns.ElementAtOrDefault(3) ?? numeric,
+                        SizeField = numericColumns.ElementAtOrDefault(1) ?? numeric,
+                        X = 28,
+                        Y = 30,
+                        Width = kind switch
+                        {
+                            DataVisualKind.Sparkline => 120,
+                            DataVisualKind.KpiProgress => 120,
+                            DataVisualKind.LinearGauge => 145,
+                            DataVisualKind.DataTable => 150,
+                            _ => 145
+                        },
+                        Height = kind switch
+                        {
+                            DataVisualKind.Sparkline => 34,
+                            DataVisualKind.KpiProgress => 40,
+                            DataVisualKind.LinearGauge => 42,
+                            DataVisualKind.DataTable => 90,
+                            _ => 95
+                        },
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddDataVisual failed: {exception.Message}");
+            throw;
+        }
     }
 
     public DevExtremeComponentElement AddDevExtremeComponent(PublicationComponentKind kind, double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var element = _components.Create(Document, kind);
-        element.Name = NextName(PublicationComponentService.ComponentName(kind));
-        element.ZIndex = NextZ();
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.AddDevExtremeComponent.");
+                    Capture();
+                    var element = _components.Create(Document, kind);
+                    element.Name = NextName(_components.ComponentName(kind));
+                    element.ZIndex = NextZ();
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddDevExtremeComponent failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ApplySelectedComponent(DevExtremeComponentElement draft)
     {
-        if (SelectedElement is not DevExtremeComponentElement selected || selected.Locked) return;
-        Capture();
-        var priorSharedId = selected.SharedComponentId;
-        _components.CopyConfiguration(draft, selected, preservePlacement: true);
-        _components.Normalize(Document, selected);
-        if (selected.Scope == PublicationComponentScope.Document)
+        try
         {
-            selected.SharedComponentId ??= priorSharedId ?? Guid.NewGuid();
-            SynchronizeDocumentComponent(selected);
+            logger.LogTrace($"Entering EditorStateService.ApplySelectedComponent.");
+                    if (SelectedElement is not DevExtremeComponentElement selected || selected.Locked) return;
+                    Capture();
+                    var priorSharedId = selected.SharedComponentId;
+                    _components.CopyConfiguration(draft, selected, preservePlacement: true);
+                    _components.Normalize(Document, selected);
+                    if (selected.Scope == PublicationComponentScope.Document)
+                    {
+                        selected.SharedComponentId ??= priorSharedId ?? Guid.NewGuid();
+                        SynchronizeDocumentComponent(selected);
+                    }
+                    else
+                    {
+                        if (priorSharedId is { } sharedId)
+                        {
+                            foreach (var page in Document.Pages.Where(page => page.Id != CurrentPage.Id))
+                                page.Elements.RemoveAll(element => element is DevExtremeComponentElement component && component.SharedComponentId == sharedId);
+                        }
+                        selected.SharedComponentId = null;
+                    }
+                    Notify();
+    
         }
-        else
+        catch (Exception exception)
         {
-            if (priorSharedId is { } sharedId)
-            {
-                foreach (var page in Document.Pages.Where(page => page.Id != CurrentPage.Id))
-                    page.Elements.RemoveAll(element => element is DevExtremeComponentElement component && component.SharedComponentId == sharedId);
-            }
-            selected.SharedComponentId = null;
+            logger.LogError(exception, $"EditorStateService.ApplySelectedComponent failed: {exception.Message}");
+            throw;
         }
-        Notify();
     }
 
     public void SetSelectedComponentScope(PublicationComponentScope scope)
     {
-        if (SelectedElement is not DevExtremeComponentElement selected || selected.Locked || selected.Scope == scope) return;
-        Capture();
-        var priorSharedId = selected.SharedComponentId;
-        selected.Scope = scope;
-        if (scope == PublicationComponentScope.Document)
+        try
         {
-            selected.SharedComponentId ??= priorSharedId ?? Guid.NewGuid();
-            _components.Normalize(Document, selected);
-            SynchronizeDocumentComponent(selected);
+            logger.LogTrace($"Entering EditorStateService.SetSelectedComponentScope.");
+                    if (SelectedElement is not DevExtremeComponentElement selected || selected.Locked || selected.Scope == scope) return;
+                    Capture();
+                    var priorSharedId = selected.SharedComponentId;
+                    selected.Scope = scope;
+                    if (scope == PublicationComponentScope.Document)
+                    {
+                        selected.SharedComponentId ??= priorSharedId ?? Guid.NewGuid();
+                        _components.Normalize(Document, selected);
+                        SynchronizeDocumentComponent(selected);
+                    }
+                    else
+                    {
+                        if (priorSharedId is { } sharedId)
+                        {
+                            foreach (var page in Document.Pages.Where(page => page.Id != CurrentPage.Id))
+                                page.Elements.RemoveAll(element => element is DevExtremeComponentElement component && component.SharedComponentId == sharedId);
+                        }
+                        selected.SharedComponentId = null;
+                        _components.Normalize(Document, selected);
+                    }
+                    Notify();
+    
         }
-        else
+        catch (Exception exception)
         {
-            if (priorSharedId is { } sharedId)
-            {
-                foreach (var page in Document.Pages.Where(page => page.Id != CurrentPage.Id))
-                    page.Elements.RemoveAll(element => element is DevExtremeComponentElement component && component.SharedComponentId == sharedId);
-            }
-            selected.SharedComponentId = null;
-            _components.Normalize(Document, selected);
+            logger.LogError(exception, $"EditorStateService.SetSelectedComponentScope failed: {exception.Message}");
+            throw;
         }
-        Notify();
     }
 
     public void UpsertDataObject(PublicationDataObject value)
     {
-        Capture();
-        var normalized = _data.Clone(value);
-        _data.ParseInto(normalized);
-        var index = Document.DataObjects.FindIndex(data => data.Id == normalized.Id);
-        if (index < 0) Document.DataObjects.Add(normalized);
-        else Document.DataObjects[index] = normalized;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpsertDataObject.");
+                    Capture();
+                    var normalized = _data.Clone(value);
+                    _data.ParseInto(normalized);
+                    var index = Document.DataObjects.FindIndex(data => data.Id == normalized.Id);
+                    if (index < 0) Document.DataObjects.Add(normalized);
+                    else Document.DataObjects[index] = normalized;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpsertDataObject failed: {exception.Message}");
+            throw;
+        }
     }
 
     public bool DeleteDataObject(Guid id)
     {
-        if (Document.Pages.SelectMany(page => page.Elements).OfType<DataVisualElement>().Any(item => item.DataObjectId == id)) return false;
-        if (Document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>().Any(item =>
-            item.Connection.DataObjectId == id
-            || item.Panels.Any(panel => panel.DataObjectId == id)
-            || item.Fields.Any(field => field.LookupDataObjectId == id))) return false;
-        var index = Document.DataObjects.FindIndex(data => data.Id == id);
-        if (index < 0) return false;
-        Capture();
-        Document.DataObjects.RemoveAt(index);
-        Notify();
-        return true;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.DeleteDataObject.");
+                    if (Document.Pages.SelectMany(page => page.Elements).OfType<DataVisualElement>().Any(item => item.DataObjectId == id)) return false;
+                    if (Document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>().Any(item =>
+                        item.Connection.DataObjectId == id
+                        || item.Panels.Any(panel => panel.DataObjectId == id)
+                        || item.Fields.Any(field => field.LookupDataObjectId == id))) return false;
+                    var index = Document.DataObjects.FindIndex(data => data.Id == id);
+                    if (index < 0) return false;
+                    Capture();
+                    Document.DataObjects.RemoveAt(index);
+                    Notify();
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.DeleteDataObject failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public void RefreshDataVisuals() => Notify(false);
+    public void RefreshDataVisuals() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.RefreshDataVisuals.");
+            Notify(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.RefreshDataVisuals failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public bool HasDueWebData => Document.DataObjects.Any(data => _webData.IsDue(data, DateTimeOffset.UtcNow));
 
     public async Task RefreshWebDataAsync(Guid? dataId = null, bool force = true, CancellationToken cancellationToken = default)
     {
-        var candidates = Document.DataObjects
-            .Where(data => data.SourceKind == PublicationDataSourceKind.Web
-                && data.Web.Enabled
-                && (dataId is null || data.Id == dataId.Value)
-                && (force || _webData.IsDue(data, DateTimeOffset.UtcNow)))
-            .ToArray();
-        await RefreshWebDataObjectsAsync(candidates, cancellationToken);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.RefreshWebDataAsync.");
+                    var candidates = Document.DataObjects
+                        .Where(data => data.SourceKind == PublicationDataSourceKind.Web
+                            && data.Web.Enabled
+                            && (dataId is null || data.Id == dataId.Value)
+                            && (force || _webData.IsDue(data, DateTimeOffset.UtcNow)))
+                        .ToArray();
+                    await RefreshWebDataObjectsAsync(candidates, cancellationToken).ConfigureAwait(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.RefreshWebDataAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
     public Task RefreshWebDataOnOpenAsync(CancellationToken cancellationToken = default)
-        => RefreshWebDataObjectsAsync(Document.DataObjects
+        {
+            try
+            {
+                logger.LogTrace($"Entering EditorStateService.RefreshWebDataOnOpenAsync.");
+                return RefreshWebDataObjectsAsync(Document.DataObjects
             .Where(data => data.SourceKind == PublicationDataSourceKind.Web
                 && data.Web.Enabled
                 && data.Web.RefreshOnOpen)
             .ToArray(), cancellationToken);
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"EditorStateService.RefreshWebDataOnOpenAsync failed: {exception.Message}");
+                throw;
+            }
+        }
 
     private async Task RefreshWebDataObjectsAsync(IReadOnlyList<PublicationDataObject> candidates, CancellationToken cancellationToken)
     {
-        if (candidates.Count == 0) return;
-        foreach (var data in candidates)
+        try
         {
-            try { await _webData.RefreshAsync(data, cancellationToken); }
-            catch when (data.Web.UseSnapshotOnFailure && data.Rows.Count > 0) { }
+            logger.LogTrace($"Entering EditorStateService.RefreshWebDataObjectsAsync.");
+                    if (candidates.Count == 0) return;
+                    foreach (var data in candidates)
+                    {
+                        try { await _webData.RefreshAsync(data, cancellationToken).ConfigureAwait(false); }
+                        catch when (data.Web.UseSnapshotOnFailure && data.Rows.Count > 0) { }
+                    }
+                    Notify(false);
+    
         }
-        Notify(false);
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.RefreshWebDataObjectsAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static string DataVisualName(DataVisualKind kind) => kind switch
+    private string DataVisualName(DataVisualKind kind) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.DataVisualName.");
+            return kind switch
     {
         DataVisualKind.CartesianChart => "Chart",
         DataVisualKind.PieChart => "Pie Chart",
@@ -888,60 +1350,108 @@ public sealed class EditorStateService : IDisposable
         DataVisualKind.KpiProgress => "KPI",
         _ => "Data Visual"
     };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.DataVisualName failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public PublicationConnectorPort? AddConnectorPort(Guid elementId, double xPercent = .5, double yPercent = .5)
     {
-        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
-        if (element is null || element.Locked) return null;
-        Capture();
-        element.ConnectorPorts ??= [];
-        var port = new PublicationConnectorPort
+        try
         {
-            Name = $"Connector point {element.ConnectorPorts.Count + 1}",
-            XPercent = Math.Clamp(xPercent, 0, 1),
-            YPercent = Math.Clamp(yPercent, 0, 1)
-        };
-        element.ConnectorPorts.Add(port);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return port;
+            logger.LogTrace($"Entering EditorStateService.AddConnectorPort.");
+                    var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
+                    if (element is null || element.Locked) return null;
+                    Capture();
+                    element.ConnectorPorts ??= [];
+                    var port = new PublicationConnectorPort
+                    {
+                        Name = $"Connector point {element.ConnectorPorts.Count + 1}",
+                        XPercent = Math.Clamp(xPercent, 0, 1),
+                        YPercent = Math.Clamp(yPercent, 0, 1)
+                    };
+                    element.ConnectorPorts.Add(port);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return port;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddConnectorPort failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void RemoveConnectorPort(Guid elementId, Guid portId)
     {
-        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
-        var port = element?.ConnectorPorts.FirstOrDefault(candidate => candidate.Id == portId);
-        if (element is null || port is null || element.Locked) return;
-        Capture();
-        element.ConnectorPorts.Remove(port);
-        foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>())
+        try
         {
-            if (connector.Source.ElementId == elementId && connector.Source.PortId == portId)
-            {
-                connector.Source.PortId = null;
-                connector.Source.Anchor = ConnectorAnchor.Center;
-            }
-            if (connector.Target.ElementId == elementId && connector.Target.PortId == portId)
-            {
-                connector.Target.PortId = null;
-                connector.Target.Anchor = ConnectorAnchor.Center;
-            }
+            logger.LogTrace($"Entering EditorStateService.RemoveConnectorPort.");
+                    var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == elementId && item is not ConnectorElement);
+                    var port = element?.ConnectorPorts.FirstOrDefault(candidate => candidate.Id == portId);
+                    if (element is null || port is null || element.Locked) return;
+                    Capture();
+                    element.ConnectorPorts.Remove(port);
+                    foreach (var connector in CurrentPage.Elements.OfType<ConnectorElement>())
+                    {
+                        if (connector.Source.ElementId == elementId && connector.Source.PortId == portId)
+                        {
+                            connector.Source.PortId = null;
+                            connector.Source.Anchor = ConnectorAnchor.Center;
+                        }
+                        if (connector.Target.ElementId == elementId && connector.Target.PortId == portId)
+                        {
+                            connector.Target.PortId = null;
+                            connector.Target.Anchor = ConnectorAnchor.Center;
+                        }
+                    }
+                    Notify();
+    
         }
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.RemoveConnectorPort failed: {exception.Message}");
+            throw;
+        }
     }
 
     public ConnectorElement? AddConnector(Guid sourceElementId, ConnectorAnchor sourceAnchor, Guid targetElementId, ConnectorAnchor targetAnchor, ConnectorMarker endMarker = ConnectorMarker.Arrow)
     {
-        if (sourceElementId == targetElementId) return null;
-        return AddConnectorAdvanced(
-            new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = sourceElementId, Anchor = sourceAnchor },
-            new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = targetElementId, Anchor = targetAnchor },
-            endMarker,
-            signal: false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.AddConnector.");
+                    if (sourceElementId == targetElementId) return null;
+                    return AddConnectorAdvanced(
+                        new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = sourceElementId, Anchor = sourceAnchor },
+                        new ConnectorEndpoint { Kind = ConnectorEndpointKind.Element, ElementId = targetElementId, Anchor = targetAnchor },
+                        endMarker,
+                        signal: false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddConnector failed: {exception.Message}");
+            throw;
+        }
     }
 
     public ConnectorElement? AddSignalConnector(ConnectorEndpoint source, ConnectorEndpoint target, ConnectorMarker endMarker = ConnectorMarker.Arrow)
-        => AddConnectorAdvanced(source, target, endMarker, signal: true);
+        {
+            try
+            {
+                logger.LogTrace($"Entering EditorStateService.AddSignalConnector.");
+                return AddConnectorAdvanced(source, target, endMarker, signal: true);
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"EditorStateService.AddSignalConnector failed: {exception.Message}");
+                throw;
+            }
+        }
 
     public ConnectorElement? AddConnectorAdvanced(
         ConnectorEndpoint source,
@@ -951,386 +1461,597 @@ public sealed class EditorStateService : IDisposable
         PublicationConnectorPort? sourcePort = null,
         PublicationConnectorPort? targetPort = null)
     {
-        if (!TryPrepareEndpoint(source, sourcePort, out var sourceOwner) ||
-            !TryPrepareEndpoint(target, targetPort, out var targetOwner)) return null;
-        if (source.Kind == ConnectorEndpointKind.Element && target.Kind == ConnectorEndpointKind.Element &&
-            source.ElementId != Guid.Empty && source.ElementId == target.ElementId) return null;
-
-        Capture();
-        AttachPendingPort(source, sourceOwner, sourcePort);
-        AttachPendingPort(target, targetOwner, targetPort);
-        var connector = new ConnectorElement
+        try
         {
-            Name = NextName(signal ? (endMarker == ConnectorMarker.None ? "Signal Connector" : "Signal Arrow") : (endMarker == ConnectorMarker.None ? "Connector" : "Arrow Connector")),
-            Source = source,
-            Target = target,
-            EndMarker = endMarker,
-            PathKind = ConnectorPathKind.Curved,
-            ZIndex = NextZ(),
-            Signal = new SignalConnectorSettings
-            {
-                Enabled = signal,
-                LineVisible = true,
-                Trigger = signal ? SignalConnectorTrigger.OnPageEnter : SignalConnectorTrigger.Manual,
-                Visual = signal ? SignalConnectorVisual.FlyingArrow : SignalConnectorVisual.None
-            }
-        };
-        CurrentPage.Elements.Add(connector);
-        SetSelectionCore([connector.Id], connector.Id);
-        Notify();
-        return connector;
+            logger.LogTrace($"Entering EditorStateService.AddConnectorAdvanced.");
+                    if (!TryPrepareEndpoint(source, sourcePort, out var sourceOwner) ||
+                        !TryPrepareEndpoint(target, targetPort, out var targetOwner)) return null;
+                    if (source.Kind == ConnectorEndpointKind.Element && target.Kind == ConnectorEndpointKind.Element &&
+                        source.ElementId != Guid.Empty && source.ElementId == target.ElementId) return null;
+
+                    Capture();
+                    AttachPendingPort(source, sourceOwner, sourcePort);
+                    AttachPendingPort(target, targetOwner, targetPort);
+                    var connector = new ConnectorElement
+                    {
+                        Name = NextName(signal ? (endMarker == ConnectorMarker.None ? "Signal Connector" : "Signal Arrow") : (endMarker == ConnectorMarker.None ? "Connector" : "Arrow Connector")),
+                        Source = source,
+                        Target = target,
+                        EndMarker = endMarker,
+                        PathKind = ConnectorPathKind.Curved,
+                        ZIndex = NextZ(),
+                        Signal = new SignalConnectorSettings
+                        {
+                            Enabled = signal,
+                            LineVisible = true,
+                            Trigger = signal ? SignalConnectorTrigger.OnPageEnter : SignalConnectorTrigger.Manual,
+                            Visual = signal ? SignalConnectorVisual.FlyingArrow : SignalConnectorVisual.None
+                        }
+                    };
+                    CurrentPage.Elements.Add(connector);
+                    SetSelectionCore([connector.Id], connector.Id);
+                    Notify();
+                    return connector;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddConnectorAdvanced failed: {exception.Message}");
+            throw;
+        }
     }
 
     private bool TryPrepareEndpoint(ConnectorEndpoint endpoint, PublicationConnectorPort? pendingPort, out PublicationElement? owner)
     {
-        owner = null;
-        if (endpoint.Kind == ConnectorEndpointKind.Canvas)
+        try
         {
-            endpoint.ElementId = Guid.Empty;
-            endpoint.PortId = null;
-            endpoint.X = Math.Clamp(endpoint.X, 0, CurrentPage.WidthMm);
-            endpoint.Y = Math.Clamp(endpoint.Y, 0, CurrentPage.HeightMm);
-            return true;
-        }
+            logger.LogTrace($"Entering EditorStateService.TryPrepareEndpoint.");
+                    owner = null;
+                    if (endpoint.Kind == ConnectorEndpointKind.Canvas)
+                    {
+                        endpoint.ElementId = Guid.Empty;
+                        endpoint.PortId = null;
+                        endpoint.X = Math.Clamp(endpoint.X, 0, CurrentPage.WidthMm);
+                        endpoint.Y = Math.Clamp(endpoint.Y, 0, CurrentPage.HeightMm);
+                        return true;
+                    }
 
-        owner = CurrentPage.Elements.FirstOrDefault(item => item.Id == endpoint.ElementId && item is not ConnectorElement);
-        if (owner is null || owner.Locked) return false;
-        owner.ConnectorPorts ??= [];
-        if (pendingPort is not null)
-        {
-            pendingPort.Id = pendingPort.Id == Guid.Empty ? Guid.NewGuid() : pendingPort.Id;
-            pendingPort.XPercent = Math.Clamp(pendingPort.XPercent, 0, 1);
-            pendingPort.YPercent = Math.Clamp(pendingPort.YPercent, 0, 1);
-            endpoint.PortId = pendingPort.Id;
-            endpoint.Anchor = ConnectorAnchor.Center;
-            return true;
+                    owner = CurrentPage.Elements.FirstOrDefault(item => item.Id == endpoint.ElementId && item is not ConnectorElement);
+                    if (owner is null || owner.Locked) return false;
+                    owner.ConnectorPorts ??= [];
+                    if (pendingPort is not null)
+                    {
+                        pendingPort.Id = pendingPort.Id == Guid.Empty ? Guid.NewGuid() : pendingPort.Id;
+                        pendingPort.XPercent = Math.Clamp(pendingPort.XPercent, 0, 1);
+                        pendingPort.YPercent = Math.Clamp(pendingPort.YPercent, 0, 1);
+                        endpoint.PortId = pendingPort.Id;
+                        endpoint.Anchor = ConnectorAnchor.Center;
+                        return true;
+                    }
+                    if (endpoint.PortId is { } portId && owner.ConnectorPorts.All(port => port.Id != portId)) endpoint.PortId = null;
+                    return true;
+    
         }
-        if (endpoint.PortId is { } portId && owner.ConnectorPorts.All(port => port.Id != portId)) endpoint.PortId = null;
-        return true;
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.TryPrepareEndpoint failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static void AttachPendingPort(ConnectorEndpoint endpoint, PublicationElement? owner, PublicationConnectorPort? pendingPort)
+    private void AttachPendingPort(ConnectorEndpoint endpoint, PublicationElement? owner, PublicationConnectorPort? pendingPort)
     {
-        if (endpoint.Kind != ConnectorEndpointKind.Element || owner is null || pendingPort is null) return;
-        owner.ConnectorPorts ??= [];
-        if (owner.ConnectorPorts.All(port => port.Id != pendingPort.Id)) owner.ConnectorPorts.Add(pendingPort);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.AttachPendingPort.");
+                    if (endpoint.Kind != ConnectorEndpointKind.Element || owner is null || pendingPort is null) return;
+                    owner.ConnectorPorts ??= [];
+                    if (owner.ConnectorPorts.All(port => port.Id != pendingPort.Id)) owner.ConnectorPorts.Add(pendingPort);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AttachPendingPort failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ReconnectConnector(Guid connectorId, bool sourceEnd, Guid elementId, ConnectorAnchor anchor)
-        => ReconnectConnectorEndpoint(connectorId, sourceEnd, new ConnectorEndpoint
+        {
+            try
+            {
+                logger.LogTrace($"Entering EditorStateService.ReconnectConnector.");
+                ReconnectConnectorEndpoint(connectorId, sourceEnd, new ConnectorEndpoint
         {
             Kind = ConnectorEndpointKind.Element,
             ElementId = elementId,
             Anchor = anchor
         });
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"EditorStateService.ReconnectConnector failed: {exception.Message}");
+                throw;
+            }
+        }
 
     public void ReconnectConnectorEndpoint(Guid connectorId, bool sourceEnd, ConnectorEndpoint replacement, PublicationConnectorPort? pendingPort = null)
     {
-        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
-        if (connector is null || connector.Locked || !TryPrepareEndpoint(replacement, pendingPort, out var owner)) return;
-        var other = sourceEnd ? connector.Target : connector.Source;
-        if (replacement.Kind == ConnectorEndpointKind.Element &&
-            other.Kind == ConnectorEndpointKind.Element &&
-            replacement.ElementId != Guid.Empty &&
-            replacement.ElementId == other.ElementId) return;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ReconnectConnectorEndpoint.");
+                    var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+                    if (connector is null || connector.Locked || !TryPrepareEndpoint(replacement, pendingPort, out var owner)) return;
+                    var other = sourceEnd ? connector.Target : connector.Source;
+                    if (replacement.Kind == ConnectorEndpointKind.Element &&
+                        other.Kind == ConnectorEndpointKind.Element &&
+                        replacement.ElementId != Guid.Empty &&
+                        replacement.ElementId == other.ElementId) return;
 
-        Capture();
-        AttachPendingPort(replacement, owner, pendingPort);
-        if (sourceEnd) connector.Source = replacement;
-        else connector.Target = replacement;
-        SetSelectionCore([connector.Id], connector.Id);
-        Notify();
+                    Capture();
+                    AttachPendingPort(replacement, owner, pendingPort);
+                    if (sourceEnd) connector.Source = replacement;
+                    else connector.Target = replacement;
+                    SetSelectionCore([connector.Id], connector.Id);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ReconnectConnectorEndpoint failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CommitConnectorControl(Guid connectorId, int controlIndex, double x, double y)
     {
-        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
-        if (connector is null || connector.Locked || controlIndex is < 1 or > 2) return;
-        Capture();
-        connector.PathKind = ConnectorPathKind.Curved;
-        if (controlIndex == 1)
+        try
         {
-            connector.Control1X = Math.Clamp(x, 0, CurrentPage.WidthMm);
-            connector.Control1Y = Math.Clamp(y, 0, CurrentPage.HeightMm);
+            logger.LogTrace($"Entering EditorStateService.CommitConnectorControl.");
+                    var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+                    if (connector is null || connector.Locked || controlIndex is < 1 or > 2) return;
+                    Capture();
+                    connector.PathKind = ConnectorPathKind.Curved;
+                    if (controlIndex == 1)
+                    {
+                        connector.Control1X = Math.Clamp(x, 0, CurrentPage.WidthMm);
+                        connector.Control1Y = Math.Clamp(y, 0, CurrentPage.HeightMm);
+                    }
+                    else
+                    {
+                        connector.Control2X = Math.Clamp(x, 0, CurrentPage.WidthMm);
+                        connector.Control2Y = Math.Clamp(y, 0, CurrentPage.HeightMm);
+                    }
+                    Notify();
+    
         }
-        else
+        catch (Exception exception)
         {
-            connector.Control2X = Math.Clamp(x, 0, CurrentPage.WidthMm);
-            connector.Control2Y = Math.Clamp(y, 0, CurrentPage.HeightMm);
+            logger.LogError(exception, $"EditorStateService.CommitConnectorControl failed: {exception.Message}");
+            throw;
         }
-        Notify();
     }
 
     public void CommitConnectorRoute(Guid connectorId, double control1X, double control1Y, double control2X, double control2Y)
     {
-        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
-        if (connector is null || connector.Locked) return;
-        Capture();
-        connector.PathKind = ConnectorPathKind.Curved;
-        connector.Control1X = Math.Clamp(control1X, 0, CurrentPage.WidthMm);
-        connector.Control1Y = Math.Clamp(control1Y, 0, CurrentPage.HeightMm);
-        connector.Control2X = Math.Clamp(control2X, 0, CurrentPage.WidthMm);
-        connector.Control2Y = Math.Clamp(control2Y, 0, CurrentPage.HeightMm);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CommitConnectorRoute.");
+                    var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+                    if (connector is null || connector.Locked) return;
+                    Capture();
+                    connector.PathKind = ConnectorPathKind.Curved;
+                    connector.Control1X = Math.Clamp(control1X, 0, CurrentPage.WidthMm);
+                    connector.Control1Y = Math.Clamp(control1Y, 0, CurrentPage.HeightMm);
+                    connector.Control2X = Math.Clamp(control2X, 0, CurrentPage.WidthMm);
+                    connector.Control2Y = Math.Clamp(control2Y, 0, CurrentPage.HeightMm);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CommitConnectorRoute failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ResetConnectorRoute(Guid connectorId)
     {
-        var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
-        if (connector is null || connector.Locked) return;
-        Capture();
-        connector.Control1X = connector.Control1Y = connector.Control2X = connector.Control2Y = null;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ResetConnectorRoute.");
+                    var connector = CurrentPage.Elements.OfType<ConnectorElement>().FirstOrDefault(item => item.Id == connectorId);
+                    if (connector is null || connector.Locked) return;
+                    Capture();
+                    connector.Control1X = connector.Control1Y = connector.Control2X = connector.Control2Y = null;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ResetConnectorRoute failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetConnectorTool(ConnectorToolKind tool)
     {
-        ConnectorTool = ConnectorTool == tool ? ConnectorToolKind.None : tool;
-        CropMode = false;
-        ContentPanMode = false;
-        Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetConnectorTool.");
+                    ConnectorTool = ConnectorTool == tool ? ConnectorToolKind.None : tool;
+                    CropMode = false;
+                    ContentPanMode = false;
+                    Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetConnectorTool failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CancelActiveTool()
     {
-        ConnectorTool = ConnectorToolKind.None;
-        CropMode = false;
-        ContentPanMode = false;
-        Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CancelActiveTool.");
+                    ConnectorTool = ConnectorToolKind.None;
+                    CropMode = false;
+                    ContentPanMode = false;
+                    Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CancelActiveTool failed: {exception.Message}");
+            throw;
+        }
     }
 
     public ShapeElement AddShape(PublicationShape shape, double? centerX = null, double? centerY = null)
     {
-        Capture();
-        var element = new ShapeElement
+        try
         {
-            Name = NextName(shape.ToString()),
-            Shape = shape,
-            X = 30,
-            Y = 40,
-            Width = shape == PublicationShape.Line ? 80 : 55,
-            Height = shape == PublicationShape.Line ? 1 : 40,
-            ZIndex = NextZ()
-        };
-        PlaceAt(element, centerX, centerY);
-        CurrentPage.Elements.Add(element);
-        SetSelectionCore([element.Id], element.Id);
-        Notify();
-        return element;
+            logger.LogTrace($"Entering EditorStateService.AddShape.");
+                    Capture();
+                    var element = new ShapeElement
+                    {
+                        Name = NextName(shape.ToString()),
+                        Shape = shape,
+                        X = 30,
+                        Y = 40,
+                        Width = shape == PublicationShape.Line ? 80 : 55,
+                        Height = shape == PublicationShape.Line ? 1 : 40,
+                        ZIndex = NextZ()
+                    };
+                    PlaceAt(element, centerX, centerY);
+                    CurrentPage.Elements.Add(element);
+                    SetSelectionCore([element.Id], element.Id);
+                    Notify();
+                    return element;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddShape failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void AddPage()
     {
-        Capture();
-        var source = CurrentPage;
-        var publicationPage = new PublicationPage
+        try
         {
-            Name = $"Page {Document.Pages.Count + 1}",
-            WidthMm = source.WidthMm,
-            HeightMm = source.HeightMm,
-            Background = source.Background,
-            Transition = CloneTransition(source.Transition),
-            TimelineDurationSeconds = source.TimelineDurationSeconds
-        };
-        foreach (var shared in Document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>()
-                     .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
-                     .GroupBy(component => component.SharedComponentId).Select(group => group.First()))
-        {
-            var clone = _components.Clone(shared);
-            clone.Id = Guid.NewGuid();
-            clone.X = Math.Clamp(clone.X, -clone.Width + 2, publicationPage.WidthMm - 2);
-            clone.Y = Math.Clamp(clone.Y, -clone.Height + 2, publicationPage.HeightMm - 2);
-            publicationPage.Elements.Add(clone);
+            logger.LogTrace($"Entering EditorStateService.AddPage.");
+                    Capture();
+                    var source = CurrentPage;
+                    var publicationPage = new PublicationPage
+                    {
+                        Name = $"Page {Document.Pages.Count + 1}",
+                        WidthMm = source.WidthMm,
+                        HeightMm = source.HeightMm,
+                        Background = source.Background,
+                        Transition = CloneTransition(source.Transition),
+                        TimelineDurationSeconds = source.TimelineDurationSeconds
+                    };
+                    foreach (var shared in Document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>()
+                                 .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
+                                 .GroupBy(component => component.SharedComponentId).Select(group => group.First()))
+                    {
+                        var clone = _components.Clone(shared);
+                        clone.Id = Guid.NewGuid();
+                        clone.X = Math.Clamp(clone.X, -clone.Width + 2, publicationPage.WidthMm - 2);
+                        clone.Y = Math.Clamp(clone.Y, -clone.Height + 2, publicationPage.HeightMm - 2);
+                        publicationPage.Elements.Add(clone);
+                    }
+                    Document.Pages.Add(publicationPage);
+                    SelectedPageId = publicationPage.Id;
+                    ClearSelectionCore();
+                    Notify();
+    
         }
-        Document.Pages.Add(publicationPage);
-        SelectedPageId = publicationPage.Id;
-        ClearSelectionCore();
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddPage failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void DuplicatePage()
     {
-        Capture();
-        var clone = ClonePage(CurrentPage);
-        clone.Id = Guid.NewGuid();
-        clone.Name = $"Page {Document.Pages.Count + 1}";
-        var idMap = clone.Elements.ToDictionary(item => item.Id, _ => Guid.NewGuid());
-        foreach (var item in clone.Elements)
+        try
         {
-            item.Id = idMap[item.Id];
-            RenewAnimationIds(item, preserveOrder: true);
-            if (item.Interaction.TargetElementId is { } interactionTarget && idMap.TryGetValue(interactionTarget, out var mappedTarget))
-                item.Interaction.TargetElementId = mappedTarget;
-            if (item.Interaction.TargetPageId == CurrentPage.Id)
-                item.Interaction.TargetPageId = clone.Id;
-            if (item is DevExtremeComponentElement component)
-            {
-                foreach (var action in component.Actions)
-                {
-                    if (action.TargetElementId is { } actionTarget && idMap.TryGetValue(actionTarget, out var mappedActionTarget))
-                        action.TargetElementId = mappedActionTarget;
-                    if (action.TargetPageId == CurrentPage.Id)
-                        action.TargetPageId = clone.Id;
-                }
-            }
+            logger.LogTrace($"Entering EditorStateService.DuplicatePage.");
+                    Capture();
+                    var clone = ClonePage(CurrentPage);
+                    clone.Id = Guid.NewGuid();
+                    clone.Name = $"Page {Document.Pages.Count + 1}";
+                    var idMap = clone.Elements.ToDictionary(item => item.Id, _ => Guid.NewGuid());
+                    foreach (var item in clone.Elements)
+                    {
+                        item.Id = idMap[item.Id];
+                        RenewAnimationIds(item, preserveOrder: true);
+                        if (item.Interaction.TargetElementId is { } interactionTarget && idMap.TryGetValue(interactionTarget, out var mappedTarget))
+                            item.Interaction.TargetElementId = mappedTarget;
+                        if (item.Interaction.TargetPageId == CurrentPage.Id)
+                            item.Interaction.TargetPageId = clone.Id;
+                        if (item is DevExtremeComponentElement component)
+                        {
+                            foreach (var action in component.Actions)
+                            {
+                                if (action.TargetElementId is { } actionTarget && idMap.TryGetValue(actionTarget, out var mappedActionTarget))
+                                    action.TargetElementId = mappedActionTarget;
+                                if (action.TargetPageId == CurrentPage.Id)
+                                    action.TargetPageId = clone.Id;
+                            }
+                        }
+                    }
+                    foreach (var connector in clone.Elements.OfType<ConnectorElement>())
+                    {
+                        if (idMap.TryGetValue(connector.Source.ElementId, out var sourceId)) connector.Source.ElementId = sourceId;
+                        if (idMap.TryGetValue(connector.Target.ElementId, out var targetId)) connector.Target.ElementId = targetId;
+                    }
+                    foreach (var guide in clone.Guides) guide.Id = Guid.NewGuid();
+                    Document.Pages.Insert(Document.Pages.IndexOf(CurrentPage) + 1, clone);
+                    SelectedPageId = clone.Id;
+                    ClearSelectionCore();
+                    Notify();
+    
         }
-        foreach (var connector in clone.Elements.OfType<ConnectorElement>())
+        catch (Exception exception)
         {
-            if (idMap.TryGetValue(connector.Source.ElementId, out var sourceId)) connector.Source.ElementId = sourceId;
-            if (idMap.TryGetValue(connector.Target.ElementId, out var targetId)) connector.Target.ElementId = targetId;
+            logger.LogError(exception, $"EditorStateService.DuplicatePage failed: {exception.Message}");
+            throw;
         }
-        foreach (var guide in clone.Guides) guide.Id = Guid.NewGuid();
-        Document.Pages.Insert(Document.Pages.IndexOf(CurrentPage) + 1, clone);
-        SelectedPageId = clone.Id;
-        ClearSelectionCore();
-        Notify();
     }
 
     public void DeletePage()
     {
-        if (Document.Pages.Count <= 1) return;
-        Capture();
-        var index = Document.Pages.IndexOf(CurrentPage);
-        var deletedPageId = CurrentPage.Id;
-        Document.Pages.RemoveAt(index);
-        foreach (var item in Document.Pages.SelectMany(page => page.Elements))
-            if (item.Interaction.TargetPageId == deletedPageId)
-                item.Interaction.TargetPageId = null;
-        SelectedPageId = Document.Pages[Math.Clamp(index - 1, 0, Document.Pages.Count - 1)].Id;
-        ClearSelectionCore();
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.DeletePage.");
+                    if (Document.Pages.Count <= 1) return;
+                    Capture();
+                    var index = Document.Pages.IndexOf(CurrentPage);
+                    var deletedPageId = CurrentPage.Id;
+                    Document.Pages.RemoveAt(index);
+                    foreach (var item in Document.Pages.SelectMany(page => page.Elements))
+                        if (item.Interaction.TargetPageId == deletedPageId)
+                            item.Interaction.TargetPageId = null;
+                    SelectedPageId = Document.Pages[Math.Clamp(index - 1, 0, Document.Pages.Count - 1)].Id;
+                    ClearSelectionCore();
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.DeletePage failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void DeleteSelected()
     {
-        var elements = SelectedElements.Where(element => !element.Locked).ToList();
-        if (elements.Count == 0) return;
-        Capture();
-        var removedIds = new HashSet<Guid>();
-        var removedSharedIds = elements.OfType<DevExtremeComponentElement>()
-            .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
-            .Select(component => component.SharedComponentId!.Value)
-            .ToHashSet();
-
-        foreach (var element in elements)
+        try
         {
-            if (element is DevExtremeComponentElement component && component.SharedComponentId is { } sharedId && removedSharedIds.Contains(sharedId))
-                continue;
-            if (CurrentPage.Elements.Remove(element)) removedIds.Add(element.Id);
-            if (element is PublicationMediaElement media)
-            {
-                _mediaAssets.Remove(media.Id);
-                foreach (var segment in media.Segments) _mediaAssets.Remove(segment.Id);
-            }
-        }
+            logger.LogTrace($"Entering EditorStateService.DeleteSelected.");
+                    var elements = SelectedElements.Where(element => !element.Locked).ToList();
+                    if (elements.Count == 0) return;
+                    Capture();
+                    var removedIds = new HashSet<Guid>();
+                    var removedSharedIds = elements.OfType<DevExtremeComponentElement>()
+                        .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
+                        .Select(component => component.SharedComponentId!.Value)
+                        .ToHashSet();
 
-        if (removedSharedIds.Count > 0)
+                    foreach (var element in elements)
+                    {
+                        if (element is DevExtremeComponentElement component && component.SharedComponentId is { } sharedId && removedSharedIds.Contains(sharedId))
+                            continue;
+                        if (CurrentPage.Elements.Remove(element)) removedIds.Add(element.Id);
+                        if (element is PublicationMediaElement media)
+                        {
+                            _mediaAssets.Remove(media.Id);
+                            foreach (var segment in media.Segments) _mediaAssets.Remove(segment.Id);
+                        }
+                    }
+
+                    if (removedSharedIds.Count > 0)
+                    {
+                        foreach (var page in Document.Pages)
+                        {
+                            foreach (var component in page.Elements.OfType<DevExtremeComponentElement>()
+                                         .Where(component => component.SharedComponentId is { } sharedId && removedSharedIds.Contains(sharedId))
+                                         .ToList())
+                            {
+                                page.Elements.Remove(component);
+                                removedIds.Add(component.Id);
+                            }
+                        }
+                    }
+
+                    foreach (var page in Document.Pages)
+                    {
+                        foreach (var connector in page.Elements.OfType<ConnectorElement>()
+                                     .Where(connector => removedIds.Contains(connector.Source.ElementId) || removedIds.Contains(connector.Target.ElementId))
+                                     .ToList())
+                        {
+                            removedIds.Add(connector.Id);
+                            page.Elements.Remove(connector);
+                        }
+
+                        foreach (var item in page.Elements)
+                        {
+                            if (item.Interaction.TargetElementId is { } targetId && removedIds.Contains(targetId))
+                                item.Interaction.TargetElementId = null;
+                            if (item is not DevExtremeComponentElement targetComponent) continue;
+                            foreach (var action in targetComponent.Actions)
+                            {
+                                if (action.TargetElementId is { } actionTargetId && removedIds.Contains(actionTargetId)) action.TargetElementId = null;
+                                if (action.TargetSharedComponentId is { } actionSharedId && removedSharedIds.Contains(actionSharedId)) action.TargetSharedComponentId = null;
+                            }
+                        }
+
+                        var ordered = page.Elements.OrderBy(element => element.ZIndex).ToList();
+                        for (var index = 0; index < ordered.Count; index++) ordered[index].ZIndex = index + 1;
+                    }
+
+                    ReindexAnimations();
+                    ClearSelectionCore();
+                    CropMode = false;
+                    ContentPanMode = false;
+                    Notify();
+    
+        }
+        catch (Exception exception)
         {
-            foreach (var page in Document.Pages)
-            {
-                foreach (var component in page.Elements.OfType<DevExtremeComponentElement>()
-                             .Where(component => component.SharedComponentId is { } sharedId && removedSharedIds.Contains(sharedId))
-                             .ToList())
-                {
-                    page.Elements.Remove(component);
-                    removedIds.Add(component.Id);
-                }
-            }
+            logger.LogError(exception, $"EditorStateService.DeleteSelected failed: {exception.Message}");
+            throw;
         }
-
-        foreach (var page in Document.Pages)
-        {
-            foreach (var connector in page.Elements.OfType<ConnectorElement>()
-                         .Where(connector => removedIds.Contains(connector.Source.ElementId) || removedIds.Contains(connector.Target.ElementId))
-                         .ToList())
-            {
-                removedIds.Add(connector.Id);
-                page.Elements.Remove(connector);
-            }
-
-            foreach (var item in page.Elements)
-            {
-                if (item.Interaction.TargetElementId is { } targetId && removedIds.Contains(targetId))
-                    item.Interaction.TargetElementId = null;
-                if (item is not DevExtremeComponentElement targetComponent) continue;
-                foreach (var action in targetComponent.Actions)
-                {
-                    if (action.TargetElementId is { } actionTargetId && removedIds.Contains(actionTargetId)) action.TargetElementId = null;
-                    if (action.TargetSharedComponentId is { } actionSharedId && removedSharedIds.Contains(actionSharedId)) action.TargetSharedComponentId = null;
-                }
-            }
-
-            var ordered = page.Elements.OrderBy(element => element.ZIndex).ToList();
-            for (var index = 0; index < ordered.Count; index++) ordered[index].ZIndex = index + 1;
-        }
-
-        ReindexAnimations();
-        ClearSelectionCore();
-        CropMode = false;
-        ContentPanMode = false;
-        Notify();
     }
 
     public void CopySelected()
     {
-        var sources = ClipboardSelection();
-        if (sources.Count == 0) return;
-        _clipboard.Clear();
-        _clipboard.AddRange(sources.Select(CloneElement));
-        ClipboardRevision++;
-        Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CopySelected.");
+                    var sources = ClipboardSelection();
+                    if (sources.Count == 0) return;
+                    _clipboard.Clear();
+                    _clipboard.AddRange(sources.Select(CloneElement));
+                    ClipboardRevision++;
+                    Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CopySelected failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CutSelected()
     {
-        if (SelectedElements.Count == 0) return;
-        CopySelected();
-        DeleteSelected();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CutSelected.");
+                    if (SelectedElements.Count == 0) return;
+                    CopySelected();
+                    DeleteSelected();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CutSelected failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void Paste()
     {
-        if (_clipboard.Count == 0) return;
-        CloneSelection(_clipboard, useInsertionPoint: true);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.Paste.");
+                    if (_clipboard.Count == 0) return;
+                    CloneSelection(_clipboard, useInsertionPoint: true);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Paste failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void DuplicateSelected()
     {
-        var sources = ClipboardSelection();
-        if (sources.Count == 0) return;
-        CloneSelection(sources, useInsertionPoint: false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.DuplicateSelected.");
+                    var sources = ClipboardSelection();
+                    if (sources.Count == 0) return;
+                    CloneSelection(sources, useInsertionPoint: false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.DuplicateSelected failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SelectAll()
     {
-        var ids = CurrentPage.Elements.Where(element => element.Visible).Select(element => element.Id).ToArray();
-        if (ids.Length == 0) return;
-        SetSelectionCore(ids, ids[0]);
-        CropMode = false;
-        ContentPanMode = false;
-        ConnectorTool = ConnectorToolKind.None;
-        EndLiveEdit();
-        Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SelectAll.");
+                    var ids = CurrentPage.Elements.Where(element => element.Visible).Select(element => element.Id).ToArray();
+                    if (ids.Length == 0) return;
+                    SetSelectionCore(ids, ids[0]);
+                    CropMode = false;
+                    ContentPanMode = false;
+                    ConnectorTool = ConnectorToolKind.None;
+                    EndLiveEdit();
+                    Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SelectAll failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void NudgeSelection(double dx, double dy)
     {
-        var elements = TransformSelectionBlock();
-        if (elements.Count == 0 || (NearlyEqual(dx, 0) && NearlyEqual(dy, 0))) return;
-        var left = elements.Min(element => element.X);
-        var top = elements.Min(element => element.Y);
-        var right = elements.Max(element => element.X + element.Width);
-        var bottom = elements.Max(element => element.Y + element.Height);
-        dx = Math.Clamp(dx, -left, CurrentPage.WidthMm - right);
-        dy = Math.Clamp(dy, -top, CurrentPage.HeightMm - bottom);
-        if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
-        Capture();
-        foreach (var element in elements)
+        try
         {
-            element.X += dx;
-            element.Y += dy;
+            logger.LogTrace($"Entering EditorStateService.NudgeSelection.");
+                    var elements = TransformSelectionBlock();
+                    if (elements.Count == 0 || (NearlyEqual(dx, 0) && NearlyEqual(dy, 0))) return;
+                    var left = elements.Min(element => element.X);
+                    var top = elements.Min(element => element.Y);
+                    var right = elements.Max(element => element.X + element.Width);
+                    var bottom = elements.Max(element => element.Y + element.Height);
+                    dx = Math.Clamp(dx, -left, CurrentPage.WidthMm - right);
+                    dy = Math.Clamp(dy, -top, CurrentPage.HeightMm - bottom);
+                    if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
+                    Capture();
+                    foreach (var element in elements)
+                    {
+                        element.X += dx;
+                        element.Y += dy;
+                    }
+                    Notify();
+    
         }
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NudgeSelection failed: {exception.Message}");
+            throw;
+        }
     }
 
     public PublicationAnimation? AddAnimation(
@@ -1338,755 +2059,1397 @@ public sealed class EditorStateService : IDisposable
         PublicationAnimationPhase phase,
         PublicationAnimationTrigger? trigger = null)
     {
-        var element = SelectedElement;
-        if (element is null) return null;
-        Capture();
-        var animation = new PublicationAnimation
+        try
         {
-            Name = $"{effect} {phase}",
-            Effect = effect,
-            Phase = phase,
-            Trigger = trigger ?? (CurrentPage.Elements.SelectMany(item => item.Animations).Any()
-                ? PublicationAnimationTrigger.AfterPrevious
-                : phase == PublicationAnimationPhase.Entrance
-                    ? PublicationAnimationTrigger.OnPageEnter
-                    : PublicationAnimationTrigger.OnClick),
-            Order = NextAnimationOrder(),
-            Direction = effect is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move
-                ? PublicationAnimationDirection.Left
-                : PublicationAnimationDirection.None,
-            DurationSeconds = effect is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia ? .05 : .6,
-            AutoReverse = phase == PublicationAnimationPhase.Emphasis && effect is not (PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia)
-        };
-        element.Animations.Add(animation);
-        EnsureTimelineDuration();
-        Notify();
-        return animation;
+            logger.LogTrace($"Entering EditorStateService.AddAnimation.");
+                    var element = SelectedElement;
+                    if (element is null) return null;
+                    Capture();
+                    var animation = new PublicationAnimation
+                    {
+                        Name = $"{effect} {phase}",
+                        Effect = effect,
+                        Phase = phase,
+                        Trigger = trigger ?? (CurrentPage.Elements.SelectMany(item => item.Animations).Any()
+                            ? PublicationAnimationTrigger.AfterPrevious
+                            : phase == PublicationAnimationPhase.Entrance
+                                ? PublicationAnimationTrigger.OnPageEnter
+                                : PublicationAnimationTrigger.OnClick),
+                        Order = NextAnimationOrder(),
+                        Direction = effect is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move
+                            ? PublicationAnimationDirection.Left
+                            : PublicationAnimationDirection.None,
+                        DurationSeconds = effect is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia ? .05 : .6,
+                        AutoReverse = phase == PublicationAnimationPhase.Emphasis && effect is not (PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia)
+                    };
+                    element.Animations.Add(animation);
+                    EnsureTimelineDuration();
+                    Notify();
+                    return animation;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddAnimation failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateAnimation(Guid animationId, Action<PublicationAnimation> update)
     {
-        var animation = FindAnimation(animationId);
-        if (animation is null) return;
-        Capture();
-        update(animation);
-        NormalizeAnimation(animation);
-        EnsureTimelineDuration();
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdateAnimation.");
+                    var animation = FindAnimation(animationId);
+                    if (animation is null) return;
+                    Capture();
+                    update(animation);
+                    NormalizeAnimation(animation);
+                    EnsureTimelineDuration();
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateAnimation failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateAnimationLive(Guid animationId, string key, Action<PublicationAnimation> update)
     {
-        var animation = FindAnimation(animationId);
-        if (animation is null) return;
-        var liveKey = $"animation:{animationId}:{key}";
-        if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+        try
         {
-            Capture();
-            _liveEditKey = liveKey;
+            logger.LogTrace($"Entering EditorStateService.UpdateAnimationLive.");
+                    var animation = FindAnimation(animationId);
+                    if (animation is null) return;
+                    var liveKey = $"animation:{animationId}:{key}";
+                    if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+                    {
+                        Capture();
+                        _liveEditKey = liveKey;
+                    }
+                    update(animation);
+                    NormalizeAnimation(animation);
+                    EnsureTimelineDuration();
+                    Notify();
+    
         }
-        update(animation);
-        NormalizeAnimation(animation);
-        EnsureTimelineDuration();
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateAnimationLive failed: {exception.Message}");
+            throw;
+        }
     }
 
     public PublicationAnimation? DuplicateAnimation(Guid animationId)
     {
-        var owner = CurrentPage.Elements.FirstOrDefault(item => item.Animations.Any(animation => animation.Id == animationId));
-        var source = owner?.Animations.FirstOrDefault(item => item.Id == animationId);
-        if (owner is null || source is null) return null;
-        Capture();
-        var clone = new PublicationAnimation
+        try
         {
-            Id = Guid.NewGuid(),
-            Name = NextName(source.Name),
-            Order = NextAnimationOrder(),
-            Phase = source.Phase,
-            Effect = source.Effect,
-            Trigger = source.Trigger,
-            Easing = source.Easing,
-            Direction = source.Direction,
-            DurationSeconds = source.DurationSeconds,
-            DelaySeconds = source.DelaySeconds,
-            TimelineStartSeconds = source.TimelineStartSeconds is { } start ? start + .25 : null,
-            DistancePercent = source.DistancePercent,
-            ScalePercent = source.ScalePercent,
-            RotationDegrees = source.RotationDegrees,
-            RepeatCount = source.RepeatCount,
-            AutoReverse = source.AutoReverse
-        };
-        owner.Animations.Add(clone);
-        ReindexAnimations();
-        EnsureTimelineDuration();
-        SetSelectionCore([owner.Id], owner.Id);
-        Notify();
-        return clone;
+            logger.LogTrace($"Entering EditorStateService.DuplicateAnimation.");
+                    var owner = CurrentPage.Elements.FirstOrDefault(item => item.Animations.Any(animation => animation.Id == animationId));
+                    var source = owner?.Animations.FirstOrDefault(item => item.Id == animationId);
+                    if (owner is null || source is null) return null;
+                    Capture();
+                    var clone = new PublicationAnimation
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = NextName(source.Name),
+                        Order = NextAnimationOrder(),
+                        Phase = source.Phase,
+                        Effect = source.Effect,
+                        Trigger = source.Trigger,
+                        Easing = source.Easing,
+                        Direction = source.Direction,
+                        DurationSeconds = source.DurationSeconds,
+                        DelaySeconds = source.DelaySeconds,
+                        TimelineStartSeconds = source.TimelineStartSeconds is { } start ? start + .25 : null,
+                        DistancePercent = source.DistancePercent,
+                        ScalePercent = source.ScalePercent,
+                        RotationDegrees = source.RotationDegrees,
+                        RepeatCount = source.RepeatCount,
+                        AutoReverse = source.AutoReverse
+                    };
+                    owner.Animations.Add(clone);
+                    ReindexAnimations();
+                    EnsureTimelineDuration();
+                    SetSelectionCore([owner.Id], owner.Id);
+                    Notify();
+                    return clone;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.DuplicateAnimation failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void DeleteAnimation(Guid animationId)
     {
-        var owner = CurrentPage.Elements.FirstOrDefault(item => item.Animations.Any(animation => animation.Id == animationId));
-        var animation = owner?.Animations.FirstOrDefault(item => item.Id == animationId);
-        if (owner is null || animation is null) return;
-        Capture();
-        owner.Animations.Remove(animation);
-        ReindexAnimations();
-        EnsureTimelineDuration();
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.DeleteAnimation.");
+                    var owner = CurrentPage.Elements.FirstOrDefault(item => item.Animations.Any(animation => animation.Id == animationId));
+                    var animation = owner?.Animations.FirstOrDefault(item => item.Id == animationId);
+                    if (owner is null || animation is null) return;
+                    Capture();
+                    owner.Animations.Remove(animation);
+                    ReindexAnimations();
+                    EnsureTimelineDuration();
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.DeleteAnimation failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void MoveAnimation(Guid animationId, int offset)
     {
-        var timeline = CurrentPage.Elements
-            .SelectMany(element => element.Animations.Select(animation => (element, animation)))
-            .OrderBy(item => item.animation.Order)
-            .ToList();
-        var index = timeline.FindIndex(item => item.animation.Id == animationId);
-        if (index < 0) return;
-        var target = Math.Clamp(index + offset, 0, timeline.Count - 1);
-        if (index == target) return;
-        Capture();
-        var moving = timeline[index];
-        timeline.RemoveAt(index);
-        timeline.Insert(target, moving);
-        for (var order = 0; order < timeline.Count; order++)
-            timeline[order].animation.Order = order + 1;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.MoveAnimation.");
+                    var timeline = CurrentPage.Elements
+                        .SelectMany(element => element.Animations.Select(animation => (element, animation)))
+                        .OrderBy(item => item.animation.Order)
+                        .ToList();
+                    var index = timeline.FindIndex(item => item.animation.Id == animationId);
+                    if (index < 0) return;
+                    var target = Math.Clamp(index + offset, 0, timeline.Count - 1);
+                    if (index == target) return;
+                    Capture();
+                    var moving = timeline[index];
+                    timeline.RemoveAt(index);
+                    timeline.Insert(target, moving);
+                    for (var order = 0; order < timeline.Count; order++)
+                        timeline[order].animation.Order = order + 1;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.MoveAnimation failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ClearSelectedAnimations()
     {
-        var element = SelectedElement;
-        if (element is null || element.Animations.Count == 0) return;
-        Capture();
-        element.Animations.Clear();
-        ReindexAnimations();
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ClearSelectedAnimations.");
+                    var element = SelectedElement;
+                    if (element is null || element.Animations.Count == 0) return;
+                    Capture();
+                    element.Animations.Clear();
+                    ReindexAnimations();
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ClearSelectedAnimations failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateInteraction(Action<PublicationInteraction> update)
     {
-        var element = SelectedElement;
-        if (element is null) return;
-        Capture();
-        element.Interaction ??= new PublicationInteraction();
-        update(element.Interaction);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdateInteraction.");
+                    var element = SelectedElement;
+                    if (element is null) return;
+                    Capture();
+                    element.Interaction ??= new PublicationInteraction();
+                    update(element.Interaction);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateInteraction failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdatePageTransition(Action<PublicationPageTransition> update)
     {
-        Capture();
-        CurrentPage.Transition ??= new PublicationPageTransition();
-        update(CurrentPage.Transition);
-        CurrentPage.Transition.DurationSeconds = Math.Clamp(CurrentPage.Transition.DurationSeconds, .1, 8);
-        CurrentPage.Transition.AutoAdvanceSeconds = Math.Clamp(CurrentPage.Transition.AutoAdvanceSeconds, .25, 3600);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdatePageTransition.");
+                    Capture();
+                    CurrentPage.Transition ??= new PublicationPageTransition();
+                    update(CurrentPage.Transition);
+                    CurrentPage.Transition.DurationSeconds = Math.Clamp(CurrentPage.Transition.DurationSeconds, .1, 8);
+                    CurrentPage.Transition.AutoAdvanceSeconds = Math.Clamp(CurrentPage.Transition.AutoAdvanceSeconds, .25, 3600);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdatePageTransition failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdatePageTransitionLive(string key, Action<PublicationPageTransition> update)
     {
-        var liveKey = $"page-transition:{SelectedPageId}:{key}";
-        if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+        try
         {
-            Capture();
-            _liveEditKey = liveKey;
+            logger.LogTrace($"Entering EditorStateService.UpdatePageTransitionLive.");
+                    var liveKey = $"page-transition:{SelectedPageId}:{key}";
+                    if (!string.Equals(_liveEditKey, liveKey, StringComparison.Ordinal))
+                    {
+                        Capture();
+                        _liveEditKey = liveKey;
+                    }
+                    CurrentPage.Transition ??= new PublicationPageTransition();
+                    update(CurrentPage.Transition);
+                    CurrentPage.Transition.DurationSeconds = Math.Clamp(CurrentPage.Transition.DurationSeconds, .1, 8);
+                    CurrentPage.Transition.AutoAdvanceSeconds = Math.Clamp(CurrentPage.Transition.AutoAdvanceSeconds, .25, 3600);
+                    Notify();
+    
         }
-        CurrentPage.Transition ??= new PublicationPageTransition();
-        update(CurrentPage.Transition);
-        CurrentPage.Transition.DurationSeconds = Math.Clamp(CurrentPage.Transition.DurationSeconds, .1, 8);
-        CurrentPage.Transition.AutoAdvanceSeconds = Math.Clamp(CurrentPage.Transition.AutoAdvanceSeconds, .25, 3600);
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdatePageTransitionLive failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetAnimationTimelineRange(Guid animationId, double startSeconds, double durationSeconds)
     {
-        var animation = FindAnimation(animationId);
-        if (animation is null) return;
-        Capture();
-        animation.TimelineStartSeconds = Math.Clamp(startSeconds, 0, 3600);
-        var playbackMultiplier = Math.Max(1, animation.RepeatCount) * (animation.AutoReverse ? 2 : 1);
-        animation.DurationSeconds = Math.Clamp(durationSeconds / playbackMultiplier, .05, 60);
-        EnsureTimelineDuration();
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetAnimationTimelineRange.");
+                    var animation = FindAnimation(animationId);
+                    if (animation is null) return;
+                    Capture();
+                    animation.TimelineStartSeconds = Math.Clamp(startSeconds, 0, 3600);
+                    var playbackMultiplier = Math.Max(1, animation.RepeatCount) * (animation.AutoReverse ? 2 : 1);
+                    animation.DurationSeconds = Math.Clamp(durationSeconds / playbackMultiplier, .05, 60);
+                    EnsureTimelineDuration();
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetAnimationTimelineRange failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ClearAnimationTimelinePosition(Guid animationId)
     {
-        var animation = FindAnimation(animationId);
-        if (animation is null || animation.TimelineStartSeconds is null) return;
-        Capture();
-        animation.TimelineStartSeconds = null;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ClearAnimationTimelinePosition.");
+                    var animation = FindAnimation(animationId);
+                    if (animation is null || animation.TimelineStartSeconds is null) return;
+                    Capture();
+                    animation.TimelineStartSeconds = null;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ClearAnimationTimelinePosition failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetMediaTimelineRange(Guid elementId, string mode, double startSeconds, double lengthSeconds)
     {
-        var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == elementId);
-        if (media is null || media.Locked) return;
-        Capture();
-        NormalizeMedia(media);
-        var oldStart = media.TimelineStartSeconds;
-        var oldLength = media.TimelineLengthSeconds;
-        var sourceRate = Math.Max(.1, media.PlaybackRate);
-        startSeconds = Math.Clamp(startSeconds, 0, 3600);
-        lengthSeconds = Math.Clamp(lengthSeconds, .05, 3600);
-        switch (mode)
+        try
         {
-            case "trim-left":
-            {
-                var oldTimelineEnd = oldStart + oldLength;
-                var newTimelineEnd = startSeconds + lengthSeconds;
-                if (Math.Abs(newTimelineEnd - oldTimelineEnd) > .15)
-                    startSeconds = Math.Max(0, oldTimelineEnd - lengthSeconds);
-                media.TrimStartSeconds = Math.Clamp(media.EffectiveTrimEndSeconds - lengthSeconds * sourceRate, 0, media.EffectiveTrimEndSeconds - .01);
-                media.TimelineStartSeconds = startSeconds;
-                break;
-            }
-            case "trim-right":
-                media.TrimEndSeconds = Math.Clamp(media.TrimStartSeconds + lengthSeconds * sourceRate, media.TrimStartSeconds + .01, Math.Max(media.DurationSeconds, media.TrimStartSeconds + .01));
-                break;
-            default:
-                media.TimelineStartSeconds = startSeconds;
-                break;
+            logger.LogTrace($"Entering EditorStateService.SetMediaTimelineRange.");
+                    var media = CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == elementId);
+                    if (media is null || media.Locked) return;
+                    Capture();
+                    NormalizeMedia(media);
+                    var oldStart = media.TimelineStartSeconds;
+                    var oldLength = media.TimelineLengthSeconds;
+                    var sourceRate = Math.Max(.1, media.PlaybackRate);
+                    startSeconds = Math.Clamp(startSeconds, 0, 3600);
+                    lengthSeconds = Math.Clamp(lengthSeconds, .05, 3600);
+                    switch (mode)
+                    {
+                        case "trim-left":
+                        {
+                            var oldTimelineEnd = oldStart + oldLength;
+                            var newTimelineEnd = startSeconds + lengthSeconds;
+                            if (Math.Abs(newTimelineEnd - oldTimelineEnd) > .15)
+                                startSeconds = Math.Max(0, oldTimelineEnd - lengthSeconds);
+                            media.TrimStartSeconds = Math.Clamp(media.EffectiveTrimEndSeconds - lengthSeconds * sourceRate, 0, media.EffectiveTrimEndSeconds - .01);
+                            media.TimelineStartSeconds = startSeconds;
+                            break;
+                        }
+                        case "trim-right":
+                            media.TrimEndSeconds = Math.Clamp(media.TrimStartSeconds + lengthSeconds * sourceRate, media.TrimStartSeconds + .01, Math.Max(media.DurationSeconds, media.TrimStartSeconds + .01));
+                            break;
+                        default:
+                            media.TimelineStartSeconds = startSeconds;
+                            break;
+                    }
+                    NormalizeMedia(media);
+                    EnsureTimelineDuration();
+                    SetSelectionCore([media.Id], media.Id);
+                    Notify();
+    
         }
-        NormalizeMedia(media);
-        EnsureTimelineDuration();
-        SetSelectionCore([media.Id], media.Id);
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetMediaTimelineRange failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetPageTimelineDuration(double seconds)
     {
-        Capture();
-        CurrentPage.TimelineDurationSeconds = Math.Clamp(seconds, 1, 3600);
-        EnsureTimelineDuration();
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetPageTimelineDuration.");
+                    Capture();
+                    CurrentPage.TimelineDurationSeconds = Math.Clamp(seconds, 1, 3600);
+                    EnsureTimelineDuration();
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetPageTimelineDuration failed: {exception.Message}");
+            throw;
+        }
     }
 
     public double EffectiveAnimationStart(PublicationAnimation target)
     {
-        if (target.TimelineStartSeconds is { } explicitStart) return Math.Max(0, explicitStart);
-        var timeline = CurrentPage.Elements.SelectMany(item => item.Animations).OrderBy(item => item.Order).ToList();
-        double previousStart = 0;
-        double previousEnd = 0;
-        foreach (var animation in timeline)
+        try
         {
-            var start = Math.Max(0, animation.DelaySeconds);
-            if (animation.Trigger == PublicationAnimationTrigger.WithPrevious) start = previousStart + Math.Max(0, animation.DelaySeconds);
-            else if (animation.Trigger == PublicationAnimationTrigger.AfterPrevious) start = previousEnd + Math.Max(0, animation.DelaySeconds);
-            else if (animation.Trigger == PublicationAnimationTrigger.OnClick) start = animation.TimelineStartSeconds ?? 0;
-            if (animation.Id == target.Id) return start;
-            previousStart = start;
-            previousEnd = start + AnimationSpan(animation);
+            logger.LogTrace($"Entering EditorStateService.EffectiveAnimationStart.");
+                    if (target.TimelineStartSeconds is { } explicitStart) return Math.Max(0, explicitStart);
+                    var timeline = CurrentPage.Elements.SelectMany(item => item.Animations).OrderBy(item => item.Order).ToList();
+                    double previousStart = 0;
+                    double previousEnd = 0;
+                    foreach (var animation in timeline)
+                    {
+                        var start = Math.Max(0, animation.DelaySeconds);
+                        if (animation.Trigger == PublicationAnimationTrigger.WithPrevious) start = previousStart + Math.Max(0, animation.DelaySeconds);
+                        else if (animation.Trigger == PublicationAnimationTrigger.AfterPrevious) start = previousEnd + Math.Max(0, animation.DelaySeconds);
+                        else if (animation.Trigger == PublicationAnimationTrigger.OnClick) start = animation.TimelineStartSeconds ?? 0;
+                        if (animation.Id == target.Id) return start;
+                        previousStart = start;
+                        previousEnd = start + AnimationSpan(animation);
+                    }
+                    return 0;
+    
         }
-        return 0;
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.EffectiveAnimationStart failed: {exception.Message}");
+            throw;
+        }
     }
 
     public double EffectivePageTimelineDuration()
     {
-        var animationEnd = CurrentPage.Elements.SelectMany(item => item.Animations)
-            .Select(item => EffectiveAnimationStart(item) + AnimationSpan(item))
-            .DefaultIfEmpty(0)
-            .Max();
-        var mediaEnd = CurrentPage.Elements.OfType<PublicationMediaElement>()
-            .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
-            .DefaultIfEmpty(0)
-            .Max();
-        return Math.Clamp(Math.Max(CurrentPage.TimelineDurationSeconds, Math.Max(animationEnd, mediaEnd) + .5), 1, 3600);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.EffectivePageTimelineDuration.");
+                    var animationEnd = CurrentPage.Elements.SelectMany(item => item.Animations)
+                        .Select(item => EffectiveAnimationStart(item) + AnimationSpan(item))
+                        .DefaultIfEmpty(0)
+                        .Max();
+                    var mediaEnd = CurrentPage.Elements.OfType<PublicationMediaElement>()
+                        .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
+                        .DefaultIfEmpty(0)
+                        .Max();
+                    return Math.Clamp(Math.Max(CurrentPage.TimelineDurationSeconds, Math.Max(animationEnd, mediaEnd) + .5), 1, 3600);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.EffectivePageTimelineDuration failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CommitMove(Guid id, double x, double y, IReadOnlyCollection<Guid>? movingIds = null)
     {
-        var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == id);
-        if (element is null || element.Locked || element is ConnectorElement) return;
-        var requestedIds = movingIds is { Count: > 0 }
-            ? movingIds.ToHashSet()
-            : new HashSet<Guid>();
-
-        // Browser-side movement is optimistic; the server-side selection remains
-        // authoritative. Merge every selected object and the persistent group unit so
-        // lower z-level members cannot be omitted by stale DOM selection markers.
-        if (_selectedElementIds.Contains(element.Id))
-            requestedIds.UnionWith(_selectedElementIds);
-        foreach (var grouped in SelectionUnit(element))
-            requestedIds.Add(grouped.Id);
-        requestedIds.Add(element.Id);
-
-        var moving = CurrentPage.Elements
-            .Where(item => requestedIds.Contains(item.Id))
-            .Where(item => !item.Locked && item is not ConnectorElement)
-            .DistinctBy(item => item.Id)
-            .ToList();
-        if (moving.All(item => item.Id != element.Id)) moving.Insert(0, element);
-        if (moving.Count == 0) return;
-
-        var requestedDx = x - element.X;
-        var requestedDy = y - element.Y;
-        var minDx = moving.Max(item => -item.Width + 2 - item.X);
-        var maxDx = moving.Min(item => CurrentPage.WidthMm - 2 - item.X);
-        var minDy = moving.Max(item => -item.Height + 2 - item.Y);
-        var maxDy = moving.Min(item => CurrentPage.HeightMm - 2 - item.Y);
-        var dx = Math.Clamp(requestedDx, minDx, maxDx);
-        var dy = Math.Clamp(requestedDy, minDy, maxDy);
-        if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
-
-        Capture();
-        foreach (var item in moving)
+        try
         {
-            item.X += dx;
-            item.Y += dy;
+            logger.LogTrace($"Entering EditorStateService.CommitMove.");
+                    var element = CurrentPage.Elements.FirstOrDefault(item => item.Id == id);
+                    if (element is null || element.Locked || element is ConnectorElement) return;
+                    var requestedIds = movingIds is { Count: > 0 }
+                        ? movingIds.ToHashSet()
+                        : new HashSet<Guid>();
+
+                    // Browser-side movement is optimistic; the server-side selection remains
+                    // authoritative. Merge every selected object and the persistent group unit so
+                    // lower z-level members cannot be omitted by stale DOM selection markers.
+                    if (_selectedElementIds.Contains(element.Id))
+                        requestedIds.UnionWith(_selectedElementIds);
+                    foreach (var grouped in SelectionUnit(element))
+                        requestedIds.Add(grouped.Id);
+                    requestedIds.Add(element.Id);
+
+                    var moving = CurrentPage.Elements
+                        .Where(item => requestedIds.Contains(item.Id))
+                        .Where(item => !item.Locked && item is not ConnectorElement)
+                        .DistinctBy(item => item.Id)
+                        .ToList();
+                    if (moving.All(item => item.Id != element.Id)) moving.Insert(0, element);
+                    if (moving.Count == 0) return;
+
+                    var requestedDx = x - element.X;
+                    var requestedDy = y - element.Y;
+                    var minDx = moving.Max(item => -item.Width + 2 - item.X);
+                    var maxDx = moving.Min(item => CurrentPage.WidthMm - 2 - item.X);
+                    var minDy = moving.Max(item => -item.Height + 2 - item.Y);
+                    var maxDy = moving.Min(item => CurrentPage.HeightMm - 2 - item.Y);
+                    var dx = Math.Clamp(requestedDx, minDx, maxDx);
+                    var dy = Math.Clamp(requestedDy, minDy, maxDy);
+                    if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
+
+                    Capture();
+                    foreach (var item in moving)
+                    {
+                        item.X += dx;
+                        item.Y += dy;
+                    }
+                    if (!_selectedElementIds.Contains(element.Id))
+                        SetSelectionCore(moving.Select(item => item.Id), element.Id);
+                    Notify();
+    
         }
-        if (!_selectedElementIds.Contains(element.Id))
-            SetSelectionCore(moving.Select(item => item.Id), element.Id);
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CommitMove failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CommitBounds(Guid id, double x, double y, double width, double height)
     {
-        var element = CurrentPage.Elements.FirstOrDefault(e => e.Id == id);
-        if (element is null || element.Locked || element is ConnectorElement) return;
-        var (minimumWidth, minimumHeight) = MinimumElementSize(element);
-        var nextWidth = Math.Max(minimumWidth, Math.Min(width, CurrentPage.WidthMm * 2));
-        var nextHeight = Math.Max(minimumHeight, Math.Min(height, CurrentPage.HeightMm * 2));
-        var nextX = Math.Clamp(x, -nextWidth + 2, CurrentPage.WidthMm - 2);
-        var nextY = Math.Clamp(y, -nextHeight + 2, CurrentPage.HeightMm - 2);
-        if (NearlyEqual(element.X, nextX) && NearlyEqual(element.Y, nextY) &&
-            NearlyEqual(element.Width, nextWidth) && NearlyEqual(element.Height, nextHeight)) return;
-        Capture();
-        element.Width = nextWidth;
-        element.Height = nextHeight;
-        element.X = nextX;
-        element.Y = nextY;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CommitBounds.");
+                    var element = CurrentPage.Elements.FirstOrDefault(e => e.Id == id);
+                    if (element is null || element.Locked || element is ConnectorElement) return;
+                    var (minimumWidth, minimumHeight) = MinimumElementSize(element);
+                    var nextWidth = Math.Max(minimumWidth, Math.Min(width, CurrentPage.WidthMm * 2));
+                    var nextHeight = Math.Max(minimumHeight, Math.Min(height, CurrentPage.HeightMm * 2));
+                    var nextX = Math.Clamp(x, -nextWidth + 2, CurrentPage.WidthMm - 2);
+                    var nextY = Math.Clamp(y, -nextHeight + 2, CurrentPage.HeightMm - 2);
+                    if (NearlyEqual(element.X, nextX) && NearlyEqual(element.Y, nextY) &&
+                        NearlyEqual(element.Width, nextWidth) && NearlyEqual(element.Height, nextHeight)) return;
+                    Capture();
+                    element.Width = nextWidth;
+                    element.Height = nextHeight;
+                    element.X = nextX;
+                    element.Y = nextY;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CommitBounds failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CommitCrop(Guid id, double cropX, double cropY, double cropScale)
     {
-        var image = CurrentPage.Elements.OfType<ImageFrameElement>().FirstOrDefault(e => e.Id == id);
-        if (image is null || image.Locked) return;
-        Capture();
-        image.CropX = Math.Clamp(cropX, -100, 100);
-        image.CropY = Math.Clamp(cropY, -100, 100);
-        image.CropScale = Math.Clamp(cropScale, .2, 8);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CommitCrop.");
+                    var image = CurrentPage.Elements.OfType<ImageFrameElement>().FirstOrDefault(e => e.Id == id);
+                    if (image is null || image.Locked) return;
+                    Capture();
+                    image.CropX = Math.Clamp(cropX, -100, 100);
+                    image.CropY = Math.Clamp(cropY, -100, 100);
+                    image.CropScale = Math.Clamp(cropScale, .2, 8);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CommitCrop failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateSelected(Action<PublicationElement> update, bool capture = true, bool allowLocked = false)
     {
-        var element = SelectedElement;
-        if (element is null || (element.Locked && !allowLocked)) return;
-        if (capture) Capture();
-        update(element);
-        if (element is DevExtremeComponentElement component)
+        try
         {
-            _components.Normalize(Document, component);
-            SynchronizeDocumentComponent(component);
+            logger.LogTrace($"Entering EditorStateService.UpdateSelected.");
+                    var element = SelectedElement;
+                    if (element is null || (element.Locked && !allowLocked)) return;
+                    if (capture) Capture();
+                    update(element);
+                    if (element is DevExtremeComponentElement component)
+                    {
+                        _components.Normalize(Document, component);
+                        SynchronizeDocumentComponent(component);
+                    }
+                    Notify();
+    
         }
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateSelected failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateSelectedLive(string key, Action<PublicationElement> update)
     {
-        var element = SelectedElement;
-        if (element is null || element.Locked) return;
-        if (!string.Equals(_liveEditKey, key, StringComparison.Ordinal))
+        try
         {
-            Capture();
-            _liveEditKey = key;
+            logger.LogTrace($"Entering EditorStateService.UpdateSelectedLive.");
+                    var element = SelectedElement;
+                    if (element is null || element.Locked) return;
+                    if (!string.Equals(_liveEditKey, key, StringComparison.Ordinal))
+                    {
+                        Capture();
+                        _liveEditKey = key;
+                    }
+                    update(element);
+                    if (element is DevExtremeComponentElement component)
+                    {
+                        _components.Normalize(Document, component);
+                        SynchronizeDocumentComponent(component);
+                    }
+                    Notify();
+    
         }
-        update(element);
-        if (element is DevExtremeComponentElement component)
+        catch (Exception exception)
         {
-            _components.Normalize(Document, component);
-            SynchronizeDocumentComponent(component);
+            logger.LogError(exception, $"EditorStateService.UpdateSelectedLive failed: {exception.Message}");
+            throw;
         }
-        Notify();
     }
 
-    public void EndLiveEdit() => _liveEditKey = null;
+    public void EndLiveEdit() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.EndLiveEdit.");
+            _liveEditKey = null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.EndLiveEdit failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public void UpdatePage(Action<PublicationPage> update)
     {
-        Capture();
-        update(CurrentPage);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdatePage.");
+                    Capture();
+                    update(CurrentPage);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdatePage failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetPageSize(double widthMm, double heightMm)
     {
-        if (widthMm is < 10 or > 2000 || heightMm is < 10 or > 2000) return;
-        UpdatePage(publicationPage =>
+        try
         {
-            publicationPage.WidthMm = widthMm;
-            publicationPage.HeightMm = heightMm;
-        });
+            logger.LogTrace($"Entering EditorStateService.SetPageSize.");
+                    if (widthMm is < 10 or > 2000 || heightMm is < 10 or > 2000) return;
+                    UpdatePage(publicationPage =>
+                    {
+                        publicationPage.WidthMm = widthMm;
+                        publicationPage.HeightMm = heightMm;
+                    });
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetPageSize failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public void SwapPageOrientation() => SetPageSize(CurrentPage.HeightMm, CurrentPage.WidthMm);
+    public void SwapPageOrientation() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SwapPageOrientation.");
+            SetPageSize(CurrentPage.HeightMm, CurrentPage.WidthMm);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SwapPageOrientation failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public void UpdateSpreadsheetDocument(byte[] content, string fileName, SpreadsheetStorageFormat format, string previewHtml, string activeSheetName)
     {
-        if (SelectedElement is not SpreadsheetElement spreadsheet || spreadsheet.Locked) return;
-        _spreadsheets.ValidateWorkbookContent(content, format);
-        Capture();
-        spreadsheet.WorkbookContent = content.ToArray();
-        spreadsheet.WorkbookFileName = _spreadsheets.NormalizeWorkbookFileName(fileName, format);
-        spreadsheet.StorageFormat = format;
-        spreadsheet.PreviewHtml = previewHtml;
-        spreadsheet.ActiveSheetName = string.IsNullOrWhiteSpace(activeSheetName) ? "Sheet1" : activeSheetName;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdateSpreadsheetDocument.");
+                    if (SelectedElement is not SpreadsheetElement spreadsheet || spreadsheet.Locked) return;
+                    _spreadsheets.ValidateWorkbookContent(content, format);
+                    Capture();
+                    spreadsheet.WorkbookContent = content.ToArray();
+                    spreadsheet.WorkbookFileName = _spreadsheets.NormalizeWorkbookFileName(fileName, format);
+                    spreadsheet.StorageFormat = format;
+                    spreadsheet.PreviewHtml = previewHtml;
+                    spreadsheet.ActiveSheetName = string.IsNullOrWhiteSpace(activeSheetName) ? "Sheet1" : activeSheetName;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateSpreadsheetDocument failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void UpdateTextDocument(byte[] content, string previewHtml, string documentBackground, StoryStorageFormat format = StoryStorageFormat.OpenXml)
     {
-        if (SelectedElement is not TextFrameElement text || text.Locked) return;
-        Capture();
-        text.DocumentContent = content;
-        text.PreviewHtml = PublicationFileService.SanitizePreviewHtml(previewHtml);
-        text.DocumentBackground = PublicationFileService.NormalizeCssBackground(documentBackground);
-        text.StoryFormat = format;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.UpdateTextDocument.");
+                    if (SelectedElement is not TextFrameElement text || text.Locked) return;
+                    Capture();
+                    text.DocumentContent = content;
+                    text.PreviewHtml = _files.SanitizePreviewHtml(previewHtml);
+                    text.DocumentBackground = _files.NormalizeCssBackground(documentBackground);
+                    text.StoryFormat = format;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.UpdateTextDocument failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ToggleCropMode()
     {
-        if (SelectedElement is not ImageFrameElement) return;
-        CropMode = !CropMode;
-        if (CropMode) ContentPanMode = false;
-        Notify(false);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ToggleCropMode.");
+                    if (SelectedElement is not ImageFrameElement) return;
+                    CropMode = !CropMode;
+                    if (CropMode) ContentPanMode = false;
+                    Notify(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ToggleCropMode failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ToggleContentPanMode()
     {
-        if (!CanPanContent(SelectedElement)) return;
-        ContentPanMode = !ContentPanMode;
-        if (ContentPanMode)
+        try
         {
-            CropMode = false;
-            ConnectorTool = ConnectorToolKind.None;
+            logger.LogTrace($"Entering EditorStateService.ToggleContentPanMode.");
+                    if (!CanPanContent(SelectedElement)) return;
+                    ContentPanMode = !ContentPanMode;
+                    if (ContentPanMode)
+                    {
+                        CropMode = false;
+                        ConnectorTool = ConnectorToolKind.None;
+                    }
+                    Notify(false);
+    
         }
-        Notify(false);
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ToggleContentPanMode failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CommitContentViewport(Guid id, double offsetX, double offsetY, double scale)
     {
-        var element = CurrentPage.Elements.FirstOrDefault(candidate => candidate.Id == id);
-        if (!CanPanContent(element) || element!.Locked) return;
-        Capture();
-        var x = Math.Clamp(offsetX, -500, 500);
-        var y = Math.Clamp(offsetY, -500, 500);
-        var zoom = Math.Clamp(scale, .1, 12);
-        switch (element)
+        try
         {
-            case TextFrameElement text: text.ContentOffsetX = x; text.ContentOffsetY = y; text.ContentScale = zoom; break;
-            case SpreadsheetElement sheet: sheet.ContentOffsetX = x; sheet.ContentOffsetY = y; sheet.ContentScale = zoom; break;
-            case DevExtremeComponentElement component: component.ContentOffsetX = x; component.ContentOffsetY = y; component.ContentScale = zoom; break;
+            logger.LogTrace($"Entering EditorStateService.CommitContentViewport.");
+                    var element = CurrentPage.Elements.FirstOrDefault(candidate => candidate.Id == id);
+                    if (!CanPanContent(element) || element!.Locked) return;
+                    Capture();
+                    var x = Math.Clamp(offsetX, -500, 500);
+                    var y = Math.Clamp(offsetY, -500, 500);
+                    var zoom = Math.Clamp(scale, .1, 12);
+                    switch (element)
+                    {
+                        case TextFrameElement text: text.ContentOffsetX = x; text.ContentOffsetY = y; text.ContentScale = zoom; break;
+                        case SpreadsheetElement sheet: sheet.ContentOffsetX = x; sheet.ContentOffsetY = y; sheet.ContentScale = zoom; break;
+                        case DevExtremeComponentElement component: component.ContentOffsetX = x; component.ContentOffsetY = y; component.ContentScale = zoom; break;
+                    }
+                    Notify();
+    
         }
-        Notify();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CommitContentViewport failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CommitMapViewport(Guid id, double longitude, double latitude, double zoom)
     {
-        var component = CurrentPage.Elements.OfType<DevExtremeComponentElement>().FirstOrDefault(candidate => candidate.Id == id);
-        if (component is null || component.Locked || SelectedElementId != id || !ContentPanMode ||
-            (component.ComponentKind != PublicationComponentKind.Map && component.ComponentKind != PublicationComponentKind.VectorMap)) return;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CommitMapViewport.");
+                    var component = CurrentPage.Elements.OfType<DevExtremeComponentElement>().FirstOrDefault(candidate => candidate.Id == id);
+                    if (component is null || component.Locked || SelectedElementId != id || !ContentPanMode ||
+                        (component.ComponentKind != PublicationComponentKind.Map && component.ComponentKind != PublicationComponentKind.VectorMap)) return;
 
-        var nextLongitude = Math.Clamp(longitude, -180, 180);
-        var nextLatitude = Math.Clamp(latitude, -90, 90);
-        var zoomMaximum = component.ComponentKind == PublicationComponentKind.VectorMap ? 256d : 20d;
-        var nextZoom = Math.Clamp(zoom, 1, zoomMaximum);
-        if (Math.Abs(component.MapCenterLongitude - nextLongitude) < .000001 &&
-            Math.Abs(component.MapCenterLatitude - nextLatitude) < .000001 &&
-            Math.Abs(component.MapZoom - nextZoom) < .0001) return;
+                    var nextLongitude = Math.Clamp(longitude, -180, 180);
+                    var nextLatitude = Math.Clamp(latitude, -90, 90);
+                    var zoomMaximum = component.ComponentKind == PublicationComponentKind.VectorMap ? 256d : 20d;
+                    var nextZoom = Math.Clamp(zoom, 1, zoomMaximum);
+                    if (Math.Abs(component.MapCenterLongitude - nextLongitude) < .000001 &&
+                        Math.Abs(component.MapCenterLatitude - nextLatitude) < .000001 &&
+                        Math.Abs(component.MapZoom - nextZoom) < .0001) return;
 
-        Capture();
-        component.MapCenterLongitude = nextLongitude;
-        component.MapCenterLatitude = nextLatitude;
-        component.MapZoom = nextZoom;
-        if (component.ComponentKind == PublicationComponentKind.Map) component.MapAutoAdjust = false;
-        Notify();
+                    Capture();
+                    component.MapCenterLongitude = nextLongitude;
+                    component.MapCenterLatitude = nextLatitude;
+                    component.MapZoom = nextZoom;
+                    if (component.ComponentKind == PublicationComponentKind.Map) component.MapAutoAdjust = false;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CommitMapViewport failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ResetContentViewport()
     {
-        if (!CanPanContent(SelectedElement)) return;
-        CommitContentViewport(SelectedElement!.Id, 0, 0, 1);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ResetContentViewport.");
+                    if (!CanPanContent(SelectedElement)) return;
+                    CommitContentViewport(SelectedElement!.Id, 0, 0, 1);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ResetContentViewport failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public static bool CanPanContent(PublicationElement? element) => element is TextFrameElement or SpreadsheetElement
+    public bool CanPanContent(PublicationElement? element) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CanPanContent.");
+            return element is TextFrameElement or SpreadsheetElement
         or DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CanPanContent failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public void AddGuide(GuideOrientation orientation)
     {
-        AddGuideAt(orientation, orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm / 2 : CurrentPage.HeightMm / 2);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.AddGuide.");
+                    AddGuideAt(orientation, orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm / 2 : CurrentPage.HeightMm / 2);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddGuide failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void AddGuideAt(GuideOrientation orientation, double positionMm)
     {
-        var max = orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm : CurrentPage.HeightMm;
-        if (positionMm < 0 || positionMm > max) return;
-        Capture();
-        CurrentPage.Guides.Add(new GuideLine
+        try
         {
-            Orientation = orientation,
-            PositionMm = Math.Clamp(positionMm, 0, max)
-        });
-        Notify();
+            logger.LogTrace($"Entering EditorStateService.AddGuideAt.");
+                    var max = orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm : CurrentPage.HeightMm;
+                    if (positionMm < 0 || positionMm > max) return;
+                    Capture();
+                    CurrentPage.Guides.Add(new GuideLine
+                    {
+                        Orientation = orientation,
+                        PositionMm = Math.Clamp(positionMm, 0, max)
+                    });
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddGuideAt failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CommitGuide(Guid id, double positionMm)
     {
-        var guide = CurrentPage.Guides.FirstOrDefault(item => item.Id == id);
-        if (guide is null) return;
-        var max = guide.Orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm : CurrentPage.HeightMm;
-        Capture();
-        guide.PositionMm = Math.Clamp(positionMm, 0, max);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CommitGuide.");
+                    var guide = CurrentPage.Guides.FirstOrDefault(item => item.Id == id);
+                    if (guide is null) return;
+                    var max = guide.Orientation == GuideOrientation.Vertical ? CurrentPage.WidthMm : CurrentPage.HeightMm;
+                    Capture();
+                    guide.PositionMm = Math.Clamp(positionMm, 0, max);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CommitGuide failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void DeleteGuide(Guid id)
     {
-        var guide = CurrentPage.Guides.FirstOrDefault(item => item.Id == id);
-        if (guide is null) return;
-        Capture();
-        CurrentPage.Guides.Remove(guide);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.DeleteGuide.");
+                    var guide = CurrentPage.Guides.FirstOrDefault(item => item.Id == id);
+                    if (guide is null) return;
+                    Capture();
+                    CurrentPage.Guides.Remove(guide);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.DeleteGuide failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void ClearGuides()
     {
-        if (CurrentPage.Guides.Count == 0) return;
-        Capture();
-        CurrentPage.Guides.Clear();
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ClearGuides.");
+                    if (CurrentPage.Guides.Count == 0) return;
+                    Capture();
+                    CurrentPage.Guides.Clear();
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ClearGuides failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetZoom(double zoom)
     {
-        var normalizedPercent = Math.Clamp(Math.Round(zoom * 100d, MidpointRounding.AwayFromZero), 20d, 400d);
-        var normalized = normalizedPercent / 100d;
-        if (NearlyEqual(Document.Zoom, normalized)) return;
-        Document.Zoom = normalized;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetZoom.");
+                    var normalizedPercent = Math.Clamp(Math.Round(zoom * 100d, MidpointRounding.AwayFromZero), 20d, 400d);
+                    var normalized = normalizedPercent / 100d;
+                    if (NearlyEqual(Document.Zoom, normalized)) return;
+                    Document.Zoom = normalized;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetZoom failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public void SetZoomPercent(double percent) => SetZoom(percent / 100d);
+    public void SetZoomPercent(double percent) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetZoomPercent.");
+            SetZoom(percent / 100d);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetZoomPercent failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public void StepZoomPercent(int deltaPercent)
     {
-        var currentPercent = Math.Round(Document.Zoom * 100d, MidpointRounding.AwayFromZero);
-        SetZoomPercent(currentPercent + deltaPercent);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.StepZoomPercent.");
+                    var currentPercent = Math.Round(Document.Zoom * 100d, MidpointRounding.AwayFromZero);
+                    SetZoomPercent(currentPercent + deltaPercent);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.StepZoomPercent failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetCanvasZoomMode(PublicationCanvasZoomMode mode)
     {
-        if (Document.View.CanvasZoomMode == mode) return;
-        Document.View.CanvasZoomMode = mode;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetCanvasZoomMode.");
+                    if (Document.View.CanvasZoomMode == mode) return;
+                    Document.View.CanvasZoomMode = mode;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetCanvasZoomMode failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetRulerUnit(MeasurementUnit unit)
     {
-        if (Document.View.RulerUnit == unit) return;
-        Document.View.RulerUnit = unit;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetRulerUnit.");
+                    if (Document.View.RulerUnit == unit) return;
+                    Document.View.RulerUnit = unit;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetRulerUnit failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CycleRulerUnit()
     {
-        var values = Enum.GetValues<MeasurementUnit>();
-        var index = Array.IndexOf(values, Document.View.RulerUnit);
-        SetRulerUnit(values[(index + 1) % values.Length]);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CycleRulerUnit.");
+                    var values = Enum.GetValues<MeasurementUnit>();
+                    var index = Array.IndexOf(values, Document.View.RulerUnit);
+                    SetRulerUnit(values[(index + 1) % values.Length]);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CycleRulerUnit failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetViewOption(Action<PublicationViewSettings> update)
     {
-        update(Document.View);
-        Document.View.GridSpacingMm = Math.Clamp(Document.View.GridSpacingMm, .5, 100);
-        Document.View.ExportDpi = Math.Clamp(Document.View.ExportDpi, 72, 600);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetViewOption.");
+                    update(Document.View);
+                    Document.View.GridSpacingMm = Math.Clamp(Document.View.GridSpacingMm, .5, 100);
+                    Document.View.ExportDpi = Math.Clamp(Document.View.ExportDpi, 72, 600);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetViewOption failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void SetPlayback(PublicationPlaybackSettings value)
     {
-        Capture();
-        Document.Playback = value;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetPlayback.");
+                    Capture();
+                    Document.Playback = value;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetPlayback failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public void BringToFront() => ReorderSelected(int.MaxValue);
-    public void SendToBack() => ReorderSelected(int.MinValue);
-    public void BringForward() => ReorderSelected(1);
-    public void SendBackward() => ReorderSelected(-1);
+    public void BringToFront() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.BringToFront.");
+            ReorderSelected(int.MaxValue);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.BringToFront failed: {exception.Message}");
+            throw;
+        }
+    }
+    public void SendToBack() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SendToBack.");
+            ReorderSelected(int.MinValue);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SendToBack failed: {exception.Message}");
+            throw;
+        }
+    }
+    public void BringForward() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.BringForward.");
+            ReorderSelected(1);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.BringForward failed: {exception.Message}");
+            throw;
+        }
+    }
+    public void SendBackward() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SendBackward.");
+            ReorderSelected(-1);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SendBackward failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public void SetSelectedLayerPosition(int position)
     {
-        var block = LayerSelectionBlock();
-        if (block.Count == 0) return;
-        var ordered = OrderedElements();
-        var selectedIds = block.Select(item => item.Id).ToHashSet();
-        var currentIndex = ordered.FindIndex(item => selectedIds.Contains(item.Id));
-        if (currentIndex < 0) return;
-        var remaining = ordered.Where(item => !selectedIds.Contains(item.Id)).ToList();
-        var targetIndex = Math.Clamp(position - 1, 0, remaining.Count);
-        if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
-        Capture();
-        remaining.InsertRange(targetIndex, block);
-        ApplyNormalizedZOrder(remaining);
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetSelectedLayerPosition.");
+                    var block = LayerSelectionBlock();
+                    if (block.Count == 0) return;
+                    var ordered = OrderedElements();
+                    var selectedIds = block.Select(item => item.Id).ToHashSet();
+                    var currentIndex = ordered.FindIndex(item => selectedIds.Contains(item.Id));
+                    if (currentIndex < 0) return;
+                    var remaining = ordered.Where(item => !selectedIds.Contains(item.Id)).ToList();
+                    var targetIndex = Math.Clamp(position - 1, 0, remaining.Count);
+                    if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
+                    Capture();
+                    remaining.InsertRange(targetIndex, block);
+                    ApplyNormalizedZOrder(remaining);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetSelectedLayerPosition failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void Align(string mode)
     {
-        var elements = TransformSelectionBlock();
-        if (elements.Count == 0) return;
-        var left = elements.Min(item => item.X);
-        var top = elements.Min(item => item.Y);
-        var right = elements.Max(item => item.X + item.Width);
-        var bottom = elements.Max(item => item.Y + item.Height);
-        var width = right - left;
-        var height = bottom - top;
-        var dx = 0d;
-        var dy = 0d;
-        switch (mode)
+        try
         {
-            case "left": dx = -left; break;
-            case "center": dx = (CurrentPage.WidthMm - width) / 2 - left; break;
-            case "right": dx = CurrentPage.WidthMm - right; break;
-            case "top": dy = -top; break;
-            case "middle": dy = (CurrentPage.HeightMm - height) / 2 - top; break;
-            case "bottom": dy = CurrentPage.HeightMm - bottom; break;
-            default: return;
+            logger.LogTrace($"Entering EditorStateService.Align.");
+                    var elements = TransformSelectionBlock();
+                    if (elements.Count == 0) return;
+                    var left = elements.Min(item => item.X);
+                    var top = elements.Min(item => item.Y);
+                    var right = elements.Max(item => item.X + item.Width);
+                    var bottom = elements.Max(item => item.Y + item.Height);
+                    var width = right - left;
+                    var height = bottom - top;
+                    var dx = 0d;
+                    var dy = 0d;
+                    switch (mode)
+                    {
+                        case "left": dx = -left; break;
+                        case "center": dx = (CurrentPage.WidthMm - width) / 2 - left; break;
+                        case "right": dx = CurrentPage.WidthMm - right; break;
+                        case "top": dy = -top; break;
+                        case "middle": dy = (CurrentPage.HeightMm - height) / 2 - top; break;
+                        case "bottom": dy = CurrentPage.HeightMm - bottom; break;
+                        default: return;
+                    }
+                    if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
+                    Capture();
+                    foreach (var element in elements)
+                    {
+                        element.X += dx;
+                        element.Y += dy;
+                    }
+                    Notify();
+    
         }
-        if (NearlyEqual(dx, 0) && NearlyEqual(dy, 0)) return;
-        Capture();
-        foreach (var element in elements)
+        catch (Exception exception)
         {
-            element.X += dx;
-            element.Y += dy;
+            logger.LogError(exception, $"EditorStateService.Align failed: {exception.Message}");
+            throw;
         }
-        Notify();
     }
 
     public void Undo()
     {
-        if (_undo.Count == 0) return;
-        _redo.Push(_files.Serialize(Document));
-        Restore(_undo.Pop());
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.Undo.");
+                    if (_undo.Count == 0) return;
+                    _redo.Push(_files.Serialize(Document));
+                    Restore(_undo.Pop());
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Undo failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void Redo()
     {
-        if (_redo.Count == 0) return;
-        _undo.Push(_files.Serialize(Document));
-        Restore(_redo.Pop());
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.Redo.");
+                    if (_redo.Count == 0) return;
+                    _undo.Push(_files.Serialize(Document));
+                    Restore(_redo.Pop());
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Redo failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void Restore(string json)
     {
-        var selectedPageIndex = Math.Max(0, Document.Pages.FindIndex(p => p.Id == SelectedPageId));
-        var streaming = Document.Streaming;
-        Document = _files.Deserialize(json);
-        Document.Streaming = streaming;
-        _files.NormalizeStreamingSettings(Document);
-        SelectedPageId = Document.Pages[Math.Min(selectedPageIndex, Document.Pages.Count - 1)].Id;
-        ClearSelectionCore();
-        CropMode = false;
-        ContentPanMode = false;
-        ConnectorTool = ConnectorToolKind.None;
-        _liveEditKey = null;
-        Notify();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.Restore.");
+                    var selectedPageIndex = Math.Max(0, Document.Pages.FindIndex(p => p.Id == SelectedPageId));
+                    var streaming = Document.Streaming;
+                    Document = _files.Deserialize(json);
+                    Document.Streaming = streaming;
+                    _files.NormalizeStreamingSettings(Document);
+                    SelectedPageId = Document.Pages[Math.Min(selectedPageIndex, Document.Pages.Count - 1)].Id;
+                    ClearSelectionCore();
+                    CropMode = false;
+                    ContentPanMode = false;
+                    ConnectorTool = ConnectorToolKind.None;
+                    _liveEditKey = null;
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Restore failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private PublicationAnimation? FindAnimation(Guid id) =>
-        CurrentPage.Elements.SelectMany(item => item.Animations).FirstOrDefault(item => item.Id == id);
+    private PublicationAnimation? FindAnimation(Guid id) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.FindAnimation.");
+            return CurrentPage.Elements.SelectMany(item => item.Animations).FirstOrDefault(item => item.Id == id);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.FindAnimation failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private int NextAnimationOrder() =>
-        CurrentPage.Elements.SelectMany(item => item.Animations).Select(item => item.Order).DefaultIfEmpty(0).Max() + 1;
+    private int NextAnimationOrder() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.NextAnimationOrder.");
+            return CurrentPage.Elements.SelectMany(item => item.Animations).Select(item => item.Order).DefaultIfEmpty(0).Max() + 1;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NextAnimationOrder failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private void ReindexAnimations()
     {
-        var timeline = CurrentPage.Elements.SelectMany(item => item.Animations).OrderBy(item => item.Order).ToList();
-        for (var index = 0; index < timeline.Count; index++) timeline[index].Order = index + 1;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ReindexAnimations.");
+                    var timeline = CurrentPage.Elements.SelectMany(item => item.Animations).OrderBy(item => item.Order).ToList();
+                    for (var index = 0; index < timeline.Count; index++) timeline[index].Order = index + 1;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ReindexAnimations failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void RenewAnimationIds(PublicationElement element, bool preserveOrder)
     {
-        var nextOrder = NextAnimationOrder();
-        foreach (var animation in element.Animations)
+        try
         {
-            animation.Id = Guid.NewGuid();
-            if (!preserveOrder) animation.Order = nextOrder++;
+            logger.LogTrace($"Entering EditorStateService.RenewAnimationIds.");
+                    var nextOrder = NextAnimationOrder();
+                    foreach (var animation in element.Animations)
+                    {
+                        animation.Id = Guid.NewGuid();
+                        if (!preserveOrder) animation.Order = nextOrder++;
+                    }
+                    if (!preserveOrder) ReindexAnimations();
+    
         }
-        if (!preserveOrder) ReindexAnimations();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.RenewAnimationIds failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void EnsureTimelineDuration()
     {
-        CurrentPage.TimelineDurationSeconds = Math.Clamp(Math.Max(CurrentPage.TimelineDurationSeconds, EffectivePageTimelineDuration()), 1, 3600);
-    }
-
-    private static double AnimationSpan(PublicationAnimation animation) =>
-        Math.Max(.05, animation.DurationSeconds) * Math.Max(1, animation.RepeatCount) * (animation.AutoReverse ? 2 : 1);
-
-    private static void NormalizeMedia(PublicationMediaElement media)
-    {
-        media.DurationSeconds = Math.Clamp(media.DurationSeconds, 0, 24 * 60 * 60);
-        media.TrimStartSeconds = Math.Clamp(media.TrimStartSeconds, 0, Math.Max(0, media.DurationSeconds));
-        var end = media.TrimEndSeconds <= media.TrimStartSeconds ? media.DurationSeconds : media.TrimEndSeconds;
-        media.TrimEndSeconds = Math.Clamp(end, media.TrimStartSeconds, Math.Max(media.TrimStartSeconds, media.DurationSeconds));
-        media.TimelineStartSeconds = Math.Clamp(media.TimelineStartSeconds, 0, 3600);
-        media.Volume = Math.Clamp(media.Volume, 0, 1);
-        media.PlaybackRate = Math.Clamp(media.PlaybackRate <= 0 ? 1 : media.PlaybackRate, .25, 4);
-        media.FadeInSeconds = Math.Clamp(media.FadeInSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
-        media.FadeOutSeconds = Math.Clamp(media.FadeOutSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
-        media.WaveformSamples ??= [];
-        if (media.WaveformSamples.Count > 256) media.WaveformSamples = media.WaveformSamples.Take(256).ToList();
-        var fallbackMimeType = media is VideoElement ? "video/webm" : "audio/webm";
-        media.MimeType = PublicationMediaData.NormalizeMimeType(media.MimeType, fallbackMimeType);
-        media.DataUrl = PublicationMediaData.NormalizeDataUrl(media.DataUrl, media.MimeType);
-        media.Segments ??= [];
-        foreach (var segment in media.Segments)
+        try
         {
-            segment.Id = segment.Id == Guid.Empty ? Guid.NewGuid() : segment.Id;
-            segment.Name = string.IsNullOrWhiteSpace(segment.Name) ? media.Name : segment.Name.Trim();
-            segment.DurationSeconds = Math.Clamp(segment.DurationSeconds, .01, 24 * 60 * 60);
-            segment.TrimStartSeconds = Math.Clamp(segment.TrimStartSeconds, 0, Math.Max(0, segment.DurationSeconds - .01));
-            segment.TrimEndSeconds = Math.Clamp(segment.TrimEndSeconds > segment.TrimStartSeconds ? segment.TrimEndSeconds : segment.DurationSeconds, segment.TrimStartSeconds + .01, segment.DurationSeconds);
-            segment.MimeType = PublicationMediaData.NormalizeMimeType(segment.MimeType, fallbackMimeType);
-            segment.DataUrl = PublicationMediaData.NormalizeDataUrl(segment.DataUrl, segment.MimeType);
-            segment.WaveformSamples ??= [];
-            if (segment.WaveformSamples.Count > 256) segment.WaveformSamples = segment.WaveformSamples.Take(256).ToList();
+            logger.LogTrace($"Entering EditorStateService.EnsureTimelineDuration.");
+                    CurrentPage.TimelineDurationSeconds = Math.Clamp(Math.Max(CurrentPage.TimelineDurationSeconds, EffectivePageTimelineDuration()), 1, 3600);
+    
         }
-        if (media is VideoElement video)
+        catch (Exception exception)
         {
-            video.FrameClipPolygon ??= [];
-            if (video.FrameClipPolygon.Count > 256) video.FrameClipPolygon = video.FrameClipPolygon.Take(256).ToList();
-            foreach (var point in video.FrameClipPolygon)
-            {
-                point.X = Math.Clamp(point.X, 0, 1);
-                point.Y = Math.Clamp(point.Y, 0, 1);
-            }
-            if (video.FrameClipPolygon.Count is > 0 and < 3) video.FrameClipPolygon.Clear();
+            logger.LogError(exception, $"EditorStateService.EnsureTimelineDuration failed: {exception.Message}");
+            throw;
         }
     }
 
-    private static void NormalizeAnimation(PublicationAnimation animation)
-    {
-        animation.DurationSeconds = Math.Clamp(animation.DurationSeconds <= 0 ? .6 : animation.DurationSeconds, .05, 60);
-        animation.DelaySeconds = Math.Clamp(animation.DelaySeconds, 0, 60);
-        if (animation.TimelineStartSeconds is { } timelineStart)
-            animation.TimelineStartSeconds = Math.Clamp(timelineStart, 0, 3600);
-        animation.DistancePercent = Math.Clamp(animation.DistancePercent, 0, 500);
-        animation.ScalePercent = Math.Clamp(animation.ScalePercent, 0, 500);
-        animation.RotationDegrees = Math.Clamp(animation.RotationDegrees, -3600, 3600);
-        animation.RepeatCount = Math.Clamp(animation.RepeatCount <= 0 ? 1 : animation.RepeatCount, 1, 100);
-        if (string.IsNullOrWhiteSpace(animation.Name)) animation.Name = $"{animation.Effect} {animation.Phase}";
+    private double AnimationSpan(PublicationAnimation animation) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.AnimationSpan.");
+            return Math.Max(.05, animation.DurationSeconds) * Math.Max(1, animation.RepeatCount) * (animation.AutoReverse ? 2 : 1);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AnimationSpan failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static PublicationPageTransition CloneTransition(PublicationPageTransition source) => new()
+    private void NormalizeMedia(PublicationMediaElement media)
+    {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.NormalizeMedia.");
+                    media.DurationSeconds = Math.Clamp(media.DurationSeconds, 0, 24 * 60 * 60);
+                    media.TrimStartSeconds = Math.Clamp(media.TrimStartSeconds, 0, Math.Max(0, media.DurationSeconds));
+                    var end = media.TrimEndSeconds <= media.TrimStartSeconds ? media.DurationSeconds : media.TrimEndSeconds;
+                    media.TrimEndSeconds = Math.Clamp(end, media.TrimStartSeconds, Math.Max(media.TrimStartSeconds, media.DurationSeconds));
+                    media.TimelineStartSeconds = Math.Clamp(media.TimelineStartSeconds, 0, 3600);
+                    media.Volume = Math.Clamp(media.Volume, 0, 1);
+                    media.PlaybackRate = Math.Clamp(media.PlaybackRate <= 0 ? 1 : media.PlaybackRate, .25, 4);
+                    media.FadeInSeconds = Math.Clamp(media.FadeInSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
+                    media.FadeOutSeconds = Math.Clamp(media.FadeOutSeconds, 0, Math.Max(0, media.TimelineLengthSeconds / 2));
+                    media.WaveformSamples ??= [];
+                    if (media.WaveformSamples.Count > 256) media.WaveformSamples = media.WaveformSamples.Take(256).ToList();
+                    var fallbackMimeType = media is VideoElement ? "video/webm" : "audio/webm";
+                    media.MimeType = _mediaData.NormalizeMimeType(media.MimeType, fallbackMimeType);
+                    media.DataUrl = _mediaData.NormalizeDataUrl(media.DataUrl, media.MimeType);
+                    media.Segments ??= [];
+                    foreach (var segment in media.Segments)
+                    {
+                        segment.Id = segment.Id == Guid.Empty ? Guid.NewGuid() : segment.Id;
+                        segment.Name = string.IsNullOrWhiteSpace(segment.Name) ? media.Name : segment.Name.Trim();
+                        segment.DurationSeconds = Math.Clamp(segment.DurationSeconds, .01, 24 * 60 * 60);
+                        segment.TrimStartSeconds = Math.Clamp(segment.TrimStartSeconds, 0, Math.Max(0, segment.DurationSeconds - .01));
+                        segment.TrimEndSeconds = Math.Clamp(segment.TrimEndSeconds > segment.TrimStartSeconds ? segment.TrimEndSeconds : segment.DurationSeconds, segment.TrimStartSeconds + .01, segment.DurationSeconds);
+                        segment.MimeType = _mediaData.NormalizeMimeType(segment.MimeType, fallbackMimeType);
+                        segment.DataUrl = _mediaData.NormalizeDataUrl(segment.DataUrl, segment.MimeType);
+                        segment.WaveformSamples ??= [];
+                        if (segment.WaveformSamples.Count > 256) segment.WaveformSamples = segment.WaveformSamples.Take(256).ToList();
+                    }
+                    if (media is VideoElement video)
+                    {
+                        video.FrameClipPolygon ??= [];
+                        if (video.FrameClipPolygon.Count > 256) video.FrameClipPolygon = video.FrameClipPolygon.Take(256).ToList();
+                        foreach (var point in video.FrameClipPolygon)
+                        {
+                            point.X = Math.Clamp(point.X, 0, 1);
+                            point.Y = Math.Clamp(point.Y, 0, 1);
+                        }
+                        if (video.FrameClipPolygon.Count is > 0 and < 3) video.FrameClipPolygon.Clear();
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NormalizeMedia failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private void NormalizeAnimation(PublicationAnimation animation)
+    {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.NormalizeAnimation.");
+                    animation.DurationSeconds = Math.Clamp(animation.DurationSeconds <= 0 ? .6 : animation.DurationSeconds, .05, 60);
+                    animation.DelaySeconds = Math.Clamp(animation.DelaySeconds, 0, 60);
+                    if (animation.TimelineStartSeconds is { } timelineStart)
+                        animation.TimelineStartSeconds = Math.Clamp(timelineStart, 0, 3600);
+                    animation.DistancePercent = Math.Clamp(animation.DistancePercent, 0, 500);
+                    animation.ScalePercent = Math.Clamp(animation.ScalePercent, 0, 500);
+                    animation.RotationDegrees = Math.Clamp(animation.RotationDegrees, -3600, 3600);
+                    animation.RepeatCount = Math.Clamp(animation.RepeatCount <= 0 ? 1 : animation.RepeatCount, 1, 100);
+                    if (string.IsNullOrWhiteSpace(animation.Name)) animation.Name = $"{animation.Effect} {animation.Phase}";
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NormalizeAnimation failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private PublicationPageTransition CloneTransition(PublicationPageTransition source) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CloneTransition.");
+            return new()
     {
         Kind = source.Kind,
         Direction = source.Direction,
@@ -2096,175 +3459,232 @@ public sealed class EditorStateService : IDisposable
         AutoAdvance = source.AutoAdvance,
         AutoAdvanceSeconds = source.AutoAdvanceSeconds
     };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CloneTransition failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private void ReorderSelected(int movement)
     {
-        var block = LayerSelectionBlock();
-        if (block.Count == 0) return;
-        var ordered = OrderedElements();
-        var selectedIds = block.Select(item => item.Id).ToHashSet();
-        var currentIndex = ordered.FindIndex(item => selectedIds.Contains(item.Id));
-        if (currentIndex < 0) return;
-        var remaining = ordered.Where(item => !selectedIds.Contains(item.Id)).ToList();
-        var targetIndex = movement switch
+        try
         {
-            int.MaxValue => remaining.Count,
-            int.MinValue => 0,
-            > 0 => Math.Min(remaining.Count, currentIndex + 1),
-            < 0 => Math.Max(0, currentIndex - 1),
-            _ => currentIndex
-        };
-        if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
-        Capture();
-        remaining.InsertRange(targetIndex, block);
-        ApplyNormalizedZOrder(remaining);
-        Notify();
+            logger.LogTrace($"Entering EditorStateService.ReorderSelected.");
+                    var block = LayerSelectionBlock();
+                    if (block.Count == 0) return;
+                    var ordered = OrderedElements();
+                    var selectedIds = block.Select(item => item.Id).ToHashSet();
+                    var currentIndex = ordered.FindIndex(item => selectedIds.Contains(item.Id));
+                    if (currentIndex < 0) return;
+                    var remaining = ordered.Where(item => !selectedIds.Contains(item.Id)).ToList();
+                    var targetIndex = movement switch
+                    {
+                        int.MaxValue => remaining.Count,
+                        int.MinValue => 0,
+                        > 0 => Math.Min(remaining.Count, currentIndex + 1),
+                        < 0 => Math.Max(0, currentIndex - 1),
+                        _ => currentIndex
+                    };
+                    if (targetIndex == currentIndex && HasNormalizedZOrder(ordered)) return;
+                    Capture();
+                    remaining.InsertRange(targetIndex, block);
+                    ApplyNormalizedZOrder(remaining);
+                    Notify();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ReorderSelected failed: {exception.Message}");
+            throw;
+        }
     }
 
     private List<PublicationElement> ClipboardSelection()
     {
-        if (SelectedElement is null) return [];
-        var selected = SelectedElements.ToList();
-        var selectedObjectIds = selected
-            .Where(element => element is not ConnectorElement)
-            .Select(element => element.Id)
-            .ToHashSet();
-        var connected = CurrentPage.Elements
-            .OfType<ConnectorElement>()
-            .Where(connector => selectedObjectIds.Contains(connector.Source.ElementId)
-                && selectedObjectIds.Contains(connector.Target.ElementId));
-        return selected
-            .Concat(connected)
-            .DistinctBy(element => element.Id)
-            .OrderBy(element => element.ZIndex)
-            .ToList();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ClipboardSelection.");
+                    if (SelectedElement is null) return [];
+                    var selected = SelectedElements.ToList();
+                    var selectedObjectIds = selected
+                        .Where(element => element is not ConnectorElement)
+                        .Select(element => element.Id)
+                        .ToHashSet();
+                    var connected = CurrentPage.Elements
+                        .OfType<ConnectorElement>()
+                        .Where(connector => selectedObjectIds.Contains(connector.Source.ElementId)
+                            && selectedObjectIds.Contains(connector.Target.ElementId));
+                    return selected
+                        .Concat(connected)
+                        .DistinctBy(element => element.Id)
+                        .OrderBy(element => element.ZIndex)
+                        .ToList();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ClipboardSelection failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void CloneSelection(IReadOnlyList<PublicationElement> sources, bool useInsertionPoint)
     {
-        if (sources.Count == 0) return;
-        var objectSources = sources.Where(source => source is not ConnectorElement).ToList();
-        if (objectSources.Count == 0 && sources.All(source => source is ConnectorElement)) return;
-
-        Capture();
-        var idMap = sources.ToDictionary(source => source.Id, _ => Guid.NewGuid());
-        var groupMap = sources
-            .Where(source => source.GroupId is not null)
-            .Select(source => source.GroupId!.Value)
-            .Distinct()
-            .ToDictionary(groupId => groupId, _ => Guid.NewGuid());
-        var sharedComponentMap = sources.OfType<DevExtremeComponentElement>()
-            .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
-            .Select(component => component.SharedComponentId!.Value)
-            .Distinct()
-            .ToDictionary(sharedId => sharedId, _ => Guid.NewGuid());
-
-        var left = objectSources.Count > 0 ? objectSources.Min(source => source.X) : 0;
-        var top = objectSources.Count > 0 ? objectSources.Min(source => source.Y) : 0;
-        var right = objectSources.Count > 0 ? objectSources.Max(source => source.X + source.Width) : left;
-        var bottom = objectSources.Count > 0 ? objectSources.Max(source => source.Y + source.Height) : top;
-        var offsetX = 5d;
-        var offsetY = 5d;
-        if (useInsertionPoint && _lastInsertionX is { } insertionX && _lastInsertionY is { } insertionY)
+        try
         {
-            offsetX = insertionX - (left + right) / 2;
-            offsetY = insertionY - (top + bottom) / 2;
-        }
+            logger.LogTrace($"Entering EditorStateService.CloneSelection.");
+                    if (sources.Count == 0) return;
+                    var objectSources = sources.Where(source => source is not ConnectorElement).ToList();
+                    if (objectSources.Count == 0 && sources.All(source => source is ConnectorElement)) return;
 
-        var nextZ = NextZ();
-        var nextAnimationOrder = NextAnimationOrder();
-        var clones = new List<PublicationElement>();
-        foreach (var source in sources.OrderBy(source => source.ZIndex))
+                    Capture();
+                    var idMap = sources.ToDictionary(source => source.Id, _ => Guid.NewGuid());
+                    var groupMap = sources
+                        .Where(source => source.GroupId is not null)
+                        .Select(source => source.GroupId!.Value)
+                        .Distinct()
+                        .ToDictionary(groupId => groupId, _ => Guid.NewGuid());
+                    var sharedComponentMap = sources.OfType<DevExtremeComponentElement>()
+                        .Where(component => component.Scope == PublicationComponentScope.Document && component.SharedComponentId is not null)
+                        .Select(component => component.SharedComponentId!.Value)
+                        .Distinct()
+                        .ToDictionary(sharedId => sharedId, _ => Guid.NewGuid());
+
+                    var left = objectSources.Count > 0 ? objectSources.Min(source => source.X) : 0;
+                    var top = objectSources.Count > 0 ? objectSources.Min(source => source.Y) : 0;
+                    var right = objectSources.Count > 0 ? objectSources.Max(source => source.X + source.Width) : left;
+                    var bottom = objectSources.Count > 0 ? objectSources.Max(source => source.Y + source.Height) : top;
+                    var offsetX = 5d;
+                    var offsetY = 5d;
+                    if (useInsertionPoint && _lastInsertionX is { } insertionX && _lastInsertionY is { } insertionY)
+                    {
+                        offsetX = insertionX - (left + right) / 2;
+                        offsetY = insertionY - (top + bottom) / 2;
+                    }
+
+                    var nextZ = NextZ();
+                    var nextAnimationOrder = NextAnimationOrder();
+                    var clones = new List<PublicationElement>();
+                    foreach (var source in sources.OrderBy(source => source.ZIndex))
+                    {
+                        var clone = CloneElement(source);
+                        clone.Id = idMap[source.Id];
+                        clone.GroupId = source.GroupId is { } groupId && groupMap.TryGetValue(groupId, out var newGroupId)
+                            ? newGroupId
+                            : null;
+                        clone.Name = NextName(source.Name);
+                        clone.ZIndex = nextZ++;
+                        if (clone is DevExtremeComponentElement componentClone)
+                        {
+                            componentClone.SharedComponentId = componentClone.Scope == PublicationComponentScope.Document
+                                && source is DevExtremeComponentElement sourceComponent
+                                && sourceComponent.SharedComponentId is { } sourceSharedId
+                                && sharedComponentMap.TryGetValue(sourceSharedId, out var newSharedId)
+                                    ? newSharedId
+                                    : null;
+                            foreach (var action in componentClone.Actions)
+                            {
+                                if (action.TargetElementId is { } actionTargetId && idMap.TryGetValue(actionTargetId, out var mappedActionTarget))
+                                    action.TargetElementId = mappedActionTarget;
+                                if (action.TargetSharedComponentId is { } actionSharedId && sharedComponentMap.TryGetValue(actionSharedId, out var mappedSharedTarget))
+                                    action.TargetSharedComponentId = mappedSharedTarget;
+                            }
+                        }
+
+                        if (clone is ConnectorElement connector)
+                        {
+                            if (idMap.TryGetValue(connector.Source.ElementId, out var mappedSource))
+                                connector.Source.ElementId = mappedSource;
+                            else if (CurrentPage.Elements.All(element => element.Id != connector.Source.ElementId))
+                                continue;
+                            if (idMap.TryGetValue(connector.Target.ElementId, out var mappedTarget))
+                                connector.Target.ElementId = mappedTarget;
+                            else if (CurrentPage.Elements.All(element => element.Id != connector.Target.ElementId))
+                                continue;
+                        }
+                        else
+                        {
+                            clone.X = Math.Clamp(source.X + offsetX, -clone.Width + 2, CurrentPage.WidthMm - 2);
+                            clone.Y = Math.Clamp(source.Y + offsetY, -clone.Height + 2, CurrentPage.HeightMm - 2);
+                        }
+
+                        if (clone.Interaction.TargetElementId is { } targetId)
+                        {
+                            if (idMap.TryGetValue(targetId, out var mappedTarget)) clone.Interaction.TargetElementId = mappedTarget;
+                            else if (CurrentPage.Elements.All(element => element.Id != targetId)) clone.Interaction.TargetElementId = null;
+                        }
+                        if (clone.Interaction.TargetPageId is { } targetPageId && Document.Pages.All(page => page.Id != targetPageId))
+                            clone.Interaction.TargetPageId = null;
+
+                        foreach (var animation in clone.Animations)
+                        {
+                            animation.Id = Guid.NewGuid();
+                            animation.Order = nextAnimationOrder++;
+                        }
+
+                        CurrentPage.Elements.Add(clone);
+                        if (source is PublicationMediaElement) _mediaAssets.Copy(source.Id, clone.Id);
+                        clones.Add(clone);
+                    }
+
+                    foreach (var component in clones.OfType<DevExtremeComponentElement>().Where(component => component.Scope == PublicationComponentScope.Document))
+                        SynchronizeDocumentComponent(component);
+                    ReindexAnimations();
+                    ApplyNormalizedZOrder(OrderedElements());
+                    SetSelectionCore(clones.Select(clone => clone.Id), clones.FirstOrDefault()?.Id);
+                    CropMode = false;
+                    ContentPanMode = false;
+                    ConnectorTool = ConnectorToolKind.None;
+                    Notify();
+    
+        }
+        catch (Exception exception)
         {
-            var clone = CloneElement(source);
-            clone.Id = idMap[source.Id];
-            clone.GroupId = source.GroupId is { } groupId && groupMap.TryGetValue(groupId, out var newGroupId)
-                ? newGroupId
-                : null;
-            clone.Name = NextName(source.Name);
-            clone.ZIndex = nextZ++;
-            if (clone is DevExtremeComponentElement componentClone)
-            {
-                componentClone.SharedComponentId = componentClone.Scope == PublicationComponentScope.Document
-                    && source is DevExtremeComponentElement sourceComponent
-                    && sourceComponent.SharedComponentId is { } sourceSharedId
-                    && sharedComponentMap.TryGetValue(sourceSharedId, out var newSharedId)
-                        ? newSharedId
-                        : null;
-                foreach (var action in componentClone.Actions)
-                {
-                    if (action.TargetElementId is { } actionTargetId && idMap.TryGetValue(actionTargetId, out var mappedActionTarget))
-                        action.TargetElementId = mappedActionTarget;
-                    if (action.TargetSharedComponentId is { } actionSharedId && sharedComponentMap.TryGetValue(actionSharedId, out var mappedSharedTarget))
-                        action.TargetSharedComponentId = mappedSharedTarget;
-                }
-            }
-
-            if (clone is ConnectorElement connector)
-            {
-                if (idMap.TryGetValue(connector.Source.ElementId, out var mappedSource))
-                    connector.Source.ElementId = mappedSource;
-                else if (CurrentPage.Elements.All(element => element.Id != connector.Source.ElementId))
-                    continue;
-                if (idMap.TryGetValue(connector.Target.ElementId, out var mappedTarget))
-                    connector.Target.ElementId = mappedTarget;
-                else if (CurrentPage.Elements.All(element => element.Id != connector.Target.ElementId))
-                    continue;
-            }
-            else
-            {
-                clone.X = Math.Clamp(source.X + offsetX, -clone.Width + 2, CurrentPage.WidthMm - 2);
-                clone.Y = Math.Clamp(source.Y + offsetY, -clone.Height + 2, CurrentPage.HeightMm - 2);
-            }
-
-            if (clone.Interaction.TargetElementId is { } targetId)
-            {
-                if (idMap.TryGetValue(targetId, out var mappedTarget)) clone.Interaction.TargetElementId = mappedTarget;
-                else if (CurrentPage.Elements.All(element => element.Id != targetId)) clone.Interaction.TargetElementId = null;
-            }
-            if (clone.Interaction.TargetPageId is { } targetPageId && Document.Pages.All(page => page.Id != targetPageId))
-                clone.Interaction.TargetPageId = null;
-
-            foreach (var animation in clone.Animations)
-            {
-                animation.Id = Guid.NewGuid();
-                animation.Order = nextAnimationOrder++;
-            }
-
-            CurrentPage.Elements.Add(clone);
-            if (source is PublicationMediaElement) _mediaAssets.Copy(source.Id, clone.Id);
-            clones.Add(clone);
+            logger.LogError(exception, $"EditorStateService.CloneSelection failed: {exception.Message}");
+            throw;
         }
-
-        foreach (var component in clones.OfType<DevExtremeComponentElement>().Where(component => component.Scope == PublicationComponentScope.Document))
-            SynchronizeDocumentComponent(component);
-        ReindexAnimations();
-        ApplyNormalizedZOrder(OrderedElements());
-        SetSelectionCore(clones.Select(clone => clone.Id), clones.FirstOrDefault()?.Id);
-        CropMode = false;
-        ContentPanMode = false;
-        ConnectorTool = ConnectorToolKind.None;
-        Notify();
     }
 
     private List<PublicationElement> LayerSelectionBlock()
     {
-        if (SelectedElement is null) return [];
-        IEnumerable<PublicationElement> source = _selectedElementIds.Count > 1 ? SelectedElements : SelectionUnit(SelectedElement);
-        var ids = source
-            .Select(item => item.Id)
-            .ToHashSet();
-        return OrderedElements().Where(item => ids.Contains(item.Id)).ToList();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.LayerSelectionBlock.");
+                    if (SelectedElement is null) return [];
+                    IEnumerable<PublicationElement> source = _selectedElementIds.Count > 1 ? SelectedElements : SelectionUnit(SelectedElement);
+                    var ids = source
+                        .Select(item => item.Id)
+                        .ToHashSet();
+                    return OrderedElements().Where(item => ids.Contains(item.Id)).ToList();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.LayerSelectionBlock failed: {exception.Message}");
+            throw;
+        }
     }
 
     private List<PublicationElement> TransformSelectionBlock()
     {
-        if (SelectedElement is null) return [];
-        IEnumerable<PublicationElement> source = _selectedElementIds.Count > 1 ? SelectedElements : SelectionUnit(SelectedElement);
-        return source.Where(item => !item.Locked && item is not ConnectorElement).DistinctBy(item => item.Id).ToList();
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.TransformSelectionBlock.");
+                    if (SelectedElement is null) return [];
+                    IEnumerable<PublicationElement> source = _selectedElementIds.Count > 1 ? SelectedElements : SelectionUnit(SelectedElement);
+                    return source.Where(item => !item.Locked && item is not ConnectorElement).DistinctBy(item => item.Id).ToList();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.TransformSelectionBlock failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static (double Width, double Height) MinimumElementSize(PublicationElement element) => element switch
+    private (double Width, double Height) MinimumElementSize(PublicationElement element) => element switch
     {
         DataVisualElement { VisualKind: DataVisualKind.Sparkline } => (55, 18),
         DataVisualElement { VisualKind: DataVisualKind.KpiProgress } => (60, 24),
@@ -2280,138 +3700,334 @@ public sealed class EditorStateService : IDisposable
         _ => (5, 5)
     };
 
-    private List<PublicationElement> OrderedElements() => CurrentPage.Elements
+    private List<PublicationElement> OrderedElements() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.OrderedElements.");
+            return CurrentPage.Elements
         .Select((element, index) => new { Element = element, Index = index })
         .OrderBy(item => item.Element.ZIndex)
         .ThenBy(item => item.Index)
         .Select(item => item.Element)
         .ToList();
-
-    private static bool HasNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
-    {
-        for (var index = 0; index < ordered.Count; index++)
-            if (ordered[index].ZIndex != index + 1) return false;
-        return true;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.OrderedElements failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static void ApplyNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
+    private bool HasNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
     {
-        for (var index = 0; index < ordered.Count; index++) ordered[index].ZIndex = index + 1;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.HasNormalizedZOrder.");
+                    for (var index = 0; index < ordered.Count; index++)
+                        if (ordered[index].ZIndex != index + 1) return false;
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.HasNormalizedZOrder failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static bool NearlyEqual(double first, double second) => Math.Abs(first - second) < .0001;
+    private void ApplyNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
+    {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ApplyNormalizedZOrder.");
+                    for (var index = 0; index < ordered.Count; index++) ordered[index].ZIndex = index + 1;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ApplyNormalizedZOrder failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private int NextZ() => CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
-    private string NextName(string basis) => $"{basis} {CurrentPage.Elements.Count + 1}";
+    private bool NearlyEqual(double first, double second) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.NearlyEqual.");
+            return Math.Abs(first - second) < .0001;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NearlyEqual failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private int NextZ() {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.NextZ.");
+            return CurrentPage.Elements.Select(e => e.ZIndex).DefaultIfEmpty(0).Max() + 1;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NextZ failed: {exception.Message}");
+            throw;
+        }
+    }
+    private string NextName(string basis) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.NextName.");
+            return $"{basis} {CurrentPage.Elements.Count + 1}";
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.NextName failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private IEnumerable<PublicationElement> SelectionUnit(PublicationElement element)
     {
-        if (element.GroupId is not { } groupId) return [element];
-        return CurrentPage.Elements.Where(item => item.GroupId == groupId);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SelectionUnit.");
+                    if (element.GroupId is not { } groupId) return [element];
+                    return CurrentPage.Elements.Where(item => item.GroupId == groupId);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SelectionUnit failed: {exception.Message}");
+            throw;
+        }
     }
 
     private IEnumerable<PublicationElement> MovableSelectionFor(PublicationElement element)
     {
-        if (_selectedElementIds.Contains(element.Id) && _selectedElementIds.Count > 1)
-            return SelectedElements;
-        return SelectionUnit(element);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.MovableSelectionFor.");
+                    if (_selectedElementIds.Contains(element.Id) && _selectedElementIds.Count > 1)
+                        return SelectedElements;
+                    return SelectionUnit(element);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.MovableSelectionFor failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void SetSelectionCore(IEnumerable<Guid> ids, Guid? primary)
     {
-        _selectedElementIds.Clear();
-        foreach (var id in ids)
-            if (CurrentPage.Elements.Any(element => element.Id == id))
-                _selectedElementIds.Add(id);
-        SelectedElementId = primary is { } value && _selectedElementIds.Contains(value)
-            ? value
-            : _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.SetSelectionCore.");
+                    _selectedElementIds.Clear();
+                    foreach (var id in ids)
+                        if (CurrentPage.Elements.Any(element => element.Id == id))
+                            _selectedElementIds.Add(id);
+                    SelectedElementId = primary is { } value && _selectedElementIds.Contains(value)
+                        ? value
+                        : _selectedElementIds.Count > 0 ? _selectedElementIds.Last() : null;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SetSelectionCore failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void ClearSelectionCore()
     {
-        _selectedElementIds.Clear();
-        SelectedElementId = null;
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ClearSelectionCore.");
+                    _selectedElementIds.Clear();
+                    SelectedElementId = null;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ClearSelectionCore failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void PlaceAt(PublicationElement element, double? centerX, double? centerY)
     {
-        var x = centerX ?? _lastInsertionX;
-        var y = centerY ?? _lastInsertionY;
-        if (x is null || y is null) return;
-        element.X = Math.Clamp(x.Value - element.Width / 2, -element.Width + 2, CurrentPage.WidthMm - 2);
-        element.Y = Math.Clamp(y.Value - element.Height / 2, -element.Height + 2, CurrentPage.HeightMm - 2);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.PlaceAt.");
+                    var x = centerX ?? _lastInsertionX;
+                    var y = centerY ?? _lastInsertionY;
+                    if (x is null || y is null) return;
+                    element.X = Math.Clamp(x.Value - element.Width / 2, -element.Width + 2, CurrentPage.WidthMm - 2);
+                    element.Y = Math.Clamp(y.Value - element.Height / 2, -element.Height + 2, CurrentPage.HeightMm - 2);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.PlaceAt failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void RemoveMediaAssets(PublicationDocument document)
     {
-        foreach (var media in PublicationElementTraversal.Descendants(document).OfType<PublicationMediaElement>())
+        try
         {
-            _mediaAssets.Remove(media.Id);
-            foreach (var segment in media.Segments) _mediaAssets.Remove(segment.Id);
+            logger.LogTrace($"Entering EditorStateService.RemoveMediaAssets.");
+                    foreach (var media in _elementTraversal.Descendants(document).OfType<PublicationMediaElement>())
+                    {
+                        _mediaAssets.Remove(media.Id);
+                        foreach (var segment in media.Segments) _mediaAssets.Remove(segment.Id);
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.RemoveMediaAssets failed: {exception.Message}");
+            throw;
         }
     }
 
     private void Capture()
     {
-        _liveEditKey = null;
-        _undo.Push(_files.Serialize(Document));
-        if (_undo.Count > 100)
+        try
         {
-            var newest = _undo.Take(100).Reverse().ToArray();
-            _undo.Clear();
-            foreach (var item in newest) _undo.Push(item);
+            logger.LogTrace($"Entering EditorStateService.Capture.");
+                    _liveEditKey = null;
+                    _undo.Push(_files.Serialize(Document));
+                    if (_undo.Count > 100)
+                    {
+                        var newest = _undo.Take(100).Reverse().ToArray();
+                        _undo.Clear();
+                        foreach (var item in newest) _undo.Push(item);
+                    }
+                    _redo.Clear();
+    
         }
-        _redo.Clear();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Capture failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void SynchronizeDocumentComponent(DevExtremeComponentElement source)
     {
-        if (source.Scope != PublicationComponentScope.Document) return;
-        source.SharedComponentId ??= Guid.NewGuid();
-        foreach (var page in Document.Pages)
+        try
         {
-            var target = page.Elements.OfType<DevExtremeComponentElement>()
-                .FirstOrDefault(component => component.Id != source.Id && component.SharedComponentId == source.SharedComponentId);
-            if (target is null)
-            {
-                if (page.Elements.Contains(source)) continue;
-                target = _components.Clone(source);
-                target.Id = Guid.NewGuid();
-                target.X = Math.Clamp(target.X, -target.Width + 2, page.WidthMm - 2);
-                target.Y = Math.Clamp(target.Y, -target.Height + 2, page.HeightMm - 2);
-                target.ZIndex = page.Elements.Count == 0 ? 1 : page.Elements.Max(element => element.ZIndex) + 1;
-                page.Elements.Add(target);
-            }
-            else _components.CopyConfiguration(source, target, preservePlacement: true);
+            logger.LogTrace($"Entering EditorStateService.SynchronizeDocumentComponent.");
+                    if (source.Scope != PublicationComponentScope.Document) return;
+                    source.SharedComponentId ??= Guid.NewGuid();
+                    foreach (var page in Document.Pages)
+                    {
+                        var target = page.Elements.OfType<DevExtremeComponentElement>()
+                            .FirstOrDefault(component => component.Id != source.Id && component.SharedComponentId == source.SharedComponentId);
+                        if (target is null)
+                        {
+                            if (page.Elements.Contains(source)) continue;
+                            target = _components.Clone(source);
+                            target.Id = Guid.NewGuid();
+                            target.X = Math.Clamp(target.X, -target.Width + 2, page.WidthMm - 2);
+                            target.Y = Math.Clamp(target.Y, -target.Height + 2, page.HeightMm - 2);
+                            target.ZIndex = page.Elements.Count == 0 ? 1 : page.Elements.Max(element => element.ZIndex) + 1;
+                            page.Elements.Add(target);
+                        }
+                        else _components.CopyConfiguration(source, target, preservePlacement: true);
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.SynchronizeDocumentComponent failed: {exception.Message}");
+            throw;
         }
     }
 
-    private PublicationElement CloneElement(PublicationElement element) => _files.CloneElement(element);
+    private PublicationElement CloneElement(PublicationElement element) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.CloneElement.");
+            return _files.CloneElement(element);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.CloneElement failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private PublicationPage ClonePage(PublicationPage publicationPage) => _files.ClonePage(publicationPage);
+    private PublicationPage ClonePage(PublicationPage publicationPage) {
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.ClonePage.");
+            return _files.ClonePage(publicationPage);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.ClonePage failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private void Notify(bool markModified = true)
     {
-        if (markModified)
+        try
         {
-            Document.ModifiedUtc = DateTimeOffset.UtcNow;
-            IsDirty = true;
-            Revision++;
+            logger.LogTrace($"Entering EditorStateService.Notify.");
+                    if (markModified)
+                    {
+                        Document.ModifiedUtc = DateTimeOffset.UtcNow;
+                        IsDirty = true;
+                        Revision++;
+                    }
+                    _liveData.Register(Document, _data, SelectedPageId);
+                    Changed?.Invoke();
+    
         }
-        _liveData.Register(Document, _data, SelectedPageId);
-        Changed?.Invoke();
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Notify failed: {exception.Message}");
+            throw;
+        }
     }
 
     private void PersistStreamingSettings()
     {
-        try { _streamingSettings.Save(Document.Id, Document.Streaming); }
-        catch { }
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.PersistStreamingSettings.");
+                    try { _streamingSettings.Save(Document.Id, Document.Streaming); }
+                    catch { }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.PersistStreamingSettings failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void Dispose()
     {
-        PersistStreamingSettings();
-        _liveData.Unregister(Document.Id);
+        try
+        {
+            logger.LogTrace($"Entering EditorStateService.Dispose.");
+                    PersistStreamingSettings();
+                    _liveData.Unregister(Document.Id);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.Dispose failed: {exception.Message}");
+            throw;
+        }
     }
 }

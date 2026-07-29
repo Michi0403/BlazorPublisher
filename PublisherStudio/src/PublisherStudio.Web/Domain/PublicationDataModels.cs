@@ -226,13 +226,5 @@ public sealed class PublicationGridRow
     public string C7 { get; set; } = string.Empty;
     public string C8 { get; set; } = string.Empty;
 
-    public static PublicationGridRow From(PublicationDataRow row, IReadOnlyList<string> columns)
-    {
-        var values = columns.Take(8).Select(column => row.Get(column)).Concat(Enumerable.Repeat(string.Empty, 8)).Take(8).ToArray();
-        return new PublicationGridRow
-        {
-            C1 = values[0], C2 = values[1], C3 = values[2], C4 = values[3],
-            C5 = values[4], C6 = values[5], C7 = values[6], C8 = values[7]
-        };
-    }
+
 }

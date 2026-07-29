@@ -5,12 +5,22 @@ namespace PublisherStudio.Services.Streaming.UseCases.Chat;
 /// <summary>
 /// Keeps provider-chat session lookup and send/subscription orchestration outside MVC controllers.
 /// </summary>
-public sealed class StreamingChatUseCases(MediaSessionRegistry sessions)
+public sealed class StreamingChatUseCases(MediaSessionRegistry sessions, ILogger<StreamingChatUseCases> logger)
 {
     private readonly MediaSessionRegistry _sessions = sessions;
 
-    public bool CanOpen(Guid sessionId) =>
-        _sessions.TryGet(sessionId, out var session) && session.Chat is not null;
+    public bool CanOpen(Guid sessionId) {
+        try
+        {
+            logger.LogTrace($"Entering StreamingChatUseCases.CanOpen.");
+            return _sessions.TryGet(sessionId, out var session) && session.Chat is not null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"StreamingChatUseCases.CanOpen failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public async Task<bool> RunSubscriberAsync(
         Guid sessionId,
@@ -18,9 +28,19 @@ public sealed class StreamingChatUseCases(MediaSessionRegistry sessions)
         WebSocket socket,
         CancellationToken cancellationToken)
     {
-        if (!_sessions.TryGet(sessionId, out var session) || session.Chat is null) return false;
-        await session.Chat.RunSubscriberAsync(outputId, socket, cancellationToken);
-        return true;
+        try
+        {
+            logger.LogTrace($"Entering StreamingChatUseCases.RunSubscriberAsync.");
+                    if (!_sessions.TryGet(sessionId, out var session) || session.Chat is null) return false;
+                    await session.Chat.RunSubscriberAsync(outputId, socket, cancellationToken).ConfigureAwait(false);
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"StreamingChatUseCases.RunSubscriberAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
     public async Task<StreamingChatSendResult> SendAsync(
@@ -29,25 +49,35 @@ public sealed class StreamingChatUseCases(MediaSessionRegistry sessions)
         string message,
         CancellationToken cancellationToken)
     {
-        if (!_sessions.TryGet(sessionId, out var session) || session.Chat is null)
-            return StreamingChatSendResult.NotFound;
         try
         {
-            return await session.Chat.SendAsync(outputId, message, cancellationToken)
-                ? StreamingChatSendResult.Accepted
-                : StreamingChatSendResult.NotConfigured;
+            logger.LogTrace($"Entering StreamingChatUseCases.SendAsync.");
+                    if (!_sessions.TryGet(sessionId, out var session) || session.Chat is null)
+                        return StreamingChatSendResult.NotFound;
+                    try
+                    {
+                        return await session.Chat.SendAsync(outputId, message, cancellationToken).ConfigureAwait(false)
+                            ? StreamingChatSendResult.Accepted
+                            : StreamingChatSendResult.NotConfigured;
+                    }
+                    catch (Exception exception)
+                    {
+                        return StreamingChatSendResult.Failed(exception.Message);
+                    }
+    
         }
         catch (Exception exception)
         {
-            return StreamingChatSendResult.Failed(exception.Message);
+            logger.LogError(exception, $"StreamingChatUseCases.SendAsync failed: {exception.Message}");
+            throw;
         }
     }
 }
 
 public sealed record StreamingChatSendResult(bool Exists, bool Sent, string Error)
 {
-    public static StreamingChatSendResult NotFound { get; } = new(false, false, string.Empty);
-    public static StreamingChatSendResult Accepted { get; } = new(true, true, string.Empty);
-    public static StreamingChatSendResult NotConfigured { get; } = new(true, false, "Chat is not configured for this output.");
-    public static StreamingChatSendResult Failed(string error) => new(true, false, error);
+    public StreamingChatSendResult NotFound { get; } = new(false, false, string.Empty);
+    public StreamingChatSendResult Accepted { get; } = new(true, true, string.Empty);
+    public StreamingChatSendResult NotConfigured { get; } = new(true, false, "Chat is not configured for this output.");
+    public StreamingChatSendResult Failed(string error) => new(true, false, error);
 }

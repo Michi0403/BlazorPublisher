@@ -95,7 +95,7 @@ for (const file of serviceFiles) {
 }
 
 assert.match(program, /builder\.Services\.AddPublisherStudioApplication\(builder\.Configuration\)/);
-assert.match(applicationComposition, /services\.AddPublisherStreaming\(\)/);
+assert.match(applicationComposition, /services\.AddPublisherStreaming\(logger\)/);
 assert.match(applicationComposition, /AddSingleton<IOpenScadDocumentService, OpenScadDocumentService>/);
 assert.match(applicationComposition, /AddSingleton<IUserInputAutomationService, UserInputAutomationService>/);
 assert.doesNotMatch(program, /MapPublisherStreamingRuntime|StreamingRuntimeEndpoints/);

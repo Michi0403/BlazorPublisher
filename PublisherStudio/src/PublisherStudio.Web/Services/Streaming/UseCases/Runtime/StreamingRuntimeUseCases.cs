@@ -8,15 +8,28 @@ public sealed class StreamingRuntimeUseCases
 {
     private readonly IWindowsHotkeyNativeService hotkeyNativeService;
     private readonly IWindowsProcessLoopbackNativeService processLoopbackNativeService;
+    private readonly NativeDeviceDiscovery nativeDeviceDiscovery;
+    private readonly NowPlayingReader nowPlayingReader;
+    private readonly ILogger<StreamingRuntimeUseCases> logger;
 
     public StreamingRuntimeUseCases(
         IWindowsHotkeyNativeService hotkeyNativeService,
-        IWindowsProcessLoopbackNativeService processLoopbackNativeService)
+        IWindowsProcessLoopbackNativeService processLoopbackNativeService,
+        NativeDeviceDiscovery nativeDeviceDiscovery,
+        NowPlayingReader nowPlayingReader,
+        ILogger<StreamingRuntimeUseCases> logger)
     {
         this.hotkeyNativeService = hotkeyNativeService;
         this.processLoopbackNativeService = processLoopbackNativeService;
+        this.nativeDeviceDiscovery = nativeDeviceDiscovery;
+        this.nowPlayingReader = nowPlayingReader;
+        this.logger = logger;
     }
-    public StreamingRuntimeCapabilities GetCapabilities() => new()
+    public StreamingRuntimeCapabilities GetCapabilities() {
+        try
+        {
+            logger.LogTrace($"Entering StreamingRuntimeUseCases.GetCapabilities.");
+            return new()
     {
         Version = "2.0.1",
         BrowserCapture = true,
@@ -32,24 +45,52 @@ public sealed class StreamingRuntimeUseCases
         HardwareEncoderProbe = true,
         Note = "The integrated PublisherStudio streaming runtime owns encoder orchestration, recording, LAN delivery, native capture-card/device discovery and Windows global hotkeys. Windows process-tree audio loopback is built in on Windows 10 build 20348 or later; browser window-audio remains the cross-platform fallback."
     };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"StreamingRuntimeUseCases.GetCapabilities failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public async Task<IReadOnlyList<PublisherStudio.Domain.NativeMediaDeviceInfo>> DiscoverDevicesAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
     {
-        var devices = await NativeDeviceDiscovery.DiscoverAsync(ffmpegPath, cancellationToken);
-        return devices.Select(device => new PublisherStudio.Domain.NativeMediaDeviceInfo
+        try
         {
-            Id = device.Id,
-            Name = device.Name,
-            Kind = device.Kind,
-            Backend = device.Backend,
-            ProcessId = device.ProcessId,
-            WindowTitle = device.WindowTitle
-        }).ToList();
+            logger.LogTrace($"Entering StreamingRuntimeUseCases.DiscoverDevicesAsync.");
+                    var devices = await nativeDeviceDiscovery.DiscoverAsync(ffmpegPath, cancellationToken).ConfigureAwait(false);
+                    return devices.Select(device => new PublisherStudio.Domain.NativeMediaDeviceInfo
+                    {
+                        Id = device.Id,
+                        Name = device.Name,
+                        Kind = device.Kind,
+                        Backend = device.Backend,
+                        ProcessId = device.ProcessId,
+                        WindowTitle = device.WindowTitle
+                    }).ToList();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"StreamingRuntimeUseCases.DiscoverDevicesAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public object? ReadNowPlaying(string directory) => NowPlayingReader.Read(directory);
+    public object? ReadNowPlaying(string directory) {
+        try
+        {
+            logger.LogTrace($"Entering StreamingRuntimeUseCases.ReadNowPlaying.");
+            return nowPlayingReader.Read(directory);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"StreamingRuntimeUseCases.ReadNowPlaying failed: {exception.Message}");
+            throw;
+        }
+    }
 }
 
 public sealed class StreamingRuntimeCapabilities

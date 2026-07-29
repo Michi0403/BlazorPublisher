@@ -1,8 +1,8 @@
 namespace PublisherStudio.Domain;
 
-public static class PublicationElementTraversal
+public sealed class PublicationElementTraversal(ILogger<PublicationElementTraversal> logger)
 {
-    public static IEnumerable<PublicationElement> Descendants(IEnumerable<PublicationElement> elements)
+    public IEnumerable<PublicationElement> Descendants(IEnumerable<PublicationElement> elements)
     {
         foreach (var element in elements)
         {
@@ -13,6 +13,6 @@ public static class PublicationElementTraversal
         }
     }
 
-    public static IEnumerable<PublicationElement> Descendants(PublicationDocument document) =>
+    public IEnumerable<PublicationElement> Descendants(PublicationDocument document) =>
         document.Pages.SelectMany(page => Descendants(page.Elements));
 }

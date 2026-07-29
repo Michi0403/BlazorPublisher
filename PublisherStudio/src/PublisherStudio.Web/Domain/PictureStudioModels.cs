@@ -16,32 +16,9 @@ public sealed class PictureDocument
     public int GridSpacingPx { get; set; } = 25;
     public List<PictureLayer> Layers { get; set; } = [];
 
-    public static PictureDocument CreateDefault(int widthPx = 1200, int heightPx = 800, bool transparent = true)
-    {
-        return new PictureDocument
-        {
-            WidthPx = Math.Clamp(widthPx, 16, 8192),
-            HeightPx = Math.Clamp(heightPx, 16, 8192),
-            Background = transparent ? "transparent" : "#ffffff"
-        };
-    }
 
-    public static PictureDocument FromRaster(string dataUrl, string name, int widthPx = 1200, int heightPx = 800)
-    {
-        var document = CreateDefault(widthPx, heightPx, true);
-        document.Name = string.IsNullOrWhiteSpace(name) ? "Picture" : Path.GetFileNameWithoutExtension(name);
-        document.Layers.Add(new RasterPictureLayer
-        {
-            Name = string.IsNullOrWhiteSpace(name) ? "Picture" : name,
-            DataUrl = dataUrl,
-            X = 0,
-            Y = 0,
-            Width = document.WidthPx,
-            Height = document.HeightPx,
-            FitMode = PictureRasterFitMode.Contain
-        });
-        return document;
-    }
+
+
 }
 
 public enum PictureLayerKind { Raster, Text, Shape, Fill, Render, Paint, Vector }

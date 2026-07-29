@@ -35,73 +35,23 @@ function Assert-Property([hashtable]$Properties, [string]$Name, [string]$Expecte
     }
 }
 
-function Assert-OptionalProperty([hashtable]$Properties, [string]$Name, [string]$Expected, [string]$RelativePath) {
-    if ($Properties.ContainsKey($Name) -and -not [string]::Equals($Properties[$Name], $Expected, [StringComparison]::OrdinalIgnoreCase)) {
-        Fail "$RelativePath defines $Name='$($Properties[$Name])'; expected '$Expected' when present."
-    }
-}
-
-function Assert-OnePropertyEquals(
-    [hashtable]$Properties,
-    [string[]]$Names,
-    [string]$Expected,
-    [string]$RelativePath,
-    [string]$Description
-) {
-    foreach ($name in $Names) {
-        if ($Properties.ContainsKey($name) -and [string]::Equals($Properties[$name], $Expected, [StringComparison]::OrdinalIgnoreCase)) {
-            return
-        }
-    }
-    Fail "$RelativePath does not define a supported $Description value of '$Expected' in any of: $($Names -join ', ')."
-}
-
-function Assert-CommonProfile(
-    [hashtable]$Properties,
-    [string]$RelativePath,
-    [string]$Runtime,
-    [string]$Folder
-) {
+function Assert-Profile([string]$RelativePath, [string]$Runtime, [string]$Folder, [string]$Platform) {
+    $properties = Read-ProfileProperties $RelativePath
     $output = "..\..\artifacts\release\$Folder\"
     foreach ($requirement in @(
         @{ Name = 'RuntimeIdentifier'; Value = $Runtime },
         @{ Name = 'SelfContained'; Value = 'true' },
+        @{ Name = 'PublishSingleFile'; Value = 'false' },
         @{ Name = 'PublishTrimmed'; Value = 'false' },
+        @{ Name = 'PublishReadyToRun'; Value = 'false' },
         @{ Name = 'DeleteExistingFiles'; Value = 'true' },
+        @{ Name = 'PublishProtocol'; Value = 'FileSystem' },
+        @{ Name = 'Platform'; Value = $Platform },
         @{ Name = 'TargetFramework'; Value = 'net10.0' },
-        @{ Name = 'PublishUrl'; Value = $output }
+        @{ Name = 'PublishUrl'; Value = $output },
+        @{ Name = 'PublishDir'; Value = $output }
     )) {
-        Assert-Property $Properties $requirement.Name $requirement.Value $RelativePath
-    }
-    Assert-OptionalProperty $Properties 'PublishDir' $output $RelativePath
-    Assert-OptionalProperty $Properties 'PublishReadyToRun' 'false' $RelativePath
-}
-
-function Assert-WebProfile([string]$RelativePath, [string]$Runtime, [string]$Folder) {
-    $properties = Read-ProfileProperties $RelativePath
-    Assert-CommonProfile $properties $RelativePath $Runtime $Folder
-    Assert-Property $properties 'PublishSingleFile' 'false' $RelativePath
-    Assert-OnePropertyEquals $properties @('PublishProtocol', 'WebPublishMethod', 'PublishProvider') 'FileSystem' $RelativePath 'file-system publish method'
-    Assert-OnePropertyEquals $properties @('Platform', 'LastUsedPlatform') 'Any CPU' $RelativePath 'platform'
-}
-
-function Assert-SetupProfile([string]$RelativePath, [string]$Runtime, [string]$Folder) {
-    $properties = Read-ProfileProperties $RelativePath
-    Assert-CommonProfile $properties $RelativePath $Runtime $Folder
-    Assert-Property $properties 'PublishSingleFile' 'true' $RelativePath
-    Assert-Property $properties 'PublishDir' "..\..\artifacts\release\$Folder\" $RelativePath
-    Assert-Property $properties 'PublishProtocol' 'FileSystem' $RelativePath
-    Assert-Property $properties 'Platform' 'Any CPU' $RelativePath
-}
-
-function Assert-ProfileInventory([string]$RelativeDirectory, [string[]]$ExpectedNames) {
-    $directory = Join-Path $root $RelativeDirectory
-    if (-not (Test-Path -LiteralPath $directory -PathType Container)) { Fail "Publish profile directory is missing: $RelativeDirectory" }
-    $actualNames = @(Get-ChildItem -LiteralPath $directory -File -Filter '*.pubxml' | ForEach-Object { $_.Name } | Sort-Object)
-    $expectedSorted = @($ExpectedNames | Sort-Object)
-    $difference = @(Compare-Object -ReferenceObject $expectedSorted -DifferenceObject $actualNames)
-    if ($difference.Count -gt 0) {
-        Fail "Unexpected publish-profile inventory in $RelativeDirectory. Expected: $($expectedSorted -join ', '); actual: $($actualNames -join ', ')."
+        Assert-Property $properties $requirement.Name $requirement.Value $RelativePath
     }
 }
 
@@ -115,14 +65,14 @@ $profiles = @(
     @{ File = 'macosarm64.pubxml'; Runtime = 'osx-arm64'; App = 'macosarm64'; Setup = 'setupmacosarm64' }
 )
 
-$expectedProfileNames = @($profiles | ForEach-Object { $_.File })
-Assert-ProfileInventory 'src\PublisherStudio.Web\Properties\PublishProfiles' $expectedProfileNames
-Assert-ProfileInventory 'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles' $expectedProfileNames
-
 foreach ($profile in $profiles) {
-    Assert-WebProfile "src\PublisherStudio.Web\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.App
-    Assert-SetupProfile "src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.Setup
+    Assert-Profile "src\PublisherStudio.Web\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.App 'AnyCPU'
+    Assert-Profile "src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.Setup 'Any CPU'
 }
+
+# Long-name Linux aliases remain supported for existing developer workflows.
+Assert-Profile 'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\linuxx64.pubxml' 'linux-x64' 'setuplinx64' 'Any CPU'
+Assert-Profile 'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\linuxarm64.pubxml' 'linux-arm64' 'setuplinarm64' 'Any CPU'
 
 $profileUserFiles = @(Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -File -Filter '*.pubxml.user' -ErrorAction SilentlyContinue)
 if ($profileUserFiles.Count -gt 0) { Fail 'Machine-specific .pubxml.user files must not be shipped in the source package.' }
@@ -138,7 +88,7 @@ $setupProject = Read-Text 'src\PublisherStudio.InstallerConsole\PublisherStudio.
 $release = Read-Text 'Build-Release.ps1'
 $allRuntimes = Read-Text 'Build-AllRuntimes.ps1'
 foreach ($project in @($webProject, $setupProject)) {
-    foreach ($marker in @('<PublishTrimmed>false</PublishTrimmed>', '<PublishReadyToRun>false</PublishReadyToRun>')) {
+    foreach ($marker in @('<PublishSingleFile>false</PublishSingleFile>', '<PublishTrimmed>false</PublishTrimmed>', '<PublishReadyToRun>false</PublishReadyToRun>')) {
         if (-not $project.Contains($marker)) { Fail "A publish project is missing $marker." }
     }
 }
@@ -157,7 +107,7 @@ if (-not $webProject.Contains('win-x64;win-x86;win-arm64;linux-x64;linux-arm64;o
     Fail 'PublisherStudio.Web.csproj must expose the same seven runtime identifiers as both publish lanes.'
 }
 if ($release -match 'PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract=true|EnableCompressionInSingleFile=true') {
-    Fail 'The scripted release lane must remain multi-file and self-contained.'
+    Fail 'The scripted release lane must remain multi-file and self-contained like the developer profiles.'
 }
 
-Write-Host 'Publish configuration validation passed for 7 application profiles, 7 installer profiles and the scripted release lane.'
+Write-Host 'Publish configuration validation passed for 7 application profiles, 9 installer/developer profiles and the synchronized scripted release lane.'

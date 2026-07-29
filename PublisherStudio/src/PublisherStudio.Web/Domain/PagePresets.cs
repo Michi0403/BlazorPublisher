@@ -2,7 +2,7 @@ namespace PublisherStudio.Domain;
 
 public sealed record PagePreset(string Key, string Name, double WidthMm, double HeightMm)
 {
-    public static IReadOnlyList<PagePreset> All { get; } =
+    public IReadOnlyList<PagePreset> All { get; } =
     [
         new("a3-p", "A3 portrait", 297, 420),
         new("a3-l", "A3 landscape", 420, 297),
@@ -18,5 +18,5 @@ public sealed record PagePreset(string Key, string Name, double WidthMm, double 
         new("square", "Square 210 × 210 mm", 210, 210)
     ];
 
-    public static PagePreset? Find(string? key) => All.FirstOrDefault(item => item.Key == key);
+    public PagePreset? Find(string? key) => All.FirstOrDefault(item => item.Key == key);
 }

@@ -17,23 +17,38 @@ using PublisherStudio.Services.UserExperience;
 using PublisherStudio.Services.Publication.Import;
 using PublisherStudio.Services.VideoStudio.Export;
 using PublisherStudio.Services.VideoStudio.Import;
+using PublisherStudio.Services.Streaming.Capture;
+using PublisherStudio.Services.Streaming.Encoding;
+using PublisherStudio.Services.Streaming.Metadata;
 
 namespace PublisherStudio.Services;
 
 public static class PublisherStudioServiceCollectionExtensions
 {
-    public static IServiceCollection AddPublisherStudioApplication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPublisherStudioApplication(this IServiceCollection services, IConfiguration configuration, ILogger logger)
     {
-        services.Configure<PublisherStudioPathOptions>(configuration.GetSection("PublisherStudio:Paths"));
-        services.Configure<OrganicPluginOptions>(configuration.GetSection(OrganicPluginOptions.SectionName));
-        services.Configure<PanelTextPatternStoreOptions>(configuration.GetSection(PanelTextPatternStoreOptions.SectionName));
+        try
+        {
+        var configurationDocument = configuration.Get<PublisherStudioConfigurationDocument>()
+            ?? throw new InvalidDataException("PublisherStudio configuration could not be loaded.");
+        services.AddSingleton(configurationDocument.Twitch);
+        services.AddSingleton(configurationDocument.OrganicPlugins);
+        services.AddSingleton(configurationDocument.PublisherStudio);
+        services.AddSingleton(configurationDocument.PublisherStudio.RuntimePolicy);
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.PublisherStudio.Paths));
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.OrganicPlugins));
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.PublisherStudio.RuntimeValueStores.PanelTextPatterns));
+        AddSingleton<IPublisherRuntimePatternService, PublisherRuntimePatternService>(services);
 
         AddSingleton<IPanelStudioTextPatternDataService, PanelStudioTextPatternDataService>(services);
         AddSingleton<IPublisherRuntimePolicyDataService, PublisherRuntimePolicyDataService>(services);
         AddSingleton<PanelStudioTextService, PanelStudioTextService>(services);
         AddSingleton<IApplicationPortResolver, ApplicationPortResolver>(services);
+        AddSingleton<IRuntimeEndpointState, RuntimeEndpointState>(services);
         AddSingleton<IRuntimeEndpointWriter, RuntimeEndpointWriter>(services);
         AddSingleton<SystemFontCatalog, SystemFontCatalog>(services);
+        AddSingleton<IPublisherDocumentFactory, PublisherDocumentFactory>(services);
+        AddSingleton<IPublicationGridRowFactory, PublicationGridRowFactory>(services);
         AddSingleton<PictureDocumentService, PictureDocumentService>(services);
         AddSingleton<OpenRasterImportService, OpenRasterImportService>(services);
         AddSingleton<OpenDocumentImportService, OpenDocumentImportService>(services);
@@ -48,6 +63,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<PublicationWebhookStore, PublicationWebhookStore>(services);
         AddSingleton<PublicationLiveDataRegistry, PublicationLiveDataRegistry>(services);
         AddSingleton<PublicationWebDataService, PublicationWebDataService>(services);
+        AddSingleton<IPublicationMarkupService, PublicationMarkupService>(services);
         AddSingleton<PublicationFileService, PublicationFileService>(services);
         AddSingleton<PublicationMediaAssetStore, PublicationMediaAssetStore>(services);
         AddSingleton<PublicationRecoveryService, PublicationRecoveryService>(services);
@@ -55,10 +71,21 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<PublicationStreamingSettingsStore, PublicationStreamingSettingsStore>(services);
         AddSingleton<TwitchOAuthService, TwitchOAuthService>(services);
         services.AddHostedService<TwitchOAuthMaintenanceService>();
-        services.AddPublisherStreaming();
+        services.AddPublisherStreaming(logger);
         AddSingleton<StreamingMediaHostClient, StreamingMediaHostClient>(services);
         AddSingleton<StreamingSessionService, StreamingSessionService>(services);
 
+        AddSingleton<WordArtPathGeometry, WordArtPathGeometry>(services);
+        AddSingleton<ConnectorGeometry, ConnectorGeometry>(services);
+        AddSingleton<PublicationAnimationData, PublicationAnimationData>(services);
+        AddSingleton<PublicationElementTraversal, PublicationElementTraversal>(services);
+        AddSingleton<PublicationMediaData, PublicationMediaData>(services);
+        AddSingleton<RichTextDocumentFactory, RichTextDocumentFactory>(services);
+        AddSingleton<SvgInterchangeSanitizer, SvgInterchangeSanitizer>(services);
+        AddSingleton<NowPlayingReader, NowPlayingReader>(services);
+        AddSingleton<FfmpegLocator, FfmpegLocator>(services);
+        AddSingleton<NativeDeviceDiscovery, NativeDeviceDiscovery>(services);
+        AddSingleton<FfmpegEncoderResolver, FfmpegEncoderResolver>(services);
         AddSingleton<IPolygonGeometryService, PolygonGeometryService>(services);
         AddSingleton<IBrowserRuntimeTemplateService, BrowserRuntimeTemplateService>(services);
         AddSingleton<IOpenScadCatalogService, OpenScadCatalogService>(services);
@@ -114,11 +141,19 @@ public static class PublisherStudioServiceCollectionExtensions
         AddScoped<PictureEditorStateService, PictureEditorStateService>(services);
         AddArchitectureDescriptors(services);
         services.AddHostedService<ServiceRegistrationLoggingHostedService>();
+        logger.LogInformation($"Registered PublisherStudio application services and architecture descriptors.");
         return services;
-    }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublisherStudio service registration failed: {exception.Message}");
+            throw;
+        }
 
-    private static void AddArchitectureDescriptors(IServiceCollection services)
-    {
+        void AddArchitectureDescriptors(IServiceCollection targetServices)
+        {
+            try
+            {
         var existing = services
             .Where(descriptor => descriptor.ServiceType == typeof(ServiceArchitectureDescriptor))
             .Select(descriptor => descriptor.ImplementationInstance as ServiceArchitectureDescriptor)
@@ -127,7 +162,7 @@ public static class PublisherStudioServiceCollectionExtensions
             .Select(descriptor => (descriptor.InterfaceType, descriptor.ImplementationType, descriptor.Lifetime))
             .ToHashSet();
 
-        var candidates = services.ToList().Select(descriptor =>
+        var candidates = targetServices.ToList().Select(descriptor =>
         {
             var implementation = descriptor.ImplementationType ?? descriptor.ImplementationInstance?.GetType();
             if (implementation is null && descriptor.ServiceType.IsClass)
@@ -151,23 +186,49 @@ public static class PublisherStudioServiceCollectionExtensions
         foreach (var descriptor in candidates)
         {
             var key = (descriptor.InterfaceType, descriptor.ImplementationType, descriptor.Lifetime);
-            if (existing.Add(key)) services.AddSingleton(descriptor);
+            if (existing.Add(key)) targetServices.AddSingleton(descriptor);
         }
-    }
+                logger.LogTrace($"Registered {candidates.Count} PublisherStudio architecture descriptor candidates.");
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"PublisherStudio architecture descriptor registration failed: {exception.Message}");
+                throw;
+            }
+        }
 
-    private static void AddSingleton<TContract, TImplementation>(IServiceCollection services)
-        where TContract : class
-        where TImplementation : class, TContract
-    {
-        services.AddSingleton<TContract, TImplementation>();
-        services.AddSingleton(new ServiceArchitectureDescriptor(typeof(TContract), typeof(TImplementation), "Singleton"));
-    }
+        void AddSingleton<TContract, TImplementation>(IServiceCollection targetServices)
+            where TContract : class
+            where TImplementation : class, TContract
+        {
+            try
+            {
+                targetServices.AddSingleton<TContract, TImplementation>();
+                targetServices.AddSingleton(new ServiceArchitectureDescriptor(typeof(TContract), typeof(TImplementation), "Singleton"));
+                logger.LogTrace($"Registered singleton service {typeof(TContract).FullName} with implementation {typeof(TImplementation).FullName}.");
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"Singleton service registration failed for {typeof(TContract).FullName}: {exception.Message}");
+                throw;
+            }
+        }
 
-    private static void AddScoped<TContract, TImplementation>(IServiceCollection services)
-        where TContract : class
-        where TImplementation : class, TContract
-    {
-        services.AddScoped<TContract, TImplementation>();
-        services.AddSingleton(new ServiceArchitectureDescriptor(typeof(TContract), typeof(TImplementation), "Scoped"));
+        void AddScoped<TContract, TImplementation>(IServiceCollection targetServices)
+            where TContract : class
+            where TImplementation : class, TContract
+        {
+            try
+            {
+                targetServices.AddScoped<TContract, TImplementation>();
+                targetServices.AddSingleton(new ServiceArchitectureDescriptor(typeof(TContract), typeof(TImplementation), "Scoped"));
+                logger.LogTrace($"Registered scoped service {typeof(TContract).FullName} with implementation {typeof(TImplementation).FullName}.");
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"Scoped service registration failed for {typeof(TContract).FullName}: {exception.Message}");
+                throw;
+            }
+        }
     }
 }

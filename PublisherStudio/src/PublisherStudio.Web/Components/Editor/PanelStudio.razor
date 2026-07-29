@@ -1118,7 +1118,7 @@
             await using var source = file.OpenReadStream(long.MaxValue);
             using var memory = new MemoryStream();
             await source.CopyToAsync(memory).ConfigureAwait(true);
-            var mime = PublicationMediaData.NormalizeMimeType(file.ContentType, "application/octet-stream");
+            var mime = MediaData.NormalizeMimeType(file.ContentType, "application/octet-stream");
             var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(memory.ToArray())}";
             switch (selected)
             {

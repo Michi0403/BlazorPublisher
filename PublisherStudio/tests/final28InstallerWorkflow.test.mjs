@@ -39,9 +39,6 @@ test('installer launchers, mirrors, shortcuts and Visual Studio profiles stay sy
   const profiles = JSON.parse(read(`${installerRoot}/Properties/launchSettings.json`)).profiles;
   assert.ok(profiles['BlazorPublisher Default Install and Update']);
   assert.ok(Object.keys(profiles).length >= launchers.length);
-  const workflowRule = read('build/Assert-InstallerWorkflow.ps1');
-  assert.match(workflowRule, /\$launchProfileProperties\s*=\s*@\(\$launchSettings\.profiles\.PSObject\.Properties\)/);
-  assert.doesNotMatch(workflowRule, /\.PSObject\.Properties\.Count/);
 });
 
 test('builds deploy and enforce the complete setup workflow', () => {

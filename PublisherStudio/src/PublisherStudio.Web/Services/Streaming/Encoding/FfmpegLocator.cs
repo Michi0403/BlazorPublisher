@@ -1,44 +1,78 @@
 using System.Diagnostics;
+using PublisherStudio.Domain;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.Encoding;
 
-public static class FfmpegLocator
+public sealed class FfmpegLocator(
+    IPublisherRuntimePolicyDataService runtimePolicy,
+    ILogger<FfmpegLocator> logger)
 {
-    public static string? Resolve(string? configuredPath = null)
+    public string? Resolve(string? configuredPath = null)
     {
-        if (!string.IsNullOrWhiteSpace(configuredPath))
-        {
-            var expanded = Environment.ExpandEnvironmentVariables(configuredPath.Trim().Trim('"'));
-            if (File.Exists(expanded)) return Path.GetFullPath(expanded);
-            if (TryResolveCommand(expanded, out var configuredCommand)) return configuredCommand;
-            return null;
-        }
-
-        var bundledNames = OperatingSystem.IsWindows()
-            ? new[] { "ffmpeg.exe", Path.Combine("tools", "ffmpeg", "ffmpeg.exe"), Path.Combine("tools", "ffmpeg.exe") }
-            : new[] { "ffmpeg", Path.Combine("tools", "ffmpeg", "ffmpeg"), Path.Combine("tools", "ffmpeg") };
-        foreach (var name in bundledNames)
-        {
-            var candidate = Path.Combine(AppContext.BaseDirectory, name);
-            if (File.Exists(candidate)) return Path.GetFullPath(candidate);
-        }
-
-        foreach (var candidate in KnownInstallLocations())
-            if (File.Exists(candidate)) return Path.GetFullPath(candidate);
-
-        return TryResolveCommand(OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg", out var command)
-            ? command
-            : null;
-    }
-
-    public static bool IsAvailable(string? configuredPath = null) => Resolve(configuredPath) is not null;
-
-    public static async Task<string?> ReadVersionAsync(string? configuredPath = null, CancellationToken cancellationToken = default)
-    {
-        var executable = Resolve(configuredPath);
-        if (executable is null) return null;
         try
         {
+            logger.LogTrace($"Resolving the FFmpeg executable.");
+            if (!string.IsNullOrWhiteSpace(configuredPath))
+            {
+                var expanded = Environment.ExpandEnvironmentVariables(configuredPath.Trim().Trim('"'));
+                if (File.Exists(expanded)) return Path.GetFullPath(expanded);
+                if (TryResolveCommand(expanded, out var configuredCommand)) return configuredCommand;
+                return null;
+            }
+
+            var bundledPaths = runtimePolicy.GetCollection(
+                OperatingSystem.IsWindows()
+                    ? PublisherRuntimeCollection.FfmpegWindowsBundledPaths
+                    : PublisherRuntimeCollection.FfmpegUnixBundledPaths);
+            foreach (var relativePath in bundledPaths)
+            {
+                var candidate = Path.Combine(
+                    AppContext.BaseDirectory,
+                    relativePath.Replace('/', Path.DirectorySeparatorChar));
+                if (File.Exists(candidate)) return Path.GetFullPath(candidate);
+            }
+
+            foreach (var candidate in KnownInstallLocations())
+                if (File.Exists(candidate)) return Path.GetFullPath(candidate);
+
+            var command = runtimePolicy
+                .GetCollection(PublisherRuntimeCollection.AllowedFfmpegExecutableNames)
+                .FirstOrDefault(name => OperatingSystem.IsWindows()
+                    ? name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+                    : !name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+            return !string.IsNullOrWhiteSpace(command) && TryResolveCommand(command, out var resolved)
+                ? resolved
+                : null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"Could not resolve the FFmpeg executable.");
+            throw;
+        }
+    }
+
+    public bool IsAvailable(string? configuredPath = null)
+    {
+        try
+        {
+            var available = Resolve(configuredPath) is not null;
+            logger.LogTrace($"FFmpeg availability was resolved as {available}.");
+            return available;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"Could not determine FFmpeg availability.");
+            throw;
+        }
+    }
+
+    public async Task<string?> ReadVersionAsync(string? configuredPath = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var executable = Resolve(configuredPath);
+            if (executable is null) return null;
             using var process = Process.Start(new ProcessStartInfo
             {
                 FileName = executable,
@@ -49,102 +83,138 @@ public static class FfmpegLocator
                 ArgumentList = { "-version" }
             });
             if (process is null) return null;
-            var firstLine = await process.StandardOutput.ReadLineAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
-            return string.IsNullOrWhiteSpace(firstLine) ? null : firstLine.Trim();
+            var firstLine = await process.StandardOutput.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            var result = string.IsNullOrWhiteSpace(firstLine) ? null : firstLine.Trim();
+            logger.LogTrace($"Read the FFmpeg version from '{executable}'.");
+            return result;
         }
-        catch { return null; }
-    }
-
-    private static IEnumerable<string> KnownInstallLocations()
-    {
-        if (OperatingSystem.IsWindows())
+        catch (Exception exception)
         {
-            var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var chocolatey = Environment.GetEnvironmentVariable("ChocolateyInstall");
-            if (!string.IsNullOrWhiteSpace(local))
-            {
-                yield return Path.Combine(local, "Microsoft", "WinGet", "Links", "ffmpeg.exe");
-                foreach (var candidate in FindWinGetPackageExecutables(local))
-                    yield return candidate;
-            }
-            if (!string.IsNullOrWhiteSpace(profile))
-                yield return Path.Combine(profile, "scoop", "shims", "ffmpeg.exe");
-            if (!string.IsNullOrWhiteSpace(chocolatey))
-                yield return Path.Combine(chocolatey, "bin", "ffmpeg.exe");
-            yield break;
+            logger.LogError(exception, $"Could not read the FFmpeg version.");
+            return null;
         }
-
-        yield return "/usr/local/bin/ffmpeg";
-        yield return "/usr/bin/ffmpeg";
-        yield return "/opt/homebrew/bin/ffmpeg";
-        yield return "/opt/local/bin/ffmpeg";
-        yield return "/snap/bin/ffmpeg";
     }
 
-
-    private static IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
+    private IEnumerable<string> KnownInstallLocations()
     {
-        var packagesRoot = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
-        if (!Directory.Exists(packagesRoot)) yield break;
-
-        IEnumerable<string> packageDirectories;
+        logger.LogTrace($"Enumerating known FFmpeg installation locations.");
         try
         {
-            packageDirectories = Directory.EnumerateDirectories(packagesRoot, "Gyan.FFmpeg*", SearchOption.TopDirectoryOnly).ToArray();
-        }
-        catch
-        {
-            yield break;
-        }
-
-        foreach (var packageDirectory in packageDirectories)
-        {
-            IEnumerable<string> matches;
-            try
+            if (OperatingSystem.IsWindows())
             {
-                matches = Directory.EnumerateFiles(packageDirectory, "ffmpeg.exe", SearchOption.AllDirectories)
-                    .OrderByDescending(path => path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
-                    .Take(4)
-                    .ToArray();
-            }
-            catch
-            {
-                continue;
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                var chocolatey = Environment.GetEnvironmentVariable("ChocolateyInstall");
+                if (!string.IsNullOrWhiteSpace(local))
+                {
+                    yield return Path.Combine(local, "Microsoft", "WinGet", "Links", "ffmpeg.exe");
+                    foreach (var candidate in FindWinGetPackageExecutables(local))
+                        yield return candidate;
+                }
+                if (!string.IsNullOrWhiteSpace(profile))
+                    yield return Path.Combine(profile, "scoop", "shims", "ffmpeg.exe");
+                if (!string.IsNullOrWhiteSpace(chocolatey))
+                    yield return Path.Combine(chocolatey, "bin", "ffmpeg.exe");
+                yield break;
             }
 
-            foreach (var match in matches)
-                yield return match;
+            foreach (var path in runtimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegUnixInstallPaths))
+                yield return path;
+        }
+        finally
+        {
+            logger.LogTrace($"Completed enumeration of known FFmpeg installation locations.");
         }
     }
 
-    private static bool TryResolveCommand(string command, out string path)
+    private IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
     {
-        path = string.Empty;
-        if (Path.IsPathRooted(command) || command.Contains(Path.DirectorySeparatorChar) || command.Contains(Path.AltDirectorySeparatorChar))
+        logger.LogTrace($"Enumerating WinGet FFmpeg package executables.");
+        try
         {
-            if (!File.Exists(command)) return false;
-            path = Path.GetFullPath(command);
-            return true;
-        }
+            var packagesRoot = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
+            if (!Directory.Exists(packagesRoot)) yield break;
 
-        var extensions = OperatingSystem.IsWindows()
-            ? (Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM")
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            : new[] { string.Empty };
-        var hasExtension = Path.HasExtension(command);
-        foreach (var directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
-                     .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            foreach (var extension in hasExtension ? new[] { string.Empty } : extensions)
+            string[] packageDirectories;
+            try
             {
-                var candidate = Path.Combine(directory.Trim('"'), command + extension);
-                if (!File.Exists(candidate)) continue;
-                path = candidate;
-                return true;
+                packageDirectories = Directory
+                    .EnumerateDirectories(packagesRoot, "Gyan.FFmpeg*", SearchOption.TopDirectoryOnly)
+                    .ToArray();
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, $"Could not enumerate WinGet FFmpeg package directories.");
+                yield break;
+            }
+
+            foreach (var packageDirectory in packageDirectories)
+            {
+                string[] matches;
+                try
+                {
+                    matches = Directory.EnumerateFiles(packageDirectory, "ffmpeg.exe", SearchOption.AllDirectories)
+                        .OrderByDescending(path => path.Contains(
+                            $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
+                            StringComparison.OrdinalIgnoreCase))
+                        .Take(runtimePolicy.InstallerDownloadAttempts)
+                        .ToArray();
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, $"Could not enumerate FFmpeg executables under '{packageDirectory}'.");
+                    continue;
+                }
+
+                foreach (var match in matches)
+                    yield return match;
             }
         }
-        return false;
+        finally
+        {
+            logger.LogTrace($"Completed WinGet FFmpeg executable enumeration.");
+        }
+    }
+
+    private bool TryResolveCommand(string command, out string path)
+    {
+        try
+        {
+            path = string.Empty;
+            if (Path.IsPathRooted(command) || command.Contains(Path.DirectorySeparatorChar) || command.Contains(Path.AltDirectorySeparatorChar))
+            {
+                if (!File.Exists(command)) return false;
+                path = Path.GetFullPath(command);
+                logger.LogTrace($"Resolved rooted FFmpeg command '{path}'.");
+                return true;
+            }
+
+            var extensions = OperatingSystem.IsWindows()
+                ? (Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM")
+                    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                : [string.Empty];
+            var hasExtension = Path.HasExtension(command);
+            foreach (var directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
+                         .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                foreach (var extension in hasExtension ? [string.Empty] : extensions)
+                {
+                    var candidate = Path.Combine(directory.Trim('"'), command + extension);
+                    if (!File.Exists(candidate)) continue;
+                    path = candidate;
+                    logger.LogTrace($"Resolved FFmpeg command '{command}' to '{path}'.");
+                    return true;
+                }
+            }
+            logger.LogTrace($"FFmpeg command '{command}' was not found.");
+            return false;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"Could not resolve FFmpeg command '{command}'.");
+            path = string.Empty;
+            return false;
+        }
     }
 }

@@ -22,8 +22,8 @@ assert.match(pageSurface, /<div class="publication-element-content @ElementZoomC
 assert.match(pageSurface, /data-editor-zoom-strategy="@ElementZoomStrategy\(element\)"/);
 assert.ok(pageSurface.indexOf('publication-element-content') < pageSurface.indexOf('@switch (element)'), 'the stable-layout wrapper must contain every editor element type');
 assert.ok(pageSurface.indexOf('</div>\n                    @if (!element.Locked)') > pageSurface.indexOf('@switch (element)'), 'selection ports and resize handles must remain outside the scaled content wrapper');
-assert.match(pageSurface, /private const double BasePixelsPerMm = 3\.7795275591;/);
-assert.match(pageSurface, /private double PixelsPerMm => BasePixelsPerMm \* State\.Document\.Zoom;/);
+assert.match(pageSurface, /@inject IPublisherRuntimePolicyDataService RuntimePolicy/);
+assert.match(pageSurface, /private double PixelsPerMm => RuntimePolicy\.BasePixelsPerMillimeter \* State\.Document\.Zoom;/);
 assert.match(pageSurface, /CanvasZoomModeClass => State\.Document\.View\.CanvasZoomMode == PublicationCanvasZoomMode\.Transform/);
 assert.match(pageSurface, /ElementZoomCompatibilityClass\(PublicationElement element\) => element is DevExtremeComponentElement/);
 assert.match(pageSurface, /ElementZoomStrategy\(PublicationElement element\) => element is DevExtremeComponentElement[\s\S]*?"transform"/);
@@ -45,7 +45,7 @@ assert.match(editor, /private int ZoomPercent => \(int\)Math\.Round\(State\.Docu
 assert.match(editor, /private void ZoomIn\(\) => State\.StepZoomPercent\(5\);/);
 assert.match(editor, /private void ZoomOut\(\) => State\.StepZoomPercent\(-5\);/);
 assert.match(editor, /private void Zoom100\(\) => State\.SetZoomPercent\(100\);/);
-assert.match(state, /public void SetZoomPercent\(double percent\) => SetZoom\(percent \/ 100d\);/);
+assert.match(state, /public void SetZoomPercent\(double percent\)[\s\S]*?SetZoom\(percent \/ 100d\);/);
 assert.match(state, /normalizedPercent = Math\.Clamp\(Math\.Round\(zoom \* 100d, MidpointRounding\.AwayFromZero\), 20d, 400d\);/);
 assert.match(files, /document\.Zoom = Math\.Clamp\(Math\.Round\(\(document\.Zoom <= 0 \? \.8 : document\.Zoom\) \* 100d, MidpointRounding\.AwayFromZero\) \/ 100d, \.2, 4\);/);
 assert.match(state, /public void StepZoomPercent\(int deltaPercent\)[\s\S]*Math\.Round\(Document\.Zoom \* 100d, MidpointRounding\.AwayFromZero\)[\s\S]*SetZoomPercent\(currentPercent \+ deltaPercent\);/);

@@ -56,7 +56,7 @@
     private string EditorId => $"wordart-path-editor-{Item.Id:N}";
     private string GridId => $"wordart-path-grid-{Item.Id:N}";
     private string GridFill => $"url(#{GridId})";
-    private string PathData => WordArtPathGeometry.Build(Item.CustomPathPoints);
+    private string PathData => WordArtGeometry.Build(Item.CustomPathPoints);
     private string EditorAspectRatio => Math.Clamp(Item.Width / Math.Max(Item.Height, 1), .35, 6).ToString("0.###", CultureInfo.InvariantCulture);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -88,7 +88,7 @@
     {
         _drawingArmed = false;
         await SetDrawModeAsync(false);
-        await PathChanged.InvokeAsync(WordArtPathGeometry.CreatePreset(key));
+        await PathChanged.InvokeAsync(WordArtGeometry.CreatePreset(key));
     }
 
     private async Task ArmDrawingAsync()
@@ -101,14 +101,14 @@
     {
         _drawingArmed = false;
         await SetDrawModeAsync(false);
-        await PathChanged.InvokeAsync(WordArtPathGeometry.Reverse(Item.CustomPathPoints));
+        await PathChanged.InvokeAsync(WordArtGeometry.Reverse(Item.CustomPathPoints));
     }
 
     private async Task ReduceAsync()
     {
         _drawingArmed = false;
         await SetDrawModeAsync(false);
-        await PathChanged.InvokeAsync(WordArtPathGeometry.Reduce(Item.CustomPathPoints));
+        await PathChanged.InvokeAsync(WordArtGeometry.Reduce(Item.CustomPathPoints));
     }
 
     private async Task SetDrawModeAsync(bool enabled)
@@ -121,7 +121,7 @@
     public async Task CommitWordArtPath(WordArtPathPoint[] points)
     {
         _drawingArmed = false;
-        var normalized = WordArtPathGeometry.Normalize(points);
+        var normalized = WordArtGeometry.Normalize(points);
         await PathChanged.InvokeAsync(normalized);
         await InvokeAsync(StateHasChanged);
     }

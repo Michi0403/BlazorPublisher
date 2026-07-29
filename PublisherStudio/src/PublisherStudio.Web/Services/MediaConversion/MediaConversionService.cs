@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using PublisherStudio.Domain;
 using PublisherStudio.Services.Streaming.Encoding;
+using PublisherStudio.Services.Configuration;
 using TextEncoding = global::System.Text.Encoding;
 
 namespace PublisherStudio.Services.MediaConversion;
@@ -32,35 +33,13 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         public object Sync { get; } = new();
     }
 
-    private static readonly MediaConversionPreset[] Definitions =
-    [
-        new("webm-vp9", "Web video · WebM VP9/Opus", "Open web video for PublisherStudio HTML, dashboards and modern browsers.", "video", ".webm", "video/webm", false, true, ["libvpx-vp9", "libopus"]),
-        new("webm-vp8", "Web video · WebM VP8/Opus", "Compatibility-oriented open WebM conversion.", "video", ".webm", "video/webm", false, true, ["libvpx", "libopus"]),
-        new("mp4-h264", "Web video · MP4 H.264/AAC", "Broad browser/device compatibility when the installed FFmpeg build provides H.264.", "video", ".mp4", "video/mp4", false, true, ["libx264", "aac"]),
-        new("video-lossless-ffv1", "Editing/archive · Matroska FFV1/FLAC", "Lossless intra-frame video and lossless audio for local editing and preservation.", "video", ".mkv", "video/x-matroska", true, false, ["ffv1", "flac"]),
-        new("video-prores", "Editing · ProRes MOV/PCM", "High-quality intraframe editing intermediate where prores_ks is available.", "video", ".mov", "video/quicktime", false, false, ["prores_ks", "pcm_s16le"]),
-        new("audio-opus", "Web audio · Ogg Opus", "Open, efficient audio for browsers and streaming workflows.", "audio", ".ogg", "audio/ogg", false, true, ["libopus"]),
-        new("audio-webm-opus", "Web audio · WebM Opus", "WebM audio for PublisherStudio HTML exports.", "audio", ".webm", "audio/webm", false, true, ["libopus"]),
-        new("audio-wav", "Audio · WAV PCM", "Lossless uncompressed PCM audio for editing and interchange.", "audio", ".wav", "audio/wav", true, false, ["pcm_s16le"]),
-        new("audio-flac", "Audio · FLAC", "Lossless compressed audio for archive and supported browser workflows.", "audio", ".flac", "audio/flac", true, false, ["flac"]),
-        new("image-png", "Picture · PNG", "Lossless browser-compatible raster image.", "image", ".png", "image/png", true, true, ["png"]),
-        new("image-webp-lossless", "Picture · lossless WebP", "Lossless WebP with alpha support.", "image", ".webp", "image/webp", true, true, ["libwebp"]),
-        new("image-webp", "Picture · compact WebP", "High-quality lossy WebP for websites and dashboards.", "image", ".webp", "image/webp", false, true, ["libwebp"]),
-        new("image-avif", "Picture · AVIF", "High-efficiency AVIF still image where an AV1 encoder is available.", "image", ".avif", "image/avif", false, true, ["libaom-av1"]),
-        new("image-jpeg", "Picture · JPEG", "Widely compatible photographic image output.", "image", ".jpg", "image/jpeg", false, true, ["mjpeg"])
-    ];
-
-    private static readonly Regex DurationPattern = new(@"Duration:\s*(?<h>\d+):(?<m>\d+):(?<s>\d+(?:\.\d+)?)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
-    private static readonly HashSet<string> ForbiddenAdvancedOptions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "-i", "-progress", "-nostats", "-y", "-n", "-report", "-filter_script", "-filter_complex_script",
-        "-vstats_file", "-passlogfile", "-attach", "-dump_attachment"
-    };
-
+    private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private readonly ConcurrentDictionary<Guid, JobState> _jobs = new();
     private readonly ILogger<MediaConversionService> _logger;
-    private readonly IConfiguration _configuration;
+    private readonly FfmpegLocator _ffmpegLocator;
+    private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
+    private readonly IPublisherRuntimePatternService _runtimePatterns;
+    private readonly PublisherStudioConfigurationNode _publisherConfiguration;
     private readonly string _root;
     private readonly string _profilesPath;
     private readonly object _profilesSync = new();
@@ -69,10 +48,18 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     private List<MediaConversionProfile>? _userProfiles;
     private bool _disposed;
 
-    public MediaConversionService(ILogger<MediaConversionService> logger, IConfiguration configuration)
+    public MediaConversionService(
+        FfmpegLocator ffmpegLocator,
+        IPublisherRuntimePolicyDataService runtimePolicy,
+        IPublisherRuntimePatternService runtimePatterns,
+        PublisherStudioConfigurationNode publisherConfiguration,
+        ILogger<MediaConversionService> logger)
     {
         _logger = logger;
-        _configuration = configuration;
+        _ffmpegLocator = ffmpegLocator;
+        _runtimePolicy = runtimePolicy;
+        _runtimePatterns = runtimePatterns;
+        _publisherConfiguration = publisherConfiguration;
         var publisherRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio");
         _root = Path.Combine(publisherRoot, "MediaConversions");
         _profilesPath = Path.Combine(publisherRoot, "MediaConversionProfiles.json");
@@ -82,178 +69,292 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
 
     public async Task<MediaConversionCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
     {
-        if (_capabilities is not null) return _capabilities;
-        await _capabilityLock.WaitAsync(cancellationToken);
         try
         {
-            if (_capabilities is not null) return _capabilities;
-            var configuredPath = _configuration["PublisherStudio:FFmpegPath"] ?? Environment.GetEnvironmentVariable("PUBLISHERSTUDIO_FFMPEG");
-            var executable = FfmpegLocator.Resolve(configuredPath);
-            if (executable is null)
-            {
-                _capabilities = new MediaConversionCapabilities(
-                    false,
-                    string.Empty,
-                    string.Empty,
-                    [],
-                    Definitions.Select(preset => preset with { Available = false, UnavailableReason = "FFmpeg was not found." }).ToArray(),
-                    "PublisherStudio does not bundle FFmpeg. The executable you install remains a separate program under its own LGPL/GPL build terms.",
-                    "Install FFmpeg and place it on PATH, in PublisherStudio/tools/ffmpeg, or configure PublisherStudio:FFmpegPath / PUBLISHERSTUDIO_FFMPEG.");
-                return _capabilities;
-            }
+            logger.LogTrace($"Entering MediaConversionService.GetCapabilitiesAsync.");
+                    if (_capabilities is not null) return _capabilities;
+                    await _capabilityLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        if (_capabilities is not null) return _capabilities;
+                        var configuredPath = string.IsNullOrWhiteSpace(_publisherConfiguration.FFmpegPath)
+                            ? Environment.GetEnvironmentVariable(_runtimePolicy.FfmpegEnvironmentVariable)
+                            : _publisherConfiguration.FFmpegPath;
+                        var executable = _ffmpegLocator.Resolve(configuredPath);
+                        if (executable is null)
+                        {
+                            _capabilities = new MediaConversionCapabilities(
+                                false,
+                                string.Empty,
+                                string.Empty,
+                                [],
+                                _runtimePolicy.MediaConversionPresets.Select(preset => preset with { Available = false, UnavailableReason = "FFmpeg was not found." }).ToArray(),
+                                "PublisherStudio does not bundle FFmpeg. The executable you install remains a separate program under its own LGPL/GPL build terms.",
+                                "Install FFmpeg and place it on PATH, in PublisherStudio/tools/ffmpeg, or configure PublisherStudio:FFmpegPath / PUBLISHERSTUDIO_FFMPEG.");
+                            return _capabilities;
+                        }
 
-            var version = await FfmpegLocator.ReadVersionAsync(executable, cancellationToken) ?? "FFmpeg detected";
-            var encoders = await ReadEncodersAsync(executable, cancellationToken);
-            var encoderSet = encoders.ToHashSet(StringComparer.OrdinalIgnoreCase);
-            var presets = Definitions.Select(definition =>
-            {
-                var missing = definition.RequiredEncoders.Where(required => !encoderSet.Contains(required)).ToArray();
-                return missing.Length == 0
-                    ? definition
-                    : definition with { Available = false, UnavailableReason = $"Installed FFmpeg build is missing: {string.Join(", ", missing)}." };
-            }).ToArray();
-            _capabilities = new MediaConversionCapabilities(
-                true,
-                executable,
-                version,
-                encoders,
-                presets,
-                "FFmpeg is normally LGPL 2.1-or-later, but optional GPL components can make a particular build GPL. PublisherStudio invokes the separately installed executable and does not redistribute it.",
-                "Use an FFmpeg build whose codec and license configuration matches your intended distribution.");
-            return _capabilities;
+                        var version = await _ffmpegLocator.ReadVersionAsync(executable, cancellationToken).ConfigureAwait(false) ?? "FFmpeg detected";
+                        var encoders = await ReadEncodersAsync(executable, cancellationToken).ConfigureAwait(false);
+                        var encoderSet = encoders.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                        var presets = _runtimePolicy.MediaConversionPresets.Select(definition =>
+                        {
+                            var missing = definition.RequiredEncoders.Where(required => !encoderSet.Contains(required)).ToArray();
+                            return missing.Length == 0
+                                ? definition
+                                : definition with { Available = false, UnavailableReason = $"Installed FFmpeg build is missing: {string.Join(", ", missing)}." };
+                        }).ToArray();
+                        _capabilities = new MediaConversionCapabilities(
+                            true,
+                            executable,
+                            version,
+                            encoders,
+                            presets,
+                            "FFmpeg is normally LGPL 2.1-or-later, but optional GPL components can make a particular build GPL. PublisherStudio invokes the separately installed executable and does not redistribute it.",
+                            "Use an FFmpeg build whose codec and license configuration matches your intended distribution.");
+                        return _capabilities;
+                    }
+                    finally
+                    {
+                        _capabilityLock.Release();
+                    }
+    
         }
-        finally
+        catch (Exception exception)
         {
-            _capabilityLock.Release();
+            logger.LogError(exception, $"MediaConversionService.GetCapabilitiesAsync failed: {exception.Message}");
+            throw;
         }
     }
 
-    public Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, CancellationToken cancellationToken = default) =>
-        QueueAsync(source, fileName, mimeType, presetId, new MediaConversionOptions(), cancellationToken);
+    public Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, CancellationToken cancellationToken = default) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.QueueAsync.");
+            return QueueAsync(source, fileName, mimeType, presetId, new MediaConversionOptions(), cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.QueueAsync failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public async Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, MediaConversionOptions options, CancellationToken cancellationToken = default)
     {
-        if (_disposed) throw new ObjectDisposedException(nameof(MediaConversionService));
-        ArgumentNullException.ThrowIfNull(source);
-        options ??= new MediaConversionOptions();
-        var normalizedOptions = NormalizeOptions(options);
-        var capabilities = await GetCapabilitiesAsync(cancellationToken);
-        if (!capabilities.Available) throw new InvalidOperationException("FFmpeg is not available.");
-        var preset = capabilities.Presets.FirstOrDefault(candidate => string.Equals(candidate.Id, presetId, StringComparison.OrdinalIgnoreCase))
-            ?? throw new ArgumentException("Unknown media conversion preset.", nameof(presetId));
-        if (!preset.Available) throw new InvalidOperationException(preset.UnavailableReason);
-
-        ValidateRequestedEncoders(capabilities, normalizedOptions);
-        var id = Guid.NewGuid();
-        var directory = Path.Combine(_root, id.ToString("N"));
-        Directory.CreateDirectory(directory);
-        var safeSourceName = SafeFileName(fileName, "source.bin");
-        var sourcePath = Path.Combine(directory, safeSourceName);
-        await using (var output = new FileStream(sourcePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1024 * 128, true))
-            await source.CopyToAsync(output, cancellationToken);
-
-        var extension = NormalizeExtension(normalizedOptions.OutputExtension, preset.OutputExtension);
-        var outputName = SafeFileName(normalizedOptions.OutputFileName, Path.GetFileNameWithoutExtension(safeSourceName) + extension);
-        if (!outputName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)) outputName += extension;
-        var outputPath = Path.Combine(directory, outputName);
-        var outputMimeType = string.IsNullOrWhiteSpace(normalizedOptions.OutputMimeType) ? preset.OutputMimeType : normalizedOptions.OutputMimeType.Trim();
-        normalizedOptions.OutputExtension = extension;
-        normalizedOptions.OutputMimeType = outputMimeType;
-        normalizedOptions.OutputFileName = outputName;
-        var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var job = new JobState
+        try
         {
-            Id = id,
-            SourceFileName = safeSourceName,
-            SourcePath = sourcePath,
-            OutputPath = outputPath,
-            OutputMimeType = outputMimeType,
-            Preset = preset,
-            Options = normalizedOptions,
-            Cancellation = linked
-        };
-        if (!_jobs.TryAdd(id, job)) throw new InvalidOperationException("The conversion job could not be registered.");
-        _ = Task.Run(() => ExecuteAsync(job, capabilities.Executable), CancellationToken.None);
-        return Snapshot(job);
+            logger.LogTrace($"Entering MediaConversionService.QueueAsync.");
+                    if (_disposed) throw new ObjectDisposedException(nameof(MediaConversionService));
+                    ArgumentNullException.ThrowIfNull(source);
+                    options ??= new MediaConversionOptions();
+                    var normalizedOptions = NormalizeOptions(options);
+                    var capabilities = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
+                    if (!capabilities.Available) throw new InvalidOperationException("FFmpeg is not available.");
+                    var preset = capabilities.Presets.FirstOrDefault(candidate => string.Equals(candidate.Id, presetId, StringComparison.OrdinalIgnoreCase))
+                        ?? throw new ArgumentException("Unknown media conversion preset.", nameof(presetId));
+                    if (!preset.Available) throw new InvalidOperationException(preset.UnavailableReason);
+
+                    ValidateRequestedEncoders(capabilities, normalizedOptions);
+                    var id = Guid.NewGuid();
+                    var directory = Path.Combine(_root, id.ToString("N"));
+                    Directory.CreateDirectory(directory);
+                    var safeSourceName = SafeFileName(fileName, "source.bin");
+                    var sourcePath = Path.Combine(directory, safeSourceName);
+                    await using (var output = new FileStream(sourcePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1024 * 128, true))
+                        await source.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
+
+                    var extension = NormalizeExtension(normalizedOptions.OutputExtension, preset.OutputExtension);
+                    var outputName = SafeFileName(normalizedOptions.OutputFileName, Path.GetFileNameWithoutExtension(safeSourceName) + extension);
+                    if (!outputName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)) outputName += extension;
+                    var outputPath = Path.Combine(directory, outputName);
+                    var outputMimeType = string.IsNullOrWhiteSpace(normalizedOptions.OutputMimeType) ? preset.OutputMimeType : normalizedOptions.OutputMimeType.Trim();
+                    normalizedOptions.OutputExtension = extension;
+                    normalizedOptions.OutputMimeType = outputMimeType;
+                    normalizedOptions.OutputFileName = outputName;
+                    var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    var job = new JobState
+                    {
+                        Id = id,
+                        SourceFileName = safeSourceName,
+                        SourcePath = sourcePath,
+                        OutputPath = outputPath,
+                        OutputMimeType = outputMimeType,
+                        Preset = preset,
+                        Options = normalizedOptions,
+                        Cancellation = linked
+                    };
+                    if (!_jobs.TryAdd(id, job)) throw new InvalidOperationException("The conversion job could not be registered.");
+                    _ = Task.Run(() => ExecuteAsync(job, capabilities.Executable), CancellationToken.None);
+                    return Snapshot(job);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.QueueAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public MediaConversionJobInfo? GetJob(Guid id) => _jobs.TryGetValue(id, out var state) ? Snapshot(state) : null;
+    public MediaConversionJobInfo? GetJob(Guid id) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.GetJob.");
+            return _jobs.TryGetValue(id, out var state) ? Snapshot(state) : null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.GetJob failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    public IReadOnlyList<MediaConversionJobInfo> GetJobs() => _jobs.Values
+    public IReadOnlyList<MediaConversionJobInfo> GetJobs() {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.GetJobs.");
+            return _jobs.Values
         .OrderByDescending(job => job.CreatedUtc)
         .Select(Snapshot)
         .ToArray();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.GetJobs failed: {exception.Message}");
+            throw;
+        }
+    }
 
     public Task<Stream?> OpenOutputAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (!_jobs.TryGetValue(id, out var job) || job.Status != MediaConversionJobStatus.Completed || !File.Exists(job.OutputPath))
-            return Task.FromResult<Stream?>(null);
-        Stream stream = new FileStream(job.OutputPath, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 128, true);
-        return Task.FromResult<Stream?>(stream);
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.OpenOutputAsync.");
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!_jobs.TryGetValue(id, out var job) || job.Status != MediaConversionJobStatus.Completed || !File.Exists(job.OutputPath))
+                        return Task.FromResult<Stream?>(null);
+                    Stream stream = new FileStream(job.OutputPath, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 128, true);
+                    return Task.FromResult<Stream?>(stream);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.OpenOutputAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
     public IReadOnlyList<MediaConversionProfile> GetProfiles()
     {
-        lock (_profilesSync)
+        try
         {
-            var profiles = BuiltInProfiles().Concat(LoadUserProfiles()).Select(CloneProfile).ToArray();
-            return profiles;
+            logger.LogTrace($"Entering MediaConversionService.GetProfiles.");
+                    lock (_profilesSync)
+                    {
+                        var profiles = BuiltInProfiles().Concat(LoadUserProfiles()).Select(CloneProfile).ToArray();
+                        return profiles;
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.GetProfiles failed: {exception.Message}");
+            throw;
         }
     }
 
     public MediaConversionProfile SaveProfile(MediaConversionProfile profile)
     {
-        ArgumentNullException.ThrowIfNull(profile);
-        lock (_profilesSync)
+        try
         {
-            var profiles = LoadUserProfiles();
-            var saved = CloneProfile(profile);
-            saved.Id = saved.Id == Guid.Empty ? Guid.NewGuid() : saved.Id;
-            saved.Name = string.IsNullOrWhiteSpace(saved.Name) ? "Custom profile" : saved.Name.Trim();
-            saved.Description = saved.Description?.Trim() ?? string.Empty;
-            saved.PresetId = string.IsNullOrWhiteSpace(saved.PresetId) ? "webm-vp9" : saved.PresetId.Trim();
-            saved.BuiltIn = false;
-            saved.ModifiedUtc = DateTimeOffset.UtcNow;
-            saved.Options = NormalizeOptions(saved.Options ?? new MediaConversionOptions());
-            var index = profiles.FindIndex(candidate => candidate.Id == saved.Id);
-            if (index >= 0) profiles[index] = saved; else profiles.Add(saved);
-            PersistProfiles(profiles);
-            return CloneProfile(saved);
+            logger.LogTrace($"Entering MediaConversionService.SaveProfile.");
+                    ArgumentNullException.ThrowIfNull(profile);
+                    lock (_profilesSync)
+                    {
+                        var profiles = LoadUserProfiles();
+                        var saved = CloneProfile(profile);
+                        saved.Id = saved.Id == Guid.Empty ? Guid.NewGuid() : saved.Id;
+                        saved.Name = string.IsNullOrWhiteSpace(saved.Name) ? "Custom profile" : saved.Name.Trim();
+                        saved.Description = saved.Description?.Trim() ?? string.Empty;
+                        saved.PresetId = string.IsNullOrWhiteSpace(saved.PresetId) ? "webm-vp9" : saved.PresetId.Trim();
+                        saved.BuiltIn = false;
+                        saved.ModifiedUtc = DateTimeOffset.UtcNow;
+                        saved.Options = NormalizeOptions(saved.Options ?? new MediaConversionOptions());
+                        var index = profiles.FindIndex(candidate => candidate.Id == saved.Id);
+                        if (index >= 0) profiles[index] = saved; else profiles.Add(saved);
+                        PersistProfiles(profiles);
+                        return CloneProfile(saved);
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.SaveProfile failed: {exception.Message}");
+            throw;
         }
     }
 
     public bool DeleteProfile(Guid id)
     {
-        lock (_profilesSync)
+        try
         {
-            var profiles = LoadUserProfiles();
-            var removed = profiles.RemoveAll(profile => profile.Id == id) > 0;
-            if (removed) PersistProfiles(profiles);
-            return removed;
+            logger.LogTrace($"Entering MediaConversionService.DeleteProfile.");
+                    lock (_profilesSync)
+                    {
+                        var profiles = LoadUserProfiles();
+                        var removed = profiles.RemoveAll(profile => profile.Id == id) > 0;
+                        if (removed) PersistProfiles(profiles);
+                        return removed;
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.DeleteProfile failed: {exception.Message}");
+            throw;
         }
     }
 
     public bool Cancel(Guid id)
     {
-        if (!_jobs.TryGetValue(id, out var job)) return false;
-        lock (job.Sync)
+        try
         {
-            if (job.Status is MediaConversionJobStatus.Completed or MediaConversionJobStatus.Failed or MediaConversionJobStatus.Cancelled) return false;
-            job.Message = "Cancelling…";
-            job.Cancellation.Cancel();
-            try { if (job.Process is { HasExited: false }) job.Process.Kill(entireProcessTree: true); } catch { }
-            return true;
+            logger.LogTrace($"Entering MediaConversionService.Cancel.");
+                    if (!_jobs.TryGetValue(id, out var job)) return false;
+                    lock (job.Sync)
+                    {
+                        if (job.Status is MediaConversionJobStatus.Completed or MediaConversionJobStatus.Failed or MediaConversionJobStatus.Cancelled) return false;
+                        job.Message = "Cancelling…";
+                        job.Cancellation.Cancel();
+                        try { if (job.Process is { HasExited: false }) job.Process.Kill(entireProcessTree: true); } catch { }
+                        return true;
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.Cancel failed: {exception.Message}");
+            throw;
         }
     }
 
     public bool Remove(Guid id)
     {
-        if (!_jobs.TryRemove(id, out var job)) return false;
-        CancelState(job);
-        try { Directory.Delete(Path.GetDirectoryName(job.SourcePath)!, true); } catch { }
-        job.Cancellation.Dispose();
-        return true;
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.Remove.");
+                    if (!_jobs.TryRemove(id, out var job)) return false;
+                    CancelState(job);
+                    try { Directory.Delete(Path.GetDirectoryName(job.SourcePath)!, true); } catch { }
+                    job.Cancellation.Dispose();
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.Remove failed: {exception.Message}");
+            throw;
+        }
     }
 
     private async Task ExecuteAsync(JobState job, string executable)
@@ -281,7 +382,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
 
             var stdoutTask = Task.Run(async () =>
             {
-                while (await process.StandardOutput.ReadLineAsync(job.Cancellation.Token) is { } line)
+                while (await process.StandardOutput.ReadLineAsync(job.Cancellation.Token) is { } line.ConfigureAwait(false))
                 {
                     if (line.StartsWith("out_time_us=", StringComparison.Ordinal)
                         && long.TryParse(line.AsSpan("out_time_us=".Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out var microseconds)
@@ -303,12 +404,12 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
             var stderr = new StringBuilder();
             var stderrTask = Task.Run(async () =>
             {
-                while (await process.StandardError.ReadLineAsync(job.Cancellation.Token) is { } line)
+                while (await process.StandardError.ReadLineAsync(job.Cancellation.Token) is { } line.ConfigureAwait(false))
                 {
                     if (stderr.Length < 16_384) stderr.AppendLine(line);
                     if (durationSeconds <= 0)
                     {
-                        var match = DurationPattern.Match(line);
+                        var match = _runtimePatterns.GetRegex(PublisherRuntimePattern.MediaDuration).Match(line);
                         if (match.Success)
                         {
                             durationSeconds = TimeSpan.FromHours(double.Parse(match.Groups["h"].Value, CultureInfo.InvariantCulture))
@@ -320,8 +421,8 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                 }
             }, job.Cancellation.Token);
 
-            await process.WaitForExitAsync(job.Cancellation.Token);
-            await Task.WhenAll(stdoutTask, stderrTask);
+            await process.WaitForExitAsync(job.Cancellation.Token).ConfigureAwait(false);
+            await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
             if (process.ExitCode != 0)
             {
                 var detail = stderr.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries).TakeLast(4);
@@ -363,25 +464,39 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
-    internal static IReadOnlyList<string> BuildArguments(MediaConversionPreset preset, MediaConversionOptions options, string inputPath, string outputPath)
+    internal IReadOnlyList<string> BuildArguments(MediaConversionPreset preset, MediaConversionOptions options, string inputPath, string outputPath)
     {
-        options = NormalizeOptions(options);
-        var arguments = new List<string> { "-hide_banner", "-y" };
-        if (options.StartSeconds is > 0) arguments.AddRange(["-ss", Number(options.StartSeconds.Value)]);
-        arguments.AddRange(["-i", inputPath]);
-        if (options.DurationSeconds is > 0) arguments.AddRange(["-t", Number(options.DurationSeconds.Value)]);
-        arguments.AddRange(["-progress", "pipe:1", "-nostats"]);
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.BuildArguments.");
+                    options = NormalizeOptions(options);
+                    var arguments = new List<string> { "-hide_banner", "-y" };
+                    if (options.StartSeconds is > 0) arguments.AddRange(["-ss", Number(options.StartSeconds.Value)]);
+                    arguments.AddRange(["-i", inputPath]);
+                    if (options.DurationSeconds is > 0) arguments.AddRange(["-t", Number(options.DurationSeconds.Value)]);
+                    arguments.AddRange(["-progress", "pipe:1", "-nostats"]);
 
-        arguments.AddRange(PresetArguments(preset.Id));
-        ApplyStreamOverrides(arguments, options);
-        ApplyFilters(arguments, options);
-        ApplyMetadata(arguments, options);
-        arguments.AddRange(ParseAdvancedArguments(options.AdvancedArguments));
-        arguments.Add(outputPath);
-        return arguments;
+                    arguments.AddRange(PresetArguments(preset.Id));
+                    ApplyStreamOverrides(arguments, options);
+                    ApplyFilters(arguments, options);
+                    ApplyMetadata(arguments, options);
+                    arguments.AddRange(ParseAdvancedArguments(options.AdvancedArguments));
+                    arguments.Add(outputPath);
+                    return arguments;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.BuildArguments failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static IReadOnlyList<string> PresetArguments(string presetId) => presetId switch
+    private IReadOnlyList<string> PresetArguments(string presetId) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.PresetArguments.");
+            return presetId switch
     {
         "webm-vp9" => ["-map", "0:v:0?", "-map", "0:a:0?", "-c:v", "libvpx-vp9", "-crf", "31", "-b:v", "0", "-row-mt", "1", "-pix_fmt", "yuv420p", "-c:a", "libopus", "-b:a", "128k"],
         "webm-vp8" => ["-map", "0:v:0?", "-map", "0:a:0?", "-c:v", "libvpx", "-crf", "10", "-b:v", "2M", "-pix_fmt", "yuv420p", "-c:a", "libopus", "-b:a", "128k"],
@@ -399,193 +514,283 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         "image-jpeg" => ["-frames:v", "1", "-c:v", "mjpeg", "-q:v", "2"],
         _ => throw new InvalidOperationException("The selected conversion preset is not implemented.")
     };
-
-    private static void ApplyStreamOverrides(List<string> arguments, MediaConversionOptions options)
-    {
-        if (options.DisableVideo) arguments.Add("-vn");
-        else
-        {
-            AddOverride(arguments, "-c:v", options.VideoCodec);
-            AddOverride(arguments, "-preset", options.VideoEncoderPreset);
-            if (options.Crf is not null) AddOverride(arguments, "-crf", options.Crf.Value.ToString(CultureInfo.InvariantCulture));
-            if (options.VideoBitrateKbps is > 0) AddOverride(arguments, "-b:v", $"{options.VideoBitrateKbps.Value}k");
-            if (options.MaximumVideoBitrateKbps is > 0) AddOverride(arguments, "-maxrate", $"{options.MaximumVideoBitrateKbps.Value}k");
-            if (options.VideoBufferKbps is > 0) AddOverride(arguments, "-bufsize", $"{options.VideoBufferKbps.Value}k");
-            AddOverride(arguments, "-pix_fmt", options.PixelFormat);
-            if (options.FrameRate is > 0) AddOverride(arguments, "-r", Number(options.FrameRate.Value));
         }
-
-        if (options.DisableAudio) arguments.Add("-an");
-        else
+        catch (Exception exception)
         {
-            AddOverride(arguments, "-c:a", options.AudioCodec);
-            if (options.AudioBitrateKbps is > 0) AddOverride(arguments, "-b:a", $"{options.AudioBitrateKbps.Value}k");
-            if (options.AudioSampleRate is > 0) AddOverride(arguments, "-ar", options.AudioSampleRate.Value.ToString(CultureInfo.InvariantCulture));
-            if (options.AudioChannels is > 0) AddOverride(arguments, "-ac", options.AudioChannels.Value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        if (options.FastStart && options.OutputExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
-            AddOverride(arguments, "-movflags", "+faststart");
-    }
-
-    private static void ApplyFilters(List<string> arguments, MediaConversionOptions options)
-    {
-        var videoFilters = new List<string>();
-        if (options.Deinterlace) videoFilters.Add("bwdif");
-        var scale = ScaleFilter(options);
-        if (!string.IsNullOrWhiteSpace(scale)) videoFilters.Add(scale);
-        if (!string.IsNullOrWhiteSpace(options.VideoFilter)) videoFilters.Add(options.VideoFilter.Trim());
-        if (videoFilters.Count > 0) AddOverride(arguments, "-vf", string.Join(',', videoFilters));
-
-        var audioFilters = new List<string>();
-        if (options.NormalizeAudio) audioFilters.Add($"loudnorm=I={Number(options.LoudnessTargetLufs)}:TP=-1.5:LRA=11");
-        if (!string.IsNullOrWhiteSpace(options.AudioFilter)) audioFilters.Add(options.AudioFilter.Trim());
-        if (audioFilters.Count > 0) AddOverride(arguments, "-af", string.Join(',', audioFilters));
-    }
-
-    private static string ScaleFilter(MediaConversionOptions options)
-    {
-        if (options.Width is not > 0 && options.Height is not > 0) return string.Empty;
-        var width = options.Width is > 0 ? options.Width.Value.ToString(CultureInfo.InvariantCulture) : "-2";
-        var height = options.Height is > 0 ? options.Height.Value.ToString(CultureInfo.InvariantCulture) : "-2";
-        if (!options.PreserveAspectRatio || options.ScaleMode == MediaConversionScaleMode.Stretch)
-            return $"scale={width}:{height}";
-        if (options.Width is not > 0 || options.Height is not > 0)
-            return $"scale={width}:{height}";
-        return options.ScaleMode switch
-        {
-            MediaConversionScaleMode.Fill => $"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
-            MediaConversionScaleMode.Fit => $"scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=black",
-            _ => $"scale={width}:{height}:force_original_aspect_ratio=decrease"
-        };
-    }
-
-    private static void ApplyMetadata(List<string> arguments, MediaConversionOptions options)
-    {
-        if (!options.CopyMetadata) arguments.AddRange(["-map_metadata", "-1"]);
-        foreach (var pair in options.Metadata ?? new Dictionary<string, string>())
-        {
-            var key = pair.Key.Trim();
-            if (string.IsNullOrWhiteSpace(key) || key.Any(character => char.IsControl(character) || character == '=')) continue;
-            arguments.AddRange(["-metadata", $"{key}={pair.Value ?? string.Empty}"]);
+            logger.LogError(exception, $"MediaConversionService.PresetArguments failed: {exception.Message}");
+            throw;
         }
     }
 
-    private static void AddOverride(List<string> arguments, string key, string? value)
+    private void ApplyStreamOverrides(List<string> arguments, MediaConversionOptions options)
     {
-        if (string.IsNullOrWhiteSpace(value)) return;
-        for (var index = arguments.Count - 2; index >= 0; index--)
+        try
         {
-            if (!arguments[index].Equals(key, StringComparison.OrdinalIgnoreCase)) continue;
-            arguments.RemoveAt(index + 1);
-            arguments.RemoveAt(index);
-            break;
-        }
-        arguments.Add(key);
-        arguments.Add(value.Trim());
-    }
+            logger.LogTrace($"Entering MediaConversionService.ApplyStreamOverrides.");
+                    if (options.DisableVideo) arguments.Add("-vn");
+                    else
+                    {
+                        AddOverride(arguments, "-c:v", options.VideoCodec);
+                        AddOverride(arguments, "-preset", options.VideoEncoderPreset);
+                        if (options.Crf is not null) AddOverride(arguments, "-crf", options.Crf.Value.ToString(CultureInfo.InvariantCulture));
+                        if (options.VideoBitrateKbps is > 0) AddOverride(arguments, "-b:v", $"{options.VideoBitrateKbps.Value}k");
+                        if (options.MaximumVideoBitrateKbps is > 0) AddOverride(arguments, "-maxrate", $"{options.MaximumVideoBitrateKbps.Value}k");
+                        if (options.VideoBufferKbps is > 0) AddOverride(arguments, "-bufsize", $"{options.VideoBufferKbps.Value}k");
+                        AddOverride(arguments, "-pix_fmt", options.PixelFormat);
+                        if (options.FrameRate is > 0) AddOverride(arguments, "-r", Number(options.FrameRate.Value));
+                    }
 
-    internal static IReadOnlyList<string> ParseAdvancedArguments(string? source)
-    {
-        if (string.IsNullOrWhiteSpace(source)) return [];
-        var result = new List<string>();
-        var token = new StringBuilder();
-        var quote = '\0';
-        var escape = false;
-        for (var index = 0; index < source.Length; index++)
+                    if (options.DisableAudio) arguments.Add("-an");
+                    else
+                    {
+                        AddOverride(arguments, "-c:a", options.AudioCodec);
+                        if (options.AudioBitrateKbps is > 0) AddOverride(arguments, "-b:a", $"{options.AudioBitrateKbps.Value}k");
+                        if (options.AudioSampleRate is > 0) AddOverride(arguments, "-ar", options.AudioSampleRate.Value.ToString(CultureInfo.InvariantCulture));
+                        if (options.AudioChannels is > 0) AddOverride(arguments, "-ac", options.AudioChannels.Value.ToString(CultureInfo.InvariantCulture));
+                    }
+
+                    if (options.FastStart && options.OutputExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                        AddOverride(arguments, "-movflags", "+faststart");
+    
+        }
+        catch (Exception exception)
         {
-            var character = source[index];
-            if (escape)
-            {
-                token.Append(character);
-                escape = false;
-                continue;
-            }
-            if (character == '\\')
-            {
-                var next = index + 1 < source.Length ? source[index + 1] : '\0';
-                // The text box is a tokenizer, not a command shell. Preserve FFmpeg's
-                // own filter/path escapes (for example \: and C:\\Media) and only
-                // consume the slash when it escapes a quote, whitespace or another slash.
-                if (next == '\\' || next is '\'' or '"' || char.IsWhiteSpace(next))
-                {
-                    escape = true;
-                    continue;
-                }
-                token.Append(character);
-                continue;
-            }
-            if (quote != '\0')
-            {
-                if (character == quote) quote = '\0'; else token.Append(character);
-                continue;
-            }
-            if (character is '\'' or '"')
-            {
-                quote = character;
-                continue;
-            }
-            if (char.IsWhiteSpace(character))
-            {
-                if (token.Length > 0) { result.Add(token.ToString()); token.Clear(); }
-                continue;
-            }
-            token.Append(character);
+            logger.LogError(exception, $"MediaConversionService.ApplyStreamOverrides failed: {exception.Message}");
+            throw;
         }
-        if (escape) token.Append('\\');
-        if (quote != '\0') throw new ArgumentException("Advanced FFmpeg arguments contain an unterminated quote.");
-        if (token.Length > 0) result.Add(token.ToString());
-        for (var index = 0; index < result.Count; index++)
+    }
+
+    private void ApplyFilters(List<string> arguments, MediaConversionOptions options)
+    {
+        try
         {
-            var value = result[index];
-            var option = value.Contains('=') ? value[..value.IndexOf('=')] : value;
-            if (ForbiddenAdvancedOptions.Contains(option))
-                throw new ArgumentException($"Advanced argument '{option}' is managed by PublisherStudio and cannot be overridden.");
-            if (!value.StartsWith("-", StringComparison.Ordinal) && index == 0)
-                throw new ArgumentException("Advanced FFmpeg arguments must start with an option.");
+            logger.LogTrace($"Entering MediaConversionService.ApplyFilters.");
+                    var videoFilters = new List<string>();
+                    if (options.Deinterlace) videoFilters.Add("bwdif");
+                    var scale = ScaleFilter(options);
+                    if (!string.IsNullOrWhiteSpace(scale)) videoFilters.Add(scale);
+                    if (!string.IsNullOrWhiteSpace(options.VideoFilter)) videoFilters.Add(options.VideoFilter.Trim());
+                    if (videoFilters.Count > 0) AddOverride(arguments, "-vf", string.Join(',', videoFilters));
+
+                    var audioFilters = new List<string>();
+                    if (options.NormalizeAudio) audioFilters.Add($"loudnorm=I={Number(options.LoudnessTargetLufs)}:TP=-1.5:LRA=11");
+                    if (!string.IsNullOrWhiteSpace(options.AudioFilter)) audioFilters.Add(options.AudioFilter.Trim());
+                    if (audioFilters.Count > 0) AddOverride(arguments, "-af", string.Join(',', audioFilters));
+    
         }
-        return result;
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.ApplyFilters failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static MediaConversionOptions NormalizeOptions(MediaConversionOptions source)
+    private string ScaleFilter(MediaConversionOptions options)
     {
-        var options = source.Clone();
-        options.StartSeconds = FinitePositiveOrZero(options.StartSeconds);
-        options.DurationSeconds = FinitePositive(options.DurationSeconds);
-        options.Width = Positive(options.Width);
-        options.Height = Positive(options.Height);
-        options.FrameRate = FinitePositive(options.FrameRate);
-        options.Crf = options.Crf is null ? null : Math.Clamp(options.Crf.Value, 0, 63);
-        options.VideoBitrateKbps = Positive(options.VideoBitrateKbps);
-        options.MaximumVideoBitrateKbps = Positive(options.MaximumVideoBitrateKbps);
-        options.VideoBufferKbps = Positive(options.VideoBufferKbps);
-        options.AudioBitrateKbps = Positive(options.AudioBitrateKbps);
-        options.AudioSampleRate = Positive(options.AudioSampleRate);
-        options.AudioChannels = options.AudioChannels is null ? null : Math.Clamp(options.AudioChannels.Value, 1, 32);
-        options.LoudnessTargetLufs = double.IsFinite(options.LoudnessTargetLufs) ? Math.Clamp(options.LoudnessTargetLufs, -70, -5) : -16;
-        options.VideoCodec = CleanOptionValue(options.VideoCodec);
-        options.AudioCodec = CleanOptionValue(options.AudioCodec);
-        options.VideoEncoderPreset = CleanOptionValue(options.VideoEncoderPreset);
-        options.PixelFormat = CleanOptionValue(options.PixelFormat);
-        options.OutputExtension = NormalizeExtension(options.OutputExtension, string.Empty);
-        options.OutputMimeType = options.OutputMimeType?.Trim() ?? string.Empty;
-        options.OutputFileName = SafeFileName(options.OutputFileName, string.Empty);
-        options.VideoFilter = options.VideoFilter?.Trim() ?? string.Empty;
-        options.AudioFilter = options.AudioFilter?.Trim() ?? string.Empty;
-        options.AdvancedArguments = options.AdvancedArguments?.Trim() ?? string.Empty;
-        _ = ParseAdvancedArguments(options.AdvancedArguments);
-        return options;
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.ScaleFilter.");
+                    if (options.Width is not > 0 && options.Height is not > 0) return string.Empty;
+                    var width = options.Width is > 0 ? options.Width.Value.ToString(CultureInfo.InvariantCulture) : "-2";
+                    var height = options.Height is > 0 ? options.Height.Value.ToString(CultureInfo.InvariantCulture) : "-2";
+                    if (!options.PreserveAspectRatio || options.ScaleMode == MediaConversionScaleMode.Stretch)
+                        return $"scale={width}:{height}";
+                    if (options.Width is not > 0 || options.Height is not > 0)
+                        return $"scale={width}:{height}";
+                    return options.ScaleMode switch
+                    {
+                        MediaConversionScaleMode.Fill => $"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
+                        MediaConversionScaleMode.Fit => $"scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=black",
+                        _ => $"scale={width}:{height}:force_original_aspect_ratio=decrease"
+                    };
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.ScaleFilter failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static void ValidateRequestedEncoders(MediaConversionCapabilities capabilities, MediaConversionOptions options)
+    private void ApplyMetadata(List<string> arguments, MediaConversionOptions options)
     {
-        var encoders = capabilities.Encoders.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        foreach (var requested in new[] { options.VideoCodec, options.AudioCodec }.Where(value => !string.IsNullOrWhiteSpace(value) && !value.Equals("copy", StringComparison.OrdinalIgnoreCase)))
-            if (!encoders.Contains(requested)) throw new InvalidOperationException($"The installed FFmpeg build does not provide encoder '{requested}'.");
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.ApplyMetadata.");
+                    if (!options.CopyMetadata) arguments.AddRange(["-map_metadata", "-1"]);
+                    foreach (var pair in options.Metadata ?? new Dictionary<string, string>())
+                    {
+                        var key = pair.Key.Trim();
+                        if (string.IsNullOrWhiteSpace(key) || key.Any(character => char.IsControl(character) || character == '=')) continue;
+                        arguments.AddRange(["-metadata", $"{key}={pair.Value ?? string.Empty}"]);
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.ApplyMetadata failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static IReadOnlyList<MediaConversionProfile> BuiltInProfiles() =>
-    [
+    private void AddOverride(List<string> arguments, string key, string? value)
+    {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.AddOverride.");
+                    if (string.IsNullOrWhiteSpace(value)) return;
+                    for (var index = arguments.Count - 2; index >= 0; index--)
+                    {
+                        if (!arguments[index].Equals(key, StringComparison.OrdinalIgnoreCase)) continue;
+                        arguments.RemoveAt(index + 1);
+                        arguments.RemoveAt(index);
+                        break;
+                    }
+                    arguments.Add(key);
+                    arguments.Add(value.Trim());
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.AddOverride failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    internal IReadOnlyList<string> ParseAdvancedArguments(string? source)
+    {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.ParseAdvancedArguments.");
+                    if (string.IsNullOrWhiteSpace(source)) return [];
+                    var result = new List<string>();
+                    var token = new StringBuilder();
+                    var quote = '\0';
+                    var escape = false;
+                    for (var index = 0; index < source.Length; index++)
+                    {
+                        var character = source[index];
+                        if (escape)
+                        {
+                            token.Append(character);
+                            escape = false;
+                            continue;
+                        }
+                        if (character == '\\')
+                        {
+                            var next = index + 1 < source.Length ? source[index + 1] : '\0';
+                            // The text box is a tokenizer, not a command shell. Preserve FFmpeg's
+                            // own filter/path escapes (for example \: and C:\\Media) and only
+                            // consume the slash when it escapes a quote, whitespace or another slash.
+                            if (next == '\\' || next is '\'' or '"' || char.IsWhiteSpace(next))
+                            {
+                                escape = true;
+                                continue;
+                            }
+                            token.Append(character);
+                            continue;
+                        }
+                        if (quote != '\0')
+                        {
+                            if (character == quote) quote = '\0'; else token.Append(character);
+                            continue;
+                        }
+                        if (character is '\'' or '"')
+                        {
+                            quote = character;
+                            continue;
+                        }
+                        if (char.IsWhiteSpace(character))
+                        {
+                            if (token.Length > 0) { result.Add(token.ToString()); token.Clear(); }
+                            continue;
+                        }
+                        token.Append(character);
+                    }
+                    if (escape) token.Append('\\');
+                    if (quote != '\0') throw new ArgumentException("Advanced FFmpeg arguments contain an unterminated quote.");
+                    if (token.Length > 0) result.Add(token.ToString());
+                    for (var index = 0; index < result.Count; index++)
+                    {
+                        var value = result[index];
+                        var option = value.Contains('=') ? value[..value.IndexOf('=')] : value;
+                        if (_runtimePolicy.GetCollection(PublisherRuntimeCollection.ForbiddenFfmpegAdvancedOptions).Contains(option, StringComparer.OrdinalIgnoreCase))
+                            throw new ArgumentException($"Advanced argument '{option}' is managed by PublisherStudio and cannot be overridden.");
+                        if (!value.StartsWith("-", StringComparison.Ordinal) && index == 0)
+                            throw new ArgumentException("Advanced FFmpeg arguments must start with an option.");
+                    }
+                    return result;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.ParseAdvancedArguments failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private MediaConversionOptions NormalizeOptions(MediaConversionOptions source)
+    {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.NormalizeOptions.");
+                    var options = source.Clone();
+                    options.StartSeconds = FinitePositiveOrZero(options.StartSeconds);
+                    options.DurationSeconds = FinitePositive(options.DurationSeconds);
+                    options.Width = Positive(options.Width);
+                    options.Height = Positive(options.Height);
+                    options.FrameRate = FinitePositive(options.FrameRate);
+                    options.Crf = options.Crf is null ? null : Math.Clamp(options.Crf.Value, 0, 63);
+                    options.VideoBitrateKbps = Positive(options.VideoBitrateKbps);
+                    options.MaximumVideoBitrateKbps = Positive(options.MaximumVideoBitrateKbps);
+                    options.VideoBufferKbps = Positive(options.VideoBufferKbps);
+                    options.AudioBitrateKbps = Positive(options.AudioBitrateKbps);
+                    options.AudioSampleRate = Positive(options.AudioSampleRate);
+                    options.AudioChannels = options.AudioChannels is null ? null : Math.Clamp(options.AudioChannels.Value, 1, 32);
+                    options.LoudnessTargetLufs = double.IsFinite(options.LoudnessTargetLufs) ? Math.Clamp(options.LoudnessTargetLufs, -70, -5) : -16;
+                    options.VideoCodec = CleanOptionValue(options.VideoCodec);
+                    options.AudioCodec = CleanOptionValue(options.AudioCodec);
+                    options.VideoEncoderPreset = CleanOptionValue(options.VideoEncoderPreset);
+                    options.PixelFormat = CleanOptionValue(options.PixelFormat);
+                    options.OutputExtension = NormalizeExtension(options.OutputExtension, string.Empty);
+                    options.OutputMimeType = options.OutputMimeType?.Trim() ?? string.Empty;
+                    options.OutputFileName = SafeFileName(options.OutputFileName, string.Empty);
+                    options.VideoFilter = options.VideoFilter?.Trim() ?? string.Empty;
+                    options.AudioFilter = options.AudioFilter?.Trim() ?? string.Empty;
+                    options.AdvancedArguments = options.AdvancedArguments?.Trim() ?? string.Empty;
+                    _ = ParseAdvancedArguments(options.AdvancedArguments);
+                    return options;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.NormalizeOptions failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private void ValidateRequestedEncoders(MediaConversionCapabilities capabilities, MediaConversionOptions options)
+    {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.ValidateRequestedEncoders.");
+                    var encoders = capabilities.Encoders.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    foreach (var requested in new[] { options.VideoCodec, options.AudioCodec }.Where(value => !string.IsNullOrWhiteSpace(value) && !value.Equals("copy", StringComparison.OrdinalIgnoreCase)))
+                        if (!encoders.Contains(requested)) throw new InvalidOperationException($"The installed FFmpeg build does not provide encoder '{requested}'.");
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.ValidateRequestedEncoders failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private IReadOnlyList<MediaConversionProfile> BuiltInProfiles() {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.BuiltInProfiles.");
+            return [
         Profile("PublisherStudio HTML · balanced", "PublisherStudio-compatible WebM with 1080p fit, VP9/Opus and browser-safe pixel format.", "webm-vp9", new MediaConversionOptions { Target = MediaConversionTarget.PublisherStudioWeb, Width = 1920, Height = 1080, ScaleMode = MediaConversionScaleMode.Fit, FrameRate = 30, Crf = 31, PixelFormat = "yuv420p", AudioBitrateKbps = 128 }),
         Profile("PublisherStudio HTML · compact", "Compact 720p WebM for structured websites and dashboards.", "webm-vp9", new MediaConversionOptions { Target = MediaConversionTarget.PublisherStudioWeb, Width = 1280, Height = 720, ScaleMode = MediaConversionScaleMode.Fit, FrameRate = 30, Crf = 36, PixelFormat = "yuv420p", AudioBitrateKbps = 96 }),
         Profile("Browser compatibility · MP4", "H.264/AAC MP4 with fast-start for broad web playback.", "mp4-h264", new MediaConversionOptions { Target = MediaConversionTarget.GeneralWeb, Width = 1920, Height = 1080, ScaleMode = MediaConversionScaleMode.Fit, FrameRate = 30, Crf = 21, PixelFormat = "yuv420p", FastStart = true, AudioBitrateKbps = 160 }),
@@ -593,8 +798,19 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         Profile("Lossless archive · FFV1", "Lossless Matroska output for local preservation.", "video-lossless-ffv1", new MediaConversionOptions { Target = MediaConversionTarget.Archive }),
         Profile("Streaming · 1080p30", "CBR-like H.264/AAC streaming profile.", "mp4-h264", new MediaConversionOptions { Target = MediaConversionTarget.Streaming, Width = 1920, Height = 1080, ScaleMode = MediaConversionScaleMode.Fit, FrameRate = 30, VideoEncoderPreset = "veryfast", VideoBitrateKbps = 6000, MaximumVideoBitrateKbps = 6000, VideoBufferKbps = 12000, PixelFormat = "yuv420p", AudioBitrateKbps = 160 })
     ];
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.BuiltInProfiles failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private static MediaConversionProfile Profile(string name, string description, string presetId, MediaConversionOptions options) => new()
+    private MediaConversionProfile Profile(string name, string description, string presetId, MediaConversionOptions options) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.Profile.");
+            return new()
     {
         Id = StableProfileId(name),
         Name = name,
@@ -604,11 +820,28 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         ModifiedUtc = DateTimeOffset.UnixEpoch,
         Options = options
     };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.Profile failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private static Guid StableProfileId(string value)
+    private Guid StableProfileId(string value)
     {
-        var bytes = System.Security.Cryptography.SHA256.HashData(TextEncoding.UTF8.GetBytes(value));
-        return new Guid(bytes.AsSpan(0, 16));
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.StableProfileId.");
+                    var bytes = System.Security.Cryptography.SHA256.HashData(TextEncoding.UTF8.GetBytes(value));
+                    return new Guid(bytes.AsSpan(0, 16));
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.StableProfileId failed: {exception.Message}");
+            throw;
+        }
     }
 
     private List<MediaConversionProfile> LoadUserProfiles()
@@ -635,14 +868,28 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
 
     private void PersistProfiles(List<MediaConversionProfile> profiles)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(_profilesPath)!);
-        var temporary = _profilesPath + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(profiles, JsonOptions));
-        File.Move(temporary, _profilesPath, true);
-        _userProfiles = profiles;
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.PersistProfiles.");
+                    Directory.CreateDirectory(Path.GetDirectoryName(_profilesPath)!);
+                    var temporary = _profilesPath + ".tmp";
+                    File.WriteAllText(temporary, JsonSerializer.Serialize(profiles, JsonOptions));
+                    File.Move(temporary, _profilesPath, true);
+                    _userProfiles = profiles;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.PersistProfiles failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static MediaConversionProfile CloneProfile(MediaConversionProfile profile) => new()
+    private MediaConversionProfile CloneProfile(MediaConversionProfile profile) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.CloneProfile.");
+            return new()
     {
         Id = profile.Id,
         Name = profile.Name,
@@ -652,112 +899,254 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         ModifiedUtc = profile.ModifiedUtc,
         Options = profile.Options?.Clone() ?? new MediaConversionOptions()
     };
-
-    private static async Task<IReadOnlyList<string>> ReadEncodersAsync(string executable, CancellationToken cancellationToken)
-    {
-        using var process = Process.Start(new ProcessStartInfo
+        }
+        catch (Exception exception)
         {
-            FileName = executable,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            ArgumentList = { "-hide_banner", "-encoders" }
-        });
-        if (process is null) return [];
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
-        var output = await outputTask;
-        _ = await errorTask;
-        return output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-            .Select(line => Regex.Match(line, @"^\s*[A-Z\.]{6}\s+(?<name>\S+)", RegexOptions.CultureInvariant))
-            .Where(match => match.Success)
-            .Select(match => match.Groups["name"].Value)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-    }
-
-    private static MediaConversionJobInfo Snapshot(JobState job)
-    {
-        lock (job.Sync)
-        {
-            return new MediaConversionJobInfo(
-                job.Id,
-                job.SourceFileName,
-                job.Preset.Id,
-                job.Status,
-                job.Progress,
-                job.Message,
-                Path.GetFileName(job.OutputPath),
-                job.OutputMimeType,
-                job.OutputSize,
-                job.CreatedUtc,
-                job.CompletedUtc)
-            {
-                Options = job.Options.Clone()
-            };
+            logger.LogError(exception, $"MediaConversionService.CloneProfile failed: {exception.Message}");
+            throw;
         }
     }
 
-    private static string SafeFileName(string? fileName, string fallback)
+    private async Task<IReadOnlyList<string>> ReadEncodersAsync(string executable, CancellationToken cancellationToken)
     {
-        var candidate = Path.GetFileName(string.IsNullOrWhiteSpace(fileName) ? fallback : fileName.Trim());
-        foreach (var invalid in Path.GetInvalidFileNameChars()) candidate = candidate.Replace(invalid, '_');
-        if (string.IsNullOrWhiteSpace(candidate)) return fallback;
-        return candidate[..Math.Min(candidate.Length, 180)];
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.ReadEncodersAsync.");
+                    using var process = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = executable,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        ArgumentList = { "-hide_banner", "-encoders" }
+                    });
+                    if (process is null) return [];
+                    var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+                    var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+                    await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+                    var output = await outputTask.ConfigureAwait(false);
+                    _ = await errorTask.ConfigureAwait(false);
+                    return output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(line => Regex.Match(line, @"^\s*[A-Z\.]{6}\s+(?<name>\S+)", RegexOptions.CultureInvariant))
+                        .Where(match => match.Success)
+                        .Select(match => match.Groups["name"].Value)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.ReadEncodersAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static string NormalizeExtension(string? requested, string fallback)
+    private MediaConversionJobInfo Snapshot(JobState job)
     {
-        var value = string.IsNullOrWhiteSpace(requested) ? fallback : requested.Trim();
-        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
-        value = value.StartsWith('.') ? value : "." + value;
-        return value.All(character => char.IsLetterOrDigit(character) || character == '.') && value.Length <= 16 ? value.ToLowerInvariant() : fallback;
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.Snapshot.");
+                    lock (job.Sync)
+                    {
+                        return new MediaConversionJobInfo(
+                            job.Id,
+                            job.SourceFileName,
+                            job.Preset.Id,
+                            job.Status,
+                            job.Progress,
+                            job.Message,
+                            Path.GetFileName(job.OutputPath),
+                            job.OutputMimeType,
+                            job.OutputSize,
+                            job.CreatedUtc,
+                            job.CompletedUtc)
+                        {
+                            Options = job.Options.Clone()
+                        };
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.Snapshot failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static string CleanOptionValue(string? value)
+    private string SafeFileName(string? fileName, string fallback)
     {
-        value = value?.Trim() ?? string.Empty;
-        return value.All(character => char.IsLetterOrDigit(character) || character is '_' or '-' or '.') ? value : string.Empty;
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.SafeFileName.");
+                    var candidate = Path.GetFileName(string.IsNullOrWhiteSpace(fileName) ? fallback : fileName.Trim());
+                    foreach (var invalid in Path.GetInvalidFileNameChars()) candidate = candidate.Replace(invalid, '_');
+                    if (string.IsNullOrWhiteSpace(candidate)) return fallback;
+                    return candidate[..Math.Min(candidate.Length, 180)];
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.SafeFileName failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static int? Positive(int? value) => value is > 0 ? value : null;
-    private static double? FinitePositive(double? value) => value.HasValue && value.Value > 0 && double.IsFinite(value.Value) ? value.Value : null;
-    private static double? FinitePositiveOrZero(double? value) => value.HasValue && value.Value >= 0 && double.IsFinite(value.Value) ? value.Value : null;
-    private static string Number(double value) => value.ToString("0.########", CultureInfo.InvariantCulture);
+    private string NormalizeExtension(string? requested, string fallback)
+    {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.NormalizeExtension.");
+                    var value = string.IsNullOrWhiteSpace(requested) ? fallback : requested.Trim();
+                    if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+                    value = value.StartsWith('.') ? value : "." + value;
+                    return value.All(character => char.IsLetterOrDigit(character) || character == '.') && value.Length <= 16 ? value.ToLowerInvariant() : fallback;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.NormalizeExtension failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private string CleanOptionValue(string? value)
+    {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.CleanOptionValue.");
+                    value = value?.Trim() ?? string.Empty;
+                    return value.All(character => char.IsLetterOrDigit(character) || character is '_' or '-' or '.') ? value : string.Empty;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.CleanOptionValue failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private int? Positive(int? value) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.Positive.");
+            return value is > 0 ? value : null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.Positive failed: {exception.Message}");
+            throw;
+        }
+    }
+    private double? FinitePositive(double? value) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.FinitePositive.");
+            return value.HasValue && value.Value > 0 && double.IsFinite(value.Value) ? value.Value : null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.FinitePositive failed: {exception.Message}");
+            throw;
+        }
+    }
+    private double? FinitePositiveOrZero(double? value) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.FinitePositiveOrZero.");
+            return value.HasValue && value.Value >= 0 && double.IsFinite(value.Value) ? value.Value : null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.FinitePositiveOrZero failed: {exception.Message}");
+            throw;
+        }
+    }
+    private string Number(double value) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.Number.");
+            return value.ToString("0.########", CultureInfo.InvariantCulture);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.Number failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private void CleanupOldDirectories()
     {
         try
         {
-            foreach (var directory in Directory.EnumerateDirectories(_root))
-            {
-                try
-                {
-                    if (Directory.GetLastWriteTimeUtc(directory) < DateTime.UtcNow.AddDays(-3)) Directory.Delete(directory, true);
-                }
-                catch { }
-            }
+            logger.LogTrace($"Entering MediaConversionService.CleanupOldDirectories.");
+                    try
+                    {
+                        foreach (var directory in Directory.EnumerateDirectories(_root))
+                        {
+                            try
+                            {
+                                if (Directory.GetLastWriteTimeUtc(directory) < DateTime.UtcNow.AddDays(-3)) Directory.Delete(directory, true);
+                            }
+                            catch { }
+                        }
+                    }
+                    catch { }
+    
         }
-        catch { }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.CleanupOldDirectories failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static void TryDelete(string path) { try { if (File.Exists(path)) File.Delete(path); } catch { } }
+    private void TryDelete(string path) {
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.TryDelete.");
+             try { if (File.Exists(path)) File.Delete(path); } catch { } 
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.TryDelete failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private static void CancelState(JobState job)
+    private void CancelState(JobState job)
     {
-        try { job.Cancellation.Cancel(); } catch { }
-        try { if (job.Process is { HasExited: false }) job.Process.Kill(entireProcessTree: true); } catch { }
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.CancelState.");
+                    try { job.Cancellation.Cancel(); } catch { }
+                    try { if (job.Process is { HasExited: false }) job.Process.Kill(entireProcessTree: true); } catch { }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.CancelState failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-        foreach (var job in _jobs.Values) CancelState(job);
-        foreach (var job in _jobs.Values) job.Cancellation.Dispose();
-        _capabilityLock.Dispose();
+        try
+        {
+            logger.LogTrace($"Entering MediaConversionService.Dispose.");
+                    if (_disposed) return;
+                    _disposed = true;
+                    foreach (var job in _jobs.Values) CancelState(job);
+                    foreach (var job in _jobs.Values) job.Cancellation.Dispose();
+                    _capabilityLock.Dispose();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaConversionService.Dispose failed: {exception.Message}");
+            throw;
+        }
     }
 }

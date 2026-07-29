@@ -2,7 +2,7 @@ using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services.Configuration;
 
-public sealed class RenderExportCatalogService : IRenderExportCatalogService
+public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogService> logger) : IRenderExportCatalogService
 {
     private readonly IReadOnlyList<RenderExportCapability> _capabilities = new List<RenderExportCapability>
     {
@@ -13,6 +13,28 @@ public sealed class RenderExportCatalogService : IRenderExportCatalogService
         new() { Format = "pdf", MimeType = "application/pdf", CapturesVideoFrames = true, CapturesCanvasEffects = true, PreservesVectorContent = false, HtmlSupport = PublicationHtmlExportSupport.RenderBeforeExport, Note = "Browser print path; dynamic media is represented by its current rendered frame." }
     }.AsReadOnly();
 
-    public IReadOnlyList<RenderExportCapability> GetCapabilities() => _capabilities;
-    public RenderExportCapability? Find(string format) => _capabilities.FirstOrDefault(item => string.Equals(item.Format, format?.TrimStart('.'), StringComparison.OrdinalIgnoreCase));
+    public IReadOnlyList<RenderExportCapability> GetCapabilities() {
+        try
+        {
+            logger.LogTrace($"Entering RenderExportCatalogService.GetCapabilities.");
+            return _capabilities;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"RenderExportCatalogService.GetCapabilities failed: {exception.Message}");
+            throw;
+        }
+    }
+    public RenderExportCapability? Find(string format) {
+        try
+        {
+            logger.LogTrace($"Entering RenderExportCatalogService.Find.");
+            return _capabilities.FirstOrDefault(item => string.Equals(item.Format, format?.TrimStart('.'), StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"RenderExportCatalogService.Find failed: {exception.Message}");
+            throw;
+        }
+    }
 }

@@ -1,7 +1,7 @@
 @using System.Globalization
 @using System.Text
 @using Microsoft.AspNetCore.Components
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -34,3 +34,12 @@
 
 @inject ILoggerFactory OperationalLoggerFactory
 @inject IUserNotificationService OperationalNotifications
+@inject WordArtPathGeometry WordArtGeometry
+@inject ConnectorGeometry ConnectorGeometryService
+@inject PublicationAnimationData AnimationData
+@inject PublicationElementTraversal ElementTraversal
+@inject PublicationMediaData MediaData
+@inject RichTextDocumentFactory RichTextFactory
+@inject SvgInterchangeSanitizer SvgSanitizer
+@inject FfmpegLocator FfmpegLocatorService
+

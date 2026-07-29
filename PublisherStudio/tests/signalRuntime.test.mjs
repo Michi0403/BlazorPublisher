@@ -30,7 +30,7 @@ assert.match(page, /ReconnectSignalConnector/);
 assert.match(page, /data-source-kind/);
 assert.match(page, /data-target-kind/);
 assert.match(page, /data-signal-enabled/);
-assert.match(print, /data-signal="@PublicationAnimationData\.Signal\(connector\)"/);
+assert.match(print, /data-signal="@AnimationData\.Signal\(connector\)"/);
 assert.match(print, /id="element-@connector\.Id"/);
 
 assert.match(inspector, /Signal Arrow \/ Connector/);

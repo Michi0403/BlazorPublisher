@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Domain;
 
@@ -11,12 +12,12 @@ public sealed class WordArtPathPoint
     public WordArtPathPoint Clone() => new() { X = X, Y = Y };
 }
 
-public static class WordArtPathGeometry
+public sealed class WordArtPathGeometry(
+    IPublisherRuntimePolicyDataService runtimePolicy,
+    ILogger<WordArtPathGeometry> logger)
 {
-    public const double ViewWidth = 1000;
-    public const double ViewHeight = 300;
 
-    public static List<WordArtPathPoint> CreatePreset(string key) => key switch
+    public List<WordArtPathPoint> CreatePreset(string key) => key switch
     {
         "Straight" => Points((60, 150), (940, 150)),
         "Rise" => Points((60, 235), (940, 65)),
@@ -28,7 +29,7 @@ public static class WordArtPathGeometry
         _ => Points((50, 170), (220, 55), (385, 245), (555, 75), (730, 230), (950, 135))
     };
 
-    public static string Build(WordArtElement item)
+    public string Build(WordArtElement item)
     {
         if (item.Warp != WordArtWarp.Custom)
         {
@@ -44,7 +45,7 @@ public static class WordArtPathGeometry
         return Build(item.CustomPathPoints);
     }
 
-    public static string Build(IReadOnlyList<WordArtPathPoint>? points)
+    public string Build(IReadOnlyList<WordArtPathPoint>? points)
     {
         var safe = Normalize(points);
         if (safe.Count == 2)
@@ -72,7 +73,7 @@ public static class WordArtPathGeometry
         return builder.ToString();
     }
 
-    public static List<WordArtPathPoint> Normalize(IReadOnlyList<WordArtPathPoint>? points)
+    public List<WordArtPathPoint> Normalize(IReadOnlyList<WordArtPathPoint>? points)
     {
         if (points is null || points.Count < 2)
             return CreatePreset("Straight");
@@ -81,8 +82,8 @@ public static class WordArtPathGeometry
             .Where(point => point is not null && double.IsFinite(point.X) && double.IsFinite(point.Y))
             .Select(point => new WordArtPathPoint
             {
-                X = Math.Clamp(point.X, 0, ViewWidth),
-                Y = Math.Clamp(point.Y, 0, ViewHeight)
+                X = Math.Clamp(point.X, 0, runtimePolicy.WordArtViewWidth),
+                Y = Math.Clamp(point.Y, 0, runtimePolicy.WordArtViewHeight)
             })
             .Take(32)
             .ToList();
@@ -90,10 +91,10 @@ public static class WordArtPathGeometry
         return normalized.Count >= 2 ? normalized : CreatePreset("Straight");
     }
 
-    public static List<WordArtPathPoint> Reverse(IReadOnlyList<WordArtPathPoint>? points) =>
+    public List<WordArtPathPoint> Reverse(IReadOnlyList<WordArtPathPoint>? points) =>
         Normalize(points).AsEnumerable().Reverse().Select(point => point.Clone()).ToList();
 
-    public static List<WordArtPathPoint> Reduce(IReadOnlyList<WordArtPathPoint>? points, int maximum = 10)
+    public List<WordArtPathPoint> Reduce(IReadOnlyList<WordArtPathPoint>? points, int maximum = 10)
     {
         var normalized = Normalize(points);
         if (normalized.Count <= maximum) return normalized.Select(point => point.Clone()).ToList();
@@ -108,8 +109,8 @@ public static class WordArtPathGeometry
         return result;
     }
 
-    private static List<WordArtPathPoint> Points(params (double X, double Y)[] values) =>
+    private List<WordArtPathPoint> Points(params (double X, double Y)[] values) =>
         values.Select(value => new WordArtPathPoint { X = value.X, Y = value.Y }).ToList();
 
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 }

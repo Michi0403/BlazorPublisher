@@ -72,7 +72,7 @@ assert.match(runtime, /startPanels/);
 assert.match(runtime, /refreshPanels/);
 
 assert.match(converterInterface, /Task<MediaConversionJobInfo> QueueAsync/);
-assert.match(converter, /FfmpegLocator\.Resolve/);
+assert.match(converter, /_ffmpegLocator\.Resolve/);
 assert.match(converter, /UseShellExecute = false/);
 assert.match(converter, /startInfo\.ArgumentList\.Add/);
 assert.match(converter, /webm-vp9/);

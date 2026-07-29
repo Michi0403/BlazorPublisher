@@ -13,9 +13,16 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class SpreadsheetDocumentService
 {
+    private readonly FontStyle defaultFontStyle = new("Calibri", 11, false, false, false, string.Empty);
+    private readonly CellStyle defaultCellStyle;
     private readonly XNamespace Main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
     private readonly XNamespace Relationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
     private readonly XNamespace PackageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships";
+
+    public SpreadsheetDocumentService()
+    {
+        defaultCellStyle = new CellStyle(defaultFontStyle, string.Empty, string.Empty, null, null, false, false);
+    }
 
     public byte[] CreateBlankXlsx(string sheetName = "Sheet1")
     {
@@ -290,7 +297,7 @@ public sealed class SpreadsheetDocumentService
                 if (covered.Contains((row, column))) continue;
                 var merge = merged.FirstOrDefault(item => item.StartRow == row && item.StartColumn == column);
                 var cell = cells.TryGetValue((row, column), out var existingCell) ? existingCell : new CellPreview(string.Empty, 0);
-                var style = styles.ElementAtOrDefault(cell.StyleIndex) ?? CellStyle.Default;
+                var style = styles.ElementAtOrDefault(cell.StyleIndex) ?? defaultCellStyle;
                 var address = ColumnName(column) + row.ToString(CultureInfo.InvariantCulture);
                 html.Append("<td class=\"publisher-sheet-cell\" data-cell=\"")
                     .Append(address)
@@ -306,7 +313,7 @@ public sealed class SpreadsheetDocumentService
                     for (var coveredColumn = column; coveredColumn <= Math.Min(maxColumn, merge.EndColumn); coveredColumn++)
                         if (coveredRow != row || coveredColumn != column) covered.Add((coveredRow, coveredColumn));
                 }
-                var css = style.ToCss();
+                var css = style.ToCss(CssText);
                 if (!string.IsNullOrWhiteSpace(css)) html.Append(" style=\"").Append(WebUtility.HtmlEncode(css)).Append('"');
                 html.Append('>').Append(WebUtility.HtmlEncode(cell.Value)).Append("</td>");
             }
@@ -432,10 +439,10 @@ public sealed class SpreadsheetDocumentService
     private IReadOnlyList<CellStyle> ReadStyles(ZipArchive archive)
     {
         var entry = archive.GetEntry("xl/styles.xml");
-        if (entry is null) return [CellStyle.Default];
+        if (entry is null) return [defaultCellStyle];
         using var input = entry.Open();
         var document = XDocument.Load(input, LoadOptions.None);
-        var fonts = document.Root?.Element(Main + "fonts")?.Elements(Main + "font").Select(ReadFont).ToList() ?? [FontStyle.Default];
+        var fonts = document.Root?.Element(Main + "fonts")?.Elements(Main + "font").Select(ReadFont).ToList() ?? [defaultFontStyle];
         var fills = document.Root?.Element(Main + "fills")?.Elements(Main + "fill").Select(ReadFill).ToList() ?? [string.Empty];
         var borders = document.Root?.Element(Main + "borders")?.Elements(Main + "border").Select(ReadBorder).ToList() ?? [string.Empty];
         var customNumberFormats = document.Root?.Element(Main + "numFmts")?.Elements(Main + "numFmt")
@@ -450,7 +457,7 @@ public sealed class SpreadsheetDocumentService
             var numberFormatId = ParseInt(xf.Attribute("numFmtId")?.Value, 0);
             var alignment = xf.Element(Main + "alignment");
             result.Add(new CellStyle(
-                fonts.ElementAtOrDefault(fontId) ?? FontStyle.Default,
+                fonts.ElementAtOrDefault(fontId) ?? defaultFontStyle,
                 fills.ElementAtOrDefault(fillId) ?? string.Empty,
                 borders.ElementAtOrDefault(borderId) ?? string.Empty,
                 alignment?.Attribute("horizontal")?.Value,
@@ -458,7 +465,7 @@ public sealed class SpreadsheetDocumentService
                 ParseBool(alignment?.Attribute("wrapText")?.Value),
                 IsDateFormat(numberFormatId, customNumberFormats.GetValueOrDefault(numberFormatId))));
         }
-        return result.Count == 0 ? [CellStyle.Default] : result;
+        return result.Count == 0 ? [defaultCellStyle] : result;
     }
 
     private FontStyle ReadFont(XElement font)
@@ -632,20 +639,18 @@ public sealed class SpreadsheetDocumentService
     private double ParseDouble(string? value, double fallback) => double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
     private bool ParseBool(string? value) => value is "1" || string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
 
+    private string CssText(string value) => "'" + value.Replace("'", "\\'", StringComparison.Ordinal) + "'";
+
     private sealed record CellPreview(string Value, int StyleIndex);
     private sealed record MergedRange(int StartRow, int StartColumn, int EndRow, int EndColumn);
-    private sealed record FontStyle(string Family, double SizePt, bool Bold, bool Italic, bool Underline, string Color)
-    {
-        public static FontStyle Default { get; } = new("Calibri", 11, false, false, false, string.Empty);
-    }
+    private sealed record FontStyle(string Family, double SizePt, bool Bold, bool Italic, bool Underline, string Color);
     private sealed record CellStyle(FontStyle Font, string Fill, string Border, string? Horizontal, string? Vertical, bool Wrap, bool IsDate)
     {
-        public static CellStyle Default { get; } = new(FontStyle.Default, string.Empty, string.Empty, null, null, false, false);
-        public string ToCss()
+        public string ToCss(Func<string, string> cssText)
         {
             var css = new List<string>
             {
-                $"font-family:{CssText(Font.Family)}",
+                $"font-family:{cssText(Font.Family)}",
                 $"font-size:{Font.SizePt.ToString("0.#", CultureInfo.InvariantCulture)}pt"
             };
             if (Font.Bold) css.Add("font-weight:700");
@@ -676,6 +681,5 @@ public sealed class SpreadsheetDocumentService
             if (Wrap) css.Add("white-space:normal");
             return string.Join(';', css);
         }
-        private static string CssText(string value) => "'" + value.Replace("'", "\\'", StringComparison.Ordinal) + "'";
     }
 }

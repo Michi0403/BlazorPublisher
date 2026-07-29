@@ -21,6 +21,7 @@ const lockJson = JSON.parse(read('src/PublisherStudio.Web/package-lock.json'));
 const webProject = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
 const installerProject = read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj');
 const doctrine = read('docs/architecture/video-project-import-doctrine.md');
+const appsettings = JSON.parse(read('src/PublisherStudio.Web/appsettings.json'));
 
 assert.match(models, /class VideoProjectDocument/);
 assert.match(models, /class MediaTimelineTrack/);
@@ -35,7 +36,8 @@ assert.match(models, /ImportMetadata/);
 assert.match(publicationModels, /VideoProjectDocument\? VideoProject/);
 assert.match(publicationModels, /FormatVersion \{ get; set; \} = "1\.55"/);
 
-assert.match(importer, /SupportedExtensions[\s\S]*\.otio[\s\S]*\.otioz[\s\S]*\.mlt[\s\S]*\.kdenlive[\s\S]*\.xges[\s\S]*\.osp[\s\S]*\.edl/);
+assert.match(importer, /runtimePolicy\.GetCollection\(PublisherRuntimeCollection\.VideoProjectExtensions\)/);
+assert.deepEqual(appsettings.PublisherStudio.RuntimePolicy.Collections.VideoProjectExtensions, ['.otio', '.otioz', '.mlt', '.kdenlive', '.xges', '.osp', '.edl']);
 assert.match(importer, /ImportOtioBundleAsync/);
 assert.match(importer, /content\.otio/);
 assert.match(importer, /ImportMlt/);
@@ -44,7 +46,7 @@ assert.match(importer, /ImportOpenShot/);
 assert.match(importer, /ImportEdl/);
 assert.match(importer, /DtdProcessing = DtdProcessing\.Prohibit/);
 assert.match(importer, /XmlResolver = null/);
-assert.match(importer, /MaxArchiveEntries/);
+assert.match(importer, /runtimePolicy\.MaximumVideoArchiveEntries/);
 assert.doesNotMatch(importer, /MaxArchiveUncompressedBytes|MaxInputBytes/, "Local-first project imports must not impose an application-defined byte ceiling.");
 assert.match(importer, /NormalizeArchivePath/);
 assert.match(importer, /PROJECT_MEDIA_RELINK_REQUIRED/);

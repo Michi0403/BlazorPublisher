@@ -4,9 +4,9 @@ namespace PublisherStudio.Domain;
 
 public readonly record struct PublicationPoint(double X, double Y);
 
-public static class ConnectorGeometry
+public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 {
-    public static bool TryResolve(PublicationPage page, ConnectorElement connector, out PublicationPoint source, out PublicationPoint target)
+    public bool TryResolve(PublicationPage page, ConnectorElement connector, out PublicationPoint source, out PublicationPoint target)
     {
         if (!TryResolveEndpoint(page, connector.Source, out source))
         {
@@ -17,7 +17,7 @@ public static class ConnectorGeometry
         return TryResolveEndpoint(page, connector.Target, out target);
     }
 
-    public static bool TryResolveEndpoint(PublicationPage page, ConnectorEndpoint endpoint, out PublicationPoint point)
+    public bool TryResolveEndpoint(PublicationPage page, ConnectorEndpoint endpoint, out PublicationPoint point)
     {
         if (endpoint.Kind == ConnectorEndpointKind.Canvas)
         {
@@ -51,7 +51,7 @@ public static class ConnectorGeometry
         return true;
     }
 
-    public static PublicationPoint Resolve(PublicationElement element, ConnectorAnchor anchor)
+    public PublicationPoint Resolve(PublicationElement element, ConnectorAnchor anchor)
     {
         var relative = anchor switch
         {
@@ -68,7 +68,7 @@ public static class ConnectorGeometry
         return Resolve(element, relative.X, relative.Y);
     }
 
-    public static PublicationPoint Resolve(PublicationElement element, double xPercent, double yPercent)
+    public PublicationPoint Resolve(PublicationElement element, double xPercent, double yPercent)
     {
         var rawX = element.X + element.Width * Math.Clamp(xPercent, 0, 1);
         var rawY = element.Y + element.Height * Math.Clamp(yPercent, 0, 1);
@@ -84,7 +84,7 @@ public static class ConnectorGeometry
             centerY + dx * Math.Sin(radians) + dy * Math.Cos(radians));
     }
 
-    public static string Path(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
+    public string Path(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
         return connector.PathKind switch
         {
@@ -94,7 +94,7 @@ public static class ConnectorGeometry
         };
     }
 
-    public static (PublicationPoint First, PublicationPoint Second) ControlPoints(
+    public (PublicationPoint First, PublicationPoint Second) ControlPoints(
         ConnectorElement connector,
         PublicationPoint source,
         PublicationPoint target)
@@ -110,7 +110,7 @@ public static class ConnectorGeometry
         return (ControlPoint(source, connector.Source.Anchor, distance), ControlPoint(target, connector.Target.Anchor, distance));
     }
 
-    private static string ElbowPath(PublicationPoint source, PublicationPoint target)
+    private string ElbowPath(PublicationPoint source, PublicationPoint target)
     {
         var dx = Math.Abs(target.X - source.X);
         var dy = Math.Abs(target.Y - source.Y);
@@ -124,13 +124,13 @@ public static class ConnectorGeometry
         return $"M {Inv(source.X)} {Inv(source.Y)} L {Inv(source.X)} {Inv(verticalMiddle)} L {Inv(target.X)} {Inv(verticalMiddle)} L {Inv(target.X)} {Inv(target.Y)}";
     }
 
-    private static string CurvedPath(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
+    private string CurvedPath(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
         var controls = ControlPoints(connector, source, target);
         return $"M {Inv(source.X)} {Inv(source.Y)} C {Inv(controls.First.X)} {Inv(controls.First.Y)} {Inv(controls.Second.X)} {Inv(controls.Second.Y)} {Inv(target.X)} {Inv(target.Y)}";
     }
 
-    private static PublicationPoint ControlPoint(PublicationPoint point, ConnectorAnchor anchor, double distance) => anchor switch
+    private PublicationPoint ControlPoint(PublicationPoint point, ConnectorAnchor anchor, double distance) => anchor switch
     {
         ConnectorAnchor.TopLeft or ConnectorAnchor.Top or ConnectorAnchor.TopRight => point with { Y = point.Y - distance },
         ConnectorAnchor.BottomLeft or ConnectorAnchor.Bottom or ConnectorAnchor.BottomRight => point with { Y = point.Y + distance },
@@ -139,12 +139,12 @@ public static class ConnectorGeometry
         _ => point
     };
 
-    public static string DashArray(ConnectorElement connector) => connector.DashStyle switch
+    public string DashArray(ConnectorElement connector) => connector.DashStyle switch
     {
         ConnectorDashStyle.Dash => $"{Inv(connector.StrokeWidthMm * 5)} {Inv(connector.StrokeWidthMm * 3)}",
         ConnectorDashStyle.Dot => $"{Inv(connector.StrokeWidthMm)} {Inv(connector.StrokeWidthMm * 2.5)}",
         _ => string.Empty
     };
 
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 }

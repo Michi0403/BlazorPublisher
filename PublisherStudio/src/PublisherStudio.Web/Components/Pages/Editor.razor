@@ -1,8 +1,9 @@
 @page "/"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: true))
 @implements IDisposable
 @inject EditorStateService State
 @inject PublicationFileService Files
+@inject IPublisherDocumentFactory DocumentFactory
 @inject PublisherStudio.Services.Publication.Import.OpenDocumentImportService OpenDocumentImporter
 @inject PublicationMediaAssetStore MediaAssets
 @inject PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService TimelineEdits
@@ -16,6 +17,7 @@
 @inject IJSRuntime JS
 @inject IUserNotificationService Notifications
 @inject ILogger<Editor> Logger
+@inject IPublisherRuntimePolicyDataService RuntimePolicy
 
 <PageTitle>BlazorPublisher</PageTitle>
 
@@ -512,7 +514,7 @@
         if (_panelStudioTargetsHtml)
         {
             var authored = draft.Views.SelectMany(view => view.Elements).Where(element => element.Visible).ToArray();
-            var html = PublicationElementTraversal.Descendants(authored).OfType<HtmlEmbedElement>().FirstOrDefault();
+            var html = ElementTraversal.Descendants(authored).OfType<HtmlEmbedElement>().FirstOrDefault();
             var remainsStandaloneHtml = draft.Views.Count == 1
                 && authored.Length == 1
                 && authored[0] is HtmlEmbedElement
@@ -550,7 +552,7 @@
 
     private async Task OpenConvertedInStudio(MediaConversionInsertRequest converted)
     {
-        var mime = PublicationMediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
+        var mime = MediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
         var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(converted.Content)}";
         await CancelPublisherPointerAsync();
         _mediaConverterVisible = false;
@@ -602,7 +604,7 @@
     }
     private void InsertConvertedMedia(MediaConversionInsertRequest converted)
     {
-        var mime = PublicationMediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
+        var mime = MediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
         var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(converted.Content)}";
         if (mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             State.AddImage(dataUrl, converted.FileName);
@@ -689,8 +691,8 @@
             if (kind is "video" or "audio")
             {
                 var videoKind = kind == "video";
-                mimeType = PublicationMediaData.NormalizeMimeType(mimeType, videoKind ? "video/webm" : "audio/webm");
-                var dataUrl = PublicationMediaData.NormalizeDataUrl($"data:{mimeType};base64,{Convert.ToBase64String(bytes)}", mimeType);
+                mimeType = MediaData.NormalizeMimeType(mimeType, videoKind ? "video/webm" : "audio/webm");
+                var dataUrl = MediaData.NormalizeDataUrl($"data:{mimeType};base64,{Convert.ToBase64String(bytes)}", mimeType);
                 var duration = request.DurationSeconds > 0 ? request.DurationSeconds : 5;
                 if (target is PublicationMediaElement media &&
                     media.Kind == (videoKind ? PublicationElementKind.Video : PublicationElementKind.Audio))
@@ -730,7 +732,7 @@
 
             if (kind is "text" or "markdown" or "docx")
             {
-                if (kind == "docx" && !PublicationFileService.IsOpenXmlDocument(bytes))
+                if (kind == "docx" && !Files.IsOpenXmlDocument(bytes))
                     throw new InvalidDataException($"'{request.Name}' is not a valid Office Open XML DOCX document.");
 
                 var text = State.AddText(request.X, request.Y);
@@ -742,16 +744,16 @@
                     if (kind == "docx")
                     {
                         text.DocumentContent = bytes.ToArray();
-                        text.PreviewHtml = PublicationFileService.CreateOpenXmlPreviewHtml(bytes, text.Name);
-                        text.DocumentBackground = PublicationFileService.ExtractOpenXmlDocumentBackground(bytes);
+                        text.PreviewHtml = Files.CreateOpenXmlPreviewHtml(bytes, text.Name);
+                        text.DocumentBackground = Files.ExtractOpenXmlDocumentBackground(bytes);
                     }
                     else
                     {
                         var content = DecodeText(bytes);
                         text.PreviewHtml = kind == "markdown" ? MarkdownToHtml(content) : PlainTextToHtml(content);
                         text.DocumentContent = kind == "markdown"
-                            ? RichTextDocumentFactory.CreateOpenXmlFromMarkdown(content)
-                            : RichTextDocumentFactory.CreateOpenXmlFromPlainText(content);
+                            ? RichTextFactory.CreateOpenXmlFromMarkdown(content)
+                            : RichTextFactory.CreateOpenXmlFromPlainText(content);
                         text.DocumentBackground = "transparent";
                     }
                     text.StoryFormat = StoryStorageFormat.OpenXml;
@@ -809,10 +811,10 @@
 
     private PictureDocument CreateManagedPictureDocument(ImageFrameElement image)
     {
-        const int width = 1200;
+        var width = RuntimePolicy.DefaultEditorViewportWidth;
         var frameAspect = image.Width > .01 ? image.Height / image.Width : 2d / 3d;
         var height = Math.Clamp((int)Math.Round(width * frameAspect), 16, 8192);
-        return PictureDocument.FromRaster(image.DataUrl, image.Name, width, height);
+        return DocumentFactory.CreatePictureFromRaster(image.DataUrl, image.Name, width, height);
     }
 
     private Task HandleExternalDropError(string message)
@@ -834,7 +836,7 @@
 
     private string ResolveDroppedMimeType(string name, string requested, string stored, string kind)
     {
-        var declared = PublicationMediaData.NormalizeMimeType(requested, stored);
+        var declared = MediaData.NormalizeMimeType(requested, stored);
         if ((kind == "picture" && declared.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) ||
             (kind == "video" && declared.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) ||
             (kind == "audio" && declared.StartsWith("audio/", StringComparison.OrdinalIgnoreCase)) ||
@@ -968,7 +970,7 @@
     private async Task SavePublication()
     {
         var json = Files.Serialize(State.Document);
-        var name = PublicationFileService.SafeFileName(State.Document.Name) + ".pubstudio.json";
+        var name = Files.SafeFileName(State.Document.Name) + ".pubstudio.json";
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
         using var streamReference = new DotNetStreamReference(stream);
         await JS.InvokeVoidAsync("publisherStudio.downloadStream", name, streamReference, "application/json");
@@ -1035,8 +1037,8 @@
             if (selected is null) throw new InvalidOperationException("Select an object before exporting it.");
             if (selected is ConnectorElement) throw new InvalidOperationException("Connector-only export is not supported yet.");
             var extension = format == "svg" ? "svg" : "png";
-            var baseName = PublicationFileService.SafeFileName(State.Document.Name);
-            var objectName = PublicationFileService.SafeFileName(selected.Name);
+            var baseName = Files.SafeFileName(State.Document.Name);
+            var objectName = Files.SafeFileName(selected.Name);
             var fileName = $"{baseName}-{objectName}.{extension}";
             ShowNotice($"Rendering {selected.Name} as {format.ToUpperInvariant()}…");
             await InvokeAsync(StateHasChanged);
@@ -1059,7 +1061,7 @@
     {
         try
         {
-            var baseName = PublicationFileService.SafeFileName(State.Document.Name);
+            var baseName = Files.SafeFileName(State.Document.Name);
             ShowNotice($"Rendering {format.ToUpperInvariant()} page export…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
@@ -1083,7 +1085,7 @@
     {
         try
         {
-            var fileName = $"{PublicationFileService.SafeFileName(State.Document.Name)}-page-{CurrentPageNumber}.{(format == "jpeg" ? "jpg" : format)}";
+            var fileName = $"{Files.SafeFileName(State.Document.Name)}-page-{CurrentPageNumber}.{(format == "jpeg" ? "jpg" : format)}";
             ShowNotice($"Rendering current page as {format.ToUpperInvariant()}…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
@@ -1103,7 +1105,7 @@
             await State.RefreshWebDataAsync(force: true);
             await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
-            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".html";
+            var fileName = Files.SafeFileName(State.Document.Name) + ".html";
             ShowNotice("Preparing interactive presentation HTML…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
@@ -1123,7 +1125,7 @@
             await State.RefreshWebDataAsync(force: true);
             await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
-            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + "-site.html";
+            var fileName = Files.SafeFileName(State.Document.Name) + "-site.html";
             ShowNotice("Preparing single-file website export…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
@@ -1155,7 +1157,7 @@
             await State.RefreshWebDataAsync(force: true);
             await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
-            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + "-website.zip";
+            var fileName = Files.SafeFileName(State.Document.Name) + "-website.zip";
             ShowNotice("Preparing structured website and media assets…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
@@ -1190,7 +1192,7 @@
             await State.RefreshWebDataAsync(force: true);
             await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
-            var fileName = PublicationFileService.SafeFileName(State.Document.Name) + ".webm";
+            var fileName = Files.SafeFileName(State.Document.Name) + ".webm";
             ShowNotice("Choose this browser tab in the capture dialog and enable tab audio when media sound should be included.");
             var result = await JS.InvokeAsync<VideoExportResult>(
                 "publisherStudio.exportPresentationVideo",
@@ -1204,7 +1206,7 @@
             {
                 _mediaConverterInitialSource = new MediaConversionInsertRequest(
                     result.FileName,
-                    PublicationMediaData.NormalizeMimeType(result.MimeType, storedMimeType),
+                    MediaData.NormalizeMimeType(result.MimeType, storedMimeType),
                     exportedBytes,
                     "Mainframe video export");
                 _mediaConverterVisible = true;
@@ -1535,10 +1537,10 @@
                 Console.WriteLine($"Media metadata inspection failed: {metadataError.Message}");
             }
 
-            mimeType = PublicationMediaData.NormalizeMimeType(
+            mimeType = MediaData.NormalizeMimeType(
                 string.IsNullOrWhiteSpace(info.MimeType) ? mimeType : info.MimeType,
                 kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg");
-            var dataUrl = PublicationMediaData.NormalizeDataUrl(
+            var dataUrl = MediaData.NormalizeDataUrl(
                 $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}",
                 mimeType);
 
@@ -1586,7 +1588,7 @@
     private string ResolveMediaMimeType(IBrowserFile file, PublicationElementKind kind)
     {
         var fallback = kind == PublicationElementKind.Video ? "video/mp4" : "audio/mpeg";
-        var declared = PublicationMediaData.NormalizeMimeType(file.ContentType, string.Empty);
+        var declared = MediaData.NormalizeMimeType(file.ContentType, string.Empty);
         if (declared.StartsWith(kind == PublicationElementKind.Video ? "video/" : "audio/", StringComparison.OrdinalIgnoreCase))
             return declared;
 

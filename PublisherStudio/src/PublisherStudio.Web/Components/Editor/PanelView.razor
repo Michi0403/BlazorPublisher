@@ -26,7 +26,7 @@
                          data-panel-element
                          data-element-id="@element.Id"
                          data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
-                         data-interaction="@PublicationAnimationData.Interaction(element)"
+                         data-interaction="@AnimationData.Interaction(element)"
                          data-interaction-action="@element.Interaction.Action"
                          data-media-kind="@(element is PublicationMediaElement ? element.Kind.ToString().ToLowerInvariant() : null)"
                          data-media-start="@(element is PublicationMediaElement media ? Inv(media.TimelineStartSeconds) : null)"

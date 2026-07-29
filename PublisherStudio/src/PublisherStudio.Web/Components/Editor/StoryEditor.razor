@@ -8,6 +8,7 @@
 @inject PublisherStudio.Services.OrganicPlugins.IOrganicResultStore OrganicResults
 @inject PublisherStudio.Services.UserExperience.IUserNotificationService Notifications
 @inject ILogger<StoryEditor> Logger
+@inject PublicationFileService Files
 
 @if (Visible && TextFrame is not null)
 {
@@ -465,7 +466,7 @@
             // formatting in the persisted copy even though a manual DOCX download was correct.
             var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
             var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
-            var openXmlBackground = PublicationFileService.ExtractOpenXmlDocumentBackground(openXml);
+            var openXmlBackground = Files.ExtractOpenXmlDocumentBackground(openXml);
             var prepared = await PrepareStoryPreview(html, openXmlBackground);
             var preview = prepared.Html;
             var documentBackground = prepared.Background;
@@ -694,14 +695,14 @@ Required result contract:
                 var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
                 var prepared = await PrepareStoryPreview(
                     content,
-                    PublicationFileService.ExtractOpenXmlDocumentBackground(openXml));
-                var pageLayout = PublicationFileService.ExtractOpenXmlPageLayout(openXml);
+                    Files.ExtractOpenXmlDocumentBackground(openXml));
+                var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
                 content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(
                     prepared,
                     $"{PublicationName} – {TextFrame.Name}",
                     pageLayout));
             }
-            var baseName = PublicationFileService.SafeFileName($"{PublicationName}-{TextFrame.Name}");
+            var baseName = Files.SafeFileName($"{PublicationName}-{TextFrame.Name}");
             await using var stream = new MemoryStream(content);
             using var reference = new DotNetStreamReference(stream);
             await JS.InvokeVoidAsync("publisherStudio.downloadStream", baseName + extension, reference, mimeType);
@@ -733,8 +734,8 @@ Required result contract:
             var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
             var prepared = await PrepareStoryPreview(
                 html,
-                PublicationFileService.ExtractOpenXmlDocumentBackground(openXml));
-            var pageLayout = PublicationFileService.ExtractOpenXmlPageLayout(openXml);
+                Files.ExtractOpenXmlDocumentBackground(openXml));
+            var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
             await JS.InvokeVoidAsync(
                 "publisherStudio.completeStoryPrintPreview",
                 previewId,
@@ -755,10 +756,10 @@ Required result contract:
 
     private async Task<StoryPreviewResult> PrepareStoryPreview(byte[] html, string? preferredBackground = null)
     {
-        var normalizedPreferredBackground = PublicationFileService.NormalizeCssBackground(preferredBackground);
+        var normalizedPreferredBackground = Files.NormalizeCssBackground(preferredBackground);
         var fallback = new StoryPreviewResult
         {
-            Html = PublicationFileService.ExtractHtmlBody(html),
+            Html = Files.ExtractHtmlBody(html),
             Background = IsVisibleBackground(normalizedPreferredBackground)
                 ? normalizedPreferredBackground
                 : TextFrame?.DocumentBackground ?? "transparent"
@@ -779,7 +780,7 @@ Required result contract:
                 ?? throw new JSException(_storyPreviewTransferError ?? "The formatted story preview transfer did not complete.");
             if (IsVisibleBackground(normalizedPreferredBackground))
                 prepared.Background = normalizedPreferredBackground;
-            prepared.Background = PublicationFileService.NormalizeCssBackground(prepared.Background);
+            prepared.Background = Files.NormalizeCssBackground(prepared.Background);
             ResetStoryPreviewTransfer();
             return prepared;
         }
@@ -801,7 +802,7 @@ Required result contract:
         _storyPreviewTransferId = transferId;
         _storyPreviewExpectedLength = totalLength;
         _storyPreviewExpectedChunks = chunkCount;
-        _storyPreviewBackground = PublicationFileService.NormalizeCssBackground(background);
+        _storyPreviewBackground = Files.NormalizeCssBackground(background);
         return true;
     }
 
@@ -858,7 +859,7 @@ Required result contract:
         bool printPreview = false)
     {
         var safeTitle = System.Net.WebUtility.HtmlEncode(title);
-        var background = PublicationFileService.NormalizeCssBackground(prepared.Background);
+        var background = Files.NormalizeCssBackground(prepared.Background);
         var pageBackground = IsVisibleBackground(background) ? background : "#ffffff";
         var pageWidth = CssMillimeters(pageLayout.PageWidthMm);
         var pageHeight = CssMillimeters(pageLayout.PageHeightMm);

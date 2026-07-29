@@ -7,6 +7,7 @@
 @inject PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService TimelineEdits
 @inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
 @inject NavigationManager Navigation
+@inject PublicationComponentService Components
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
@@ -712,9 +713,9 @@
             {
                 <section class="property-section component-properties">
                     <h3>Interactive component</h3>
-                    <p class="property-note">Browser-native @PublicationComponentService.ComponentName(component.ComponentKind), exported with the same embedded DevExtreme runtime as the interactive charts.</p>
+                    <p class="property-note">Browser-native @Components.ComponentName(component.ComponentKind), exported with the same embedded DevExtreme runtime as the interactive charts.</p>
                     <div class="data-source-summary">
-                        <span><b>Control:</b> @PublicationComponentService.ComponentName(component.ComponentKind)</span>
+                        <span><b>Control:</b> @Components.ComponentName(component.ComponentKind)</span>
                         <span><b>Scope:</b> @(component.Scope == PublicationComponentScope.Document ? "All pages" : "This page")</span>
                         <span><b>Source:</b> @ComponentSource(component)</span>
                         <span><b>Fields:</b> @component.Fields.Count</span>
@@ -1380,10 +1381,10 @@
         UpdateSelectedLiveEffectFilter(filter => filter.Color = value);
     }
 
-    private void ChangeLiveEffectFilterAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.Amount = value);
-    private void ChangeLiveEffectFilterSecondaryAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.SecondaryAmount = value);
-    private void ChangeLiveEffectFilterTertiaryAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.TertiaryAmount = value);
-    private void ChangeLiveEffectFilterResidualOpacity(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, static (filter, value) => filter.ResidualOpacity = value);
+    private void ChangeLiveEffectFilterAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, (filter, value) => filter.Amount = value);
+    private void ChangeLiveEffectFilterSecondaryAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, (filter, value) => filter.SecondaryAmount = value);
+    private void ChangeLiveEffectFilterTertiaryAmount(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, (filter, value) => filter.TertiaryAmount = value);
+    private void ChangeLiveEffectFilterResidualOpacity(ChangeEventArgs args) => ChangeLiveEffectFilterNumber(args, (filter, value) => filter.ResidualOpacity = value);
 
     private void ChangeLiveEffectFilterNumber(ChangeEventArgs args, Action<VideoEffectFilter, double> update)
     {
@@ -1726,14 +1727,14 @@
         {
             item.Warp = warp;
             if (warp == WordArtWarp.Custom)
-                item.CustomPathPoints = WordArtPathGeometry.Normalize(item.CustomPathPoints);
+                item.CustomPathPoints = WordArtGeometry.Normalize(item.CustomPathPoints);
         });
     }
 
     private void ChangeWordArtPath(List<WordArtPathPoint> points) => SetWordArt(item =>
     {
         item.Warp = WordArtWarp.Custom;
-        item.CustomPathPoints = WordArtPathGeometry.Normalize(points);
+        item.CustomPathPoints = WordArtGeometry.Normalize(points);
     });
     private void ToggleWordArtBold(ChangeEventArgs args) => SetWordArt(item => item.Bold = ReadBool(args));
     private void ToggleWordArtItalic(ChangeEventArgs args) => SetWordArt(item => item.Italic = ReadBool(args));
@@ -1774,7 +1775,7 @@
         if (mimeType == "image/svg+xml")
         {
             var sourceSvg = new UTF8Encoding(false, true).GetString(bytes);
-            bytes = Encoding.UTF8.GetBytes(SvgInterchangeSanitizer.Sanitize(sourceSvg));
+            bytes = Encoding.UTF8.GetBytes(SvgSanitizer.Sanitize(sourceSvg));
         }
         var dataUrl = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
         SetWordArt(item =>
@@ -2017,7 +2018,7 @@
         ".gif" => "image/gif",
         ".webp" => "image/webp",
         ".svg" => "image/svg+xml",
-        _ when declared?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true => PublicationMediaData.NormalizeMimeType(declared, "image/png"),
+        _ when declared?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true => MediaData.NormalizeMimeType(declared, "image/png"),
         _ => string.Empty
     };
 
@@ -2027,7 +2028,7 @@
         ".webm" => "video/webm",
         ".ogv" or ".ogg" => "video/ogg",
         ".mov" => "video/quicktime",
-        _ when declared?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true => PublicationMediaData.NormalizeMimeType(declared, "video/webm"),
+        _ when declared?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true => MediaData.NormalizeMimeType(declared, "video/webm"),
         _ => string.Empty
     };
 

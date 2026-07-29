@@ -1253,7 +1253,7 @@
     {
         try
         {
-            var ffmpeg = FfmpegLocator.Resolve(_machine.FfmpegPath);
+            var ffmpeg = FfmpegLocatorService.Resolve(_machine.FfmpegPath);
             _nativeDevices = await MediaHost.DiscoverNativeDevicesAsync();
             if (_nativeDevices.Count > 0)
             {

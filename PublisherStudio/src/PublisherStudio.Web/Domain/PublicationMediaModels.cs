@@ -212,9 +212,9 @@ public sealed class MediaSourceInfo
     public List<double> WaveformSamples { get; set; } = [];
 }
 
-public static class PublicationMediaData
+public sealed class PublicationMediaData(ILogger<PublicationMediaData> logger)
 {
-    public static string NormalizeMimeType(string? mimeType, string fallback)
+    public string NormalizeMimeType(string? mimeType, string fallback)
     {
         var value = mimeType?.Trim() ?? string.Empty;
         var separator = value.IndexOf(';');
@@ -222,7 +222,7 @@ public static class PublicationMediaData
         return value.Contains('/') ? value.ToLowerInvariant() : fallback;
     }
 
-    public static string NormalizeDataUrl(string? dataUrl, string fallbackMimeType)
+    public string NormalizeDataUrl(string? dataUrl, string fallbackMimeType)
     {
         if (string.IsNullOrWhiteSpace(dataUrl) || !dataUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
             return dataUrl ?? string.Empty;

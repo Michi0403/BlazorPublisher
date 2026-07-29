@@ -164,7 +164,7 @@ assert.match(lanServer, /href=\\"/);
 assert.match(lanServer, /try \{ sourceBuffer\.mode/);
 assert.match(webProgram, /ProtectKeysWithDpapi/);
 assert.match(webProgram, /AddPublisherStudioApplication/);
-assert.match(applicationComposition, /services\.AddPublisherStreaming\(\)/);
+assert.match(applicationComposition, /services\.AddPublisherStreaming\(logger\)/);
 assert.doesNotMatch(webProgram, /MapPublisherStreamingRuntime|StreamingRuntimeEndpoints/);
 assert.match(applicationComposition, /AddHostedService<TwitchOAuthMaintenanceService>/);
 assert.match(streamingComposition, /public static class StreamingServiceCollectionExtensions/);

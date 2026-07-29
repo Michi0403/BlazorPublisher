@@ -7,67 +7,79 @@ using PublisherStudio.Domain;
 
 namespace PublisherStudio.Services.PictureStudio.Import;
 
-public sealed class OpenRasterImportService
+public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFactory, 
+    SvgInterchangeSanitizer svgSanitizer,
+    ILogger<OpenRasterImportService> logger)
 {
     private readonly XName LayerName = "layer";
     private readonly XName StackName = "stack";
 
     public async Task<PictureImportResult> ImportAsync(Stream input, string fileName, CancellationToken cancellationToken = default)
     {
-        using var buffer = new MemoryStream();
-        await input.CopyToAsync(buffer, cancellationToken);
-        buffer.Position = 0;
-        using var archive = new ZipArchive(buffer, ZipArchiveMode.Read, leaveOpen: false);
-        var issues = new List<InterchangeIssue>();
-
-        var mimetype = archive.GetEntry("mimetype");
-        if (mimetype is not null)
+        try
         {
-            await using var mimeStream = mimetype.Open();
-            using var mimeReader = new StreamReader(mimeStream, Encoding.ASCII, false, leaveOpen: false);
-            var value = (await mimeReader.ReadToEndAsync(cancellationToken)).Trim();
-            if (!string.Equals(value, "image/openraster", StringComparison.Ordinal))
-                throw new InvalidDataException("The archive is not an OpenRaster document.");
+            logger.LogTrace($"Entering OpenRasterImportService.ImportAsync.");
+                    using var buffer = new MemoryStream();
+                    await input.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+                    buffer.Position = 0;
+                    using var archive = new ZipArchive(buffer, ZipArchiveMode.Read, leaveOpen: false);
+                    var issues = new List<InterchangeIssue>();
+
+                    var mimetype = archive.GetEntry("mimetype");
+                    if (mimetype is not null)
+                    {
+                        await using var mimeStream = mimetype.Open();
+                        using var mimeReader = new StreamReader(mimeStream, Encoding.ASCII, false, leaveOpen: false);
+                        var value = (await mimeReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
+                        if (!string.Equals(value, "image/openraster", StringComparison.Ordinal))
+                            throw new InvalidDataException("The archive is not an OpenRaster document.");
+                    }
+                    else
+                    {
+                        issues.Add(new(InterchangeIssueSeverity.Warning, "ORA_MIMETYPE_MISSING", "The OpenRaster mimetype entry is missing; stack.xml was used for compatibility."));
+                    }
+
+                    var stackEntry = archive.GetEntry("stack.xml")
+                        ?? throw new InvalidDataException("The OpenRaster archive does not contain stack.xml.");
+                    XDocument stackDocument;
+                    await using (var stackStream = stackEntry.Open())
+                    {
+                        var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersFromEntities = 0, MaxCharactersInDocument = 0 };
+                        using var reader = XmlReader.Create(stackStream, settings);
+                        stackDocument = XDocument.Load(reader);
+                    }
+
+                    var image = stackDocument.Root ?? throw new InvalidDataException("The OpenRaster stack is empty.");
+                    var sourceWidth = ReadInt(image.Attribute("w")?.Value, 1200);
+                    var sourceHeight = ReadInt(image.Attribute("h")?.Value, 800);
+                    var scale = Math.Min(1d, Math.Min(8192d / Math.Max(1, sourceWidth), 8192d / Math.Max(1, sourceHeight)));
+                    if (scale < 1)
+                        issues.Add(new(InterchangeIssueSeverity.Warning, "ORA_CANVAS_SCALED", $"The {sourceWidth} × {sourceHeight} canvas was proportionally reduced to fit Picture Studio's 8192 px limit."));
+
+                    var document = documentFactory.CreatePicture(
+                        Math.Max(16, (int)Math.Round(sourceWidth * scale)),
+                        Math.Max(16, (int)Math.Round(sourceHeight * scale)),
+                        true);
+                    document.Name = string.IsNullOrWhiteSpace(fileName) ? "OpenRaster" : Path.GetFileNameWithoutExtension(fileName);
+                    document.FormatVersion = "1.4";
+                    document.GridVisible = false;
+
+                    var flattened = new List<PictureLayer>();
+                    var rootStack = image.Elements().FirstOrDefault(element => element.Name.LocalName == StackName.LocalName)
+                        ?? throw new InvalidDataException("The OpenRaster document does not contain a root layer stack.");
+                    await ReadStackAsync(archive, rootStack, flattened, issues, string.Empty, 1, true, scale, cancellationToken).ConfigureAwait(false);
+
+                    // OpenRaster lists the uppermost layer first. Picture Studio renders bottom to top.
+                    flattened.Reverse();
+                    document.Layers.AddRange(flattened);
+                    return new PictureImportResult { Document = document, Issues = issues };
+    
         }
-        else
+        catch (Exception exception)
         {
-            issues.Add(new(InterchangeIssueSeverity.Warning, "ORA_MIMETYPE_MISSING", "The OpenRaster mimetype entry is missing; stack.xml was used for compatibility."));
+            logger.LogError(exception, $"OpenRasterImportService.ImportAsync failed: {exception.Message}");
+            throw;
         }
-
-        var stackEntry = archive.GetEntry("stack.xml")
-            ?? throw new InvalidDataException("The OpenRaster archive does not contain stack.xml.");
-        XDocument stackDocument;
-        await using (var stackStream = stackEntry.Open())
-        {
-            var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersFromEntities = 0, MaxCharactersInDocument = 0 };
-            using var reader = XmlReader.Create(stackStream, settings);
-            stackDocument = XDocument.Load(reader);
-        }
-
-        var image = stackDocument.Root ?? throw new InvalidDataException("The OpenRaster stack is empty.");
-        var sourceWidth = ReadInt(image.Attribute("w")?.Value, 1200);
-        var sourceHeight = ReadInt(image.Attribute("h")?.Value, 800);
-        var scale = Math.Min(1d, Math.Min(8192d / Math.Max(1, sourceWidth), 8192d / Math.Max(1, sourceHeight)));
-        if (scale < 1)
-            issues.Add(new(InterchangeIssueSeverity.Warning, "ORA_CANVAS_SCALED", $"The {sourceWidth} × {sourceHeight} canvas was proportionally reduced to fit Picture Studio's 8192 px limit."));
-
-        var document = PictureDocument.CreateDefault(
-            Math.Max(16, (int)Math.Round(sourceWidth * scale)),
-            Math.Max(16, (int)Math.Round(sourceHeight * scale)),
-            true);
-        document.Name = string.IsNullOrWhiteSpace(fileName) ? "OpenRaster" : Path.GetFileNameWithoutExtension(fileName);
-        document.FormatVersion = "1.4";
-        document.GridVisible = false;
-
-        var flattened = new List<PictureLayer>();
-        var rootStack = image.Elements().FirstOrDefault(element => element.Name.LocalName == StackName.LocalName)
-            ?? throw new InvalidDataException("The OpenRaster document does not contain a root layer stack.");
-        await ReadStackAsync(archive, rootStack, flattened, issues, string.Empty, 1, true, scale, cancellationToken);
-
-        // OpenRaster lists the uppermost layer first. Picture Studio renders bottom to top.
-        flattened.Reverse();
-        document.Layers.AddRange(flattened);
-        return new PictureImportResult { Document = document, Issues = issues };
     }
 
     private async Task ReadStackAsync(
@@ -81,118 +93,128 @@ public sealed class OpenRasterImportService
         double scale,
         CancellationToken cancellationToken)
     {
-        var stackName = CleanName(stack.Attribute("name")?.Value, string.Empty);
-        var groupPath = string.IsNullOrWhiteSpace(stackName)
-            ? parentPath
-            : string.IsNullOrWhiteSpace(parentPath) ? stackName : $"{parentPath} / {stackName}";
-        var opacity = parentOpacity * ReadDouble(stack.Attribute("opacity")?.Value, 1);
-        var visible = parentVisible && !string.Equals(stack.Attribute("visibility")?.Value, "hidden", StringComparison.OrdinalIgnoreCase);
-        var isolation = stack.Attribute("isolation")?.Value;
-        if (!string.IsNullOrWhiteSpace(stackName) &&
-            (!Nearly(opacity, parentOpacity) || string.Equals(isolation, "auto", StringComparison.OrdinalIgnoreCase)))
-            issues.Add(new(InterchangeIssueSeverity.Warning, "ORA_GROUP_FLATTENED", $"Layer group '{groupPath}' was mapped to flat Picture Studio layers; group compositing is approximated.", groupPath));
-
-        foreach (var child in stack.Elements())
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (child.Name.LocalName == StackName.LocalName)
-            {
-                await ReadStackAsync(archive, child, layers, issues, groupPath, opacity, visible, scale, cancellationToken);
-                continue;
-            }
-            if (child.Name.LocalName != LayerName.LocalName) continue;
+            logger.LogTrace($"Entering OpenRasterImportService.ReadStackAsync.");
+                    var stackName = CleanName(stack.Attribute("name")?.Value, string.Empty);
+                    var groupPath = string.IsNullOrWhiteSpace(stackName)
+                        ? parentPath
+                        : string.IsNullOrWhiteSpace(parentPath) ? stackName : $"{parentPath} / {stackName}";
+                    var opacity = parentOpacity * ReadDouble(stack.Attribute("opacity")?.Value, 1);
+                    var visible = parentVisible && !string.Equals(stack.Attribute("visibility")?.Value, "hidden", StringComparison.OrdinalIgnoreCase);
+                    var isolation = stack.Attribute("isolation")?.Value;
+                    if (!string.IsNullOrWhiteSpace(stackName) &&
+                        (!Nearly(opacity, parentOpacity) || string.Equals(isolation, "auto", StringComparison.OrdinalIgnoreCase)))
+                        issues.Add(new(InterchangeIssueSeverity.Warning, "ORA_GROUP_FLATTENED", $"Layer group '{groupPath}' was mapped to flat Picture Studio layers; group compositing is approximated.", groupPath));
 
-            var source = child.Attribute("src")?.Value?.Replace('\\', '/').Trim();
-            if (string.IsNullOrWhiteSpace(source) || source.StartsWith('/') || source.Split('/').Any(part => part == ".."))
-            {
-                issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_SOURCE_INVALID", "A layer with an unsafe or missing source path was skipped.", groupPath));
-                continue;
-            }
-            var entry = archive.GetEntry(source);
-            if (entry is null)
-            {
-                issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_MISSING", $"Layer source '{source}' is missing and was skipped.", groupPath));
-                continue;
-            }
-
-            var name = CleanName(child.Attribute("name")?.Value, Path.GetFileNameWithoutExtension(source));
-            if (entry.Length <= 0)
-            {
-                issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_EMPTY", $"Layer '{name}' is empty and was skipped.", groupPath));
-                continue;
-            }
-            await using var layerStream = entry.Open();
-            using var layerBuffer = new MemoryStream();
-            await layerStream.CopyToAsync(layerBuffer, cancellationToken);
-            var bytes = layerBuffer.ToArray();
-            var extension = Path.GetExtension(source).ToLowerInvariant();
-            var x = ReadInt(child.Attribute("x")?.Value, 0) * scale;
-            var y = ReadInt(child.Attribute("y")?.Value, 0) * scale;
-            var layerOpacity = opacity * ReadDouble(child.Attribute("opacity")?.Value, 1);
-            var layerVisible = visible && !string.Equals(child.Attribute("visibility")?.Value, "hidden", StringComparison.OrdinalIgnoreCase);
-            var blend = MapBlendMode(child.Attribute("composite-op")?.Value);
-            var locked = IsTrue(child.Attribute("edit-locked")?.Value) || IsTrue(child.Attribute("locked")?.Value);
-
-            if (extension is ".svg" or ".svgz")
-            {
-                try
-                {
-                    var svgText = extension == ".svgz" ? DecompressSvg(bytes) : DecodeSvg(bytes);
-                    var sanitized = SvgInterchangeSanitizer.Sanitize(svgText);
-                    var (viewportWidth, viewportHeight, _, _) = SvgInterchangeSanitizer.ReadViewport(sanitized);
-                    layers.Add(new SvgPictureLayer
+                    foreach (var child in stack.Elements())
                     {
-                        Name = name,
-                        GroupPath = groupPath,
-                        SvgMarkup = sanitized,
-                        SourceFormat = "OpenRaster SVG",
-                        SourceElementId = source,
-                        X = x,
-                        Y = y,
-                        Width = Math.Max(1, viewportWidth * scale),
-                        Height = Math.Max(1, viewportHeight * scale),
-                        Opacity = Math.Clamp(layerOpacity, 0, 1),
-                        Visible = layerVisible,
-                        Locked = locked,
-                        BlendMode = blend
-                    });
-                }
-                catch (Exception ex) when (ex is InvalidDataException or XmlException or DecoderFallbackException)
-                {
-                    issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_SVG_LAYER_INVALID", $"Vector layer '{name}' could not be decoded safely and was skipped: {ex.Message}", groupPath));
-                }
-                continue;
-            }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (child.Name.LocalName == StackName.LocalName)
+                        {
+                            await ReadStackAsync(archive, child, layers, issues, groupPath, opacity, visible, scale, cancellationToken).ConfigureAwait(false);
+                            continue;
+                        }
+                        if (child.Name.LocalName != LayerName.LocalName) continue;
 
-            var mime = extension switch
-            {
-                ".png" => "image/png",
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".webp" => "image/webp",
-                _ => string.Empty
-            };
-            if (string.IsNullOrWhiteSpace(mime))
-            {
-                issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_FORMAT_UNSUPPORTED", $"Layer '{name}' uses unsupported source format '{extension}' and was skipped.", groupPath));
-                continue;
-            }
+                        var source = child.Attribute("src")?.Value?.Replace('\\', '/').Trim();
+                        if (string.IsNullOrWhiteSpace(source) || source.StartsWith('/') || source.Split('/').Any(part => part == ".."))
+                        {
+                            issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_SOURCE_INVALID", "A layer with an unsafe or missing source path was skipped.", groupPath));
+                            continue;
+                        }
+                        var entry = archive.GetEntry(source);
+                        if (entry is null)
+                        {
+                            issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_MISSING", $"Layer source '{source}' is missing and was skipped.", groupPath));
+                            continue;
+                        }
 
-            var (imageWidth, imageHeight) = ReadImageSize(bytes, extension);
-            layers.Add(new RasterPictureLayer
-            {
-                Name = name,
-                GroupPath = groupPath,
-                DataUrl = $"data:{mime};base64,{Convert.ToBase64String(bytes)}",
-                X = x,
-                Y = y,
-                Width = Math.Max(1, (imageWidth > 0 ? imageWidth : 1) * scale),
-                Height = Math.Max(1, (imageHeight > 0 ? imageHeight : 1) * scale),
-                Opacity = Math.Clamp(layerOpacity, 0, 1),
-                Visible = layerVisible,
-                Locked = locked,
-                BlendMode = blend,
-                FitMode = PictureRasterFitMode.Stretch
-            });
+                        var name = CleanName(child.Attribute("name")?.Value, Path.GetFileNameWithoutExtension(source));
+                        if (entry.Length <= 0)
+                        {
+                            issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_EMPTY", $"Layer '{name}' is empty and was skipped.", groupPath));
+                            continue;
+                        }
+                        await using var layerStream = entry.Open();
+                        using var layerBuffer = new MemoryStream();
+                        await layerStream.CopyToAsync(layerBuffer, cancellationToken).ConfigureAwait(false);
+                        var bytes = layerBuffer.ToArray();
+                        var extension = Path.GetExtension(source).ToLowerInvariant();
+                        var x = ReadInt(child.Attribute("x")?.Value, 0) * scale;
+                        var y = ReadInt(child.Attribute("y")?.Value, 0) * scale;
+                        var layerOpacity = opacity * ReadDouble(child.Attribute("opacity")?.Value, 1);
+                        var layerVisible = visible && !string.Equals(child.Attribute("visibility")?.Value, "hidden", StringComparison.OrdinalIgnoreCase);
+                        var blend = MapBlendMode(child.Attribute("composite-op")?.Value);
+                        var locked = IsTrue(child.Attribute("edit-locked")?.Value) || IsTrue(child.Attribute("locked")?.Value);
+
+                        if (extension is ".svg" or ".svgz")
+                        {
+                            try
+                            {
+                                var svgText = extension == ".svgz" ? DecompressSvg(bytes) : DecodeSvg(bytes);
+                                var sanitized = svgSanitizer.Sanitize(svgText);
+                                var (viewportWidth, viewportHeight, _, _) = svgSanitizer.ReadViewport(sanitized);
+                                layers.Add(new SvgPictureLayer
+                                {
+                                    Name = name,
+                                    GroupPath = groupPath,
+                                    SvgMarkup = sanitized,
+                                    SourceFormat = "OpenRaster SVG",
+                                    SourceElementId = source,
+                                    X = x,
+                                    Y = y,
+                                    Width = Math.Max(1, viewportWidth * scale),
+                                    Height = Math.Max(1, viewportHeight * scale),
+                                    Opacity = Math.Clamp(layerOpacity, 0, 1),
+                                    Visible = layerVisible,
+                                    Locked = locked,
+                                    BlendMode = blend
+                                });
+                            }
+                            catch (Exception ex) when (ex is InvalidDataException or XmlException or DecoderFallbackException)
+                            {
+                                issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_SVG_LAYER_INVALID", $"Vector layer '{name}' could not be decoded safely and was skipped: {ex.Message}", groupPath));
+                            }
+                            continue;
+                        }
+
+                        var mime = extension switch
+                        {
+                            ".png" => "image/png",
+                            ".jpg" or ".jpeg" => "image/jpeg",
+                            ".webp" => "image/webp",
+                            _ => string.Empty
+                        };
+                        if (string.IsNullOrWhiteSpace(mime))
+                        {
+                            issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_FORMAT_UNSUPPORTED", $"Layer '{name}' uses unsupported source format '{extension}' and was skipped.", groupPath));
+                            continue;
+                        }
+
+                        var (imageWidth, imageHeight) = ReadImageSize(bytes, extension);
+                        layers.Add(new RasterPictureLayer
+                        {
+                            Name = name,
+                            GroupPath = groupPath,
+                            DataUrl = $"data:{mime};base64,{Convert.ToBase64String(bytes)}",
+                            X = x,
+                            Y = y,
+                            Width = Math.Max(1, (imageWidth > 0 ? imageWidth : 1) * scale),
+                            Height = Math.Max(1, (imageHeight > 0 ? imageHeight : 1) * scale),
+                            Opacity = Math.Clamp(layerOpacity, 0, 1),
+                            Visible = layerVisible,
+                            Locked = locked,
+                            BlendMode = blend,
+                            FitMode = PictureRasterFitMode.Stretch
+                        });
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.ReadStackAsync failed: {exception.Message}");
+            throw;
         }
     }
 
@@ -206,70 +228,163 @@ public sealed class OpenRasterImportService
     }
 
 
-    private int ReadInt(string? value, int fallback) =>
-        int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
+    private int ReadInt(string? value, int fallback) {
+        try
+        {
+            logger.LogTrace($"Entering OpenRasterImportService.ReadInt.");
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.ReadInt failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private double ReadDouble(string? value, double fallback) =>
-        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) && double.IsFinite(parsed)
+    private double ReadDouble(string? value, double fallback) {
+        try
+        {
+            logger.LogTrace($"Entering OpenRasterImportService.ReadDouble.");
+            return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) && double.IsFinite(parsed)
             ? parsed
             : fallback;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.ReadDouble failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private PictureBlendMode MapBlendMode(string? value)
     {
-        var operation = value?.Trim();
-        if (string.IsNullOrWhiteSpace(operation)) return PictureBlendMode.Normal;
-        var separator = operation.LastIndexOf(':');
-        if (separator >= 0 && separator < operation.Length - 1) operation = operation[(separator + 1)..];
-        return operation.ToLowerInvariant() switch
+        try
         {
-            "multiply" => PictureBlendMode.Multiply,
-            "screen" => PictureBlendMode.Screen,
-            "overlay" => PictureBlendMode.Overlay,
-            "darken" => PictureBlendMode.Darken,
-            "lighten" => PictureBlendMode.Lighten,
-            _ => PictureBlendMode.Normal
-        };
+            logger.LogTrace($"Entering OpenRasterImportService.MapBlendMode.");
+                    var operation = value?.Trim();
+                    if (string.IsNullOrWhiteSpace(operation)) return PictureBlendMode.Normal;
+                    var separator = operation.LastIndexOf(':');
+                    if (separator >= 0 && separator < operation.Length - 1) operation = operation[(separator + 1)..];
+                    return operation.ToLowerInvariant() switch
+                    {
+                        "multiply" => PictureBlendMode.Multiply,
+                        "screen" => PictureBlendMode.Screen,
+                        "overlay" => PictureBlendMode.Overlay,
+                        "darken" => PictureBlendMode.Darken,
+                        "lighten" => PictureBlendMode.Lighten,
+                        _ => PictureBlendMode.Normal
+                    };
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.MapBlendMode failed: {exception.Message}");
+            throw;
+        }
     }
 
     private string DecodeSvg(byte[] bytes)
     {
-        using var input = new MemoryStream(bytes, writable: false);
-        using var reader = new StreamReader(input, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
-        return reader.ReadToEnd();
+        try
+        {
+            logger.LogTrace($"Entering OpenRasterImportService.DecodeSvg.");
+                    using var input = new MemoryStream(bytes, writable: false);
+                    using var reader = new StreamReader(input, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
+                    return reader.ReadToEnd();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.DecodeSvg failed: {exception.Message}");
+            throw;
+        }
     }
 
     private string DecompressSvg(byte[] bytes)
     {
         try
         {
-            using var input = new MemoryStream(bytes, writable: false);
-            using var gzip = new GZipStream(input, CompressionMode.Decompress, leaveOpen: false);
-            using var output = new MemoryStream();
-            gzip.CopyTo(output);
-            return DecodeSvg(output.ToArray());
+            logger.LogTrace($"Entering OpenRasterImportService.DecompressSvg.");
+                    try
+                    {
+                        using var input = new MemoryStream(bytes, writable: false);
+                        using var gzip = new GZipStream(input, CompressionMode.Decompress, leaveOpen: false);
+                        using var output = new MemoryStream();
+                        gzip.CopyTo(output);
+                        return DecodeSvg(output.ToArray());
+                    }
+                    catch (InvalidDataException)
+                    {
+                        throw;
+                    }
+                    catch (IOException exception)
+                    {
+                        throw new InvalidDataException("The SVGZ layer could not be decompressed.", exception);
+                    }
+    
         }
-        catch (InvalidDataException)
+        catch (Exception exception)
         {
+            logger.LogError(exception, $"OpenRasterImportService.DecompressSvg failed: {exception.Message}");
             throw;
-        }
-        catch (IOException exception)
-        {
-            throw new InvalidDataException("The SVGZ layer could not be decompressed.", exception);
         }
     }
 
     private int ReadBigEndianInt(byte[] bytes, int offset)
     {
-        if (offset < 0 || offset > bytes.Length - 4) return 0;
-        var value = ((uint)bytes[offset] << 24)
-            | ((uint)bytes[offset + 1] << 16)
-            | ((uint)bytes[offset + 2] << 8)
-            | bytes[offset + 3];
-        return value <= int.MaxValue ? (int)value : 0;
+        try
+        {
+            logger.LogTrace($"Entering OpenRasterImportService.ReadBigEndianInt.");
+                    if (offset < 0 || offset > bytes.Length - 4) return 0;
+                    var value = ((uint)bytes[offset] << 24)
+                        | ((uint)bytes[offset + 1] << 16)
+                        | ((uint)bytes[offset + 2] << 8)
+                        | bytes[offset + 3];
+                    return value <= int.MaxValue ? (int)value : 0;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.ReadBigEndianInt failed: {exception.Message}");
+            throw;
+        }
     }
 
 
-    private string CleanName(string? value, string fallback) => string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
-    private bool IsTrue(string? value) => value is not null && (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1");
-    private bool Nearly(double left, double right) => Math.Abs(left - right) < .0001;
+    private string CleanName(string? value, string fallback) {
+        try
+        {
+            logger.LogTrace($"Entering OpenRasterImportService.CleanName.");
+            return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.CleanName failed: {exception.Message}");
+            throw;
+        }
+    }
+    private bool IsTrue(string? value) {
+        try
+        {
+            logger.LogTrace($"Entering OpenRasterImportService.IsTrue.");
+            return value is not null && (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.IsTrue failed: {exception.Message}");
+            throw;
+        }
+    }
+    private bool Nearly(double left, double right) {
+        try
+        {
+            logger.LogTrace($"Entering OpenRasterImportService.Nearly.");
+            return Math.Abs(left - right) < .0001;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"OpenRasterImportService.Nearly failed: {exception.Message}");
+            throw;
+        }
+    }
 }

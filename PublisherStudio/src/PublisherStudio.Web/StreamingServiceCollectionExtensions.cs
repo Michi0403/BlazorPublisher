@@ -11,14 +11,17 @@ namespace PublisherStudio;
 /// </summary>
 public static class StreamingServiceCollectionExtensions
 {
-    public static IServiceCollection AddPublisherStreaming(this IServiceCollection services)
+    public static IServiceCollection AddPublisherStreaming(this IServiceCollection services, ILogger logger)
     {
+        try
+        {
         services.AddSingleton<IWindowsHotkeyNativeService, WindowsHotkeyNativeService>();
         services.AddSingleton<IWindowsProcessLoopbackNativeService, WindowsProcessLoopbackNativeService>();
         services.AddSingleton<GlobalHotkeyService>();
         services.AddHostedService<GlobalHotkeyHostedService>();
         services.AddSingleton<EncoderOrchestrator>();
         services.AddSingleton<NativeCaptureRegistry>();
+        services.AddSingleton<IMediaSessionFactory, MediaSessionFactory>();
         services.AddSingleton<MediaSessionRegistry>();
 
         services.AddSingleton<StreamingRuntimeUseCases>();
@@ -29,6 +32,13 @@ public static class StreamingServiceCollectionExtensions
         services.AddSingleton<StreamingLanUseCases>();
         services.AddSingleton<PlatformChatHub>();
         services.AddSingleton<WebRtcSignalingHub>();
+        logger.LogInformation($"Registered PublisherStudio streaming services.");
         return services;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublisherStudio streaming service registration failed: {exception.Message}");
+            throw;
+        }
     }
 }

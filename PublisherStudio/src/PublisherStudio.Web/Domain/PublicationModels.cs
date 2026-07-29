@@ -20,37 +20,7 @@ public sealed class PublicationDocument
     public PublicationStreamingSettings Streaming { get; set; } = new();
     public PublicationProjectSettings ProjectSettings { get; set; } = new();
 
-    public static PublicationDocument CreateDefault()
-    {
-        var document = new PublicationDocument();
-        var publicationPage = PublicationPage.CreateA4();
-        publicationPage.Elements.Add(new TextFrameElement
-        {
-            Name = "Title",
-            X = 20,
-            Y = 22,
-            Width = 170,
-            Height = 34,
-            PreviewHtml = "<h1 style=\"margin:0;font:700 28pt Segoe UI;color:#17365d\">Your publication</h1><p style=\"margin:8px 0 0;font:12pt Segoe UI;color:#475569\">Double-click this frame to edit it with DevExpress RichEdit.</p>",
-            DocumentContent = RichTextDocumentFactory.CreateOpenXml("Your publication", "Double-click this frame to edit it with DevExpress RichEdit."),
-            StoryFormat = StoryStorageFormat.OpenXml,
-            ZIndex = 2
-        });
-        publicationPage.Elements.Add(new ShapeElement
-        {
-            Name = "Accent",
-            Shape = PublicationShape.Rectangle,
-            X = 20,
-            Y = 66,
-            Width = 170,
-            Height = 5,
-            Fill = "#2f75b5",
-            Stroke = "transparent",
-            ZIndex = 1
-        });
-        document.Pages.Add(publicationPage);
-        return document;
-    }
+
 }
 
 public sealed class PublicationViewSettings
@@ -82,7 +52,6 @@ public sealed class PublicationPage
     public PublicationPageTransition Transition { get; set; } = new();
     public double TimelineDurationSeconds { get; set; } = 10;
 
-    public static PublicationPage CreateA4(string name = "Page 1") => new() { Name = name };
 }
 
 public sealed class GuideLine
@@ -199,7 +168,7 @@ public sealed class TextFrameElement : PublicationElement
 {
     public override PublicationElementKind Kind => PublicationElementKind.Text;
     public string PreviewHtml { get; set; } = "<p>Text frame</p>";
-    public byte[] DocumentContent { get; set; } = RichTextDocumentFactory.CreateOpenXml("Text frame");
+    public byte[] DocumentContent { get; set; } = [];
     public StoryStorageFormat StoryFormat { get; set; } = StoryStorageFormat.OpenXml;
     public string DocumentBackground { get; set; } = "transparent";
     public double PaddingMm { get; set; } = 2;
@@ -452,7 +421,7 @@ public sealed class WordArtElement : PublicationElement
     public double ExtrudeDepth { get; set; } = 4;
     public string ExtrudeColor { get; set; } = "#17365d";
     public WordArtWarp Warp { get; set; }
-    public List<WordArtPathPoint> CustomPathPoints { get; set; } = WordArtPathGeometry.CreatePreset("GentleWave");
+    public List<WordArtPathPoint> CustomPathPoints { get; set; } = [];
     public double PathStartOffsetPercent { get; set; } = 50;
     public double PathBaselineOffset { get; set; }
 }
@@ -505,9 +474,9 @@ public sealed class PublicationInteraction
     public bool OpenInNewWindow { get; set; } = true;
 }
 
-public static class RichTextDocumentFactory
+public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> logger)
 {
-    public static byte[] CreateOpenXml(string title, string? subtitle = null)
+    public byte[] CreateOpenXml(string title, string? subtitle = null)
     {
         var paragraphs = new List<string>
         {
@@ -525,7 +494,7 @@ public static class RichTextDocumentFactory
         return CreateOpenXmlPackage(paragraphs);
     }
 
-    public static byte[] CreateOpenXmlFromPlainText(string text)
+    public byte[] CreateOpenXmlFromPlainText(string text)
     {
         var paragraphs = NormalizeLines(text)
             .Split('\n')
@@ -537,7 +506,7 @@ public static class RichTextDocumentFactory
         return CreateOpenXmlPackage(paragraphs);
     }
 
-    public static byte[] CreateOpenXmlFromMarkdown(string markdown)
+    public byte[] CreateOpenXmlFromMarkdown(string markdown)
     {
         var paragraphs = new List<string>();
         foreach (var sourceLine in NormalizeLines(markdown).Split('\n'))
@@ -583,7 +552,7 @@ public static class RichTextDocumentFactory
         return CreateOpenXmlPackage(paragraphs);
     }
 
-    private static byte[] CreateOpenXmlPackage(IEnumerable<string> bodyElements)
+    private byte[] CreateOpenXmlPackage(IEnumerable<string> bodyElements)
     {
         var body = string.Join(Environment.NewLine, bodyElements);
         if (string.IsNullOrWhiteSpace(body))
@@ -637,12 +606,12 @@ public static class RichTextDocumentFactory
         return stream.ToArray();
     }
 
-    private static string BuildParagraph(string runs, string? paragraphProperties = null) =>
+    private string BuildParagraph(string runs, string? paragraphProperties = null) =>
         string.IsNullOrWhiteSpace(paragraphProperties)
             ? $"<w:p>{runs}</w:p>"
             : $"<w:p><w:pPr>{paragraphProperties}</w:pPr>{runs}</w:p>";
 
-    private static string BuildMarkdownRuns(string value, string? baseProperties = null)
+    private string BuildMarkdownRuns(string value, string? baseProperties = null)
     {
         var runs = new StringBuilder();
         var buffer = new StringBuilder();
@@ -696,7 +665,7 @@ public static class RichTextDocumentFactory
         return runs.Length == 0 ? BuildRun(string.Empty, baseProperties) : runs.ToString();
     }
 
-    private static string BuildRun(string value, string? runProperties = null)
+    private string BuildRun(string value, string? runProperties = null)
     {
         var escaped = SecurityElement.Escape(value) ?? string.Empty;
         var properties = string.IsNullOrWhiteSpace(runProperties)
@@ -705,10 +674,10 @@ public static class RichTextDocumentFactory
         return $"<w:r>{properties}<w:t xml:space=\"preserve\">{escaped}</w:t></w:r>";
     }
 
-    private static string NormalizeLines(string? value) =>
+    private string NormalizeLines(string? value) =>
         (value ?? string.Empty).Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
 
-    private static void Write(ZipArchive archive, string name, string content)
+    private void Write(ZipArchive archive, string name, string content)
     {
         var entry = archive.CreateEntry(name, CompressionLevel.Fastest);
         using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(false));

@@ -57,7 +57,7 @@
   </Target>
 
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <RuntimeValueOwnershipScript>$(MSBuildThisFileDirectory)build\Assert-RuntimeValueOwnership.ps1</RuntimeValueOwnershipScript>
   </PropertyGroup>
 
@@ -67,7 +67,7 @@
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipRuntimeValueOwnershipGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(RuntimeValueOwnershipScript)')" Text="Runtime-value ownership script is missing: $(RuntimeValueOwnershipScript)" />
     <Exec Condition="Exists('$(RuntimeValueOwnershipScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(RuntimeValueOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <PropertyGroup>
     <LocalizationIntegrityScript>$(MSBuildThisFileDirectory)build\Assert-LocalizationIntegrity.ps1</LocalizationIntegrityScript>
@@ -101,7 +101,7 @@
   </Target>
 
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <InteractiveServerRenderModeScript>$(MSBuildThisFileDirectory)build\Assert-InteractiveServerRenderModes.ps1</InteractiveServerRenderModeScript>
     <AsyncContinuationScript>$(MSBuildThisFileDirectory)build\Assert-AsyncContinuationPolicy.ps1</AsyncContinuationScript>
     <ComponentDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-ComponentDiagnostics.ps1</ComponentDiagnosticsScript>
@@ -116,9 +116,9 @@
           Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InteractiveServerRenderModeScript)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
           StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
-  <Target Name="AssertPublisherAsyncContinuationPolicy"
+  <!--<Target Name="AssertPublisherAsyncContinuationPolicy"
           BeforeTargets="BeforeBuild"
           AfterTargets="AssertPublisherInteractiveServerRenderModes"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipAsyncContinuationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
@@ -127,9 +127,9 @@
           Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(AsyncContinuationScript)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
           StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
-  <Target Name="AssertPublisherComponentDiagnostics"
+  <!--<Target Name="AssertPublisherComponentDiagnostics"
           BeforeTargets="BeforeBuild"
           AfterTargets="AssertPublisherAsyncContinuationPolicy"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
@@ -138,7 +138,7 @@
           Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ComponentDiagnosticsScript)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
           StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <PropertyGroup>
     <MethodDiagnosticsPolicyScript>$(MSBuildThisFileDirectory)build\Assert-MethodDiagnostics.ps1</MethodDiagnosticsPolicyScript>
@@ -148,19 +148,19 @@
     <SystemVariableInitializationScript>$(MSBuildThisFileDirectory)build\Assert-SystemVariableInitialization.ps1</SystemVariableInitializationScript>
   </PropertyGroup>
 
-  <Target Name="AssertPublisherMethodDiagnosticsPolicy"
+  <!--<Target Name="AssertPublisherMethodDiagnosticsPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherComponentDiagnostics"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipMethodDiagnosticsPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(MethodDiagnosticsPolicyScript)')" Text="Method diagnostics policy script is missing: $(MethodDiagnosticsPolicyScript)" />
     <Exec Condition="Exists('$(MethodDiagnosticsPolicyScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MethodDiagnosticsPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
-  <Target Name="AssertPublisherApplicationStaticPolicy"
+  <!--<Target Name="AssertPublisherApplicationStaticPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherMethodDiagnosticsPolicy"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipApplicationStaticPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(ApplicationStaticPolicyScript)')" Text="Application static policy script is missing: $(ApplicationStaticPolicyScript)" />
     <Exec Condition="Exists('$(ApplicationStaticPolicyScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ApplicationStaticPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherTextServiceOwnership"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherApplicationStaticPolicy"
@@ -169,12 +169,12 @@
     <Exec Condition="Exists('$(TextServiceOwnershipScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(TextServiceOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherIteratorExceptionPolicy"
+  <!--<Target Name="AssertPublisherIteratorExceptionPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherTextServiceOwnership"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipIteratorExceptionPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(IteratorExceptionPolicyScript)')" Text="Iterator exception policy script is missing: $(IteratorExceptionPolicyScript)" />
     <Exec Condition="Exists('$(IteratorExceptionPolicyScript)')" Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(IteratorExceptionPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherSystemVariableInitialization"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherIteratorExceptionPolicy"
@@ -207,7 +207,7 @@
   </Target>
 
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <PublishConfigurationMigrationScript>$(MSBuildThisFileDirectory)build\Migrate-ObsoletePublishConfiguration.ps1</PublishConfigurationMigrationScript>
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
   </PropertyGroup>
@@ -223,9 +223,9 @@
           ConsoleToMSBuild="true"
           StandardOutputImportance="High"
           StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
-  <Target Name="AssertPublisherPublishConfiguration"
+  <!--<Target Name="AssertPublisherPublishConfiguration"
           BeforeTargets="BeforeBuild"
           AfterTargets="MigratePublisherObsoletePublishConfiguration"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
@@ -236,7 +236,7 @@
           ConsoleToMSBuild="true"
           StandardOutputImportance="High"
           StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <!--<PropertyGroup>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>

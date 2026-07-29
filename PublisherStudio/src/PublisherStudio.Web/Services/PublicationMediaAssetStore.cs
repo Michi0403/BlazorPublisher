@@ -9,7 +9,10 @@ namespace PublisherStudio.Services;
 /// This prevents multi-megabyte data URLs from being copied into every Blazor render batch.
 /// The original data URL remains in the document model so saved projects stay self-contained.
 /// </summary>
-public sealed class PublicationMediaAssetStore
+public sealed class PublicationMediaAssetStore(
+    PublicationMediaData mediaData,
+    PublicationElementTraversal elementTraversal,
+    ILogger<PublicationMediaAssetStore> logger)
 {
     private sealed record MediaAsset(byte[] Bytes, string MimeType, string Version, string SourceKey, DateTimeOffset LastAccessUtc);
 
@@ -17,121 +20,255 @@ public sealed class PublicationMediaAssetStore
 
     public string GetOrRegister(PublicationMediaElement media)
     {
-        var first = media.EffectiveSegments.FirstOrDefault();
-        return first is null
-            ? Register(media.Id, media.DataUrl, media.MimeType)
-            : GetOrRegister(first);
+        try
+        {
+            logger.LogTrace($"Entering PublicationMediaAssetStore.GetOrRegister.");
+                    var first = media.EffectiveSegments.FirstOrDefault();
+                    return first is null
+                        ? Register(media.Id, media.DataUrl, media.MimeType)
+                        : GetOrRegister(first);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.GetOrRegister failed: {exception.Message}");
+            throw;
+        }
     }
 
     public string GetOrRegister(PublicationMediaSegment segment)
-        => Register(segment.Id, segment.DataUrl, segment.MimeType);
+        {
+            try
+            {
+                logger.LogTrace($"Entering PublicationMediaAssetStore.GetOrRegister.");
+                return Register(segment.Id, segment.DataUrl, segment.MimeType);
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"PublicationMediaAssetStore.GetOrRegister failed: {exception.Message}");
+                throw;
+            }
+        }
 
     public string Register(Guid id, string? source, string? declaredMimeType)
     {
-        if (id == Guid.Empty || string.IsNullOrWhiteSpace(source)) return source ?? string.Empty;
-        if (!source.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return source;
-
-        var sourceKey = CreateSourceKey(source, declaredMimeType);
-        if (_assets.TryGetValue(id, out var cached) && cached.SourceKey == sourceKey)
+        try
         {
-            _assets[id] = cached with { LastAccessUtc = DateTimeOffset.UtcNow };
-            return BuildUrl(id, cached.Version);
-        }
+            logger.LogTrace($"Entering PublicationMediaAssetStore.Register.");
+                    if (id == Guid.Empty || string.IsNullOrWhiteSpace(source)) return source ?? string.Empty;
+                    if (!source.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return source;
 
-        if (!TryDecodeDataUrl(source, declaredMimeType, out var bytes, out var mimeType)) return source;
-        return RegisterBytes(id, bytes, mimeType, sourceKey);
+                    var sourceKey = CreateSourceKey(source, declaredMimeType);
+                    if (_assets.TryGetValue(id, out var cached) && cached.SourceKey == sourceKey)
+                    {
+                        _assets[id] = cached with { LastAccessUtc = DateTimeOffset.UtcNow };
+                        return BuildUrl(id, cached.Version);
+                    }
+
+                    if (!TryDecodeDataUrl(source, declaredMimeType, out var bytes, out var mimeType)) return source;
+                    return RegisterBytes(id, bytes, mimeType, sourceKey);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.Register failed: {exception.Message}");
+            throw;
+        }
     }
 
     public string RegisterBytes(Guid id, byte[] bytes, string? mimeType)
-        => RegisterBytes(id, bytes, mimeType, sourceKey: null);
+        {
+            try
+            {
+                logger.LogTrace($"Entering PublicationMediaAssetStore.RegisterBytes.");
+                return RegisterBytes(id, bytes, mimeType, sourceKey: null);
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"PublicationMediaAssetStore.RegisterBytes failed: {exception.Message}");
+                throw;
+            }
+        }
 
     private string RegisterBytes(Guid id, byte[] bytes, string? mimeType, string? sourceKey)
     {
-        if (id == Guid.Empty || bytes.Length == 0) return string.Empty;
-        var normalizedMime = PublicationMediaData.NormalizeMimeType(mimeType, "application/octet-stream");
-        var version = CreateVersion(bytes, normalizedMime);
-        var asset = new MediaAsset(bytes, normalizedMime, version, sourceKey ?? $"bytes:{version}", DateTimeOffset.UtcNow);
+        try
+        {
+            logger.LogTrace($"Entering PublicationMediaAssetStore.RegisterBytes.");
+                    if (id == Guid.Empty || bytes.Length == 0) return string.Empty;
+                    var normalizedMime = mediaData.NormalizeMimeType(mimeType, "application/octet-stream");
+                    var version = CreateVersion(bytes, normalizedMime);
+                    var asset = new MediaAsset(bytes, normalizedMime, version, sourceKey ?? $"bytes:{version}", DateTimeOffset.UtcNow);
 
-        _assets[id] = asset;
-        return BuildUrl(id, version);
+                    _assets[id] = asset;
+                    return BuildUrl(id, version);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.RegisterBytes failed: {exception.Message}");
+            throw;
+        }
     }
 
     public bool TryGet(Guid id, out byte[] bytes, out string mimeType, out string version)
     {
-        if (_assets.TryGetValue(id, out var asset))
+        try
         {
-            _assets[id] = asset with { LastAccessUtc = DateTimeOffset.UtcNow };
-            bytes = asset.Bytes;
-            mimeType = asset.MimeType;
-            version = asset.Version;
-            return true;
-        }
+            logger.LogTrace($"Entering PublicationMediaAssetStore.TryGet.");
+                    if (_assets.TryGetValue(id, out var asset))
+                    {
+                        _assets[id] = asset with { LastAccessUtc = DateTimeOffset.UtcNow };
+                        bytes = asset.Bytes;
+                        mimeType = asset.MimeType;
+                        version = asset.Version;
+                        return true;
+                    }
 
-        bytes = [];
-        mimeType = "application/octet-stream";
-        version = string.Empty;
-        return false;
+                    bytes = [];
+                    mimeType = "application/octet-stream";
+                    version = string.Empty;
+                    return false;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.TryGet failed: {exception.Message}");
+            throw;
+        }
     }
 
     public bool Copy(Guid sourceId, Guid targetId)
     {
-        if (sourceId == Guid.Empty || targetId == Guid.Empty || !_assets.TryGetValue(sourceId, out var asset)) return false;
-        _assets[targetId] = asset with { LastAccessUtc = DateTimeOffset.UtcNow };
-        return true;
+        try
+        {
+            logger.LogTrace($"Entering PublicationMediaAssetStore.Copy.");
+                    if (sourceId == Guid.Empty || targetId == Guid.Empty || !_assets.TryGetValue(sourceId, out var asset)) return false;
+                    _assets[targetId] = asset with { LastAccessUtc = DateTimeOffset.UtcNow };
+                    return true;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.Copy failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void RegisterDocument(PublicationDocument document)
     {
-        foreach (var media in PublicationElementTraversal.Descendants(document).OfType<PublicationMediaElement>())
+        try
         {
-            foreach (var segment in media.EffectiveSegments)
-                GetOrRegister(segment);
+            logger.LogTrace($"Entering PublicationMediaAssetStore.RegisterDocument.");
+                    foreach (var media in elementTraversal.Descendants(document).OfType<PublicationMediaElement>())
+                    {
+                        foreach (var segment in media.EffectiveSegments)
+                            GetOrRegister(segment);
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.RegisterDocument failed: {exception.Message}");
+            throw;
         }
     }
 
-    public void Remove(Guid id) => _assets.TryRemove(id, out _);
+    public void Remove(Guid id) {
+        try
+        {
+            logger.LogTrace($"Entering PublicationMediaAssetStore.Remove.");
+            _assets.TryRemove(id, out _);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.Remove failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private string BuildUrl(Guid id, string version)
-        => $"/api/assets/media/{id:D}?v={Uri.EscapeDataString(version)}";
+        {
+            try
+            {
+                logger.LogTrace($"Entering PublicationMediaAssetStore.BuildUrl.");
+                return $"/api/assets/media/{id:D}?v={Uri.EscapeDataString(version)}";
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"PublicationMediaAssetStore.BuildUrl failed: {exception.Message}");
+                throw;
+            }
+        }
 
     private string CreateSourceKey(string source, string? mimeType)
     {
-        var firstLength = Math.Min(192, source.Length);
-        var lastLength = Math.Min(192, Math.Max(0, source.Length - firstLength));
-        var first = source[..firstLength];
-        var last = lastLength > 0 ? source[^lastLength..] : string.Empty;
-        var sample = $"{first}|{source.Length.ToString(System.Globalization.CultureInfo.InvariantCulture)}|{mimeType ?? string.Empty}|{last}";
-        return Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(sample)))[..16].ToLowerInvariant();
+        try
+        {
+            logger.LogTrace($"Entering PublicationMediaAssetStore.CreateSourceKey.");
+                    var firstLength = Math.Min(192, source.Length);
+                    var lastLength = Math.Min(192, Math.Max(0, source.Length - firstLength));
+                    var first = source[..firstLength];
+                    var last = lastLength > 0 ? source[^lastLength..] : string.Empty;
+                    var sample = $"{first}|{source.Length.ToString(System.Globalization.CultureInfo.InvariantCulture)}|{mimeType ?? string.Empty}|{last}";
+                    return Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(sample)))[..16].ToLowerInvariant();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.CreateSourceKey failed: {exception.Message}");
+            throw;
+        }
     }
 
     private string CreateVersion(byte[] bytes, string mimeType)
     {
-        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        hash.AppendData(bytes.AsSpan(0, Math.Min(bytes.Length, 64 * 1024)));
-        if (bytes.Length > 64 * 1024)
-            hash.AppendData(bytes.AsSpan(Math.Max(0, bytes.Length - 64 * 1024)));
-        hash.AppendData(System.Text.Encoding.UTF8.GetBytes($"|{bytes.Length}|{mimeType}"));
-        return Convert.ToHexString(hash.GetHashAndReset())[..16].ToLowerInvariant();
+        try
+        {
+            logger.LogTrace($"Entering PublicationMediaAssetStore.CreateVersion.");
+                    using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+                    hash.AppendData(bytes.AsSpan(0, Math.Min(bytes.Length, 64 * 1024)));
+                    if (bytes.Length > 64 * 1024)
+                        hash.AppendData(bytes.AsSpan(Math.Max(0, bytes.Length - 64 * 1024)));
+                    hash.AppendData(System.Text.Encoding.UTF8.GetBytes($"|{bytes.Length}|{mimeType}"));
+                    return Convert.ToHexString(hash.GetHashAndReset())[..16].ToLowerInvariant();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationMediaAssetStore.CreateVersion failed: {exception.Message}");
+            throw;
+        }
     }
 
     private bool TryDecodeDataUrl(string source, string? declaredMimeType, out byte[] bytes, out string mimeType)
     {
-        bytes = [];
-        mimeType = PublicationMediaData.NormalizeMimeType(declaredMimeType, "application/octet-stream");
-        if (!source.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return false;
-
-        var marker = source.LastIndexOf(";base64,", StringComparison.OrdinalIgnoreCase);
-        if (marker < 5) return false;
-        mimeType = PublicationMediaData.NormalizeMimeType(source.Substring(5, marker - 5), mimeType);
         try
         {
-            bytes = Convert.FromBase64String(source[(marker + 8)..]);
-            return bytes.Length > 0;
+            logger.LogTrace($"Entering PublicationMediaAssetStore.TryDecodeDataUrl.");
+                    bytes = [];
+                    mimeType = mediaData.NormalizeMimeType(declaredMimeType, "application/octet-stream");
+                    if (!source.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return false;
+
+                    var marker = source.LastIndexOf(";base64,", StringComparison.OrdinalIgnoreCase);
+                    if (marker < 5) return false;
+                    mimeType = mediaData.NormalizeMimeType(source.Substring(5, marker - 5), mimeType);
+                    try
+                    {
+                        bytes = Convert.FromBase64String(source[(marker + 8)..]);
+                        return bytes.Length > 0;
+                    }
+                    catch (FormatException)
+                    {
+                        bytes = [];
+                        return false;
+                    }
+    
         }
-        catch (FormatException)
+        catch (Exception exception)
         {
-            bytes = [];
-            return false;
+            logger.LogError(exception, $"PublicationMediaAssetStore.TryDecodeDataUrl failed: {exception.Message}");
+            throw;
         }
     }
 }

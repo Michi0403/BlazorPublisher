@@ -1009,12 +1009,12 @@
     private void WordArtCustomPath() => SetWordArt(item =>
     {
         item.Warp = WordArtWarp.Custom;
-        item.CustomPathPoints = WordArtPathGeometry.Normalize(item.CustomPathPoints);
+        item.CustomPathPoints = WordArtGeometry.Normalize(item.CustomPathPoints);
     });
     private void WordArtReversePath() => SetWordArt(item =>
     {
         item.Warp = WordArtWarp.Custom;
-        item.CustomPathPoints = WordArtPathGeometry.Reverse(item.CustomPathPoints);
+        item.CustomPathPoints = WordArtGeometry.Reverse(item.CustomPathPoints);
     });
     private void WordArtMoreDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Min(18, item.ExtrudeDepth + 2));
     private void WordArtLessDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Max(0, item.ExtrudeDepth - 2));

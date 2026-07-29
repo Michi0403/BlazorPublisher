@@ -4,6 +4,7 @@
 @inject PublicationMediaAssetStore MediaAssets
 @inject IUserNotificationService Notifications
 @inject ILogger<PageSurface> Logger
+@inject IPublisherRuntimePolicyDataService RuntimePolicy
 
 <div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null) @(!SelectionVisualsEnabled ? "selection-visuals-suppressed" : null)"
      tabindex="0" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
@@ -66,9 +67,9 @@
 
             @foreach (var connector in State.CurrentPage.Elements.OfType<ConnectorElement>().Where(e => e.Visible))
             {
-                if (ConnectorGeometry.TryResolve(State.CurrentPage, connector, out var sourcePoint, out var targetPoint))
+                if (ConnectorGeometryService.TryResolve(State.CurrentPage, connector, out var sourcePoint, out var targetPoint))
                 {
-                    var connectorPath = ConnectorGeometry.Path(connector, sourcePoint, targetPoint);
+                    var connectorPath = ConnectorGeometryService.Path(connector, sourcePoint, targetPoint);
                     <svg @key="connector.Id" id="element-@connector.Id" class="pub-connector @(connector.Signal.Enabled ? "signal-connector" : null) @(!connector.Signal.LineVisible ? "signal-line-hidden" : null) @(State.IsSelected(connector.Id) ? "selected" : null) @(connector.Id == State.SelectedElementId ? "selection-primary" : null) @(connector.Locked ? "locked" : null)"
                          style="z-index:@connector.ZIndex"
                          viewBox="0 0 @Inv(State.CurrentPage.WidthMm) @Inv(State.CurrentPage.HeightMm)"
@@ -79,8 +80,8 @@
                          data-element-id="@connector.Id"
                          data-selected="@State.IsSelected(connector.Id).ToString().ToLowerInvariant()"
                          data-group-id="@connector.GroupId"
-                         data-animations="@PublicationAnimationData.Animations(connector)"
-                         data-interaction="@PublicationAnimationData.Interaction(connector)"
+                         data-animations="@AnimationData.Animations(connector)"
+                         data-interaction="@AnimationData.Interaction(connector)"
                          data-interaction-action="@connector.Interaction.Action"
                          data-playback-hidden="@connector.HiddenAtPresentationStart.ToString().ToLowerInvariant()"
                          data-connector-id="@connector.Id"
@@ -89,7 +90,7 @@
                          data-path-kind="@connector.PathKind" data-start-marker="@connector.StartMarker" data-end-marker="@connector.EndMarker"
                          data-control1-x="@NullableInv(connector.Control1X)" data-control1-y="@NullableInv(connector.Control1Y)" data-control2-x="@NullableInv(connector.Control2X)" data-control2-y="@NullableInv(connector.Control2Y)"
                          data-stroke="@connector.Stroke" data-stroke-width="@Inv(connector.StrokeWidthMm)" data-dash-style="@connector.DashStyle"
-                         data-signal="@PublicationAnimationData.Signal(connector)"
+                         data-signal="@AnimationData.Signal(connector)"
                          data-signal-enabled="@connector.Signal.Enabled.ToString().ToLowerInvariant()"
                          data-signal-line-visible="@connector.Signal.LineVisible.ToString().ToLowerInvariant()"
                          @oncontextmenu="args => ShowElementContextMenu(connector, args)" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
@@ -99,11 +100,11 @@
                         </defs>
                         <path class="connector-hit" d="@connectorPath"></path>
                         <path class="connector-line" d="@connectorPath" stroke="@connector.Stroke" stroke-width="@Inv(connector.StrokeWidthMm)"
-                              stroke-dasharray="@ConnectorGeometry.DashArray(connector)"
+                              stroke-dasharray="@ConnectorGeometryService.DashArray(connector)"
                               marker-start="@MarkerUrl(connector, true)" marker-end="@MarkerUrl(connector, false)"></path>
                         @if (connector.Id == State.SelectedElementId && !connector.Locked)
                         {
-                            var controls = ConnectorGeometry.ControlPoints(connector, sourcePoint, targetPoint);
+                            var controls = ConnectorGeometryService.ControlPoints(connector, sourcePoint, targetPoint);
                             var routeX = (controls.First.X + controls.Second.X) / 2;
                             var routeY = (controls.First.Y + controls.Second.Y) / 2;
                             <path class="connector-control-guide" d="M @Inv(sourcePoint.X) @Inv(sourcePoint.Y) L @Inv(controls.First.X) @Inv(controls.First.Y) M @Inv(targetPoint.X) @Inv(targetPoint.Y) L @Inv(controls.Second.X) @Inv(controls.Second.Y)"></path>
@@ -126,8 +127,8 @@
                      data-element-width="@Inv(element.Width)"
                      data-element-height="@Inv(element.Height)"
                      data-element-rotation="@Inv(element.Rotation)"
-                     data-animations="@PublicationAnimationData.Animations(element)"
-                     data-interaction="@PublicationAnimationData.Interaction(element)"
+                     data-animations="@AnimationData.Animations(element)"
+                     data-interaction="@AnimationData.Interaction(element)"
                      data-interaction-action="@element.Interaction.Action"
                      data-selected="@State.IsSelected(element.Id).ToString().ToLowerInvariant()"
                      data-group-id="@element.GroupId"
@@ -144,7 +145,7 @@
                      data-media-trigger="@(element is PublicationMediaElement mediaTrigger ? mediaTrigger.PlaybackTrigger.ToString() : null)"
                      data-media-fade-in="@(element is PublicationMediaElement mediaFadeIn ? Inv(mediaFadeIn.FadeInSeconds) : null)"
                      data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)"
-                     class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(State.IsSelected(element.Id) ? "selected" : null) @(element.Id == State.SelectedElementId ? "selection-primary" : null) @(State.ContentPanMode && element.Id == State.SelectedElementId && EditorStateService.CanPanContent(element) ? "content-pan-target" : null) @(element.GroupId is not null ? "grouped" : null) @(element.Locked ? "locked" : null)"
+                     class="pub-element kind-@element.Kind.ToString().ToLowerInvariant() @(State.IsSelected(element.Id) ? "selected" : null) @(element.Id == State.SelectedElementId ? "selection-primary" : null) @(State.ContentPanMode && element.Id == State.SelectedElementId && State.CanPanContent(element) ? "content-pan-target" : null) @(element.GroupId is not null ? "grouped" : null) @(element.Locked ? "locked" : null)"
                      style="@ElementStyle(element)"
                      data-help="@ElementDesignerHelp(element)"
                      @oncontextmenu="args => ShowElementContextMenu(element, args)"
@@ -265,7 +266,7 @@
                             <span class="connector-port connector-port-custom" style="left:@Percent(port.XPercent);top:@Percent(port.YPercent)" data-connector-port data-owner-id="@element.Id" data-anchor="Center" data-port-id="@port.Id" title="@port.Name"></span>
                         }
                     }
-                    @if (element.Id == State.SelectedElementId && !State.HasMultipleSelection && !element.Locked && !(State.CropMode && element is ImageFrameElement) && !(State.ContentPanMode && EditorStateService.CanPanContent(element)))
+                    @if (element.Id == State.SelectedElementId && !State.HasMultipleSelection && !element.Locked && !(State.CropMode && element is ImageFrameElement) && !(State.ContentPanMode && State.CanPanContent(element)))
                     {
                         foreach (var handle in Handles)
                         {
@@ -704,8 +705,7 @@
         ConnectorAnchor.TopLeft, ConnectorAnchor.Top, ConnectorAnchor.TopRight, ConnectorAnchor.Right,
         ConnectorAnchor.BottomRight, ConnectorAnchor.Bottom, ConnectorAnchor.BottomLeft, ConnectorAnchor.Left
     ];
-    private const double BasePixelsPerMm = 3.7795275591;
-    private double PixelsPerMm => BasePixelsPerMm * State.Document.Zoom;
+    private double PixelsPerMm => RuntimePolicy.BasePixelsPerMillimeter * State.Document.Zoom;
     private string CanvasZoomModeClass => State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform
         ? "zoom-mode-transform"
         : "zoom-mode-css";
@@ -1428,7 +1428,7 @@
         State.UpdateSelected(_ =>
         {
             item.Warp = WordArtWarp.Custom;
-            item.CustomPathPoints = WordArtPathGeometry.Normalize(item.CustomPathPoints);
+            item.CustomPathPoints = WordArtGeometry.Normalize(item.CustomPathPoints);
         });
     }
 
@@ -1438,7 +1438,7 @@
         State.UpdateSelected(_ =>
         {
             item.Warp = WordArtWarp.Custom;
-            item.CustomPathPoints = WordArtPathGeometry.Reverse(item.CustomPathPoints);
+            item.CustomPathPoints = WordArtGeometry.Reverse(item.CustomPathPoints);
         });
     }
 
@@ -1675,7 +1675,7 @@
     private string FrameClipPath(IEnumerable<MediaFramePoint> points) =>
         $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
     private string Mm(double mm) => Px(mm * PixelsPerMm);
-    private string ContentMm(double mm) => Px(mm * BasePixelsPerMm);
+    private string ContentMm(double mm) => Px(mm * RuntimePolicy.BasePixelsPerMillimeter);
     private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private string NullableInv(double? value) => value is { } number ? Inv(number) : string.Empty;
     private string Percent(double value) => $"{Math.Clamp(value, 0, 1) * 100:0.###}%";

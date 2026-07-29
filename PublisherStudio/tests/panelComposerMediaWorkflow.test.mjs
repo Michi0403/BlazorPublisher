@@ -78,7 +78,7 @@ for (const property of ['StartSeconds', 'DurationSeconds', 'Width', 'Height', 'F
 assert.match(conversionService, /ProcessStartInfo[\s\S]*UseShellExecute = false/);
 assert.match(conversionService, /startInfo\.ArgumentList\.Add/);
 assert.match(conversionService, /ParseAdvancedArguments/);
-assert.match(conversionService, /ForbiddenAdvancedOptions/);
+assert.match(conversionService, /PublisherRuntimeCollection\.ForbiddenFfmpegAdvancedOptions/);
 assert.match(conversionService, /Preserve FFmpeg's[\s\S]*filter\/path escapes/);
 assert.match(conversionService, /next == '\\\\' \|\| next is/);
 assert.match(conversionService, /PublisherStudio HTML · balanced/);

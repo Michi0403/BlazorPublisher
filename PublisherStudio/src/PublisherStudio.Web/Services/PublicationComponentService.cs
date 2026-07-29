@@ -11,445 +11,527 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PublicationComponentService
 {
+        private readonly ILogger<PublicationComponentService> logger;
+
     private readonly PublicationDataService _data;
+    private readonly IPublicationMarkupService _markup;
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public PublicationComponentService(PublicationDataService data) => _data = data;
+    public PublicationComponentService(PublicationDataService data, IPublicationMarkupService markup, ILogger<PublicationComponentService> logger)
+    {
+        _data = data;
+        _markup = markup;
+        this.logger = logger;
+    }
 
     public DevExtremeComponentElement Clone(DevExtremeComponentElement source)
     {
-        var json = JsonSerializer.Serialize(source, _json);
-        return JsonSerializer.Deserialize<DevExtremeComponentElement>(json, _json) ?? new DevExtremeComponentElement();
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.Clone.");
+                    var json = JsonSerializer.Serialize(source, _json);
+                    return JsonSerializer.Deserialize<DevExtremeComponentElement>(json, _json) ?? new DevExtremeComponentElement();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.Clone failed: {exception.Message}");
+            throw;
+        }
     }
 
     public void CopyConfiguration(DevExtremeComponentElement source, DevExtremeComponentElement target, bool preservePlacement = true)
     {
-        var id = target.Id;
-        var x = target.X;
-        var y = target.Y;
-        var width = target.Width;
-        var height = target.Height;
-        var rotation = target.Rotation;
-        var zIndex = target.ZIndex;
-        var visible = target.Visible;
-        var locked = target.Locked;
-        var hidden = target.HiddenAtPresentationStart;
-        var group = target.GroupId;
-        var animations = target.Animations;
-        var interaction = target.Interaction;
-        var clone = Clone(source);
-        foreach (var property in typeof(DevExtremeComponentElement).GetProperties().Where(property => property.CanRead && property.CanWrite))
-            property.SetValue(target, property.GetValue(clone));
-        target.Id = id;
-        if (!preservePlacement) return;
-        target.X = x;
-        target.Y = y;
-        target.Width = width;
-        target.Height = height;
-        target.Rotation = rotation;
-        target.ZIndex = zIndex;
-        target.Visible = visible;
-        target.Locked = locked;
-        target.HiddenAtPresentationStart = hidden;
-        target.GroupId = group;
-        target.Animations = animations;
-        target.Interaction = interaction;
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.CopyConfiguration.");
+                    var id = target.Id;
+                    var x = target.X;
+                    var y = target.Y;
+                    var width = target.Width;
+                    var height = target.Height;
+                    var rotation = target.Rotation;
+                    var zIndex = target.ZIndex;
+                    var visible = target.Visible;
+                    var locked = target.Locked;
+                    var hidden = target.HiddenAtPresentationStart;
+                    var group = target.GroupId;
+                    var animations = target.Animations;
+                    var interaction = target.Interaction;
+                    var clone = Clone(source);
+                    foreach (var property in typeof(DevExtremeComponentElement).GetProperties().Where(property => property.CanRead && property.CanWrite))
+                        property.SetValue(target, property.GetValue(clone));
+                    target.Id = id;
+                    if (!preservePlacement) return;
+                    target.X = x;
+                    target.Y = y;
+                    target.Width = width;
+                    target.Height = height;
+                    target.Rotation = rotation;
+                    target.ZIndex = zIndex;
+                    target.Visible = visible;
+                    target.Locked = locked;
+                    target.HiddenAtPresentationStart = hidden;
+                    target.GroupId = group;
+                    target.Animations = animations;
+                    target.Interaction = interaction;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.CopyConfiguration failed: {exception.Message}");
+            throw;
+        }
     }
 
     public DevExtremeComponentElement Create(PublicationDocument document, PublicationComponentKind kind)
     {
-        _data.EnsureBuiltInObjects(document);
-        var data = kind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView
-            ? EnsurePublicationMediaObject(document)
-            : kind == PublicationComponentKind.Chat
-                ? EnsureChatPreviewObject(document)
-                : EnsureDataObject(document);
-        var element = new DevExtremeComponentElement
+        try
         {
-            Name = ComponentName(kind),
-            Title = ComponentName(kind),
-            ComponentKind = kind,
-            Connection = new PublicationComponentConnection
-            {
-                Mode = PublicationComponentDataMode.PublicationDataObject,
-                DataObjectId = data.Id
-            },
-            Width = DefaultSize(kind).Width,
-            Height = DefaultSize(kind).Height,
-            ShowTitle = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler
-                or PublicationComponentKind.Form or PublicationComponentKind.Gallery or PublicationComponentKind.TileView
-                or PublicationComponentKind.PivotGrid or PublicationComponentKind.Splitter or PublicationComponentKind.TabPanel
-                or PublicationComponentKind.MultiView or PublicationComponentKind.ScrollView or PublicationComponentKind.Map or PublicationComponentKind.VectorMap,
-            ShowFilterRow = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList,
-            ShowSearchPanel = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.PivotGrid,
-            AllowPaging = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList,
-            EditMode = kind is PublicationComponentKind.Form ? PublicationComponentEditMode.Form : PublicationComponentEditMode.ReadOnly,
-            SelectionMode = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.TileView
-                ? PublicationComponentSelectionMode.Single
-                : PublicationComponentSelectionMode.None
-        };
-        if (kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
-        {
-            element.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
-            element.MenuItems.Add(new PublicationMenuItem { Text = "Menu item" });
+            logger.LogTrace($"Entering PublicationComponentService.Create.");
+                    _data.EnsureBuiltInObjects(document);
+                    var data = kind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView
+                        ? EnsurePublicationMediaObject(document)
+                        : kind == PublicationComponentKind.Chat
+                            ? EnsureChatPreviewObject(document)
+                            : EnsureDataObject(document);
+                    var element = new DevExtremeComponentElement
+                    {
+                        Name = ComponentName(kind),
+                        Title = ComponentName(kind),
+                        ComponentKind = kind,
+                        Connection = new PublicationComponentConnection
+                        {
+                            Mode = PublicationComponentDataMode.PublicationDataObject,
+                            DataObjectId = data.Id
+                        },
+                        Width = DefaultSize(kind).Width,
+                        Height = DefaultSize(kind).Height,
+                        ShowTitle = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler
+                            or PublicationComponentKind.Form or PublicationComponentKind.Gallery or PublicationComponentKind.TileView
+                            or PublicationComponentKind.PivotGrid or PublicationComponentKind.Splitter or PublicationComponentKind.TabPanel
+                            or PublicationComponentKind.MultiView or PublicationComponentKind.ScrollView or PublicationComponentKind.Map or PublicationComponentKind.VectorMap,
+                        ShowFilterRow = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList,
+                        ShowSearchPanel = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.PivotGrid,
+                        AllowPaging = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList,
+                        EditMode = kind is PublicationComponentKind.Form ? PublicationComponentEditMode.Form : PublicationComponentEditMode.ReadOnly,
+                        SelectionMode = kind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.TileView
+                            ? PublicationComponentSelectionMode.Single
+                            : PublicationComponentSelectionMode.None
+                    };
+                    if (kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+                    {
+                        element.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+                        element.MenuItems.Add(new PublicationMenuItem { Text = "Menu item" });
+                    }
+                    if (kind == PublicationComponentKind.VectorMap)
+                    {
+                        element.MapCenterLatitude = 20;
+                        element.MapCenterLongitude = 0;
+                        element.MapZoom = 1;
+                    }
+                    ApplyFieldsFromDataObject(document, element, replace: true);
+                    ApplyKindDefaults(document, element);
+                    Normalize(document, element);
+                    return element;
+    
         }
-        if (kind == PublicationComponentKind.VectorMap)
+        catch (Exception exception)
         {
-            element.MapCenterLatitude = 20;
-            element.MapCenterLongitude = 0;
-            element.MapZoom = 1;
+            logger.LogError(exception, $"PublicationComponentService.Create failed: {exception.Message}");
+            throw;
         }
-        ApplyFieldsFromDataObject(document, element, replace: true);
-        ApplyKindDefaults(document, element);
-        Normalize(document, element);
-        return element;
     }
 
     public void Normalize(PublicationDocument document, DevExtremeComponentElement item)
     {
-        _data.EnsureBuiltInObjects(document);
-        item.Connection ??= new PublicationComponentConnection();
-        item.Connection.Headers ??= [];
-        item.Fields ??= [];
-        item.Actions ??= [];
-        item.Panels ??= [];
-        item.MenuItems ??= [];
-        item.VectorFeatures ??= [];
-        item.Title = string.IsNullOrWhiteSpace(item.Title) ? ComponentName(item.ComponentKind) : item.Title.Trim();
-        item.Name = string.IsNullOrWhiteSpace(item.Name) ? item.Title : item.Name.Trim();
-        item.PageSize = Math.Clamp(item.PageSize <= 0 ? 20 : item.PageSize, 1, 1000);
-        item.ColumnCount = Math.Clamp(item.ColumnCount <= 0 ? 1 : item.ColumnCount, 1, 12);
-        item.BorderWidthMm = Math.Clamp(item.BorderWidthMm, 0, 8);
-        item.ContentOffsetX = Math.Clamp(item.ContentOffsetX, -500, 500);
-        item.ContentOffsetY = Math.Clamp(item.ContentOffsetY, -500, 500);
-        item.ContentScale = Math.Clamp(item.ContentScale <= 0 ? 1 : item.ContentScale, .1, 12);
-        item.MapCenterLatitude = Math.Clamp(item.MapCenterLatitude, -90, 90);
-        item.MapCenterLongitude = Math.Clamp(item.MapCenterLongitude, -180, 180);
-        var mapZoomMaximum = item.ComponentKind == PublicationComponentKind.VectorMap ? 256d : 20d;
-        item.MapZoom = Math.Clamp(item.MapZoom <= 0 ? 1 : item.MapZoom, 1, mapZoomMaximum);
-        var mapProvider = item.MapProvider?.Trim() ?? string.Empty;
-        item.MapProvider = mapProvider.ToLowerInvariant() switch
+        try
         {
-            "google" => "google",
-            "googlestatic" => "googleStatic",
-            "azure" => "azure",
-            "bing" => "bing",
-            _ => string.Empty
-        };
-        item.MapApiKey = item.MapApiKey?.Trim() ?? string.Empty;
-        item.MapId = item.MapId?.Trim() ?? string.Empty;
-        item.MapType = string.IsNullOrWhiteSpace(item.MapType) ? "roadmap" : item.MapType.Trim();
-        item.VectorProjection = string.IsNullOrWhiteSpace(item.VectorProjection) ? "mercator" : item.VectorProjection.Trim();
-        item.MediaKindField = string.IsNullOrWhiteSpace(item.MediaKindField) ? "mediaType" : item.MediaKindField.Trim();
-        item.MediaSourceField = string.IsNullOrWhiteSpace(item.MediaSourceField) ? "source" : item.MediaSourceField.Trim();
-        item.MediaPosterField = string.IsNullOrWhiteSpace(item.MediaPosterField) ? "poster" : item.MediaPosterField.Trim();
-        item.MediaAltTextField = string.IsNullOrWhiteSpace(item.MediaAltTextField) ? "altText" : item.MediaAltTextField.Trim();
-        item.ChatChannel ??= string.Empty;
-        item.ChatPlatformField = string.IsNullOrWhiteSpace(item.ChatPlatformField) ? "platform" : item.ChatPlatformField.Trim();
-        item.ChatChannelField = string.IsNullOrWhiteSpace(item.ChatChannelField) ? "channel" : item.ChatChannelField.Trim();
-        item.ChatMessageField = string.IsNullOrWhiteSpace(item.ChatMessageField) ? "text" : item.ChatMessageField.Trim();
-        item.ChatTimestampField = string.IsNullOrWhiteSpace(item.ChatTimestampField) ? "timestamp" : item.ChatTimestampField.Trim();
-        item.ChatAuthorIdField = string.IsNullOrWhiteSpace(item.ChatAuthorIdField) ? "authorId" : item.ChatAuthorIdField.Trim();
-        item.ChatAuthorNameField = string.IsNullOrWhiteSpace(item.ChatAuthorNameField) ? "authorName" : item.ChatAuthorNameField.Trim();
-        item.ChatAuthorAvatarField = string.IsNullOrWhiteSpace(item.ChatAuthorAvatarField) ? "authorAvatar" : item.ChatAuthorAvatarField.Trim();
-        item.ChatCurrentUserId = string.IsNullOrWhiteSpace(item.ChatCurrentUserId) ? "publisher" : item.ChatCurrentUserId.Trim();
-        item.ChatCurrentUserName = string.IsNullOrWhiteSpace(item.ChatCurrentUserName) ? "Streamer" : item.ChatCurrentUserName.Trim();
-        item.ChatCurrentUserAvatar ??= string.Empty;
-        item.ChatMaxVisibleMessages = Math.Clamp(item.ChatMaxVisibleMessages <= 0 ? 12 : item.ChatMaxVisibleMessages, 1, 100);
-        item.ChatBackgroundOpacity = Math.Clamp(double.IsFinite(item.ChatBackgroundOpacity) ? item.ChatBackgroundOpacity : .88, 0, 1);
-        item.ChatMessageOpacity = Math.Clamp(double.IsFinite(item.ChatMessageOpacity) ? item.ChatMessageOpacity : .78, 0, 1);
-        item.CustomCssClass = SanitizeCssClass(item.CustomCssClass);
-        item.CustomCss = SanitizeInlineCss(item.CustomCss);
-        foreach (var feature in item.VectorFeatures)
-        {
-            if (feature.Id == Guid.Empty) feature.Id = Guid.NewGuid();
-            feature.Name = string.IsNullOrWhiteSpace(feature.Name) ? "Feature" : feature.Name.Trim();
-            feature.Points ??= [];
-            feature.Points = feature.Points.Where(point => double.IsFinite(point.Longitude) && double.IsFinite(point.Latitude)).Select(point => new PublicationMapPoint
-            {
-                Longitude = Math.Clamp(point.Longitude, -180, 180),
-                Latitude = Math.Clamp(point.Latitude, -90, 90)
-            }).ToList();
-            feature.Opacity = Math.Clamp(feature.Opacity, 0, 1);
-            feature.Width = Math.Clamp(feature.Width <= 0 ? 1 : feature.Width, .25, 40);
-            feature.Size = Math.Clamp(feature.Size <= 0 ? 10 : feature.Size, 2, 100);
-        }
-        item.Width = Math.Max(24, item.Width);
-        item.Height = Math.Max(12, item.Height);
-        item.AdvancedOptionsJson = NormalizeJsonObject(item.AdvancedOptionsJson);
-        item.Connection.ODataVersion = item.Connection.ODataVersion is 2 or 3 or 4 ? item.Connection.ODataVersion : 4;
-        item.Connection.KeyField = string.IsNullOrWhiteSpace(item.Connection.KeyField) ? item.KeyField : item.Connection.KeyField.Trim();
-        item.Connection.KeyType = NormalizeODataKeyType(item.Connection.KeyType);
-        item.Connection.Url ??= string.Empty;
-        item.Connection.InsertUrl ??= string.Empty;
-        item.Connection.UpdateUrl ??= string.Empty;
-        item.Connection.DeleteUrl ??= string.Empty;
-        item.Connection.JsonPath ??= string.Empty;
-        item.Connection.LoadBody ??= string.Empty;
-        foreach (var header in item.Connection.Headers)
-        {
-            header.Name ??= string.Empty;
-            header.Value ??= string.Empty;
-        }
+            logger.LogTrace($"Entering PublicationComponentService.Normalize.");
+                    _data.EnsureBuiltInObjects(document);
+                    item.Connection ??= new PublicationComponentConnection();
+                    item.Connection.Headers ??= [];
+                    item.Fields ??= [];
+                    item.Actions ??= [];
+                    item.Panels ??= [];
+                    item.MenuItems ??= [];
+                    item.VectorFeatures ??= [];
+                    item.Title = string.IsNullOrWhiteSpace(item.Title) ? ComponentName(item.ComponentKind) : item.Title.Trim();
+                    item.Name = string.IsNullOrWhiteSpace(item.Name) ? item.Title : item.Name.Trim();
+                    item.PageSize = Math.Clamp(item.PageSize <= 0 ? 20 : item.PageSize, 1, 1000);
+                    item.ColumnCount = Math.Clamp(item.ColumnCount <= 0 ? 1 : item.ColumnCount, 1, 12);
+                    item.BorderWidthMm = Math.Clamp(item.BorderWidthMm, 0, 8);
+                    item.ContentOffsetX = Math.Clamp(item.ContentOffsetX, -500, 500);
+                    item.ContentOffsetY = Math.Clamp(item.ContentOffsetY, -500, 500);
+                    item.ContentScale = Math.Clamp(item.ContentScale <= 0 ? 1 : item.ContentScale, .1, 12);
+                    item.MapCenterLatitude = Math.Clamp(item.MapCenterLatitude, -90, 90);
+                    item.MapCenterLongitude = Math.Clamp(item.MapCenterLongitude, -180, 180);
+                    var mapZoomMaximum = item.ComponentKind == PublicationComponentKind.VectorMap ? 256d : 20d;
+                    item.MapZoom = Math.Clamp(item.MapZoom <= 0 ? 1 : item.MapZoom, 1, mapZoomMaximum);
+                    var mapProvider = item.MapProvider?.Trim() ?? string.Empty;
+                    item.MapProvider = mapProvider.ToLowerInvariant() switch
+                    {
+                        "google" => "google",
+                        "googlestatic" => "googleStatic",
+                        "azure" => "azure",
+                        "bing" => "bing",
+                        _ => string.Empty
+                    };
+                    item.MapApiKey = item.MapApiKey?.Trim() ?? string.Empty;
+                    item.MapId = item.MapId?.Trim() ?? string.Empty;
+                    item.MapType = string.IsNullOrWhiteSpace(item.MapType) ? "roadmap" : item.MapType.Trim();
+                    item.VectorProjection = string.IsNullOrWhiteSpace(item.VectorProjection) ? "mercator" : item.VectorProjection.Trim();
+                    item.MediaKindField = string.IsNullOrWhiteSpace(item.MediaKindField) ? "mediaType" : item.MediaKindField.Trim();
+                    item.MediaSourceField = string.IsNullOrWhiteSpace(item.MediaSourceField) ? "source" : item.MediaSourceField.Trim();
+                    item.MediaPosterField = string.IsNullOrWhiteSpace(item.MediaPosterField) ? "poster" : item.MediaPosterField.Trim();
+                    item.MediaAltTextField = string.IsNullOrWhiteSpace(item.MediaAltTextField) ? "altText" : item.MediaAltTextField.Trim();
+                    item.ChatChannel ??= string.Empty;
+                    item.ChatPlatformField = string.IsNullOrWhiteSpace(item.ChatPlatformField) ? "platform" : item.ChatPlatformField.Trim();
+                    item.ChatChannelField = string.IsNullOrWhiteSpace(item.ChatChannelField) ? "channel" : item.ChatChannelField.Trim();
+                    item.ChatMessageField = string.IsNullOrWhiteSpace(item.ChatMessageField) ? "text" : item.ChatMessageField.Trim();
+                    item.ChatTimestampField = string.IsNullOrWhiteSpace(item.ChatTimestampField) ? "timestamp" : item.ChatTimestampField.Trim();
+                    item.ChatAuthorIdField = string.IsNullOrWhiteSpace(item.ChatAuthorIdField) ? "authorId" : item.ChatAuthorIdField.Trim();
+                    item.ChatAuthorNameField = string.IsNullOrWhiteSpace(item.ChatAuthorNameField) ? "authorName" : item.ChatAuthorNameField.Trim();
+                    item.ChatAuthorAvatarField = string.IsNullOrWhiteSpace(item.ChatAuthorAvatarField) ? "authorAvatar" : item.ChatAuthorAvatarField.Trim();
+                    item.ChatCurrentUserId = string.IsNullOrWhiteSpace(item.ChatCurrentUserId) ? "publisher" : item.ChatCurrentUserId.Trim();
+                    item.ChatCurrentUserName = string.IsNullOrWhiteSpace(item.ChatCurrentUserName) ? "Streamer" : item.ChatCurrentUserName.Trim();
+                    item.ChatCurrentUserAvatar ??= string.Empty;
+                    item.ChatMaxVisibleMessages = Math.Clamp(item.ChatMaxVisibleMessages <= 0 ? 12 : item.ChatMaxVisibleMessages, 1, 100);
+                    item.ChatBackgroundOpacity = Math.Clamp(double.IsFinite(item.ChatBackgroundOpacity) ? item.ChatBackgroundOpacity : .88, 0, 1);
+                    item.ChatMessageOpacity = Math.Clamp(double.IsFinite(item.ChatMessageOpacity) ? item.ChatMessageOpacity : .78, 0, 1);
+                    item.CustomCssClass = SanitizeCssClass(item.CustomCssClass);
+                    item.CustomCss = SanitizeInlineCss(item.CustomCss);
+                    foreach (var feature in item.VectorFeatures)
+                    {
+                        if (feature.Id == Guid.Empty) feature.Id = Guid.NewGuid();
+                        feature.Name = string.IsNullOrWhiteSpace(feature.Name) ? "Feature" : feature.Name.Trim();
+                        feature.Points ??= [];
+                        feature.Points = feature.Points.Where(point => double.IsFinite(point.Longitude) && double.IsFinite(point.Latitude)).Select(point => new PublicationMapPoint
+                        {
+                            Longitude = Math.Clamp(point.Longitude, -180, 180),
+                            Latitude = Math.Clamp(point.Latitude, -90, 90)
+                        }).ToList();
+                        feature.Opacity = Math.Clamp(feature.Opacity, 0, 1);
+                        feature.Width = Math.Clamp(feature.Width <= 0 ? 1 : feature.Width, .25, 40);
+                        feature.Size = Math.Clamp(feature.Size <= 0 ? 10 : feature.Size, 2, 100);
+                    }
+                    item.Width = Math.Max(24, item.Width);
+                    item.Height = Math.Max(12, item.Height);
+                    item.AdvancedOptionsJson = NormalizeJsonObject(item.AdvancedOptionsJson);
+                    item.Connection.ODataVersion = item.Connection.ODataVersion is 2 or 3 or 4 ? item.Connection.ODataVersion : 4;
+                    item.Connection.KeyField = string.IsNullOrWhiteSpace(item.Connection.KeyField) ? item.KeyField : item.Connection.KeyField.Trim();
+                    item.Connection.KeyType = NormalizeODataKeyType(item.Connection.KeyType);
+                    item.Connection.Url ??= string.Empty;
+                    item.Connection.InsertUrl ??= string.Empty;
+                    item.Connection.UpdateUrl ??= string.Empty;
+                    item.Connection.DeleteUrl ??= string.Empty;
+                    item.Connection.JsonPath ??= string.Empty;
+                    item.Connection.LoadBody ??= string.Empty;
+                    foreach (var header in item.Connection.Headers)
+                    {
+                        header.Name ??= string.Empty;
+                        header.Value ??= string.Empty;
+                    }
 
-        var dataObject = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
-        if (item.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot)
-        {
-            if (dataObject is null && document.DataObjects.Count > 0)
-            {
-                item.Connection.DataObjectId = document.DataObjects[0].Id;
-                dataObject = document.DataObjects[0];
-            }
-            if (item.Fields.Count == 0 && dataObject is not null)
-                ApplyFieldsFromDataObject(document, item, replace: true);
+                    var dataObject = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
+                    if (item.Connection.Mode is PublicationComponentDataMode.PublicationDataObject or PublicationComponentDataMode.StaticSnapshot)
+                    {
+                        if (dataObject is null && document.DataObjects.Count > 0)
+                        {
+                            item.Connection.DataObjectId = document.DataObjects[0].Id;
+                            dataObject = document.DataObjects[0];
+                        }
+                        if (item.Fields.Count == 0 && dataObject is not null)
+                            ApplyFieldsFromDataObject(document, item, replace: true);
+                    }
+
+                    var seenFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    item.Fields = item.Fields
+                        .Where(field => !string.IsNullOrWhiteSpace(field.DataField))
+                        .Where(field => seenFields.Add(field.DataField.Trim()))
+                        .Select(field =>
+                        {
+                            field.DataField = field.DataField.Trim();
+                            field.Caption = string.IsNullOrWhiteSpace(field.Caption) ? Friendly(field.DataField) : field.Caption.Trim();
+                            field.Width = Math.Clamp(field.Width, 0, 2000);
+                            field.Format ??= string.Empty;
+                            field.LookupDataField ??= string.Empty;
+                            field.LookupDisplayField ??= string.Empty;
+                            if (field.Id == Guid.Empty) field.Id = Guid.NewGuid();
+                            return field;
+                        }).ToList();
+
+                    var menuIds = new HashSet<Guid>();
+                    foreach (var menuItem in item.MenuItems)
+                    {
+                        if (menuItem.Id == Guid.Empty || !menuIds.Add(menuItem.Id))
+                        {
+                            menuItem.Id = Guid.NewGuid();
+                            menuIds.Add(menuItem.Id);
+                        }
+                        menuItem.Text = string.IsNullOrWhiteSpace(menuItem.Text) ? "Menu item" : menuItem.Text.Trim();
+                        menuItem.Url ??= string.Empty;
+                        menuItem.IconCssClass = SanitizeCssClass(menuItem.IconCssClass);
+                        if (menuItem.ParentId == menuItem.Id || (menuItem.ParentId is { } parentId && !item.MenuItems.Any(candidate => candidate.Id == parentId))) menuItem.ParentId = null;
+                        if (menuItem.TargetPageId is { } targetPageId && document.Pages.All(page => page.Id != targetPageId)) menuItem.TargetPageId = null;
+                        if (menuItem.Destination == PublicationMenuDestinationKind.Page && menuItem.TargetPageId is null) menuItem.Destination = PublicationMenuDestinationKind.None;
+                        if (menuItem.Destination == PublicationMenuDestinationKind.ExternalUrl && string.IsNullOrWhiteSpace(menuItem.Url)) menuItem.Destination = PublicationMenuDestinationKind.None;
+                    }
+
+                    foreach (var action in item.Actions)
+                    {
+                        if (action.Id == Guid.Empty) action.Id = Guid.NewGuid();
+                        action.Url ??= string.Empty;
+                        action.MailTo ??= string.Empty;
+                        action.MailSubject ??= string.Empty;
+                        action.MailBody ??= string.Empty;
+                        action.ConfirmationText ??= string.Empty;
+                        action.SourceField ??= string.Empty;
+                        action.TargetField ??= string.Empty;
+                        action.ValueTemplate ??= "{{value}}";
+                        action.Script ??= string.Empty;
+                        if (action.TargetPageId is { } pageId && document.Pages.All(page => page.Id != pageId)) action.TargetPageId = null;
+                        if (action.TargetElementId is { } elementId)
+                        {
+                            var target = document.Pages.SelectMany(page => page.Elements).FirstOrDefault(element => element.Id == elementId);
+                            if (target is null)
+                            {
+                                action.TargetElementId = null;
+                            }
+                            else if (target is DevExtremeComponentElement targetComponent && targetComponent.SharedComponentId is { } sharedTargetId)
+                            {
+                                action.TargetSharedComponentId = sharedTargetId;
+                            }
+                        }
+                        if (action.TargetSharedComponentId is { } targetSharedId
+                            && document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>()
+                                .All(component => component.SharedComponentId != targetSharedId))
+                        {
+                            action.TargetSharedComponentId = null;
+                        }
+                        if (!item.AllowCustomScript && action.Action == PublicationComponentActionKind.CustomScript) action.Action = PublicationComponentActionKind.None;
+                    }
+
+                    foreach (var panel in item.Panels)
+                    {
+                        if (panel.Id == Guid.Empty) panel.Id = Guid.NewGuid();
+                        panel.Title = string.IsNullOrWhiteSpace(panel.Title) ? "Panel" : panel.Title.Trim();
+                        panel.Size ??= string.Empty;
+                        panel.MinSize ??= string.Empty;
+                        panel.MaxSize ??= string.Empty;
+                        panel.ContentHtml = _markup.SanitizePreviewHtml(panel.ContentHtml ?? string.Empty);
+                        panel.Fields ??= [];
+                        if (panel.DataObjectId == Guid.Empty && dataObject is not null) panel.DataObjectId = dataObject.Id;
+                    }
+
+                    ApplyKindDefaults(document, item, onlyMissing: true);
+                    if (item.Scope == PublicationComponentScope.Document)
+                        item.SharedComponentId ??= Guid.NewGuid();
+                    else
+                        item.SharedComponentId = null;
+    
         }
-
-        var seenFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        item.Fields = item.Fields
-            .Where(field => !string.IsNullOrWhiteSpace(field.DataField))
-            .Where(field => seenFields.Add(field.DataField.Trim()))
-            .Select(field =>
-            {
-                field.DataField = field.DataField.Trim();
-                field.Caption = string.IsNullOrWhiteSpace(field.Caption) ? Friendly(field.DataField) : field.Caption.Trim();
-                field.Width = Math.Clamp(field.Width, 0, 2000);
-                field.Format ??= string.Empty;
-                field.LookupDataField ??= string.Empty;
-                field.LookupDisplayField ??= string.Empty;
-                if (field.Id == Guid.Empty) field.Id = Guid.NewGuid();
-                return field;
-            }).ToList();
-
-        var menuIds = new HashSet<Guid>();
-        foreach (var menuItem in item.MenuItems)
+        catch (Exception exception)
         {
-            if (menuItem.Id == Guid.Empty || !menuIds.Add(menuItem.Id))
-            {
-                menuItem.Id = Guid.NewGuid();
-                menuIds.Add(menuItem.Id);
-            }
-            menuItem.Text = string.IsNullOrWhiteSpace(menuItem.Text) ? "Menu item" : menuItem.Text.Trim();
-            menuItem.Url ??= string.Empty;
-            menuItem.IconCssClass = SanitizeCssClass(menuItem.IconCssClass);
-            if (menuItem.ParentId == menuItem.Id || (menuItem.ParentId is { } parentId && !item.MenuItems.Any(candidate => candidate.Id == parentId))) menuItem.ParentId = null;
-            if (menuItem.TargetPageId is { } targetPageId && document.Pages.All(page => page.Id != targetPageId)) menuItem.TargetPageId = null;
-            if (menuItem.Destination == PublicationMenuDestinationKind.Page && menuItem.TargetPageId is null) menuItem.Destination = PublicationMenuDestinationKind.None;
-            if (menuItem.Destination == PublicationMenuDestinationKind.ExternalUrl && string.IsNullOrWhiteSpace(menuItem.Url)) menuItem.Destination = PublicationMenuDestinationKind.None;
+            logger.LogError(exception, $"PublicationComponentService.Normalize failed: {exception.Message}");
+            throw;
         }
-
-        foreach (var action in item.Actions)
-        {
-            if (action.Id == Guid.Empty) action.Id = Guid.NewGuid();
-            action.Url ??= string.Empty;
-            action.MailTo ??= string.Empty;
-            action.MailSubject ??= string.Empty;
-            action.MailBody ??= string.Empty;
-            action.ConfirmationText ??= string.Empty;
-            action.SourceField ??= string.Empty;
-            action.TargetField ??= string.Empty;
-            action.ValueTemplate ??= "{{value}}";
-            action.Script ??= string.Empty;
-            if (action.TargetPageId is { } pageId && document.Pages.All(page => page.Id != pageId)) action.TargetPageId = null;
-            if (action.TargetElementId is { } elementId)
-            {
-                var target = document.Pages.SelectMany(page => page.Elements).FirstOrDefault(element => element.Id == elementId);
-                if (target is null)
-                {
-                    action.TargetElementId = null;
-                }
-                else if (target is DevExtremeComponentElement targetComponent && targetComponent.SharedComponentId is { } sharedTargetId)
-                {
-                    action.TargetSharedComponentId = sharedTargetId;
-                }
-            }
-            if (action.TargetSharedComponentId is { } targetSharedId
-                && document.Pages.SelectMany(page => page.Elements).OfType<DevExtremeComponentElement>()
-                    .All(component => component.SharedComponentId != targetSharedId))
-            {
-                action.TargetSharedComponentId = null;
-            }
-            if (!item.AllowCustomScript && action.Action == PublicationComponentActionKind.CustomScript) action.Action = PublicationComponentActionKind.None;
-        }
-
-        foreach (var panel in item.Panels)
-        {
-            if (panel.Id == Guid.Empty) panel.Id = Guid.NewGuid();
-            panel.Title = string.IsNullOrWhiteSpace(panel.Title) ? "Panel" : panel.Title.Trim();
-            panel.Size ??= string.Empty;
-            panel.MinSize ??= string.Empty;
-            panel.MaxSize ??= string.Empty;
-            panel.ContentHtml = PublicationFileService.SanitizePreviewHtml(panel.ContentHtml ?? string.Empty);
-            panel.Fields ??= [];
-            if (panel.DataObjectId == Guid.Empty && dataObject is not null) panel.DataObjectId = dataObject.Id;
-        }
-
-        ApplyKindDefaults(document, item, onlyMissing: true);
-        if (item.Scope == PublicationComponentScope.Document)
-            item.SharedComponentId ??= Guid.NewGuid();
-        else
-            item.SharedComponentId = null;
     }
 
     public void ApplyFieldsFromDataObject(PublicationDocument document, DevExtremeComponentElement item, bool replace)
     {
-        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
-        var columns = _data.ResolveColumns(data);
-        if (!replace && item.Fields.Count > 0) return;
-        item.Fields = columns.Select((column, index) => new PublicationComponentField
+        try
         {
-            DataField = column.Name,
-            Caption = Friendly(column.Name),
-            ValueKind = column.ValueKind,
-            Editor = EditorFor(column.ValueKind),
-            Area = index == 0 ? PublicationComponentFieldArea.Row : column.ValueKind == PublicationDataValueKind.Number
-                ? PublicationComponentFieldArea.Data
-                : PublicationComponentFieldArea.Column,
-            Editable = true,
-            Visible = true
-        }).ToList();
-        ApplyMappingsFromFields(item);
+            logger.LogTrace($"Entering PublicationComponentService.ApplyFieldsFromDataObject.");
+                    var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
+                    var columns = _data.ResolveColumns(data);
+                    if (!replace && item.Fields.Count > 0) return;
+                    item.Fields = columns.Select((column, index) => new PublicationComponentField
+                    {
+                        DataField = column.Name,
+                        Caption = Friendly(column.Name),
+                        ValueKind = column.ValueKind,
+                        Editor = EditorFor(column.ValueKind),
+                        Area = index == 0 ? PublicationComponentFieldArea.Row : column.ValueKind == PublicationDataValueKind.Number
+                            ? PublicationComponentFieldArea.Data
+                            : PublicationComponentFieldArea.Column,
+                        Editable = true,
+                        Visible = true
+                    }).ToList();
+                    ApplyMappingsFromFields(item);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.ApplyFieldsFromDataObject failed: {exception.Message}");
+            throw;
+        }
     }
 
     public object BuildClientConfiguration(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content")
     {
-        Normalize(document, item);
-        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
-        var columns = data is null ? Array.Empty<PublicationDataColumn>() : _data.ResolveColumns(data).ToArray();
-        var rows = data is null ? Array.Empty<Dictionary<string, object?>>() : _data.ResolveRows(document, data, currentPageId)
-            .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value, columns.FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind), StringComparer.OrdinalIgnoreCase))
-            .ToArray();
-        var live = BuildLiveData(document, data);
-        var panelConfigs = item.Panels.Select(panel => BuildPanelConfiguration(document, panel, currentPageId)).ToArray();
-        return new
+        try
         {
-            id = item.Id,
-            designerMode,
-            designerInteractionMode = string.Equals(designerInteractionMode, "object", StringComparison.OrdinalIgnoreCase) ? "object" : "content",
-            sharedComponentId = item.SharedComponentId,
-            kind = item.ComponentKind.ToString(),
-            scope = item.Scope.ToString(),
-            item.Title,
-            item.ShowTitle,
-            item.ShowBorders,
-            item.ShowFilterRow,
-            item.ShowHeaderFilter,
-            item.ShowSearchPanel,
-            item.ShowGroupPanel,
-            item.ShowColumnChooser,
-            item.AllowSorting,
-            item.AllowFiltering,
-            item.AllowPaging,
-            item.AllowReordering,
-            item.AllowResizing,
-            item.WordWrap,
-            item.AutoExpandAll,
-            item.PageSize,
-            editMode = item.EditMode.ToString(),
-            selectionMode = item.SelectionMode.ToString(),
-            item.KeyField,
-            item.ParentField,
-            item.TextField,
-            item.ValueField,
-            item.DisplayField,
-            item.ImageField,
-            item.MediaKindField,
-            item.MediaSourceField,
-            item.MediaPosterField,
-            item.MediaAltTextField,
-            item.MediaShowControls,
-            item.MediaAutoPlay,
-            item.MediaMuted,
-            item.MediaLoop,
-            item.StartDateField,
-            item.EndDateField,
-            item.AllDayField,
-            item.TargetPageField,
-            item.UrlField,
-            item.CurrentView,
-            item.Orientation,
-            menuSourceMode = item.MenuSourceMode.ToString(),
-            menuItems = BuildMenuItems(item),
-            item.ColumnCount,
-            item.ButtonText,
-            chatPlatform = item.ChatPlatform.ToString(),
-            item.ChatChannel,
-            item.ChatPlatformField,
-            item.ChatChannelField,
-            item.ChatMessageField,
-            item.ChatTimestampField,
-            item.ChatAuthorIdField,
-            item.ChatAuthorNameField,
-            item.ChatAuthorAvatarField,
-            item.ChatCurrentUserId,
-            item.ChatCurrentUserName,
-            item.ChatCurrentUserAvatar,
-            item.ChatAllowSending,
-            item.ChatShowAvatar,
-            item.ChatShowTimestamp,
-            item.ChatOptimisticSend,
-            chatDisplayMode = item.ChatDisplayMode.ToString(),
-            item.ChatMaxVisibleMessages,
-            item.ChatCompact,
-            item.ChatFadeOlderMessages,
-            item.ChatShowPlatformBadge,
-            item.ChatBackgroundOpacity,
-            item.ChatMessageOpacity,
-            item.Placeholder,
-            item.InitialValue,
-            item.Background,
-            item.CustomCssClass,
-            item.CustomCss,
-            item.MapProvider,
-            item.MapType,
-            item.MapApiKey,
-            item.MapId,
-            item.MapCenterLatitude,
-            item.MapCenterLongitude,
-            item.MapZoom,
-            item.MapControls,
-            item.MapAutoAdjust,
-            item.MapShowRoutes,
-            item.LatitudeField,
-            item.LongitudeField,
-            item.AddressField,
-            item.MarkerTooltipField,
-            item.MapRouteField,
-            item.MapOrderField,
-            vectorBaseLayer = item.VectorBaseLayer.ToString(),
-            item.VectorProjection,
-            item.VectorShowLabels,
-            item.VectorLabelField,
-            item.VectorValueField,
-            item.VectorColorField,
-            vectorFeatures = item.VectorFeatures.Select(feature => new
-            {
-                feature.Id, feature.Name, kind = feature.Kind.ToString(), feature.Points, feature.Color, feature.BorderColor,
-                feature.Opacity, feature.Width, feature.Size, feature.Label, feature.Value
-            }).ToArray(),
-            item.AdvancedOptionsJson,
-            item.AllowCustomScript,
-            fields = BuildFields(document, item.Fields, currentPageId),
-            actions = BuildActions(document, item, currentPageId),
-            panels = panelConfigs,
-            rows,
-            columnKinds = columns.ToDictionary(column => column.Name, column => column.ValueKind.ToString(), StringComparer.OrdinalIgnoreCase),
-            connection = BuildConnection(item.Connection,
-                item.Connection.Mode == PublicationComponentDataMode.PublicationDataObject ? live : null),
-            pages = document.Pages.Select(page => new { id = page.Id, page.Name }).ToArray(),
-            elements = document.Pages.SelectMany(page => page.Elements).Select(element => new { id = element.Id, element.Name, pageId = document.Pages.First(page => page.Elements.Contains(element)).Id }).ToArray()
-        };
+            logger.LogTrace($"Entering PublicationComponentService.BuildClientConfiguration.");
+                    Normalize(document, item);
+                    var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == item.Connection.DataObjectId);
+                    var columns = data is null ? Array.Empty<PublicationDataColumn>() : _data.ResolveColumns(data).ToArray();
+                    var rows = data is null ? Array.Empty<Dictionary<string, object?>>() : _data.ResolveRows(document, data, currentPageId)
+                        .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value, columns.FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind), StringComparer.OrdinalIgnoreCase))
+                        .ToArray();
+                    var live = BuildLiveData(document, data);
+                    var panelConfigs = item.Panels.Select(panel => BuildPanelConfiguration(document, panel, currentPageId)).ToArray();
+                    return new
+                    {
+                        id = item.Id,
+                        designerMode,
+                        designerInteractionMode = string.Equals(designerInteractionMode, "object", StringComparison.OrdinalIgnoreCase) ? "object" : "content",
+                        sharedComponentId = item.SharedComponentId,
+                        kind = item.ComponentKind.ToString(),
+                        scope = item.Scope.ToString(),
+                        item.Title,
+                        item.ShowTitle,
+                        item.ShowBorders,
+                        item.ShowFilterRow,
+                        item.ShowHeaderFilter,
+                        item.ShowSearchPanel,
+                        item.ShowGroupPanel,
+                        item.ShowColumnChooser,
+                        item.AllowSorting,
+                        item.AllowFiltering,
+                        item.AllowPaging,
+                        item.AllowReordering,
+                        item.AllowResizing,
+                        item.WordWrap,
+                        item.AutoExpandAll,
+                        item.PageSize,
+                        editMode = item.EditMode.ToString(),
+                        selectionMode = item.SelectionMode.ToString(),
+                        item.KeyField,
+                        item.ParentField,
+                        item.TextField,
+                        item.ValueField,
+                        item.DisplayField,
+                        item.ImageField,
+                        item.MediaKindField,
+                        item.MediaSourceField,
+                        item.MediaPosterField,
+                        item.MediaAltTextField,
+                        item.MediaShowControls,
+                        item.MediaAutoPlay,
+                        item.MediaMuted,
+                        item.MediaLoop,
+                        item.StartDateField,
+                        item.EndDateField,
+                        item.AllDayField,
+                        item.TargetPageField,
+                        item.UrlField,
+                        item.CurrentView,
+                        item.Orientation,
+                        menuSourceMode = item.MenuSourceMode.ToString(),
+                        menuItems = BuildMenuItems(item),
+                        item.ColumnCount,
+                        item.ButtonText,
+                        chatPlatform = item.ChatPlatform.ToString(),
+                        item.ChatChannel,
+                        item.ChatPlatformField,
+                        item.ChatChannelField,
+                        item.ChatMessageField,
+                        item.ChatTimestampField,
+                        item.ChatAuthorIdField,
+                        item.ChatAuthorNameField,
+                        item.ChatAuthorAvatarField,
+                        item.ChatCurrentUserId,
+                        item.ChatCurrentUserName,
+                        item.ChatCurrentUserAvatar,
+                        item.ChatAllowSending,
+                        item.ChatShowAvatar,
+                        item.ChatShowTimestamp,
+                        item.ChatOptimisticSend,
+                        chatDisplayMode = item.ChatDisplayMode.ToString(),
+                        item.ChatMaxVisibleMessages,
+                        item.ChatCompact,
+                        item.ChatFadeOlderMessages,
+                        item.ChatShowPlatformBadge,
+                        item.ChatBackgroundOpacity,
+                        item.ChatMessageOpacity,
+                        item.Placeholder,
+                        item.InitialValue,
+                        item.Background,
+                        item.CustomCssClass,
+                        item.CustomCss,
+                        item.MapProvider,
+                        item.MapType,
+                        item.MapApiKey,
+                        item.MapId,
+                        item.MapCenterLatitude,
+                        item.MapCenterLongitude,
+                        item.MapZoom,
+                        item.MapControls,
+                        item.MapAutoAdjust,
+                        item.MapShowRoutes,
+                        item.LatitudeField,
+                        item.LongitudeField,
+                        item.AddressField,
+                        item.MarkerTooltipField,
+                        item.MapRouteField,
+                        item.MapOrderField,
+                        vectorBaseLayer = item.VectorBaseLayer.ToString(),
+                        item.VectorProjection,
+                        item.VectorShowLabels,
+                        item.VectorLabelField,
+                        item.VectorValueField,
+                        item.VectorColorField,
+                        vectorFeatures = item.VectorFeatures.Select(feature => new
+                        {
+                            feature.Id, feature.Name, kind = feature.Kind.ToString(), feature.Points, feature.Color, feature.BorderColor,
+                            feature.Opacity, feature.Width, feature.Size, feature.Label, feature.Value
+                        }).ToArray(),
+                        item.AdvancedOptionsJson,
+                        item.AllowCustomScript,
+                        fields = BuildFields(document, item.Fields, currentPageId),
+                        actions = BuildActions(document, item, currentPageId),
+                        panels = panelConfigs,
+                        rows,
+                        columnKinds = columns.ToDictionary(column => column.Name, column => column.ValueKind.ToString(), StringComparer.OrdinalIgnoreCase),
+                        connection = BuildConnection(item.Connection,
+                            item.Connection.Mode == PublicationComponentDataMode.PublicationDataObject ? live : null),
+                        pages = document.Pages.Select(page => new { id = page.Id, page.Name }).ToArray(),
+                        elements = document.Pages.SelectMany(page => page.Elements).Select(element => new { id = element.Id, element.Name, pageId = document.Pages.First(page => page.Elements.Contains(element)).Id }).ToArray()
+                    };
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.BuildClientConfiguration failed: {exception.Message}");
+            throw;
+        }
     }
 
-    public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content") =>
-        Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(BuildClientConfiguration(document, item, currentPageId, designerMode, designerInteractionMode), _json));
+    public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content") {
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.BuildClientConfigurationBase64.");
+            return Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(BuildClientConfiguration(document, item, currentPageId, designerMode, designerInteractionMode), _json));
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.BuildClientConfigurationBase64 failed: {exception.Message}");
+            throw;
+        }
+    }
 
 
-    private static object[] BuildMenuItems(DevExtremeComponentElement item)
-        => item.MenuItems.Where(menuItem => menuItem.Visible).Select(menuItem => (object)new
+    private object[] BuildMenuItems(DevExtremeComponentElement item)
+        {
+            try
+            {
+                logger.LogTrace($"Entering PublicationComponentService.BuildMenuItems.");
+                return item.MenuItems.Where(menuItem => menuItem.Visible).Select(menuItem => (object)new
         {
             id = menuItem.Id,
             parentId = menuItem.ParentId,
@@ -463,124 +545,165 @@ public sealed class PublicationComponentService
             visible = menuItem.Visible,
             icon = menuItem.IconCssClass
         }).ToArray();
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"PublicationComponentService.BuildMenuItems failed: {exception.Message}");
+                throw;
+            }
+        }
 
     private object[] BuildFields(PublicationDocument document, IEnumerable<PublicationComponentField> fields, Guid currentPageId)
     {
-        return fields.Select(field =>
+        try
         {
-            object? lookup = null;
-            if (field.LookupDataObjectId is { } lookupId)
-            {
-                var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == lookupId);
-                if (data is not null)
-                {
-                    var rows = _data.ResolveRows(document, data, currentPageId)
-                        .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value,
-                            _data.ResolveColumns(data).FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
-                            StringComparer.OrdinalIgnoreCase))
-                        .ToArray();
-                    var columns = _data.ResolveColumns(data);
-                    var valueExpr = string.IsNullOrWhiteSpace(field.LookupDataField)
-                        ? columns.FirstOrDefault()?.Name ?? field.DataField
-                        : field.LookupDataField;
-                    var displayExpr = string.IsNullOrWhiteSpace(field.LookupDisplayField)
-                        ? columns.Skip(1).FirstOrDefault()?.Name ?? valueExpr
-                        : field.LookupDisplayField;
-                    lookup = new { rows, valueExpr, displayExpr };
-                }
-            }
-            return (object)new
-            {
-                field.Id,
-                field.DataField,
-                field.Caption,
-                valueKind = field.ValueKind.ToString(),
-                editor = field.Editor.ToString(),
-                field.Visible,
-                field.Editable,
-                field.Required,
-                field.Width,
-                field.Format,
-                area = field.Area.ToString(),
-                summaryType = field.SummaryType.ToString(),
-                field.LookupDataField,
-                field.LookupDisplayField,
-                field.LookupDataObjectId,
-                lookup
-            };
-        }).ToArray();
+            logger.LogTrace($"Entering PublicationComponentService.BuildFields.");
+                    return fields.Select(field =>
+                    {
+                        object? lookup = null;
+                        if (field.LookupDataObjectId is { } lookupId)
+                        {
+                            var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == lookupId);
+                            if (data is not null)
+                            {
+                                var rows = _data.ResolveRows(document, data, currentPageId)
+                                    .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value,
+                                        _data.ResolveColumns(data).FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
+                                        StringComparer.OrdinalIgnoreCase))
+                                    .ToArray();
+                                var columns = _data.ResolveColumns(data);
+                                var valueExpr = string.IsNullOrWhiteSpace(field.LookupDataField)
+                                    ? columns.FirstOrDefault()?.Name ?? field.DataField
+                                    : field.LookupDataField;
+                                var displayExpr = string.IsNullOrWhiteSpace(field.LookupDisplayField)
+                                    ? columns.Skip(1).FirstOrDefault()?.Name ?? valueExpr
+                                    : field.LookupDisplayField;
+                                lookup = new { rows, valueExpr, displayExpr };
+                            }
+                        }
+                        return (object)new
+                        {
+                            field.Id,
+                            field.DataField,
+                            field.Caption,
+                            valueKind = field.ValueKind.ToString(),
+                            editor = field.Editor.ToString(),
+                            field.Visible,
+                            field.Editable,
+                            field.Required,
+                            field.Width,
+                            field.Format,
+                            area = field.Area.ToString(),
+                            summaryType = field.SummaryType.ToString(),
+                            field.LookupDataField,
+                            field.LookupDisplayField,
+                            field.LookupDataObjectId,
+                            lookup
+                        };
+                    }).ToArray();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.BuildFields failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static object[] BuildActions(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId)
+    private object[] BuildActions(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId)
     {
-        var currentPage = document.Pages.FirstOrDefault(page => page.Id == currentPageId);
-        return item.Actions.Select(action =>
+        try
         {
-            var targetElementId = action.TargetElementId;
-            if (action.TargetSharedComponentId is { } sharedTargetId && currentPage is not null)
-            {
-                targetElementId = currentPage.Elements.OfType<DevExtremeComponentElement>()
-                    .FirstOrDefault(component => component.SharedComponentId == sharedTargetId)?.Id
-                    ?? targetElementId;
-            }
-            return (object)new
-            {
-                action.Id,
-                trigger = action.Trigger.ToString(),
-                action = action.Action.ToString(),
-                action.TargetPageId,
-                TargetElementId = targetElementId,
-                action.TargetSharedComponentId,
-                action.Url,
-                action.OpenInNewWindow,
-                action.MailTo,
-                action.MailSubject,
-                action.MailBody,
-                action.ConfirmationText,
-                action.SourceField,
-                action.TargetField,
-                action.ValueTemplate,
-                action.Script
-            };
-        }).ToArray();
+            logger.LogTrace($"Entering PublicationComponentService.BuildActions.");
+                    var currentPage = document.Pages.FirstOrDefault(page => page.Id == currentPageId);
+                    return item.Actions.Select(action =>
+                    {
+                        var targetElementId = action.TargetElementId;
+                        if (action.TargetSharedComponentId is { } sharedTargetId && currentPage is not null)
+                        {
+                            targetElementId = currentPage.Elements.OfType<DevExtremeComponentElement>()
+                                .FirstOrDefault(component => component.SharedComponentId == sharedTargetId)?.Id
+                                ?? targetElementId;
+                        }
+                        return (object)new
+                        {
+                            action.Id,
+                            trigger = action.Trigger.ToString(),
+                            action = action.Action.ToString(),
+                            action.TargetPageId,
+                            TargetElementId = targetElementId,
+                            action.TargetSharedComponentId,
+                            action.Url,
+                            action.OpenInNewWindow,
+                            action.MailTo,
+                            action.MailSubject,
+                            action.MailBody,
+                            action.ConfirmationText,
+                            action.SourceField,
+                            action.TargetField,
+                            action.ValueTemplate,
+                            action.Script
+                        };
+                    }).ToArray();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.BuildActions failed: {exception.Message}");
+            throw;
+        }
     }
 
     private object BuildPanelConfiguration(PublicationDocument document, PublicationComponentPanel panel, Guid currentPageId)
     {
-        var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == panel.DataObjectId);
-        var rows = data is null ? Array.Empty<Dictionary<string, object?>>() : _data.ResolveRows(document, data, currentPageId)
-            .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value,
-                _data.ResolveColumns(data).FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
-                StringComparer.OrdinalIgnoreCase)).ToArray();
-        var fields = panel.Fields.Count > 0
-            ? panel.Fields
-            : data is null
-                ? new List<PublicationComponentField>()
-                : _data.ResolveColumns(data).Select(column => new PublicationComponentField
-                {
-                    DataField = column.Name,
-                    Caption = Friendly(column.Name),
-                    ValueKind = column.ValueKind,
-                    Editor = EditorFor(column.ValueKind)
-                }).ToList();
-        return new
+        try
         {
-            id = panel.Id,
-            panel.Title,
-            panel.Size,
-            panel.MinSize,
-            panel.MaxSize,
-            panel.Collapsible,
-            panel.Collapsed,
-            childKind = panel.ChildKind.ToString(),
-            panel.ContentHtml,
-            fields = BuildFields(document, fields, currentPageId),
-            rows,
-            live = BuildLiveData(document, data)
-        };
+            logger.LogTrace($"Entering PublicationComponentService.BuildPanelConfiguration.");
+                    var data = document.DataObjects.FirstOrDefault(candidate => candidate.Id == panel.DataObjectId);
+                    var rows = data is null ? Array.Empty<Dictionary<string, object?>>() : _data.ResolveRows(document, data, currentPageId)
+                        .Select(row => row.Values.ToDictionary(pair => pair.Key, pair => (object?)ConvertValue(pair.Value,
+                            _data.ResolveColumns(data).FirstOrDefault(column => string.Equals(column.Name, pair.Key, StringComparison.OrdinalIgnoreCase))?.ValueKind),
+                            StringComparer.OrdinalIgnoreCase)).ToArray();
+                    var fields = panel.Fields.Count > 0
+                        ? panel.Fields
+                        : data is null
+                            ? new List<PublicationComponentField>()
+                            : _data.ResolveColumns(data).Select(column => new PublicationComponentField
+                            {
+                                DataField = column.Name,
+                                Caption = Friendly(column.Name),
+                                ValueKind = column.ValueKind,
+                                Editor = EditorFor(column.ValueKind)
+                            }).ToList();
+                    return new
+                    {
+                        id = panel.Id,
+                        panel.Title,
+                        panel.Size,
+                        panel.MinSize,
+                        panel.MaxSize,
+                        panel.Collapsible,
+                        panel.Collapsed,
+                        childKind = panel.ChildKind.ToString(),
+                        panel.ContentHtml,
+                        fields = BuildFields(document, fields, currentPageId),
+                        rows,
+                        live = BuildLiveData(document, data)
+                    };
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.BuildPanelConfiguration failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private object BuildConnection(PublicationComponentConnection connection, object? dataObjectLive) => new
+    private object BuildConnection(PublicationComponentConnection connection, object? dataObjectLive) {
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.BuildConnection.");
+            return new
     {
         mode = connection.Mode.ToString(),
         processingMode = connection.ProcessingMode.ToString(),
@@ -606,191 +729,289 @@ public sealed class PublicationComponentService
         connection.Headers,
         dataObjectLive
     };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.BuildConnection failed: {exception.Message}");
+            throw;
+        }
+    }
 
     private object? BuildLiveData(PublicationDocument document, PublicationDataObject? data)
     {
-        if (data?.SourceKind != PublicationDataSourceKind.Web) return null;
-        return new
+        try
         {
-            enabled = data.Web.Enabled,
-            transport = data.Web.Transport.ToString(),
-            method = data.Web.Method.ToString(),
-            url = data.Web.AllowExportedHtmlFetch ? data.Web.Url : string.Empty,
-            headers = data.Web.AllowExportedHtmlFetch
-    ? data.Web.Headers
-    : new List<PublicationWebHeader>(),
-            body = data.Web.AllowExportedHtmlFetch ? data.Web.RequestBody : string.Empty,
-            responseFormat = data.Web.ResponseFormat.ToString(),
-            jsonPath = data.Web.JsonPath,
-            delimiter = data.Web.Delimiter,
-            firstRowContainsHeaders = data.Web.FirstRowContainsHeaders,
-            refreshIntervalSeconds = data.Web.RefreshIntervalSeconds,
-            allowExportedHtmlFetch = data.Web.AllowExportedHtmlFetch,
-            useSnapshotOnFailure = data.Web.UseSnapshotOnFailure,
-            monolithRowsUrl = data.Web.AllowExportedHtmlFetch
-                ? $"/api/publisher/exports/{document.Id}/data/{data.Id}/{data.Web.ExportAccessToken}/rows"
-                : string.Empty
-        };
+            logger.LogTrace($"Entering PublicationComponentService.BuildLiveData.");
+                    if (data?.SourceKind != PublicationDataSourceKind.Web) return null;
+                    return new
+                    {
+                        enabled = data.Web.Enabled,
+                        transport = data.Web.Transport.ToString(),
+                        method = data.Web.Method.ToString(),
+                        url = data.Web.AllowExportedHtmlFetch ? data.Web.Url : string.Empty,
+                        headers = data.Web.AllowExportedHtmlFetch
+                ? data.Web.Headers
+                : new List<PublicationWebHeader>(),
+                        body = data.Web.AllowExportedHtmlFetch ? data.Web.RequestBody : string.Empty,
+                        responseFormat = data.Web.ResponseFormat.ToString(),
+                        jsonPath = data.Web.JsonPath,
+                        delimiter = data.Web.Delimiter,
+                        firstRowContainsHeaders = data.Web.FirstRowContainsHeaders,
+                        refreshIntervalSeconds = data.Web.RefreshIntervalSeconds,
+                        allowExportedHtmlFetch = data.Web.AllowExportedHtmlFetch,
+                        useSnapshotOnFailure = data.Web.UseSnapshotOnFailure,
+                        monolithRowsUrl = data.Web.AllowExportedHtmlFetch
+                            ? $"/api/publisher/exports/{document.Id}/data/{data.Id}/{data.Web.ExportAccessToken}/rows"
+                            : string.Empty
+                    };
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.BuildLiveData failed: {exception.Message}");
+            throw;
+        }
     }
 
     private PublicationDataObject EnsureDataObject(PublicationDocument document)
     {
-        _data.EnsureBuiltInObjects(document);
-        var existing = document.DataObjects.FirstOrDefault(data => data.SourceKind is not PublicationDataSourceKind.PublicationPages
-            and not PublicationDataSourceKind.PublicationDocument
-            and not PublicationDataSourceKind.DocumentObjects
-            and not PublicationDataSourceKind.PublicationMedia);
-        if (existing is not null) return existing;
-        var data = _data.CreateSample();
-        document.DataObjects.Add(data);
-        return data;
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.EnsureDataObject.");
+                    _data.EnsureBuiltInObjects(document);
+                    var existing = document.DataObjects.FirstOrDefault(data => data.SourceKind is not PublicationDataSourceKind.PublicationPages
+                        and not PublicationDataSourceKind.PublicationDocument
+                        and not PublicationDataSourceKind.DocumentObjects
+                        and not PublicationDataSourceKind.PublicationMedia);
+                    if (existing is not null) return existing;
+                    var data = _data.CreateSample();
+                    document.DataObjects.Add(data);
+                    return data;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.EnsureDataObject failed: {exception.Message}");
+            throw;
+        }
     }
 
     private PublicationDataObject EnsurePublicationMediaObject(PublicationDocument document)
     {
-        _data.EnsureBuiltInObjects(document);
-        return document.DataObjects.First(data => data.SourceKind == PublicationDataSourceKind.PublicationMedia);
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.EnsurePublicationMediaObject.");
+                    _data.EnsureBuiltInObjects(document);
+                    return document.DataObjects.First(data => data.SourceKind == PublicationDataSourceKind.PublicationMedia);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.EnsurePublicationMediaObject failed: {exception.Message}");
+            throw;
+        }
     }
 
     private PublicationDataObject EnsureChatPreviewObject(PublicationDocument document)
     {
-        var existing = document.DataObjects.FirstOrDefault(data => string.Equals(data.SourceReference, "publisherstudio:chat-preview", StringComparison.Ordinal));
-        if (existing is not null) return existing;
-        var data = new PublicationDataObject
+        try
         {
-            Name = "Chat preview",
-            SourceKind = PublicationDataSourceKind.Json,
-            SourceReference = "publisherstudio:chat-preview",
-            RawSource = """[{"id":"welcome-1","platform":"Preview","channel":"","text":"Chat messages stay isolated by platform.","timestamp":"2026-01-01T12:00:00Z","authorId":"viewer-1","authorName":"Viewer","authorAvatar":""}]"""
-        };
-        _data.ParseInto(data);
-        document.DataObjects.Add(data);
-        return data;
+            logger.LogTrace($"Entering PublicationComponentService.EnsureChatPreviewObject.");
+                    var existing = document.DataObjects.FirstOrDefault(data => string.Equals(data.SourceReference, "publisherstudio:chat-preview", StringComparison.Ordinal));
+                    if (existing is not null) return existing;
+                    var data = new PublicationDataObject
+                    {
+                        Name = "Chat preview",
+                        SourceKind = PublicationDataSourceKind.Json,
+                        SourceReference = "publisherstudio:chat-preview",
+                        RawSource = """[{"id":"welcome-1","platform":"Preview","channel":"","text":"Chat messages stay isolated by platform.","timestamp":"2026-01-01T12:00:00Z","authorId":"viewer-1","authorName":"Viewer","authorAvatar":""}]"""
+                    };
+                    _data.ParseInto(data);
+                    document.DataObjects.Add(data);
+                    return data;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.EnsureChatPreviewObject failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static object? ConvertValue(string value, PublicationDataValueKind? kind)
+    private object? ConvertValue(string value, PublicationDataValueKind? kind)
     {
-        if (kind == PublicationDataValueKind.Number && double.TryParse(value, System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out var number)) return number;
-        if (kind == PublicationDataValueKind.Boolean && bool.TryParse(value, out var boolean)) return boolean;
-        if (kind == PublicationDataValueKind.DateTime && DateTimeOffset.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out var date)) return date;
-        return value;
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.ConvertValue.");
+                    if (kind == PublicationDataValueKind.Number && double.TryParse(value, System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out var number)) return number;
+                    if (kind == PublicationDataValueKind.Boolean && bool.TryParse(value, out var boolean)) return boolean;
+                    if (kind == PublicationDataValueKind.DateTime && DateTimeOffset.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out var date)) return date;
+                    return value;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.ConvertValue failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static void ApplyMappingsFromFields(DevExtremeComponentElement item)
+    private void ApplyMappingsFromFields(DevExtremeComponentElement item)
     {
-        var fields = item.Fields;
-        if (fields.Count == 0) return;
-        item.KeyField = Find(fields, "id", "key") ?? fields[0].DataField;
-        item.ParentField = Find(fields, "parentid", "parent") ?? item.ParentField;
-        item.TextField = Find(fields, "text", "title", "name", "subject") ?? fields[0].DataField;
-        item.DisplayField = item.TextField;
-        item.ValueField = Find(fields, "value", "amount", "total", "id") ?? fields[0].DataField;
-        item.ImageField = Find(fields, "image", "imageurl", "thumbnail", "photo", "poster", "url") ?? item.ImageField;
-        item.MediaKindField = Find(fields, "mediatype", "kind", "type") ?? item.MediaKindField;
-        item.MediaSourceField = Find(fields, "source", "mediaurl", "videourl", "audiourl", "url") ?? item.MediaSourceField;
-        item.MediaPosterField = Find(fields, "poster", "thumbnail", "image") ?? item.MediaPosterField;
-        item.MediaAltTextField = Find(fields, "alttext", "alt", "description", "title", "name") ?? item.MediaAltTextField;
-        item.ChatPlatformField = Find(fields, "platform", "provider", "network") ?? item.ChatPlatformField;
-        item.ChatChannelField = Find(fields, "channel", "streamid", "roomid", "room") ?? item.ChatChannelField;
-        item.ChatMessageField = Find(fields, "text", "message", "body", "content") ?? item.ChatMessageField;
-        item.ChatTimestampField = Find(fields, "timestamp", "createdat", "sentat", "date", "time") ?? item.ChatTimestampField;
-        item.ChatAuthorIdField = Find(fields, "authorid", "userid", "senderid") ?? item.ChatAuthorIdField;
-        item.ChatAuthorNameField = Find(fields, "authorname", "username", "displayname", "sender", "author") ?? item.ChatAuthorNameField;
-        item.ChatAuthorAvatarField = Find(fields, "authoravatar", "avatar", "profileimage") ?? item.ChatAuthorAvatarField;
-        item.StartDateField = Find(fields, "startdate", "start", "from") ?? item.StartDateField;
-        item.EndDateField = Find(fields, "enddate", "end", "to") ?? item.EndDateField;
-        item.AllDayField = Find(fields, "allday", "isfullday") ?? item.AllDayField;
-        item.TargetPageField = Find(fields, "targetpageid", "pageid", "page") ?? item.TargetPageField;
-        item.UrlField = Find(fields, "url", "link", "href") ?? item.UrlField;
-        item.LatitudeField = Find(fields, "latitude", "lat") ?? item.LatitudeField;
-        item.LongitudeField = Find(fields, "longitude", "lng", "lon", "long") ?? item.LongitudeField;
-        item.AddressField = Find(fields, "address", "location", "place") ?? item.AddressField;
-        item.MarkerTooltipField = Find(fields, "tooltip", "label", "text", "title", "name") ?? item.MarkerTooltipField;
-        item.MapRouteField = Find(fields, "routeid", "route", "group") ?? item.MapRouteField;
-        item.MapOrderField = Find(fields, "order", "sequence", "index", "position") ?? item.MapOrderField;
-        item.VectorLabelField = Find(fields, "label", "name", "text", "title") ?? item.VectorLabelField;
-        item.VectorValueField = Find(fields, "value", "amount", "total", "population") ?? item.VectorValueField;
-        item.VectorColorField = Find(fields, "color", "colour", "fill") ?? item.VectorColorField;
-        item.Connection.KeyField = item.KeyField;
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.ApplyMappingsFromFields.");
+                    var fields = item.Fields;
+                    if (fields.Count == 0) return;
+                    item.KeyField = Find(fields, "id", "key") ?? fields[0].DataField;
+                    item.ParentField = Find(fields, "parentid", "parent") ?? item.ParentField;
+                    item.TextField = Find(fields, "text", "title", "name", "subject") ?? fields[0].DataField;
+                    item.DisplayField = item.TextField;
+                    item.ValueField = Find(fields, "value", "amount", "total", "id") ?? fields[0].DataField;
+                    item.ImageField = Find(fields, "image", "imageurl", "thumbnail", "photo", "poster", "url") ?? item.ImageField;
+                    item.MediaKindField = Find(fields, "mediatype", "kind", "type") ?? item.MediaKindField;
+                    item.MediaSourceField = Find(fields, "source", "mediaurl", "videourl", "audiourl", "url") ?? item.MediaSourceField;
+                    item.MediaPosterField = Find(fields, "poster", "thumbnail", "image") ?? item.MediaPosterField;
+                    item.MediaAltTextField = Find(fields, "alttext", "alt", "description", "title", "name") ?? item.MediaAltTextField;
+                    item.ChatPlatformField = Find(fields, "platform", "provider", "network") ?? item.ChatPlatformField;
+                    item.ChatChannelField = Find(fields, "channel", "streamid", "roomid", "room") ?? item.ChatChannelField;
+                    item.ChatMessageField = Find(fields, "text", "message", "body", "content") ?? item.ChatMessageField;
+                    item.ChatTimestampField = Find(fields, "timestamp", "createdat", "sentat", "date", "time") ?? item.ChatTimestampField;
+                    item.ChatAuthorIdField = Find(fields, "authorid", "userid", "senderid") ?? item.ChatAuthorIdField;
+                    item.ChatAuthorNameField = Find(fields, "authorname", "username", "displayname", "sender", "author") ?? item.ChatAuthorNameField;
+                    item.ChatAuthorAvatarField = Find(fields, "authoravatar", "avatar", "profileimage") ?? item.ChatAuthorAvatarField;
+                    item.StartDateField = Find(fields, "startdate", "start", "from") ?? item.StartDateField;
+                    item.EndDateField = Find(fields, "enddate", "end", "to") ?? item.EndDateField;
+                    item.AllDayField = Find(fields, "allday", "isfullday") ?? item.AllDayField;
+                    item.TargetPageField = Find(fields, "targetpageid", "pageid", "page") ?? item.TargetPageField;
+                    item.UrlField = Find(fields, "url", "link", "href") ?? item.UrlField;
+                    item.LatitudeField = Find(fields, "latitude", "lat") ?? item.LatitudeField;
+                    item.LongitudeField = Find(fields, "longitude", "lng", "lon", "long") ?? item.LongitudeField;
+                    item.AddressField = Find(fields, "address", "location", "place") ?? item.AddressField;
+                    item.MarkerTooltipField = Find(fields, "tooltip", "label", "text", "title", "name") ?? item.MarkerTooltipField;
+                    item.MapRouteField = Find(fields, "routeid", "route", "group") ?? item.MapRouteField;
+                    item.MapOrderField = Find(fields, "order", "sequence", "index", "position") ?? item.MapOrderField;
+                    item.VectorLabelField = Find(fields, "label", "name", "text", "title") ?? item.VectorLabelField;
+                    item.VectorValueField = Find(fields, "value", "amount", "total", "population") ?? item.VectorValueField;
+                    item.VectorColorField = Find(fields, "color", "colour", "fill") ?? item.VectorColorField;
+                    item.Connection.KeyField = item.KeyField;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.ApplyMappingsFromFields failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static string? Find(IEnumerable<PublicationComponentField> fields, params string[] names)
+    private string? Find(IEnumerable<PublicationComponentField> fields, params string[] names)
     {
-        foreach (var field in fields)
+        try
         {
-            var normalized = new string(field.DataField.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
-            if (names.Any(name => normalized == name)) return field.DataField;
+            logger.LogTrace($"Entering PublicationComponentService.Find.");
+                    foreach (var field in fields)
+                    {
+                        var normalized = new string(field.DataField.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
+                        if (names.Any(name => normalized == name)) return field.DataField;
+                    }
+                    return null;
+    
         }
-        return null;
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.Find failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static void ApplyKindDefaults(PublicationDocument document, DevExtremeComponentElement item, bool onlyMissing = false)
+    private void ApplyKindDefaults(PublicationDocument document, DevExtremeComponentElement item, bool onlyMissing = false)
     {
-        var dataId = item.Connection.DataObjectId;
-        if (item.IsLayoutContainer && item.Panels.Count == 0)
+        try
         {
-            item.Panels =
-            [
-                new PublicationComponentPanel { Title = "Data", Size = "55%", ChildKind = PublicationComponentKind.DataGrid, DataObjectId = dataId },
-                new PublicationComponentPanel { Title = "Details", ChildKind = PublicationComponentKind.Form, DataObjectId = dataId }
-            ];
+            logger.LogTrace($"Entering PublicationComponentService.ApplyKindDefaults.");
+                    var dataId = item.Connection.DataObjectId;
+                    if (item.IsLayoutContainer && item.Panels.Count == 0)
+                    {
+                        item.Panels =
+                        [
+                            new PublicationComponentPanel { Title = "Data", Size = "55%", ChildKind = PublicationComponentKind.DataGrid, DataObjectId = dataId },
+                            new PublicationComponentPanel { Title = "Details", ChildKind = PublicationComponentKind.Form, DataObjectId = dataId }
+                        ];
+                    }
+                    if (item.ComponentKind == PublicationComponentKind.Button && item.Actions.Count == 0)
+                        item.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.NextPage });
+                    if (item.ComponentKind == PublicationComponentKind.Form
+                        && item.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.Submit)
+                        && item.Connection.Mode is PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData
+                        && (item.Connection.AllowInsert || item.Connection.AllowUpdate || !string.IsNullOrWhiteSpace(item.Connection.InsertUrl)))
+                    {
+                        item.Actions.Add(new PublicationComponentAction
+                        {
+                            Trigger = PublicationComponentActionTrigger.Submit,
+                            Action = PublicationComponentActionKind.SubmitRest
+                        });
+                    }
+                    if ((item.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+                        && item.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
+                        item.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
+                    if (item.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView)
+                    {
+                        item.MediaKindField = string.IsNullOrWhiteSpace(item.MediaKindField) ? "mediaType" : item.MediaKindField;
+                        item.MediaSourceField = string.IsNullOrWhiteSpace(item.MediaSourceField) ? "source" : item.MediaSourceField;
+                        item.MediaPosterField = string.IsNullOrWhiteSpace(item.MediaPosterField) ? "poster" : item.MediaPosterField;
+                        item.MediaAltTextField = string.IsNullOrWhiteSpace(item.MediaAltTextField) ? "altText" : item.MediaAltTextField;
+                    }
+                    if (item.ComponentKind == PublicationComponentKind.Chat)
+                    {
+                        item.ShowTitle = false;
+                        item.ChatMessageField = string.IsNullOrWhiteSpace(item.ChatMessageField) ? "text" : item.ChatMessageField;
+                        item.ChatAuthorNameField = string.IsNullOrWhiteSpace(item.ChatAuthorNameField) ? "authorName" : item.ChatAuthorNameField;
+                        item.ChatTimestampField = string.IsNullOrWhiteSpace(item.ChatTimestampField) ? "timestamp" : item.ChatTimestampField;
+                    }
+                    if (item.ComponentKind == PublicationComponentKind.Scheduler)
+                    {
+                        item.EditMode = item.EditMode == PublicationComponentEditMode.ReadOnly ? PublicationComponentEditMode.Form : item.EditMode;
+                        item.CurrentView = string.IsNullOrWhiteSpace(item.CurrentView) ? "week" : item.CurrentView;
+                    }
+                    if (item.ComponentKind == PublicationComponentKind.PivotGrid)
+                    {
+                        var visible = item.Fields.Where(field => field.Visible).ToList();
+                        if (visible.Count > 0 && visible.All(field => field.Area == PublicationComponentFieldArea.None))
+                        {
+                            visible[0].Area = PublicationComponentFieldArea.Row;
+                            if (visible.Count > 1) visible[1].Area = visible[1].ValueKind == PublicationDataValueKind.Number ? PublicationComponentFieldArea.Data : PublicationComponentFieldArea.Column;
+                            foreach (var field in visible.Skip(2).Where(field => field.ValueKind == PublicationDataValueKind.Number)) field.Area = PublicationComponentFieldArea.Data;
+                        }
+                    }
+    
         }
-        if (item.ComponentKind == PublicationComponentKind.Button && item.Actions.Count == 0)
-            item.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.NextPage });
-        if (item.ComponentKind == PublicationComponentKind.Form
-            && item.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.Submit)
-            && item.Connection.Mode is PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData
-            && (item.Connection.AllowInsert || item.Connection.AllowUpdate || !string.IsNullOrWhiteSpace(item.Connection.InsertUrl)))
+        catch (Exception exception)
         {
-            item.Actions.Add(new PublicationComponentAction
-            {
-                Trigger = PublicationComponentActionTrigger.Submit,
-                Action = PublicationComponentActionKind.SubmitRest
-            });
-        }
-        if ((item.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
-            && item.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
-            item.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
-        if (item.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView)
-        {
-            item.MediaKindField = string.IsNullOrWhiteSpace(item.MediaKindField) ? "mediaType" : item.MediaKindField;
-            item.MediaSourceField = string.IsNullOrWhiteSpace(item.MediaSourceField) ? "source" : item.MediaSourceField;
-            item.MediaPosterField = string.IsNullOrWhiteSpace(item.MediaPosterField) ? "poster" : item.MediaPosterField;
-            item.MediaAltTextField = string.IsNullOrWhiteSpace(item.MediaAltTextField) ? "altText" : item.MediaAltTextField;
-        }
-        if (item.ComponentKind == PublicationComponentKind.Chat)
-        {
-            item.ShowTitle = false;
-            item.ChatMessageField = string.IsNullOrWhiteSpace(item.ChatMessageField) ? "text" : item.ChatMessageField;
-            item.ChatAuthorNameField = string.IsNullOrWhiteSpace(item.ChatAuthorNameField) ? "authorName" : item.ChatAuthorNameField;
-            item.ChatTimestampField = string.IsNullOrWhiteSpace(item.ChatTimestampField) ? "timestamp" : item.ChatTimestampField;
-        }
-        if (item.ComponentKind == PublicationComponentKind.Scheduler)
-        {
-            item.EditMode = item.EditMode == PublicationComponentEditMode.ReadOnly ? PublicationComponentEditMode.Form : item.EditMode;
-            item.CurrentView = string.IsNullOrWhiteSpace(item.CurrentView) ? "week" : item.CurrentView;
-        }
-        if (item.ComponentKind == PublicationComponentKind.PivotGrid)
-        {
-            var visible = item.Fields.Where(field => field.Visible).ToList();
-            if (visible.Count > 0 && visible.All(field => field.Area == PublicationComponentFieldArea.None))
-            {
-                visible[0].Area = PublicationComponentFieldArea.Row;
-                if (visible.Count > 1) visible[1].Area = visible[1].ValueKind == PublicationDataValueKind.Number ? PublicationComponentFieldArea.Data : PublicationComponentFieldArea.Column;
-                foreach (var field in visible.Skip(2).Where(field => field.ValueKind == PublicationDataValueKind.Number)) field.Area = PublicationComponentFieldArea.Data;
-            }
+            logger.LogError(exception, $"PublicationComponentService.ApplyKindDefaults failed: {exception.Message}");
+            throw;
         }
     }
 
-    private static PublicationComponentEditorKind EditorFor(PublicationDataValueKind kind) => kind switch
+    private PublicationComponentEditorKind EditorFor(PublicationDataValueKind kind) {
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.EditorFor.");
+            return kind switch
     {
         PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox,
         PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox,
         PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox,
         _ => PublicationComponentEditorKind.TextBox
     };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.EditorFor failed: {exception.Message}");
+            throw;
+        }
+    }
 
-    private static (double Width, double Height) DefaultSize(PublicationComponentKind kind) => kind switch
+    private (double Width, double Height) DefaultSize(PublicationComponentKind kind) => kind switch
     {
         PublicationComponentKind.Button => (42, 14),
         PublicationComponentKind.CheckBox => (48, 14),
@@ -805,7 +1026,11 @@ public sealed class PublicationComponentService
         _ => (160, 95)
     };
 
-    public static string ComponentName(PublicationComponentKind kind) => kind switch
+    public string ComponentName(PublicationComponentKind kind) {
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.ComponentName.");
+            return kind switch
     {
         PublicationComponentKind.DataGrid => "Data Grid",
         PublicationComponentKind.TreeList => "Tree List",
@@ -828,46 +1053,104 @@ public sealed class PublicationComponentService
         PublicationComponentKind.Chat => "Chat",
         _ => Friendly(kind.ToString())
     };
-
-    public static string Friendly(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
-        var result = System.Text.RegularExpressions.Regex.Replace(value.Replace('_', ' '), "([a-z0-9])([A-Z])", "$1 $2");
-        return char.ToUpperInvariant(result[0]) + result[1..];
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.ComponentName failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static string SanitizeCssClass(string? value) => string.Join(' ', (value ?? string.Empty)
+    public string Friendly(string value)
+    {
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.Friendly.");
+                    if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+                    var result = System.Text.RegularExpressions.Regex.Replace(value.Replace('_', ' '), "([a-z0-9])([A-Z])", "$1 $2");
+                    return char.ToUpperInvariant(result[0]) + result[1..];
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.Friendly failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private string SanitizeCssClass(string? value) {
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.SanitizeCssClass.");
+            return string.Join(' ', (value ?? string.Empty)
         .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .Where(token => token.All(character => char.IsLetterOrDigit(character) || character is '-' or '_'))
         .Take(8));
-
-    private static string SanitizeInlineCss(string? value)
-    {
-        var source = (value ?? string.Empty).Replace("{", string.Empty).Replace("}", string.Empty);
-        var blocked = new[] { "javascript:", "expression(", "@import", "</style", "behavior:", "-moz-binding" };
-        if (blocked.Any(token => source.Contains(token, StringComparison.OrdinalIgnoreCase))) return string.Empty;
-        return string.Join(';', source.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(declaration => declaration.Contains(':'))
-            .Take(64));
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.SanitizeCssClass failed: {exception.Message}");
+            throw;
+        }
     }
 
-    private static string NormalizeJsonObject(string? json)
+    private string SanitizeInlineCss(string? value)
     {
-        if (string.IsNullOrWhiteSpace(json)) return "{}";
         try
         {
-            using var document = JsonDocument.Parse(json);
-            return document.RootElement.ValueKind == JsonValueKind.Object ? document.RootElement.GetRawText() : "{}";
+            logger.LogTrace($"Entering PublicationComponentService.SanitizeInlineCss.");
+                    var source = (value ?? string.Empty).Replace("{", string.Empty).Replace("}", string.Empty);
+                    var blocked = new[] { "javascript:", "expression(", "@import", "</style", "behavior:", "-moz-binding" };
+                    if (blocked.Any(token => source.Contains(token, StringComparison.OrdinalIgnoreCase))) return string.Empty;
+                    return string.Join(';', source.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Where(declaration => declaration.Contains(':'))
+                        .Take(64));
+    
         }
-        catch (JsonException)
+        catch (Exception exception)
         {
-            return "{}";
+            logger.LogError(exception, $"PublicationComponentService.SanitizeInlineCss failed: {exception.Message}");
+            throw;
         }
     }
 
-    private static string NormalizeODataKeyType(string? value)
+    private string NormalizeJsonObject(string? json)
     {
-        var normalized = value?.Trim();
-        return normalized is "String" or "Int32" or "Int64" or "Guid" ? normalized : "Int32";
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.NormalizeJsonObject.");
+                    if (string.IsNullOrWhiteSpace(json)) return "{}";
+                    try
+                    {
+                        using var document = JsonDocument.Parse(json);
+                        return document.RootElement.ValueKind == JsonValueKind.Object ? document.RootElement.GetRawText() : "{}";
+                    }
+                    catch (JsonException)
+                    {
+                        return "{}";
+                    }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.NormalizeJsonObject failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    private string NormalizeODataKeyType(string? value)
+    {
+        try
+        {
+            logger.LogTrace($"Entering PublicationComponentService.NormalizeODataKeyType.");
+                    var normalized = value?.Trim();
+                    return normalized is "String" or "Int32" or "Int64" or "Guid" ? normalized : "Int32";
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"PublicationComponentService.NormalizeODataKeyType failed: {exception.Message}");
+            throw;
+        }
     }
 }

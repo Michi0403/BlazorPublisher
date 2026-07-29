@@ -12,20 +12,12 @@ using PublisherStudio.Services;
 using PublisherStudio.Services.PictureStudio.Import;
 using PublisherStudio.Services.OrganicPlugins;
 using PublisherStudio.Services.UserExperience;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Components.Editor;
 
 public partial class PictureEditor
 {
-    private const string CanvasId = "picture-studio-canvas";
-    private const string CanvasHostId = "picture-studio-canvas-host";
-    private const string StudioRootId = "picture-studio-window";
-    private const string ImageInputId = "picture-studio-image-input";
-    private const string ImageDropInputId = "picture-studio-image-drop-input";
-    private const string LayeredInputId = "picture-studio-layered-input";
-    private const string LayerDropInputId = "picture-studio-layer-drop-input";
-    private const double MinDrawWidth = .25;
-    private const double MaxDrawWidth = 512;
     private readonly string[] PictureColors =
     [
         "#000000", "#ffffff", "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b", "#92400e"
@@ -38,6 +30,8 @@ public partial class PictureEditor
     [Inject] private ILocalGptConnectionService LocalGptConnection { get; set; } = default!;
     [Inject] private IUserNotificationService Notifications { get; set; } = default!;
     [Inject] private ILogger<PictureEditor> Logger { get; set; } = default!;
+    [Inject] private IPublisherRuntimePolicyDataService RuntimePolicy { get; set; } = default!;
+    [Inject] private PublicationFileService Files { get; set; } = default!;
 
     [Parameter] public bool Visible { get; set; }
     [Parameter] public Guid SessionId { get; set; }
@@ -222,11 +216,11 @@ public partial class PictureEditor
         {
             await _module.InvokeVoidAsync(
                 "initializePictureStudio",
-                CanvasId,
+                RuntimePolicy.PictureStudio.CanvasId,
                 _self,
-                StudioRootId,
-                ImageDropInputId,
-                LayerDropInputId);
+                RuntimePolicy.PictureStudio.StudioRootId,
+                RuntimePolicy.PictureStudio.ImageDropInputId,
+                RuntimePolicy.PictureStudio.LayerDropInputId);
             _initialized = true;
             _renderRequested = true;
         }
@@ -248,7 +242,7 @@ public partial class PictureEditor
         if (_module is null || !Visible) return;
         try
         {
-            await _module.InvokeVoidAsync("renderPictureStudio", CanvasId, State.Document, State.SelectedLayerId?.ToString(), State.Document.Zoom, new
+            await _module.InvokeVoidAsync("renderPictureStudio", RuntimePolicy.PictureStudio.CanvasId, State.Document, State.SelectedLayerId?.ToString(), State.Document.Zoom, new
             {
                 Tool = _drawTool.ToString(),
                 Color = _drawColor,
@@ -378,7 +372,7 @@ public partial class PictureEditor
     {
         if (_module is not null && args.Button == 2)
         {
-            var id = await _module.InvokeAsync<string?>("hitTestPictureStudioLayer", CanvasId, args.ClientX, args.ClientY);
+            var id = await _module.InvokeAsync<string?>("hitTestPictureStudioLayer", RuntimePolicy.PictureStudio.CanvasId, args.ClientX, args.ClientY);
             State.SelectLayer(Guid.TryParse(id, out var parsed) ? parsed : null);
         }
         await InvokeAsync(StateHasChanged);
@@ -402,20 +396,20 @@ public partial class PictureEditor
     private async Task RequestImage()
     {
         _replaceRasterLayerId = null;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", ImageInputId);
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId);
     }
 
     private async Task RequestLayeredImport()
     {
         _replaceRasterLayerId = null;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", LayeredInputId);
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.LayeredInputId);
     }
 
     private async Task RequestRasterReplacement()
     {
         if (State.SelectedLayer is not RasterPictureLayer { Locked: false } raster) return;
         _replaceRasterLayerId = raster.Id;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", ImageInputId);
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId);
     }
 
     private Task ImportImage(InputFileChangeEventArgs args) => ImportImageCore(args, forceAdd: false);
@@ -570,7 +564,7 @@ public partial class PictureEditor
     private async Task FitCanvas()
     {
         if (_module is null) return;
-        var zoom = await _module.InvokeAsync<double>("fitPictureStudio", CanvasHostId, State.Document.WidthPx, State.Document.HeightPx);
+        var zoom = await _module.InvokeAsync<double>("fitPictureStudio", RuntimePolicy.PictureStudio.CanvasHostId, State.Document.WidthPx, State.Document.HeightPx);
         State.SetZoom(zoom);
     }
 
@@ -837,7 +831,7 @@ public partial class PictureEditor
     private async Task DownloadSvg()
     {
         if (_module is null) return;
-        var fileName = $"{PublicationFileService.SafeFileName(State.Document.Name)}.svg";
+        var fileName = $"{Files.SafeFileName(State.Document.Name)}.svg";
         await _module.InvokeVoidAsync("downloadPictureStudioSvg", State.Document, fileName);
     }
 
@@ -846,7 +840,7 @@ public partial class PictureEditor
         if (_module is null) return;
         try
         {
-            var name = PublicationFileService.SafeFileName(State.Document.Name) + "." + extension;
+            var name = Files.SafeFileName(State.Document.Name) + "." + extension;
             await _module.InvokeVoidAsync("downloadPictureStudio", State.Document, name, mimeType, quality);
         }
         catch (Exception ex)
@@ -884,7 +878,7 @@ public partial class PictureEditor
     private void FillGradientTool() => SetDrawTool(PictureDrawTool.FillGradient);
     private async Task ClearAreaSelection()
     {
-        if (_module is not null) await _module.InvokeVoidAsync("clearPictureStudioAreaSelection", CanvasId);
+        if (_module is not null) await _module.InvokeVoidAsync("clearPictureStudioAreaSelection", RuntimePolicy.PictureStudio.CanvasId);
         _renderRequested = true;
     }
 
@@ -893,7 +887,7 @@ public partial class PictureEditor
         if (_module is null || State.SelectedLayer is null) return null;
         try
         {
-            return await _module.InvokeAsync<PictureAreaSelection?>("getPictureStudioAreaSelection", CanvasId);
+            return await _module.InvokeAsync<PictureAreaSelection?>("getPictureStudioAreaSelection", RuntimePolicy.PictureStudio.CanvasId);
         }
         catch (JSDisconnectedException) { return null; }
         catch (TaskCanceledException) { return null; }
@@ -1025,7 +1019,7 @@ public partial class PictureEditor
         if (_module is null) return;
         try
         {
-            await _module.InvokeVoidAsync("cancelPictureStudioInteraction", CanvasId);
+            await _module.InvokeVoidAsync("cancelPictureStudioInteraction", RuntimePolicy.PictureStudio.CanvasId);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -1037,7 +1031,7 @@ public partial class PictureEditor
         if (_module is null || !_initialized) return;
         try
         {
-            await _module.InvokeVoidAsync("disposePictureStudio", CanvasId);
+            await _module.InvokeVoidAsync("disposePictureStudio", RuntimePolicy.PictureStudio.CanvasId);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -1055,18 +1049,18 @@ public partial class PictureEditor
     private void ChangeDrawSecondaryColor(string value) { if (!string.IsNullOrWhiteSpace(value)) _drawSecondaryColor = value; _renderRequested = true; }
     private void SetDrawWidth(double value)
     {
-        _drawWidth = Math.Clamp(value, MinDrawWidth, MaxDrawWidth);
+        _drawWidth = Math.Clamp(value, RuntimePolicy.PictureStudio.MinimumDrawWidth, RuntimePolicy.PictureStudio.MaximumDrawWidth);
         _renderRequested = true;
     }
     private double WidthToSlider(double width)
     {
-        var clamped = Math.Clamp(width, MinDrawWidth, MaxDrawWidth);
-        return Math.Log(clamped / MinDrawWidth) / Math.Log(MaxDrawWidth / MinDrawWidth) * 100;
+        var clamped = Math.Clamp(width, RuntimePolicy.PictureStudio.MinimumDrawWidth, RuntimePolicy.PictureStudio.MaximumDrawWidth);
+        return Math.Log(clamped / RuntimePolicy.PictureStudio.MinimumDrawWidth) / Math.Log(RuntimePolicy.PictureStudio.MaximumDrawWidth / RuntimePolicy.PictureStudio.MinimumDrawWidth) * 100;
     }
     private double SliderToWidth(double slider)
     {
         var normalized = Math.Clamp(slider, 0, 100) / 100;
-        var width = MinDrawWidth * Math.Pow(MaxDrawWidth / MinDrawWidth, normalized);
+        var width = RuntimePolicy.PictureStudio.MinimumDrawWidth * Math.Pow(RuntimePolicy.PictureStudio.MaximumDrawWidth / RuntimePolicy.PictureStudio.MinimumDrawWidth, normalized);
         var step = width switch
         {
             < 4 => .25,

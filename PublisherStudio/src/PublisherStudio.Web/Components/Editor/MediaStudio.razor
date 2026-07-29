@@ -5,6 +5,7 @@
 @inject MediaTimelineEditService TimelineEdits
 @inject VideoProjectImportService VideoProjectImporter
 @inject VideoLayerInterchangeService VideoLayerInterchange
+@inject IPublisherRuntimePolicyDataService RuntimePolicy
 
 @if (Visible)
 {
@@ -2303,10 +2304,10 @@
         CommitSelectedSegment(refreshVideoEffects: true);
     }
 
-    private void ChangeVideoLayerMorphAmount(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.MorphAmount = Math.Clamp(value, 0, 1), refreshScad: false);
-    private void ChangeVideoLayerAnimationSpeed(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.AnimationSpeed = Math.Clamp(value, 0, 8), refreshScad: false);
-    private void ChangeVideoLayerDepth(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.Depth = Math.Clamp(value, .02, .5), refreshScad: true);
-    private void ChangeVideoLayerRoundness(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, static (layer, value) => layer.Roundness = Math.Clamp(value, 0, .5), refreshScad: true);
+    private void ChangeVideoLayerMorphAmount(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, (layer, value) => layer.MorphAmount = Math.Clamp(value, 0, 1), refreshScad: false);
+    private void ChangeVideoLayerAnimationSpeed(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, (layer, value) => layer.AnimationSpeed = Math.Clamp(value, 0, 8), refreshScad: false);
+    private void ChangeVideoLayerDepth(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, (layer, value) => layer.Depth = Math.Clamp(value, .02, .5), refreshScad: true);
+    private void ChangeVideoLayerRoundness(ChangeEventArgs args) => ChangeSelectedVideoLayerNumber(args, (layer, value) => layer.Roundness = Math.Clamp(value, 0, .5), refreshScad: true);
 
     private void ChangeSelectedVideoLayerNumber(ChangeEventArgs args, Action<VideoEffectLayer, double> assign, bool refreshScad)
     {
@@ -2438,10 +2439,10 @@
         CommitSelectedSegment(refreshVideoEffects: true);
     }
 
-    private void ChangeVideoFilterAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.Amount = value);
-    private void ChangeVideoFilterSecondaryAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.SecondaryAmount = value);
-    private void ChangeVideoFilterTertiaryAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.TertiaryAmount = value);
-    private void ChangeVideoFilterResidualOpacity(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, static (filter, value) => filter.ResidualOpacity = value);
+    private void ChangeVideoFilterAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, (filter, value) => filter.Amount = value);
+    private void ChangeVideoFilterSecondaryAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, (filter, value) => filter.SecondaryAmount = value);
+    private void ChangeVideoFilterTertiaryAmount(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, (filter, value) => filter.TertiaryAmount = value);
+    private void ChangeVideoFilterResidualOpacity(ChangeEventArgs args) => ChangeSelectedVideoFilterNumber(args, (filter, value) => filter.ResidualOpacity = value);
 
     private void ChangeSelectedVideoFilterNumber(ChangeEventArgs args, Action<VideoEffectFilter, double> assign)
     {
@@ -3502,7 +3503,7 @@
             var studioName = IsVideo ? "Video Studio" : "Audio Studio";
             var request = new MediaConversionInsertRequest(
                 string.IsNullOrWhiteSpace(segment.Name) ? (IsVideo ? "video-clip" : "audio-clip") : segment.Name,
-                PublicationMediaData.NormalizeMimeType(segment.MimeType, storedMime),
+                MediaData.NormalizeMimeType(segment.MimeType, storedMime),
                 bytes,
                 selectedVideoRange ? "Video Studio selected range" : $"{studioName} selected clip")
             {
@@ -3687,7 +3688,7 @@
 
     private string CreateToneDataUrl(double durationSeconds, double frequency, double volume)
     {
-        const int sampleRate = 44_100;
+        var sampleRate = RuntimePolicy.AudioSampleRate;
         var frames = Math.Max(1, (int)Math.Floor(sampleRate * Math.Max(.1, durationSeconds)));
         using var stream = new MemoryStream(44 + frames * 2);
         using var writer = new BinaryWriter(stream, Encoding.ASCII, leaveOpen: true);

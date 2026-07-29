@@ -21,6 +21,7 @@ public sealed class LocalGptConnectionService(
     IOrganicTransportSecurityPolicy transportSecurityPolicy,
     IOrganicConnectionRuntimeState runtimeState,
     IOrganicWireEnvelopeFactory envelopeFactory,
+    IRuntimeEndpointState runtimeEndpointState,
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
 {
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
@@ -99,7 +100,7 @@ public sealed class LocalGptConnectionService(
                         Address = "0.0.0.0",
                         ServicePort = 0,
                         DiscoveryPort = OrganicWireProtocol.DefaultDiscoveryPort,
-                        WebBaseUrl = RuntimeEndpointStore.BaseUrl,
+                        WebBaseUrl = runtimeEndpointState.BaseUrl,
                         IsConnected = true,
                         TransportKind = OneWireTransportKind.Tcp,
                         SupportedTransports = ["tcp", "http-json"],
@@ -137,68 +138,118 @@ public sealed class LocalGptConnectionService(
 
     public async Task DisconnectAsync()
     {
-        await lifecycleGate.WaitAsync().ConfigureAwait(false);
-        try { await DisconnectCoreAsync().ConfigureAwait(false); }
-        finally { lifecycleGate.Release(); }
+        try
+        {
+            logger.LogTrace($"Entering LocalGptConnectionService.DisconnectAsync.");
+                    await lifecycleGate.WaitAsync().ConfigureAwait(false);
+                    try { await DisconnectCoreAsync().ConfigureAwait(false); }
+                    finally { lifecycleGate.Release(); }
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"LocalGptConnectionService.DisconnectAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
     public async Task<Guid> SendCouncilRequestAsync(OrganicCouncilPromptRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        if (string.IsNullOrWhiteSpace(request.Prompt)) throw new ArgumentException("A council prompt is required.", nameof(request));
-        var envelope = new OrganicWireEnvelope
+        try
         {
-            MessageType = OrganicWireMessageType.CouncilRequest,
-            SourcePeerId = localPeerId,
-            TargetPeerId = peerId,
-            CapabilityKey = "council.run",
-            Organs = ["brain"],
-            Skills = [request.TeamKey],
-            UserConfirmed = true,
-            Properties = new Dictionary<string, JsonElement>
-            {
-                ["CouncilRequest"] = JsonSerializer.SerializeToElement(request, codec.JsonOptions)
-            }
-        };
-        return await SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+            logger.LogTrace($"Entering LocalGptConnectionService.SendCouncilRequestAsync.");
+                    ArgumentNullException.ThrowIfNull(request);
+                    if (string.IsNullOrWhiteSpace(request.Prompt)) throw new ArgumentException("A council prompt is required.", nameof(request));
+                    var envelope = new OrganicWireEnvelope
+                    {
+                        MessageType = OrganicWireMessageType.CouncilRequest,
+                        SourcePeerId = localPeerId,
+                        TargetPeerId = peerId,
+                        CapabilityKey = "council.run",
+                        Organs = ["brain"],
+                        Skills = [request.TeamKey],
+                        UserConfirmed = true,
+                        Properties = new Dictionary<string, JsonElement>
+                        {
+                            ["CouncilRequest"] = JsonSerializer.SerializeToElement(request, codec.JsonOptions)
+                        }
+                    };
+                    return await SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"LocalGptConnectionService.SendCouncilRequestAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
     public Task<Guid> SendEnvelopeAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(envelope);
-        var connectedWriter = writer;
-        if (connectedWriter is null || !State.IsConnected) throw new InvalidOperationException("PublisherStudio is not connected to LocalGPT.");
-        if (!State.IsLinked && envelope.MessageType != OrganicWireMessageType.Hello)
-            throw new InvalidOperationException("The 1-Wire transport is waiting for LocalGPT frontend link approval.");
-        return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, runtimeState.GetSnapshot().IsLoopback, cancellationToken);
+        try
+        {
+            logger.LogTrace($"Entering LocalGptConnectionService.SendEnvelopeAsync.");
+                    ArgumentNullException.ThrowIfNull(envelope);
+                    var connectedWriter = writer;
+                    if (connectedWriter is null || !State.IsConnected) throw new InvalidOperationException("PublisherStudio is not connected to LocalGPT.");
+                    if (!State.IsLinked && envelope.MessageType != OrganicWireMessageType.Hello)
+                        throw new InvalidOperationException("The 1-Wire transport is waiting for LocalGPT frontend link approval.");
+                    return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, runtimeState.GetSnapshot().IsLoopback, cancellationToken);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"LocalGptConnectionService.SendEnvelopeAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
     public async Task<OrganicWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default)
     {
-        if (correlationId == Guid.Empty) throw new ArgumentException("A correlation id is required.", nameof(correlationId));
-        if (recentResponses.TryRemove(correlationId, out var cached)) return cached;
-        var waiter = responseWaiters.GetOrAdd(correlationId, _ => new TaskCompletionSource<OrganicWireEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously));
-        if (recentResponses.TryRemove(correlationId, out cached))
-        {
-            responseWaiters.TryRemove(correlationId, out _);
-            return cached;
-        }
-        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeoutCts.CancelAfter(timeout);
         try
         {
-            return await waiter.Task.WaitAsync(timeoutCts.Token).ConfigureAwait(false);
+            logger.LogTrace($"Entering LocalGptConnectionService.WaitForResultAsync.");
+                    if (correlationId == Guid.Empty) throw new ArgumentException("A correlation id is required.", nameof(correlationId));
+                    if (recentResponses.TryRemove(correlationId, out var cached)) return cached;
+                    var waiter = responseWaiters.GetOrAdd(correlationId, _ => new TaskCompletionSource<OrganicWireEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously));
+                    if (recentResponses.TryRemove(correlationId, out cached))
+                    {
+                        responseWaiters.TryRemove(correlationId, out _);
+                        return cached;
+                    }
+                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    timeoutCts.CancelAfter(timeout);
+                    try
+                    {
+                        return await waiter.Task.WaitAsync(timeoutCts.Token).ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        responseWaiters.TryRemove(correlationId, out _);
+                    }
+    
         }
-        finally
+        catch (Exception exception)
         {
-            responseWaiters.TryRemove(correlationId, out _);
+            logger.LogError(exception, $"LocalGptConnectionService.WaitForResultAsync failed: {exception.Message}");
+            throw;
         }
     }
 
     public async Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(item);
-        await SendEnvelopeAsync(envelopeFactory.CreateWorkEnvelope(item, localPeerId), cancellationToken).ConfigureAwait(false);
+        try
+        {
+            logger.LogTrace($"Entering LocalGptConnectionService.SendWorkResultAsync.");
+                    ArgumentNullException.ThrowIfNull(item);
+                    await SendEnvelopeAsync(envelopeFactory.CreateWorkEnvelope(item, localPeerId), cancellationToken).ConfigureAwait(false);
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"LocalGptConnectionService.SendWorkResultAsync failed: {exception.Message}");
+            throw;
+        }
     }
 
     private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
@@ -446,30 +497,60 @@ public sealed class LocalGptConnectionService(
 
     private OrganicCapabilityDescriptor ApplyPermissionPolicy(string requestedPeerId, OrganicCapabilityDescriptor capability)
     {
-        var rule = permissions.Resolve(requestedPeerId, capability.Key);
-        if (rule is null)
-            return capability;
-        capability.IsExposedToPeer = rule.IsExposed;
-        capability.AllowPeerInvocation = rule.AllowInvocation;
-        capability.RequiresFrontendUserConfirmation = rule.RequiresFrontendConfirmation;
-        capability.RequiresHumanConfirmation = rule.RequiresFrontendConfirmation;
-        capability.RequiresHumanInteractionOnTargetSystem = rule.RequiresFrontendConfirmation;
-        capability.InteractionEditor = rule.InteractionEditor;
-        capability.ConfigurationKey = $"publisher:{requestedPeerId}:{capability.Key}:{rule.Organ}";
-        return capability;
+        try
+        {
+            logger.LogTrace($"Entering LocalGptConnectionService.ApplyPermissionPolicy.");
+                    var rule = permissions.Resolve(requestedPeerId, capability.Key);
+                    if (rule is null)
+                        return capability;
+                    capability.IsExposedToPeer = rule.IsExposed;
+                    capability.AllowPeerInvocation = rule.AllowInvocation;
+                    capability.RequiresFrontendUserConfirmation = rule.RequiresFrontendConfirmation;
+                    capability.RequiresHumanConfirmation = rule.RequiresFrontendConfirmation;
+                    capability.RequiresHumanInteractionOnTargetSystem = rule.RequiresFrontendConfirmation;
+                    capability.InteractionEditor = rule.InteractionEditor;
+                    capability.ConfigurationKey = $"publisher:{requestedPeerId}:{capability.Key}:{rule.Organ}";
+                    return capability;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"LocalGptConnectionService.ApplyPermissionPolicy failed: {exception.Message}");
+            throw;
+        }
     }
 
     private string NormalizeAddress(string address, string hostName)
     {
-        if (string.IsNullOrWhiteSpace(address) || address is "0.0.0.0" or "::")
-            return string.Equals(hostName, Environment.MachineName, StringComparison.OrdinalIgnoreCase) ? "127.0.0.1" : hostName;
-        return address;
+        try
+        {
+            logger.LogTrace($"Entering LocalGptConnectionService.NormalizeAddress.");
+                    if (string.IsNullOrWhiteSpace(address) || address is "0.0.0.0" or "::")
+                        return string.Equals(hostName, Environment.MachineName, StringComparison.OrdinalIgnoreCase) ? "127.0.0.1" : hostName;
+                    return address;
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"LocalGptConnectionService.NormalizeAddress failed: {exception.Message}");
+            throw;
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
-        await DisconnectAsync().ConfigureAwait(false);
-        lifecycleGate.Dispose();
-        writeGate.Dispose();
+        try
+        {
+            logger.LogTrace($"Entering LocalGptConnectionService.DisposeAsync.");
+                    await DisconnectAsync().ConfigureAwait(false);
+                    lifecycleGate.Dispose();
+                    writeGate.Dispose();
+    
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"LocalGptConnectionService.DisposeAsync failed: {exception.Message}");
+            throw;
+        }
     }
 }

@@ -49,6 +49,69 @@ public sealed class ApplicationPortResolver(
     }
 }
 
+
+public interface IRuntimeEndpointState
+{
+    string BaseUrl { get; }
+    void SetBaseUrl(string baseUrl);
+    void Clear();
+}
+
+public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) : IRuntimeEndpointState
+{
+    private readonly System.Threading.Lock sync = new();
+    private string baseUrl = string.Empty;
+
+    public string BaseUrl
+    {
+        get
+        {
+            try
+            {
+                lock (sync)
+                {
+                    logger.LogTrace($"Read the PublisherStudio runtime endpoint state.");
+                    return baseUrl;
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, $"Reading the PublisherStudio runtime endpoint state failed: {exception.Message}");
+                throw;
+            }
+        }
+    }
+
+    public void SetBaseUrl(string baseUrl)
+    {
+        try
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(baseUrl);
+            lock (sync) this.baseUrl = baseUrl;
+            logger.LogInformation($"Updated the PublisherStudio runtime endpoint state.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"Updating the PublisherStudio runtime endpoint state failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    public void Clear()
+    {
+        try
+        {
+            lock (sync) baseUrl = string.Empty;
+            logger.LogInformation($"Cleared the PublisherStudio runtime endpoint state.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"Clearing the PublisherStudio runtime endpoint state failed: {exception.Message}");
+            throw;
+        }
+    }
+}
+
 public interface IRuntimeEndpointWriter
 {
     void Write(WebApplication app);
@@ -61,12 +124,15 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
     private readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
     private readonly string _runtimeDirectory;
     private readonly string _runtimeFilePath;
+    private readonly IRuntimeEndpointState _runtimeEndpointState;
 
     public RuntimeEndpointWriter(
         ISystemVariableStoreService systemVariables,
-        ILogger<RuntimeEndpointWriter>? logger = null)
+        IRuntimeEndpointState runtimeEndpointState,
+        ILogger<RuntimeEndpointWriter> logger)
     {
-        _logger = logger ?? NullLogger<RuntimeEndpointWriter>.Instance;
+        _logger = logger;
+        _runtimeEndpointState = runtimeEndpointState;
         _runtimeDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             systemVariables.DataProtectionApplicationName,
@@ -81,7 +147,7 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
             var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()?.Addresses;
             var baseUrl = addresses?.FirstOrDefault(address => Uri.TryCreate(address, UriKind.Absolute, out _))
                 ?? throw new InvalidOperationException("PublisherStudio started without a usable server address.");
-            RuntimeEndpointStore.BaseUrl = baseUrl;
+            _runtimeEndpointState.SetBaseUrl(baseUrl);
             var uri = new Uri(baseUrl);
             Directory.CreateDirectory(_runtimeDirectory);
             File.WriteAllText(_runtimeFilePath, System.Text.Json.JsonSerializer.Serialize(new
@@ -121,7 +187,7 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
             }
 
             File.Delete(_runtimeFilePath);
-            RuntimeEndpointStore.BaseUrl = string.Empty;
+            _runtimeEndpointState.Clear();
             _logger.LogInformation("PublisherStudio removed its runtime endpoint file {RuntimeFilePath}.", _runtimeFilePath);
         }
         catch (IOException exception)

@@ -175,23 +175,18 @@ The file picker is reset before every picture/open command, so selecting the sam
 
 ## InstallerConsole
 
-Publish and install the web project:
+Build the self-contained, multi-file application and setup payload into the shared release location:
 
 ```powershell
-dotnet publish src/PublisherStudio.Web -c Release -r win-x64 --self-contained false -o artifacts/payload
-dotnet run --project src/PublisherStudio.InstallerConsole -- install --payload artifacts/payload --start
+.\Build-Release.ps1 -Runtime win-x64
 ```
 
-Start an existing installation:
+The command-line workflow and the Visual Studio publish profiles both write to `artifacts\release`. Extract `setupwinx64.zip` as a complete folder and run `Install.cmd`; the setup executable intentionally depends on the adjacent self-contained runtime files and is no longer published as a misleading standalone file.
+
+For a direct application publish, keep the same reviewed properties:
 
 ```powershell
-dotnet run --project src/PublisherStudio.InstallerConsole -- start
-```
-
-Build directly from a ZIP without Git:
-
-```powershell
-dotnet run --project src/PublisherStudio.InstallerConsole -- source --source-zip https://github.com/OWNER/REPOSITORY/archive/refs/heads/main.zip --start
+dotnet publish src/PublisherStudio.Web -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -p:PublishReadyToRun=false -o artifacts/release/winx64
 ```
 
 ## Maintainer and development assistance
@@ -200,7 +195,7 @@ PublisherStudio / BlazorPublisher is created and maintained by **Michael Fleisch
 
 ## Logging integrity guardrail
 
-Logging is not removed as “cleanup”. Structured service/controller diagnostics, exception logging and expected-cancellation handling are protected by `build/Assert-LoggingIntegrity.ps1` and `build/logging-baseline.json`. The baseline is monotonic: a refactor may add diagnostics, but silently reducing existing logger references, log calls or catch/log boundaries fails the dedicated CI workflow. The same guard runs from the provided development/release scripts and from direct Windows MSBuild/Visual Studio application builds. See `docs/LOGGING_INTEGRITY.md`.
+Structured logging and clear exception handling are application behavior, not disposable noise. Refactors should preserve useful diagnostics while avoiding secrets, full payloads, and blame-oriented user messages. Repository validation scripts are developer-invoked and are not injected into ordinary builds.
 
 ## Deliberate limits
 

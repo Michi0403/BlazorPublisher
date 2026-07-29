@@ -207,13 +207,27 @@
   </Target>
 
 
-  <!--<PropertyGroup>
+  <PropertyGroup>
+    <PublishConfigurationMigrationScript>$(MSBuildThisFileDirectory)build\Migrate-ObsoletePublishConfiguration.ps1</PublishConfigurationMigrationScript>
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
   </PropertyGroup>
 
-  <Target Name="AssertPublisherPublishConfiguration"
+  <Target Name="MigratePublisherObsoletePublishConfiguration"
           BeforeTargets="BeforeBuild"
           AfterTargets="AssertPublisherJavaScriptDiagnostics"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationMigration)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(PublishConfigurationMigrationScript)')" Text="Publish configuration migration script is missing: $(PublishConfigurationMigrationScript)" />
+    <Exec Condition="Exists('$(PublishConfigurationMigrationScript)')"
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublishConfigurationMigrationScript)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="High"
+          StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherPublishConfiguration"
+          BeforeTargets="BeforeBuild"
+          AfterTargets="MigratePublisherObsoletePublishConfiguration"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(PublishConfigurationScript)')" Text="Publish configuration guard script is missing: $(PublishConfigurationScript)" />
     <Exec Condition="Exists('$(PublishConfigurationScript)')"
@@ -222,7 +236,7 @@
           ConsoleToMSBuild="true"
           StandardOutputImportance="High"
           StandardErrorImportance="High" />
-  </Target>-->
+  </Target>
 
   <!--<PropertyGroup>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>

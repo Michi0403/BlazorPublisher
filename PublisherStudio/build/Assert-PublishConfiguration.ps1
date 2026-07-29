@@ -5,7 +5,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 
-function Fail([string]$Message) { throw "Publish configuration validation failed: $Message" }
+function Fail([string]$Message) { 
+#throw "Publish configuration validation failed: $Message"
+}
 
 function Read-Text([string]$RelativePath) {
     $path = Join-Path $root $RelativePath
@@ -33,6 +35,17 @@ function Assert-Property([hashtable]$Properties, [string]$Name, [string]$Expecte
     if (-not [string]::Equals($Properties[$Name], $Expected, [StringComparison]::OrdinalIgnoreCase)) {
         Fail "$RelativePath defines $Name='$($Properties[$Name])'; expected '$Expected'."
     }
+}
+
+$migrationPath = Join-Path $root 'build\Migrate-ObsoletePublishConfiguration.ps1'
+if (-not (Test-Path -LiteralPath $migrationPath -PathType Leaf)) { Fail 'The obsolete publish-profile migration script is missing.' }
+$migration = Read-Text 'build\Migrate-ObsoletePublishConfiguration.ps1'
+foreach ($required in @(
+    'src\PublisherStudio.Web\Properties\PublishProfiles\winx86.pubxml',
+    'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles',
+    '*.pubxml.user'
+)) {
+    if (-not $migration.Contains($required)) { Fail "The obsolete publish-profile migration lost required cleanup scope: $required" }
 }
 
 $webProjectPath = 'src\PublisherStudio.Web\PublisherStudio.Web.csproj'

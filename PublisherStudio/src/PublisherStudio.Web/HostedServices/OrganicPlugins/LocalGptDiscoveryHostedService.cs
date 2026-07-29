@@ -84,17 +84,23 @@ public sealed class LocalGptDiscoveryHostedService(
                     Interlocked.CompareExchange(ref autoConnectInProgress, 1, 0) == 0)
                 {
                     automaticallyAttemptedPeers.Add(peer.PeerId);
+                    var connected = false;
                     try
                     {
                         logger.LogInformation("Automatically opening the local 1-Wire transport to discovered peer {PeerId}; human link/MFA approval remains required.", peer.PeerId);
-                        await connection.ConnectAsync(peer.PeerId, stoppingToken).ConfigureAwait(false);
+                        connected = (await connection.ConnectAsync(peer.PeerId, stoppingToken).ConfigureAwait(false)).IsConnected;
                     }
                     catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
                     catch (Exception ex)
                     {
-                        logger.LogWarning(ex, "Automatic 1-Wire transport connection to {PeerId} failed; the next discovery beacon may retry.", peer.PeerId);
+                        logger.LogWarning(ex, "Automatic 1-Wire transport connection to {PeerId} failed; a later discovery beacon may retry.", peer.PeerId);
                     }
-                    finally { Interlocked.Exchange(ref autoConnectInProgress, 0); }
+                    finally
+                    {
+                        if (!connected)
+                            automaticallyAttemptedPeers.Remove(peer.PeerId);
+                        Interlocked.Exchange(ref autoConnectInProgress, 0);
+                    }
                 }
             }
             catch (JsonException ex)

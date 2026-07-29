@@ -1,7 +1,9 @@
 using PublisherStudio.Domain;
 using PublisherStudio.Services;
 using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -15,6 +17,7 @@ public sealed class LocalGptConnectionService(
     IOrganicPermissionStore permissions,
     IOrganicWorkCoordinator work,
     IOrganicResultStore results,
+    IOrganicReplayGuard replayGuard,
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
 {
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
@@ -29,6 +32,7 @@ public sealed class LocalGptConnectionService(
     private Task? readLoop;
     private string peerId = string.Empty;
     private Guid connectionId;
+    private bool connectionIsLoopback = true;
     private readonly string localPeerId = $"publisherstudio:{Environment.MachineName}";
 
     public event Action? Changed;
@@ -45,6 +49,8 @@ public sealed class LocalGptConnectionService(
             var address = NormalizeAddress(peer.Address, peer.HostName);
             var tcp = new TcpClient();
             await tcp.ConnectAsync(address, peer.ServicePort, cancellationToken).ConfigureAwait(false);
+            var remoteAddress = (tcp.Client.RemoteEndPoint as IPEndPoint)?.Address;
+            var isLoopback = remoteAddress is not null && IPAddress.IsLoopback(remoteAddress);
             var stream = tcp.GetStream();
             var connectedReader = new StreamReader(stream, Encoding.UTF8, false, 8192, leaveOpen: true);
             var connectedWriter = new StreamWriter(stream, new UTF8Encoding(false), 8192, leaveOpen: true) { AutoFlush = true };
@@ -54,6 +60,7 @@ public sealed class LocalGptConnectionService(
             writer = connectedWriter;
             connectionCancellation = new CancellationTokenSource();
             connectionId = connectedId;
+            connectionIsLoopback = isLoopback;
             peerId = requestedPeerId;
             State.IsConnected = true;
             State.IsLinked = false;
@@ -62,7 +69,7 @@ public sealed class LocalGptConnectionService(
             State.ConnectedUtc = DateTimeOffset.UtcNow;
             State.LastError = "Waiting for LocalGPT frontend link approval.";
             discovery.SetConnected(requestedPeerId, true);
-            readLoop = ReadLoopAsync(connectedId, requestedPeerId, connectedReader, connectedWriter, connectionCancellation.Token);
+            readLoop = ReadLoopAsync(connectedId, requestedPeerId, connectedReader, connectedWriter, isLoopback, connectionCancellation.Token);
             Changed?.Invoke();
 
             var localCapabilities = (await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false))
@@ -161,7 +168,7 @@ public sealed class LocalGptConnectionService(
         if (connectedWriter is null || !State.IsConnected) throw new InvalidOperationException("PublisherStudio is not connected to LocalGPT.");
         if (!State.IsLinked && envelope.MessageType != OrganicWireMessageType.Hello)
             throw new InvalidOperationException("The 1-Wire transport is waiting for LocalGPT frontend link approval.");
-        return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, cancellationToken);
+        return SendEnvelopeCoreAsync(envelope, connectedWriter, peerId, connectionIsLoopback, cancellationToken);
     }
 
     public async Task<OrganicWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default)
@@ -192,7 +199,7 @@ public sealed class LocalGptConnectionService(
         await SendEnvelopeAsync(CreateWorkResultEnvelope(item), cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, CancellationToken cancellationToken)
+    private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
         {
@@ -202,11 +209,20 @@ public sealed class LocalGptConnectionService(
                 if (line is null) break;
                 var envelope = codec.DeserializeAndValidate(line);
                 await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
-                await HandleIncomingAsync(envelope, connectedId, connectedPeerId, connectedWriter, cancellationToken).ConfigureAwait(false);
+                if (!string.Equals(envelope.SourcePeerId, connectedPeerId, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidDataException("The organic 1-Wire SourcePeerId does not match the peer identity owned by this connection.");
+                if (string.Equals(envelope.SourcePeerId, localPeerId, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidDataException("A remote connection cannot claim PublisherStudio's local peer identity.");
+                if (!isLoopback && OrganicTransportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
+                    !OrganicTransportSecurityPolicy.IsProtected(envelope))
+                    throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be received.");
+                if (!replayGuard.TryAccept(connectedPeerId, envelope.MessageId, envelope.CreatedUtc))
+                    throw new InvalidDataException("This organic 1-Wire message id has already been processed or is outside the accepted replay window.");
+                await HandleIncomingAsync(envelope, connectedId, connectedPeerId, connectedWriter, isLoopback, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
-        catch (Exception ex) when (ex is IOException or SocketException or JsonException or InvalidDataException or ObjectDisposedException)
+        catch (Exception ex) when (ex is IOException or SocketException or JsonException or InvalidDataException or ObjectDisposedException or CryptographicException)
         {
             if (connectionId == connectedId)
                 State.LastError = ex.Message;
@@ -224,7 +240,7 @@ public sealed class LocalGptConnectionService(
         }
     }
 
-    private async Task HandleIncomingAsync(OrganicWireEnvelope envelope, Guid connectedId, string connectedPeerId, StreamWriter connectedWriter, CancellationToken cancellationToken)
+    private async Task HandleIncomingAsync(OrganicWireEnvelope envelope, Guid connectedId, string connectedPeerId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         if (envelope.MessageType is OrganicWireMessageType.WorkResult or OrganicWireMessageType.Error or OrganicWireMessageType.ApprovalRequired)
         {
@@ -261,7 +277,7 @@ public sealed class LocalGptConnectionService(
                     CorrelationId = envelope.CorrelationId,
                     SourcePeerId = localPeerId,
                     TargetPeerId = connectedPeerId
-                }, connectedWriter, connectedPeerId, cancellationToken).ConfigureAwait(false);
+                }, connectedWriter, connectedPeerId, isLoopback, cancellationToken).ConfigureAwait(false);
                 goto case OrganicWireMessageType.CapabilityResponse;
             case OrganicWireMessageType.CapabilityResponse:
             case OrganicWireMessageType.SkillResponse:
@@ -294,7 +310,7 @@ public sealed class LocalGptConnectionService(
                 results.RecordEnvelope(envelope);
                 break;
             case OrganicWireMessageType.Invoke:
-                StartInvoke(envelope, connectedId, connectedWriter, cancellationToken);
+                StartInvoke(envelope, connectedId, connectedWriter, isLoopback, cancellationToken);
                 break;
             default:
                 results.RecordEnvelope(envelope);
@@ -302,16 +318,16 @@ public sealed class LocalGptConnectionService(
         }
     }
 
-    private void StartInvoke(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, CancellationToken cancellationToken)
+    private void StartInvoke(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
-        var task = ProcessInvokeAsync(envelope, connectedId, connectedWriter, cancellationToken);
+        var task = ProcessInvokeAsync(envelope, connectedId, connectedWriter, isLoopback, cancellationToken);
         if (!activeInvocations.TryAdd(envelope.MessageId, task))
             throw new InvalidOperationException($"Organic work message {envelope.MessageId} is already being processed.");
 
         task.GetAwaiter().OnCompleted(() => activeInvocations.TryRemove(envelope.MessageId, out _));
     }
 
-    private async Task ProcessInvokeAsync(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, CancellationToken cancellationToken)
+    private async Task ProcessInvokeAsync(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
         {
@@ -321,7 +337,7 @@ public sealed class LocalGptConnectionService(
                 logger.LogDebug("Organic work {WorkItemId} completed after its LocalGPT connection ended; the result remains available in PublisherStudio.", item.Id);
                 return;
             }
-            await SendEnvelopeCoreAsync(CreateWorkResultEnvelope(item), connectedWriter, item.PeerId, cancellationToken).ConfigureAwait(false);
+            await SendEnvelopeCoreAsync(CreateWorkResultEnvelope(item), connectedWriter, item.PeerId, isLoopback, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception ex)
@@ -330,11 +346,14 @@ public sealed class LocalGptConnectionService(
         }
     }
 
-    private async Task<Guid> SendEnvelopeCoreAsync(OrganicWireEnvelope envelope, StreamWriter connectedWriter, string targetPeerId, CancellationToken cancellationToken)
+    private async Task<Guid> SendEnvelopeCoreAsync(OrganicWireEnvelope envelope, StreamWriter connectedWriter, string targetPeerId, bool isLoopback, CancellationToken cancellationToken)
     {
         envelope.SourcePeerId = string.IsNullOrWhiteSpace(envelope.SourcePeerId) ? localPeerId : envelope.SourcePeerId;
         envelope.TargetPeerId = string.IsNullOrWhiteSpace(envelope.TargetPeerId) ? targetPeerId : envelope.TargetPeerId;
         await security.ProtectOutgoingAsync(envelope, cancellationToken).ConfigureAwait(false);
+        if (!isLoopback && OrganicTransportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
+            !OrganicTransportSecurityPolicy.IsProtected(envelope))
+            throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be sent.");
         var json = codec.Serialize(envelope);
         await writeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try { await connectedWriter.WriteLineAsync(json.AsMemory(), cancellationToken).ConfigureAwait(false); }
@@ -384,7 +403,7 @@ public sealed class LocalGptConnectionService(
         writer?.Dispose();
         client?.Dispose();
         connectionCancellation?.Dispose();
-        client = null; reader = null; writer = null; connectionCancellation = null; readLoop = null; peerId = string.Empty;
+        client = null; reader = null; writer = null; connectionCancellation = null; readLoop = null; peerId = string.Empty; connectionIsLoopback = true;
         State.IsConnected = false;
         State.IsLinked = false;
         State.PeerId = string.Empty;

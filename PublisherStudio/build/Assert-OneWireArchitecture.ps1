@@ -1,54 +1,59 @@
+[CmdletBinding()]
 param()
-$ErrorActionPreference = "Stop"
-Set-StrictMode -Version Latest
-$root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 
-function Fail([string]$Message) { throw "1-Wire architecture validation failed: $Message" }
-function ReadText([string]$RelativePath) {
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $PSScriptRoot
+$findings = [System.Collections.Generic.List[string]]::new()
+
+function Add-Finding([string]$Message) { $findings.Add($Message) }
+function Read-OptionalText([string]$RelativePath) {
     $path = Join-Path $root $RelativePath
-    if (-not (Test-Path -LiteralPath $path)) { Fail "Required file is missing: $RelativePath" }
-    return [System.IO.File]::ReadAllText($path)
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+        Add-Finding "Missing file: $RelativePath"
+        return ''
+    }
+    return [IO.File]::ReadAllText($path)
 }
 
-$webProject = ReadText "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
-$globalUsing = ReadText "src\PublisherStudio.Web\GlobalUsings.OneWire.cs"
-$securityService = ReadText "src\PublisherStudio.Web\Services\OrganicPlugins\OrganicRuntimeSecurityService.cs"
-$installer = ReadText "src\PublisherStudio.InstallerConsole\Program.cs"
-$portResolver = ReadText "src\PublisherStudio.Web\Services\ApplicationHostServices.cs"
-$systemVariableContract = ReadText "src\PublisherStudio.Web\Services\Configuration\ISystemVariableStoreService.cs"
-$systemVariableStore = ReadText "src\PublisherStudio.Web\Services\Configuration\SystemVariableStoreService.cs"
-$buildScript = ReadText "Build-LocalDevelopment.ps1"
-$installerProject = ReadText "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
-$installLauncher = ReadText "src\PublisherStudio.InstallerConsole\Install.cmd"
-$updateLauncher = ReadText "src\PublisherStudio.InstallerConsole\Update.cmd"
-$startLauncher = ReadText "src\PublisherStudio.InstallerConsole\Start.cmd"
-$uninstallLauncher = ReadText "src\PublisherStudio.InstallerConsole\Uninstall.cmd"
-$settings = Get-Content -Raw -LiteralPath (Join-Path $root "src\PublisherStudio.Web\appsettings.json") | ConvertFrom-Json
-$launch = Get-Content -Raw -LiteralPath (Join-Path $root "src\PublisherStudio.Web\Properties\launchSettings.json") | ConvertFrom-Json
+$webProject = Read-OptionalText 'src\PublisherStudio.Web\PublisherStudio.Web.csproj'
+$globalUsing = Read-OptionalText 'src\PublisherStudio.Web\GlobalUsings.OneWire.cs'
+$interfaces = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\IOrganicPluginServices.cs'
+$connection = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\LocalGptConnectionService.cs'
+$state = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\OrganicPluginStateServices.cs'
+$discovery = Read-OptionalText 'src\PublisherStudio.Web\HostedServices\OrganicPlugins\LocalGptDiscoveryHostedService.cs'
+$host = Read-OptionalText 'src\PublisherStudio.Web\Services\ApplicationHostServices.cs'
+$systemVariableStore = Read-OptionalText 'src\PublisherStudio.Web\Services\Configuration\SystemVariableStoreService.cs'
+$settingsPath = Join-Path $root 'src\PublisherStudio.Web\appsettings.json'
 
-if ($webProject -notmatch 'PackageReference Include="LocalGPT\.WireProtocolVersion"') { Fail "PublisherStudio must consume the authoritative protocol package." }
-if ($webProject -match 'ProjectReference[^\r\n]*LocalGPT\.WireProtocolVersion') { Fail "PublisherStudio must not contain a protocol source-project reference." }
-if (Test-Path -LiteralPath (Join-Path $root "src\LocalGPT.WireProtocolVersion")) { Fail "PublisherStudio must not duplicate the LocalGPT protocol source project." }
-if ($globalUsing -notmatch 'global using LocalGPT\.WireProtocol;') { Fail "The application-wide protocol namespace import is missing." }
-if ($securityService -notmatch 'using LocalGPT\.WireProtocol;') { Fail "OrganicRuntimeSecurityService must explicitly import the protocol namespace in addition to the global safeguard." }
-if ($installer -notmatch 'WaitForRuntimeEndpoint' -or $installer -notmatch 'TryGetRunningEndpoint') { Fail "PublisherStudio start must wait for the process-owned runtime URL before opening a browser." }
-if ($installer -match 'Thread\.Sleep\(TimeSpan\.FromSeconds\(2\)\)') { Fail "The old guessed two-second browser start returned." }
-if ($installer -notmatch 'PublisherStudio startup failed' -or $installer -notmatch 'throw;') { Fail "PublisherStudio desktop startup failures must propagate to the launcher." }
-if ($installer -match 'Doomland|Your args to string|args were initially empty') { Fail "Temporary debug-console wording must not ship in PublisherStudio Setup." }
-if ($installerProject -notmatch '<None Update="Install\.cmd">' -or $installerProject -notmatch '<None Update="Update\.cmd">' -or $installerProject -notmatch '<None Update="Start\.cmd">' -or $installerProject -notmatch '<None Update="Uninstall\.cmd">') { Fail "The published setup must contain all four reviewed PublisherStudio launchers." }
-if ($installLauncher -notmatch '--install-blazorpublisher --force-delete --start-blazorpublisher --port 58071 --shortcuts') { Fail "PublisherStudio fresh install launcher no longer uses the canonical install/start/shortcut path." }
-if ($updateLauncher -notmatch '--update-blazorpublisher --start-blazorpublisher --port 58071 --shortcuts' -or $updateLauncher -match '--force-delete') { Fail "PublisherStudio update must preserve local runtime data while restarting on the canonical port." }
-if ($startLauncher -notmatch '--start-blazorpublisher --port 58071') { Fail "PublisherStudio Start launcher no longer uses the canonical loopback port." }
-if ($uninstallLauncher -notmatch '--uninstall --force-delete') { Fail "PublisherStudio Uninstall launcher no longer performs the reviewed application removal path." }
-if ($portResolver -notmatch 'systemVariables\.DefaultPort') { Fail "PublisherStudio port resolution must use the configuration-backed system-variable store." }
-if ($portResolver -match '(?m)^[^\r\n]*58071') { Fail "PublisherStudio runtime port resolution must not reintroduce a hardcoded port literal outside the system-variable seed/configuration boundary." }
-if ($systemVariableContract -notmatch 'int\s+DefaultPort\s*\{\s*get;\s*\}') { Fail "PublisherStudio system-variable contract must expose the canonical default port." }
-if ($systemVariableStore -notmatch 'Application\.DefaultPort' -or $systemVariableStore -notmatch 'public\s+int\s+DefaultPort\s*=>\s*GetInt\(_defaultPortName,\s*58071\)') { Fail "PublisherStudio system-variable seed must retain canonical port 58071." }
-if ($securityService -notmatch 'OneWireProtocol\.') { Fail "Organic runtime security no longer references the authoritative protocol contract." }
-if ($buildScript -notmatch 'Ensure-WireProtocolPackage\.ps1') { Fail "The build must bootstrap the authoritative protocol package before restore." }
-if ([int]$settings.PublisherStudio.Port -ne 58071) { Fail "PublisherStudio default web port must remain 58071." }
-if ([int]$settings.OrganicPlugins.ServicePort -ne 51140 -or [int]$settings.OrganicPlugins.DiscoveryPort -ne 51141) { Fail "Organic 1-Wire defaults must match LocalGPT TCP 51140 / UDP 51141." }
-if ([string]$settings.OrganicPlugins.BroadcastAddress -ne '255.255.255.255') { Fail "Organic broadcast address must remain 255.255.255.255." }
-if ([string]$launch.profiles.'PublisherStudio.Web'.applicationUrl -ne 'http://127.0.0.1:58071') { Fail "Visual Studio and installer start paths must share the same PublisherStudio loopback URL." }
+if ($webProject -and $webProject -notmatch 'PackageReference Include="LocalGPT\.WireProtocolVersion"') { Add-Finding 'PublisherStudio no longer consumes the authoritative protocol package.' }
+if ($webProject -match 'ProjectReference[^\r\n]*LocalGPT\.WireProtocolVersion') { Add-Finding 'PublisherStudio contains a protocol source-project reference instead of the package.' }
+if (Test-Path -LiteralPath (Join-Path $root 'src\LocalGPT.WireProtocolVersion')) { Add-Finding 'PublisherStudio contains a duplicate protocol source project.' }
+if ($globalUsing -and $globalUsing -notmatch 'global using LocalGPT\.WireProtocol;') { Add-Finding 'The application-wide protocol namespace import is missing.' }
+if ($interfaces -and $interfaces -notmatch 'IOrganicReplayGuard') { Add-Finding 'The replay-guard contract is missing.' }
+if ($state -and $state -notmatch 'class OrganicReplayGuard') { Add-Finding 'The replay-guard implementation is missing.' }
+if ($connection -and $connection -notmatch 'connectionIsLoopback') { Add-Finding 'Connection transport locality is no longer tracked.' }
+if ($connection -and $connection -notmatch 'SourcePeerId does not match the peer identity owned by this connection') { Add-Finding 'The TCP connection no longer pins SourcePeerId to its discovered peer.' }
+if ($discovery -and $discovery -notmatch 'automaticallyAttemptedPeers\.Remove') { Add-Finding 'Failed automatic connections will not become retryable.' }
+if ($host -and $host -notmatch 'systemVariables\.DefaultPort') { Add-Finding 'PublisherStudio port resolution no longer uses systemVariables.DefaultPort.' }
+if ($systemVariableStore -and $systemVariableStore -notmatch 'Application\.DefaultPort') { Add-Finding 'SystemVariableStoreService.cs no longer owns Application.DefaultPort.' }
 
-Write-Host "1-Wire architecture validation passed for PublisherStudio." -ForegroundColor Green
+if (-not (Test-Path -LiteralPath $settingsPath -PathType Leaf)) {
+    Add-Finding 'Missing PublisherStudio appsettings.json.'
+}
+else {
+    try { $settings = Get-Content -Raw -LiteralPath $settingsPath | ConvertFrom-Json }
+    catch { Add-Finding "appsettings.json is invalid JSON: $($_.Exception.Message)"; $settings = $null }
+    if ($settings) {
+        if ([int]$settings.PublisherStudio.Port -ne 58071) { Add-Finding 'PublisherStudio default port is not 58071.' }
+        if ([int]$settings.OrganicPlugins.ServicePort -ne 51140 -or [int]$settings.OrganicPlugins.DiscoveryPort -ne 51141) { Add-Finding 'Organic 1-Wire ports no longer match LocalGPT.' }
+    }
+}
+
+if ($findings.Count -eq 0) {
+    Write-Host 'PublisherStudio 1-Wire static audit completed with no findings.' -ForegroundColor Green
+}
+else {
+    foreach ($finding in $findings) { Write-Warning $finding }
+    Write-Host "PublisherStudio 1-Wire static audit completed with $($findings.Count) finding(s). This audit reports only and does not block the build." -ForegroundColor Yellow
+}

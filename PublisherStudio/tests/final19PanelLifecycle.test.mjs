@@ -30,8 +30,11 @@ test('Panel Studio does not switch to interact through background input and logs
   assert.match(panel, /Panel Studio browser interaction ended normally\. Binding:/);
 });
 
-test('Panel Studio lifecycle validation remains available explicitly', () => {
+test('Panel Studio lifecycle safeguard is part of direct Windows builds', () => {
+  const targets = read('Directory.Build.targets');
   const guard = read('build/Assert-PanelStudioInteractionLifecycle.ps1');
+  assert.match(targets, /AssertPublisherPanelStudioInteractionLifecycle/);
+  assert.match(targets, /Assert-PanelStudioInteractionLifecycle\.ps1/);
   assert.match(guard, /Repeated renders must reuse the existing binding/);
   assert.match(guard, /Gamepad or keyboard interop must not switch/);
 });

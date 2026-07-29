@@ -192,11 +192,9 @@ internal static class Program
             ValidateZipArchive(zipPath, logger);
             ValidateZipArchive(setupZipPath, logger);
 
-            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (string.IsNullOrWhiteSpace(localAppData))
-                throw new InvalidOperationException("LOCALAPPDATA could not be resolved.");
-
-            var targetPath = Path.Combine(localAppData, "BlazorPublisher");
+            var targetPath = GetBlazorPublisherInstallRoot(logger);
+            if (string.IsNullOrWhiteSpace(targetPath))
+                throw new InvalidOperationException("The PublisherStudio installation directory could not be resolved.");
 
             if (options.ForceDelete)
                 DeleteIfExists(targetPath, logger);
@@ -770,7 +768,17 @@ internal static class Program
             if (string.IsNullOrWhiteSpace(localAppData))
                 throw new InvalidOperationException("LOCALAPPDATA could not be resolved.");
 
-            return Path.Combine(localAppData, "BlazorPublisher");
+            var canonical = Path.Combine(localAppData, "Programs", "BlazorPublisher");
+            var legacy = Path.Combine(localAppData, "BlazorPublisher");
+            if (Directory.Exists(canonical))
+                return canonical;
+            if (Directory.Exists(legacy))
+            {
+                logger.LogInformation("Using the existing legacy PublisherStudio installation directory '{LegacyInstallRoot}'. Fresh installations use '{CanonicalInstallRoot}'.", legacy, canonical);
+                return legacy;
+            }
+
+            return canonical;
         }
         catch (Exception ex)
         {
@@ -1112,27 +1120,9 @@ internal static class Program
 
             if (selected is null)
             {
-                logger.LogWarning(
-                    $"No exact asset match found for setupAsset={setupAsset}, platform={platform}, arch={arch}. Falling back to first matching setup mode.");
-
-                foreach (var asset in assets.EnumerateArray())
-                {
-                    var name = asset.GetProperty("name").GetString() ?? string.Empty;
-
-                    var isSetupAsset =
-                        name.Contains("setup", StringComparison.OrdinalIgnoreCase)
-                        || name.Contains("installer", StringComparison.OrdinalIgnoreCase)
-                        || name.Contains("bootstrap", StringComparison.OrdinalIgnoreCase);
-
-                    if (isSetupAsset == setupAsset)
-                    {
-                        selected = asset;
-                        break;
-                    }
-                }
+                throw new InvalidOperationException(
+                    $"No safe PublisherStudio release asset matched setupAsset={setupAsset}, platform={platform}, arch={arch}. Refusing to deploy an asset for another runtime.");
             }
-
-            selected ??= assets.EnumerateArray().First();
 
             var downloadUrl = selected.Value.GetProperty("browser_download_url").GetString();
             var assetName = selected.Value.GetProperty("name").GetString();

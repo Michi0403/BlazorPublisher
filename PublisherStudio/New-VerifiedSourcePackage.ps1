@@ -6,6 +6,24 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $root = (Resolve-Path -LiteralPath $PSScriptRoot).Path
 
+& (Join-Path $root 'build\Assert-LocalizationIntegrity.ps1')
+& (Join-Path $root 'build\Assert-GitSourceVisibility.ps1')
+
+$node = Get-Command node -ErrorAction SilentlyContinue
+if (-not $node) { throw 'Node.js is required for the source-closure tests.' }
+Push-Location (Join-Path $root 'src/PublisherStudio.Web')
+try {
+    & node ../../tests/csharpCompilationSafety.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw 'C# source-closure test failed.' }
+    & node ../../tests/organicPluginOneWire.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw 'Organic WireProtocolVersion test failed.' }
+    & node ../../tests/runtimeBootstrapSafety.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw 'Runtime/bootstrap safety test failed.' }
+    & node ../../tests/localizationEncodingGitVisibility.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw 'Localization encoding/Git visibility regression test failed.' }
+}
+finally { Pop-Location }
+
 $output = [IO.Path]::GetFullPath($OutputPath)
 $directory = Split-Path -Parent $output
 New-Item -ItemType Directory -Path $directory -Force | Out-Null
@@ -34,4 +52,4 @@ finally {
 
 $hash = (Get-FileHash -LiteralPath $output -Algorithm SHA256).Hash.ToLowerInvariant()
 Set-Content -LiteralPath "$output.sha256" -Value "$hash  $([IO.Path]::GetFileName($output))" -Encoding ascii
-Write-Host "PublisherStudio source package created: $output"
+Write-Host "Verified PublisherStudio source package created: $output"

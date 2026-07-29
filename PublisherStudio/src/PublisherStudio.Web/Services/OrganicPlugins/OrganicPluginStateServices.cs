@@ -234,6 +234,43 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     };
 }
 
+public sealed class OrganicReplayGuard(ILogger<OrganicReplayGuard> logger) : IOrganicReplayGuard
+{
+    private static readonly TimeSpan Retention = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan AllowedFutureSkew = TimeSpan.FromMinutes(2);
+    private readonly ConcurrentDictionary<string, DateTimeOffset> accepted = new(StringComparer.OrdinalIgnoreCase);
+    private int cleanupCounter;
+
+    public bool TryAccept(string peerId, Guid messageId, DateTimeOffset createdUtc)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(peerId);
+        if (messageId == Guid.Empty)
+            return false;
+
+        var now = DateTimeOffset.UtcNow;
+        if (createdUtc < now - Retention || createdUtc > now + AllowedFutureSkew)
+        {
+            logger.LogWarning("Rejected organic 1-Wire message {MessageId} from {PeerId} because its timestamp is outside the accepted replay window.", messageId, peerId);
+            return false;
+        }
+
+        var key = $"{peerId}\n{messageId:N}";
+        if (!accepted.TryAdd(key, now.Add(Retention)))
+        {
+            logger.LogWarning("Rejected replayed organic 1-Wire message {MessageId} from {PeerId}.", messageId, peerId);
+            return false;
+        }
+
+        if (Interlocked.Increment(ref cleanupCounter) % 64 == 0 || accepted.Count > 4096)
+        {
+            foreach (var stale in accepted.Where(pair => pair.Value <= now).Select(pair => pair.Key).ToArray())
+                accepted.TryRemove(stale, out _);
+        }
+
+        return true;
+    }
+}
+
 public sealed class OrganicResultStore : IOrganicResultStore
 {
     private readonly ConcurrentQueue<OrganicPluginWorkItem> results = new();

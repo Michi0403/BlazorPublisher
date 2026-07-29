@@ -1,6 +1,6 @@
 # PublisherStudio publish configuration policy
 
-PublisherStudio uses one publish contract for the command-line release scripts and every Visual Studio publish profile.
+PublisherStudio keeps Visual Studio publish profiles only for the web host. Installer output is produced exclusively by `Build-Release.ps1`, preventing duplicate and differently named deployment folders.
 
 ## Runtime policy
 
@@ -18,7 +18,7 @@ The project files apply `SelfContained=true` only when a `RuntimeIdentifier` is 
 Both publishing paths write to `artifacts\release`:
 
 - application folders: `winx64`, `winarm64`, `linx64`, `linarm64`, `macosx64`, `macosarm64`;
-- setup folders: `setupwin-x64`, `setupwin-arm64`, `setuplin-x64`, `setuplin-arm64`, `setupmacos-x64`, `setupmacos-arm64`.
+- setup folders created by the release script: `setupwinx64`, `setupwinarm64`, `setuplinx64`, `setuplinarm64`, `setupmacosx64`, `setupmacosarm64`.
 
 `Build-Release.ps1` creates the matching ZIP assets. Because the setup is multi-file, the release workflow does not copy a bare `PublisherStudio.Setup.exe` to the artifact root. Use the complete setup folder or setup ZIP.
 

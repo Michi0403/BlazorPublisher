@@ -46,22 +46,10 @@ foreach ($project in @(
     @{ Name = $webProjectPath; Text = $webProject },
     @{ Name = $setupProjectPath; Text = $setupProject }
 )) {
-    if ($project.Text -notmatch '<SelfContained\s+Condition="''\$\(RuntimeIdentifier\)'' != ''''">true</SelfContained>') { Fail "$($project.Name) must default RID-based publishes to self-contained output without changing ordinary RID-less builds." }
-    if ($project.Text -notmatch '<PublishSingleFile>false</PublishSingleFile>') { Fail "$($project.Name) must disable single-file publishing." }
-    if ($project.Text -notmatch '<PublishTrimmed>false</PublishTrimmed>') { Fail "$($project.Name) must disable trimming." }
-    if ($project.Text -notmatch '<PublishReadyToRun>false</PublishReadyToRun>') { Fail "$($project.Name) must disable ReadyToRun publishing." }
-}
-
-$configurationMarkers = @(
-    '<Content Update="appsettings\*\.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />',
-    '<Content Update="Localization\\\*\*\\\*\.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />',
-    '<Content Update="Configuration\\\*\*\\\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />',
-    '<None Update="Configuration\\\*\*\\\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />',
-    '<PublisherStudioConfigurationFile Include="appsettings\*\.json;Configuration\\\*\*\\\*;Localization\\\*\*\\\*\.json" />',
-    'ValidatePublisherConfigurationFilesForPublish'
-)
-foreach ($marker in $configurationMarkers) {
-    if ($webProject -notmatch $marker) { Fail "PublisherStudio.Web.csproj does not preserve the complete reviewed configuration payload marker: $marker" }
+    if ($project.Text -notmatch '<SelfContained\s+Condition="''\$\(RuntimeIdentifier\)'' != ''''">true</SelfContained>') { Fail "$($project.Name) must default RID-based publishes to self-contained output." }
+    foreach ($marker in @('<PublishSingleFile>false</PublishSingleFile>', '<PublishTrimmed>false</PublishTrimmed>', '<PublishReadyToRun>false</PublishReadyToRun>')) {
+        if (-not $project.Text.Contains($marker)) { Fail "$($project.Name) is missing $marker." }
+    }
 }
 
 $expectedWebProfiles = @(
@@ -72,24 +60,20 @@ $expectedWebProfiles = @(
     @{ File = 'macosx64.pubxml'; Runtime = 'osx-x64'; Folder = 'macosx64' },
     @{ File = 'macosarm64.pubxml'; Runtime = 'osx-arm64'; Folder = 'macosarm64' }
 )
-$expectedSetupProfiles = @(
-    @{ File = 'FolderProfile.pubxml'; Runtime = 'win-x64'; Folder = 'setupwin-x64' },
-    @{ File = 'winx64.pubxml'; Runtime = 'win-x64'; Folder = 'setupwin-x64' },
-    @{ File = 'winarm64.pubxml'; Runtime = 'win-arm64'; Folder = 'setupwin-arm64' },
-    @{ File = 'linuxx64.pubxml'; Runtime = 'linux-x64'; Folder = 'setuplin-x64' },
-    @{ File = 'linuxarm64.pubxml'; Runtime = 'linux-arm64'; Folder = 'setuplin-arm64' },
-    @{ File = 'macosx64.pubxml'; Runtime = 'osx-x64'; Folder = 'setupmacos-x64' },
-    @{ File = 'macosarm64.pubxml'; Runtime = 'osx-arm64'; Folder = 'setupmacos-arm64' }
-)
 
 $webProfileRoot = Join-Path $root 'src\PublisherStudio.Web\Properties\PublishProfiles'
-$setupProfileRoot = Join-Path $root 'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles'
 $actualWebProfiles = @(Get-ChildItem -LiteralPath $webProfileRoot -File -Filter '*.pubxml' | Select-Object -ExpandProperty Name | Sort-Object)
-$actualSetupProfiles = @(Get-ChildItem -LiteralPath $setupProfileRoot -File -Filter '*.pubxml' | Select-Object -ExpandProperty Name | Sort-Object)
 $expectedWebNames = @($expectedWebProfiles | ForEach-Object { $_.File } | Sort-Object)
-$expectedSetupNames = @($expectedSetupProfiles | ForEach-Object { $_.File } | Sort-Object)
 if (($actualWebProfiles -join '|') -ne ($expectedWebNames -join '|')) { Fail "Unexpected PublisherStudio.Web publish-profile inventory: $($actualWebProfiles -join ', ')" }
-if (($actualSetupProfiles -join '|') -ne ($expectedSetupNames -join '|')) { Fail "Unexpected installer publish-profile inventory: $($actualSetupProfiles -join ', ')" }
+
+$setupProfileRoot = Join-Path $root 'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles'
+if (Test-Path -LiteralPath $setupProfileRoot) {
+    $obsoleteProfiles = @(Get-ChildItem -LiteralPath $setupProfileRoot -File -ErrorAction SilentlyContinue)
+    if ($obsoleteProfiles.Count -gt 0) { Fail 'Installer publish profiles are obsolete; Build-Release.ps1 is the single installer publish path.' }
+}
+
+$profileUserFiles = @(Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -File -Filter '*.pubxml.user' -ErrorAction SilentlyContinue)
+if ($profileUserFiles.Count -gt 0) { Fail 'User-specific .pubxml.user files must not be shipped in the source package.' }
 
 foreach ($profile in $expectedWebProfiles) {
     $relative = "src\PublisherStudio.Web\Properties\PublishProfiles\$($profile.File)"
@@ -103,35 +87,27 @@ foreach ($profile in $expectedWebProfiles) {
     Assert-Property $properties 'PublishUrl' "..\..\artifacts\release\$($profile.Folder)\" $relative
 }
 
-foreach ($profile in $expectedSetupProfiles) {
-    $relative = "src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\$($profile.File)"
-    $properties = Read-ProfileProperties $relative
-    Assert-Property $properties 'RuntimeIdentifier' $profile.Runtime $relative
-    Assert-Property $properties 'SelfContained' 'true' $relative
-    Assert-Property $properties 'PublishSingleFile' 'false' $relative
-    Assert-Property $properties 'PublishTrimmed' 'false' $relative
-    Assert-Property $properties 'PublishReadyToRun' 'false' $relative
-    Assert-Property $properties 'DeleteExistingFiles' 'true' $relative
-    Assert-Property $properties 'PublishDir' "..\..\artifacts\release\$($profile.Folder)\" $relative
+$releaseMappings = @(
+    @{ Runtime = 'win-x64'; App = 'winx64'; Setup = 'setupwinx64' },
+    @{ Runtime = 'win-arm64'; App = 'winarm64'; Setup = 'setupwinarm64' },
+    @{ Runtime = 'linux-x64'; App = 'linx64'; Setup = 'setuplinx64' },
+    @{ Runtime = 'linux-arm64'; App = 'linarm64'; Setup = 'setuplinarm64' },
+    @{ Runtime = 'osx-x64'; App = 'macosx64'; Setup = 'setupmacosx64' },
+    @{ Runtime = 'osx-arm64'; App = 'macosarm64'; Setup = 'setupmacosarm64' }
+)
+foreach ($mapping in $releaseMappings) {
+    foreach ($fragment in @(
+        '"' + $mapping.Runtime + '"',
+        'AppFolder = "' + $mapping.App + '"',
+        'SetupFolder = "' + $mapping.Setup + '"',
+        'SetupAsset = "' + $mapping.Setup + '"'
+    )) {
+        if (-not $release.Contains($fragment)) { Fail "Build-Release.ps1 is missing synchronized mapping: $fragment" }
+    }
+    if (-not $allRuntimes.Contains('"' + $mapping.Runtime + '"')) { Fail "Build-AllRuntimes.ps1 is missing runtime $($mapping.Runtime)." }
 }
 
-if ($release -notmatch '\$multiFileSelfContainedProperties\s*=\s*@\(') { Fail 'Build-Release.ps1 must own one shared multi-file self-contained property list.' }
-if (([regex]::Matches($release, '\+\s*\$multiFileSelfContainedProperties')).Count -ne 2) { Fail 'Build-Release.ps1 must apply the shared publish properties to both the application and installer.' }
-if ($release -match 'PublishSingleFile=true' -or $release -match 'IncludeNativeLibrariesForSelfExtract=true' -or $release -match 'EnableCompressionInSingleFile=true') { Fail 'Build-Release.ps1 still contains a single-file publish switch.' }
-if ($release -notmatch 'Assert-PublishedConfigurationFiles\s+-SourceRoot\s+\$webDirectory\s+-PublishRoot\s+\$appFolder') { Fail 'Build-Release.ps1 must validate every published configuration file.' }
-if ($release -match 'Join-Path\s+\$artifacts\s+"PublisherStudio\.Setup\.exe"') { Fail 'A multi-file setup may not be exposed as a misleading standalone executable.' }
+if ($release -match 'SetupFolder\s*=\s*"[^"]*-' ) { Fail 'Installer output folders must use the same canonical token as their ZIP asset names.' }
+if ($release -match 'PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract=true|EnableCompressionInSingleFile=true') { Fail 'Single-file publishing is not part of the reviewed deployment path.' }
 
-foreach ($profile in $expectedWebProfiles) {
-    $mapping = 'AppFolder = "{0}"' -f $profile.Folder
-    if ($release -notmatch [regex]::Escape($mapping)) { Fail "Build-Release.ps1 is missing application folder mapping $($profile.Folder)." }
-}
-foreach ($profile in @($expectedSetupProfiles | Where-Object { $_.File -ne 'FolderProfile.pubxml' })) {
-    $mapping = 'SetupFolder = "{0}"' -f $profile.Folder
-    if ($release -notmatch [regex]::Escape($mapping)) { Fail "Build-Release.ps1 is missing installer folder mapping $($profile.Folder)." }
-}
-foreach ($runtime in @('win-x64', 'win-arm64', 'linux-x64', 'linux-arm64', 'osx-x64', 'osx-arm64')) {
-    if ($allRuntimes -notmatch [regex]::Escape('"' + $runtime + '"')) { Fail "Build-AllRuntimes.ps1 is missing runtime $runtime." }
-}
-if ($allRuntimes -notmatch 'Assert-PublishConfiguration\.ps1') { Fail 'Build-AllRuntimes.ps1 must validate publish-profile synchronization before dispatch.' }
-
-Write-Host "Publish configuration validation passed for $($expectedWebProfiles.Count) application and $($expectedSetupProfiles.Count) installer profiles. All publishes are self-contained, multi-file and configuration-complete."
+Write-Host "Publish configuration validation passed for $($expectedWebProfiles.Count) web-host profiles and the single scripted installer publish path."

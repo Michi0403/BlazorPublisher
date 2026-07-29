@@ -17,6 +17,7 @@ public sealed class OrganicWireHttpController(
     IOrganicRuntimeSecurityService security,
     IOrganicCapabilityCatalog capabilities,
     IOrganicWorkCoordinator work,
+    IOrganicReplayGuard replayGuard,
     ILogger<OrganicWireHttpController> logger) : ControllerBase
 {
     [HttpGet("profile")]
@@ -59,10 +60,17 @@ public sealed class OrganicWireHttpController(
             await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
             if (envelope.MessageType is not OrganicWireMessageType.Invoke)
                 return BadRequest(new { Error = "The PublisherStudio HTTP/JSON adapter currently accepts Invoke envelopes; use profile for catalog discovery." });
+            if (!OrganicTransportSecurityPolicy.IsProtected(envelope))
+                throw new CryptographicException("PublisherStudio HTTP/JSON Invoke requests require an MFA-verified signed and encrypted peer.");
+            if (!replayGuard.TryAccept(envelope.SourcePeerId, envelope.MessageId, envelope.CreatedUtc))
+                throw new InvalidDataException("This organic 1-Wire message id has already been processed or is outside the accepted replay window.");
 
             var item = await work.ReceiveAsync(envelope, cancellationToken).ConfigureAwait(false);
             var response = CreateWorkEnvelope(item);
             await security.ProtectOutgoingAsync(response, cancellationToken).ConfigureAwait(false);
+            if (OrganicTransportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
+                !OrganicTransportSecurityPolicy.IsProtected(response))
+                throw new CryptographicException("The PublisherStudio HTTP/JSON response requires an MFA-verified peer before application data can be returned.");
             return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -92,6 +100,9 @@ public sealed class OrganicWireHttpController(
                 return NotFound(new { CorrelationId = correlationId, Status = "NotFoundOrNotQueuedYet" });
             var response = CreateWorkEnvelope(item);
             await security.ProtectOutgoingAsync(response, cancellationToken).ConfigureAwait(false);
+            if (OrganicTransportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
+                !OrganicTransportSecurityPolicy.IsProtected(response))
+                throw new CryptographicException("The PublisherStudio HTTP/JSON work response requires an MFA-verified peer before application data can be returned.");
             return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
         }
         catch (Exception ex)
@@ -110,7 +121,7 @@ public sealed class OrganicWireHttpController(
                 : OrganicWireMessageType.WorkResult,
         CorrelationId = item.CorrelationId,
         ReplyToMessageId = item.MessageId,
-        SourcePeerId = "publisherstudio",
+        SourcePeerId = $"publisherstudio:{Environment.MachineName}",
         TargetPeerId = item.PeerId,
         CapabilityKey = item.CapabilityKey,
         Error = item.Error,

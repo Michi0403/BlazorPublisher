@@ -60,6 +60,14 @@ function Assert-PublishedConfigurationFiles {
 
     Write-Host "Published configuration validation passed for $($configurationSources.Count) files." -ForegroundColor Green
 }
+
+& (Join-Path $root "build\Assert-LoggingIntegrity.ps1")
+& (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
+& (Join-Path $root "build\Assert-JavaScriptDiagnostics.ps1")
+& (Join-Path $root "build\Assert-PublishConfiguration.ps1")
+& (Join-Path $root "build\Assert-InstallerWorkflow.ps1")
+& (Join-Path $root "build\Assert-RuntimeValueOwnership.ps1")
+& (Join-Path $root "build\Assert-LocalizationIntegrity.ps1")
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 
 if ($UseBundledWireProtocolPackage) {
@@ -82,12 +90,12 @@ if (-not (Test-Path -LiteralPath $wireProtocolPackage -PathType Leaf)) {
 }
 
 $profile = switch ($Runtime) {
-    "win-x64"     { @{ Asset = "winx64";     SetupAsset = "setupwinx64";     AppFolder = "winx64";     SetupFolder = "setupwin-x64" } }
-    "win-arm64"   { @{ Asset = "winarm64";   SetupAsset = "setupwinarm64";   AppFolder = "winarm64";   SetupFolder = "setupwin-arm64" } }
-    "linux-x64"   { @{ Asset = "linx64";     SetupAsset = "setuplinx64";     AppFolder = "linx64";     SetupFolder = "setuplin-x64" } }
-    "linux-arm64" { @{ Asset = "linarm64";   SetupAsset = "setuplinarm64";   AppFolder = "linarm64";   SetupFolder = "setuplin-arm64" } }
-    "osx-x64"     { @{ Asset = "macosx64";   SetupAsset = "setupmacosx64";   AppFolder = "macosx64";   SetupFolder = "setupmacos-x64" } }
-    "osx-arm64"   { @{ Asset = "macosarm64"; SetupAsset = "setupmacosarm64"; AppFolder = "macosarm64"; SetupFolder = "setupmacos-arm64" } }
+    "win-x64"     { @{ Asset = "winx64";     SetupAsset = "setupwinx64";     AppFolder = "winx64";     SetupFolder = "setupwinx64" } }
+    "win-arm64"   { @{ Asset = "winarm64";   SetupAsset = "setupwinarm64";   AppFolder = "winarm64";   SetupFolder = "setupwinarm64" } }
+    "linux-x64"   { @{ Asset = "linx64";     SetupAsset = "setuplinx64";     AppFolder = "linx64";     SetupFolder = "setuplinx64" } }
+    "linux-arm64" { @{ Asset = "linarm64";   SetupAsset = "setuplinarm64";   AppFolder = "linarm64";   SetupFolder = "setuplinarm64" } }
+    "osx-x64"     { @{ Asset = "macosx64";   SetupAsset = "setupmacosx64";   AppFolder = "macosx64";   SetupFolder = "setupmacosx64" } }
+    "osx-arm64"   { @{ Asset = "macosarm64"; SetupAsset = "setupmacosarm64"; AppFolder = "macosarm64"; SetupFolder = "setupmacosarm64" } }
     default { throw "Unsupported release runtime: $Runtime" }
 }
 
@@ -121,7 +129,10 @@ $wireProperties = @(
     "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
     "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
     "-p:RestoreAdditionalProjectSources=$packageDirectory",
-    "-p:SkipWireProtocolBootstrap=true"
+    "-p:SkipWireProtocolBootstrap=true",
+    "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true"
 )
 
 Write-Host "Restoring BlazorPublisher application for $Runtime after protocol preparation..." -ForegroundColor Cyan
@@ -140,10 +151,12 @@ Invoke-DotNet -Arguments (@(
 Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $appFolder
 
 Write-Host "Restoring BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel") -FailureMessage "BlazorPublisher setup restore failed."
+Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Runtime, "--disable-parallel", "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true") -FailureMessage "BlazorPublisher setup restore failed."
 
 Write-Host "Publishing BlazorPublisher setup for $Runtime..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments (@(
+Invoke-DotNet -Arguments @(
     "publish", $setupProject,
     "-c", $Configuration,
     "-f", "net10.0",
@@ -152,7 +165,10 @@ Invoke-DotNet -Arguments (@(
     "-maxcpucount:1",
     "-p:DebugType=None",
     "-p:DebugSymbols=false",
-    "-o", $setupFolder
+    "-o", $setupFolder,
+    "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true"
 ) + $multiFileSelfContainedProperties) -FailureMessage "BlazorPublisher setup publish failed."
 
 $appExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Web.exe" } else { "PublisherStudio.Web" }

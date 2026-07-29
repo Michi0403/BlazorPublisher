@@ -31,7 +31,14 @@ test('Panel Studio binding and JS callbacks are guarded and renderer-affine', ()
   assert.doesNotMatch(hitLayer, /@ondblclick="\(\) => ActivateElementInteraction\(element\.Id\)"/);
 });
 
-test('render, async, and component diagnostic checks remain available for explicit validation', () => {
+test('PublisherStudio direct builds enforce render, async, and component diagnostic policies', () => {
+  const targets = read('Directory.Build.targets');
+  for (const name of [
+    'AssertPublisherInteractiveServerRenderModes',
+    'AssertPublisherAsyncContinuationPolicy',
+    'AssertPublisherComponentDiagnostics'
+  ]) assert.match(targets, new RegExp(name));
+
   const renderGuard = read('build/Assert-InteractiveServerRenderModes.ps1');
   assert.match(renderGuard, /Components\/Pages\/Editor\.razor/);
   assert.match(renderGuard, /AddInteractiveServerRenderMode\(\)/);

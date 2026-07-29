@@ -19,6 +19,7 @@ const store = read('src/PublisherStudio.Web/Services/Configuration/SystemVariabl
 const contract = read('src/PublisherStudio.Web/Services/Configuration/ISystemVariableStoreService.cs');
 const host = read('src/PublisherStudio.Web/Services/ApplicationHostServices.cs');
 const editor = read('src/PublisherStudio.Web/Services/EditorStateService.cs');
+const targets = read('Directory.Build.targets');
 const policy = read('build/Assert-SystemVariableInitialization.ps1');
 const settings = JSON.parse(read('src/PublisherStudio.Web/appsettings.json'));
 
@@ -35,6 +36,7 @@ assert.match(editor, /_systemVariables\.DefaultCulture/);
 assert.match(contract, /IReadOnlyDictionary<string, string> Snapshot\(\)/);
 assert.match(store, /system-variables\.json/);
 assert.match(store, /File\.Move\(temporaryPath, _storagePath, true\)/);
+assert.match(targets, /AssertPublisherSystemVariableInitialization/);
 assert.match(policy, /direct-system-variable-name/);
 assert.ok(Array.isArray(JSON.parse(read('build/system-variable-initialization-baseline.json'))));
 assert.equal(settings.PublisherStudio.SystemVariables['Application.DefaultPort'], '58071');

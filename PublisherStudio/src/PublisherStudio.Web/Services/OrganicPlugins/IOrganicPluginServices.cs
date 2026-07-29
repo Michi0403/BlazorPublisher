@@ -36,7 +36,7 @@ public interface IOrganicRuntimeSecurityService
     Task UnprotectIncomingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
 }
 
-public interface IOrganicCapabilityCatalog : LocalGPT.WireProtocol.IOneWireCapabilityProvider
+public interface IOrganicCapabilityCatalog
 {
     Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<OrganicSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default);
@@ -69,6 +69,11 @@ public interface IOrganicWorkCoordinator
 public interface IOrganicWorkExecutor
 {
     Task<string> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
+}
+
+public interface IOrganicReplayGuard
+{
+    bool TryAccept(string peerId, Guid messageId, DateTimeOffset createdUtc);
 }
 
 public interface IOrganicResultStore

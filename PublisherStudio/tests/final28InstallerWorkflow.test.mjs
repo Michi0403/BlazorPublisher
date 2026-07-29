@@ -46,7 +46,10 @@ test('builds deploy and enforce the complete setup workflow', () => {
   const release = read('Build-Release.ps1');
   const development = read('Build-LocalDevelopment.ps1');
   const allRuntimes = read('Build-AllRuntimes.ps1');
+  const targets = read('Directory.Build.targets');
   assert.match(project, /<None Update="\*\.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" \/>/);
   for (const launcher of launchers) assert.ok(release.includes(`"${launcher}"`), launcher);
-  assert.match(project, /<None Update="\*\.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" \/>/);
+  for (const content of [release, development, allRuntimes, targets]) {
+    assert.ok(content.includes('Assert-InstallerWorkflow.ps1'));
+  }
 });

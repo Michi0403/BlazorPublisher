@@ -21,3 +21,7 @@ test('PowerShell 5.1 path normalization uses single characters in every new guar
   }
 });
 
+test('logging integrity ignores extracted build workspaces', () => {
+  const script = read('build/Assert-LoggingIntegrity.ps1');
+  assert.match(script, /bin\|obj\|artifacts\|node_modules\|build/);
+});

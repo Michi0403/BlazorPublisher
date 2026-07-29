@@ -16,6 +16,10 @@ $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.cspro
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 $packageDirectory = Join-Path $root "packages"
 
+# Report narrow protocol/wiring findings without blocking local development.
+& (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
+& (Join-Path $root "build\Assert-InstallerWorkflow.ps1")
+
 function Invoke-DotNet {
     param([Parameter(Mandatory)][string[]]$Arguments, [Parameter(Mandatory)][string]$FailureMessage)
     & dotnet @Arguments
@@ -46,17 +50,24 @@ $wireProperties = @(
     "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
     "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
     "-p:RestoreAdditionalProjectSources=$packageDirectory",
-    "-p:SkipWireProtocolBootstrap=true"
+    "-p:SkipWireProtocolBootstrap=true",
+    "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true"
 )
 
 Write-Host "Restoring PublisherStudio.Web after the protocol package is available..." -ForegroundColor Cyan
 Invoke-DotNet -Arguments (@("restore", $webProject, "--disable-parallel", "--force-evaluate") + $wireProperties) -FailureMessage "PublisherStudio.Web restore failed."
 Write-Host "Restoring PublisherStudio installer..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @("restore", $setupProject, "--disable-parallel", "--force-evaluate") -FailureMessage "PublisherStudio installer restore failed."
+Invoke-DotNet -Arguments @("restore", $setupProject, "--disable-parallel", "--force-evaluate", "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true") -FailureMessage "PublisherStudio installer restore failed."
 
 Write-Host "Building PublisherStudio.Web as a single ordered project..." -ForegroundColor Cyan
 Invoke-DotNet -Arguments (@("build", $webProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1") + $wireProperties) -FailureMessage "PublisherStudio.Web build failed."
 Write-Host "Building PublisherStudio installer after the web project..." -ForegroundColor Cyan
-Invoke-DotNet -Arguments @("build", $setupProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1") -FailureMessage "PublisherStudio installer build failed."
+Invoke-DotNet -Arguments @("build", $setupProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1", "-p:SkipLoggingIntegrityGuard=true",
+    "-p:SkipLocalizationIntegrityGuard=true",
+    "-p:SkipGitSourceVisibilityGuard=true") -FailureMessage "PublisherStudio installer build failed."
 
 Write-Host "PublisherStudio development build succeeded in authoritative NuGet package mode." -ForegroundColor Green

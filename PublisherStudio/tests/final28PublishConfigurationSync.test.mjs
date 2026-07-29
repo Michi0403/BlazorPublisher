@@ -6,84 +6,37 @@ import test from 'node:test';
 const root = path.resolve(import.meta.dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-const webProject = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
-const setupProject = read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj');
 const release = read('Build-Release.ps1');
-const allRuntimes = read('Build-AllRuntimes.ps1');
-const guard = read('build/Assert-PublishConfiguration.ps1');
-
 const webProfiles = [
-  ['winx64.pubxml', 'win-x64', 'winx64'],
-  ['winarm64.pubxml', 'win-arm64', 'winarm64'],
-  ['linx64.pubxml', 'linux-x64', 'linx64'],
-  ['linarm64.pubxml', 'linux-arm64', 'linarm64'],
-  ['macosx64.pubxml', 'osx-x64', 'macosx64'],
-  ['macosarm64.pubxml', 'osx-arm64', 'macosarm64'],
-];
-const setupProfiles = [
-  ['FolderProfile.pubxml', 'win-x64', 'setupwin-x64'],
-  ['winx64.pubxml', 'win-x64', 'setupwin-x64'],
-  ['winarm64.pubxml', 'win-arm64', 'setupwin-arm64'],
-  ['linuxx64.pubxml', 'linux-x64', 'setuplin-x64'],
-  ['linuxarm64.pubxml', 'linux-arm64', 'setuplin-arm64'],
-  ['macosx64.pubxml', 'osx-x64', 'setupmacos-x64'],
-  ['macosarm64.pubxml', 'osx-arm64', 'setupmacos-arm64'],
+  ['winx64.pubxml', 'win-x64', 'winx64', 'setupwinx64'],
+  ['winarm64.pubxml', 'win-arm64', 'winarm64', 'setupwinarm64'],
+  ['linx64.pubxml', 'linux-x64', 'linx64', 'setuplinx64'],
+  ['linarm64.pubxml', 'linux-arm64', 'linarm64', 'setuplinarm64'],
+  ['macosx64.pubxml', 'osx-x64', 'macosx64', 'setupmacosx64'],
+  ['macosarm64.pubxml', 'osx-arm64', 'macosarm64', 'setupmacosarm64'],
 ];
 
-function assertCommonProfile(profile, runtime, outputProperty, outputFolder) {
-  assert.match(profile, new RegExp(`<RuntimeIdentifier>${runtime}</RuntimeIdentifier>`));
-  assert.match(profile, /<SelfContained>true<\/SelfContained>/);
-  assert.match(profile, /<PublishSingleFile>false<\/PublishSingleFile>/);
-  assert.match(profile, /<PublishTrimmed>false<\/PublishTrimmed>/);
-  assert.match(profile, /<PublishReadyToRun>false<\/PublishReadyToRun>/);
-  assert.match(profile, /<DeleteExistingFiles>true<\/DeleteExistingFiles>/);
-  assert.match(profile, new RegExp(`<${outputProperty}>\\.\\.\\\\\\.\\.\\\\artifacts\\\\release\\\\${outputFolder}\\\\</${outputProperty}>`));
-  assert.doesNotMatch(profile, /IncludeNativeLibrariesForSelfExtract|EnableCompressionInSingleFile|PublishSingleFile>true/);
-}
-
-test('all project and profile publishes are self-contained multi-file outputs', () => {
-  for (const project of [webProject, setupProject]) {
-    assert.match(project, /<SelfContained Condition="'\$\(RuntimeIdentifier\)' != ''">true<\/SelfContained>/);
-    assert.match(project, /<PublishSingleFile>false<\/PublishSingleFile>/);
-    assert.match(project, /<PublishTrimmed>false<\/PublishTrimmed>/);
-    assert.match(project, /<PublishReadyToRun>false<\/PublishReadyToRun>/);
-  }
-  for (const [file, runtime, folder] of webProfiles) {
-    assertCommonProfile(read(`src/PublisherStudio.Web/Properties/PublishProfiles/${file}`), runtime, 'PublishUrl', folder);
-  }
-  for (const [file, runtime, folder] of setupProfiles) {
-    assertCommonProfile(read(`src/PublisherStudio.InstallerConsole/Properties/PublishProfiles/${file}`), runtime, 'PublishDir', folder);
-  }
+test('only web-host publish profiles remain', () => {
+  const webRoot = path.join(root, 'src', 'PublisherStudio.Web', 'Properties', 'PublishProfiles');
+  assert.deepEqual(
+    fs.readdirSync(webRoot).filter(name => name.endsWith('.pubxml')).sort(),
+    webProfiles.map(([name]) => name).sort(),
+  );
+  const setupRoot = path.join(root, 'src', 'PublisherStudio.InstallerConsole', 'Properties', 'PublishProfiles');
+  assert.equal(fs.existsSync(setupRoot), false);
+  assert.deepEqual(fs.readdirSync(webRoot).filter(name => name.endsWith('.pubxml.user')), []);
 });
 
-test('release scripts and Visual Studio profiles share the artifact layout', () => {
-  assert.match(release, /\$multiFileSelfContainedProperties\s*=\s*@\(/);
-  assert.equal((release.match(/\+\s*\$multiFileSelfContainedProperties/g) ?? []).length, 2);
-  assert.doesNotMatch(release, /PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract=true|EnableCompressionInSingleFile=true/);
-  assert.doesNotMatch(release, /Join-Path\s+\$artifacts\s+"PublisherStudio\.Setup\.exe"/);
-  for (const [, runtime, folder] of webProfiles) {
-    assert.ok(release.includes(`"${runtime}"`), runtime);
-    assert.ok(release.includes(`AppFolder = "${folder}"`), folder);
-    assert.ok(allRuntimes.includes(`"${runtime}"`), runtime);
+test('web profiles and release folder names use one runtime token', () => {
+  for (const [file, runtime, appFolder, setupFolder] of webProfiles) {
+    const profile = read(`src/PublisherStudio.Web/Properties/PublishProfiles/${file}`);
+    assert.match(profile, new RegExp(`<RuntimeIdentifier>${runtime}</RuntimeIdentifier>`));
+    assert.match(profile, new RegExp(`<PublishUrl>\\.\\.\\\\\\.\\.\\\\artifacts\\\\release\\\\${appFolder}\\\\</PublishUrl>`));
+    for (const marker of ['<SelfContained>true</SelfContained>', '<PublishSingleFile>false</PublishSingleFile>', '<PublishTrimmed>false</PublishTrimmed>', '<PublishReadyToRun>false</PublishReadyToRun>'])
+      assert.ok(profile.includes(marker), `${file}:${marker}`);
+    assert.ok(release.includes(`AppFolder = "${appFolder}"`), appFolder);
+    assert.ok(release.includes(`SetupFolder = "${setupFolder}"`), setupFolder);
+    assert.ok(release.includes(`SetupAsset = "${setupFolder}"`), setupFolder);
   }
-  for (const [file,, folder] of setupProfiles.filter(([file]) => file !== 'FolderProfile.pubxml')) {
-    assert.ok(release.includes(`SetupFolder = "${folder}"`), `${file}:${folder}`);
-  }
-});
-
-test('every maintained configuration payload is copied and checked after publish', () => {
-  for (const marker of [
-    'Content Update="appsettings*.json"',
-    'Content Update="Localization\\**\\*.json"',
-    'Content Update="Configuration\\**\\*"',
-    'None Update="Configuration\\**\\*"',
-    'PublisherStudioConfigurationFile Include="appsettings*.json;Configuration\\**\\*;Localization\\**\\*.json"',
-    'ValidatePublisherConfigurationFilesForPublish',
-  ]) assert.ok(webProject.includes(marker), marker);
-  assert.match(release, /Assert-PublishedConfigurationFiles -SourceRoot \$webDirectory -PublishRoot \$appFolder/);
-});
-
-test('publish configuration validation remains explicit and source-backed', () => {
-  assert.match(guard, /Publish configuration validation passed/);
-  assert.match(webProject, /ValidatePublisherConfigurationFilesForPublish/);
+  assert.doesNotMatch(release, /SetupFolder\s*=\s*"[^"]*-/);
 });

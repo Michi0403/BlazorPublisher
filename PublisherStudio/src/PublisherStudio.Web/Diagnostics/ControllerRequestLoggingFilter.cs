@@ -47,11 +47,13 @@ public sealed class ControllerRequestLoggingFilter(
         }
         catch (OperationCanceledException exception) when (context.HttpContext.RequestAborted.IsCancellationRequested)
         {
-            logger.LogDebug(
+#if DEBUG
+            logger.LogInformation(
                 exception,
-                "Controller action {Controller}.{Action} was cancelled because the client disconnected.",
+                "Controller action {Controller}.{Action} was cancelled because the client disconnected in a Debug build.",
                 controller,
                 action);
+#endif
             throw;
         }
         catch (Exception exception)

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.Services.OrganicPlugins;
+using PublisherStudio.Services.Automation;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -20,6 +21,7 @@ public sealed class OrganicWireHttpController(
     IOrganicReplayGuard replayGuard,
     IOrganicTransportSecurityPolicy transportSecurityPolicy,
     IOrganicWireEnvelopeFactory envelopeFactory,
+    IApiSurfaceCatalogService apiSurfaces,
     ILogger<OrganicWireHttpController> logger) : ControllerBase
 {
     [HttpGet("profile")]
@@ -38,7 +40,8 @@ public sealed class OrganicWireHttpController(
                 Security = await security.GetPublicDescriptorAsync(cancellationToken).ConfigureAwait(false),
                 Capabilities = await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
                 Skills = await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false),
-                UiFeatures = await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false)
+                UiFeatures = await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false),
+                ControllerSurfaces = apiSurfaces.GetSurfaces()
             });
         }
         catch (Exception ex)
@@ -75,9 +78,11 @@ public sealed class OrganicWireHttpController(
                 throw new CryptographicException("The PublisherStudio HTTP/JSON response requires an MFA-verified peer before application data can be returned.");
             return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
         {
-            logger.LogInformation("Cancelled a PublisherStudio organic HTTP/JSON request at the caller's request.");
+#if DEBUG
+            logger.LogInformation(exception, "Cancelled a PublisherStudio organic HTTP/JSON request at the caller's request in a Debug build.");
+#endif
             return StatusCode(499);
         }
         catch (Exception ex) when (ex is JsonException or InvalidDataException or CryptographicException or FormatException or ArgumentException)

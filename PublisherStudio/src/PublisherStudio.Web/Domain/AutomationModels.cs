@@ -81,7 +81,16 @@ public sealed class ApiSurfaceDescriptor
 {
     public string Controller { get; set; } = string.Empty;
     public List<string> Routes { get; set; } = [];
+    public List<ApiSurfaceMethodDescriptor> Methods { get; set; } = [];
     public List<string> ServiceContracts { get; set; } = [];
+}
+
+public sealed class ApiSurfaceMethodDescriptor
+{
+    public string MethodName { get; set; } = string.Empty;
+    public string HttpMethod { get; set; } = string.Empty;
+    public string Route { get; set; } = string.Empty;
+    public bool IsReadOnly { get; set; }
 }
 
 public sealed record BrowserRuntimeTemplateRequest(string Payload);

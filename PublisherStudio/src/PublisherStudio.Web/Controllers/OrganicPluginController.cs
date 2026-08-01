@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.Domain;
+using PublisherStudio.Services.Automation;
 using PublisherStudio.Services.OrganicPlugins;
 
 namespace PublisherStudio.Controllers;
@@ -15,6 +16,7 @@ public sealed class OrganicPluginController(
     ILocalGptConnectionService connection,
     IOrganicConnectionRuntimeState runtimeState,
     IOrganicReplayPolicyDataService replayPolicy,
+    IApiSurfaceCatalogService apiSurfaces,
     ILogger<OrganicPluginController> logger) : ControllerBase
 {
     [HttpGet("status")]
@@ -51,6 +53,29 @@ public sealed class OrganicPluginController(
         {
             logger.LogError(ex, $"Could not return the configured organic replay policy.");
             return Problem(ex.Message);
+        }
+    }
+
+    [HttpGet("addon-manifest")]
+    public ActionResult<object> AddonManifest()
+    {
+        try
+        {
+            var surfaces = apiSurfaces.GetSurfaces();
+            logger.LogInformation("Returned the Publisher Studio organic add-on manifest with {ControllerCount} controller surface(s).", surfaces.Count);
+            return Ok(new
+            {
+                Key = "publisherstudio",
+                DisplayName = "Publisher Studio / BlazorPublisher",
+                SourcePeerId = "publisherstudio",
+                IsOnline = connection.State.IsConnected,
+                ControllerSurfaces = surfaces
+            });
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not return the Publisher Studio organic add-on manifest.");
+            return Problem(exception.Message);
         }
     }
 

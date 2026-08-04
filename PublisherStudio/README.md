@@ -15,6 +15,14 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## 2.0.2 installer and runtime recovery
+
+The release lane preserves the established runtime wrapper folders (`winx64`, `setupwinx64`, and their other RID equivalents) so installed launchers and older setup versions continue to resolve the same paths. New setup versions validate both payloads before changing the installation, merge application files in place with manifest-owned stale-file cleanup and rollback, and never delete or move the application directory during an update. Setup launchers keep their stable paths and can promote a staged standalone `PublisherStudio.Setup.repair.exe`. Windows application archives place a hash-catalogued launcher-repair prelude before application files, so even an older setup can stage its repair before a locked running application interrupts the legacy extraction pass.
+
+LocalGPT/1-Wire remains optional. PublisherStudio listens for local discovery when enabled, but does not automatically open a transport by default. PublisherStudio uses loopback port 58071; LocalGPT web and 1-Wire TCP/UDP ports remain separate. Long-running browser recording previews now reattach their live stream if Blazor replaces the preview element, while the existing complete recording/save pipeline is retained.
+
+See `CHANGELOG-v2.0.2.md` for the repair boundary and maintainer-run acceptance items.
+
 ## LocalGPT AI Council integration
 
 PublisherStudio discovers LocalGPT through a compact UDP beacon and establishes the approved organic link over TCP. Capability, skill, UI-feature, and hardware directories are exchanged only after the link is approved, avoiding oversized discovery packets while preserving the complete shared catalogue. PublisherStudio can advertise its eye, hand, OpenSCAD, spreadsheet, media, and publishing capabilities and can submit work to configured LocalGPT Council teams.
@@ -33,7 +41,7 @@ Runtime security is not embedded in the package. PublisherStudio creates its own
 
 PublisherStudio uses one protocol mode only: an authoritative NuGet package produced by LocalGPT. There is deliberately no `src/LocalGPT.WireProtocolVersion` directory and no protocol project in `PublisherStudio.sln`. This prevents two Git repositories from silently diverging on the same wire contract.
 
-The first build prepares `packages/LocalGPT.WireProtocolVersion.2.1.0.nupkg` before NuGet restore. It can copy the package from a LocalGPT checkout or per-user cache, or download the official asset from the latest LocalGPT GitHub release. The package cache is ignored by Git.
+The first build prepares `packages/LocalGPT.WireProtocolVersion.2.1.1.nupkg` before NuGet restore. It can copy the package from a LocalGPT checkout or per-user cache, or download the official asset from the latest LocalGPT GitHub release. The package cache is ignored by Git.
 
 Local development:
 
@@ -53,7 +61,7 @@ All supported release runtimes, strictly sequential and reusing one already prep
 .\Build-AllRuntimes.ps1
 ```
 
-A package URL can be supplied directly with `-WireProtocolPackageUrl`. Without one, PublisherStudio uses `https://github.com/Michi0403/LocalGPT/releases/latest/download/LocalGPT.WireProtocolVersion.2.1.0.nupkg`. The installer/update/start wiring remains independent: PublisherStudio can be installed and used without LocalGPT, and the organic page simply reports that no peer is connected until the user starts and authorizes one.
+A package URL can be supplied directly with `-WireProtocolPackageUrl`. Without one, PublisherStudio uses `https://github.com/Michi0403/LocalGPT/releases/latest/download/LocalGPT.WireProtocolVersion.2.1.1.nupkg`. The installer/update/start wiring remains independent: PublisherStudio can be installed and used without LocalGPT, and the organic page simply reports that no peer is connected until the user starts and authorizes one.
 
 ## v1.0.88: publish-candidate interaction hardening
 
@@ -175,13 +183,13 @@ The file picker is reset before every picture/open command, so selecting the sam
 
 ## InstallerConsole
 
-Build the self-contained, multi-file application and setup payload into the shared release location:
+Build the self-contained multi-file application and standalone setup payload into the shared release location:
 
 ```powershell
 .\Build-Release.ps1 -Runtime win-x64
 ```
 
-The command-line workflow and the Visual Studio publish profiles both write to `artifacts\release`. Extract `setupwinx64.zip` as a complete folder and run `Install.cmd`; the setup executable intentionally depends on the adjacent self-contained runtime files and is no longer published as a misleading standalone file.
+The command-line workflow and the Visual Studio publish profiles both write to `artifacts\release`. Extract `setupwinx64.zip` as a complete folder and run `Install.cmd`. The setup executable is a self-contained single file, while the surrounding launchers, icon, protocol evidence and release manifest preserve the stable installer workflow and repair paths.
 
 For a direct application publish, keep the same reviewed properties:
 

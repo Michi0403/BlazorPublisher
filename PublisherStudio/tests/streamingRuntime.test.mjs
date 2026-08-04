@@ -168,7 +168,7 @@ assert.match(applicationComposition, /services\.AddPublisherStreaming\(logger\)/
 assert.doesNotMatch(webProgram, /MapPublisherStreamingRuntime|StreamingRuntimeEndpoints/);
 assert.match(applicationComposition, /AddHostedService<TwitchOAuthMaintenanceService>/);
 assert.match(streamingComposition, /public static class StreamingServiceCollectionExtensions/);
-assert.match(runtimeUseCases, /Version = "2\.0\.1"/);
+assert.match(runtimeUseCases, /Version = "2\.0\.2"/);
 assert.match(streamingControllers, /api\/mediahost\/sessions/);
 assert.match(streamingControllers, /ingest\/websocket/);
 assert.match(streamingClient, /In-process facade/);
@@ -179,8 +179,7 @@ assert.match(ffmpegLocator, /AppContext\.BaseDirectory/);
 assert.match(ffmpegProvisioner, /Gyan\.FFmpeg/);
 assert.match(ffmpegProvisioner, /brew/);
 assert.match(ffmpegProvisioner, /apt-get/);
-assert.match(installerProgram, /RemoveLegacyMediaHostPayload\(targetPath, logger\)/);
-assert.match(installerProgram, /PublisherStudio\.MediaHost\*/);
+assert.doesNotMatch(installerProgram, /RemoveLegacyMediaHostPayload|PublisherStudio\.MediaHost\*/);
 assert.doesNotMatch(buildRelease, /PublisherStudio\.MediaHost/);
 assert.doesNotMatch(solution, /PublisherStudio\.MediaHost|PublisherStudio\.StreamingRuntime/);
 assert.match(componentRuntime, /PublisherStudioOutputContext/);

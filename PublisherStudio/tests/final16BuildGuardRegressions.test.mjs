@@ -7,17 +7,26 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-test('PowerShell 5.1 path normalization uses single characters in every new guard', () => {
-  for (const name of [
-    'Assert-MethodDiagnostics.ps1',
-    'Assert-ApplicationStaticPolicy.ps1',
-    'Assert-TextServiceOwnership.ps1',
-    'Assert-IteratorExceptionPolicy.ps1'
+test('PowerShell 5.1 path normalization is centralized and wrappers use the shared audit', () => {
+  const core = read('build/Invoke-ArchitectureAudit.ps1');
+  assert.doesNotMatch(core, /TrimStart\('\\','\/'\)/);
+  assert.match(core, /TrimStart\(\[char\[\]\]@\(\[char\]'\\', \[char\]'\/'\)\)/);
+  assert.match(core, /Replace\('\\', '\/'\)/);
+
+  for (const [name, mode] of [
+    ['Assert-MethodDiagnostics.ps1', 'methods'],
+    ['Assert-ApplicationStaticPolicy.ps1', 'static'],
+    ['Assert-RuntimeValueOwnership.ps1', 'runtime'],
   ]) {
-    const script = read(path.join('build', name));
-    assert.doesNotMatch(script, /TrimStart\('\\\\','\/'\)/);
+    const wrapper = read(`build/${name}`);
+    assert.match(wrapper, /Invoke-ArchitectureAudit\.ps1/);
+    assert.match(wrapper, new RegExp(`-Mode ${mode}`));
+  }
+
+  for (const name of ['Assert-TextServiceOwnership.ps1', 'Assert-IteratorExceptionPolicy.ps1', 'Assert-SystemVariableInitialization.ps1']) {
+    const script = read(`build/${name}`);
+    assert.doesNotMatch(script, /TrimStart\('\\','\/'\)/);
     assert.match(script, /TrimStart\(\[char\[\]\]@\(\[char\]'\\', \[char\]'\/'\)\)/);
     assert.match(script, /Replace\(\[char\]'\\', \[char\]'\/'\)/);
   }
 });
-

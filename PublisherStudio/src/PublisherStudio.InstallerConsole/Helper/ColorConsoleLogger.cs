@@ -7,7 +7,7 @@ using System.Text;
 ///
 ///https://github.com/dotnet/docs/tree/main/docs/core/extensions/snippets/configuration/console-custom-logging
 ///
-namespace PublisherStudio.Helper
+namespace PublisherStudio.InstallerConsole.Helper
 {
     public sealed class ColorConsoleLogger(
     string name,

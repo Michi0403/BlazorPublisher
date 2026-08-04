@@ -35,13 +35,13 @@ function Assert-Property([hashtable]$Properties, [string]$Name, [string]$Expecte
     }
 }
 
-function Assert-Profile([string]$RelativePath, [string]$Runtime, [string]$Folder, [string]$Platform) {
+function Assert-Profile([string]$RelativePath, [string]$Runtime, [string]$Folder, [string]$Platform, [bool]$SingleFile) {
     $properties = Read-ProfileProperties $RelativePath
     $output = "..\..\artifacts\release\$Folder\"
     foreach ($requirement in @(
         @{ Name = 'RuntimeIdentifier'; Value = $Runtime },
         @{ Name = 'SelfContained'; Value = 'true' },
-        @{ Name = 'PublishSingleFile'; Value = 'false' },
+        @{ Name = 'PublishSingleFile'; Value = $(if ($SingleFile) { 'true' } else { 'false' }) },
         @{ Name = 'PublishTrimmed'; Value = 'false' },
         @{ Name = 'PublishReadyToRun'; Value = 'false' },
         @{ Name = 'DeleteExistingFiles'; Value = 'true' },
@@ -53,7 +53,12 @@ function Assert-Profile([string]$RelativePath, [string]$Runtime, [string]$Folder
     )) {
         Assert-Property $properties $requirement.Name $requirement.Value $RelativePath
     }
+    if ($SingleFile) {
+        Assert-Property $properties 'IncludeNativeLibrariesForSelfExtract' 'true' $RelativePath
+        Assert-Property $properties 'EnableCompressionInSingleFile' 'true' $RelativePath
+    }
 }
+
 
 $profiles = @(
     @{ File = 'winx64.pubxml'; Runtime = 'win-x64'; App = 'winx64'; Setup = 'setupwinx64' },
@@ -66,13 +71,9 @@ $profiles = @(
 )
 
 foreach ($profile in $profiles) {
-    Assert-Profile "src\PublisherStudio.Web\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.App 'AnyCPU'
-    Assert-Profile "src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.Setup 'Any CPU'
+    Assert-Profile "src\PublisherStudio.Web\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.App 'AnyCPU' $false
+    Assert-Profile "src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\$($profile.File)" $profile.Runtime $profile.Setup 'Any CPU' $true
 }
-
-# Long-name Linux aliases remain supported for existing developer workflows.
-Assert-Profile 'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\linuxx64.pubxml' 'linux-x64' 'setuplinx64' 'Any CPU'
-Assert-Profile 'src\PublisherStudio.InstallerConsole\Properties\PublishProfiles\linuxarm64.pubxml' 'linux-arm64' 'setuplinarm64' 'Any CPU'
 
 $profileUserFiles = @(Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -File -Filter '*.pubxml.user' -ErrorAction SilentlyContinue)
 if ($profileUserFiles.Count -gt 0) { Fail 'Machine-specific .pubxml.user files must not be shipped in the source package.' }
@@ -87,10 +88,11 @@ $webProject = Read-Text 'src\PublisherStudio.Web\PublisherStudio.Web.csproj'
 $setupProject = Read-Text 'src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj'
 $release = Read-Text 'Build-Release.ps1'
 $allRuntimes = Read-Text 'Build-AllRuntimes.ps1'
-foreach ($project in @($webProject, $setupProject)) {
-    foreach ($marker in @('<PublishSingleFile>false</PublishSingleFile>', '<PublishTrimmed>false</PublishTrimmed>', '<PublishReadyToRun>false</PublishReadyToRun>')) {
-        if (-not $project.Contains($marker)) { Fail "A publish project is missing $marker." }
-    }
+foreach ($marker in @('<PublishSingleFile>false</PublishSingleFile>', '<PublishTrimmed>false</PublishTrimmed>', '<PublishReadyToRun>false</PublishReadyToRun>')) {
+    if (-not $webProject.Contains($marker)) { Fail "The PublisherStudio application project is missing $marker." }
+}
+foreach ($marker in @('<PublishSingleFile Condition="''$(RuntimeIdentifier)'' != ''''">true</PublishSingleFile>', '<IncludeNativeLibrariesForSelfExtract Condition="''$(RuntimeIdentifier)'' != ''''">true</IncludeNativeLibrariesForSelfExtract>', '<EnableCompressionInSingleFile Condition="''$(RuntimeIdentifier)'' != ''''">true</EnableCompressionInSingleFile>', '<PublishTrimmed>false</PublishTrimmed>', '<PublishReadyToRun>false</PublishReadyToRun>')) {
+    if (-not $setupProject.Contains($marker)) { Fail "The PublisherStudio setup project is missing $marker." }
 }
 foreach ($profile in $profiles) {
     foreach ($fragment in @(
@@ -107,7 +109,7 @@ if (-not $webProject.Contains('win-x64;win-x86;win-arm64;linux-x64;linux-arm64;o
     Fail 'PublisherStudio.Web.csproj must expose the same seven runtime identifiers as both publish lanes.'
 }
 if ($release -match 'PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract=true|EnableCompressionInSingleFile=true') {
-    Fail 'The scripted release lane must remain multi-file and self-contained like the developer profiles.'
+    Fail 'Build-Release.ps1 must consume the reviewed profiles instead of overriding their application/setup packaging policies.'
 }
 
-Write-Host 'Publish configuration validation passed for 7 application profiles, 9 installer/developer profiles and the synchronized scripted release lane.'
+Write-Host 'Publish configuration validation passed for 7 multi-file application profiles, 7 standalone setup profiles and the synchronized scripted release lane.'

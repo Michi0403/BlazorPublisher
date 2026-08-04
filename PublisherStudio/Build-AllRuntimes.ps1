@@ -1,6 +1,6 @@
 param(
     [string]$Configuration = "Release",
-    [string]$WireProtocolVersion = "2.1.0",
+    [string]$WireProtocolVersion = "2.1.1",
     [string]$WireProtocolPackageUrl = "",
     [string]$LocalGptRepository = "",
     [switch]$RefreshWireProtocolPackage,

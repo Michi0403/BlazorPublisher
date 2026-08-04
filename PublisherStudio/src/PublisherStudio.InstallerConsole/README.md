@@ -1,6 +1,6 @@
 # BlazorPublisher InstallerConsole
 
-`PublisherStudio.Setup.exe` is the entry point of the Git-free, self-contained multi-file release installer for Windows. Keep it together with the DLLs and runtime files in the published setup directory.
+`PublisherStudio.Setup.exe` is the entry point of the Git-free, self-contained single-file release installer. Keep it in the published setup directory so the stable launchers, icon, protocol evidence and release manifest remain available.
 
 A double-click with no arguments downloads the latest application ZIP from `Michi0403/BlazorPublisher`, installs it to `%LOCALAPPDATA%\Programs\BlazorPublisher`, generates `Install.cmd`, `Update.cmd`, `Start.cmd`, and `Uninstall.cmd`, creates a Start Menu folder, starts the web host, and opens its detected loopback URL.
 
@@ -11,7 +11,7 @@ winx64.zip
 setupwinx64.zip
 ```
 
-The application ZIP contains the complete `PublisherStudio.Web` publish output. The setup ZIP contains the complete multi-file setup output. Extract the setup ZIP before launching it; do not copy only `PublisherStudio.Setup.exe`.
+The application ZIP contains the complete multi-file `PublisherStudio.Web` publish output. The setup ZIP contains the standalone setup executable plus launchers, repair executable, icon, protocol evidence and release manifest. Extract the setup ZIP as a unit so launcher repair remains available.
 
 ```powershell
 .\PublisherStudio.Setup.exe --install-blazorpublisher

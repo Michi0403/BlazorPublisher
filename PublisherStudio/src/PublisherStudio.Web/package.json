@@ -1,6 +1,6 @@
 {
   "name": "publisherstudio-web-assets",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "test:timeline": "node ../../tests/timelineInterop.test.mjs",
     "test:components": "node ../../tests/componentRuntime.test.mjs",
     "test:signals": "node ../../tests/signalRuntime.test.mjs",
-    "test": "npm run test:timeline && npm run test:components && npm run test:signals && npm run test:pointer && npm run test:mapmodes && npm run test:fonts && npm run test:zoom && npm run test:streaming && npm run test:interface && npm run test:installer && npm run test:persistence && npm run test:usability && npm run test:architecture && npm run test:contracts && npm run test:compilation-safety && npm run test:interchange && npm run test:media-gestures && npm run test:studio-overlays && npm run test:component-drop && npm run test:video-time-overlay && npm run test:video-layers && npm run test:video-project-import && npm run test:structured-site && npm run test:video-interactions && npm run test:panels-media-conversion && npm run test:streaming-chat-hardening && npm run test:panel-composer-media-workflow && npm run test:video-selection-3d && npm run test:service-api-evolution && npm run test:openscad-builder && npm run test:automation-screenshot-api && npm run test:localization-code && npm run test:render-export-snapshot && npm run test:sdk-default-items && npm run test:release-task-ledger && npm run test:browser-runtime-template && npm run test:interaction-stacking-release-gate && npm run test:organic-plugins && npm run test:runtime-bootstrap && npm run test:interactive-export-localization && npm run test:workspace-proof && npm run test:organic-story && npm run test:razor-diagnostics && npm run test:organic-security-http-ocr && npm run test:final-compiler-startup-onewire && npm run test:runtime-safety-localization-automation && npm run test:final-panel-localization-release && npm run test:final28-publish-configuration && npm run test:architecture-policy",
+    "test": "node --test --test-concurrency=1 ../../tests/*.test.mjs",
     "test:fonts": "node ../../tests/fontIntegration.test.mjs",
     "test:zoom": "node ../../tests/canvasZoomScaling.test.mjs",
     "test:streaming": "node ../../tests/streamingRuntime.test.mjs",
@@ -57,7 +57,8 @@
     "test:runtime-safety-localization-automation": "node ../../tests/runtimeSafetyLocalizationAutomation.test.mjs",
     "test:final-panel-localization-release": "node ../../tests/finalPanelLocalizationReleaseContract.test.mjs",
     "test:final28-publish-configuration": "node ../../tests/final28PublishConfigurationSync.test.mjs",
-    "test:architecture-policy": "node ../../tests/applicationArchitecturePolicy.test.mjs"
+    "test:architecture-policy": "node ../../tests/applicationArchitecturePolicy.test.mjs",
+    "test:media-recording-preview": "node ../../tests/mediaRecordingPreviewResilience.test.mjs"
   },
   "dependencies": {
     "devextreme-dist": "25.2.8",

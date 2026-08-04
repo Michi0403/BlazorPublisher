@@ -24,8 +24,8 @@ assert.match(controller, /Browser screenshot automation requires an explicitly l
 assert.match(organicPage, /Enable browser automation for this tab/);
 assert.match(organicPage, /publisherAutomation\.enableForSession/);
 assert.match(organicPage, /publisherAutomation\.disableForSession/);
-assert.match(options, /AutoConnectDiscoveredPeer \{ get; set; \} = true/);
-assert.equal(settings.OrganicPlugins.AutoConnectDiscoveredPeer, true);
+assert.match(options, /AutoConnectDiscoveredPeer \{ get; set; \} = false/);
+assert.equal(settings.OrganicPlugins.AutoConnectDiscoveredPeer, false);
 assert.match(discovery, /Automatically opening the local 1-Wire transport/);
 assert.match(discovery, /human link\/MFA approval remains required/);
 assert.match(discovery, /IPAddress\.IsLoopback/);
@@ -34,4 +34,4 @@ assert.match(discovery, /automaticallyAttemptedPeers/);
 assert.doesNotMatch(program, /new AcceptLanguageHeaderRequestCultureProvider\(\)/);
 assert.match(program, /new CookieRequestCultureProvider\(\)/);
 assert.match(localization, /requiredKeys\.All\(translated\.ContainsKey\)/);
-console.log('PASS explicit linked automation, automatic local transport discovery, and single-language culture safeguards.');
+console.log('PASS explicit linked automation, optional local transport discovery, and single-language culture safeguards.');

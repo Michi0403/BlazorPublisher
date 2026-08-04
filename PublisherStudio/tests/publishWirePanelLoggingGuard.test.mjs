@@ -9,7 +9,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
 test('PublisherStudio release uses the RID-neutral protocol package and explicit RID restore', () => {
   const release = read('Build-Release.ps1');
-  assert.match(release, /WireProtocolVersion = "2\.1\.0"/);
+  assert.match(release, /WireProtocolVersion = "2\.1\.1"/);
   assert.match(release, /"restore", \$webProject, "-r", \$Runtime/);
   assert.doesNotMatch(release, /UseLocalWireProtocolProject/);
   assert.match(release, /Ensure-WireProtocolPackage\.ps1/);

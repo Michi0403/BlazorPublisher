@@ -182,6 +182,8 @@ function stateFor(id) { try {
             dotnet: null,
             recorder: null,
             stream: null,
+            recordingPreviewTimer: 0,
+            recordingPreviewElement: null,
             chunks: [],
             rangeHandler: null,
             stopAt: null,
@@ -278,6 +280,59 @@ function isInterruptedPlaybackError(error) { try {
         || message.includes('interrupted by a call to pause')
         || message.includes('interrupted by a new load request');
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:isInterruptedPlaybackError@268', __javascriptError); throw __javascriptError; }}
+
+
+function stopRecordingPreviewWatch(state) { try {
+    if (state.recordingPreviewTimer) clearInterval(state.recordingPreviewTimer);
+    state.recordingPreviewTimer = 0;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopRecordingPreviewWatch', __javascriptError); throw __javascriptError; }}
+
+function detachRecordingPreview(state) { try {
+    stopRecordingPreviewWatch(state);
+    const candidates = [state.recordingPreviewElement, mediaElement(state.id)].filter(Boolean);
+    for (const preview of new Set(candidates)) {
+        if (!(preview instanceof HTMLVideoElement) || preview.srcObject !== state.stream) continue;
+        cancelRangePlayback(state, preview, true);
+        preview.srcObject = null;
+    }
+    state.recordingPreviewElement = null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:detachRecordingPreview', __javascriptError); throw __javascriptError; }}
+
+function ensureRecordingPreview(state) { try {
+    if (!state.stream) return false;
+    const preview = mediaElement(state.id);
+    if (!(preview instanceof HTMLVideoElement)) return false;
+    if (state.recordingPreviewElement && state.recordingPreviewElement !== preview && state.recordingPreviewElement.srcObject === state.stream) {
+        try { state.recordingPreviewElement.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch:recording-preview-pause', __caughtJavaScriptError); }
+        state.recordingPreviewElement.srcObject = null;
+    }
+    if (preview.srcObject !== state.stream) {
+        cancelRangePlayback(state, preview, true);
+        preview.removeAttribute('src');
+        preview.srcObject = state.stream;
+    }
+    state.recordingPreviewElement = preview;
+    preview.muted = true;
+    preview.playsInline = true;
+    if (preview.paused || preview.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        const request = preview.play();
+        if (request?.catch) request.catch(error => { try {
+            const name = String(error?.name || '');
+            if (!isInterruptedPlaybackError(error) && name !== 'NotAllowedError')
+                publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recording-preview-play', error);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recording-preview-play-callback', __javascriptError); throw __javascriptError; }});
+    }
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:ensureRecordingPreview', __javascriptError); throw __javascriptError; }}
+
+function startRecordingPreviewWatch(state) { try {
+    stopRecordingPreviewWatch(state);
+    ensureRecordingPreview(state);
+    state.recordingPreviewTimer = setInterval(() => { try {
+        if (!state.stream) { stopRecordingPreviewWatch(state); return; }
+        ensureRecordingPreview(state);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recording-preview-watch', __javascriptError); }}, 1000);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startRecordingPreviewWatch', __javascriptError); throw __javascriptError; }}
 
 function cancelRangePlayback(state, element, pause = true) { try {
     state.playCommandVersion = (Number(state.playCommandVersion) || 0) + 1;
@@ -1397,21 +1452,12 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     state.chunks = [];
     state.discardRecording = false;
     const preview = mediaElement(id);
-    if (kind === 'video' && preview instanceof HTMLVideoElement) {
-        cancelRangePlayback(state, preview, true);
-        preview.removeAttribute('src');
-        preview.srcObject = state.stream;
-        preview.muted = true;
-        preview.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:promise-catch@1400', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:preview.play().catch@1400', __javascriptError); throw __javascriptError; }});
-    }
+    if (kind === 'video') startRecordingPreviewWatch(state);
     const mimeType = preferredMime(kind);
     try {
         state.recorder = mimeType ? new MediaRecorder(state.stream, { mimeType }) : new MediaRecorder(state.stream);
     } catch (error) {
-        if (preview instanceof HTMLVideoElement && preview.srcObject === state.stream) {
-            cancelRangePlayback(state, preview, true);
-            preview.srcObject = null;
-        }
+        detachRecordingPreview(state);
         for (const track of state.stream.getTracks()) track.stop();
         state.stream = null;
         throw error;
@@ -1421,11 +1467,7 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:state.recorder.addEventListener@1414', __javascriptError); throw __javascriptError; }});
     state.recorder.addEventListener('stop', async () => { try {
         try {
-            const preview = mediaElement(id);
-            if (preview instanceof HTMLVideoElement && preview.srcObject === state.stream) {
-                cancelRangePlayback(state, preview, true);
-                preview.srcObject = null;
-            }
+            detachRecordingPreview(state);
             if (state.discardRecording) return;
             const blob = new Blob(state.chunks, { type: state.recorder?.mimeType || mimeType || (kind === 'video' ? 'video/webm' : 'audio/webm') });
             if (!blob.size) throw new Error('The browser completed the recording but produced an empty file.');
@@ -1461,11 +1503,7 @@ export function stopMediaRecording(id) { try {
 export function cancelMediaRecording(id) { try {
     const state = stateFor(id);
     state.discardRecording = true;
-    const preview = mediaElement(id);
-    if (preview instanceof HTMLVideoElement && preview.srcObject === state.stream) {
-        cancelRangePlayback(state, preview, true);
-        preview.srcObject = null;
-    }
+    detachRecordingPreview(state);
     try { if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1464', __caughtJavaScriptError);  }
     for (const track of state.stream?.getTracks() || []) track.stop();
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:cancelMediaRecording@1456', __javascriptError); throw __javascriptError; }}
@@ -1537,10 +1575,7 @@ export function disposeMediaStudio(id) { try {
     if (!state) return;
     state.discardRecording = true;
     const element = mediaElement(id);
-    if (element instanceof HTMLVideoElement && element.srcObject === state.stream) {
-        cancelRangePlayback(state, element, true);
-        element.srcObject = null;
-    }
+    detachRecordingPreview(state);
     try { if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1539', __caughtJavaScriptError);  }
     for (const track of state.stream?.getTracks() || []) track.stop();
     if (element) cancelRangePlayback(state, element, true);

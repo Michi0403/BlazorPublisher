@@ -28,6 +28,10 @@ const assertProfile = (relative, runtime, folder, singleFile) => {
     `<PublishSingleFile>${singleFile ? 'true' : 'false'}</PublishSingleFile>`,
     '<DeleteExistingFiles>true</DeleteExistingFiles>',
   ]) assert.ok(profile.includes(marker), `${relative}:${marker}`);
+  if (singleFile) {
+    assert.ok(profile.includes('<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>'), `${relative}:native self-extract`);
+    assert.ok(profile.includes('<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>'), `${relative}:single-file compression`);
+  }
   assert.doesNotMatch(profile, /<PublishTrimmed>true<\/PublishTrimmed>/);
   assert.doesNotMatch(profile, /<PublishReadyToRun>true<\/PublishReadyToRun>/);
 };

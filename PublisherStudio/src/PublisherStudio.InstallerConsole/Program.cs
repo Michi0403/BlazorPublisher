@@ -1,4 +1,5 @@
-using PublisherStudio.Helper;
+using PublisherStudio.InstallerConsole.Helper;
+using PublisherStudio.InstallerConsole.Installation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -16,6 +17,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+
+namespace PublisherStudio.InstallerConsole;
 internal static class Program
 {
     private const string BlazorPublisherRepo = "Michi0403/BlazorPublisher";
@@ -27,7 +30,7 @@ internal static class Program
     {
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.0.1");
+        Console.WriteLine("PublisherStudio Setup 2.0.2");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default preservation-first install and update routine.");
@@ -171,74 +174,74 @@ internal static class Program
     {
         try
         {
-            var zipPath = options.BlazorPublisherZipPath ?? Path.Combine(Environment.CurrentDirectory, BlazorPublisherZipName);
-            var setupZipPath = options.BlazorPublisherSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, BlazorPublisherSetupZipName);
+            var layout = PublisherStudioInstallLayout.Resolve(logger);
+            var deployment = new PublisherStudioDeploymentService(logger);
+            var cacheDirectory = Path.Combine(Path.GetTempPath(), "PublisherStudio", "downloads");
+            Directory.CreateDirectory(cacheDirectory);
 
-            // Download and validate both payloads before touching an existing installation.
-            await DownloadLatestReleaseAssetAsync(
-                BlazorPublisherRepo,
-                zipPath,
-                logger,
-                options,
-                setupAsset: false).ConfigureAwait(false);
+            var applicationZipPath = !string.IsNullOrWhiteSpace(options.BlazorPublisherZipPath)
+                ? Path.GetFullPath(Environment.ExpandEnvironmentVariables(options.BlazorPublisherZipPath))
+                : Path.Combine(cacheDirectory, BlazorPublisherZipName);
+            var setupZipPath = !string.IsNullOrWhiteSpace(options.BlazorPublisherSetupZipPath)
+                ? Path.GetFullPath(Environment.ExpandEnvironmentVariables(options.BlazorPublisherSetupZipPath))
+                : Path.Combine(cacheDirectory, BlazorPublisherSetupZipName);
 
-            await DownloadLatestReleaseAssetAsync(
-                BlazorPublisherRepo,
-                setupZipPath,
-                logger,
-                options,
-                setupAsset: true).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(options.BlazorPublisherZipPath))
+            {
+                await DownloadLatestReleaseAssetAsync(
+                    BlazorPublisherRepo,
+                    applicationZipPath,
+                    logger,
+                    options,
+                    setupAsset: false,
+                    runtimeIdentifier: layout.RuntimeIdentifier).ConfigureAwait(false);
+            }
+            else
+            {
+                logger.LogInformation("Using explicit PublisherStudio application package {PackagePath}.", applicationZipPath);
+            }
 
-            ValidateZipArchive(zipPath, logger);
-            ValidateZipArchive(setupZipPath, logger);
+            if (string.IsNullOrWhiteSpace(options.BlazorPublisherSetupZipPath))
+            {
+                await DownloadLatestReleaseAssetAsync(
+                    BlazorPublisherRepo,
+                    setupZipPath,
+                    logger,
+                    options,
+                    setupAsset: true,
+                    runtimeIdentifier: layout.RuntimeIdentifier).ConfigureAwait(false);
+            }
+            else
+            {
+                logger.LogInformation("Using explicit PublisherStudio setup package {PackagePath}.", setupZipPath);
+            }
 
-            var targetPath = GetBlazorPublisherInstallRoot(logger);
-            if (string.IsNullOrWhiteSpace(targetPath))
-                throw new InvalidOperationException("The PublisherStudio installation directory could not be resolved.");
+            // Validate both release assets before the installed application is stopped or any
+            // application/setup file is changed.
+            ValidateZipArchive(applicationZipPath, layout.ApplicationExecutableName, "Application", layout.RuntimeIdentifier, logger);
+            ValidateZipArchive(setupZipPath, layout.SetupExecutableName, "Setup", layout.RuntimeIdentifier, logger);
 
-            if (options.ForceDelete)
-                DeleteIfExists(targetPath, logger);
-
-            Directory.CreateDirectory(targetPath);
-
-            logger.LogInformation($"Extracting BlazorPublisher app '{zipPath}' to '{targetPath}'");
-            ExtractZipWithFallback(zipPath, targetPath, logger);
-
-            logger.LogInformation($"Extracting BlazorPublisher setup/bootstrap '{setupZipPath}' to '{targetPath}'");
-            ExtractZipWithFallback(setupZipPath, targetPath, logger);
-
-            RemoveLegacyMediaHostPayload(targetPath, logger);
-
-            logger.LogDebug($"BlazorPublisher installed to '{targetPath}'.");
-            logger.LogInformation($"BlazorPublisher app and setup/bootstrap files now reside in '{targetPath}'.");
+            deployment.DeployApplication(applicationZipPath, layout);
+            var setupReplacementScheduled = deployment.DeploySetup(setupZipPath, layout);
+            logger.LogInformation(
+                "PublisherStudio application files were carefully merged into {ApplicationDirectory}; setup launchers target {SetupDirectory}. DelayedSetupReplacement={DelayedSetupReplacement}.",
+                layout.ApplicationDirectory,
+                layout.SetupDirectory,
+                setupReplacementScheduled);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in InstallBlazorPublisherAsync. options {options}");
+            logger.LogError(ex, "PublisherStudio installation/update failed. Unrelated application files and user data were preserved; overwritten managed files were rolled back when possible.");
             throw;
         }
     }
 
-    private static void ValidateZipArchive(string path, ILogger logger)
+    private static void ValidateZipArchive(string path, string expectedExecutable, string expectedPayloadKind, string expectedRuntimeIdentifier, ILogger logger)
     {
         if (!File.Exists(path))
-            throw new FileNotFoundException($"Downloaded archive was not found: {path}", path);
-
-        try
-        {
-            using var archive = ZipFile.OpenRead(path);
-            if (archive.Entries.Count == 0)
-                throw new InvalidDataException($"Downloaded archive contains no entries: {path}");
-            logger.LogInformation("Validated archive '{Path}' ({Entries} entries).", path, archive.Entries.Count);
-        }
-        catch (InvalidDataException)
-        {
-            throw;
-        }
-        catch (Exception exception)
-        {
-            throw new InvalidDataException($"Downloaded archive is invalid or unreadable: {path}", exception);
-        }
+            throw new FileNotFoundException($"Release archive was not found: {path}", path);
+        PublisherStudioDeploymentService.ValidateArchive(path, expectedPayloadKind, expectedExecutable, expectedRuntimeIdentifier, logger);
+        logger.LogInformation("Validated {PayloadKind} archive {ArchivePath}.", expectedPayloadKind, path);
     }
 
     private static void UninstallBlazorPublisherWindows(CliOptions options, ILogger logger)
@@ -361,6 +364,7 @@ internal static class Program
     {
         try
         {
+            var layout = PublisherStudioInstallLayout.Resolve(logger);
             var shortcuts = new List<ShortcutDefinition>
             {
                 new(
@@ -384,12 +388,15 @@ internal static class Program
 
             foreach (var launcher in launchers)
             {
-                AddCmdShortcutIfExists(
-                    shortcuts,
-                    blazorPublisherRoot,
-                    launcher.FileName,
-                    launcher.ShortcutName,
-                    logger);
+                // The setup folder is a stable launcher contract. During a self-update the new
+                // folder is staged and replaces this exact path after the current setup exits,
+                // so shortcuts can be repaired before the delayed replacement completes.
+                var launcherPath = Path.Combine(layout.SetupDirectory, launcher.FileName);
+                shortcuts.Add(new ShortcutDefinition(
+                    ShortcutName: launcher.ShortcutName,
+                    TargetPath: launcherPath,
+                    Arguments: string.Empty,
+                    WorkingDirectory: layout.SetupDirectory));
             }
 
             return shortcuts;
@@ -523,12 +530,15 @@ internal static class Program
                 return null;
             }
 
+            var layout = PublisherStudioInstallLayout.Resolve(logger);
             var knownCandidates = new[]
             {
-            Path.Combine(blazorPublisherRoot, "PublisherStudio.ico"),
-            Path.Combine(blazorPublisherRoot, "BlazorPublisher.ico"),
-            Path.Combine(blazorPublisherRoot, GetRuntimeFolderName(), "PublisherStudio.ico")
-        };
+                Path.Combine(layout.SetupDirectory, "PublisherStudio.ico"),
+                Path.Combine(layout.ApplicationDirectory, "PublisherStudio.ico"),
+                Path.Combine(blazorPublisherRoot, "PublisherStudio.ico"),
+                Path.Combine(blazorPublisherRoot, "BlazorPublisher.ico"),
+                Path.Combine(blazorPublisherRoot, GetRuntimeFolderName(), "PublisherStudio.ico")
+            };
 
             foreach (var candidate in knownCandidates)
             {
@@ -600,13 +610,12 @@ internal static class Program
                 return null;
             }
 
-            var directPath = Path.Combine(blazorPublisherRoot, fileName);
-
-            logger.LogInformation($"Checking direct BlazorPublisher file candidate: {directPath}");
-
-            if (File.Exists(directPath))
+            var layout = PublisherStudioInstallLayout.Resolve(logger);
+            foreach (var directPath in new[] { Path.Combine(layout.SetupDirectory, fileName), Path.Combine(blazorPublisherRoot, fileName) })
             {
-                logger.LogInformation($"Resolved BlazorPublisher file from direct path: {directPath}");
+                logger.LogInformation("Checking PublisherStudio file candidate: {CandidatePath}", directPath);
+                if (!File.Exists(directPath)) continue;
+                logger.LogInformation("Resolved PublisherStudio file from direct path: {CandidatePath}", directPath);
                 return directPath;
             }
 
@@ -660,11 +669,13 @@ internal static class Program
                 ? "PublisherStudio.Web.exe"
                 : "PublisherStudio.Web";
 
+            var layout = PublisherStudioInstallLayout.Resolve(logger);
             var knownCandidates = new[]
             {
-            Path.Combine(blazorPublisherRoot, GetRuntimeFolderName(), executableName),
-            Path.Combine(blazorPublisherRoot, executableName)
-        };
+                Path.Combine(layout.ApplicationDirectory, executableName),
+                Path.Combine(blazorPublisherRoot, GetRuntimeFolderName(), executableName),
+                Path.Combine(blazorPublisherRoot, executableName)
+            };
 
             foreach (var candidate in knownCandidates)
             {
@@ -748,44 +759,20 @@ internal static class Program
     }
     private static void EnsureWindowsOnly(string featureName, ILogger logger)
     {
-        try
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                throw new PlatformNotSupportedException($"{featureName} is Windows-only.");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, $"Error in EnsureWindowsOnly. featureName {featureName.ToString()}");
-        }
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        var exception = new PlatformNotSupportedException($"{featureName} is Windows-only.");
+        logger.LogError(exception, "Windows-only setup feature {FeatureName} was requested on another platform.", featureName);
+        throw exception;
     }
 
     private static string GetBlazorPublisherInstallRoot(ILogger logger)
     {
-        try
-        {
-            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
-            if (string.IsNullOrWhiteSpace(localAppData))
-                throw new InvalidOperationException("LOCALAPPDATA could not be resolved.");
-
-            var canonical = Path.Combine(localAppData, "Programs", "BlazorPublisher");
-            var legacy = Path.Combine(localAppData, "BlazorPublisher");
-            if (Directory.Exists(canonical))
-                return canonical;
-            if (Directory.Exists(legacy))
-            {
-                logger.LogInformation("Using the existing legacy PublisherStudio installation directory '{LegacyInstallRoot}'. Fresh installations use '{CanonicalInstallRoot}'.", legacy, canonical);
-                return legacy;
-            }
-
-            return canonical;
-        }
+        try { return PublisherStudioInstallLayout.Resolve(logger).RootDirectory; }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in GetBlazorPublisherInstallRoot.  {ex.ToString()}");
+            logger.LogError(ex, "PublisherStudio installation root resolution failed.");
             return string.Empty;
         }
-
     }
 
     private static string GetStartMenuFolder(CliOptions options, ILogger logger)
@@ -1075,7 +1062,8 @@ internal static class Program
         string outFile,
         ILogger logger,
         CliOptions options,
-        bool setupAsset)
+        bool setupAsset,
+        string runtimeIdentifier)
     {
         try
         {
@@ -1090,8 +1078,7 @@ internal static class Program
             if (!root.TryGetProperty("assets", out var assets) || assets.GetArrayLength() == 0)
                 throw new InvalidOperationException($"No downloadable release assets found for {repo}.");
 
-            var platform = GetPlatformToken();
-            var arch = GetArchitectureToken();
+            var (platform, arch) = GetReleaseAssetTokens(runtimeIdentifier);
 
             JsonElement? selected = null;
 
@@ -1423,86 +1410,6 @@ internal static class Program
       
     }
 
-    private static void RemoveLegacyMediaHostPayload(string installRoot, ILogger logger)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(installRoot) || !Directory.Exists(installRoot))
-                return;
-
-            var normalizedRoot = Path.GetFullPath(installRoot)
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                + Path.DirectorySeparatorChar;
-            var removed = 0;
-
-            var legacyDirectories = Directory.EnumerateDirectories(
-                    installRoot,
-                    "MediaHost",
-                    new EnumerationOptions
-                    {
-                        RecurseSubdirectories = true,
-                        IgnoreInaccessible = true,
-                        MatchCasing = MatchCasing.CaseInsensitive,
-                        AttributesToSkip = FileAttributes.ReparsePoint
-                    })
-                .OrderByDescending(path => path.Length)
-                .ToList();
-
-            foreach (var directory in legacyDirectories)
-            {
-                var fullPath = Path.GetFullPath(directory);
-                if (!fullPath.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                try
-                {
-                    Directory.Delete(fullPath, recursive: true);
-                    removed++;
-                    logger.LogInformation("Removed obsolete standalone Media Host directory '{Path}'.", fullPath);
-                }
-                catch (Exception exception)
-                {
-                    logger.LogWarning(exception, "Could not remove obsolete Media Host directory '{Path}'.", fullPath);
-                }
-            }
-
-            foreach (var file in Directory.EnumerateFiles(
-                         installRoot,
-                         "PublisherStudio.MediaHost*",
-                         new EnumerationOptions
-                         {
-                             RecurseSubdirectories = true,
-                             IgnoreInaccessible = true,
-                             MatchCasing = MatchCasing.CaseInsensitive,
-                             AttributesToSkip = FileAttributes.ReparsePoint
-                         }))
-            {
-                var fullPath = Path.GetFullPath(file);
-                if (!fullPath.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                try
-                {
-                    File.SetAttributes(fullPath, FileAttributes.Normal);
-                    File.Delete(fullPath);
-                    removed++;
-                    logger.LogInformation("Removed obsolete standalone Media Host file '{Path}'.", fullPath);
-                }
-                catch (Exception exception)
-                {
-                    logger.LogWarning(exception, "Could not remove obsolete Media Host file '{Path}'.", fullPath);
-                }
-            }
-
-            if (removed > 0)
-                logger.LogInformation("Removed {Count} obsolete standalone Media Host item(s) during the single-application migration.", removed);
-        }
-        catch (Exception exception)
-        {
-            logger.LogWarning(exception, "Legacy Media Host cleanup could not be completed under '{Path}'.", installRoot);
-        }
-    }
-
     private static void DeleteIfExists(string path, ILogger logger)
     {
         try
@@ -1523,34 +1430,6 @@ internal static class Program
             logger.LogError(ex, $"Error in DeleteIfExists. path {path.ToString()}");
         }
     }
-    private static void ExtractZipWithFallback(string zipPath, string targetPath, ILogger logger)
-    {
-        try
-        {
-            Directory.CreateDirectory(targetPath);
-            try
-            {
-                ZipFile.ExtractToDirectory(zipPath, targetPath, overwriteFiles: true);
-                return;
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, $".NET ZIP extraction failed: {ex.Message}");
-            }
-
-            var sevenZip = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "7-Zip", "7z.exe");
-            if (!File.Exists(sevenZip))
-                throw new InvalidOperationException("ZIP extraction failed and 7-Zip was not found. Install 7-Zip or enable long paths.");
-
-            RunProcessAsync(sevenZip, $"x \"{zipPath}\" -o\"{targetPath}\" -y", logger).GetAwaiter().GetResult();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, $"Error in ExtractZipWithFallback. zipPath {zipPath.ToString()} targetPath {targetPath.ToString()}");
-            throw;
-        }
-    }
-
     private static async Task RunProcessAsync(string fileName, string arguments, ILogger logger)
     {
         try
@@ -1585,6 +1464,22 @@ internal static class Program
             throw;
         }
 
+    }
+
+    private static (string Platform, string Architecture) GetReleaseAssetTokens(string runtimeIdentifier)
+    {
+        var normalized = runtimeIdentifier.Trim().ToLowerInvariant();
+        var separator = normalized.LastIndexOf('-');
+        if (separator <= 0 || separator == normalized.Length - 1)
+            throw new ArgumentException($"Invalid PublisherStudio runtime identifier '{runtimeIdentifier}'.", nameof(runtimeIdentifier));
+        var platform = normalized[..separator] switch
+        {
+            "win" => "win",
+            "linux" => "lin",
+            "osx" => "macos",
+            _ => throw new PlatformNotSupportedException($"PublisherStudio release runtime '{runtimeIdentifier}' is not supported.")
+        };
+        return (platform, normalized[(separator + 1)..]);
     }
 
     private static string GetPlatformToken()
@@ -1823,7 +1718,7 @@ Usage:
   PublisherStudio.Setup [options]
 
 Common examples:
-  PublisherStudio.Setup --install-blazorpublisher --force-delete --start-blazorpublisher --shortcuts
+  PublisherStudio.Setup --install-blazorpublisher --start-blazorpublisher --shortcuts
   PublisherStudio.Setup --update-blazorpublisher --start-blazorpublisher --shortcuts
   PublisherStudio.Setup --start-blazorpublisher --port 58071
   PublisherStudio.Setup --install-ffmpeg
@@ -1832,18 +1727,18 @@ Common examples:
 
 Options:
   --install-blazorpublisher         Download and install the latest BlazorPublisher release.
-  --update-blazorpublisher          Download and extract the latest BlazorPublisher application and setup release.
+  --update-blazorpublisher          Download both release payloads, merge the runtime files safely, and repair/replace setup launchers.
   --start-blazorpublisher           Start PublisherStudio.Web from the local BlazorPublisher installation.
   --install-ffmpeg                  Check for FFmpeg and install it with an available OS package manager.
   --check-ffmpeg                    Report whether FFmpeg is available without installing it.
   --skip-ffmpeg                     Skip the automatic FFmpeg check/install during app installation or update.
   --blazorpublisher-zip <path>      Override BlazorPublisher application ZIP download path.
-  --blazorpublisher-setup-zip <path> Override BlazorPublisher setup ZIP download path.
+  --blazorpublisher-setup-zip <path> Override the setup/launcher ZIP. Normal updates replace setup after the running bootstrap exits.
   --blazorpublisher-exe <path>      Override PublisherStudio.Web executable path.
   --port <number>                   Port for BlazorPublisher. Default: 58071.
   --wait                            An option beside opening with mouse to keep it running.
   --no-browser                      Start BlazorPublisher without opening the browser.
-  --force-delete                    Delete the existing installation before extracting. Not used by default.
+  --force-delete                    Required only with --uninstall. Application updates never delete the runtime directory.
   --all                             Install BlazorPublisher, create shortcuts, and start BlazorPublisher.
   --verbose                         Print full exception details on failure.
   --help                            Show this help.

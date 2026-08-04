@@ -65,8 +65,20 @@ foreach ($launcher in $launchers) {
 }
 
 $defaultLauncher = Get-Content -LiteralPath (Join-Path $installerRoot 'Default.cmd') -Raw
-if (-not $defaultLauncher.Contains('call "%~dp0PublisherStudio.Setup.exe"')) {
-    Fail 'Default.cmd must invoke the setup executable without command-line arguments.'
+foreach ($required in @(
+    'set "SETUP_EXE=%~dp0PublisherStudio.Setup.exe"',
+    'set "SETUP_REPAIR=%~dp0PublisherStudio.Setup.repair.exe"',
+    'copy /b /y "%SETUP_REPAIR%" "%SETUP_EXE%.incoming"',
+    'move /y "%SETUP_EXE%.incoming" "%SETUP_EXE%"',
+    'call "%SETUP_EXE%"',
+    ':setup_repair_failed'
+)) {
+    if (-not $defaultLauncher.Contains($required)) {
+        Fail "Default.cmd is missing the launcher-repair contract: $required"
+    }
+}
+if ($defaultLauncher.Contains('call "%SETUP_EXE%" --')) {
+    Fail 'Default.cmd must invoke the setup executable without command-line arguments after promoting any staged repair.'
 }
 
 $launchSettingsPath = Join-Path $installerRoot 'Properties\launchSettings.json'

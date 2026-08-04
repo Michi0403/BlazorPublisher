@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 ///
 ///https://github.com/dotnet/docs/tree/main/docs/core/extensions/snippets/configuration/console-custom-logging
 ///
-namespace PublisherStudio.Helper
+namespace PublisherStudio.InstallerConsole.Helper
 {
 
     [ProviderAlias("ColorConsole")]

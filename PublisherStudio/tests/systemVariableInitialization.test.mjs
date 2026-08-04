@@ -6,13 +6,18 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-for (const name of ['Assert-MethodDiagnostics.ps1', 'Assert-IteratorExceptionPolicy.ps1']) {
-  const guard = read(`build/${name}`);
-  assert.doesNotMatch(guard, /System\.Collections\.Generic\.List\[object\]/);
-  assert.doesNotMatch(guard, /return @\(\$records\)/);
-  assert.match(guard, /\$records = @\(\)/);
-  assert.match(guard, /return \$records/);
-}
+const sharedAudit = read('build/Invoke-ArchitectureAudit.ps1');
+assert.doesNotMatch(sharedAudit, /System\.Collections\.Generic\.List\[object\]/);
+assert.doesNotMatch(sharedAudit, /return @\(\$records\)/);
+assert.match(sharedAudit, /\$records = @\(\)/);
+assert.match(sharedAudit, /return \$records/);
+assert.match(read('build/Assert-MethodDiagnostics.ps1'), /Invoke-ArchitectureAudit\.ps1'\) -Mode methods/);
+
+const iterator = read('build/Assert-IteratorExceptionPolicy.ps1');
+assert.doesNotMatch(iterator, /System\.Collections\.Generic\.List\[object\]/);
+assert.doesNotMatch(iterator, /return @\(\$records\)/);
+assert.match(iterator, /\$records = @\(\)/);
+assert.match(iterator, /return \$records/);
 
 const program = read('src/PublisherStudio.Web/Program.cs');
 const store = read('src/PublisherStudio.Web/Services/Configuration/SystemVariableStoreService.cs');

@@ -10,7 +10,7 @@ assert.equal(fs.existsSync(path.join(root, 'src', 'LocalGPT.WireProtocolVersion'
 const csproj = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
 assert.match(csproj, /PackageReference Include="LocalGPT\.WireProtocolVersion"/);
 assert.doesNotMatch(csproj, /ProjectReference[^>]+WireProtocol/);
-assert.ok(read('Directory.Build.props').includes('<LocalGptWireProtocolVersion>2.1.0</LocalGptWireProtocolVersion>'));
+assert.ok(read('Directory.Build.props').includes('<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>'));
 const localBuild = read('Build-LocalDevelopment.ps1');
 for (const token of ['--force-evaluate', '-maxcpucount:1', 'Ensure-WireProtocolPackage.ps1']) assert.ok(localBuild.includes(token), token);
 const packageBootstrap = read('build/Ensure-WireProtocolPackage.ps1');

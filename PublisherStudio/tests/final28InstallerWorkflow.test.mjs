@@ -35,7 +35,9 @@ test('installer launchers, mirrors, shortcuts and Visual Studio profiles stay sy
     if (launcher !== 'Uninstall.cmd') assert.doesNotMatch(projectLauncher, /--force-delete/);
     assert.ok(program.includes(`"${launcher}"`), launcher);
   }
-  assert.match(read(`${installerRoot}/Default.cmd`), /call "%~dp0PublisherStudio\.Setup\.exe"\s*$/m);
+  const defaultLauncher = read(`${installerRoot}/Default.cmd`);
+  for (const marker of ['SETUP_EXE', 'SETUP_REPAIR', '.incoming', 'move /y', ':setup_repair_failed']) assert.ok(defaultLauncher.includes(marker), marker);
+  assert.match(defaultLauncher, /call "%SETUP_EXE%"\s*$/m);
   const profiles = JSON.parse(read(`${installerRoot}/Properties/launchSettings.json`)).profiles;
   assert.ok(profiles['BlazorPublisher Default Install and Update']);
   assert.ok(Object.keys(profiles).length >= launchers.length);

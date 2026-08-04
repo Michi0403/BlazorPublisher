@@ -1,3 +1,25 @@
+# PublisherStudio 2.0.2 validation status
+
+PublisherStudio 2.0.2 is a source-level repair candidate. The maintained validation completed in this environment is:
+
+- Complete Node source-contract suite: **88/88 assertions passed** across 71 test modules.
+- Architecture audit: static, methods, runtime and combined modes passed.
+- XML/MSBuild: 21 maintained files parsed.
+- JSON: 26 maintained files parsed.
+- JavaScript/ES modules: 88 maintained files passed `node --check`; vendored third-party distributions are excluded from this syntax count.
+- Python: 2 maintained files compiled.
+- Solution closure: both projects referenced by `PublisherStudio.sln` exist.
+- Application version is 2.0.2 and the LocalGPT wire-protocol package is 2.1.1.
+- All eight setup launchers are byte-identical between the release-launcher directory and InstallerConsole payload.
+- The JavaScript diagnostics hash inventory matches the maintained browser sources.
+- The repair source contains no PDFs, merge markers or archived AI scratch transcript. Visual Studio user files and generated directories are excluded from the source package.
+
+The installer changes were reviewed for preservation boundaries: application updates merge files with per-file rollback; unknown files and locally modified stale files are retained; setup replacement is delayed when running from the stable setup directory; automatic recursive legacy `MediaHost` cleanup is absent; and whole-install deletion remains an explicit `--uninstall --force-delete` operation.
+
+Native .NET 10 compilation, PowerShell 5.1 execution, Windows setup self-replacement, licensed DevExpress restore, GitHub release publication, and real browser camera/screen capture remain maintainer-run acceptance items.
+
+---
+
 # Validation status
 
 The v0.8 source tree was checked without restoring proprietary packages.

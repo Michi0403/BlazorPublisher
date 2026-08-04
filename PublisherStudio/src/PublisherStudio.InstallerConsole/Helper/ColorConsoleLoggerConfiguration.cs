@@ -1,5 +1,4 @@
 
-using PublisherStudio.Helper;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Text.Json.Serialization;
 ///
 ///https://github.com/dotnet/docs/tree/main/docs/core/extensions/snippets/configuration/console-custom-logging
 ///
-namespace PublisherStudio.Helper
+namespace PublisherStudio.InstallerConsole.Helper
 {
     public class ColorConsoleLoggerConfiguration
     {

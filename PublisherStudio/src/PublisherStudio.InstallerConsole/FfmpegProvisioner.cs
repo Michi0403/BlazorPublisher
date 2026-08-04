@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
+
+namespace PublisherStudio.InstallerConsole;
 internal static class FfmpegProvisioner
 {
     private static readonly TimeSpan ProgressHeartbeat = TimeSpan.FromSeconds(30);

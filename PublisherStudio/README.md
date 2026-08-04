@@ -15,6 +15,14 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## 2.0.3 Windows build-policy compatibility
+
+PublisherStudio now executes its maintained Windows build guards with the same process-output discipline used by LocalGPT. Python audit output remains visible in Visual Studio but can no longer be mistaken for the process exit code. Iterator inspection excludes C# type declarations, the two newly exposed iterator violations are materialized and logged, publish profiles explicitly own their protocol/platform/output settings, and Visual Studio setup workflows are verified by name with Windows PowerShell 5.1-safe enumeration.
+
+This release keeps the 2.0.2 preservation-first installer behavior unchanged: setup may repair or replace itself, while the application directory is updated by validated file-level merge and is never deleted wholesale.
+
+See `CHANGELOG-v2.0.3.md` for the exact repair boundary.
+
 ## 2.0.2 installer and runtime recovery
 
 The release lane preserves the established runtime wrapper folders (`winx64`, `setupwinx64`, and their other RID equivalents) so installed launchers and older setup versions continue to resolve the same paths. New setup versions validate both payloads before changing the installation, merge application files in place with manifest-owned stale-file cleanup and rollback, and never delete or move the application directory during an update. Setup launchers keep their stable paths and can promote a staged standalone `PublisherStudio.Setup.repair.exe`. Windows application archives place a hash-catalogued launcher-repair prelude before application files, so even an older setup can stage its repair before a locked running application interrupts the legacy extraction pass.

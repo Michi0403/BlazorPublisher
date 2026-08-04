@@ -39,19 +39,27 @@ function Assert-Profile([string]$RelativePath, [string]$Runtime, [string]$Folder
     $properties = Read-ProfileProperties $RelativePath
     $output = "..\..\artifacts\release\$Folder\"
     foreach ($requirement in @(
+        @{ Name = 'Configuration'; Value = 'Release' },
         @{ Name = 'RuntimeIdentifier'; Value = $Runtime },
         @{ Name = 'SelfContained'; Value = 'true' },
         @{ Name = 'PublishSingleFile'; Value = $(if ($SingleFile) { 'true' } else { 'false' }) },
         @{ Name = 'PublishTrimmed'; Value = 'false' },
-        @{ Name = 'PublishReadyToRun'; Value = 'false' },
         @{ Name = 'DeleteExistingFiles'; Value = 'true' },
         @{ Name = 'PublishProtocol'; Value = 'FileSystem' },
         @{ Name = 'Platform'; Value = $Platform },
-        @{ Name = 'TargetFramework'; Value = 'net10.0' },
-        @{ Name = 'PublishUrl'; Value = $output },
-        @{ Name = 'PublishDir'; Value = $output }
+        @{ Name = 'TargetFramework'; Value = 'net10.0' }
     )) {
         Assert-Property $properties $requirement.Name $requirement.Value $RelativePath
+    }
+    if ($properties.ContainsKey('PublishReadyToRun')) {
+        Assert-Property $properties 'PublishReadyToRun' 'false' $RelativePath
+    }
+    $declaredOutput = @('PublishDir', 'PublishUrl') | Where-Object { $properties.ContainsKey($_) }
+    if ($declaredOutput.Count -eq 0) {
+        Fail "$RelativePath must define PublishDir or PublishUrl so release scripts can consume profile-owned output."
+    }
+    foreach ($outputProperty in $declaredOutput) {
+        Assert-Property $properties $outputProperty $output $RelativePath
     }
     if ($SingleFile) {
         Assert-Property $properties 'IncludeNativeLibrariesForSelfExtract' 'true' $RelativePath

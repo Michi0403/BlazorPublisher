@@ -1,15 +1,6 @@
 [
-  "src/PublisherStudio.Web/Domain/PublicationElementTraversal.cs|public static IEnumerable<PublicationElement> Descendants(IEnumerable<PublicationElement> elements)|iterator requires logging",
-  "src/PublisherStudio.Web/Domain/PublicationElementTraversal.cs|public static IEnumerable<PublicationElement> Descendants(IEnumerable<PublicationElement> elements)|iterator requires try/finally",
   "src/PublisherStudio.Web/Services/Automation/BusinessObjectContextService.cs|private IEnumerable<Type> UnwrapTypes(Type type)|iterator requires logging",
   "src/PublisherStudio.Web/Services/Automation/BusinessObjectContextService.cs|private IEnumerable<Type> UnwrapTypes(Type type)|iterator requires try/finally",
   "src/PublisherStudio.Web/Services/OpenScad/OpenScadDocumentService.cs|private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)|iterator requires logging",
-  "src/PublisherStudio.Web/Services/OpenScad/OpenScadDocumentService.cs|private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)|iterator requires try/finally",
-  "src/PublisherStudio.Web/Services/Streaming/Encoding/FfmpegLocator.cs|private static IEnumerable<string> FindWinGetPackageExecutables(string localAppData)|iterator contains catch",
-  "src/PublisherStudio.Web/Services/Streaming/Encoding/FfmpegLocator.cs|private static IEnumerable<string> FindWinGetPackageExecutables(string localAppData)|iterator requires logging",
-  "src/PublisherStudio.Web/Services/Streaming/Encoding/FfmpegLocator.cs|private static IEnumerable<string> FindWinGetPackageExecutables(string localAppData)|iterator requires try/finally",
-  "src/PublisherStudio.Web/Services/Streaming/Encoding/FfmpegLocator.cs|private static IEnumerable<string> KnownInstallLocations()|iterator requires logging",
-  "src/PublisherStudio.Web/Services/Streaming/Encoding/FfmpegLocator.cs|private static IEnumerable<string> KnownInstallLocations()|iterator requires try/finally",
-  "src/PublisherStudio.Web/Services/VideoStudio/Import/VideoProjectImportService.cs|private static IEnumerable<JsonElement> JsonArray(JsonElement owner, string property)|iterator requires logging",
-  "src/PublisherStudio.Web/Services/VideoStudio/Import/VideoProjectImportService.cs|private static IEnumerable<JsonElement> JsonArray(JsonElement owner, string property)|iterator requires try/finally"
+  "src/PublisherStudio.Web/Services/OpenScad/OpenScadDocumentService.cs|private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)|iterator requires try/finally"
 ]

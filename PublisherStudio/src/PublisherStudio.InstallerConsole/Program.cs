@@ -30,7 +30,7 @@ internal static class Program
     {
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.0.2");
+        Console.WriteLine("PublisherStudio Setup 2.0.3");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default preservation-first install and update routine.");

@@ -130,11 +130,11 @@ public sealed class FfmpegLocator(
 
     private IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
     {
-        logger.LogTrace($"Enumerating WinGet FFmpeg package executables.");
         try
         {
+            logger.LogTrace("Collecting WinGet FFmpeg package executables.");
             var packagesRoot = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
-            if (!Directory.Exists(packagesRoot)) yield break;
+            if (!Directory.Exists(packagesRoot)) return Array.Empty<string>();
 
             string[] packageDirectories;
             try
@@ -145,35 +145,35 @@ public sealed class FfmpegLocator(
             }
             catch (Exception exception)
             {
-                logger.LogWarning(exception, $"Could not enumerate WinGet FFmpeg package directories.");
-                yield break;
+                logger.LogWarning(exception, "Could not enumerate WinGet FFmpeg package directories.");
+                return Array.Empty<string>();
             }
 
+            var matches = new List<string>();
             foreach (var packageDirectory in packageDirectories)
             {
-                string[] matches;
                 try
                 {
-                    matches = Directory.EnumerateFiles(packageDirectory, "ffmpeg.exe", SearchOption.AllDirectories)
+                    matches.AddRange(Directory
+                        .EnumerateFiles(packageDirectory, "ffmpeg.exe", SearchOption.AllDirectories)
                         .OrderByDescending(path => path.Contains(
                             $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
                             StringComparison.OrdinalIgnoreCase))
-                        .Take(runtimePolicy.InstallerDownloadAttempts)
-                        .ToArray();
+                        .Take(runtimePolicy.InstallerDownloadAttempts));
                 }
                 catch (Exception exception)
                 {
-                    logger.LogWarning(exception, $"Could not enumerate FFmpeg executables under '{packageDirectory}'.");
-                    continue;
+                    logger.LogWarning(exception, "Could not enumerate FFmpeg executables under '{PackageDirectory}'.", packageDirectory);
                 }
-
-                foreach (var match in matches)
-                    yield return match;
             }
+
+            logger.LogTrace("Collected {ExecutableCount} WinGet FFmpeg executable candidates.", matches.Count);
+            return matches;
         }
-        finally
+        catch (Exception exception)
         {
-            logger.LogTrace($"Completed WinGet FFmpeg executable enumeration.");
+            logger.LogError(exception, "Could not collect WinGet FFmpeg package executables.");
+            throw;
         }
     }
 

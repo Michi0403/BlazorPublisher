@@ -31,7 +31,7 @@ public sealed class StreamingRuntimeUseCases
             logger.LogTrace($"Entering StreamingRuntimeUseCases.GetCapabilities.");
             return new()
     {
-        Version = "2.0.2",
+        Version = "2.0.3",
         BrowserCapture = true,
         BrowserAudioMix = true,
         NativeDeviceDiscovery = true,

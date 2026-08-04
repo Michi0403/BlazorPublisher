@@ -83,11 +83,22 @@ if ($defaultLauncher.Contains('call "%SETUP_EXE%" --')) {
 
 $launchSettingsPath = Join-Path $installerRoot 'Properties\launchSettings.json'
 $launchSettings = Get-Content -LiteralPath $launchSettingsPath -Raw | ConvertFrom-Json
-if ($launchSettings.profiles.PSObject.Properties.Count -lt $launchers.Count) {
-    Fail 'Visual Studio launch profiles do not cover the maintained setup workflows.'
-}
-if (-not $launchSettings.profiles.'BlazorPublisher Default Install and Update') {
-    Fail 'The no-command Visual Studio profile is missing.'
+$launchProfileNames = @($launchSettings.profiles.PSObject.Properties | ForEach-Object { $_.Name })
+$requiredLaunchProfiles = @(
+    'BlazorPublisher Default Install and Update',
+    'BlazorPublisher Install Preserving Data',
+    'BlazorPublisher Update Preserving Data',
+    'BlazorPublisher Start',
+    'BlazorPublisher Start without Browser',
+    'BlazorPublisher Check FFmpeg',
+    'BlazorPublisher Install FFmpeg',
+    'BlazorPublisher Uninstall Preview',
+    'BlazorPublisher Uninstall Explicit Delete'
+)
+foreach ($profileName in $requiredLaunchProfiles) {
+    if ($launchProfileNames -notcontains $profileName) {
+        Fail "Visual Studio launch profile is missing: $profileName"
+    }
 }
 
 $project = Get-Content -LiteralPath (Join-Path $installerRoot 'PublisherStudio.InstallerConsole.csproj') -Raw

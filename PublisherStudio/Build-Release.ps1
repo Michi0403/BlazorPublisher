@@ -189,7 +189,7 @@ function Assert-ReleaseArchiveLayout {
         $expectedExecutable = "$RootFolderName/$Executable"
         $expectedManifest = "$RootFolderName/publisherstudio-release.json"
         if (-not ($names -contains $expectedExecutable)) { throw "Release archive does not preserve the legacy-compatible $expectedExecutable layout: $ArchivePath" }
-        if (-not ($names -contains $expectedManifest)) { throw "Release archive is missing $expectedManifest: $ArchivePath" }
+        if (-not ($names -contains $expectedManifest)) { throw "Release archive is missing ${expectedManifest}: $ArchivePath" }
         if (-not [string]::IsNullOrWhiteSpace($AllowedAdditionalRoot)) {
             $repairExecutable = "$AllowedAdditionalRoot/PublisherStudio.Setup.repair.exe"
             $repairManifest = "$AllowedAdditionalRoot/publisherstudio-bootstrap-repair.json"

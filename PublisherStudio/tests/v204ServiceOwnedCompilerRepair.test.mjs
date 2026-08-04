@@ -91,8 +91,8 @@ test('2.0.4 validates release mappings semantically and keeps synchronized folde
   assert.match(windowsMapping, /SetupAsset\s*=\s*"setupwinx64"/);
 });
 
-test('2.0.4 version is aligned across active release surfaces', () => {
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.0\.4<\/Version>/);
-  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.0\.4<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.0.4');
+test('active version is aligned across release surfaces', () => {
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.0\.5<\/Version>/);
+  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.0\.5<\/Version>/);
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.0.5');
 });

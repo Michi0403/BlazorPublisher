@@ -4,6 +4,7 @@ Status values are **Closed**, **Partial**, or **Deferred**. A task may be remove
 
 | Task | Status in 1.0.89 | Evidence / next step |
 |---|---|---|
+| v2.0.5 Windows build/release-script correction | Closed at source-contract baseline | Repairs the DI constructor in SpreadsheetDocumentService, Windows PowerShell variable delimiting, and logging classification for deterministic instance services. Native Windows/.NET/DevExpress evidence remains maintainer-run. |
 | v2.0.4 service-owned compiler repair | Closed at source-contract baseline | Moves data contracts to BusinessObjects, restores injected factories/services at stale static call sites, repairs capture/streaming constructor drift, fixes InteractiveServer imports and parses release mappings semantically. Native Windows/DevExpress build evidence remains maintainer-run. |
 | v1.0.89 LocalGPT normal application/installer port compatibility | Closed | Organic discovery/service ports are separate and optional; LocalGPT restores its public read-only runtime port surface and validates distinct port contracts. |
 | v1.0.89 organic 1-Wire DTO, discovery, TCP connection and capability negotiation | Closed at TCP/UDP baseline | Versioned envelopes, bounded message size, SHA-256, CRC32, encrypted/public payload exclusivity and online capability exchange are implemented. UART/SPI/MQTT adapters remain deferred. |

@@ -2,6 +2,7 @@ using PublisherStudio.BusinessObjects;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+// logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
 public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> logger)

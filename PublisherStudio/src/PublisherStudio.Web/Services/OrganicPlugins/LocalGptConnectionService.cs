@@ -95,7 +95,7 @@ public sealed class LocalGptConnectionService(
                         PeerId = localPeerId,
                         DisplayName = "PublisherStudio / BlazorPublisher",
                         Application = "PublisherStudio",
-                        ApplicationVersion = "2.0.4-organic-wire",
+                        ApplicationVersion = "2.0.5-organic-wire",
                         HostName = Environment.MachineName,
                         Address = "0.0.0.0",
                         ServicePort = 0,

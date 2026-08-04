@@ -17,5 +17,5 @@ assert.match(agents, /Release task ledger/);
 assert.match(agents, /OpenSCAD builder compatibility/);
 assert.match(agents, /private static methods/);
 assert.match(release, /docs\/architecture\/task-ledger\.md/);
-assert.match(release, /2\.0\.4/);
+assert.match(release, /2\.0\.5/);
 console.log('release changelog/task-ledger continuity and architecture-maintenance contracts passed');

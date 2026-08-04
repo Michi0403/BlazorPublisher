@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Security;
 using System.Text;
+// logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
 public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> logger)

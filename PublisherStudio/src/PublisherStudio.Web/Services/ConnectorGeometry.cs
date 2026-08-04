@@ -1,6 +1,7 @@
 using PublisherStudio.BusinessObjects;
 using System.Globalization;
 
+// logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
 public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)

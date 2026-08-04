@@ -15,9 +15,9 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
-## 2.0.4 service-owned compiler repair
+## 2.0.5 Windows build and release-script correction
 
-The current repair moves data contracts into `PublisherStudio.BusinessObjects`, routes construction and formatting through injected services/factories, fixes the remaining native-capture and streaming constructor drift, restores the Blazor render-mode import, and repairs the release-map guard without adding application statics. See `CHANGELOG-v2.0.4.md`.
+The current correction keeps the 2.0.4 service-owned architecture intact and fixes the Windows failures found during the maintainer build: one invalid DI constructor shape, a Windows PowerShell 5.1 interpolation parser error, and six deterministic instance services that the logging guard had misclassified as operational boundaries. No application statics were added, and shared data contracts remain in `PublisherStudio.BusinessObjects`. See `CHANGELOG-v2.0.5.md`.
 
 ## 2.0.3 Windows build-policy compatibility
 

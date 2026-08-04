@@ -43,6 +43,7 @@ $protectedPaths = @(
     'build/javascript-diagnostics-files.sha256',
     'CHANGELOG-v2.0.2.md',
     'CHANGELOG-v2.0.4.md',
+    'CHANGELOG-v2.0.5.md',
     'RELEASE.md',
     'docs/RUNTIME_VALUE_OWNERSHIP.md',
     'docs/PUBLISH_CONFIGURATION_POLICY.md',

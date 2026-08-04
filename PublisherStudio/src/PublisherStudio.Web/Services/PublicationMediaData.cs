@@ -1,4 +1,5 @@
 using PublisherStudio.BusinessObjects;
+// logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
 public sealed class PublicationMediaData(ILogger<PublicationMediaData> logger)

@@ -1,5 +1,6 @@
 using PublisherStudio.BusinessObjects;
 
+// logging-policy: pure-helper
 namespace PublisherStudio.Services.Streaming.UseCases.Chat;
 
 public interface IStreamingChatResultFactory

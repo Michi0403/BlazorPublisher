@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using PublisherStudio.Services.Configuration;
 
+// logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
 public sealed class WordArtPathGeometry(

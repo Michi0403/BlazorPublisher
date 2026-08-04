@@ -11,18 +11,20 @@ namespace PublisherStudio.Services;
 /// Creates workbook packages and produces a safe, static canvas representation without
 /// requiring the separately licensed Office File API HTML exporter.
 /// </summary>
-public sealed class SpreadsheetDocumentService(IPublicationMarkupService markup)
+public sealed class SpreadsheetDocumentService
 {
-    private readonly IPublicationMarkupService _markup = markup;
-    private readonly FontStyle defaultFontStyle = new("Calibri", 11, false, false, false, string.Empty);
+    private readonly IPublicationMarkupService _markup;
+    private readonly FontStyle defaultFontStyle;
     private readonly CellStyle defaultCellStyle;
     private readonly XNamespace Main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
     private readonly XNamespace Relationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
     private readonly XNamespace PackageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships";
 
-    public  SpreadsheetDocumentService()
+    public SpreadsheetDocumentService(IPublicationMarkupService markup)
     {
-       this. defaultCellStyle = new CellStyle(defaultFontStyle, string.Empty, string.Empty, null, null, false, false);
+        _markup = markup ?? throw new ArgumentNullException(nameof(markup));
+        defaultFontStyle = new FontStyle("Calibri", 11, false, false, false, string.Empty);
+        defaultCellStyle = new CellStyle(defaultFontStyle, string.Empty, string.Empty, null, null, false, false);
     }
 
     public byte[] CreateBlankXlsx(string sheetName = "Sheet1")

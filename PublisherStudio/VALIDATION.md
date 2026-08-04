@@ -1,23 +1,24 @@
-# PublisherStudio 2.0.4 validation status
+# PublisherStudio 2.0.5 validation status
 
-PublisherStudio 2.0.4 is a service-owned compiler/composition repair candidate based on the preservation-first 2.0.2 installer recovery and the 2.0.3 Windows build-policy correction.
+PublisherStudio 2.0.5 is a narrow Windows build and release-script correction based on the preservation-first installer recovery and the service-owned 2.0.4 compiler repair.
 
 Validated in this environment:
 
-- Application and setup version are 2.0.4.
-- Wire protocol package remains 2.1.1.
-- The complete repository Node contract suite passes 97 of 97 tests when the prepared DevExpress browser runtime is present.
-- The sanitized extracted source package passes 96 of 97 tests; the sole expected failure is the intentionally omitted generated/licensed `wwwroot/vendor/devextreme-dist/js/dx.all.js` asset.
+- Application, setup, browser runtime and npm package versions are aligned at 2.0.5.
+- Wire protocol package remains independently pinned to 2.1.1.
+- 100 source-contract tests pass.
+- One additional test requires the intentionally omitted licensed/generated `wwwroot/vendor/devextreme-dist/js/dx.all.js` asset.
 - Architecture policy passes in static, methods, runtime, structure and combined modes.
-- The exact stale static calls and constructor call sites reported by the maintainer are absent.
-- Data contracts are owned by `PublisherStudio.BusinessObjects`; the BusinessObjects layer has no dependency on PublisherStudio services or `ILogger`.
-- JSON, XML/MSBuild, JavaScript and Python source syntax checks pass.
-- ZIP integrity, portable path and generated-output exclusion checks pass.
+- The Python architecture-audit unit suite passes 4 of 4 tests.
+- `SpreadsheetDocumentService` has one DI constructor and no primary/secondary-constructor conflict.
+- The release script contains no unbraced variable immediately followed by a colon.
+- The six reported deterministic services are explicitly classified as exception-transparent pure helpers and remain DI-owned instance services.
+- JavaScript diagnostics hashes, JSON/XML structure, archive paths and active version surfaces are validated.
 
 Not executable in this environment:
 
 - .NET 10 compilation and analyzers.
-- Windows PowerShell 5.1 build targets.
+- Windows PowerShell 5.1 build/release targets.
 - DevExpress licensed asset preparation.
 - Windows installer self-replacement and publish workflows.
 - Live camera, screen capture and process-loopback tests.

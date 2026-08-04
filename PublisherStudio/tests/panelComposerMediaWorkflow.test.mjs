@@ -13,11 +13,11 @@ const walk = directory => fs.readdirSync(directory, { withFileTypes: true }).fla
 const panelStudio = read('src/PublisherStudio.Web/Components/Editor/PanelStudio.razor');
 const panelPreview = read('src/PublisherStudio.Web/Components/Editor/PanelElementPreview.razor');
 const panelService = read('src/PublisherStudio.Web/Services/Panels/PanelDocumentService.cs');
-const panelModels = read('src/PublisherStudio.Web/Domain/PublicationPanelModels.cs');
-const publicationModels = read('src/PublisherStudio.Web/Domain/PublicationModels.cs');
+const panelModels = read('src/PublisherStudio.Web/BusinessObjects/PublicationPanelModels.cs');
+const publicationModels = read('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs');
 const publicationFiles = read('src/PublisherStudio.Web/Services/PublicationFileService.cs');
 const converterStudio = read('src/PublisherStudio.Web/Components/Editor/MediaConverterStudio.razor');
-const conversionModels = read('src/PublisherStudio.Web/Domain/MediaConversionModels.cs');
+const conversionModels = read('src/PublisherStudio.Web/BusinessObjects/MediaConversionModels.cs');
 const conversionService = read('src/PublisherStudio.Web/Services/MediaConversion/MediaConversionService.cs');
 const conversionController = read('src/PublisherStudio.Web/Controllers/MediaConversionController.cs');
 const editor = read('src/PublisherStudio.Web/Components/Pages/Editor.razor');

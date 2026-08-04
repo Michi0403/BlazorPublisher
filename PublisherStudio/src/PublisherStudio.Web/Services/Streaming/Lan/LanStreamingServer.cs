@@ -8,15 +8,17 @@ namespace PublisherStudio.Services.Streaming.Lan;
 public sealed class LanStreamingServer : IAsyncDisposable
 {
     private readonly MediaSession _session;
+    private readonly ILogger<LanStreamingServer> _logger;
     private readonly SemaphoreSlim _viewerGate;
     private readonly CancellationTokenSource _cancellation = new();
     private WebApplication? _app;
     private Task? _runTask;
     private RtspLanServer? _rtspServer;
 
-    public LanStreamingServer(MediaSession session)
+    public LanStreamingServer(MediaSession session, ILogger<LanStreamingServer> logger)
     {
         _session = session;
+        _logger = logger;
         _viewerGate = new SemaphoreSlim(Math.Clamp(session.LanDefinition.ViewerLimit, 1, 10_000));
         AccessToken = session.LanDefinition.RequireAccessToken
             ? Convert.ToHexString(RandomNumberGenerator.GetBytes(18)).ToLowerInvariant()
@@ -208,6 +210,7 @@ public sealed class LanStreamingServer : IAsyncDisposable
         }
         catch (Exception exception)
         {
+            _logger.LogError(exception, "LAN streaming server failed for media session {SessionId}.", _session.Id);
             LastError = exception.Message;
             Status = "error";
         }

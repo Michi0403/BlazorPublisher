@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
-const domain = read('src','PublisherStudio.Web','Domain','AutomationModels.cs');
+const domain = read('src','PublisherStudio.Web','BusinessObjects','AutomationModels.cs');
 const services = read('src','PublisherStudio.Web','Services','Automation','IAutomationServices.cs');
 const queues = read('src','PublisherStudio.Web','Services','Automation','BrowserAutomationServices.cs');
 const controller = read('src','PublisherStudio.Web','Controllers','AutomationController.cs');

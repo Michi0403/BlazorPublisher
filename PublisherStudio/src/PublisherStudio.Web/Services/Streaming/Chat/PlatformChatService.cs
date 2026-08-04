@@ -1,3 +1,4 @@
+using PublisherStudio.BusinessObjects;
 using System.Collections.Concurrent;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -10,44 +11,45 @@ using TextEncoding = global::System.Text.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Chat;
 
-public sealed record PlatformChatMessage(
-    string Id,
-    Guid OutputId,
-    string Platform,
-    string Channel,
-    string AuthorId,
-    string AuthorName,
-    string AuthorAvatar,
-    string Text,
-    DateTimeOffset Timestamp,
-    string Color = "",
-    string Badges = "");
-
 public sealed class PlatformChatService : IAsyncDisposable
 {
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly MediaSession _session;
+    private readonly ILogger<PlatformChatService> _logger;
     private readonly ConcurrentDictionary<Guid, IPlatformChatAdapter> _adapters = new();
     private readonly ConcurrentDictionary<Guid, ConcurrentQueue<PlatformChatMessage>> _history = new();
     private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, Channel<PlatformChatMessage>>> _subscribers = new();
     private readonly CancellationTokenSource _lifetime = new();
 
-    public PlatformChatService(MediaSession session) => _session = session;
+    public PlatformChatService(MediaSession session, ILogger<PlatformChatService> logger)
+    {
+        _session = session;
+        _logger = logger;
+    }
 
     public IReadOnlyDictionary<Guid, string> Status => _adapters.ToDictionary(pair => pair.Key, pair => pair.Value.Status);
 
     public void Start()
     {
-        foreach (var output in _session.OutputDefinitions.Where(item => item.ChatEnabled))
+        try
         {
-            IPlatformChatAdapter? adapter = output.Provider switch
+            _logger.LogTrace("Starting platform chat for media session {SessionId}.", _session.Id);
+            foreach (var output in _session.OutputDefinitions.Where(item => item.ChatEnabled))
             {
-                0 when HasChatConfiguration(output) => new TwitchIrcChatAdapter(output, Publish, _lifetime.Token),
-                1 when HasChatConfiguration(output) => new YouTubeLiveChatAdapter(output, Publish, _lifetime.Token),
-                _ => null
-            };
-            if (adapter is null || !_adapters.TryAdd(output.OutputId, adapter)) continue;
-            adapter.Start();
+                IPlatformChatAdapter? adapter = output.Provider switch
+                {
+                    0 when HasChatConfiguration(output) => new TwitchIrcChatAdapter(output, Publish, _lifetime.Token),
+                    1 when HasChatConfiguration(output) => new YouTubeLiveChatAdapter(output, Publish, _lifetime.Token),
+                    _ => null
+                };
+                if (adapter is null || !_adapters.TryAdd(output.OutputId, adapter)) continue;
+                adapter.Start();
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Could not start platform chat for media session {SessionId}.", _session.Id);
+            throw;
         }
     }
 
@@ -88,7 +90,10 @@ public sealed class PlatformChatService : IAsyncDisposable
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
-        catch (WebSocketException) { }
+        catch (WebSocketException exception)
+        {
+            _logger.LogWarning(exception, "Platform-chat subscriber disconnected for output {OutputId}.", outputId);
+        }
         finally
         {
             outputSubscribers.TryRemove(subscriberId, out _);
@@ -118,7 +123,8 @@ public sealed class PlatformChatService : IAsyncDisposable
             foreach (var channel in subscribers.Values) channel.Writer.TryComplete();
         _subscribers.Clear();
         foreach (var adapter in _adapters.Values)
-            try { await adapter.DisposeAsync(); } catch { }
+            try { await adapter.DisposeAsync(); }
+            catch (Exception exception) { _logger.LogWarning(exception, "Could not dispose a platform-chat adapter."); }
         _adapters.Clear();
         _lifetime.Dispose();
     }

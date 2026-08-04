@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
 

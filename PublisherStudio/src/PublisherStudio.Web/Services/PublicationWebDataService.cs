@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
 

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.MediaConversion;
 
 namespace PublisherStudio.Controllers;

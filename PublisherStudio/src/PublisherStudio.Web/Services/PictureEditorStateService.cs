@@ -1,19 +1,21 @@
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
 
 public sealed class PictureEditorStateService
 {
     private readonly PictureDocumentService _documents;
+    private readonly IPublisherDocumentFactory _documentFactory;
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private string? _liveEditKey;
     private PictureLayer? _clipboard;
 
-    public PictureEditorStateService(PictureDocumentService documents)
+    public PictureEditorStateService(PictureDocumentService documents, IPublisherDocumentFactory documentFactory)
     {
         _documents = documents;
-        Document = PictureDocument.CreateDefault();
+        _documentFactory = documentFactory;
+        Document = _documentFactory.CreatePicture();
     }
 
     public event Action? Changed;
@@ -26,7 +28,7 @@ public sealed class PictureEditorStateService
 
     public void StartNew(int widthPx = 1200, int heightPx = 800, bool transparent = true)
     {
-        Document = PictureDocument.CreateDefault(widthPx, heightPx, transparent);
+        Document = _documentFactory.CreatePicture(widthPx, heightPx, transparent);
         SelectedLayerId = null;
         ResetHistory();
         Notify();
@@ -42,7 +44,7 @@ public sealed class PictureEditorStateService
 
     public void StartFromRaster(string dataUrl, string name, int widthPx = 1200, int heightPx = 800)
     {
-        Document = PictureDocument.FromRaster(dataUrl, name, widthPx, heightPx);
+        Document = _documentFactory.CreatePictureFromRaster(dataUrl, name, widthPx, heightPx);
         SelectedLayerId = Document.Layers.LastOrDefault()?.Id;
         ResetHistory();
         Notify();
@@ -641,7 +643,7 @@ public sealed class PictureEditorStateService
 
     private PictureLayer CloneLayer(PictureLayer layer)
     {
-        var wrapper = PictureDocument.CreateDefault(Document.WidthPx, Document.HeightPx, true);
+        var wrapper = _documentFactory.CreatePicture(Document.WidthPx, Document.HeightPx, true);
         wrapper.Layers.Add(layer);
         return _documents.Clone(wrapper).Layers[0];
     }

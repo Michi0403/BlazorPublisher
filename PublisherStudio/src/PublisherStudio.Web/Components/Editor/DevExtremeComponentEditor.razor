@@ -45,7 +45,7 @@
                     {
                         <button type="button" class="@(_draft.ComponentKind == kind ? "selected" : null)" @onclick="() => ChangeKind(kind)">
                             <b>@ComponentIcon(kind)</b>
-                            <span>@PublicationComponentService.ComponentName(kind)</span>
+                            <span>@Components.ComponentName(kind)</span>
                         </button>
                     }
                 </aside>
@@ -446,7 +446,7 @@
                     else if (_section == "behavior")
                     {
                         <section class="component-section">
-                            <h3>@PublicationComponentService.ComponentName(_draft.ComponentKind) behavior</h3>
+                            <h3>@Components.ComponentName(_draft.ComponentKind) behavior</h3>
                             <p class="component-info">Only options supported by the selected component are shown here.</p>
                             <div class="component-form-grid">
                                 @if (SupportsEditMode)
@@ -644,7 +644,7 @@
                                     <article @key="panel.Id">
                                         <div class="component-form-grid wide">
                                             <label>Title<input @bind="panel.Title" /></label>
-                                            <label>Child component<select @bind="panel.ChildKind">@foreach (var kind in PanelComponentKinds) { <option value="@kind">@PublicationComponentService.ComponentName(kind)</option> }</select></label>
+                                            <label>Child component<select @bind="panel.ChildKind">@foreach (var kind in PanelComponentKinds) { <option value="@kind">@Components.ComponentName(kind)</option> }</select></label>
                                             <label>Dataset<select @bind="panel.DataObjectId">@foreach (var data in State.Document.DataObjects) { <option value="@data.Id">@data.Name</option> }</select></label>
                                             <label>Size<input @bind="panel.Size" placeholder="50% or 320px" /></label>
                                             <label>Minimum<input @bind="panel.MinSize" /></label>
@@ -738,7 +738,7 @@
                 </main>
 
                 <aside class="component-preview-pane">
-                    <div class="pane-heading"><strong>Live preview</strong><span>@PublicationComponentService.ComponentName(_draft.ComponentKind)</span></div>
+                    <div class="pane-heading"><strong>Live preview</strong><span>@Components.ComponentName(_draft.ComponentKind)</span></div>
                     <div class="component-preview-frame">
                         <DevExtremeComponentView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" IdPrefix="studio"
                             ElementIdOverride="ps-component-vector-designer" DesignerMode="true" DesignerInteractionMode="content" />
@@ -850,13 +850,13 @@
         PublicationComponentKind.MultiView => "▱", PublicationComponentKind.Splitter => "◫", PublicationComponentKind.ScrollView => "↕",
         PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Map => "⌖", PublicationComponentKind.VectorMap => "◈", PublicationComponentKind.Chat => "◉", PublicationComponentKind.Button => "▰", _ => "⌨"
     };
-    private string Friendly(string value) => PublicationComponentService.Friendly(value);
+    private string Friendly(string value) => Components.Friendly(value);
 
     private void ChangeKind(PublicationComponentKind kind)
     {
         if (_draft is null || _draft.ComponentKind == kind) return;
         _draft.ComponentKind = kind;
-        _draft.Title = PublicationComponentService.ComponentName(kind);
+        _draft.Title = Components.ComponentName(kind);
         _draft.Name = _draft.Title;
         if (_draft.IsLayoutContainer && _draft.Panels.Count == 0) AddPanel();
         if (kind == PublicationComponentKind.Button && _draft.Actions.Count == 0)

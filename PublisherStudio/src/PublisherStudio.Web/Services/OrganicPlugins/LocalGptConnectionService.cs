@@ -1,4 +1,4 @@
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services;
 using System.Collections.Concurrent;
 using System.Net;
@@ -95,7 +95,7 @@ public sealed class LocalGptConnectionService(
                         PeerId = localPeerId,
                         DisplayName = "PublisherStudio / BlazorPublisher",
                         Application = "PublisherStudio",
-                        ApplicationVersion = "2.0.3-organic-wire",
+                        ApplicationVersion = "2.0.4-organic-wire",
                         HostName = Environment.MachineName,
                         Address = "0.0.0.0",
                         ServicePort = 0,

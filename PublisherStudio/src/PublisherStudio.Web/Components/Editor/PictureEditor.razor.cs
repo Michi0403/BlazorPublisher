@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using DevExpress.Blazor;
 using Microsoft.JSInterop;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services;
 using PublisherStudio.Services.PictureStudio.Import;
 using PublisherStudio.Services.OrganicPlugins;

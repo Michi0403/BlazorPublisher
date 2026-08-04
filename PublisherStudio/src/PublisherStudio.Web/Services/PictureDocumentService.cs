@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
 

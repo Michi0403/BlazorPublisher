@@ -7,10 +7,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
 const componentRuntime = read('src/PublisherStudio.Web/wwwroot/js/componentRuntime.js');
-const componentModel = read('src/PublisherStudio.Web/Domain/PublicationComponentModels.cs');
+const componentModel = read('src/PublisherStudio.Web/BusinessObjects/PublicationComponentModels.cs');
 const componentService = read('src/PublisherStudio.Web/Services/PublicationComponentService.cs');
 const componentEditor = read('src/PublisherStudio.Web/Components/Editor/DevExtremeComponentEditor.razor');
-const dataModel = read('src/PublisherStudio.Web/Domain/PublicationDataModels.cs');
+const dataModel = read('src/PublisherStudio.Web/BusinessObjects/PublicationDataModels.cs');
 const dataService = read('src/PublisherStudio.Web/Services/PublicationDataService.cs');
 const dataEditor = read('src/PublisherStudio.Web/Components/Editor/DataVisualEditor.razor');
 const dataView = read('src/PublisherStudio.Web/Components/Editor/DataVisualView.razor');
@@ -18,7 +18,7 @@ const visualRuntime = read('src/PublisherStudio.Web/wwwroot/js/liveDataInterop.j
 const interop = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
 const surface = read('src/PublisherStudio.Web/Components/Editor/PageSurface.razor');
 const css = read('src/PublisherStudio.Web/wwwroot/css/site.css');
-const publicationModel = read('src/PublisherStudio.Web/Domain/PublicationModels.cs');
+const publicationModel = read('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs');
 const editorState = read('src/PublisherStudio.Web/Services/EditorStateService.cs');
 
 // High-DPI editor zoom uses selectable Chromium CSS layout zoom and compact transform rendering.

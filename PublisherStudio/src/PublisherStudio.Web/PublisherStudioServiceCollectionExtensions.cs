@@ -1,6 +1,6 @@
 using PublisherStudio.Controllers;
 using PublisherStudio.Diagnostics;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.HostedServices.Streaming;
 using PublisherStudio.HostedServices.OrganicPlugins;
 using PublisherStudio.Services.Automation;
@@ -48,6 +48,8 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IRuntimeEndpointWriter, RuntimeEndpointWriter>(services);
         AddSingleton<SystemFontCatalog, SystemFontCatalog>(services);
         AddSingleton<IPublisherDocumentFactory, PublisherDocumentFactory>(services);
+        AddSingleton<IPagePresetCatalog, PagePresetCatalog>(services);
+        AddSingleton<IStoryPageLayoutService, StoryPageLayoutService>(services);
         AddSingleton<IPublicationGridRowFactory, PublicationGridRowFactory>(services);
         AddSingleton<PictureDocumentService, PictureDocumentService>(services);
         AddSingleton<OpenRasterImportService, OpenRasterImportService>(services);

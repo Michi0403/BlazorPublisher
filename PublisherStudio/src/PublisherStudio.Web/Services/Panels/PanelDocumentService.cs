@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging.Abstractions;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Panels;
 

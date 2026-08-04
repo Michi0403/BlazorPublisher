@@ -1,5 +1,5 @@
 using System.Reflection;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Automation;
 
@@ -12,7 +12,7 @@ public sealed class BusinessObjectContextService(
     public BusinessObjectContextSnapshot CreateSnapshot()
     {
         var domainTypes = _assembly.GetExportedTypes()
-            .Where(type => type.Namespace?.StartsWith("PublisherStudio.Domain", StringComparison.Ordinal) == true)
+            .Where(type => type.Namespace?.StartsWith("PublisherStudio.BusinessObjects", StringComparison.Ordinal) == true)
             .OrderBy(type => type.FullName)
             .Select(type => new BusinessObjectDescriptor
             {
@@ -43,7 +43,7 @@ public sealed class BusinessObjectContextService(
                 .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                 .SelectMany(method => method.GetParameters().Select(parameter => parameter.ParameterType).Append(method.ReturnType))
                 .SelectMany(UnwrapTypes)
-                .Where(type => type.Namespace?.StartsWith("PublisherStudio.Domain", StringComparison.Ordinal) == true)
+                .Where(type => type.Namespace?.StartsWith("PublisherStudio.BusinessObjects", StringComparison.Ordinal) == true)
                 .Select(type => type.Name)
                 .Distinct()
                 .OrderBy(name => name)

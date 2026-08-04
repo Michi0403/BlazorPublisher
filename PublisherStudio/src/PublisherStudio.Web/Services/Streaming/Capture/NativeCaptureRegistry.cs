@@ -8,11 +8,40 @@ using PublisherStudio.Services.Streaming.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
-public sealed class NativeCaptureRegistry(
+public interface INativeCaptureSessionFactory
+{
+    NativeCaptureSession Create(NativeCaptureRequest request);
+}
+
+public sealed class NativeCaptureSessionFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
-    IWindowsProcessLoopbackNativeService processLoopbackNativeService,
     FfmpegLocator ffmpegLocator,
+    IWindowsProcessLoopbackCaptureFactory processLoopbackFactory,
     ILoggerFactory loggerFactory,
+    ILogger<NativeCaptureSessionFactory> logger) : INativeCaptureSessionFactory
+{
+    public NativeCaptureSession Create(NativeCaptureRequest request)
+    {
+        try
+        {
+            logger.LogTrace("Creating a native capture session for {CaptureKind}.", request.Kind);
+            return new NativeCaptureSession(
+                request,
+                runtimePolicy,
+                ffmpegLocator,
+                processLoopbackFactory,
+                loggerFactory.CreateLogger<NativeCaptureSession>());
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not create a native capture session.");
+            throw;
+        }
+    }
+}
+
+public sealed class NativeCaptureRegistry(
+    INativeCaptureSessionFactory sessionFactory,
     ILogger<NativeCaptureRegistry> logger) : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, NativeCaptureSession> _captures = new();
@@ -21,35 +50,39 @@ public sealed class NativeCaptureRegistry(
     {
         try
         {
-            logger.LogTrace($"Entering NativeCaptureRegistry.Create.");
-                    var session = new NativeCaptureSession(
-                        request,
-                        runtimePolicy,
-                        processLoopbackNativeService,
-                        ffmpegLocator,
-                        loggerFactory.CreateLogger<NativeCaptureSession>());
-                    if (!_captures.TryAdd(session.Id, session)) throw new InvalidOperationException("Could not register native capture.");
-                    try { session.Start(); }
-                    catch { _captures.TryRemove(session.Id, out _); session.Dispose(); throw; }
-                    return session;
-    
+            logger.LogTrace("Entering NativeCaptureRegistry.Create.");
+            var session = sessionFactory.Create(request);
+            if (!_captures.TryAdd(session.Id, session))
+                throw new InvalidOperationException("Could not register native capture.");
+            try
+            {
+                session.Start();
+                return session;
+            }
+            catch
+            {
+                _captures.TryRemove(session.Id, out _);
+                session.Dispose();
+                throw;
+            }
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, $"NativeCaptureRegistry.Create failed: {exception.Message}");
+            logger.LogError(exception, "NativeCaptureRegistry.Create failed: {Message}", exception.Message);
             throw;
         }
     }
 
-    public bool TryGet(Guid id, out NativeCaptureSession session) {
+    public bool TryGet(Guid id, out NativeCaptureSession session)
+    {
         try
         {
-            logger.LogTrace($"Entering NativeCaptureRegistry.TryGet.");
+            logger.LogTrace("Entering NativeCaptureRegistry.TryGet.");
             return _captures.TryGetValue(id, out session!);
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, $"NativeCaptureRegistry.TryGet failed: {exception.Message}");
+            logger.LogError(exception, "NativeCaptureRegistry.TryGet failed: {Message}", exception.Message);
             throw;
         }
     }
@@ -58,15 +91,14 @@ public sealed class NativeCaptureRegistry(
     {
         try
         {
-            logger.LogTrace($"Entering NativeCaptureRegistry.Stop.");
-                    if (!_captures.TryRemove(id, out var session)) return false;
-                    session.Dispose();
-                    return true;
-    
+            logger.LogTrace("Entering NativeCaptureRegistry.Stop.");
+            if (!_captures.TryRemove(id, out var session)) return false;
+            session.Dispose();
+            return true;
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, $"NativeCaptureRegistry.Stop failed: {exception.Message}");
+            logger.LogError(exception, "NativeCaptureRegistry.Stop failed: {Message}", exception.Message);
             throw;
         }
     }
@@ -75,13 +107,12 @@ public sealed class NativeCaptureRegistry(
     {
         try
         {
-            logger.LogTrace($"Entering NativeCaptureRegistry.Dispose.");
-                    foreach (var id in _captures.Keys.ToArray()) Stop(id);
-    
+            logger.LogTrace("Entering NativeCaptureRegistry.Dispose.");
+            foreach (var id in _captures.Keys.ToArray()) Stop(id);
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, $"NativeCaptureRegistry.Dispose failed: {exception.Message}");
+            logger.LogError(exception, "NativeCaptureRegistry.Dispose failed: {Message}", exception.Message);
             throw;
         }
     }
@@ -91,31 +122,28 @@ public sealed class NativeCaptureSession : IDisposable
 {
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
     private readonly NativeCaptureRequest _request;
-    private readonly IWindowsProcessLoopbackNativeService _processLoopbackNativeService;
     private readonly FfmpegLocator _ffmpegLocator;
+    private readonly IWindowsProcessLoopbackCaptureFactory _processLoopbackFactory;
     private readonly ILogger<NativeCaptureSession> logger;
-    private readonly ILoggerFactory loggerFactory;
     private readonly object _sync = new();
     private readonly Dictionary<Guid, Channel<byte[]>> _subscribers = [];
     private readonly CancellationTokenSource _cancellation = new();
     private Process? _process;
-    private WindowsProcessLoopbackCapture? _processLoopback;
+    private IWindowsProcessLoopbackCapture? _processLoopback;
     private byte[] _initialization = [];
     private bool _disposed;
 
     public NativeCaptureSession(
         NativeCaptureRequest request,
         IPublisherRuntimePolicyDataService runtimePolicy,
-        IWindowsProcessLoopbackNativeService processLoopbackNativeService,
         FfmpegLocator ffmpegLocator,
-        ILoggerFactory loggerFactory,
+        IWindowsProcessLoopbackCaptureFactory processLoopbackFactory,
         ILogger<NativeCaptureSession> logger)
     {
         _request = request;
         _runtimePolicy = runtimePolicy;
-        _processLoopbackNativeService = processLoopbackNativeService;
         _ffmpegLocator = ffmpegLocator;
-        loggerFactory = loggerFactory;
+        _processLoopbackFactory = processLoopbackFactory;
         this.logger = logger;
         Id = Guid.NewGuid();
         IsAudioOnly = request.Kind.Equals("Microphone", StringComparison.OrdinalIgnoreCase)
@@ -165,15 +193,10 @@ public sealed class NativeCaptureSession : IDisposable
                         var processText = string.IsNullOrWhiteSpace(_request.ApplicationId) ? _request.DeviceId : _request.ApplicationId;
                         if (!uint.TryParse(processText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var processId) || processId <= 4)
                             throw new InvalidOperationException("Select a valid Windows process for application audio capture.");
-                        _processLoopback = new WindowsProcessLoopbackCapture(
+                        _processLoopback = _processLoopbackFactory.Create(
                             processId,
                             process.StandardInput.BaseStream,
-                            _cancellation.Token,
-                            _processLoopbackNativeService,
-                            _runtimePolicy.NativeInterop,
-                            _runtimePolicy.AudioClientInterfaceId,
-                            _runtimePolicy.AudioCaptureClientInterfaceId,
-                            loggerFactory.CreateLogger<WindowsProcessLoopbackCapture>());
+                            _cancellation.Token);
                         _processLoopback.Start();
                     }
     

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Streaming.Encoding;
 using PublisherStudio.Services.Configuration;
 using TextEncoding = global::System.Text.Encoding;

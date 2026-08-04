@@ -4,59 +4,12 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.MediaStudio.UseCases;
 using PublisherStudio.Services.Panels;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
-
-public sealed record StoryPageLayout(
-    double PageWidthMm,
-    double PageHeightMm,
-    double MarginTopMm,
-    double MarginRightMm,
-    double MarginBottomMm,
-    double MarginLeftMm)
-{
-    public StoryPageLayout Default { get; } = new(210, 297, 25.4, 25.4, 25.4, 25.4);
-
-    public double ContentWidthMm => Math.Max(1, PageWidthMm - MarginLeftMm - MarginRightMm);
-    public double ContentHeightMm => Math.Max(1, PageHeightMm - MarginTopMm - MarginBottomMm);
-    public bool IsLandscape => PageWidthMm > PageHeightMm;
-
-    public StoryPageLayout Normalize(
-        double pageWidthMm,
-        double pageHeightMm,
-        double marginTopMm,
-        double marginRightMm,
-        double marginBottomMm,
-        double marginLeftMm)
-    {
-        var width = Math.Clamp(double.IsFinite(pageWidthMm) ? pageWidthMm : Default.PageWidthMm, 25.4, 2000);
-        var height = Math.Clamp(double.IsFinite(pageHeightMm) ? pageHeightMm : Default.PageHeightMm, 25.4, 2000);
-        var top = NormalizeMargin(marginTopMm, height);
-        var right = NormalizeMargin(marginRightMm, width);
-        var bottom = NormalizeMargin(marginBottomMm, height);
-        var left = NormalizeMargin(marginLeftMm, width);
-        NormalizePair(ref left, ref right, width);
-        NormalizePair(ref top, ref bottom, height);
-        return new StoryPageLayout(width, height, top, right, bottom, left);
-    }
-
-    private double NormalizeMargin(double value, double pageSize) =>
-        Math.Clamp(double.IsFinite(value) ? value : 0, 0, Math.Max(0, pageSize - 1));
-
-    private void NormalizePair(ref double first, ref double second, double pageSize)
-    {
-        var maximum = Math.Max(1, pageSize - 1);
-        var sum = first + second;
-        if (sum <= maximum || sum <= 0) return;
-        var scale = maximum / sum;
-        first *= scale;
-        second *= scale;
-    }
-}
 
 public sealed partial class PublicationFileService
 {
@@ -73,6 +26,7 @@ public sealed partial class PublicationFileService
     private readonly IPublisherRuntimePatternService _runtimePatterns;
     private readonly IPublisherDocumentFactory _documentFactory;
     private readonly IPublicationMarkupService _markup;
+    private readonly IStoryPageLayoutService _storyPageLayouts;
     private readonly ILogger<PublicationFileService> logger;
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
@@ -96,6 +50,7 @@ public sealed partial class PublicationFileService
         IPublisherRuntimePatternService runtimePatterns,
         IPublisherDocumentFactory documentFactory,
         IPublicationMarkupService markup,
+        IStoryPageLayoutService storyPageLayouts,
         ILogger<PublicationFileService> logger)
     {
         _pictures = pictures;
@@ -111,6 +66,7 @@ public sealed partial class PublicationFileService
         _runtimePatterns = runtimePatterns;
         _documentFactory = documentFactory;
         _markup = markup;
+        _storyPageLayouts = storyPageLayouts;
         this.logger = logger;
     }
 
@@ -704,7 +660,7 @@ public sealed partial class PublicationFileService
         try
         {
             logger.LogTrace($"Entering PublicationFileService.ExtractOpenXmlPageLayout.");
-                    var fallback = StoryPageLayout.Default;
+                    var fallback = _storyPageLayouts.GetDefault();
                     if (openXml is null || openXml.Length < 4 || openXml[0] != (byte)'P' || openXml[1] != (byte)'K')
                         return fallback;
 
@@ -761,7 +717,7 @@ public sealed partial class PublicationFileService
                             else left += gutter;
                         }
 
-                        return StoryPageLayout.Normalize(width, height, top, right, bottom, left);
+                        return _storyPageLayouts.Normalize(width, height, top, right, bottom, left);
                     }
                     catch (InvalidDataException)
                     {

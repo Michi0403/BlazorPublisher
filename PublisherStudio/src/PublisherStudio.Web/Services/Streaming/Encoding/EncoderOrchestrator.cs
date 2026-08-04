@@ -1,4 +1,4 @@
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Diagnostics;

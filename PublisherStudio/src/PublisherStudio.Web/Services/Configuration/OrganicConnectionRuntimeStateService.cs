@@ -1,4 +1,4 @@
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 
 namespace PublisherStudio.Services.Configuration;

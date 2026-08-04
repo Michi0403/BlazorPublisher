@@ -1,5 +1,5 @@
 using System.Text.Json;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Streaming.MediaHost;
 
@@ -20,7 +20,7 @@ public sealed class StreamingMediaHostClient(
     private readonly StreamingRuntimeUseCases _runtime = runtime;
     private readonly StreamingSessionUseCases _sessions = sessions;
 
-    public async Task<List<PublisherStudio.Domain.NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
+    public async Task<List<PublisherStudio.BusinessObjects.NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
     {
         var settings = await _profiles.LoadAsync(cancellationToken);
         var devices = await _runtime.DiscoverDevicesAsync(settings.FfmpegPath, cancellationToken);

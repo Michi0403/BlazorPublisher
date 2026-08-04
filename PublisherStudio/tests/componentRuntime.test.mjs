@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const runtimePath = path.join(root, 'src', 'PublisherStudio.Web', 'wwwroot', 'js', 'componentRuntime.js');
 const exportPath = path.join(root, 'src', 'PublisherStudio.Web', 'wwwroot', 'js', 'publisherInterop.js');
-const modelPath = path.join(root, 'src', 'PublisherStudio.Web', 'Domain', 'PublicationComponentModels.cs');
+const modelPath = path.join(root, 'src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationComponentModels.cs');
 const servicePath = path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'PublicationComponentService.cs');
 const ribbonPath = path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'PublicationRibbon.razor');
 const editorPath = path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'DevExtremeComponentEditor.razor');
@@ -27,12 +27,12 @@ const state = fs.readFileSync(statePath, 'utf8');
 const devExtreme = fs.readFileSync(devExtremePath, 'utf8');
 const css = fs.readFileSync(cssPath, 'utf8');
 
-const dataModel = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Domain', 'PublicationDataModels.cs'), 'utf8');
+const dataModel = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationDataModels.cs'), 'utf8');
 const dataService = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Services', 'PublicationDataService.cs'), 'utf8');
 const dataManager = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'DataManager.razor'), 'utf8');
 const pageSurface = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'Editor', 'PageSurface.razor'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Components', 'App.razor'), 'utf8');
-const publicationModel = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'Domain', 'PublicationModels.cs'), 'utf8');
+const publicationModel = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationModels.cs'), 'utf8');
 
 const components = {
   DataGrid: 'dxDataGrid',

@@ -9,7 +9,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const pageSurface = read('src/PublisherStudio.Web/Components/Editor/PageSurface.razor');
 const editor = read('src/PublisherStudio.Web/Components/Pages/Editor.razor');
 const ribbon = read('src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor');
-const model = read('src/PublisherStudio.Web/Domain/PublicationModels.cs');
+const model = read('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs');
 const state = read('src/PublisherStudio.Web/Services/EditorStateService.cs');
 const files = read('src/PublisherStudio.Web/Services/PublicationFileService.cs');
 const css = read('src/PublisherStudio.Web/wwwroot/css/site.css');

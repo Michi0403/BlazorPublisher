@@ -7,8 +7,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
 const mediaStudio = read('src', 'PublisherStudio.Web', 'Components', 'Editor', 'MediaStudio.razor');
-const mediaModels = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationMediaModels.cs');
-const publicationModels = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationModels.cs');
+const mediaModels = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationMediaModels.cs');
+const publicationModels = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationModels.cs');
 const editor = read('src', 'PublisherStudio.Web', 'Components', 'Pages', 'Editor.razor');
 const timelineService = read('src', 'PublisherStudio.Web', 'Services', 'MediaStudio', 'UseCases', 'MediaTimelineEditService.cs');
 const interop = read('src', 'PublisherStudio.Web', 'wwwroot', 'js', 'mediaStudioInterop.js');

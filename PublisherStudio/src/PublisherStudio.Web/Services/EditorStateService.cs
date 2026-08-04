@@ -1,4 +1,4 @@
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Panels;
 using PublisherStudio.Services.Configuration;
 

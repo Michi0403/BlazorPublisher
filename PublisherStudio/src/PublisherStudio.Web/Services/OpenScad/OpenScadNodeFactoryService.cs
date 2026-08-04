@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 

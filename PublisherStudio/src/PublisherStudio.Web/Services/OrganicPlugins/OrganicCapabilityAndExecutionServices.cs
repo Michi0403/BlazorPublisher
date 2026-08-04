@@ -1,4 +1,4 @@
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services;
 using PublisherStudio.Services.Automation;
 using PublisherStudio.Services.MediaConversion;

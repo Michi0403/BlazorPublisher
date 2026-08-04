@@ -1,13 +1,25 @@
-# PublisherStudio 2.0.3 validation status
+# PublisherStudio 2.0.4 validation status
 
-PublisherStudio 2.0.3 is a source-level build-policy repair candidate based on the 2.0.2 installer/runtime recovery release. Maintained validation completed in this environment includes:
+PublisherStudio 2.0.4 is a service-owned compiler/composition repair candidate based on the preservation-first 2.0.2 installer recovery and the 2.0.3 Windows build-policy correction.
 
-- Shared architecture audit passed in `static`, `methods`, `runtime`, and `all` modes.
-- Regression checks cover Python output/exit-code separation, C# type-declaration exclusion in the iterator guard, materialized iterator repairs, explicit publish-profile ownership, and exact installer launch-profile validation.
-- JSON, XML/MSBuild, JavaScript and Python syntax validation passed.
-- Complete Node source-contract suite passes when the licensed DevExpress browser assets are restored; the sanitized source archive intentionally excludes generated licensed vendor files.
-- Application and setup version are 2.0.3.
-- LocalGPT wire-protocol package remains 2.1.1.
-- No build target or architecture guard was disabled.
+Validated in this environment:
 
-A native Windows .NET 10 build, DevExpress restore, publish, launcher self-repair, installer update, and runtime acceptance must still be performed on the maintainer machine. The exact unshown C# compiler diagnostics mentioned after the supplied guard logs were not available in the conversation, so this package fixes every supplied failure and strengthens lexical compile-safety checks, but remains UNVERIFIED until that build log is rerun.
+- Application and setup version are 2.0.4.
+- Wire protocol package remains 2.1.1.
+- The complete repository Node contract suite passes 97 of 97 tests when the prepared DevExpress browser runtime is present.
+- The sanitized extracted source package passes 96 of 97 tests; the sole expected failure is the intentionally omitted generated/licensed `wwwroot/vendor/devextreme-dist/js/dx.all.js` asset.
+- Architecture policy passes in static, methods, runtime, structure and combined modes.
+- The exact stale static calls and constructor call sites reported by the maintainer are absent.
+- Data contracts are owned by `PublisherStudio.BusinessObjects`; the BusinessObjects layer has no dependency on PublisherStudio services or `ILogger`.
+- JSON, XML/MSBuild, JavaScript and Python source syntax checks pass.
+- ZIP integrity, portable path and generated-output exclusion checks pass.
+
+Not executable in this environment:
+
+- .NET 10 compilation and analyzers.
+- Windows PowerShell 5.1 build targets.
+- DevExpress licensed asset preparation.
+- Windows installer self-replacement and publish workflows.
+- Live camera, screen capture and process-loopback tests.
+
+The package therefore remains UNVERIFIED until the maintainer runs the native Windows build and runtime tests.

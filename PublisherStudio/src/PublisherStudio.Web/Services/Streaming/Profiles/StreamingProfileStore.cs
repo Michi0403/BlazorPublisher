@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Streaming.Profiles;
 

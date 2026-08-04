@@ -1,5 +1,5 @@
 using System.Globalization;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.VideoStudio.Export;
 

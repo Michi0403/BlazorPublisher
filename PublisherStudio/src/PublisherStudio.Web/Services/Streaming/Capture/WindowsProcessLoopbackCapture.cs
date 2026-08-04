@@ -1,7 +1,46 @@
+using PublisherStudio.Services.Configuration;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace PublisherStudio.Services.Streaming.Capture;
+
+public interface IWindowsProcessLoopbackCapture : IDisposable
+{
+    void Start();
+}
+
+public interface IWindowsProcessLoopbackCaptureFactory
+{
+    IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken);
+}
+
+public sealed class WindowsProcessLoopbackCaptureFactory(
+    IWindowsProcessLoopbackNativeService nativeService,
+    IPublisherRuntimePolicyDataService runtimePolicy,
+    ILoggerFactory loggerFactory,
+    ILogger<WindowsProcessLoopbackCaptureFactory> logger) : IWindowsProcessLoopbackCaptureFactory
+{
+    public IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogTrace("Creating Windows process loopback capture for process {ProcessId}.", processId);
+            return new WindowsProcessLoopbackCapture(
+                processId,
+                destination,
+                cancellationToken,
+                nativeService,
+                runtimePolicy.AudioClientInterfaceId,
+                runtimePolicy.AudioCaptureClientInterfaceId,
+                loggerFactory.CreateLogger<WindowsProcessLoopbackCapture>());
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not create Windows process loopback capture for process {ProcessId}.", processId);
+            throw;
+        }
+    }
+}
 
 /// <summary>
 /// Windows 10 build 20348+ process-tree loopback capture. The implementation
@@ -9,7 +48,7 @@ namespace PublisherStudio.Services.Streaming.Capture;
 /// stereo, 16-bit PCM into the integrated streaming runtime's FFmpeg stdin instead of a WAV file.
 /// </summary>
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsProcessLoopbackCapture : IDisposable
+internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCapture
 {
     private const string VirtualAudioDeviceProcessLoopback = "VAD\\Process_Loopback";
     private const uint AudclntStreamflagsLoopback = 0x00020000;
@@ -20,6 +59,7 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
     private const ushort VtBlob = 65;
 
     private readonly Guid _audioClientInterfaceId;
+    private readonly ILogger<WindowsProcessLoopbackCapture> _logger;
     private readonly Guid _audioCaptureClientInterfaceId;
     private readonly IWindowsProcessLoopbackNativeService _nativeService;
     private readonly uint _processId;
@@ -36,13 +76,15 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         CancellationToken cancellationToken,
         IWindowsProcessLoopbackNativeService nativeService,
         Guid audioClientInterfaceId,
-        Guid audioCaptureClientInterfaceId)
+        Guid audioCaptureClientInterfaceId,
+        ILogger<WindowsProcessLoopbackCapture> logger)
     {
         if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Process audio loopback is available only on Windows.");
         _processId = processId;
         _nativeService = nativeService;
         _audioClientInterfaceId = audioClientInterfaceId;
         _audioCaptureClientInterfaceId = audioCaptureClientInterfaceId;
+        _logger = logger;
         _destination = destination;
         _cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _thread = new Thread(CaptureThread)
@@ -137,6 +179,7 @@ internal sealed class WindowsProcessLoopbackCapture : IDisposable
         }
         catch (Exception exception)
         {
+            _logger.LogError(exception, "Windows process loopback capture failed for process {ProcessId}.", _processId);
             if (!_started.IsSet) _startupError = exception;
         }
         finally

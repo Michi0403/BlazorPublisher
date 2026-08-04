@@ -9,7 +9,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const architecture = read('build/Invoke-ArchitectureAudit.ps1');
 const iteratorGuard = read('build/Assert-IteratorExceptionPolicy.ps1');
 const iteratorBaseline = read('build/iterator-exception-baseline.json');
-const traversal = read('src/PublisherStudio.Web/Domain/PublicationElementTraversal.cs');
+const traversal = read('src/PublisherStudio.Web/Services/PublicationElementTraversal.cs');
 const ffmpeg = read('src/PublisherStudio.Web/Services/Streaming/Encoding/FfmpegLocator.cs');
 const publishGuard = read('build/Assert-PublishConfiguration.ps1');
 const installerGuard = read('build/Assert-InstallerWorkflow.ps1');

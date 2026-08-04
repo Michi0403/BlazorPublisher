@@ -1,5 +1,5 @@
 using System.Text;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 

@@ -1,0 +1,230 @@
+using System.Globalization;
+
+namespace PublisherStudio.BusinessObjects;
+
+public enum PublicationDataSourceKind
+{
+    Json,
+    DelimitedText,
+    Xml,
+    DocumentObjects,
+    PublicationPages,
+    PublicationDocument,
+    PublicationMedia,
+    Web
+}
+
+public enum PublicationDataValueKind
+{
+    Text,
+    Number,
+    Boolean,
+    DateTime
+}
+
+public enum DocumentObjectDataScope
+{
+    CurrentPage,
+    AllPages
+}
+
+public sealed class PublicationDataObject
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = "Data";
+    public PublicationDataSourceKind SourceKind { get; set; } = PublicationDataSourceKind.DelimitedText;
+    public string RawSource { get; set; } = "Category,Value\nA,42\nB,67\nC,53";
+    public string SourceReference { get; set; } = string.Empty;
+    public string Delimiter { get; set; } = ",";
+    public bool FirstRowContainsHeaders { get; set; } = true;
+    public DocumentObjectDataScope DocumentScope { get; set; } = DocumentObjectDataScope.AllPages;
+    public PublicationWebBinding Web { get; set; } = new();
+    public List<PublicationDataColumn> Columns { get; set; } = [];
+    public List<PublicationDataRow> Rows { get; set; } = [];
+    public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
+}
+
+public sealed class PublicationDataColumn
+{
+    public string Name { get; set; } = "Column";
+    public PublicationDataValueKind ValueKind { get; set; } = PublicationDataValueKind.Text;
+}
+
+public sealed class PublicationDataRow
+{
+    public Dictionary<string, string> Values { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public string Get(string field) => Values.TryGetValue(field, out var value) ? value : string.Empty;
+
+    public double GetNumber(string field)
+    {
+        var value = Get(field);
+        if (double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var invariant)) return invariant;
+        if (double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out var current)) return current;
+        if (bool.TryParse(value, out var boolean)) return boolean ? 1 : 0;
+
+        // Text and date fields are valid measures too: a non-empty value counts as one.
+        // This keeps every parsed field available to charts without pretending that text
+        // has an arbitrary numeric magnitude.
+        return string.IsNullOrWhiteSpace(value) ? 0 : 1;
+    }
+}
+
+public enum DataVisualKind
+{
+    CartesianChart,
+    PieChart,
+    PolarChart,
+    Sparkline,
+    BarGauge,
+    CircularGauge,
+    LinearGauge,
+    RangeSelector,
+    Sankey,
+    Funnel,
+    Pyramid,
+    TreeMap,
+    DataTable,
+    KpiProgress
+}
+
+public enum CartesianChartStyle
+{
+    Bar,
+    Line,
+    Spline,
+    Scatter,
+    Area,
+    SplineArea,
+    StepLine,
+    StepArea,
+    StackedBar,
+    FullStackedBar,
+    StackedArea,
+    FullStackedArea,
+    StackedLine,
+    FullStackedLine,
+    StackedSpline,
+    FullStackedSpline,
+    StackedSplineArea,
+    FullStackedSplineArea,
+    RangeArea,
+    RangeBar,
+    Bubble,
+    Candlestick,
+    Stock
+}
+
+public enum PieChartStyle
+{
+    Pie,
+    Doughnut
+}
+
+public enum PolarChartStyle
+{
+    Line,
+    Area,
+    Bar,
+    StackedBar,
+    Scatter
+}
+
+public enum SparklineChartStyle
+{
+    Line,
+    Spline,
+    StepLine,
+    Area,
+    SplineArea,
+    StepArea,
+    Bar,
+    WinLoss
+}
+
+public enum DataVisualArgumentMode
+{
+    Auto,
+    Discrete,
+    Continuous,
+    DateTime
+}
+
+public enum DataVisualAggregationMode
+{
+    Auto,
+    None,
+    Sum,
+    Average,
+    Minimum,
+    Maximum,
+    Count
+}
+
+public enum DataVisualSortMode
+{
+    DataOrder,
+    ArgumentAscending,
+    ArgumentDescending,
+    ValueAscending,
+    ValueDescending
+}
+
+public sealed class DataVisualElement : PublicationElement
+{
+    public override PublicationElementKind Kind => PublicationElementKind.DataVisual;
+    public Guid DataObjectId { get; set; }
+    public DataVisualKind VisualKind { get; set; } = DataVisualKind.CartesianChart;
+    public CartesianChartStyle CartesianStyle { get; set; } = CartesianChartStyle.Bar;
+    public PieChartStyle PieStyle { get; set; }
+    public PolarChartStyle PolarStyle { get; set; }
+    public SparklineChartStyle SparklineStyle { get; set; }
+    public string Title { get; set; } = "Chart";
+    public string ArgumentField { get; set; } = string.Empty;
+    public string SeriesField { get; set; } = string.Empty;
+    public DataVisualArgumentMode ArgumentMode { get; set; } = DataVisualArgumentMode.Auto;
+    public DataVisualAggregationMode AggregationMode { get; set; } = DataVisualAggregationMode.Auto;
+    public DataVisualSortMode SortMode { get; set; } = DataVisualSortMode.DataOrder;
+    public List<string> ValueFields { get; set; } = [];
+    public string LowValueField { get; set; } = string.Empty;
+    public string HighValueField { get; set; } = string.Empty;
+    public string OpenValueField { get; set; } = string.Empty;
+    public string CloseValueField { get; set; } = string.Empty;
+    public string SizeField { get; set; } = string.Empty;
+    public string TargetField { get; set; } = string.Empty;
+    public string ParentField { get; set; } = string.Empty;
+    public bool ShowLegend { get; set; } = true;
+    public bool ShowLabels { get; set; }
+    public bool ShowTitle { get; set; } = true;
+    public bool TableShowHeader { get; set; } = true;
+    public bool TableShowFilterRow { get; set; }
+    public int RowLimit { get; set; } = 12;
+    public double MinimumValue { get; set; }
+    public double MaximumValue { get; set; } = 100;
+    public string Background { get; set; } = "#ffffff";
+    public string BorderColor { get; set; } = "#cbd5e1";
+    public double BorderWidthMm { get; set; } = .25;
+}
+
+public sealed record DataChartPoint(string Argument, string Series, double Value);
+public sealed record DataPiePoint(string Argument, double Value);
+public sealed record DataSparkPoint(string Argument, double Value);
+public sealed record DataRangePoint(string Argument, string Series, double Low, double High);
+public sealed record DataBubblePoint(string Argument, string Series, double Value, double Size);
+public sealed record DataFinancialPoint(string Argument, double Open, double High, double Low, double Close);
+public sealed record DataSankeyPoint(string Source, string Target, double Weight);
+public sealed record DataTreeMapPoint(string Label, string Parent, double Value);
+
+public sealed class PublicationGridRow
+{
+    public string C1 { get; set; } = string.Empty;
+    public string C2 { get; set; } = string.Empty;
+    public string C3 { get; set; } = string.Empty;
+    public string C4 { get; set; } = string.Empty;
+    public string C5 { get; set; } = string.Empty;
+    public string C6 { get; set; } = string.Empty;
+    public string C7 { get; set; } = string.Empty;
+    public string C8 { get; set; } = string.Empty;
+
+
+}

@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
-const domain = read('src','PublisherStudio.Web','Domain','OpenScadModels.cs');
+const domain = read('src','PublisherStudio.Web','BusinessObjects','OpenScadModels.cs');
 const catalog = read('src','PublisherStudio.Web','Services','OpenScad','OpenScadCatalogService.cs');
 const contracts = read('src','PublisherStudio.Web','Services','OpenScad','IOpenScadServices.cs');
 const document = read('src','PublisherStudio.Web','Services','OpenScad','OpenScadDocumentService.cs');

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OpenScad;
 
 namespace PublisherStudio.Services.VideoStudio.Export;

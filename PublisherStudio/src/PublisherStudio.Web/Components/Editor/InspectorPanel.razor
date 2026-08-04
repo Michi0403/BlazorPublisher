@@ -8,6 +8,7 @@
 @inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
 @inject NavigationManager Navigation
 @inject PublicationComponentService Components
+@inject IPagePresetCatalog PagePresets
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
@@ -102,7 +103,7 @@
                 <label>Preset
                     <select value="@CurrentPresetKey" @onchange="ChangePagePreset">
                         <option value="custom">Custom</option>
-                        @foreach (var preset in PagePreset.All)
+                        @foreach (var preset in PagePresets.GetAll())
                         {
                             <option value="@preset.Key">@preset.Name</option>
                         }
@@ -1018,7 +1019,7 @@
     private string PageTabClass => _tab == "page" ? "active" : string.Empty;
     private string LayersTabClass => _tab == "layers" ? "active" : string.Empty;
     private string AnimationsTabClass => _tab == "animations" ? "active" : string.Empty;
-    private string CurrentPresetKey => PagePreset.All.FirstOrDefault(preset => Nearly(preset.WidthMm, State.CurrentPage.WidthMm) && Nearly(preset.HeightMm, State.CurrentPage.HeightMm))?.Key ?? "custom";
+    private string CurrentPresetKey => PagePresets.GetAll().FirstOrDefault(preset => Nearly(preset.WidthMm, State.CurrentPage.WidthMm) && Nearly(preset.HeightMm, State.CurrentPage.HeightMm))?.Key ?? "custom";
     private double PageTimelineContentEnd => Math.Max(
         State.CurrentPage.Elements.SelectMany(item => item.Animations)
             .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
@@ -1609,7 +1610,7 @@
 
     private void ChangePagePreset(ChangeEventArgs args)
     {
-        var preset = PagePreset.Find(args.Value?.ToString());
+        var preset = PagePresets.Find(args.Value?.ToString());
         if (preset is not null) State.SetPageSize(preset.WidthMm, preset.HeightMm);
     }
 

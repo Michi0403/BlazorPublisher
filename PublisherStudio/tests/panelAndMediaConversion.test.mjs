@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-const models = read('src/PublisherStudio.Web/Domain/PublicationModels.cs');
-const panelModels = read('src/PublisherStudio.Web/Domain/PublicationPanelModels.cs');
-const traversal = read('src/PublisherStudio.Web/Domain/PublicationElementTraversal.cs');
+const models = read('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs');
+const panelModels = read('src/PublisherStudio.Web/BusinessObjects/PublicationPanelModels.cs');
+const traversal = read('src/PublisherStudio.Web/Services/PublicationElementTraversal.cs');
 const panels = read('src/PublisherStudio.Web/Services/Panels/PanelDocumentService.cs');
 const panelView = read('src/PublisherStudio.Web/Components/Editor/PanelView.razor');
 const panelStudio = read('src/PublisherStudio.Web/Components/Editor/PanelStudio.razor');
@@ -87,10 +87,10 @@ assert.match(applicationComposition, /AddSingleton<IMediaConversionService, Medi
 assert.match(applicationComposition, /AddSingleton<PanelDocumentService, PanelDocumentService>/);
 assert.equal(appsettings.PublisherStudio.FFmpegPath, '');
 
-assert.equal(packageJson.version, '2.0.3');
-assert.equal(lockJson.version, '2.0.3');
-assert.equal(lockJson.packages[''].version, '2.0.3');
-assert.match(webProject, /<Version>2\.0\.3<\/Version>/);
-assert.match(installerProject, /<Version>2\.0\.3<\/Version>/);
+assert.equal(packageJson.version, '2.0.4');
+assert.equal(lockJson.version, '2.0.4');
+assert.equal(lockJson.packages[''].version, '2.0.4');
+assert.match(webProject, /<Version>2\.0\.4<\/Version>/);
+assert.match(installerProject, /<Version>2\.0\.4<\/Version>/);
 
 console.log('Panel/Div Studio, recursive shared-component rendering, dashboard library, FFmpeg service/controller/UI, and version contracts passed.');

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
-const models = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationModels.cs');
+const models = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationModels.cs');
 const surface = read('src', 'PublisherStudio.Web', 'Components', 'Editor', 'PageSurface.razor');
 const editor = read('src', 'PublisherStudio.Web', 'Components', 'Pages', 'Editor.razor');
 const pictureEditor = read('src', 'PublisherStudio.Web', 'Components', 'Editor', 'PictureEditor.razor.cs');

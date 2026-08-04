@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OpenScad;
 
 namespace PublisherStudio.Controllers;

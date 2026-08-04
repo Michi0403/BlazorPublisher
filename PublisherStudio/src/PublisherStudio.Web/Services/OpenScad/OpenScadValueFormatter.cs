@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 
@@ -24,7 +24,13 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
         };
     }
 
-    public string Quote(string value) => $"\"{(value ?? string.Empty).Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
+    public string Quote(string value)
+    {
+        var escaped = (value ?? string.Empty)
+            .Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("\"", "\\\"", StringComparison.Ordinal);
+        return "\"" + escaped + "\"";
+    }
 
     public string Identifier(string value, string fallback = "part")
     {
@@ -36,8 +42,13 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
         return builder.Length == 0 ? fallback : builder.ToString();
     }
 
-    private string Vector(IEnumerable<double> values) => $"[{string.Join(", ", values.Select(Number))}]";
-    private string Matrix(IEnumerable<IEnumerable<double>> rows) => $"[{string.Join(", ", rows.Select(Vector))}]";
-    private string Faces(IEnumerable<IEnumerable<int>> rows) => $"[{string.Join(", ", rows.Select(row => $"[{string.Join(", ", row)}]"))}]";
+    private string Vector(IEnumerable<double> values) => "[" + string.Join(", ", values.Select(Number)) + "]";
+    private string Matrix(IEnumerable<IEnumerable<double>> rows) => "[" + string.Join(", ", rows.Select(Vector)) + "]";
+
+    private string Faces(IEnumerable<IEnumerable<int>> rows)
+    {
+        var formattedRows = rows.Select(row => "[" + string.Join(", ", row) + "]");
+        return "[" + string.Join(", ", formattedRows) + "]";
+    }
     private string Number(double value) => double.IsFinite(value) ? value.ToString("0.######", CultureInfo.InvariantCulture) : "0";
 }

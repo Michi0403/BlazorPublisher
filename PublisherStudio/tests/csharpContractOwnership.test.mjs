@@ -50,15 +50,15 @@ for (const declaration of declarations) {
   byName.set(declaration.name, entries);
 }
 
-// Domain/Models own shared contracts. Services must consume those contracts rather
+// BusinessObjects own shared contracts. Services must consume those contracts rather
 // than introducing an identically named shadow type in an implementation namespace.
 for (const [name, entries] of byName) {
-  const shared = entries.filter(entry => /^PublisherStudio\.(?:Domain|Models)(?:\.|$)/.test(entry.namespaceName));
+  const shared = entries.filter(entry => /^PublisherStudio\.BusinessObjects(?:\.|$)/.test(entry.namespaceName));
   const services = entries.filter(entry => /^PublisherStudio\.Services(?:\.|$)/.test(entry.namespaceName));
   assert.equal(
     shared.length > 0 && services.length > 0,
     false,
-    `Service type shadows a Domain/Models contract named ${name}: ${entries.map(entry => `${entry.namespaceName} (${entry.file})`).join(', ')}`
+    `Service type shadows a BusinessObjects contract named ${name}: ${entries.map(entry => `${entry.namespaceName} (${entry.file})`).join(', ')}`
   );
 }
 
@@ -83,8 +83,8 @@ for (const [name, entries] of byName) {
 const hotkeyDeclarations = byName.get('MediaHostHotkeyEvent') ?? [];
 assert.deepEqual(
   hotkeyDeclarations.map(entry => entry.namespaceName),
-  ['PublisherStudio.Domain.Streaming'],
-  'MediaHostHotkeyEvent must have exactly one authoritative declaration in Domain/Streaming.'
+  ['PublisherStudio.BusinessObjects.Streaming'],
+  'MediaHostHotkeyEvent must have exactly one authoritative declaration in BusinessObjects/Streaming.'
 );
 
 const mediaHostClient = fs.readFileSync(path.join(web, 'Services', 'Streaming', 'MediaHost', 'StreamingMediaHostClient.cs'), 'utf8');

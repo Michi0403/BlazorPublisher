@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.Encoding;

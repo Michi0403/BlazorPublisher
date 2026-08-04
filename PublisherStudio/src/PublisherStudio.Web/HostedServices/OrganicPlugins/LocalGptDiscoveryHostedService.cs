@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 using System.Net;
 using System.Net.Sockets;

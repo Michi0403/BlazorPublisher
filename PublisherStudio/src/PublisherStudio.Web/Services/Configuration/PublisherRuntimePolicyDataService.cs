@@ -1,5 +1,5 @@
 using System.Collections.Frozen;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
@@ -138,6 +138,9 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
                 string.IsNullOrWhiteSpace(options.DocumentDefaults.PublicationName) ||
                 options.DocumentDefaults.PageWidthMillimeters <= 0 ||
                 options.DocumentDefaults.PictureWidthPixels <= 0 ||
+                options.DocumentDefaults.StoryPageWidthMillimeters <= 0 ||
+                options.DocumentDefaults.StoryPageHeightMillimeters <= 0 ||
+                options.DocumentDefaults.PagePresets.Count == 0 ||
                 options.MediaSessionDefaults.MasterWidth <= 0 ||
                 options.MediaSessionDefaults.IngestChannelCapacity <= 0)
                 throw new InvalidDataException("The PublisherStudio runtime policy contains invalid numeric, text, endpoint, native, or media-preset values.");

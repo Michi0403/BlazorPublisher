@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
-const publicationModels = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationModels.cs');
-const models = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationMediaModels.cs');
-const panelModels = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationPanelModels.cs');
+const publicationModels = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationModels.cs');
+const models = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationMediaModels.cs');
+const panelModels = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationPanelModels.cs');
 const timeline = read('src', 'PublisherStudio.Web', 'Services', 'MediaStudio', 'UseCases', 'MediaTimelineEditService.cs');
 const studio = read('src', 'PublisherStudio.Web', 'Components', 'Editor', 'MediaStudio.razor');
 const view = read('src', 'PublisherStudio.Web', 'Components', 'Editor', 'VideoMediaView.razor');

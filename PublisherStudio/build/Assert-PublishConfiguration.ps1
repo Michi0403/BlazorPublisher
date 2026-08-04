@@ -103,13 +103,25 @@ foreach ($marker in @('<PublishSingleFile Condition="''$(RuntimeIdentifier)'' !=
     if (-not $setupProject.Contains($marker)) { Fail "The PublisherStudio setup project is missing $marker." }
 }
 foreach ($profile in $profiles) {
-    foreach ($fragment in @(
-        '"' + $profile.Runtime + '"',
-        'AppFolder = "' + $profile.App + '"',
-        'SetupFolder = "' + $profile.Setup + '"',
-        'SetupAsset = "' + $profile.Setup + '"'
+    $runtimeLiteral = [Regex]::Escape('"' + $profile.Runtime + '"')
+    $mappingMatch = [Regex]::Match(
+        $release,
+        "(?s)$runtimeLiteral\s*\{\s*@\{(?<Body>.*?)\}\s*\}",
+        [Text.RegularExpressions.RegexOptions]::CultureInvariant)
+    if (-not $mappingMatch.Success) {
+        Fail "Build-Release.ps1 is missing the release mapping block for $($profile.Runtime)."
+    }
+
+    $mappingBody = $mappingMatch.Groups['Body'].Value
+    foreach ($property in @(
+        @{ Name = 'AppFolder'; Value = $profile.App },
+        @{ Name = 'SetupFolder'; Value = $profile.Setup },
+        @{ Name = 'SetupAsset'; Value = $profile.Setup }
     )) {
-        if (-not $release.Contains($fragment)) { Fail "Build-Release.ps1 is missing synchronized mapping: $fragment" }
+        $propertyPattern = '(?m)\b' + [Regex]::Escape($property.Name) + '\s*=\s*"' + [Regex]::Escape($property.Value) + '"'
+        if (-not [Regex]::IsMatch($mappingBody, $propertyPattern, [Text.RegularExpressions.RegexOptions]::CultureInvariant)) {
+            Fail "Build-Release.ps1 maps $($profile.Runtime) without $($property.Name)='$($property.Value)'."
+        }
     }
     if (-not $allRuntimes.Contains('"' + $profile.Runtime + '"')) { Fail "Build-AllRuntimes.ps1 is missing runtime $($profile.Runtime)." }
 }

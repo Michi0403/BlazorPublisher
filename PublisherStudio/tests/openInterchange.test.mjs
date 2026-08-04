@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
-const pictureModels = read('src', 'PublisherStudio.Web', 'Domain', 'PictureStudioModels.cs');
-const publicationModels = read('src', 'PublisherStudio.Web', 'Domain', 'PublicationModels.cs');
-const interchangeModels = read('src', 'PublisherStudio.Web', 'Domain', 'InterchangeModels.cs');
+const pictureModels = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PictureStudioModels.cs');
+const publicationModels = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationModels.cs');
+const interchangeModels = read('src', 'PublisherStudio.Web', 'BusinessObjects', 'InterchangeModels.cs');
 const sanitizer = read('src', 'PublisherStudio.Web', 'Services', 'PictureStudio', 'Import', 'SvgInterchangeSanitizer.cs');
 const openRaster = read('src', 'PublisherStudio.Web', 'Services', 'PictureStudio', 'Import', 'OpenRasterImportService.cs');
 const openDocument = read('src', 'PublisherStudio.Web', 'Services', 'Publication', 'Import', 'OpenDocumentImportService.cs');

@@ -7,9 +7,9 @@ namespace PublisherStudio.Services.Streaming.Sessions;
 public sealed class MediaSessionRegistry(
     GlobalHotkeyService hotkeys,
     EncoderOrchestrator encoder,
-    IPublisherRuntimePolicyDataService runtimePolicy,
-    ILoggerFactory loggerFactory,
     IMediaSessionFactory mediaSessionFactory,
+    IPlatformChatServiceFactory chatFactory,
+    ILanStreamingServerFactory lanServerFactory,
     ILogger<MediaSessionRegistry> logger) : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, MediaSession> _sessions = new();
@@ -26,11 +26,11 @@ public sealed class MediaSessionRegistry(
                     try
                     {
                         _hotkeys.Configure(session.Id, session.Hotkeys.Where(item => item.Global));
-                        session.Chat = new PlatformChatService(session, runtimePolicy, loggerFactory, loggerFactory.CreateLogger<PlatformChatService>());
+                        session.Chat = chatFactory.Create(session);
                         session.Chat.Start();
                         if (session.LanEnabled)
                         {
-                            session.LanServer = new LanStreamingServer(session, runtimePolicy, loggerFactory, loggerFactory.CreateLogger<LanStreamingServer>());
+                            session.LanServer = lanServerFactory.Create(session);
                             session.LanServer.Start();
                         }
                         return session;

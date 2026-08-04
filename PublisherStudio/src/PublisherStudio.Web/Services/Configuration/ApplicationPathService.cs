@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 

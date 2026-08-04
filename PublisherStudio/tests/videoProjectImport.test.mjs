@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-const models = read('src/PublisherStudio.Web/Domain/PublicationMediaModels.cs');
-const publicationModels = read('src/PublisherStudio.Web/Domain/PublicationModels.cs');
+const models = read('src/PublisherStudio.Web/BusinessObjects/PublicationMediaModels.cs');
+const publicationModels = read('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs');
 const importer = read('src/PublisherStudio.Web/Services/VideoStudio/Import/VideoProjectImportService.cs');
 const timeline = read('src/PublisherStudio.Web/Services/MediaStudio/UseCases/MediaTimelineEditService.cs');
 const studio = read('src/PublisherStudio.Web/Components/Editor/MediaStudio.razor');
@@ -77,11 +77,11 @@ assert.match(applicationComposition, /AddSingleton<VideoProjectImportService, Vi
 assert.match(interop, /\(otio\|otioz\|mlt\|kdenlive\|xges\|osp\|edl\)/);
 assert.match(interop, /actualKind === 'project'/);
 
-assert.equal(packageJson.version, '2.0.3');
-assert.equal(lockJson.version, '2.0.3');
-assert.equal(lockJson.packages[''].version, '2.0.3');
-assert.match(webProject, /<Version>2\.0\.3<\/Version>/);
-assert.match(installerProject, /<Version>2\.0\.3<\/Version>/);
+assert.equal(packageJson.version, '2.0.4');
+assert.equal(lockJson.version, '2.0.4');
+assert.equal(lockJson.packages[''].version, '2.0.4');
+assert.match(webProject, /<Version>2\.0\.4<\/Version>/);
+assert.match(installerProject, /<Version>2\.0\.4<\/Version>/);
 
 assert.match(doctrine, /OpenTimelineIO/);
 assert.match(doctrine, /MLT XML/);

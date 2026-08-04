@@ -17,16 +17,21 @@ public static class StreamingServiceCollectionExtensions
         {
         services.AddSingleton<IWindowsHotkeyNativeService, WindowsHotkeyNativeService>();
         services.AddSingleton<IWindowsProcessLoopbackNativeService, WindowsProcessLoopbackNativeService>();
+        services.AddSingleton<IWindowsProcessLoopbackCaptureFactory, WindowsProcessLoopbackCaptureFactory>();
         services.AddSingleton<GlobalHotkeyService>();
         services.AddHostedService<GlobalHotkeyHostedService>();
         services.AddSingleton<EncoderOrchestrator>();
+        services.AddSingleton<INativeCaptureSessionFactory, NativeCaptureSessionFactory>();
         services.AddSingleton<NativeCaptureRegistry>();
         services.AddSingleton<IMediaSessionFactory, MediaSessionFactory>();
+        services.AddSingleton<IPlatformChatServiceFactory, PlatformChatServiceFactory>();
+        services.AddSingleton<ILanStreamingServerFactory, LanStreamingServerFactory>();
         services.AddSingleton<MediaSessionRegistry>();
 
         services.AddSingleton<StreamingRuntimeUseCases>();
         services.AddSingleton<NativeCaptureUseCases>();
         services.AddSingleton<StreamingSessionUseCases>();
+        services.AddSingleton<IStreamingChatResultFactory, StreamingChatResultFactory>();
         services.AddSingleton<StreamingChatUseCases>();
         services.AddSingleton<StreamingIngestUseCases>();
         services.AddSingleton<StreamingLanUseCases>();

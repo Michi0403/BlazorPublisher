@@ -31,7 +31,7 @@ public sealed class StreamingRuntimeUseCases
             logger.LogTrace($"Entering StreamingRuntimeUseCases.GetCapabilities.");
             return new()
     {
-        Version = "2.0.3",
+        Version = "2.0.4",
         BrowserCapture = true,
         BrowserAudioMix = true,
         NativeDeviceDiscovery = true,
@@ -53,7 +53,7 @@ public sealed class StreamingRuntimeUseCases
         }
     }
 
-    public async Task<IReadOnlyList<PublisherStudio.Domain.NativeMediaDeviceInfo>> DiscoverDevicesAsync(
+    public async Task<IReadOnlyList<PublisherStudio.BusinessObjects.NativeMediaDeviceInfo>> DiscoverDevicesAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
     {
@@ -61,7 +61,7 @@ public sealed class StreamingRuntimeUseCases
         {
             logger.LogTrace($"Entering StreamingRuntimeUseCases.DiscoverDevicesAsync.");
                     var devices = await nativeDeviceDiscovery.DiscoverAsync(ffmpegPath, cancellationToken).ConfigureAwait(false);
-                    return devices.Select(device => new PublisherStudio.Domain.NativeMediaDeviceInfo
+                    return devices.Select(device => new PublisherStudio.BusinessObjects.NativeMediaDeviceInfo
                     {
                         Id = device.Id,
                         Name = device.Name,

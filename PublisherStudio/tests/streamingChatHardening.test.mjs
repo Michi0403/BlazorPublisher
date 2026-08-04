@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
-const model = read('src/PublisherStudio.Web/Domain/PublicationComponentModels.cs');
+const model = read('src/PublisherStudio.Web/BusinessObjects/PublicationComponentModels.cs');
 const service = read('src/PublisherStudio.Web/Services/PublicationComponentService.cs');
 const editor = read('src/PublisherStudio.Web/Components/Editor/DevExtremeComponentEditor.razor');
 const panels = read('src/PublisherStudio.Web/Services/Panels/PanelDocumentService.cs');

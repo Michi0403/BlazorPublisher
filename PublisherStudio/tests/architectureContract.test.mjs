@@ -94,7 +94,7 @@ for (const file of serviceFiles) {
   assert.doesNotMatch(text, /Microsoft\.AspNetCore\.Mvc/, `Reusable service depends on MVC: ${path.relative(root, file)}`);
 }
 
-assert.match(program, /builder\.Services\.AddPublisherStudioApplication\(builder\.Configuration\)/);
+assert.match(program, /builder\.Services\.AddPublisherStudioApplication\(builder\.Configuration,\s*startupLogger\)/);
 assert.match(applicationComposition, /services\.AddPublisherStreaming\(logger\)/);
 assert.match(applicationComposition, /AddSingleton<IOpenScadDocumentService, OpenScadDocumentService>/);
 assert.match(applicationComposition, /AddSingleton<IUserInputAutomationService, UserInputAutomationService>/);

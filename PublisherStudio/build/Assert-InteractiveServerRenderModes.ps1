@@ -23,6 +23,11 @@ foreach ($entry in $expected.GetEnumerator()) {
         Fail "Render mode changed in $relative. Expected directive '$expectedDirective'; found $found."
     }
 }
+$importsPath = Join-Path $appRoot 'Components\_Imports.razor'
+$imports = [System.IO.File]::ReadAllText($importsPath, $utf8)
+if (-not $imports.Contains('@using static Microsoft.AspNetCore.Components.Web.RenderMode')) {
+    Fail 'Components/_Imports.razor no longer imports RenderMode for @rendermode InteractiveServer.'
+}
 $programPath = Join-Path $appRoot 'Program.cs'
 $appPath = Join-Path $appRoot 'Components\App.razor'
 $program = [System.IO.File]::ReadAllText($programPath, $utf8)

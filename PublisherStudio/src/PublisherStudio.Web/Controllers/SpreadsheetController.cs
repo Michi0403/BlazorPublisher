@@ -1,7 +1,7 @@
 using DevExpress.AspNetCore.Spreadsheet;
 using DevExpress.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Models;
 using PublisherStudio.Services;
 

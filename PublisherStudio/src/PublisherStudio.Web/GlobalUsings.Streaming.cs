@@ -1,4 +1,4 @@
-global using PublisherStudio.Domain.Streaming;
+global using PublisherStudio.BusinessObjects.Streaming;
 global using PublisherStudio.Services.Streaming.Capture;
 global using PublisherStudio.Services.Streaming.Chat;
 global using PublisherStudio.Services.Streaming.Encoding;

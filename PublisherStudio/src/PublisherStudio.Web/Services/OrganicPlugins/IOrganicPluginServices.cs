@@ -1,4 +1,4 @@
-using PublisherStudio.Domain;
+using PublisherStudio.BusinessObjects;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;

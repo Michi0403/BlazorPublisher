@@ -15,6 +15,10 @@ PublisherStudio is a local-first desktop publishing environment powered by an AS
 
 Your files remain under the signed-in user's control. PublisherStudio listens only on the local loopback interface.
 
+## 2.0.4 service-owned compiler repair
+
+The current repair moves data contracts into `PublisherStudio.BusinessObjects`, routes construction and formatting through injected services/factories, fixes the remaining native-capture and streaming constructor drift, restores the Blazor render-mode import, and repairs the release-map guard without adding application statics. See `CHANGELOG-v2.0.4.md`.
+
 ## 2.0.3 Windows build-policy compatibility
 
 PublisherStudio now executes its maintained Windows build guards with the same process-output discipline used by LocalGPT. Python audit output remains visible in Visual Studio but can no longer be mistaken for the process exit code. Iterator inspection excludes C# type declarations, the two newly exposed iterator violations are materialized and logged, publish profiles explicitly own their protocol/platform/output settings, and Visual Studio setup workflows are verified by name with Windows PowerShell 5.1-safe enumeration.

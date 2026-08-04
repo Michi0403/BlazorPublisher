@@ -37,6 +37,9 @@ public static class Program
     public static WebApplication BuildWebApp(string[]? args = null)
     {
         var effectiveArgs = args ?? [];
+        using var startupLoggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
+        var startupLogger = startupLoggerFactory.CreateLogger("PublisherStudio.Startup");
+
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
             ApplicationName = typeof(Program).Assembly.GetName().Name,
@@ -106,7 +109,7 @@ public static class Program
                 }));
         });
 
-        builder.Services.AddPublisherStudioApplication(builder.Configuration);
+        builder.Services.AddPublisherStudioApplication(builder.Configuration, startupLogger);
         if (!builder.Environment.IsDevelopment())
             builder.Logging.AddFilter((category, level) => level >= LogLevel.Warning);
 

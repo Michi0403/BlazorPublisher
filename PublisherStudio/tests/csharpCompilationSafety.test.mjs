@@ -231,7 +231,7 @@ assert.doesNotMatch(
 // enum member. This catches stale preset names such as PlatformChat before C#
 // compilation reaches CS0117. Platform chat itself is modeled by the shared
 // PublicationComponentKind.Chat control, not as a media-capture source.
-const streamingModels = fs.readFileSync(path.join(web, 'Domain', 'PublicationStreamingModels.cs'), 'utf8');
+const streamingModels = fs.readFileSync(path.join(web, 'BusinessObjects', 'PublicationStreamingModels.cs'), 'utf8');
 const sourceKindBody = streamingModels.match(/public enum PublicationLiveSourceKind\s*\{([\s\S]*?)\}/)?.[1] ?? '';
 const sourceKindMembers = new Set(
   sourceKindBody

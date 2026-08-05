@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html class="publisherstudio-kawaii-docs" data-bs-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Getting started | PublisherStudio</title>
+<script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); } catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto" ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try { localStorage.setItem(cookieName, preference); localStorage.setItem("theme", preference); } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+<link data-publisherstudio-favicon="true" href="../favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="../favicon.ico" rel="alternate icon"/>
+<link data-publisherstudio-kawaii-style="true" href="../styles/publisherstudio-kawaii.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="navbar navbar-expand-md navbar-dark">
+<div class="container-xxl">
+<a class="navbar-brand" href="../index.html"><img alt="PublisherStudio cat paw" id="logo" src="../logo.svg"/> <span>PublisherStudio</span></a>
+<nav class="navbar-nav"><a class="nav-link" href="../index.html">Overview</a><a class="nav-link" href="../articles/getting-started.html">Documentation</a><a class="nav-link" href="../api/index.html">API reference</a></nav>
+</div>
+</header>
+<div class="container-xxl layout publisherstudio-snapshot-layout"><aside aria-label="Documentation" class="publisherstudio-snapshot-nav"><h5>Documentation</h5><nav><a href="../index.html">Documentation home</a><a aria-current="page" href="getting-started.html">Getting started</a><a href="editor-workspace.html">Editor workspace</a><a href="stories-and-spreadsheets.html">Stories and spreadsheets</a><a href="pictures-and-media.html">Pictures and media</a><a href="animation-and-interaction.html">Animation and interaction</a><a href="streaming-and-recording.html">Streaming and recording</a><a href="publishing-and-export.html">Publishing and export</a><a href="installer-and-updates.html">Installer and updates</a><a href="localgpt-and-onewire.html">LocalGPT and 1-Wire</a><a href="privacy-and-security.html">Privacy and security</a><a href="architecture.html">Architecture</a><a href="developer-build.html">Developer build</a><a href="troubleshooting.html">Troubleshooting</a><a href="documentation-system.html">Documentation system</a><a href="../api/index.html">API reference</a></nav></aside>
+<main class="main"><article class="content"><h1>Getting started</h1>
+<p>PublisherStudio opens directly into the publication workspace. A new document contains a page, a canvas, a ribbon, a page list, and a properties panel.</p>
+<h2>Your first little publication</h2>
+<p>1. Give the publication a clear name in the title bar. 2. Choose <strong>Insert</strong> and add a text box, picture, spreadsheet, panel, or media object. 3. Move and resize the object on the page. 4. Use the right-hand inspector to adjust the selected object. 5. Save the native project before exporting. 6. Choose <strong>File</strong> and create a PDF, image, website, or recorded presentation.</p>
+<h2>The native project is the source of truth</h2>
+<p>PublisherStudio stores editable publication data in its own project format. Exported images, websites, PDFs, and videos are delivery formats. Keep the native project when you want to edit the work later.</p>
+<h2>Choose the application language</h2>
+<p>Use the language selector in the upper-right corner of PublisherStudio. The choice reloads the current local page, stores a request-culture cookie, and applies one complete JSON catalog to the application shell.</p>
+<p>Application language and publication language are separate: the global selector changes PublisherStudio, while the Inspector language setting controls exported document and website metadata.</p>
+<h2>Local by default</h2>
+<p>The application listens on the local loopback interface. It does not need LocalGPT to create or publish documents. The optional LocalGPT page remains quiet until you choose to connect it.</p>
+<div class="NOTE"><h5>Note</h5>
+<p>The first source build needs the prepared DevExpress browser assets. End-user release packages already contain the runtime assets they need.</p></div></article></main>
+<aside class="toc"><h5>In this article</h5><a href="#">Getting started</a></aside>
+</div>
+<footer class="footer"><div class="container-xxl">PublisherStudio 2.1.9 - Kawaii documentation snapshot</div></footer>
+<script data-publisherstudio-kawaii-script="true" src="../styles/publisherstudio-kawaii.js" type="module"></script>
+</body>
+</html>

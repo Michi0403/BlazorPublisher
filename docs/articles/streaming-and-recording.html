@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html class="publisherstudio-kawaii-docs" data-bs-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Streaming and recording | PublisherStudio</title>
+<script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); } catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto" ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try { localStorage.setItem(cookieName, preference); localStorage.setItem("theme", preference); } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+<link data-publisherstudio-favicon="true" href="../favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="../favicon.ico" rel="alternate icon"/>
+<link data-publisherstudio-kawaii-style="true" href="../styles/publisherstudio-kawaii.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="navbar navbar-expand-md navbar-dark">
+<div class="container-xxl">
+<a class="navbar-brand" href="../index.html"><img alt="PublisherStudio cat paw" id="logo" src="../logo.svg"/> <span>PublisherStudio</span></a>
+<nav class="navbar-nav"><a class="nav-link" href="../index.html">Overview</a><a class="nav-link" href="../articles/getting-started.html">Documentation</a><a class="nav-link" href="../api/index.html">API reference</a></nav>
+</div>
+</header>
+<div class="container-xxl layout publisherstudio-snapshot-layout"><aside aria-label="Documentation" class="publisherstudio-snapshot-nav"><h5>Documentation</h5><nav><a href="../index.html">Documentation home</a><a href="getting-started.html">Getting started</a><a href="editor-workspace.html">Editor workspace</a><a href="stories-and-spreadsheets.html">Stories and spreadsheets</a><a href="pictures-and-media.html">Pictures and media</a><a href="animation-and-interaction.html">Animation and interaction</a><a aria-current="page" href="streaming-and-recording.html">Streaming and recording</a><a href="publishing-and-export.html">Publishing and export</a><a href="installer-and-updates.html">Installer and updates</a><a href="localgpt-and-onewire.html">LocalGPT and 1-Wire</a><a href="privacy-and-security.html">Privacy and security</a><a href="architecture.html">Architecture</a><a href="developer-build.html">Developer build</a><a href="troubleshooting.html">Troubleshooting</a><a href="documentation-system.html">Documentation system</a><a href="../api/index.html">API reference</a></nav></aside>
+<main class="main"><article class="content"><h1>Streaming and recording</h1>
+<p>Streaming Studio combines scenes, live inputs, chat, hotkeys, recording, and output control in one local session.</p>
+<h2>Session flow</h2>
+<p>1. Open Streaming Studio. 2. Choose or create a profile. 3. Add page, camera, screen, window, audio, or browser sources. 4. Run a dry test. 5. Start recording or a configured output. 6. Stop the output before closing the session.</p>
+<h2>Local capture</h2>
+<p>Browser capture is used where it fits. Windows process-loopback capture and FFmpeg services are selected only on supported platforms. Credentials and stream keys stay in protected local stores, not inside publications or interchange files.</p>
+<h2>Preview and saved media</h2>
+<p>The preview is a live projection. The recording pipeline owns the saved bytes. A preview that needs reattachment should not corrupt a complete recording.</p>
+<h2>When the preview turns black</h2>
+<p>First check whether the saved recording is still complete. If it is, reopen the preview or change the active source. The diagnostics bridge records browser-side failures, while expected circuit disconnects remain low-noise diagnostics.</p></article></main>
+<aside class="toc"><h5>In this article</h5><a href="#">Streaming and recording</a></aside>
+</div>
+<footer class="footer"><div class="container-xxl">PublisherStudio 2.1.9 - Kawaii documentation snapshot</div></footer>
+<script data-publisherstudio-kawaii-script="true" src="../styles/publisherstudio-kawaii.js" type="module"></script>
+</body>
+</html>

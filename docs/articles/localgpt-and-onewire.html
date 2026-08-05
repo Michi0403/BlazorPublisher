@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html class="publisherstudio-kawaii-docs" data-bs-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>LocalGPT and 1-Wire | PublisherStudio</title>
+<script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); } catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto" ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try { localStorage.setItem(cookieName, preference); localStorage.setItem("theme", preference); } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+<link data-publisherstudio-favicon="true" href="../favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="../favicon.ico" rel="alternate icon"/>
+<link data-publisherstudio-kawaii-style="true" href="../styles/publisherstudio-kawaii.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="navbar navbar-expand-md navbar-dark">
+<div class="container-xxl">
+<a class="navbar-brand" href="../index.html"><img alt="PublisherStudio cat paw" id="logo" src="../logo.svg"/> <span>PublisherStudio</span></a>
+<nav class="navbar-nav"><a class="nav-link" href="../index.html">Overview</a><a class="nav-link" href="../articles/getting-started.html">Documentation</a><a class="nav-link" href="../api/index.html">API reference</a></nav>
+</div>
+</header>
+<div class="container-xxl layout publisherstudio-snapshot-layout"><aside aria-label="Documentation" class="publisherstudio-snapshot-nav"><h5>Documentation</h5><nav><a href="../index.html">Documentation home</a><a href="getting-started.html">Getting started</a><a href="editor-workspace.html">Editor workspace</a><a href="stories-and-spreadsheets.html">Stories and spreadsheets</a><a href="pictures-and-media.html">Pictures and media</a><a href="animation-and-interaction.html">Animation and interaction</a><a href="streaming-and-recording.html">Streaming and recording</a><a href="publishing-and-export.html">Publishing and export</a><a href="installer-and-updates.html">Installer and updates</a><a aria-current="page" href="localgpt-and-onewire.html">LocalGPT and 1-Wire</a><a href="privacy-and-security.html">Privacy and security</a><a href="architecture.html">Architecture</a><a href="developer-build.html">Developer build</a><a href="troubleshooting.html">Troubleshooting</a><a href="documentation-system.html">Documentation system</a><a href="../api/index.html">API reference</a></nav></aside>
+<main class="main"><article class="content"><h1>LocalGPT and 1-Wire</h1>
+<p>PublisherStudio works without LocalGPT. The 1-Wire connection is an optional local collaboration path.</p>
+<h2>Discovery and connection</h2>
+<p>PublisherStudio listens for compact LocalGPT discovery broadcasts on UDP port <code>51141</code>. A selected peer can then establish the larger approved transport over TCP port <code>51140</code>.</p>
+<p>Discovery does not grant control. The user must approve the link, and each protected eye, hand, screen, spreadsheet, media, or publishing capability remains subject to its permission policy.</p>
+<h2>Default ports</h2>
+<ul>
+<li>PublisherStudio web host: <code>58071</code></li>
+<li>LocalGPT 1-Wire TCP: <code>51140</code></li>
+<li>LocalGPT discovery UDP: <code>51141</code></li>
+</ul>
+<p>These contracts stay separate so both applications can run side by side.</p>
+<h2>Protocol ownership</h2>
+<p>The shared wire protocol is versioned independently and consumed from the authoritative <code>LocalGPT.WireProtocolVersion</code> package. PublisherStudio does not carry a second copy of the protocol project.</p>
+<h2>Quiet standalone behavior</h2>
+<p>When LocalGPT is absent, PublisherStudio continues normally. The Organic Plugins page reports that no peer is connected instead of treating the optional capability as an application failure.</p>
+<h2>Runtime identity and small devices</h2>
+<p>PublisherStudio identity and secrets are generated at runtime; they are not shipped as a shared default credential. Small peers such as an ESP32 can participate only through an approved capability and transport profile. Discovery alone never grants an ESP32—or any other peer—permission to capture, publish, or control content.</p></article></main>
+<aside class="toc"><h5>In this article</h5><a href="#">LocalGPT and 1-Wire</a></aside>
+</div>
+<footer class="footer"><div class="container-xxl">PublisherStudio 2.1.9 - Kawaii documentation snapshot</div></footer>
+<script data-publisherstudio-kawaii-script="true" src="../styles/publisherstudio-kawaii.js" type="module"></script>
+</body>
+</html>

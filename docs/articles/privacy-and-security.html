@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html class="publisherstudio-kawaii-docs" data-bs-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Privacy and security | PublisherStudio</title>
+<script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); } catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto" ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try { localStorage.setItem(cookieName, preference); localStorage.setItem("theme", preference); } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+<link data-publisherstudio-favicon="true" href="../favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="../favicon.ico" rel="alternate icon"/>
+<link data-publisherstudio-kawaii-style="true" href="../styles/publisherstudio-kawaii.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="navbar navbar-expand-md navbar-dark">
+<div class="container-xxl">
+<a class="navbar-brand" href="../index.html"><img alt="PublisherStudio cat paw" id="logo" src="../logo.svg"/> <span>PublisherStudio</span></a>
+<nav class="navbar-nav"><a class="nav-link" href="../index.html">Overview</a><a class="nav-link" href="../articles/getting-started.html">Documentation</a><a class="nav-link" href="../api/index.html">API reference</a></nav>
+</div>
+</header>
+<div class="container-xxl layout publisherstudio-snapshot-layout"><aside aria-label="Documentation" class="publisherstudio-snapshot-nav"><h5>Documentation</h5><nav><a href="../index.html">Documentation home</a><a href="getting-started.html">Getting started</a><a href="editor-workspace.html">Editor workspace</a><a href="stories-and-spreadsheets.html">Stories and spreadsheets</a><a href="pictures-and-media.html">Pictures and media</a><a href="animation-and-interaction.html">Animation and interaction</a><a href="streaming-and-recording.html">Streaming and recording</a><a href="publishing-and-export.html">Publishing and export</a><a href="installer-and-updates.html">Installer and updates</a><a href="localgpt-and-onewire.html">LocalGPT and 1-Wire</a><a aria-current="page" href="privacy-and-security.html">Privacy and security</a><a href="architecture.html">Architecture</a><a href="developer-build.html">Developer build</a><a href="troubleshooting.html">Troubleshooting</a><a href="documentation-system.html">Documentation system</a><a href="../api/index.html">API reference</a></nav></aside>
+<main class="main"><article class="content"><h1>Privacy and security</h1>
+<p>PublisherStudio is local-first, but local software still needs careful boundaries.</p>
+<h2>Data ownership</h2>
+<p>Publication projects, recordings, workbooks, pictures, settings, and protected connection state remain under the signed-in user's account. Exporters do not upload content by default.</p>
+<h2>Untrusted input</h2>
+<p>Imported archives, SVG/XML, websites, media, JSON, spreadsheet files, LocalGPT envelopes, and browser messages are treated as untrusted. Importers validate paths, sizes, required files, and dangerous content before committing changes.</p>
+<h2>Credentials</h2>
+<p>OAuth sessions, stream keys, LAN secrets, and machine-specific capture settings are stored outside publications and templates. They are not copied into normal interchange exports.</p>
+<h2>Loopback host</h2>
+<p>The default web endpoint binds to <code>127.0.0.1</code>. Opening PublisherStudio to another interface is a deliberate deployment decision and should be paired with appropriate authentication, firewall, and transport controls.</p></article></main>
+<aside class="toc"><h5>In this article</h5><a href="#">Privacy and security</a></aside>
+</div>
+<footer class="footer"><div class="container-xxl">PublisherStudio 2.1.9 - Kawaii documentation snapshot</div></footer>
+<script data-publisherstudio-kawaii-script="true" src="../styles/publisherstudio-kawaii.js" type="module"></script>
+</body>
+</html>

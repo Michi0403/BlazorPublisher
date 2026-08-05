@@ -91,7 +91,7 @@ test('2.0.4 validates release mappings semantically and keeps synchronized folde
 });
 
 test('active version is aligned across release surfaces', () => {
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.8');
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.9');
 });

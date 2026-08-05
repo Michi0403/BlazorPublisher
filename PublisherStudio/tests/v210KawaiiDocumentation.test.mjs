@@ -12,11 +12,11 @@ function expectContains(relative, values) {
   return text;
 }
 
-test('2.1.8 application and setup versions are aligned', () => {
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.8');
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.8');
+test('2.1.9 application and setup versions are aligned', () => {
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.9');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.9');
 });
 
 test('compiler XML documentation is generated and guarded', () => {
@@ -101,7 +101,7 @@ test('DocFX website and PDF share the Kawaii design contract', () => {
 });
 
 test('GitHub Pages uses the same pinned snapshot workflow as LocalGPT', () => {
-  expectContains('.github/workflows/publish-shipped-docs.yml', [
+  expectContains('../.github/workflows/publish-shipped-docs.yml', [
     'actions/checkout@v6',
     'actions/configure-pages@v5',
     'actions/upload-pages-artifact@v4',
@@ -109,8 +109,8 @@ test('GitHub Pages uses the same pinned snapshot workflow as LocalGPT', () => {
     'prepare-pages-artifact.py',
     '.github/pages/publisherstudio-kawaii-docs.zip'
   ]);
-  assert.equal(fs.existsSync(path.join(root, '.github/scripts/extract-shipped-docs.py')), false);
-  expectContains('.github/scripts/prepare-pages-artifact.py', [
+  assert.equal(fs.existsSync(path.join(root, '..', '.github/scripts/extract-shipped-docs.py')), false);
+  expectContains('../.github/scripts/prepare-pages-artifact.py', [
     'publisherstudio-kawaii.css',
     'publisherstudio-kawaii.js',
     'documentation-status.json',
@@ -118,7 +118,7 @@ test('GitHub Pages uses the same pinned snapshot workflow as LocalGPT', () => {
     'logo.svg',
     'data-publisherstudio-theme-bootstrap'
   ]);
-  assert.ok(fs.existsSync(path.join(root, '.github/pages/publisherstudio-kawaii-docs.zip')));
+  assert.ok(fs.existsSync(path.join(root, '..', '.github/pages/publisherstudio-kawaii-docs.zip')));
 });
 
 test('the documentation milestone publish warnings remain repaired', () => {

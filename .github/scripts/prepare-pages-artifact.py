@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Validate and package the pinned PublisherStudio Kawaii documentation snapshot.
 
-The generated DocFX trees under docs/_site and wwwroot/help-docs are intentionally
-ignored by Git. GitHub Actions therefore publishes a single tracked ZIP snapshot
-instead of assuming ignored build output exists after checkout.
+Generated DocFX trees are intentionally ignored by Git. GitHub Actions publishes a
+single tracked ZIP snapshot, but only after validating its identity, version, PDF,
+local links, theme assets, path safety, and API payload.
 """
 
 from __future__ import annotations
@@ -15,7 +15,9 @@ import shutil
 import stat
 import sys
 import tempfile
+from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
+from urllib.parse import unquote, urlsplit
 from zipfile import BadZipFile, ZipFile
 
 
@@ -51,8 +53,20 @@ JS_MARKERS = (
     "publisherstudio-cursor-paw",
 )
 
+LINK_ATTRIBUTES = frozenset(("href", "src", "action", "poster"))
 MAX_UNCOMPRESSED_BYTES = 512 * 1024 * 1024
 MAX_FILE_COUNT = 20_000
+
+
+class LocalLinkCollector(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.urls: list[str] = []
+
+    def handle_starttag(self, _tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if name.lower() in LINK_ATTRIBUTES and value and value.strip():
+                self.urls.append(value.strip())
 
 
 def read_text(path: Path) -> str:
@@ -71,7 +85,50 @@ def fail(message: str) -> None:
     raise RuntimeError(message)
 
 
-def validate_source(source: Path) -> dict[str, object]:
+def validate_local_links(source: Path) -> None:
+    source_root = source.resolve()
+    failures: list[str] = []
+
+    for page in sorted(source.rglob("*.html")):
+        parser = LocalLinkCollector()
+        try:
+            parser.feed(read_text(page))
+        except (UnicodeDecodeError, ValueError) as error:
+            fail(f"HTML could not be parsed as UTF-8: {page}: {error}")
+
+        for raw_url in parser.urls:
+            parsed = urlsplit(raw_url)
+            if parsed.scheme or parsed.netloc or raw_url.startswith(("#", "data:", "mailto:", "javascript:")):
+                continue
+
+            local_url = unquote(parsed.path).replace("\\", "/")
+            if not local_url:
+                continue
+            if local_url.startswith(("/", "~/")):
+                failures.append(f"{page.relative_to(source)} -> root-relative URL {raw_url!r}")
+                continue
+
+            target = (page.parent / local_url).resolve(strict=False)
+            try:
+                target.relative_to(source_root)
+            except ValueError:
+                failures.append(f"{page.relative_to(source)} -> escaping URL {raw_url!r}")
+                continue
+
+            if target.is_dir() or local_url.endswith("/"):
+                target = target / "index.html"
+            if not target.is_file():
+                failures.append(f"{page.relative_to(source)} -> missing target {raw_url!r}")
+
+    if failures:
+        preview = "; ".join(failures[:20])
+        remainder = len(failures) - 20
+        if remainder > 0:
+            preview += f"; and {remainder} more"
+        fail("Documentation contains invalid local links: " + preview)
+
+
+def validate_source(source: Path, expected_version: str | None = None) -> dict[str, object]:
     if not source.is_dir():
         fail(f"Documentation source does not exist: {source}")
 
@@ -109,16 +166,44 @@ def validate_source(source: Path) -> dict[str, object]:
     if not isinstance(status, dict):
         fail("documentation-status.json must contain an object")
 
+    version = str(status.get("version") or status.get("Version") or "").strip()
+    if not version:
+        fail("documentation-status.json does not declare a version")
+    if expected_version and version != expected_version:
+        fail(f"Documentation version {version!r} does not match PublisherStudio source version {expected_version!r}")
+
+    pdf_file_name = status.get("pdfFileName")
+    if not isinstance(pdf_file_name, str) or not pdf_file_name.strip():
+        fail("documentation-status.json does not declare pdfFileName")
+    pdf_file_name = pdf_file_name.strip()
+    pdf_path = PurePosixPath(pdf_file_name.replace("\\", "/"))
+    if pdf_path.is_absolute() or ".." in pdf_path.parts or len(pdf_path.parts) != 1 or pdf_path.suffix.lower() != ".pdf":
+        fail(f"documentation-status.json contains an unsafe PDF name: {pdf_file_name!r}")
+    published_pdf = source / pdf_file_name
+    if not published_pdf.is_file() or published_pdf.stat().st_size <= 0:
+        fail(f"Declared documentation PDF is missing or empty: {pdf_file_name}")
+    declared_pdf_bytes = status.get("pdfBytes")
+    if isinstance(declared_pdf_bytes, int) and declared_pdf_bytes != published_pdf.stat().st_size:
+        fail(
+            f"documentation-status.json declares {declared_pdf_bytes} PDF bytes, "
+            f"but {pdf_file_name} contains {published_pdf.stat().st_size} bytes"
+        )
+
     html_files = list(source.rglob("*.html"))
     api_html_files = list((source / "api").rglob("*.html"))
     if len(html_files) < 20 or len(api_html_files) < 1:
         fail(f"Documentation output looks incomplete ({len(html_files)} HTML, {len(api_html_files)} API HTML)")
 
+    validate_local_links(source)
+
     return {
         "source": source.as_posix(),
-        "version": status.get("version") or status.get("Version") or "unknown",
+        "version": version,
+        "pdfFileName": pdf_file_name,
+        "pdfBytes": published_pdf.stat().st_size,
         "htmlFiles": len(html_files),
         "apiHtmlFiles": len(api_html_files),
+        "localLinksValidated": True,
         "themePersistence": True,
         "catPawFavicon": True,
         "kawaiiStyleSha256": sha256(source / "styles/publisherstudio-kawaii.css"),
@@ -143,11 +228,18 @@ def safe_extract_zip(archive: Path, destination: Path) -> Path:
             if total_size > MAX_UNCOMPRESSED_BYTES:
                 fail(f"Pinned Pages archive is too large after extraction: {total_size} bytes")
 
+            normalized_names: set[str] = set()
             for entry in entries:
                 raw_name = entry.filename.replace("\\", "/")
                 path = PurePosixPath(raw_name)
                 if path.is_absolute() or ".." in path.parts:
                     fail(f"Unsafe path in pinned Pages archive: {entry.filename}")
+
+                normalized_name = "/".join(part for part in path.parts if part not in ("", "."))
+                folded_name = normalized_name.casefold()
+                if folded_name in normalized_names:
+                    fail(f"Duplicate path in pinned Pages archive: {entry.filename}")
+                normalized_names.add(folded_name)
 
                 unix_mode = entry.external_attr >> 16
                 if stat.S_ISLNK(unix_mode):
@@ -180,23 +272,25 @@ def main() -> int:
     source_group.add_argument("--archive", type=Path)
     source_group.add_argument("--source", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--expected-version")
     args = parser.parse_args()
 
     try:
         output = args.output.resolve(strict=False)
+        expected_version = args.expected_version.strip() if args.expected_version else None
 
         if args.archive is not None:
             archive = args.archive.resolve(strict=True)
             with tempfile.TemporaryDirectory(prefix="publisherstudio-pages-") as temp_dir:
                 extracted_source = safe_extract_zip(archive, Path(temp_dir))
-                metadata = validate_source(extracted_source)
+                metadata = validate_source(extracted_source, expected_version)
                 copy_tree(extracted_source, output)
             metadata["deploymentSource"] = "tracked Kawaii documentation snapshot"
             metadata["sourceArchive"] = archive.as_posix()
             metadata["sourceArchiveSha256"] = sha256(archive)
         else:
             source = args.source.resolve(strict=True)
-            metadata = validate_source(source)
+            metadata = validate_source(source, expected_version)
             copy_tree(source, output)
             metadata["deploymentSource"] = "explicit documentation directory"
 

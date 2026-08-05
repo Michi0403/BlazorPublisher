@@ -77,7 +77,7 @@ internal static class Program
 
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.1.7");
+        Console.WriteLine("PublisherStudio Setup 2.1.9");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");
@@ -231,8 +231,16 @@ internal static class Program
                 setupAsset: true,
                 runtimeIdentifier: runtimeIdentifier).ConfigureAwait(false);
 
-            ValidateReleaseArchive(zipPath, GetRuntimeFolderName(), logger);
-            ValidateReleaseArchive(setupZipPath, "setup" + GetRuntimeFolderName(), logger);
+            ValidateReleaseArchive(
+                zipPath,
+                GetRuntimeFolderName(),
+                GetExpectedPublishedExecutable(runtimeIdentifier, setupAsset: false),
+                logger);
+            ValidateReleaseArchive(
+                setupZipPath,
+                "setup" + GetRuntimeFolderName(),
+                GetExpectedPublishedExecutable(runtimeIdentifier, setupAsset: true),
+                logger);
 
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (string.IsNullOrWhiteSpace(localAppData))
@@ -1119,7 +1127,11 @@ internal static class Program
             runtimeIdentifier).ConfigureAwait(false);
     }
 
-    private static void ValidateReleaseArchive(string archivePath, string expectedRootDirectory, ILogger logger)
+    private static void ValidateReleaseArchive(
+        string archivePath,
+        string expectedRootDirectory,
+        string expectedExecutable,
+        ILogger logger)
     {
         if (!File.Exists(archivePath))
             throw new FileNotFoundException($"PublisherStudio release archive was not found: {archivePath}", archivePath);
@@ -1129,14 +1141,48 @@ internal static class Program
             throw new InvalidDataException($"PublisherStudio release archive is empty: {archivePath}");
 
         var expectedPrefix = expectedRootDirectory.TrimEnd('/', '\\') + "/";
-        var hasExpectedRoot = archive.Entries.Any(entry =>
-            entry.FullName.Replace('\\', '/').StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase));
+        var expectedExecutablePath = expectedPrefix + expectedExecutable;
+        var normalizedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var hasExpectedExecutable = false;
 
-        if (!hasExpectedRoot)
+        foreach (var entry in archive.Entries)
+        {
+            var rawName = entry.FullName;
+            var normalizedName = rawName.Replace('\\', '/').TrimStart('/');
+            var pathParts = normalizedName.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (string.IsNullOrWhiteSpace(normalizedName)
+                || rawName.StartsWith("/", StringComparison.Ordinal)
+                || rawName.StartsWith("\\", StringComparison.Ordinal)
+                || pathParts.Any(part => part == ".."))
+            {
+                throw new InvalidDataException($"PublisherStudio release archive contains an unsafe path: '{rawName}'.");
+            }
+
+            if (!normalizedNames.Add(normalizedName))
+                throw new InvalidDataException($"PublisherStudio release archive contains a duplicate path: '{normalizedName}'.");
+
+            if (!normalizedName.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException(
+                    $"PublisherStudio release archive entry '{normalizedName}' is outside required wrapper '{expectedRootDirectory}'.");
+            }
+
+            if (string.Equals(normalizedName, expectedExecutablePath, StringComparison.OrdinalIgnoreCase))
+                hasExpectedExecutable = true;
+        }
+
+        if (!hasExpectedExecutable)
+        {
             throw new InvalidDataException(
-                $"PublisherStudio release archive '{archivePath}' does not contain the required wrapper directory '{expectedRootDirectory}'.");
+                $"PublisherStudio release archive '{archivePath}' does not contain required executable '{expectedExecutablePath}'.");
+        }
 
-        logger.LogInformation("Validated release archive {ArchivePath} with wrapper directory {WrapperDirectory}.", archivePath, expectedRootDirectory);
+        logger.LogInformation(
+            "Validated release archive {ArchivePath} with wrapper directory {WrapperDirectory} and executable {Executable}.",
+            archivePath,
+            expectedRootDirectory,
+            expectedExecutable);
     }
 
     private static async Task DownloadLatestReleaseAssetAsync(
@@ -1295,7 +1341,7 @@ internal static class Program
 
                 using var totalTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/1.0");
+                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/2.1.9");
                 request.Headers.Accept.ParseAdd("*/*");
                 if (resumeAt > 0)
                     request.Headers.Range = new RangeHeaderValue(resumeAt, null);
@@ -1587,6 +1633,13 @@ internal static class Program
         return $"{(setupAsset ? "setup" : string.Empty)}{runtimeFolder}.zip";
     }
 
+    private static string GetExpectedPublishedExecutable(string runtimeIdentifier, bool setupAsset)
+    {
+        var isWindows = runtimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase);
+        var fileName = setupAsset ? "PublisherStudio.Setup" : "PublisherStudio.Web";
+        return isWindows ? fileName + ".exe" : fileName;
+    }
+
     private static string GetPlatformToken()
     {
 
@@ -1651,7 +1704,7 @@ internal static class Program
         try
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "1.0"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "2.1.9"));
             client.Timeout = Timeout.InfiniteTimeSpan;
             return client;
         }

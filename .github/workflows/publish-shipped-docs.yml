@@ -6,6 +6,7 @@ on:
       - '.github/workflows/publish-shipped-docs.yml'
       - '.github/scripts/prepare-pages-artifact.py'
       - '.github/pages/publisherstudio-kawaii-docs.zip'
+      - 'PublisherStudio/src/PublisherStudio.Web/PublisherStudio.Web.csproj'
   workflow_dispatch:
 
 permissions:
@@ -32,9 +33,12 @@ jobs:
         run: |
           set -euo pipefail
           test -f .github/pages/publisherstudio-kawaii-docs.zip
+          EXPECTED_VERSION="$(python3 -c 'import xml.etree.ElementTree as ET; root = ET.parse("PublisherStudio/src/PublisherStudio.Web/PublisherStudio.Web.csproj").getroot(); print(next((node.text.strip() for node in root.iter() if node.tag.rsplit("}", 1)[-1] == "Version" and node.text and node.text.strip()), ""))')"
+          test -n "$EXPECTED_VERSION"
           python3 .github/scripts/prepare-pages-artifact.py \
             --archive .github/pages/publisherstudio-kawaii-docs.zip \
-            --output pages-artifact
+            --output pages-artifact \
+            --expected-version "$EXPECTED_VERSION"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

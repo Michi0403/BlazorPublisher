@@ -1,5 +1,5 @@
-# PublisherStudio v1.0.76 release
+# PublisherStudio 2.1.9
 
-PublisherStudio v1.0.76 fixes VideoStudio temporal-selection persistence, selection-to-layer timing, live chroma/filter refresh, and interrupted browser playback promises that previously surfaced through Blazor Server JSInterop/RemoteRenderer.
+The maintained application source is in `PublisherStudio/`. Repository-level automation, including GitHub Pages deployment, is intentionally stored in `.github/` where GitHub Actions can discover it.
 
-See `PublisherStudio/CHANGELOG-v1.0.76.md`, `PublisherStudio/SOURCE-CHANGES-v1.0.76.txt`, `PublisherStudio/TEST-RESULTS-v1.0.76.txt`, and `PublisherStudio/VALIDATION.md`.
+See `PublisherStudio/RELEASE.md`, `PublisherStudio/CHANGELOG-v2.1.9.md`, and `PublisherStudio/VALIDATION.md`.

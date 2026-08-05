@@ -2,7 +2,7 @@
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **2.1.7** adds bounded development exception diagnostics without changing release logging. PublisherStudio now records first-chance application exceptions, expected circuit teardown, host termination, and endpoint-cleanup failures with structured context while preserving the LocalGPT-shaped publish, deployment, documentation, and optional 1-Wire contracts.
+Version **2.1.9** completes the release-facing installer, archive, documentation, and GitHub Pages contracts. It preserves the established LocalGPT-shaped runtime mapping, AppData layout, shortcut behavior, bounded diagnostics, and optional 1-Wire integration while adding strict asset and archive validation before installation.
 
 ## A gentle first path
 

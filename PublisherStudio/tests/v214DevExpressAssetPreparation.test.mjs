@@ -16,7 +16,7 @@ function writeSizedFile(file, bytes, prefix) {
   fs.writeFileSync(file, content);
 }
 
-test('2.1.8 prepares pinned DevExtreme assets from nested npm layouts', () => {
+test('2.1.9 prepares pinned DevExtreme assets from nested npm layouts', () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'publisherstudio-devextreme-'));
   try {
     const project = path.join(temp, 'PublisherStudio.Web');

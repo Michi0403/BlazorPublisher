@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html class="publisherstudio-kawaii-docs" lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>Class PublicationMediaElement | PublisherStudio Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class PublicationMediaElement | PublisherStudio Documentation ">
+      
+      <meta name="description" content="Represents a publication media element.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  <link rel="stylesheet" href="../styles/publisherstudio-kawaii.css?v=6186303f7e28" data-publisherstudio-kawaii-style="true" />
+</head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="PublisherStudio">
+            PublisherStudio
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement">
+
+
+
+  <h1 id="PublisherStudio_BusinessObjects_PublicationMediaElement" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement" class="text-break">
+Class PublicationMediaElement  
+  </h1><aside class="publisherstudio-api-neko-note" role="note"><span class="publisherstudio-api-neko-mascot" aria-hidden="true">&#x1F431;&#x2009;&#x1F436;</span><span><strong>Neko & Puppy type guide</strong> · Tiny paws, tidy details: constructors, properties, methods, and events stay cuddled up with the type that owns them, nya~ woof!</span></aside>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="PublisherStudio.html">PublisherStudio</a>.<a class="xref" href="PublisherStudio.BusinessObjects.html">BusinessObjects</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>PublisherStudio.Web.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Represents a publication media element.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public abstract class PublicationMediaElement : PublicationElement</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html">PublicationElement</a></div>
+      <div><span class="xref">PublicationMediaElement</span></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist derived">
+    <dt>Derived</dt>
+    <dd>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.AudioElement.html">AudioElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.VideoElement.html">VideoElement</a></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Id">PublicationElement.Id</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Name">PublicationElement.Name</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Kind">PublicationElement.Kind</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_X">PublicationElement.X</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Y">PublicationElement.Y</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Width">PublicationElement.Width</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Height">PublicationElement.Height</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Rotation">PublicationElement.Rotation</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ZIndex">PublicationElement.ZIndex</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Visible">PublicationElement.Visible</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Locked">PublicationElement.Locked</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_HiddenAtPresentationStart">PublicationElement.HiddenAtPresentationStart</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_GroupId">PublicationElement.GroupId</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Animations">PublicationElement.Animations</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Interaction">PublicationElement.Interaction</a>
+    </div>
+    <div>
+      <a class="xref" href="PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ConnectorPorts">PublicationElement.ConnectorPorts</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--constructors" data-member-kind="Constructors" style="--publisherstudio-api-accent:#a855f7;" role="region" aria-labelledby="constructors"><h2 class="section" id="constructors"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2728;</span>Constructors
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement__ctor_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.#ctor*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement__ctor" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.#ctor">
+  PublicationMediaElement()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected PublicationMediaElement()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--properties" data-member-kind="Properties" style="--publisherstudio-api-accent:#06b6d4;" role="region" aria-labelledby="properties"><h2 class="section" id="properties"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x1F43E;</span>Properties
+<span class="publisherstudio-api-member-count" aria-label="19 items">19</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_AutoPlay_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.AutoPlay*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_AutoPlay" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.AutoPlay">
+  AutoPlay
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets auto play.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool AutoPlay { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_DataUrl_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.DataUrl*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_DataUrl" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.DataUrl">
+  DataUrl
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets data URL.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string DataUrl { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_DurationSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.DurationSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_DurationSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.DurationSeconds">
+  DurationSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets duration seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double DurationSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_EffectiveSegments_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveSegments*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_EffectiveSegments" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveSegments">
+  EffectiveSegments
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets effective segments.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[JsonIgnore]
+public IReadOnlyList&lt;PublicationMediaSegment&gt; EffectiveSegments { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublicationMediaSegment.html">PublicationMediaSegment</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_EffectiveTrimEndSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveTrimEndSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_EffectiveTrimEndSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveTrimEndSeconds">
+  EffectiveTrimEndSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets effective trim end seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[JsonIgnore]
+public double EffectiveTrimEndSeconds { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_FadeInSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.FadeInSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_FadeInSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.FadeInSeconds">
+  FadeInSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets fade in seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double FadeInSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_FadeOutSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.FadeOutSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_FadeOutSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.FadeOutSeconds">
+  FadeOutSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets fade out seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double FadeOutSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_Loop_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Loop*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_Loop" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Loop">
+  Loop
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets loop.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Loop { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_MimeType_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.MimeType*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_MimeType" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.MimeType">
+  MimeType
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets mime type.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string MimeType { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_Muted_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Muted*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_Muted" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Muted">
+  Muted
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets muted.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Muted { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_PlaybackRate_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackRate*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_PlaybackRate" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackRate">
+  PlaybackRate
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets playback rate.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double PlaybackRate { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_PlaybackTrigger_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackTrigger*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_PlaybackTrigger" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackTrigger">
+  PlaybackTrigger
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets playback trigger.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublicationMediaPlaybackTrigger PlaybackTrigger { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublicationMediaPlaybackTrigger.html">PublicationMediaPlaybackTrigger</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_Segments_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Segments*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_Segments" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Segments">
+  Segments
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets segments.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;PublicationMediaSegment&gt; Segments { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublicationMediaSegment.html">PublicationMediaSegment</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_TimelineLengthSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineLengthSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_TimelineLengthSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineLengthSeconds">
+  TimelineLengthSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets timeline length seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[JsonIgnore]
+public double TimelineLengthSeconds { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_TimelineStartSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineStartSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_TimelineStartSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineStartSeconds">
+  TimelineStartSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets timeline start seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TimelineStartSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_TrimEndSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TrimEndSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_TrimEndSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TrimEndSeconds">
+  TrimEndSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets trim end seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TrimEndSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_TrimStartSeconds_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TrimStartSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_TrimStartSeconds" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.TrimStartSeconds">
+  TrimStartSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets trim start seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TrimStartSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_Volume_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Volume*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_Volume" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.Volume">
+  Volume
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets volume.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double Volume { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationMediaElement_WaveformSamples_" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.WaveformSamples*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationMediaElement_WaveformSamples" data-uid="PublisherStudio.BusinessObjects.PublicationMediaElement.WaveformSamples">
+  WaveformSamples
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets waveform samples.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;double&gt; WaveformSamples { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+</div></section>
+</div></section></article>
+
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          PublisherStudio 2.1.2 · generated documentation
+        </div>
+      </div>
+    </footer>
+  <script type="module" src="../styles/publisherstudio-kawaii.js?v=2cbe66e9efd7" data-publisherstudio-kawaii-script="true"></script>
+</body>
+</html>

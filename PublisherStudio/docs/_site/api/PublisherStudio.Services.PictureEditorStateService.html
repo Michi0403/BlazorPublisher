@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html class="publisherstudio-kawaii-docs" lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>Class PictureEditorStateService | PublisherStudio Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class PictureEditorStateService | PublisherStudio Documentation ">
+      
+      <meta name="description" content="Provides picture editor state service operations.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  <link rel="stylesheet" href="../styles/publisherstudio-kawaii.css?v=6186303f7e28" data-publisherstudio-kawaii-style="true" />
+</head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="PublisherStudio">
+            PublisherStudio
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="PublisherStudio.Services.PictureEditorStateService">
+
+
+
+  <h1 id="PublisherStudio_Services_PictureEditorStateService" data-uid="PublisherStudio.Services.PictureEditorStateService" class="text-break">
+Class PictureEditorStateService  
+  </h1><aside class="publisherstudio-api-neko-note" role="note"><span class="publisherstudio-api-neko-mascot" aria-hidden="true">&#x1F431;&#x2009;&#x1F436;</span><span><strong>Neko & Puppy type guide</strong> · Tiny paws, tidy details: constructors, properties, methods, and events stay cuddled up with the type that owns them, nya~ woof!</span></aside>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="PublisherStudio.html">PublisherStudio</a>.<a class="xref" href="PublisherStudio.Services.html">Services</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>PublisherStudio.Web.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Provides picture editor state service operations.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class PictureEditorStateService</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">PictureEditorStateService</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--constructors" data-member-kind="Constructors" style="--publisherstudio-api-accent:#a855f7;" role="region" aria-labelledby="constructors"><h2 class="section" id="constructors"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2728;</span>Constructors
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService__ctor_" data-uid="PublisherStudio.Services.PictureEditorStateService.#ctor*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService__ctor_PublisherStudio_Services_PictureDocumentService_PublisherStudio_Services_IPublisherDocumentFactory_" data-uid="PublisherStudio.Services.PictureEditorStateService.#ctor(PublisherStudio.Services.PictureDocumentService,PublisherStudio.Services.IPublisherDocumentFactory)">
+  PictureEditorStateService(PictureDocumentService, IPublisherDocumentFactory)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the picture editor state service operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PictureEditorStateService(PictureDocumentService documents, IPublisherDocumentFactory documentFactory)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>documents</code> <a class="xref" href="PublisherStudio.Services.PictureDocumentService.html">PictureDocumentService</a></dt>
+    <dd></dd>
+    <dt><code>documentFactory</code> <a class="xref" href="PublisherStudio.Services.IPublisherDocumentFactory.html">IPublisherDocumentFactory</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--properties" data-member-kind="Properties" style="--publisherstudio-api-accent:#06b6d4;" role="region" aria-labelledby="properties"><h2 class="section" id="properties"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x1F43E;</span>Properties
+<span class="publisherstudio-api-member-count" aria-label="6 items">6</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CanPaste_" data-uid="PublisherStudio.Services.PictureEditorStateService.CanPaste*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CanPaste" data-uid="PublisherStudio.Services.PictureEditorStateService.CanPaste">
+  CanPaste
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets can paste.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool CanPaste { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CanRedo_" data-uid="PublisherStudio.Services.PictureEditorStateService.CanRedo*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CanRedo" data-uid="PublisherStudio.Services.PictureEditorStateService.CanRedo">
+  CanRedo
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets can redo.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool CanRedo { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CanUndo_" data-uid="PublisherStudio.Services.PictureEditorStateService.CanUndo*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CanUndo" data-uid="PublisherStudio.Services.PictureEditorStateService.CanUndo">
+  CanUndo
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets can undo.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool CanUndo { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_Document_" data-uid="PublisherStudio.Services.PictureEditorStateService.Document*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_Document" data-uid="PublisherStudio.Services.PictureEditorStateService.Document">
+  Document
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets document.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PictureDocument Document { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PictureDocument.html">PictureDocument</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SelectedLayer_" data-uid="PublisherStudio.Services.PictureEditorStateService.SelectedLayer*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SelectedLayer" data-uid="PublisherStudio.Services.PictureEditorStateService.SelectedLayer">
+  SelectedLayer
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets selected layer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PictureLayer? SelectedLayer { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PictureLayer.html">PictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SelectedLayerId_" data-uid="PublisherStudio.Services.PictureEditorStateService.SelectedLayerId*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SelectedLayerId" data-uid="PublisherStudio.Services.PictureEditorStateService.SelectedLayerId">
+  SelectedLayerId
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets selected layer identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Guid? SelectedLayerId { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--methods" data-member-kind="Methods" style="--publisherstudio-api-accent:#3b82f6;" role="region" aria-labelledby="methods"><h2 class="section" id="methods"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2699;&#xFE0F;</span>Methods
+<span class="publisherstudio-api-member-count" aria-label="45 items">45</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddAreaFill_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddAreaFill*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddAreaFill_System_String_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_String_System_String_System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddAreaFill(System.String,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.String,System.Boolean)">
+  AddAreaFill(string, IReadOnlyList&lt;PicturePoint&gt;, string, string, bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds area fill.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ShapePictureLayer AddAreaFill(string selectionKind, IReadOnlyList&lt;PicturePoint&gt; points, string primaryColor, string secondaryColor, bool gradient)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>selectionKind</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>points</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PicturePoint.html">PicturePoint</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>primaryColor</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>secondaryColor</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>gradient</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.ShapePictureLayer.html">ShapePictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddFill_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddFill*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddFill_PublisherStudio_BusinessObjects_PictureFillKind_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddFill(PublisherStudio.BusinessObjects.PictureFillKind)">
+  AddFill(PictureFillKind)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds fill.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public FillPictureLayer AddFill(PictureFillKind fillKind = PictureFillKind.LinearGradient)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>fillKind</code> <a class="xref" href="PublisherStudio.BusinessObjects.PictureFillKind.html">PictureFillKind</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.FillPictureLayer.html">FillPictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddImportedLayers_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddImportedLayers*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddImportedLayers_PublisherStudio_BusinessObjects_PictureDocument_System_String_System_Nullable_System_Double__System_Nullable_System_Double__" data-uid="PublisherStudio.Services.PictureEditorStateService.AddImportedLayers(PublisherStudio.BusinessObjects.PictureDocument,System.String,System.Nullable{System.Double},System.Nullable{System.Double})">
+  AddImportedLayers(PictureDocument, string?, double?, double?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds imported layers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int AddImportedLayers(PictureDocument importedDocument, string? groupName = null, double? centerX = null, double? centerY = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>importedDocument</code> <a class="xref" href="PublisherStudio.BusinessObjects.PictureDocument.html">PictureDocument</a></dt>
+    <dd></dd>
+    <dt><code>groupName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>centerX</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+    <dt><code>centerY</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddPaint_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddPaint*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddPaint_System_String_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddPaint(System.String)">
+  AddPaint(string)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds paint.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PaintPictureLayer AddPaint(string name = &quot;Paint&quot;)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>name</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PaintPictureLayer.html">PaintPictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddPath_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddPath*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddPath_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_String_System_Double_System_Boolean_System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddPath(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Boolean,System.Boolean)">
+  AddPath(IReadOnlyList&lt;PicturePoint&gt;, string, double, bool, bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds path.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ShapePictureLayer AddPath(IReadOnlyList&lt;PicturePoint&gt; points, string strokeColor, double strokeWidth, bool closed = false, bool smooth = true)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>points</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PicturePoint.html">PicturePoint</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>strokeColor</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>strokeWidth</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>closed</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+    <dt><code>smooth</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.ShapePictureLayer.html">ShapePictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddRaster_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddRaster*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddRaster_System_String_System_String_System_Int32_System_Int32_System_Nullable_System_Double__System_Nullable_System_Double__" data-uid="PublisherStudio.Services.PictureEditorStateService.AddRaster(System.String,System.String,System.Int32,System.Int32,System.Nullable{System.Double},System.Nullable{System.Double})">
+  AddRaster(string, string, int, int, double?, double?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds raster.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public RasterPictureLayer AddRaster(string dataUrl, string name, int naturalWidth = 0, int naturalHeight = 0, double? centerX = null, double? centerY = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>dataUrl</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>name</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>naturalWidth</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>naturalHeight</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>centerX</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+    <dt><code>centerY</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.RasterPictureLayer.html">RasterPictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddRender_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddRender*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddRender_PublisherStudio_BusinessObjects_PictureRenderKind_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddRender(PublisherStudio.BusinessObjects.PictureRenderKind)">
+  AddRender(PictureRenderKind)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds render.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public RenderPictureLayer AddRender(PictureRenderKind renderKind = PictureRenderKind.Clouds)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>renderKind</code> <a class="xref" href="PublisherStudio.BusinessObjects.PictureRenderKind.html">PictureRenderKind</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.RenderPictureLayer.html">RenderPictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddShape_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddShape*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddShape_PublisherStudio_BusinessObjects_PictureShapeKind_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddShape(PublisherStudio.BusinessObjects.PictureShapeKind)">
+  AddShape(PictureShapeKind)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds shape.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ShapePictureLayer AddShape(PictureShapeKind shape = PictureShapeKind.Rectangle)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>shape</code> <a class="xref" href="PublisherStudio.BusinessObjects.PictureShapeKind.html">PictureShapeKind</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.ShapePictureLayer.html">ShapePictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddShapeAt_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddShapeAt*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddShapeAt_PublisherStudio_BusinessObjects_PictureShapeKind_System_Double_System_Double_System_Double_System_Double_System_Double_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddShapeAt(PublisherStudio.BusinessObjects.PictureShapeKind,System.Double,System.Double,System.Double,System.Double,System.Double)">
+  AddShapeAt(PictureShapeKind, double, double, double, double, double)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds shape at.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ShapePictureLayer AddShapeAt(PictureShapeKind shape, double x, double y, double width, double height, double rotation = 0)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>shape</code> <a class="xref" href="PublisherStudio.BusinessObjects.PictureShapeKind.html">PictureShapeKind</a></dt>
+    <dd></dd>
+    <dt><code>x</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>y</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>width</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>height</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>rotation</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.ShapePictureLayer.html">ShapePictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddStroke_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddStroke*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddStroke_PublisherStudio_BusinessObjects_PictureStrokeKind_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_String_System_Double_System_Double_System_Double_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddStroke(PublisherStudio.BusinessObjects.PictureStrokeKind,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Double,System.Double)">
+  AddStroke(PictureStrokeKind, IReadOnlyList&lt;PicturePoint&gt;, string, double, double, double)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds stroke.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void AddStroke(PictureStrokeKind kind, IReadOnlyList&lt;PicturePoint&gt; points, string color, double widthPx, double opacity, double hardness)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>kind</code> <a class="xref" href="PublisherStudio.BusinessObjects.PictureStrokeKind.html">PictureStrokeKind</a></dt>
+    <dd></dd>
+    <dt><code>points</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PicturePoint.html">PicturePoint</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>color</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>widthPx</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>opacity</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>hardness</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_AddText_" data-uid="PublisherStudio.Services.PictureEditorStateService.AddText*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_AddText" data-uid="PublisherStudio.Services.PictureEditorStateService.AddText">
+  AddText()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Adds text.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TextPictureLayer AddText()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.TextPictureLayer.html">TextPictureLayer</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_ApplySelectedClip_" data-uid="PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_ApplySelectedClip_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)">
+  ApplySelectedClip(IReadOnlyList&lt;PicturePoint&gt;, bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Applies selected clip.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool ApplySelectedClip(IReadOnlyList&lt;PicturePoint&gt; points, bool inverted)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>points</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PicturePoint.html">PicturePoint</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>inverted</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_BringSelectedToFront_" data-uid="PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_BringSelectedToFront" data-uid="PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront">
+  BringSelectedToFront()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the bring selected to front operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void BringSelectedToFront()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CenterSelected_" data-uid="PublisherStudio.Services.PictureEditorStateService.CenterSelected*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CenterSelected" data-uid="PublisherStudio.Services.PictureEditorStateService.CenterSelected">
+  CenterSelected()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the center selected operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CenterSelected()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_ClearSelectedClip_" data-uid="PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_ClearSelectedClip" data-uid="PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip">
+  ClearSelectedClip()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the clear selected clip operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool ClearSelectedClip()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_ClearSelectedPaint_" data-uid="PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_ClearSelectedPaint" data-uid="PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint">
+  ClearSelectedPaint()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the clear selected paint operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ClearSelectedPaint()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CloneDocument_" data-uid="PublisherStudio.Services.PictureEditorStateService.CloneDocument*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CloneDocument" data-uid="PublisherStudio.Services.PictureEditorStateService.CloneDocument">
+  CloneDocument()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the clone document operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PictureDocument CloneDocument()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PictureDocument.html">PictureDocument</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CommitTransform_" data-uid="PublisherStudio.Services.PictureEditorStateService.CommitTransform*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CommitTransform_System_Guid_System_Double_System_Double_System_Double_System_Double_System_Double_" data-uid="PublisherStudio.Services.PictureEditorStateService.CommitTransform(System.Guid,System.Double,System.Double,System.Double,System.Double,System.Double)">
+  CommitTransform(Guid, double, double, double, double, double)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the commit transform operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CommitTransform(Guid id, double x, double y, double width, double height, double rotation)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a></dt>
+    <dd></dd>
+    <dt><code>x</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>y</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>width</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>height</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>rotation</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CopySelected_" data-uid="PublisherStudio.Services.PictureEditorStateService.CopySelected*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CopySelected" data-uid="PublisherStudio.Services.PictureEditorStateService.CopySelected">
+  CopySelected()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the copy selected operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopySelected()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_CopySelectedRegion_" data-uid="PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_CopySelectedRegion_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)">
+  CopySelectedRegion(IReadOnlyList&lt;PicturePoint&gt;, bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the copy selected region operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool CopySelectedRegion(IReadOnlyList&lt;PicturePoint&gt; points, bool inverted = false)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>points</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PicturePoint.html">PicturePoint</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>inverted</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_DeleteSelected_" data-uid="PublisherStudio.Services.PictureEditorStateService.DeleteSelected*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_DeleteSelected" data-uid="PublisherStudio.Services.PictureEditorStateService.DeleteSelected">
+  DeleteSelected()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Deletes selected.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void DeleteSelected()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_DuplicateSelected_" data-uid="PublisherStudio.Services.PictureEditorStateService.DuplicateSelected*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_DuplicateSelected" data-uid="PublisherStudio.Services.PictureEditorStateService.DuplicateSelected">
+  DuplicateSelected()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the duplicate selected operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void DuplicateSelected()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_EndLiveEdit_" data-uid="PublisherStudio.Services.PictureEditorStateService.EndLiveEdit*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_EndLiveEdit" data-uid="PublisherStudio.Services.PictureEditorStateService.EndLiveEdit">
+  EndLiveEdit()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the end live edit operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void EndLiveEdit()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_FitSelectedToCanvas_" data-uid="PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_FitSelectedToCanvas" data-uid="PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas">
+  FitSelectedToCanvas()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the fit selected to canvas operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void FitSelectedToCanvas()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_MoveSelectedLayer_" data-uid="PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_MoveSelectedLayer_System_Int32_" data-uid="PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer(System.Int32)">
+  MoveSelectedLayer(int)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the move selected layer operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void MoveSelectedLayer(int delta)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>delta</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_Paste_" data-uid="PublisherStudio.Services.PictureEditorStateService.Paste*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_Paste" data-uid="PublisherStudio.Services.PictureEditorStateService.Paste">
+  Paste()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the paste operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Paste()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_Redo_" data-uid="PublisherStudio.Services.PictureEditorStateService.Redo*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_Redo" data-uid="PublisherStudio.Services.PictureEditorStateService.Redo">
+  Redo()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the redo operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Redo()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_ReplaceRaster_" data-uid="PublisherStudio.Services.PictureEditorStateService.ReplaceRaster*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_ReplaceRaster_System_Guid_System_String_" data-uid="PublisherStudio.Services.PictureEditorStateService.ReplaceRaster(System.Guid,System.String)">
+  ReplaceRaster(Guid, string)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the replace raster operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool ReplaceRaster(Guid id, string dataUrl)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a></dt>
+    <dd></dd>
+    <dt><code>dataUrl</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SelectLayer_" data-uid="PublisherStudio.Services.PictureEditorStateService.SelectLayer*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SelectLayer_System_Nullable_System_Guid__" data-uid="PublisherStudio.Services.PictureEditorStateService.SelectLayer(System.Nullable{System.Guid})">
+  SelectLayer(Guid?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the select layer operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SelectLayer(Guid? id)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SendSelectedToBack_" data-uid="PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SendSelectedToBack" data-uid="PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack">
+  SendSelectedToBack()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the send selected to back operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SendSelectedToBack()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SetBackground_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetBackground*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SetBackground_System_String_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetBackground(System.String)">
+  SetBackground(string)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Sets background.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetBackground(string value)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>value</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SetDocumentName_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetDocumentName*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SetDocumentName_System_String_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetDocumentName(System.String)">
+  SetDocumentName(string)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Sets document name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetDocumentName(string name)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>name</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SetDocumentSize_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetDocumentSize*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SetDocumentSize_System_Int32_System_Int32_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetDocumentSize(System.Int32,System.Int32)">
+  SetDocumentSize(int, int)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Sets document size.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetDocumentSize(int widthPx, int heightPx)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>widthPx</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>heightPx</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SetGrid_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetGrid*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SetGrid_System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetGrid(System.Boolean)">
+  SetGrid(bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Sets grid.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetGrid(bool visible)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>visible</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SetGridSpacing_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetGridSpacing*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SetGridSpacing_System_Int32_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetGridSpacing(System.Int32)">
+  SetGridSpacing(int)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Sets grid spacing.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetGridSpacing(int pixels)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>pixels</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SetSnap_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetSnap*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SetSnap_System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetSnap(System.Boolean)">
+  SetSnap(bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Sets snap.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetSnap(bool enabled)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>enabled</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_SetZoom_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetZoom*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_SetZoom_System_Double_" data-uid="PublisherStudio.Services.PictureEditorStateService.SetZoom(System.Double)">
+  SetZoom(double)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Sets zoom.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetZoom(double zoom)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>zoom</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_StartFromDocument_" data-uid="PublisherStudio.Services.PictureEditorStateService.StartFromDocument*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_StartFromDocument_PublisherStudio_BusinessObjects_PictureDocument_" data-uid="PublisherStudio.Services.PictureEditorStateService.StartFromDocument(PublisherStudio.BusinessObjects.PictureDocument)">
+  StartFromDocument(PictureDocument)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Starts from document.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void StartFromDocument(PictureDocument document)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>document</code> <a class="xref" href="PublisherStudio.BusinessObjects.PictureDocument.html">PictureDocument</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_StartFromRaster_" data-uid="PublisherStudio.Services.PictureEditorStateService.StartFromRaster*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_StartFromRaster_System_String_System_String_System_Int32_System_Int32_" data-uid="PublisherStudio.Services.PictureEditorStateService.StartFromRaster(System.String,System.String,System.Int32,System.Int32)">
+  StartFromRaster(string, string, int, int)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Starts from raster.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void StartFromRaster(string dataUrl, string name, int widthPx = 1200, int heightPx = 800)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>dataUrl</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>name</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>widthPx</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>heightPx</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_StartNew_" data-uid="PublisherStudio.Services.PictureEditorStateService.StartNew*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_StartNew_System_Int32_System_Int32_System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.StartNew(System.Int32,System.Int32,System.Boolean)">
+  StartNew(int, int, bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Starts new.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void StartNew(int widthPx = 1200, int heightPx = 800, bool transparent = true)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>widthPx</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>heightPx</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>transparent</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_ToggleLock_" data-uid="PublisherStudio.Services.PictureEditorStateService.ToggleLock*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_ToggleLock_System_Guid_" data-uid="PublisherStudio.Services.PictureEditorStateService.ToggleLock(System.Guid)">
+  ToggleLock(Guid)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the toggle lock operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ToggleLock(Guid id)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_ToggleVisibility_" data-uid="PublisherStudio.Services.PictureEditorStateService.ToggleVisibility*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_ToggleVisibility_System_Guid_" data-uid="PublisherStudio.Services.PictureEditorStateService.ToggleVisibility(System.Guid)">
+  ToggleVisibility(Guid)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the toggle visibility operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ToggleVisibility(Guid id)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_Undo_" data-uid="PublisherStudio.Services.PictureEditorStateService.Undo*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_Undo" data-uid="PublisherStudio.Services.PictureEditorStateService.Undo">
+  Undo()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Runs the undo operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Undo()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_UpdateSelected_" data-uid="PublisherStudio.Services.PictureEditorStateService.UpdateSelected*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_UpdateSelected_System_Action_PublisherStudio_BusinessObjects_PictureLayer__System_Boolean_System_Boolean_" data-uid="PublisherStudio.Services.PictureEditorStateService.UpdateSelected(System.Action{PublisherStudio.BusinessObjects.PictureLayer},System.Boolean,System.Boolean)">
+  UpdateSelected(Action&lt;PictureLayer&gt;, bool, bool)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Updates selected.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void UpdateSelected(Action&lt;PictureLayer&gt; update, bool capture = true, bool allowLocked = false)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>update</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action-1">Action</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PictureLayer.html">PictureLayer</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>capture</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+    <dt><code>allowLocked</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_Services_PictureEditorStateService_UpdateSelectedLive_" data-uid="PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_UpdateSelectedLive_System_String_System_Action_PublisherStudio_BusinessObjects_PictureLayer__" data-uid="PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive(System.String,System.Action{PublisherStudio.BusinessObjects.PictureLayer})">
+  UpdateSelectedLive(string, Action&lt;PictureLayer&gt;)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Updates selected live.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void UpdateSelectedLive(string key, Action&lt;PictureLayer&gt; update)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>key</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>update</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action-1">Action</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PictureLayer.html">PictureLayer</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--events" data-member-kind="Events" style="--publisherstudio-api-accent:#ec4899;" role="region" aria-labelledby="events"><h2 class="section" id="events"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x26A1;</span>Events
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_PictureEditorStateService_Changed" data-uid="PublisherStudio.Services.PictureEditorStateService.Changed">
+  Changed
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Occurs when changed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public event Action? Changed</code></pre>
+  </div>
+
+
+
+
+
+
+  <h4 class="section">Event Type</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action">Action</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+</div></section>
+</div></section></article>
+
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          PublisherStudio 2.1.2 · generated documentation
+        </div>
+      </div>
+    </footer>
+  <script type="module" src="../styles/publisherstudio-kawaii.js?v=2cbe66e9efd7" data-publisherstudio-kawaii-script="true"></script>
+</body>
+</html>

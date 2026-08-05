@@ -1,4 +1,4 @@
-namespace PublisherStudio.Services.Streaming.UseCases.Runtime;
+﻿namespace PublisherStudio.Services.Streaming.UseCases.Runtime;
 
 /// <summary>
 /// Orchestrates read-only runtime information used by the desktop host UI.
@@ -37,7 +37,7 @@ public sealed class StreamingRuntimeUseCases
             logger.LogTrace($"Entering StreamingRuntimeUseCases.GetCapabilities.");
             return new()
     {
-        Version = "2.1.1",
+        Version = "2.1.2",
         BrowserCapture = true,
         BrowserAudioMix = true,
         NativeDeviceDiscovery = true,

@@ -9,6 +9,7 @@
     --publisher-z-tooltip: 2200;
     --publisher-z-notification: 1800;
     --publisher-z-export: 1900;
+    --publisher-z-chrome: 1500;
 }
 
 * { box-sizing: border-box; }
@@ -27,7 +28,7 @@ button { cursor: pointer; }
     display: flex;
     align-items: center;
     gap: 9px;
-    padding: 3px 12px;
+    padding: 3px 224px 3px 12px;
     color: white;
     background: linear-gradient(90deg, #0f4b78, #1768a0);
 }
@@ -54,6 +55,60 @@ button { cursor: pointer; }
 
 .document-name:focus { border-bottom-color: #fff; }
 .modified-label { margin-left: auto; opacity: .78; font-size: 12px; }
+
+/* Global application language selection follows the LocalGPT request-culture flow. */
+.publisher-language-switcher {
+    position: fixed;
+    z-index: var(--publisher-z-chrome);
+    top: 4px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 30px;
+    max-width: min(210px, calc(100vw - 24px));
+    padding: 3px 7px;
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 34%);
+    border-radius: 4px;
+    background: rgb(6 53 88 / 88%);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 22%);
+    backdrop-filter: blur(6px);
+}
+
+.publisher-language-switcher label {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.publisher-language-switcher select {
+    min-width: 0;
+    width: 132px;
+    max-width: 100%;
+    height: 24px;
+    padding: 1px 22px 1px 6px;
+    color: #172033;
+    border: 1px solid #8ea3b4;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.publisher-language-switcher select:focus-visible {
+    outline: 2px solid #ffd5ef;
+    outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+    .title-bar { padding-right: 154px; }
+    .publisher-language-switcher { right: 6px; max-width: 142px; }
+    .publisher-language-switcher label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .publisher-language-switcher select { width: 126px; }
+}
+
+@media print {
+    .publisher-language-switcher { display: none !important; }
+}
 .publication-ribbon { min-height: 142px; border-bottom: 1px solid #a8adb5; background: #fff; }
 .editor-workspace {
     --pages-pane-width: 172px;

@@ -5,7 +5,7 @@ items:
   id: ConfigurationController
   parent: PublisherStudio.Controllers
   children:
-  - PublisherStudio.Controllers.ConfigurationController.#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService)
+  - PublisherStudio.Controllers.ConfigurationController.#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Controllers.ConfigurationController})
   - PublisherStudio.Controllers.ConfigurationController.Cultures
   - PublisherStudio.Controllers.ConfigurationController.EnsurePaths(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
   - PublisherStudio.Controllers.ConfigurationController.Paths
@@ -233,16 +233,16 @@ items:
     arguments:
     - type: System.String
       value: api/configuration
-- uid: PublisherStudio.Controllers.ConfigurationController.#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService)
-  commentId: M:PublisherStudio.Controllers.ConfigurationController.#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService)
-  id: '#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService)'
+- uid: PublisherStudio.Controllers.ConfigurationController.#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Controllers.ConfigurationController})
+  commentId: M:PublisherStudio.Controllers.ConfigurationController.#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Controllers.ConfigurationController})
+  id: '#ctor(PublisherStudio.Services.Configuration.IApplicationPathService,PublisherStudio.Services.Configuration.IFileLocalizationService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Controllers.ConfigurationController})'
   parent: PublisherStudio.Controllers.ConfigurationController
   langs:
   - csharp
   - vb
-  name: ConfigurationController(IApplicationPathService, IFileLocalizationService)
-  nameWithType: ConfigurationController.ConfigurationController(IApplicationPathService, IFileLocalizationService)
-  fullName: PublisherStudio.Controllers.ConfigurationController.ConfigurationController(PublisherStudio.Services.Configuration.IApplicationPathService, PublisherStudio.Services.Configuration.IFileLocalizationService)
+  name: ConfigurationController(IApplicationPathService, IFileLocalizationService, ILogger<ConfigurationController>)
+  nameWithType: ConfigurationController.ConfigurationController(IApplicationPathService, IFileLocalizationService, ILogger<ConfigurationController>)
+  fullName: PublisherStudio.Controllers.ConfigurationController.ConfigurationController(PublisherStudio.Services.Configuration.IApplicationPathService, PublisherStudio.Services.Configuration.IFileLocalizationService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Controllers.ConfigurationController>)
   type: Constructor
   assemblies:
   - PublisherStudio.Web
@@ -250,17 +250,19 @@ items:
   summary: Provides configuration controller operations.
   example: []
   syntax:
-    content: public ConfigurationController(IApplicationPathService paths, IFileLocalizationService localization)
+    content: public ConfigurationController(IApplicationPathService paths, IFileLocalizationService localization, ILogger<ConfigurationController> logger)
     parameters:
     - id: paths
       type: PublisherStudio.Services.Configuration.IApplicationPathService
     - id: localization
       type: PublisherStudio.Services.Configuration.IFileLocalizationService
-    content.vb: Public Sub New(paths As IApplicationPathService, localization As IFileLocalizationService)
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Controllers.ConfigurationController}
+    content.vb: Public Sub New(paths As IApplicationPathService, localization As IFileLocalizationService, logger As ILogger(Of ConfigurationController))
   overload: PublisherStudio.Controllers.ConfigurationController.#ctor*
-  nameWithType.vb: ConfigurationController.New(IApplicationPathService, IFileLocalizationService)
-  fullName.vb: PublisherStudio.Controllers.ConfigurationController.New(PublisherStudio.Services.Configuration.IApplicationPathService, PublisherStudio.Services.Configuration.IFileLocalizationService)
-  name.vb: New(IApplicationPathService, IFileLocalizationService)
+  nameWithType.vb: ConfigurationController.New(IApplicationPathService, IFileLocalizationService, ILogger(Of ConfigurationController))
+  fullName.vb: PublisherStudio.Controllers.ConfigurationController.New(PublisherStudio.Services.Configuration.IApplicationPathService, PublisherStudio.Services.Configuration.IFileLocalizationService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Controllers.ConfigurationController))
+  name.vb: New(IApplicationPathService, IFileLocalizationService, ILogger(Of ConfigurationController))
 - uid: PublisherStudio.Controllers.ConfigurationController.Paths
   commentId: M:PublisherStudio.Controllers.ConfigurationController.Paths
   id: Paths
@@ -9814,7 +9816,7 @@ references:
 - uid: PublisherStudio.Controllers.ConfigurationController.#ctor*
   commentId: Overload:PublisherStudio.Controllers.ConfigurationController.#ctor
   isExternal: true
-  href: PublisherStudio.Controllers.ConfigurationController.html#PublisherStudio_Controllers_ConfigurationController__ctor_PublisherStudio_Services_Configuration_IApplicationPathService_PublisherStudio_Services_Configuration_IFileLocalizationService_
+  href: PublisherStudio.Controllers.ConfigurationController.html#PublisherStudio_Controllers_ConfigurationController__ctor_PublisherStudio_Services_Configuration_IApplicationPathService_PublisherStudio_Services_Configuration_IFileLocalizationService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Controllers_ConfigurationController__
   name: ConfigurationController
   nameWithType: ConfigurationController.ConfigurationController
   fullName: PublisherStudio.Controllers.ConfigurationController.ConfigurationController
@@ -9837,6 +9839,41 @@ references:
   name: IFileLocalizationService
   nameWithType: IFileLocalizationService
   fullName: PublisherStudio.Services.Configuration.IFileLocalizationService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Controllers.ConfigurationController}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Controllers.ConfigurationController}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<ConfigurationController>
+  nameWithType: ILogger<ConfigurationController>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Controllers.ConfigurationController>
+  nameWithType.vb: ILogger(Of ConfigurationController)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Controllers.ConfigurationController)
+  name.vb: ILogger(Of ConfigurationController)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Controllers.ConfigurationController
+    name: ConfigurationController
+    isExternal: true
+    href: PublisherStudio.Controllers.ConfigurationController.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Controllers.ConfigurationController
+    name: ConfigurationController
+    isExternal: true
+    href: PublisherStudio.Controllers.ConfigurationController.html
+  - name: )
 - uid: PublisherStudio.Services.Configuration
   commentId: N:PublisherStudio.Services.Configuration
   isExternal: true
@@ -9874,6 +9911,71 @@ references:
     name: Configuration
     isExternal: true
     href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
 - uid: PublisherStudio.Controllers.ConfigurationController.Paths*
   commentId: Overload:PublisherStudio.Controllers.ConfigurationController.Paths
   isExternal: true

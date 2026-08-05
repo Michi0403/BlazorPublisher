@@ -11,7 +11,7 @@ PublisherStudio uses these existing solution roots and their subnamespaces:
 - `Hubs` for persistent connection entry points and connection-specific coordination
 - `Services` for reusable application capabilities, general data processing, persistence and technical I/O such as files, network communication, FFmpeg, devices and operating-system APIs
 - `HostedServices` for application-lifetime scheduling, polling and start/stop lifecycle adapters
-- `Domain` and `Models` for authoritative documents, shared contracts and view models
+- `BusinessObjects` for authoritative documents, shared contracts, configuration data and view models
 
 There is no separate `Backend` architectural root. Controllers and Hubs are backend entry points; backend work behind those entry points is implemented as reusable Services.
 
@@ -32,11 +32,11 @@ If logic is useful from more than one caller, it belongs in Services rather than
 
 ## Contract and type ownership
 
-Every semantic contract has exactly one authoritative declaration. Shared request, event, state and result types used across Components, Controllers, Hubs, Services or HostedServices belong to the existing `Domain` or `Models` owner and must be reused directly. Do not redeclare a same-named Service-local copy of a Domain/Models type.
+Every semantic contract has exactly one authoritative declaration. Shared request, event, state and result types used across Components, Controllers, Hubs, Services or HostedServices belong to `PublisherStudio.BusinessObjects` and must be reused directly. Do not redeclare a same-named Service-local copy of a BusinessObjects type.
 
 A separate transport DTO is allowed only at a real serialization, process or provider boundary. Name it according to that boundary (`Request`, `Response`, `Dto`, `Message` or provider-specific name), map it once at the boundary, and do not leak it through the in-process service graph. An in-process facade is not a reason to clone a shared contract.
 
-`GlobalUsings*.cs` creates one project-wide symbol scope. Before adding or moving a public/internal type into a globally imported namespace, search all type declarations for the same simple name. The architecture tests must remain free of Domain/Models-to-Services shadow types and global-using name collisions. When moving a contract, remove the old declaration in the same change and update all consumers; do not leave compatibility duplicates behind.
+`GlobalUsings*.cs` creates one project-wide symbol scope. Before adding or moving a public/internal type into a globally imported namespace, search all type declarations for the same simple name. The architecture tests must remain free of BusinessObjects-to-Services shadow types and global-using name collisions. When moving a contract, remove the old declaration in the same change and update all consumers; do not leave compatibility duplicates behind.
 
 ## Compiler-visible namespace safety
 
@@ -69,10 +69,10 @@ Allowed examples:
 The intended direction is:
 
 ```text
-Components -------> Services / service use cases -------> Domain / Models
-Controllers ------> Services / service use cases -------> Domain / Models
-Hubs -------------> Services / service use cases -------> Domain / Models
-HostedServices ---> Services / service use cases -------> Domain / Models
+Components -------> Services / service use cases -------> BusinessObjects
+Controllers ------> Services / service use cases -------> BusinessObjects
+Hubs -------------> Services / service use cases -------> BusinessObjects
+HostedServices ---> Services / service use cases -------> BusinessObjects
 ```
 
 A composition-root helper beside `Program.cs` may register all roots in dependency injection. It is wiring, not business processing.
@@ -102,7 +102,7 @@ canonical model -> capability analysis -> mapping -> external writer
 
 Imports must not mutate the active project before validation succeeds. Exporters must report unsupported, flattened and lossy features. Do not reshape the native model around a third-party format.
 
-Adapters belong under the owning `Services/<Area>/Import` or `Services/<Area>/Export` subnamespace. Interchange parsers and writers belong under the owning reusable Service namespace, for example `Services/PictureStudio/Import` or `Services/Publication/Import`. Their shared result and issue contracts belong in `Domain` or `Models`; Components only choose a file, display the report and commit the validated canonical result.
+Adapters belong under the owning `Services/<Area>/Import` or `Services/<Area>/Export` subnamespace. Interchange parsers and writers belong under the owning reusable Service namespace, for example `Services/PictureStudio/Import` or `Services/Publication/Import`. Their shared result and issue contracts belong in `BusinessObjects`; Components only choose a file, display the report and commit the validated canonical result.
 
 Open specifications do not automatically permit adding an implementation package. Prefer open specifications and existing BCL capabilities. Do not add a NuGet, npm package, native binary or separate process for a format adapter without explicit approval. DTD processing must be prohibited for SVG/XML imports. They must also reject entity expansion, executable content, event attributes and undeclared online dependencies. Package imports must validate archive paths, entry sizes and required manifest/content files. Add deterministic fixtures and architecture tests for every new adapter.
 
@@ -164,6 +164,12 @@ The checklist must cover, where applicable:
 - a regression test for every crash, race, unreachable command or stacking defect fixed by the release.
 
 A visual feature is not release-complete merely because its renderer looks correct. It is complete only when it remains operable through the shared object-layer structure and the supported input families, and when failures do not tear down the Blazor circuit.
+
+## Application localization and installer independence
+
+PublisherStudio application localization is owned by `IFileLocalizationService`, the flat JSON catalogs under `src/PublisherStudio.Web/Localization`, request-culture middleware, and the application layout selector. New application strings must use the same catalog structure and keep the reviewed culture catalogs synchronized. Application language and publication-language metadata are separate settings.
+
+The installer console remains a dependency-light bootstrap application. Do not move the web localization service, DevExpress packages, Blazor components, or application JSON translation runtime into the installer. Installer messages stay concise and operational; the language selector belongs to PublisherStudio.Web.
 
 ## LocalGPT-aligned installer and release deployment
 

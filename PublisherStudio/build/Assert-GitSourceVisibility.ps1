@@ -1,4 +1,4 @@
-Set-StrictMode -Version Latest
+﻿Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 function Fail([string]$Message) { throw "Git source visibility validation failed: $Message" }
@@ -50,6 +50,7 @@ $protectedPaths = @(
     'CHANGELOG-v2.0.5.md',
     'CHANGELOG-v2.1.0.md',
     'CHANGELOG-v2.1.1.md',
+    'CHANGELOG-v2.1.2.md',
     'AGENTS.md',
     'src/PublisherStudio.InstallerConsole/README.md',
     'RELEASE.md',

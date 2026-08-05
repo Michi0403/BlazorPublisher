@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.Json;
 
@@ -83,6 +84,108 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         catch (Exception exception)
         {
             logger.LogError(exception, $"FileLocalizationService.Get failed: {exception.Message}");
+            throw;
+        }
+    }
+
+
+    /// <summary>
+    /// Resolves a requested culture to one complete PublisherStudio localization catalog.
+    /// </summary>
+    public string ResolveAvailableCulture(string? culture)
+    {
+        try
+        {
+            logger.LogTrace("Resolving the requested PublisherStudio culture.");
+            var normalized = NormalizeCulture(culture);
+            return GetAvailableCultures().FirstOrDefault(item =>
+                string.Equals(item, normalized, StringComparison.OrdinalIgnoreCase)) ?? "en-US";
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublisherStudio culture resolution failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets the native display name and normalized culture name for one available catalog.
+    /// </summary>
+    public string GetCultureDisplayName(string culture)
+    {
+        try
+        {
+            logger.LogTrace("Creating the display label for PublisherStudio culture {Culture}.", culture);
+            var selected = ResolveAvailableCulture(culture);
+            var info = CultureInfo.GetCultureInfo(selected);
+            return $"{info.NativeName} ({info.Name})";
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublisherStudio culture display-name creation failed for {Culture}.", culture);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Builds a local return URL while removing stale culture query values.
+    /// </summary>
+    public string BuildCultureReturnUrl(string absoluteUri)
+    {
+        try
+        {
+            logger.LogTrace("Building the PublisherStudio culture return URL.");
+            if (!Uri.TryCreate(absoluteUri, UriKind.Absolute, out var current)) return "/";
+            return BuildCultureUrl(current.AbsolutePath, current.Query, null);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublisherStudio culture return URL creation failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Adds an explicit request culture to one validated local return URL.
+    /// </summary>
+    public string BuildCultureRedirectUrl(string? returnUrl, string culture)
+    {
+        try
+        {
+            logger.LogTrace("Building the PublisherStudio culture redirect URL.");
+            var selected = ResolveAvailableCulture(culture);
+            var local = string.IsNullOrWhiteSpace(returnUrl)
+                || !returnUrl.StartsWith("/", StringComparison.Ordinal)
+                || returnUrl.StartsWith("//", StringComparison.Ordinal)
+                    ? "/"
+                    : returnUrl;
+            if (!Uri.TryCreate("http://publisherstudio.invalid" + local, UriKind.Absolute, out var parsed))
+                return "/?culture=" + Uri.EscapeDataString(selected) + "&ui-culture=" + Uri.EscapeDataString(selected);
+            return BuildCultureUrl(parsed.AbsolutePath, parsed.Query, selected);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublisherStudio culture redirect URL creation failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Builds the application endpoint used to persist and select one culture.
+    /// </summary>
+    public string BuildCultureSelectionUrl(string absoluteUri, string culture)
+    {
+        try
+        {
+            logger.LogTrace("Building the PublisherStudio culture-selection endpoint.");
+            var selected = ResolveAvailableCulture(culture);
+            var returnUrl = BuildCultureReturnUrl(absoluteUri);
+            var endpoint = QueryHelpers.AddQueryString("/api/configuration/localization/select", "culture", selected);
+            return QueryHelpers.AddQueryString(endpoint, "returnUrl", returnUrl);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublisherStudio culture-selection endpoint creation failed.");
             throw;
         }
     }
@@ -189,6 +292,44 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         catch (Exception exception)
         {
             logger.LogError(exception, $"FileLocalizationService.AddCultures failed: {exception.Message}");
+            throw;
+        }
+    }
+
+
+    /// <summary>
+    /// Builds one local route while preserving query values unrelated to localization.
+    /// </summary>
+    private string BuildCultureUrl(string absolutePath, string query, string? culture)
+    {
+        try
+        {
+            logger.LogTrace("Building a local PublisherStudio culture route.");
+            var result = string.IsNullOrWhiteSpace(absolutePath) ? "/" : absolutePath;
+            foreach (var pair in QueryHelpers.ParseQuery(query))
+            {
+                if (string.Equals(pair.Key, "culture", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(pair.Key, "ui-culture", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                foreach (var value in pair.Value)
+                {
+                    if (value is null) continue;
+                    result = QueryHelpers.AddQueryString(result, pair.Key, value);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(culture))
+            {
+                result = QueryHelpers.AddQueryString(result, "culture", culture);
+                result = QueryHelpers.AddQueryString(result, "ui-culture", culture);
+            }
+
+            return result;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Local PublisherStudio culture route creation failed.");
             throw;
         }
     }

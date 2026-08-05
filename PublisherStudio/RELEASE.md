@@ -1,6 +1,6 @@
-# PublisherStudio 2.1.1 installer healing release
+# PublisherStudio 2.1.2 application-language and build-policy release
 
-PublisherStudio 2.1.1 replaces the broken custom deployment system with the working LocalGPT deployment pattern.
+PublisherStudio 2.1.2 keeps the working LocalGPT deployment pattern from 2.1.1, restores the logging-integrity policy required by the Windows build, and exposes the application language selector globally.
 
 ## Maintained deployment contract
 

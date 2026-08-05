@@ -142,6 +142,11 @@ public static class Program
             SupportedUICultures = supportedCultures,
             RequestCultureProviders =
             [
+                new QueryStringRequestCultureProvider
+                {
+                    QueryStringKey = "culture",
+                    UIQueryStringKey = "ui-culture"
+                },
                 // Keep the shell in one language. Browser Accept-Language no longer partially
                 // translates an otherwise English UI; users choose a reviewed culture explicitly.
                 new CookieRequestCultureProvider()

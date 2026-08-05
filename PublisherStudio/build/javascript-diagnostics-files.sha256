@@ -1,4 +1,4 @@
-# PublisherStudio 2.1.1 maintained browser JavaScript diagnostics inventory.
+# PublisherStudio 2.1.2 maintained browser JavaScript diagnostics inventory.
 0aa950cda3f3f631e5808c121df55e9776ca8b45f0d89f2b987301221dd8769d  src/PublisherStudio.Web/wwwroot/js/automationInterop.js
 3387d628db0e85e0a50785e40f5b61f6da893779e51d965a91d24df8a0e1d85f  src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
 9f0f9bc1989316bb7f9cf8415f060b8aa218e882f90188dad974ca96f1168565  src/PublisherStudio.Web/wwwroot/js/javascript-diagnostics.js
@@ -7,7 +7,7 @@
 1ffa0560a1867bb4ec3a1b49360ce10e6eb142eaf97b8f07736238a9ed03a042  src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js
 4d6f06c6c069c981e4076f90f0c3205f403f7a0a4c55732e906ca7aef871bc37  src/PublisherStudio.Web/wwwroot/js/organicSecurityQr.js
 4beec1b1cf32d4a17cf853dba911aaf11a0bc27a769a0a22e1884eaae889ba15  src/PublisherStudio.Web/wwwroot/js/pictureStudioInterop.js
-a08054f14e2c93582638b641db92dd22c51aef76a25ca5bb6a31c367b1190f2b  src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
+78beb3499174652a9ba5a834a889edbfcba59835df0b9ba17f08e2d8f91e86ce  src/PublisherStudio.Web/wwwroot/js/publisherInterop.js
 869930d4953b9c70efa748d74969aab596592776030767f242b1ed19982883b4  src/PublisherStudio.Web/wwwroot/js/secureCaptureInterop.js
 593e35db36d1cef6c25f3bf422306815dd66b41b75b0ce8612843655a4e62bf0  src/PublisherStudio.Web/wwwroot/js/spreadsheetEditorInterop.js
 b0bb04b86934627f419270f213c4629337642a45461392b79d614be055205305  src/PublisherStudio.Web/wwwroot/js/streamingInterop.js

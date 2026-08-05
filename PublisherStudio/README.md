@@ -2,7 +2,7 @@
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **2.1.1** restores the one-click deployment contract by aligning PublisherStudio with the working LocalGPT installer and release layout. The Kawaii DocFX documentation introduced in 2.1.0 remains included.
+Version **2.1.2** keeps the LocalGPT-aligned one-click deployment contract, restores the enabled logging-policy source, and adds an always-visible JSON-backed application language selector. The Kawaii DocFX documentation introduced in 2.1.0 remains included.
 
 ## A gentle first path
 

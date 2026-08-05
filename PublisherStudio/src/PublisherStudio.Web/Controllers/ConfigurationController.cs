@@ -10,7 +10,10 @@ namespace PublisherStudio.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/configuration")]
-public sealed class ConfigurationController(IApplicationPathService paths, IFileLocalizationService localization) : ControllerBase
+public sealed class ConfigurationController(
+    IApplicationPathService paths,
+    IFileLocalizationService localization,
+    ILogger<ConfigurationController> logger) : ControllerBase
 {
     /// <summary>
     /// Runs the paths operation.
@@ -67,14 +70,29 @@ public sealed class ConfigurationController(IApplicationPathService paths, IFile
     [HttpGet("localization/select")]
     public IActionResult SelectCulture([FromQuery] string culture, [FromQuery] string? returnUrl = "/")
     {
-        var available = localization.GetAvailableCultures();
-        var selected = available.FirstOrDefault(item => string.Equals(item, culture, StringComparison.OrdinalIgnoreCase)) ?? "en-US";
+        var selected = localization.ResolveAvailableCulture(culture);
+        Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+        Response.Headers["Pragma"] = "no-cache";
         Response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(selected)),
-            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(2), IsEssential = true, SameSite = SameSiteMode.Lax });
-        var destination = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "/";
-        return LocalRedirect(destination);
+            new CookieOptions
+            {
+                IsEssential = true,
+                HttpOnly = false,
+                SameSite = SameSiteMode.Lax,
+                Secure = Request.IsHttps,
+                Path = "/",
+                MaxAge = TimeSpan.FromDays(365),
+                Expires = DateTimeOffset.UtcNow.AddYears(1)
+            });
+        var localReturnUrl = string.IsNullOrWhiteSpace(returnUrl) || !Url.IsLocalUrl(returnUrl) ? "/" : returnUrl;
+        var redirectUrl = localization.BuildCultureRedirectUrl(localReturnUrl, selected);
+        logger.LogInformation(
+            "PublisherStudio UI culture changed to {Culture}; reloading {ReturnUrl} with an explicit request culture.",
+            selected,
+            redirectUrl);
+        return LocalRedirect(redirectUrl);
     }
 
 }

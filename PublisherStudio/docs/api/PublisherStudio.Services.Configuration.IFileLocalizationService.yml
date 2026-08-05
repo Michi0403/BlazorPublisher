@@ -5,9 +5,14 @@ items:
   id: IFileLocalizationService
   parent: PublisherStudio.Services.Configuration
   children:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
   - PublisherStudio.Services.Configuration.IFileLocalizationService.Get(System.String,System.String,System.String)
   - PublisherStudio.Services.Configuration.IFileLocalizationService.GetAvailableCultures
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
   - PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(System.String)
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
   - PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
   langs:
   - csharp
@@ -40,6 +45,8 @@ items:
   assemblies:
   - PublisherStudio.Web
   namespace: PublisherStudio.Services.Configuration
+  summary: Gets all complete built-in and user-overridden localization cultures.
+  example: []
   syntax:
     content: IReadOnlyList<string> GetAvailableCultures()
     return:
@@ -60,6 +67,8 @@ items:
   assemblies:
   - PublisherStudio.Web
   namespace: PublisherStudio.Services.Configuration
+  summary: Gets the effective flat JSON string dictionary for one culture.
+  example: []
   syntax:
     content: IReadOnlyDictionary<string, string> GetStrings(string? culture = null)
     parameters:
@@ -86,6 +95,8 @@ items:
   assemblies:
   - PublisherStudio.Web
   namespace: PublisherStudio.Services.Configuration
+  summary: Gets one localized string with English and caller-provided fallback behavior.
+  example: []
   syntax:
     content: string Get(string key, string? culture = null, string? fallback = null)
     parameters:
@@ -102,6 +113,150 @@ items:
   nameWithType.vb: IFileLocalizationService.Get(String, String, String)
   fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.Get(String, String, String)
   name.vb: Get(String, String, String)
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
+  id: ResolveAvailableCulture(System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: ResolveAvailableCulture(string?)
+  nameWithType: IFileLocalizationService.ResolveAvailableCulture(string?)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Resolves a requested culture to one complete PublisherStudio catalog.
+  example: []
+  syntax:
+    content: string ResolveAvailableCulture(string? culture)
+    parameters:
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function ResolveAvailableCulture(culture As String) As String
+  overload: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture*
+  nameWithType.vb: IFileLocalizationService.ResolveAvailableCulture(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(String)
+  name.vb: ResolveAvailableCulture(String)
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
+  id: GetCultureDisplayName(System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: GetCultureDisplayName(string)
+  nameWithType: IFileLocalizationService.GetCultureDisplayName(string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Gets the native display label for one available culture.
+  example: []
+  syntax:
+    content: string GetCultureDisplayName(string culture)
+    parameters:
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function GetCultureDisplayName(culture As String) As String
+  overload: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName*
+  nameWithType.vb: IFileLocalizationService.GetCultureDisplayName(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(String)
+  name.vb: GetCultureDisplayName(String)
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+  id: BuildCultureReturnUrl(System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: BuildCultureReturnUrl(string)
+  nameWithType: IFileLocalizationService.BuildCultureReturnUrl(string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Builds a local return URL without stale localization query values.
+  example: []
+  syntax:
+    content: string BuildCultureReturnUrl(string absoluteUri)
+    parameters:
+    - id: absoluteUri
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function BuildCultureReturnUrl(absoluteUri As String) As String
+  overload: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl*
+  nameWithType.vb: IFileLocalizationService.BuildCultureReturnUrl(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(String)
+  name.vb: BuildCultureReturnUrl(String)
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  id: BuildCultureRedirectUrl(System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: BuildCultureRedirectUrl(string?, string)
+  nameWithType: IFileLocalizationService.BuildCultureRedirectUrl(string?, string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(string?, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Adds an explicit request culture to one validated local return URL.
+  example: []
+  syntax:
+    content: string BuildCultureRedirectUrl(string? returnUrl, string culture)
+    parameters:
+    - id: returnUrl
+      type: System.String
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function BuildCultureRedirectUrl(returnUrl As String, culture As String) As String
+  overload: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl*
+  nameWithType.vb: IFileLocalizationService.BuildCultureRedirectUrl(String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(String, String)
+  name.vb: BuildCultureRedirectUrl(String, String)
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+  id: BuildCultureSelectionUrl(System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: BuildCultureSelectionUrl(string, string)
+  nameWithType: IFileLocalizationService.BuildCultureSelectionUrl(string, string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Builds the endpoint URL used to select and persist one application culture.
+  example: []
+  syntax:
+    content: string BuildCultureSelectionUrl(string absoluteUri, string culture)
+    parameters:
+    - id: absoluteUri
+      type: System.String
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function BuildCultureSelectionUrl(absoluteUri As String, culture As String) As String
+  overload: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl*
+  nameWithType.vb: IFileLocalizationService.BuildCultureSelectionUrl(String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(String, String)
+  name.vb: BuildCultureSelectionUrl(String, String)
 - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
   commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
   id: SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
@@ -116,6 +271,8 @@ items:
   assemblies:
   - PublisherStudio.Web
   namespace: PublisherStudio.Services.Configuration
+  summary: Saves persistent user overrides for one flat JSON localization catalog.
+  example: []
   syntax:
     content: Task SaveOverridesAsync(string culture, IReadOnlyDictionary<string, string> strings, CancellationToken cancellationToken = default)
     parameters:
@@ -390,6 +547,41 @@ references:
   name: Get
   nameWithType: IFileLocalizationService.Get
   fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.Get
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture*
+  commentId: Overload:PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_ResolveAvailableCulture_System_String_
+  name: ResolveAvailableCulture
+  nameWithType: IFileLocalizationService.ResolveAvailableCulture
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName*
+  commentId: Overload:PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetCultureDisplayName_System_String_
+  name: GetCultureDisplayName
+  nameWithType: IFileLocalizationService.GetCultureDisplayName
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl*
+  commentId: Overload:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureReturnUrl_System_String_
+  name: BuildCultureReturnUrl
+  nameWithType: IFileLocalizationService.BuildCultureReturnUrl
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl*
+  commentId: Overload:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureRedirectUrl_System_String_System_String_
+  name: BuildCultureRedirectUrl
+  nameWithType: IFileLocalizationService.BuildCultureRedirectUrl
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl*
+  commentId: Overload:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureSelectionUrl_System_String_System_String_
+  name: BuildCultureSelectionUrl
+  nameWithType: IFileLocalizationService.BuildCultureSelectionUrl
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl
 - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync*
   commentId: Overload:PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync
   isExternal: true

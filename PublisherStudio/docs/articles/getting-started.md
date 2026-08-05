@@ -15,6 +15,12 @@ PublisherStudio opens directly into the publication workspace. A new document co
 
 PublisherStudio stores editable publication data in its own project format. Exported images, websites, PDFs, and videos are delivery formats. Keep the native project when you want to edit the work later.
 
+## Choose the application language
+
+Use the language selector in the upper-right corner of PublisherStudio. The choice reloads the current local page, stores a request-culture cookie, and applies one complete JSON catalog to the application shell.
+
+Application language and publication language are separate: the global selector changes PublisherStudio, while the Inspector language setting controls exported document and website metadata.
+
 ## Local by default
 
 The application listens on the local loopback interface. It does not need LocalGPT to create or publish documents. The optional LocalGPT page remains quiet until you choose to connect it.

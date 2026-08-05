@@ -7765,7 +7765,7 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) { try {
 
     const uniqueWarnings = [...new Set(warnings)];
     const manifest = {
-        publisherStudioVersion: '2.1.1',
+        publisherStudioVersion: '2.1.2',
         kind: options.mode,
         generatedUtc: new Date().toISOString(),
         assetCount,

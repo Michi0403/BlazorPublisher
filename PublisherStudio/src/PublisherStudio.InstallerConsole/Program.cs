@@ -1,4 +1,4 @@
-using PublisherStudio.InstallerConsole.Helper;
+﻿using PublisherStudio.InstallerConsole.Helper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -79,7 +79,7 @@ internal static class Program
 
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.1.1");
+        Console.WriteLine("PublisherStudio Setup 2.1.2");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");

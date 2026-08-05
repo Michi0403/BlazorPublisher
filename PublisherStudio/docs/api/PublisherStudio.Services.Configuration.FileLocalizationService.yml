@@ -6,9 +6,14 @@ items:
   parent: PublisherStudio.Services.Configuration
   children:
   - PublisherStudio.Services.Configuration.FileLocalizationService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService})
+  - PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  - PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl(System.String)
+  - PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
   - PublisherStudio.Services.Configuration.FileLocalizationService.Get(System.String,System.String,System.String)
   - PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures
+  - PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName(System.String)
   - PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings(System.String)
+  - PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture(System.String)
   - PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
   langs:
   - csharp
@@ -152,6 +157,160 @@ items:
   nameWithType.vb: FileLocalizationService.Get(String, String, String)
   fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.Get(String, String, String)
   name.vb: Get(String, String, String)
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture(System.String)
+  id: ResolveAvailableCulture(System.String)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: ResolveAvailableCulture(string?)
+  nameWithType: FileLocalizationService.ResolveAvailableCulture(string?)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Resolves a requested culture to one complete PublisherStudio localization catalog.
+  example: []
+  syntax:
+    content: public string ResolveAvailableCulture(string? culture)
+    parameters:
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function ResolveAvailableCulture(culture As String) As String
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
+  nameWithType.vb: FileLocalizationService.ResolveAvailableCulture(String)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture(String)
+  name.vb: ResolveAvailableCulture(String)
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName(System.String)
+  id: GetCultureDisplayName(System.String)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: GetCultureDisplayName(string)
+  nameWithType: FileLocalizationService.GetCultureDisplayName(string)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Gets the native display name and normalized culture name for one available catalog.
+  example: []
+  syntax:
+    content: public string GetCultureDisplayName(string culture)
+    parameters:
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function GetCultureDisplayName(culture As String) As String
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
+  nameWithType.vb: FileLocalizationService.GetCultureDisplayName(String)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName(String)
+  name.vb: GetCultureDisplayName(String)
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl(System.String)
+  id: BuildCultureReturnUrl(System.String)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: BuildCultureReturnUrl(string)
+  nameWithType: FileLocalizationService.BuildCultureReturnUrl(string)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Builds a local return URL while removing stale culture query values.
+  example: []
+  syntax:
+    content: public string BuildCultureReturnUrl(string absoluteUri)
+    parameters:
+    - id: absoluteUri
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function BuildCultureReturnUrl(absoluteUri As String) As String
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+  nameWithType.vb: FileLocalizationService.BuildCultureReturnUrl(String)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl(String)
+  name.vb: BuildCultureReturnUrl(String)
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  id: BuildCultureRedirectUrl(System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: BuildCultureRedirectUrl(string?, string)
+  nameWithType: FileLocalizationService.BuildCultureRedirectUrl(string?, string)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl(string?, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Adds an explicit request culture to one validated local return URL.
+  example: []
+  syntax:
+    content: public string BuildCultureRedirectUrl(string? returnUrl, string culture)
+    parameters:
+    - id: returnUrl
+      type: System.String
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function BuildCultureRedirectUrl(returnUrl As String, culture As String) As String
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  nameWithType.vb: FileLocalizationService.BuildCultureRedirectUrl(String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl(String, String)
+  name.vb: BuildCultureRedirectUrl(String, String)
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+  id: BuildCultureSelectionUrl(System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: BuildCultureSelectionUrl(string, string)
+  nameWithType: FileLocalizationService.BuildCultureSelectionUrl(string, string)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl(string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Builds the application endpoint used to persist and select one culture.
+  example: []
+  syntax:
+    content: public string BuildCultureSelectionUrl(string absoluteUri, string culture)
+    parameters:
+    - id: absoluteUri
+      type: System.String
+    - id: culture
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function BuildCultureSelectionUrl(absoluteUri As String, culture As String) As String
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+  nameWithType.vb: FileLocalizationService.BuildCultureSelectionUrl(String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl(String, String)
+  name.vb: BuildCultureSelectionUrl(String, String)
 - uid: PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
   commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
   id: SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
@@ -914,6 +1073,230 @@ references:
     href: https://learn.microsoft.com/dotnet/api/system.string
   - name: ','
   - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_ResolveAvailableCulture_System_String_
+  name: ResolveAvailableCulture
+  nameWithType: FileLocalizationService.ResolveAvailableCulture
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.ResolveAvailableCulture
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_ResolveAvailableCulture_System_String_
+  name: ResolveAvailableCulture(string)
+  nameWithType: IFileLocalizationService.ResolveAvailableCulture(string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(string)
+  nameWithType.vb: IFileLocalizationService.ResolveAvailableCulture(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(String)
+  name.vb: ResolveAvailableCulture(String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
+    name: ResolveAvailableCulture
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_ResolveAvailableCulture_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.ResolveAvailableCulture(System.String)
+    name: ResolveAvailableCulture
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_ResolveAvailableCulture_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_GetCultureDisplayName_System_String_
+  name: GetCultureDisplayName
+  nameWithType: FileLocalizationService.GetCultureDisplayName
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.GetCultureDisplayName
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetCultureDisplayName_System_String_
+  name: GetCultureDisplayName(string)
+  nameWithType: IFileLocalizationService.GetCultureDisplayName(string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(string)
+  nameWithType.vb: IFileLocalizationService.GetCultureDisplayName(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(String)
+  name.vb: GetCultureDisplayName(String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
+    name: GetCultureDisplayName
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetCultureDisplayName_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetCultureDisplayName(System.String)
+    name: GetCultureDisplayName
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetCultureDisplayName_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_BuildCultureReturnUrl_System_String_
+  name: BuildCultureReturnUrl
+  nameWithType: FileLocalizationService.BuildCultureReturnUrl
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureReturnUrl
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureReturnUrl_System_String_
+  name: BuildCultureReturnUrl(string)
+  nameWithType: IFileLocalizationService.BuildCultureReturnUrl(string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(string)
+  nameWithType.vb: IFileLocalizationService.BuildCultureReturnUrl(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(String)
+  name.vb: BuildCultureReturnUrl(String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+    name: BuildCultureReturnUrl
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureReturnUrl_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureReturnUrl(System.String)
+    name: BuildCultureReturnUrl
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureReturnUrl_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_BuildCultureRedirectUrl_System_String_System_String_
+  name: BuildCultureRedirectUrl
+  nameWithType: FileLocalizationService.BuildCultureRedirectUrl
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureRedirectUrl
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureRedirectUrl_System_String_System_String_
+  name: BuildCultureRedirectUrl(string, string)
+  nameWithType: IFileLocalizationService.BuildCultureRedirectUrl(string, string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(string, string)
+  nameWithType.vb: IFileLocalizationService.BuildCultureRedirectUrl(String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(String, String)
+  name.vb: BuildCultureRedirectUrl(String, String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+    name: BuildCultureRedirectUrl
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureRedirectUrl_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureRedirectUrl(System.String,System.String)
+    name: BuildCultureRedirectUrl
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureRedirectUrl_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_BuildCultureSelectionUrl_System_String_System_String_
+  name: BuildCultureSelectionUrl
+  nameWithType: FileLocalizationService.BuildCultureSelectionUrl
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.BuildCultureSelectionUrl
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureSelectionUrl_System_String_System_String_
+  name: BuildCultureSelectionUrl(string, string)
+  nameWithType: IFileLocalizationService.BuildCultureSelectionUrl(string, string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(string, string)
+  nameWithType.vb: IFileLocalizationService.BuildCultureSelectionUrl(String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(String, String)
+  name.vb: BuildCultureSelectionUrl(String, String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+    name: BuildCultureSelectionUrl
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureSelectionUrl_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.BuildCultureSelectionUrl(System.String,System.String)
+    name: BuildCultureSelectionUrl
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_BuildCultureSelectionUrl_System_String_System_String_
+  - name: (
   - uid: System.String
     name: String
     isExternal: true

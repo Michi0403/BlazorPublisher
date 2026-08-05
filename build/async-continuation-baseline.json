@@ -1,0 +1,362 @@
+{
+  "files": {
+    "Components/Editor/BarcodeEditor.razor": {
+      "maxUnconfiguredAwaitCount": 9,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/DataManager.razor": {
+      "maxUnconfiguredAwaitCount": 6,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/DataVisualClientHost.razor": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/DataVisualEditor.razor": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/DevExtremeComponentEditor.razor": {
+      "maxUnconfiguredAwaitCount": 5,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/DevExtremeComponentView.razor": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/InspectorPanel.razor": {
+      "maxUnconfiguredAwaitCount": 13,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/LiveSourceView.razor": {
+      "maxUnconfiguredAwaitCount": 4,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/MediaConverterStudio.razor": {
+      "maxUnconfiguredAwaitCount": 25,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/MediaStudio.razor": {
+      "maxUnconfiguredAwaitCount": 96,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/PageNavigator.razor": {
+      "maxUnconfiguredAwaitCount": 4,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/PageSurface.razor": {
+      "maxUnconfiguredAwaitCount": 18,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/PanelStudio.razor": {
+      "maxUnconfiguredAwaitCount": 3,
+      "maxConfigureAwaitTrueCount": 20,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/PictureEditor.razor.cs": {
+      "maxUnconfiguredAwaitCount": 57,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/PublicationTimeline.razor": {
+      "maxUnconfiguredAwaitCount": 21,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/SpreadsheetEditor.razor": {
+      "maxUnconfiguredAwaitCount": 12,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/StoryEditor.razor": {
+      "maxUnconfiguredAwaitCount": 47,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/StreamingStudio.razor": {
+      "maxUnconfiguredAwaitCount": 38,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/VideoMediaView.razor": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/WebDataRefreshHost.razor": {
+      "maxUnconfiguredAwaitCount": 6,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Editor/WordArtPathEditor.razor": {
+      "maxUnconfiguredAwaitCount": 15,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/OrganicPlugins/OrganicApprovalBar.razor": {
+      "maxUnconfiguredAwaitCount": 5,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/OrganicPlugins/OrganicSecurityPanel.razor": {
+      "maxUnconfiguredAwaitCount": 20,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Pages/Editor.razor": {
+      "maxUnconfiguredAwaitCount": 145,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Pages/Localization.razor": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Pages/OrganicPlugins.razor": {
+      "maxUnconfiguredAwaitCount": 18,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/AssetController.cs": {
+      "maxUnconfiguredAwaitCount": 5,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/ConfigurationController.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 1
+    },
+    "Controllers/MediaConversionController.cs": {
+      "maxUnconfiguredAwaitCount": 4,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/OrganicPluginController.cs": {
+      "maxUnconfiguredAwaitCount": 7,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/OrganicWireHttpController.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 8
+    },
+    "Controllers/PublicationController.cs": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/SpreadsheetController.cs": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/Streaming/UseCases/NativeCaptureController.cs": {
+      "maxUnconfiguredAwaitCount": 5,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/Streaming/UseCases/StreamingChatController.cs": {
+      "maxUnconfiguredAwaitCount": 4,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/Streaming/UseCases/StreamingIngestController.cs": {
+      "maxUnconfiguredAwaitCount": 5,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/Streaming/UseCases/StreamingRuntimeController.cs": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Controllers/WebDataController.cs": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Diagnostics/ControllerRequestLoggingFilter.cs": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "HostedServices/OrganicPlugins/LocalGptDiscoveryHostedService.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 3
+    },
+    "HostedServices/Streaming/TwitchOAuthMaintenanceService.cs": {
+      "maxUnconfiguredAwaitCount": 3,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Program.cs": {
+      "maxUnconfiguredAwaitCount": 3,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/CodeEditing/CodeLanguageService.cs": {
+      "maxUnconfiguredAwaitCount": 6,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Configuration/FileLocalizationService.cs": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 1
+    },
+    "Services/EditorStateService.cs": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/MediaConversion/MediaConversionService.cs": {
+      "maxUnconfiguredAwaitCount": 13,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/OrganicPlugins/LocalGptConnectionService.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 28
+    },
+    "Services/OrganicPlugins/OrganicCapabilityAndExecutionServices.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 11
+    },
+    "Services/OrganicPlugins/OrganicRuntimeSecurityService.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 29
+    },
+    "Services/OrganicPlugins/RecurringScreenReaderService.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 8
+    },
+    "Services/PictureStudio/Import/OpenRasterImportService.cs": {
+      "maxUnconfiguredAwaitCount": 8,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Publication/Import/OpenDocumentImportService.cs": {
+      "maxUnconfiguredAwaitCount": 9,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/PublicationRecoveryService.cs": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 4
+    },
+    "Services/PublicationWebDataService.cs": {
+      "maxUnconfiguredAwaitCount": 5,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Capture/NativeCaptureRegistry.cs": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Capture/NativeDeviceDiscovery.cs": {
+      "maxUnconfiguredAwaitCount": 7,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Chat/PlatformChatService.cs": {
+      "maxUnconfiguredAwaitCount": 25,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Encoding/EncoderOrchestrator.cs": {
+      "maxUnconfiguredAwaitCount": 8,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Encoding/FfmpegLocator.cs": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Lan/LanStreamingServer.cs": {
+      "maxUnconfiguredAwaitCount": 26,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Lan/RtspLanServer.cs": {
+      "maxUnconfiguredAwaitCount": 26,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Lan/WebRtcSignalingService.cs": {
+      "maxUnconfiguredAwaitCount": 24,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/MediaHost/StreamingMediaHostClient.cs": {
+      "maxUnconfiguredAwaitCount": 6,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/OAuth/TwitchOAuthService.cs": {
+      "maxUnconfiguredAwaitCount": 46,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/Profiles/StreamingProfileStore.cs": {
+      "maxUnconfiguredAwaitCount": 35,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/UseCases/Chat/StreamingChatUseCases.cs": {
+      "maxUnconfiguredAwaitCount": 2,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/UseCases/Editor/StreamingSessionService.cs": {
+      "maxUnconfiguredAwaitCount": 16,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/UseCases/Ingest/StreamingIngestUseCases.cs": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/Streaming/UseCases/Runtime/StreamingRuntimeUseCases.cs": {
+      "maxUnconfiguredAwaitCount": 1,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Services/VideoStudio/Import/VideoProjectImportService.cs": {
+      "maxUnconfiguredAwaitCount": 6,
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Layout/JavaScriptDiagnosticsBridge.razor": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 1,
+      "minConfigureAwaitFalseCount": 0
+    }
+  },
+  "policy": "Renderer sources stay on the Blazor context; service/controller continuations remain explicitly background-safe. Existing unconfigured awaits are a reviewed ceiling and may only decrease.",
+  "schemaVersion": 1,
+  "sourceRoot": "src/PublisherStudio.Web"
+}

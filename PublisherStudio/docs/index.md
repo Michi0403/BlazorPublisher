@@ -1,4 +1,4 @@
-﻿# PublisherStudio documentation
+# PublisherStudio documentation
 
 Welcome to the cozy side of serious publishing. PublisherStudio brings page layout, stories, spreadsheets, pictures, audio, video, streaming, and interactive web exports into one local workspace.
 
@@ -36,8 +36,3 @@ This guide is generated with DocFX from maintained Markdown and C# XML comments.
 - a versioned PDF book;
 - an XML-backed API reference;
 - a status manifest used by the app and GitHub Pages workflow.
-
-
-
-
-

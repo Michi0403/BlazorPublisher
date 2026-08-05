@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 const root = path.resolve(import.meta.dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-test('2.1.9 repairs the installer compiler expression and the orphan XML comment', () => {
+test('2.1.8 repairs the installer compiler expression and the orphan XML comment', () => {
   const installer = read('src/PublisherStudio.InstallerConsole/Program.cs');
   assert.match(installer, /_ = Process\.Start\(startInfo\)\s*\?\? throw new InvalidOperationException/);
   assert.doesNotMatch(installer, /(?<!_ = )Process\.Start\(startInfo\) \?\? throw/);
@@ -29,15 +29,15 @@ test('release publishing is the PublisherStudio subset of the LocalGPT shared al
     'Cached one verified documentation payload for all RID publishes.',
     'foreach ($rid in $runtimes)',
     'Assert-PublisherStudioDocumentationPayload',
-    'New-PublisherStudioReleaseArchive -SourceDirectory $appFolder',
-    'New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder'
+    'Compress-Archive -Path $appFolder',
+    'Compress-Archive -Path $setupFolder'
   ]) assert.ok(release.includes(marker), marker);
   assert.match(all, /Runtime = "all"/);
   assert.doesNotMatch(release, /Programs\\PublisherStudio|BlazorPublisher/);
 });
 
 test('GitHub Pages deploys the pinned validated Kawaii snapshot with the LocalGPT workflow shape', () => {
-  const workflow = read('../.github/workflows/publish-shipped-docs.yml');
+  const workflow = read('.github/workflows/publish-shipped-docs.yml');
   for (const marker of [
     'actions/checkout@v6',
     'actions/configure-pages@v5',
@@ -46,11 +46,11 @@ test('GitHub Pages deploys the pinned validated Kawaii snapshot with the LocalGP
     '.github/pages/publisherstudio-kawaii-docs.zip',
     '.github/scripts/prepare-pages-artifact.py'
   ]) assert.ok(workflow.includes(marker), marker);
-  assert.equal(fs.existsSync(path.join(root, '..', '.github/scripts/extract-shipped-docs.py')), false);
-  assert.ok(fs.existsSync(path.join(root, '..', '.github/pages/publisherstudio-kawaii-docs.zip')));
+  assert.equal(fs.existsSync(path.join(root, '.github/scripts/extract-shipped-docs.py')), false);
+  assert.ok(fs.existsSync(path.join(root, '.github/pages/publisherstudio-kawaii-docs.zip')));
   execFileSync('python3', [
-    path.join(root, '..', '.github/scripts/prepare-pages-artifact.py'),
-    '--archive', path.join(root, '..', '.github/pages/publisherstudio-kawaii-docs.zip'),
+    path.join(root, '.github/scripts/prepare-pages-artifact.py'),
+    '--archive', path.join(root, '.github/pages/publisherstudio-kawaii-docs.zip'),
     '--output', path.join(root, '.tmp-pages-validation-v213')
   ], { stdio: 'pipe' });
   fs.rmSync(path.join(root, '.tmp-pages-validation-v213'), { recursive: true, force: true });

@@ -22,8 +22,8 @@ test('PublisherStudio acquires and validates both exact assets before changing A
   const setupExtract = installer.indexOf('ExtractZipWithFallback(setupZipPath, targetPath, logger)');
   assert.ok(appDownload >= 0 && appDownload < setupDownload);
   assert.ok(setupDownload < appExtract && appExtract < setupExtract);
-  assert.match(installer, /ValidateReleaseArchive\(\s*zipPath,\s*GetRuntimeFolderName\(\),\s*GetExpectedPublishedExecutable\(runtimeIdentifier, setupAsset: false\),\s*logger\)/);
-  assert.match(installer, /ValidateReleaseArchive\(\s*setupZipPath,\s*"setup" \+ GetRuntimeFolderName\(\),\s*GetExpectedPublishedExecutable\(runtimeIdentifier, setupAsset: true\),\s*logger\)/);
+  assert.match(installer, /ValidateReleaseArchive\(zipPath, GetRuntimeFolderName\(\), logger\)/);
+  assert.match(installer, /ValidateReleaseArchive\(setupZipPath, "setup" \+ GetRuntimeFolderName\(\), logger\)/);
   assert.match(installer, /var targetPath = Path\.Combine\(localAppData, "PublisherStudio"\)/);
   assert.equal((installer.match(/ExtractZipWithFallback\([^;]+targetPath, logger\)/g) ?? []).length, 2);
 });
@@ -42,8 +42,8 @@ test('one-click command injection matches the maintained LocalGPT setup pattern'
 });
 
 test('release and launchers expose only the requested PublisherStudio actions', () => {
-  assert.match(release, /New-PublisherStudioReleaseArchive -SourceDirectory \$appFolder -DestinationPath \$appZip/);
-  assert.match(release, /New-PublisherStudioReleaseArchive -SourceDirectory \$setupFolder -DestinationPath \$setupZip/);
+  assert.match(release, /Compress-Archive -Path \$appFolder -DestinationPath \$appZip/);
+  assert.match(release, /Compress-Archive -Path \$setupFolder -DestinationPath \$setupZip/);
   const expected = ['Install.cmd', 'Start.cmd', 'Update.cmd'];
   assert.deepEqual(fs.readdirSync(path.join(root, 'installer-launchers')).sort(), expected);
   for (const file of expected) {

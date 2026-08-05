@@ -39,11 +39,10 @@ assert.match(installer, /Timeout\.InfiniteTimeSpan/);
 assert.doesNotMatch(installer, /PublisherStudioInstallLayout|PublisherStudioDeploymentService|PublisherStudioReleaseManifest/);
 assert.doesNotMatch(installer, /RemoveLegacyMediaHostPayload|PublisherStudio\.MediaHost\*/);
 
-assert.match(release, /New-PublisherStudioReleaseArchive -SourceDirectory \$appFolder -DestinationPath \$appZip/);
-assert.match(release, /New-PublisherStudioReleaseArchive -SourceDirectory \$setupFolder -DestinationPath \$setupZip/);
+assert.match(release, /Compress-Archive -Path \$appFolder -DestinationPath \$appZip/);
+assert.match(release, /Compress-Archive -Path \$setupFolder -DestinationPath \$setupZip/);
 assert.match(release, /Assert-ReleaseArchiveLayout -ArchivePath \$appZip/);
 assert.match(release, /Assert-ReleaseArchiveLayout -ArchivePath \$setupZip/);
-assert.doesNotMatch(release, /Compress-Archive/);
 assert.doesNotMatch(release, /SchemaVersion = 2|Write-ReleaseManifest|Write-BootstrapRepairManifest|PublisherStudio\.Setup\.repair\.exe|publisherstudio-bootstrap-repair/);
 
 console.log('installer resilience and LocalGPT-aligned AppData deployment contract tests passed');

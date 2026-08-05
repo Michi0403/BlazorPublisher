@@ -4,12 +4,9 @@ $ErrorActionPreference = 'Stop'
 function Fail([string]$Message) { throw "Git source visibility validation failed: $Message" }
 
 $root = Split-Path -Parent $PSScriptRoot
-$repositoryRoot = Split-Path -Parent $root
 $ignorePath = Join-Path $root '.gitignore'
 $protectedPaths = @(
     'Directory.Build.targets',
-    'NuGet.Config',
-    'packages/.gitkeep',
     'Build-LocalDevelopment.ps1',
     'Build-AllRuntimes.ps1',
     'Build-Release.ps1',
@@ -17,7 +14,6 @@ $protectedPaths = @(
     'Update-GitHubPagesSnapshot.cmd',
     'build/Assert-GitSourceVisibility.ps1',
     'build/Build-Documentation.ps1',
-    'build/Repair-DocfxNamespacePages.ps1',
     'build/Update-GitHubPagesSnapshot.ps1',
     'build/Add-XmlDocumentation.py',
     'build/Assert-XmlDocumentationCoverage.py',
@@ -57,13 +53,15 @@ $protectedPaths = @(
     'CHANGELOG-v2.1.0.md',
     'CHANGELOG-v2.1.1.md',
     'CHANGELOG-v2.1.2.md',
-    'CHANGELOG-v2.1.9.md',
-    'CHANGELOG-v2.1.9-pages-hotfix.md',
+    'CHANGELOG-v2.1.7.md',
     'DOCUMENTATION-PUBLISHING-R4.md',
     'AGENTS.md',
     'src/PublisherStudio.InstallerConsole/README.md',
     'RELEASE.md',
     '.config/dotnet-tools.json',
+    '.github/workflows/publish-shipped-docs.yml',
+    '.github/scripts/prepare-pages-artifact.py',
+    '.github/pages/publisherstudio-kawaii-docs.zip',
     'docs/docfx.json',
     'docs/toc.yml',
     'docs/guide/toc.yml',
@@ -98,8 +96,6 @@ $protectedPaths = @(
     'tests/v210KawaiiDocumentation.test.mjs',
     'tests/v211LocalGptInstallerHealing.test.mjs',
     'tests/v213LocalGptParityRepair.test.mjs',
-    'tests/v219PagesReleaseCompletion.test.mjs',
-    'tests/v219PagesNamespaceRepair.test.mjs',
     'tests/applicationArchitecturePolicy.test.mjs',
     'tests/final14RenderModeGuard.test.mjs',
     'tests/final16BuildGuardRegressions.test.mjs',
@@ -126,22 +122,10 @@ $requiredIgnoreRules = @(
     '!tests/*.mjs',
     '!src/PublisherStudio.Web/Localization/',
     '!src/PublisherStudio.Web/Localization/*.json',
-    'docs/.tools/',
-    'docs/.print-book/'
+    '!.github/pages/',
+    '!.github/pages/publisherstudio-kawaii-docs.zip'
 )
 
-
-$repositoryProtectedPaths = @(
-    'README.md',
-    'RELEASE.md',
-    '.github/workflows/publish-shipped-docs.yml',
-    '.github/scripts/prepare-pages-artifact.py',
-    '.github/pages/publisherstudio-kawaii-docs.zip',
-    '.github/pages/README.md',
-    'docs/.nojekyll',
-    'docs/index.html',
-    'docs/documentation-status.json'
-)
 if (-not (Test-Path -LiteralPath $ignorePath -PathType Leaf)) { Fail "Missing $ignorePath" }
 $ignoreLines = @([System.IO.File]::ReadAllLines($ignorePath) | ForEach-Object { $_.Trim() })
 foreach ($rule in $requiredIgnoreRules) {
@@ -151,24 +135,14 @@ foreach ($relative in $protectedPaths) {
     $nativeRelative = $relative.Replace('/', [System.IO.Path]::DirectorySeparatorChar.ToString())
     if (-not (Test-Path -LiteralPath (Join-Path $root $nativeRelative) -PathType Leaf)) { Fail "Protected source file is missing: $relative" }
 }
-foreach ($relative in $repositoryProtectedPaths) {
-    $nativeRelative = $relative.Replace('/', [System.IO.Path]::DirectorySeparatorChar.ToString())
-    if (-not (Test-Path -LiteralPath (Join-Path $repositoryRoot $nativeRelative) -PathType Leaf)) { Fail "Protected repository file is missing: $relative" }
-}
 
-$gitDirectory = Join-Path $repositoryRoot '.git'
+$gitDirectory = Join-Path $root '.git'
 $git = Get-Command git -ErrorAction SilentlyContinue
 if ((Test-Path -LiteralPath $gitDirectory) -and $git) {
     foreach ($relative in $protectedPaths) {
-        $repositoryRelative = "PublisherStudio/$relative"
-        & $git.Source -C $repositoryRoot check-ignore --no-index --quiet -- $repositoryRelative
-        if ($LASTEXITCODE -eq 0) { Fail "Protected source file is ignored by Git: $repositoryRelative" }
-        if ($LASTEXITCODE -ne 1) { Fail "git check-ignore failed for $repositoryRelative with exit code $LASTEXITCODE" }
-    }
-    foreach ($relative in $repositoryProtectedPaths) {
-        & $git.Source -C $repositoryRoot check-ignore --no-index --quiet -- $relative
-        if ($LASTEXITCODE -eq 0) { Fail "Protected repository file is ignored by Git: $relative" }
+        & $git.Source -C $root check-ignore --no-index --quiet -- $relative
+        if ($LASTEXITCODE -eq 0) { Fail "Protected source file is ignored by Git: $relative" }
         if ($LASTEXITCODE -ne 1) { Fail "git check-ignore failed for $relative with exit code $LASTEXITCODE" }
     }
 }
-Write-Host "Git source visibility validation passed for $($protectedPaths.Count) PublisherStudio files and $($repositoryProtectedPaths.Count) repository automation files."
+Write-Host "Git source visibility validation passed for $($protectedPaths.Count) PublisherStudio files."

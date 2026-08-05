@@ -1,6 +1,6 @@
 {
   "name": "publisherstudio-web-assets",
-  "version": "2.1.7",
+  "version": "2.1.9",
   "private": true,
   "type": "module",
   "scripts": {

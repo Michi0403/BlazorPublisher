@@ -54,7 +54,7 @@ test('release archives use the same wrapper extraction contract as LocalGPT', ()
     assert.ok(project.includes(`<None Update="${launcher}" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />`), launcher);
     assert.ok(release.includes(`"${launcher}"`), launcher);
   }
-  assert.match(release, /Compress-Archive -Path \$appFolder -DestinationPath \$appZip/);
-  assert.match(release, /Compress-Archive -Path \$setupFolder -DestinationPath \$setupZip/);
+  assert.match(release, /New-PublisherStudioReleaseArchive -SourceDirectory \$appFolder -DestinationPath \$appZip/);
+  assert.match(release, /New-PublisherStudioReleaseArchive -SourceDirectory \$setupFolder -DestinationPath \$setupZip/);
   assert.doesNotMatch(release, /Write-ReleaseManifest|Write-BootstrapRepairManifest|PublisherStudio\.Setup\.repair\.exe/);
 });

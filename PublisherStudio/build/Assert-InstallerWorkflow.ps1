@@ -34,6 +34,8 @@ foreach ($forbidden in @(
 }
 
 foreach ($required in @(
+    'https://github.com/{repo}/releases/latest/download/{Uri.EscapeDataString(expectedAssetName)}',
+    'Direct latest-release download for {AssetName} failed. Falling back to the GitHub release API.',
     'https://api.github.com/repos/{repo}/releases/latest',
     'GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset)',
     'string.Equals(name, expectedAssetName, StringComparison.OrdinalIgnoreCase)',
@@ -127,10 +129,16 @@ foreach ($launcher in $launchers) {
     if (-not $release.Contains('"' + $launcher + '"')) { Fail "Build-Release.ps1 does not validate deployed launcher $launcher." }
 }
 foreach ($required in @(
-    'Compress-Archive -Path $appFolder -DestinationPath $appZip',
-    'Compress-Archive -Path $setupFolder -DestinationPath $setupZip'
+    'function New-PublisherStudioReleaseArchive',
+    'New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip',
+    'New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip',
+    'Assert-ReleaseArchiveLayout -ArchivePath $appZip',
+    'Assert-ReleaseArchiveLayout -ArchivePath $setupZip'
 )) {
-    if (-not $release.Contains($required)) { Fail "Build-Release.ps1 is missing the LocalGPT-aligned archive operation: $required" }
+    if (-not $release.Contains($required)) { Fail "Build-Release.ps1 is missing the verified archive operation: $required" }
+}
+if ($release.Contains('Compress-Archive')) {
+    Fail 'Build-Release.ps1 may not use Compress-Archive for release payloads.'
 }
 foreach ($forbidden in @('Write-ReleaseManifest', 'Write-BootstrapRepairManifest', 'PublisherStudio.Setup.repair.exe', 'publisherstudio-bootstrap-repair.json')) {
     if ($release.Contains($forbidden)) { Fail "Build-Release.ps1 still enforces the superseded repair-manifest flow: $forbidden" }

@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html class="publisherstudio-kawaii-docs" lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>Class PublisherRuntimePolicyOptions | PublisherStudio Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class PublisherRuntimePolicyOptions | PublisherStudio Documentation ">
+      
+      <meta name="description" content="Represents a publisher runtime policy options.">
+      <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=f744350ad7f0" data-publisherstudio-favicon="true" />
+<link rel="alternate icon" href="../favicon.ico?v=c1e7eb37cc8b" />
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  <script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); }
+        catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto"
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try {
+    localStorage.setItem(cookieName, preference);
+    localStorage.setItem("theme", preference);
+  } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+<link rel="stylesheet" href="../styles/publisherstudio-kawaii.css?v=c9d87c847b70" data-publisherstudio-kawaii-style="true" />
+</head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="PublisherStudio">
+            PublisherStudio
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions">
+
+
+
+  <h1 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions" class="text-break">
+Class PublisherRuntimePolicyOptions  
+  </h1><aside class="publisherstudio-api-neko-note" role="note"><span class="publisherstudio-api-neko-mascot" aria-hidden="true">&#x1F431;&#x2009;&#x1F436;</span><span><strong>Neko & Puppy type guide</strong> Â· Tiny paws, tidy details: constructors, properties, methods, and events stay cuddled up with the type that owns them, nya~ woof!</span></aside>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="PublisherStudio.html">PublisherStudio</a>.<a class="xref" href="PublisherStudio.BusinessObjects.html">BusinessObjects</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>PublisherStudio.Web.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Represents a publisher runtime policy options.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed record PublisherRuntimePolicyOptions : IEquatable&lt;PublisherRuntimePolicyOptions&gt;</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">PublisherRuntimePolicyOptions</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.html">PublisherRuntimePolicyOptions</a>&gt;</div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--constructors" data-member-kind="Constructors" style="--publisherstudio-api-accent:#a855f7;" role="region" aria-labelledby="constructors"><h2 class="section" id="constructors"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2728;</span>Constructors
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions__ctor_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.#ctor*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions__ctor" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.#ctor">
+  PublisherRuntimePolicyOptions()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublisherRuntimePolicyOptions()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--properties" data-member-kind="Properties" style="--publisherstudio-api-accent:#06b6d4;" role="region" aria-labelledby="properties"><h2 class="section" id="properties"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x1F43E;</span>Properties
+<span class="publisherstudio-api-member-count" aria-label="28 items">28</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_AudioCaptureClientInterfaceId_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.AudioCaptureClientInterfaceId*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_AudioCaptureClientInterfaceId" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.AudioCaptureClientInterfaceId">
+  AudioCaptureClientInterfaceId
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets audio capture client interface identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string AudioCaptureClientInterfaceId { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_AudioClientInterfaceId_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.AudioClientInterfaceId*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_AudioClientInterfaceId" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.AudioClientInterfaceId">
+  AudioClientInterfaceId
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets audio client interface identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string AudioClientInterfaceId { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_AudioSampleRate_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.AudioSampleRate*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_AudioSampleRate" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.AudioSampleRate">
+  AudioSampleRate
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets audio sample rate.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int AudioSampleRate { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_BasePixelsPerMillimeter_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.BasePixelsPerMillimeter*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_BasePixelsPerMillimeter" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.BasePixelsPerMillimeter">
+  BasePixelsPerMillimeter
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets base pixels per millimeter.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double BasePixelsPerMillimeter { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_Collections_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.Collections*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_Collections" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.Collections">
+  Collections
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets collections.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Dictionary&lt;PublisherRuntimeCollection, string[]&gt; Collections { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.dictionary-2">Dictionary</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimeCollection.html">PublisherRuntimeCollection</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>[]&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_DefaultEditorViewportWidth_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.DefaultEditorViewportWidth*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_DefaultEditorViewportWidth" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.DefaultEditorViewportWidth">
+  DefaultEditorViewportWidth
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets default editor viewport width.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int DefaultEditorViewportWidth { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_DocumentDefaults_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.DocumentDefaults*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_DocumentDefaults" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.DocumentDefaults">
+  DocumentDefaults
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets document defaults.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublisherDocumentDefaultsPolicy DocumentDefaults { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.html">PublisherDocumentDefaultsPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_FfmpegEnvironmentVariable_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.FfmpegEnvironmentVariable*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_FfmpegEnvironmentVariable" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.FfmpegEnvironmentVariable">
+  FfmpegEnvironmentVariable
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets FFmpeg environment variable.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string FfmpegEnvironmentVariable { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_InstallerDownloadAttempts_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.InstallerDownloadAttempts*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_InstallerDownloadAttempts" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.InstallerDownloadAttempts">
+  InstallerDownloadAttempts
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets installer download attempts.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int InstallerDownloadAttempts { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_InstallerMoveAttempts_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.InstallerMoveAttempts*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_InstallerMoveAttempts" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.InstallerMoveAttempts">
+  InstallerMoveAttempts
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets installer move attempts.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int InstallerMoveAttempts { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MaximumNotificationMessages_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MaximumNotificationMessages*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MaximumNotificationMessages" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MaximumNotificationMessages">
+  MaximumNotificationMessages
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets maximum notification messages.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int MaximumNotificationMessages { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MaximumVideoArchiveEntries_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MaximumVideoArchiveEntries*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MaximumVideoArchiveEntries" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MaximumVideoArchiveEntries">
+  MaximumVideoArchiveEntries
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets maximum video archive entries.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int MaximumVideoArchiveEntries { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MediaConversionPresets_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MediaConversionPresets*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MediaConversionPresets" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MediaConversionPresets">
+  MediaConversionPresets
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets media conversion presets.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;MediaConversionPreset&gt; MediaConversionPresets { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.MediaConversionPreset.html">MediaConversionPreset</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MediaSessionDefaults_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MediaSessionDefaults*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MediaSessionDefaults" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MediaSessionDefaults">
+  MediaSessionDefaults
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets media session defaults.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublisherMediaSessionDefaultsPolicy MediaSessionDefaults { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy.html">PublisherMediaSessionDefaultsPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MinimumMediaSourceLength_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MinimumMediaSourceLength*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_MinimumMediaSourceLength" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.MinimumMediaSourceLength">
+  MinimumMediaSourceLength
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets minimum media source length.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double MinimumMediaSourceLength { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_NativeInterop_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.NativeInterop*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_NativeInterop" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.NativeInterop">
+  NativeInterop
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets native interop.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublisherNativeInteropPolicy NativeInterop { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html">PublisherNativeInteropPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicProtocolVersion_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicProtocolVersion*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicProtocolVersion" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicProtocolVersion">
+  OrganicProtocolVersion
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets organic protocol version.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string OrganicProtocolVersion { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicSecuritySchemaVersion_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicSecuritySchemaVersion*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicSecuritySchemaVersion" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicSecuritySchemaVersion">
+  OrganicSecuritySchemaVersion
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets organic security schema version.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int OrganicSecuritySchemaVersion { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicTotpAlphabet_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicTotpAlphabet*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicTotpAlphabet" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicTotpAlphabet">
+  OrganicTotpAlphabet
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets organic totp alphabet.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string OrganicTotpAlphabet { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicTotpPeriodSeconds_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicTotpPeriodSeconds*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_OrganicTotpPeriodSeconds" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.OrganicTotpPeriodSeconds">
+  OrganicTotpPeriodSeconds
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets organic totp period seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int OrganicTotpPeriodSeconds { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_PictureStudio_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.PictureStudio*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_PictureStudio" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.PictureStudio">
+  PictureStudio
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture studio.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublisherPictureStudioPolicy PictureStudio { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html">PublisherPictureStudioPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_RegexPatterns_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.RegexPatterns*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_RegexPatterns" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.RegexPatterns">
+  RegexPatterns
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets regex patterns.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Dictionary&lt;PublisherRuntimePattern, PublisherRegexPolicy&gt; RegexPatterns { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.dictionary-2">Dictionary</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimePattern.html">PublisherRuntimePattern</a>, <a class="xref" href="PublisherStudio.BusinessObjects.PublisherRegexPolicy.html">PublisherRegexPolicy</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_SpreadsheetSessionLifetimeHours_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.SpreadsheetSessionLifetimeHours*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_SpreadsheetSessionLifetimeHours" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.SpreadsheetSessionLifetimeHours">
+  SpreadsheetSessionLifetimeHours
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets spreadsheet session lifetime hours.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double SpreadsheetSessionLifetimeHours { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_TwitchEndpoints_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.TwitchEndpoints*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_TwitchEndpoints" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.TwitchEndpoints">
+  TwitchEndpoints
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets twitch endpoints.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublisherTwitchEndpointPolicy TwitchEndpoints { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublisherTwitchEndpointPolicy.html">PublisherTwitchEndpointPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_TwitchRefreshSafetyWindowMinutes_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.TwitchRefreshSafetyWindowMinutes*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_TwitchRefreshSafetyWindowMinutes" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.TwitchRefreshSafetyWindowMinutes">
+  TwitchRefreshSafetyWindowMinutes
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets twitch refresh safety window minutes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TwitchRefreshSafetyWindowMinutes { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_TwitchValidationIntervalMinutes_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.TwitchValidationIntervalMinutes*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_TwitchValidationIntervalMinutes" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.TwitchValidationIntervalMinutes">
+  TwitchValidationIntervalMinutes
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets twitch validation interval minutes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TwitchValidationIntervalMinutes { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_WordArtViewHeight_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.WordArtViewHeight*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_WordArtViewHeight" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.WordArtViewHeight">
+  WordArtViewHeight
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets word art view height.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double WordArtViewHeight { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_WordArtViewWidth_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.WordArtViewWidth*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_WordArtViewWidth" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.WordArtViewWidth">
+  WordArtViewWidth
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets word art view width.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double WordArtViewWidth { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--methods" data-member-kind="Methods" style="--publisherstudio-api-accent:#3b82f6;" role="region" aria-labelledby="methods"><h2 class="section" id="methods"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2699;&#xFE0F;</span>Methods
+<span class="publisherstudio-api-member-count" aria-label="4 items">4</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_Equals_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.Equals*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_Equals_PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.Equals(PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions)">
+  Equals(PublisherRuntimePolicyOptions?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(PublisherRuntimePolicyOptions? other)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>other</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.html">PublisherRuntimePolicyOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_Equals_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.Equals*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_Equals_System_Object_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.Equals(System.Object)">
+  Equals(object?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override bool Equals(object? obj)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>obj</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_GetHashCode_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.GetHashCode*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_GetHashCode" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.GetHashCode">
+  GetHashCode()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override int GetHashCode()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_ToString_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.ToString*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_ToString" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.ToString">
+  ToString()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--operators" data-member-kind="Operators" style="--publisherstudio-api-accent:#f97316;" role="region" aria-labelledby="operators"><h2 class="section" id="operators"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2797;</span>Operators
+<span class="publisherstudio-api-member-count" aria-label="2 items">2</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_op_Equality_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.op_Equality*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_op_Equality_PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.op_Equality(PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions,PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions)">
+  operator ==(PublisherRuntimePolicyOptions?, PublisherRuntimePolicyOptions?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool operator ==(PublisherRuntimePolicyOptions? left, PublisherRuntimePolicyOptions? right)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>left</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.html">PublisherRuntimePolicyOptions</a></dt>
+    <dd></dd>
+    <dt><code>right</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.html">PublisherRuntimePolicyOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_op_Inequality_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.op_Inequality*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_op_Inequality_PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_PublisherStudio_BusinessObjects_PublisherRuntimePolicyOptions_" data-uid="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.op_Inequality(PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions,PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions)">
+  operator !=(PublisherRuntimePolicyOptions?, PublisherRuntimePolicyOptions?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool operator !=(PublisherRuntimePolicyOptions? left, PublisherRuntimePolicyOptions? right)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>left</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.html">PublisherRuntimePolicyOptions</a></dt>
+    <dd></dd>
+    <dt><code>right</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherRuntimePolicyOptions.html">PublisherRuntimePolicyOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+</div></section>
+</div></section></article>
+
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          PublisherStudio 2.1.9 Â· generated documentation
+        </div>
+      </div>
+    </footer>
+  <script type="module" src="../styles/publisherstudio-kawaii.js?v=8bb20edf66bf" data-publisherstudio-kawaii-script="true"></script>
+</body>
+</html>

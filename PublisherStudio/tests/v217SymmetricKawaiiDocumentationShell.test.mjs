@@ -47,19 +47,19 @@ with zipfile.ZipFile(archive) as z:
     names=set(z.namelist())
     index=z.read('articles/getting-started.html').decode('utf-8')
 assert css == source
-assert status['version'] == '2.1.8'
-assert status['pdfFileName'] == 'PublisherStudio-2.1.8.pdf'
-assert 'PublisherStudio-2.1.8.pdf' in names
+assert status['version'] == '2.1.9'
+assert status['pdfFileName'] == 'PublisherStudio-2.1.9.pdf'
+assert 'PublisherStudio-2.1.9.pdf' in names
 assert 'publisherstudio-snapshot-layout' in index
 assert 'publisherstudio-snapshot-nav' in index
 print(hashlib.sha256(css).hexdigest())
 `;
-  execFileSync('python', ['-c', script, path.join(root, '.github/pages/publisherstudio-kawaii-docs.zip'), cssPath], { stdio: 'pipe' });
+  execFileSync('python', ['-c', script, path.join(root, '..', '.github/pages/publisherstudio-kawaii-docs.zip'), cssPath], { stdio: 'pipe' });
 });
 
-test('2.1.8 source version surfaces remain aligned', () => {
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.8');
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.8');
+test('2.1.9 source version surfaces remain aligned', () => {
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.9');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.9');
 });

@@ -210,13 +210,96 @@ function Assert-ReleaseArchiveLayout {
             if (-not $name.StartsWith("$RootFolderName/", [StringComparison]::OrdinalIgnoreCase)) {
                 throw "Release archive entry '$name' escapes expected wrapper '$RootFolderName'."
             }
-            if ($name.StartsWith('/') -or $name.Split('/') -contains '..') {
+            if ($name.StartsWith('/', [StringComparison]::Ordinal) -or $name.Split('/') -contains '..') {
                 throw "Unsafe archive path '$name' in $ArchivePath"
             }
         }
     }
     finally {
         $archive.Dispose()
+    }
+}
+
+
+function New-PublisherStudioReleaseArchive {
+    param(
+        [Parameter(Mandatory)][string]$SourceDirectory,
+        [Parameter(Mandatory)][string]$DestinationPath,
+        [Parameter(Mandatory)][string]$RootFolderName
+    )
+
+    $sourceRoot = [IO.Path]::GetFullPath($SourceDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+    if (-not (Test-Path -LiteralPath $sourceRoot -PathType Container)) {
+        throw "Release archive source directory does not exist: $sourceRoot"
+    }
+    if ([string]::IsNullOrWhiteSpace($RootFolderName) -or $RootFolderName.IndexOfAny([char[]]"/\\") -ge 0) {
+        throw "Release archive wrapper must be one directory name: $RootFolderName"
+    }
+
+    $files = @(Get-ChildItem -LiteralPath $sourceRoot -File -Recurse | Sort-Object FullName)
+    if ($files.Count -eq 0) { throw "Release archive source is empty: $sourceRoot" }
+
+    $destination = [IO.Path]::GetFullPath($DestinationPath)
+    $destinationDirectory = Split-Path -Parent $destination
+    New-Item -ItemType Directory -Path $destinationDirectory -Force | Out-Null
+    $temporaryArchive = "$destination.$([Guid]::NewGuid().ToString('N')).tmp"
+
+    Add-Type -AssemblyName System.IO.Compression -ErrorAction SilentlyContinue
+    Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+    try {
+        $archive = [IO.Compression.ZipFile]::Open($temporaryArchive, [IO.Compression.ZipArchiveMode]::Create)
+        try {
+            foreach ($file in $files) {
+                $relative = $file.FullName.Substring($sourceRoot.Length).TrimStart([char[]]"\/").Replace('\', '/')
+                if ([string]::IsNullOrWhiteSpace($relative) -or $relative.Split('/') -contains '..') {
+                    throw "Unsafe release archive source path: $($file.FullName)"
+                }
+                $entryName = "$RootFolderName/$relative"
+                $written = $false
+                $lastReadError = $null
+                for ($attempt = 1; $attempt -le 4 -and -not $written; $attempt++) {
+                    $entry = $null
+                    try {
+                        $input = [IO.File]::Open($file.FullName, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+                        try {
+                            $entry = $archive.CreateEntry($entryName, [IO.Compression.CompressionLevel]::Optimal)
+                            $entry.LastWriteTime = [DateTimeOffset]::new(1980, 1, 1, 0, 0, 0, [TimeSpan]::Zero)
+                            $output = $entry.Open()
+                            try { $input.CopyTo($output) }
+                            finally { $output.Dispose() }
+                        }
+                        finally { $input.Dispose() }
+                        $written = $true
+                    }
+                    catch {
+                        $lastReadError = $_.Exception
+                        if ($null -ne $entry) {
+                            try { $entry.Delete() } catch { }
+                        }
+                        if ($attempt -lt 4) { Start-Sleep -Milliseconds (150 * $attempt) }
+                    }
+                }
+                if (-not $written) {
+                    throw "Could not add release file '$($file.FullName)' after 4 attempts: $($lastReadError.Message)"
+                }
+            }
+        }
+        finally { $archive.Dispose() }
+
+        $verification = [IO.Compression.ZipFile]::OpenRead($temporaryArchive)
+        try {
+            $entries = @($verification.Entries | Where-Object { -not [string]::IsNullOrWhiteSpace($_.Name) })
+            if ($entries.Count -ne $files.Count) {
+                throw "Release archive entry count $($entries.Count) does not match source file count $($files.Count): $temporaryArchive"
+            }
+        }
+        finally { $verification.Dispose() }
+
+        Remove-Item -LiteralPath $destination -Force -ErrorAction SilentlyContinue
+        [IO.File]::Move($temporaryArchive, $destination)
+    }
+    finally {
+        Remove-Item -LiteralPath $temporaryArchive -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -391,8 +474,8 @@ function Publish-Runtime {
     $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path -LiteralPath (Join-Path $setupFolder $_) -PathType Leaf) })
     if ($missingSetupFiles.Count -gt 0) { throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')" }
 
-    Compress-Archive -Path $appFolder -DestinationPath $appZip -CompressionLevel Optimal -Force
-    Compress-Archive -Path $setupFolder -DestinationPath $setupZip -CompressionLevel Optimal -Force
+    New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $profile.AppFolder
+    New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder
     Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable
     Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
     Write-Host "Created $appZip" -ForegroundColor Green

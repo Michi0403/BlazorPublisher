@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html class="publisherstudio-kawaii-docs" lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>Class BrowserAutomationCommand | PublisherStudio Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class BrowserAutomationCommand | PublisherStudio Documentation ">
+      
+      <meta name="description" content="Represents a browser automation command.">
+      <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=f744350ad7f0" data-publisherstudio-favicon="true" />
+<link rel="alternate icon" href="../favicon.ico?v=c1e7eb37cc8b" />
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  <script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); }
+        catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto"
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try {
+    localStorage.setItem(cookieName, preference);
+    localStorage.setItem("theme", preference);
+  } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+<link rel="stylesheet" href="../styles/publisherstudio-kawaii.css?v=c9d87c847b70" data-publisherstudio-kawaii-style="true" />
+</head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="PublisherStudio">
+            PublisherStudio
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand">
+
+
+
+  <h1 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand" class="text-break">
+Class BrowserAutomationCommand  
+  </h1><aside class="publisherstudio-api-neko-note" role="note"><span class="publisherstudio-api-neko-mascot" aria-hidden="true">&#x1F431;&#x2009;&#x1F436;</span><span><strong>Neko & Puppy type guide</strong> Â· Tiny paws, tidy details: constructors, properties, methods, and events stay cuddled up with the type that owns them, nya~ woof!</span></aside>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="PublisherStudio.html">PublisherStudio</a>.<a class="xref" href="PublisherStudio.BusinessObjects.html">BusinessObjects</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>PublisherStudio.Web.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Represents a browser automation command.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class BrowserAutomationCommand</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">BrowserAutomationCommand</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--constructors" data-member-kind="Constructors" style="--publisherstudio-api-accent:#a855f7;" role="region" aria-labelledby="constructors"><h2 class="section" id="constructors"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2728;</span>Constructors
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand__ctor_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.#ctor*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand__ctor" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.#ctor">
+  BrowserAutomationCommand()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public BrowserAutomationCommand()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--properties" data-member-kind="Properties" style="--publisherstudio-api-accent:#06b6d4;" role="region" aria-labelledby="properties"><h2 class="section" id="properties"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x1F43E;</span>Properties
+<span class="publisherstudio-api-member-count" aria-label="20 items">20</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_AltKey_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.AltKey*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_AltKey" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.AltKey">
+  AltKey
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets alt key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool AltKey { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Button_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Button*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Button" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Button">
+  Button
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets button.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int Button { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Code_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Code*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Code" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Code">
+  Code
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets code.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Code { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_CompletedUtc_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.CompletedUtc*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_CompletedUtc" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.CompletedUtc">
+  CompletedUtc
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets completed UTC.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DateTimeOffset? CompletedUtc { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetimeoffset">DateTimeOffset</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_CreatedUtc_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.CreatedUtc*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_CreatedUtc" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.CreatedUtc">
+  CreatedUtc
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets the UTC creation time.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DateTimeOffset CreatedUtc { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetimeoffset">DateTimeOffset</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_CtrlKey_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.CtrlKey*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_CtrlKey" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.CtrlKey">
+  CtrlKey
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets ctrl key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool CtrlKey { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_DeltaX_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.DeltaX*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_DeltaX" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.DeltaX">
+  DeltaX
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets delta horizontal position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double DeltaX { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_DeltaY_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.DeltaY*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_DeltaY" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.DeltaY">
+  DeltaY
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets delta vertical position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double DeltaY { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Error_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Error*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Error" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Error">
+  Error
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets error.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Error { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Id_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Id*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Id" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Id">
+  Id
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets the stable identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Guid Id { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Key_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Key*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Key" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Key">
+  Key
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Key { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Kind_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Kind*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Kind" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Kind">
+  Kind
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets kind.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public BrowserAutomationCommandKind Kind { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.html">BrowserAutomationCommandKind</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_MetaKey_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.MetaKey*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_MetaKey" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.MetaKey">
+  MetaKey
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets meta key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool MetaKey { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Result_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Result*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Result" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Result">
+  Result
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets result.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Result { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Selector_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Selector*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Selector" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Selector">
+  Selector
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets selector.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Selector { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_ShiftKey_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.ShiftKey*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_ShiftKey" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.ShiftKey">
+  ShiftKey
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets shift key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool ShiftKey { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Status_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Status*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Status" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Status">
+  Status
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets status.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public AutomationRequestStatus Status { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.AutomationRequestStatus.html">AutomationRequestStatus</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Text_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Text*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Text" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Text">
+  Text
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets text.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Text { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_X_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.X*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_X" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.X">
+  X
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets horizontal position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double X { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Y_" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Y*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_BrowserAutomationCommand_Y" data-uid="PublisherStudio.BusinessObjects.BrowserAutomationCommand.Y">
+  Y
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets vertical position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double Y { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+</div></section>
+</div></section></article>
+
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          PublisherStudio 2.1.9 Â· generated documentation
+        </div>
+      </div>
+    </footer>
+  <script type="module" src="../styles/publisherstudio-kawaii.js?v=8bb20edf66bf" data-publisherstudio-kawaii-script="true"></script>
+</body>
+</html>

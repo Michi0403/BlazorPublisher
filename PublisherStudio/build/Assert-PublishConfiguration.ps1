@@ -143,12 +143,17 @@ if ($release -match 'PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract
     Fail 'Build-Release.ps1 must consume the reviewed profiles instead of overriding their application/setup packaging policies.'
 }
 foreach ($required in @(
-    'Compress-Archive -Path $appFolder -DestinationPath $appZip',
-    'Compress-Archive -Path $setupFolder -DestinationPath $setupZip',
+    'function New-PublisherStudioReleaseArchive',
+    'New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip',
+    'New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip',
     'Assert-ReleaseArchiveLayout -ArchivePath $appZip',
-    'Assert-ReleaseArchiveLayout -ArchivePath $setupZip'
+    'Assert-ReleaseArchiveLayout -ArchivePath $setupZip',
+    '$entry.LastWriteTime = [DateTimeOffset]::new(1980, 1, 1, 0, 0, 0, [TimeSpan]::Zero)'
 )) {
-    if (-not $release.Contains($required)) { Fail "Build-Release.ps1 is missing the LocalGPT-aligned archive contract: $required" }
+    if (-not $release.Contains($required)) { Fail "Build-Release.ps1 is missing the verified archive contract: $required" }
+}
+if ($release.Contains('Compress-Archive')) {
+    Fail 'Build-Release.ps1 may not use Compress-Archive for release payloads; the verified retrying ZIP writer is required.'
 }
 foreach ($forbidden in @(
     'Write-ReleaseManifest',

@@ -5,7 +5,7 @@ The previous workflow tried to publish
 listed in `.gitignore`, so it exists after a local documentation build but does not
 exist in a clean GitHub Actions checkout.
 
-R4 publishes `.github/pages/publisherstudio-kawaii-docs.zip`, a tracked snapshot of the
+R4 publishes the repository-root `.github/pages/publisherstudio-kawaii-docs.zip`, a tracked snapshot of the
 same generated site. The workflow performs path-safety checks, validates the Kawaii
 theme, persistent theme selector, API pages and cat-paw favicon, then uploads the
 extracted tree as the Pages artifact.
@@ -16,4 +16,4 @@ workflow no longer deploys from release tags, so the tag protection that rejecte
 `v2.1.4` is not involved.
 
 
-After a successful PublisherStudio build, run `Update-GitHubPagesSnapshot.cmd` to replace the tracked snapshot with the exact generated DocFX tree from `wwwroot/help-docs`. This is the PublisherStudio-named maintenance step; the workflow and validator stay line-for-line shaped like LocalGPT.
+After a successful PublisherStudio build, run `Update-GitHubPagesSnapshot.cmd` from the `PublisherStudio` directory to replace the tracked snapshot with the exact generated DocFX tree from `wwwroot/help-docs`. This is the PublisherStudio-named maintenance step; the workflow and validator stay line-for-line shaped like LocalGPT.

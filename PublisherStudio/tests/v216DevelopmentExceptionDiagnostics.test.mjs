@@ -38,9 +38,9 @@ test('host termination and endpoint cleanup failures have explicit logging', () 
   assert.match(program, /hostLogger\.LogError\(exception, "PublisherStudio could not remove its owned runtime endpoint/);
 });
 
-test('2.1.8 remains independent from the LocalGPT wire protocol version', () => {
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.8');
+test('2.1.9 remains independent from the LocalGPT wire protocol version', () => {
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.9<\/Version>/);
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.9');
   assert.match(read('Directory.Build.props'), /<LocalGptWireProtocolVersion>2\.1\.1<\/LocalGptWireProtocolVersion>/);
 });

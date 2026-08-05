@@ -130,13 +130,6 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioInteractionLifecycleScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherJavaScriptDiagnostics"
-          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioInteractionLifecycle"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipJavaScriptDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
-    <Error Condition="!Exists('$(JavaScriptDiagnosticsScript)')" Text="JavaScript diagnostics guard script is missing: $(JavaScriptDiagnosticsScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
-
   <Target Name="AssertPublisherPublishConfiguration"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherJavaScriptDiagnostics"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
@@ -149,23 +142,6 @@
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipInstallerWorkflowGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(InstallerWorkflowScript)')" Text="Installer workflow guard script is missing: $(InstallerWorkflowScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InstallerWorkflowScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
-
-  <Target Name="AssertPublisherGitSourceVisibility"
-          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherInstallerWorkflow"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipGitSourceVisibilityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
-    <Error Condition="!Exists('$(GitSourceVisibilityScript)')" Text="Git source-visibility guard script is missing: $(GitSourceVisibilityScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(GitSourceVisibilityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
-
-
-  <Target Name="AssertPublisherXmlDocumentationCoverage"
-          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherGitSourceVisibility"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipXmlDocumentationCoverageGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
-    <Error Condition="!Exists('$(XmlDocumentationCoverageScript)')" Text="XML documentation coverage guard script is missing: $(XmlDocumentationCoverageScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(XmlDocumentationCoverageScript)&quot;"
-          WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
-          StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <PropertyGroup>

@@ -29,15 +29,15 @@ The wrapper names vary by operating system and architecture, but the product roo
 
 Double-clicking `PublisherStudio.Setup.exe` performs the normal install/update path:
 
-1. download the matching application release;
-2. extract it into `%LOCALAPPDATA%\PublisherStudio`;
-3. download and refresh the matching setup release;
+1. resolve and download the exact matching application and setup release assets;
+2. validate both ZIP wrappers and required executables before changing the installation;
+3. extract both archives into `%LOCALAPPDATA%\PublisherStudio`;
 4. ensure FFmpeg is available;
 5. create the required Desktop and Start Menu shortcuts;
 6. start PublisherStudio on port `58071`.
 
 No command-line argument is required.
-The setup queries the newest published GitHub release and requires exact runtime assets. On Windows x64 those assets are `winx64.zip` and `setupwinx64.zip`; a missing pair is an error rather than permission to install another architecture.
+The setup first uses GitHub's exact `releases/latest/download` asset URL and falls back to the release API when necessary. It requires exact runtime assets. On Windows x64 those assets are `winx64.zip` and `setupwinx64.zip`; a missing pair is an error rather than permission to install another architecture.
 
 
 ## Updates

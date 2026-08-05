@@ -23,7 +23,7 @@ src/PublisherStudio.Web/wwwroot/vendor/devextreme-license.version
 packages/*.nupkg
 packages/*.download
 
-# Keep build gates, regression tests and localization catalogs visible to Git.
+# Keep maintained build gates and localization catalogs visible to Git.
 !Directory.Build.targets
 !Build-LocalDevelopment.ps1
 !Build-Release.ps1
@@ -32,8 +32,6 @@ packages/*.download
 !build/*.ps1
 !build/*.json
 !build/*.sha256
-!tests/
-!tests/*.mjs
 !src/PublisherStudio.Web/Localization/
 !src/PublisherStudio.Web/Localization/*.json
 
@@ -47,3 +45,18 @@ src/PublisherStudio.Web/wwwroot/help-docs/
 
 
 !Update-GitHubPagesSnapshot.cmd
+
+# Generated source/package staging and Python caches
+__pycache__/
+*.pyc
+.publisherstudio-pages-*/
+
+# The tracked Pages ZIP is maintained under .github/pages; generated site trees stay ignored.
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
+!.github/scripts/
+!.github/scripts/*.py
+!.github/pages/
+!.github/pages/README.md
+!.github/pages/publisherstudio-kawaii-docs.zip

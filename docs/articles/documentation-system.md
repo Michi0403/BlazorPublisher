@@ -24,6 +24,6 @@ The decoration is a smile, not a fog machine: headings stay clear, code remains 
 
 ## GitHub Pages
 
-GitHub Pages uses the same pinned-snapshot workflow as LocalGPT. The tracked repository-root `.github/pages/publisherstudio-kawaii-docs.zip` is validated for path safety, the persistent theme selector, the cat-paw favicon, relative project-page links, and API pages before deployment.
+GitHub Pages uses the same pinned-snapshot workflow as LocalGPT. The tracked `.github/pages/publisherstudio-kawaii-docs.zip` is validated for safe archive paths, the persistent theme selector, the cat-paw favicon, and a complete API page set before deployment.
 
-After a successful application build, run `Update-GitHubPagesSnapshot.cmd` to refresh the publication payload from the exact generated `wwwroot/help-docs` tree. The command repairs DocFX namespace landing pages, validates all remaining local links, and updates both the authoritative `.github/pages/publisherstudio-kawaii-docs.zip` workflow snapshot and the repository-root `/docs` no-Jekyll mirror. The mirror keeps branch-based Pages configuration operational while the workflow publishes the same validated content when Pages is configured for GitHub Actions.
+After a successful application build, run `Update-GitHubPagesSnapshot.cmd` to validate the exact generated `wwwroot/help-docs` tree and atomically replace the single tracked Pages ZIP. The GitHub Actions workflow extracts that snapshot, adds `.nojekyll`, validates it again, and publishes the resulting static artifact. No second documentation mirror or Jekyll build is used.

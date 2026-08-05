@@ -77,7 +77,7 @@ internal static class Program
 
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.1.9");
+        Console.WriteLine("PublisherStudio Setup 2.1.10");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");
@@ -1341,7 +1341,7 @@ internal static class Program
 
                 using var totalTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/2.1.9");
+                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/2.1.10");
                 request.Headers.Accept.ParseAdd("*/*");
                 if (resumeAt > 0)
                     request.Headers.Range = new RangeHeaderValue(resumeAt, null);
@@ -1622,8 +1622,8 @@ internal static class Program
             "win-x64" => "winx64",
             "win-x86" => "winx86",
             "win-arm64" => "winarm64",
-            "linux-x64" => "linx64",
-            "linux-arm64" => "linarm64",
+            "linux-x64" => "linuxx64",
+            "linux-arm64" => "linuxarm64",
             "osx-x64" => "macosx64",
             "osx-arm64" => "macosarm64",
             _ => throw new PlatformNotSupportedException(
@@ -1639,24 +1639,6 @@ internal static class Program
         var fileName = setupAsset ? "PublisherStudio.Setup" : "PublisherStudio.Web";
         return isWindows ? fileName + ".exe" : fileName;
     }
-
-    private static string GetPlatformToken()
-    {
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "win";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "lin";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macos";
-        return "";
-    }
-
-    private static string GetArchitectureToken() => RuntimeInformation.OSArchitecture switch
-    {
-        Architecture.X64 => "x64",
-        Architecture.X86 => "x86",
-        Architecture.Arm => "arm",
-        Architecture.Arm64 => "arm64",
-        _ => ""
-    };
 
     private static string GetRuntimeIdentifier()
     {
@@ -1679,9 +1661,8 @@ internal static class Program
 
     private static string GetRuntimeFolderName()
     {
-        var platform = GetPlatformToken();
-        var architecture = GetArchitectureToken();
-        return $"{platform}{architecture}";
+        var runtimeIdentifier = GetRuntimeIdentifier();
+        return Path.GetFileNameWithoutExtension(GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset: false));
     }
 
     private static void ValidateRepo(string repo, ILogger logger)
@@ -1704,7 +1685,7 @@ internal static class Program
         try
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "2.1.9"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "2.1.10"));
             client.Timeout = Timeout.InfiniteTimeSpan;
             return client;
         }

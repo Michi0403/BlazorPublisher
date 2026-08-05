@@ -28,11 +28,11 @@ All supported runtimes can be built sequentially with:
 .\Build-AllRuntimes.ps1
 ```
 
-The release lane restores the authoritative LocalGPT wire protocol package, publishes the application and standalone setup, validates configuration and documentation, then creates manifest-backed archives.
+The release lane restores the authoritative LocalGPT wire protocol package, publishes the application and standalone setup, validates configuration and documentation, then creates validated runtime-wrapper archives.
 
 ## Quality gates
 
-The maintained build checks architecture, diagnostics, localization, InteractiveServer render modes, async continuations, component boundaries, text ownership, iterator policy, system-variable initialization, JavaScript diagnostics, publish profiles, installer workflow, XML documentation coverage, and documentation output.
+The maintained build checks architecture, diagnostics, localization, InteractiveServer render modes, async continuations, component boundaries, text ownership, iterator policy, system-variable initialization, publish profiles, installer workflow, PowerShell 5.1 compatibility, and documentation output.
 
 ## Release record
 

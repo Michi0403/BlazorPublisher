@@ -14,6 +14,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+& (Join-Path $root "build\Assert-PowerShellCompatibility.ps1")
 $artifacts = Join-Path $root "artifacts\release"
 $packageDirectory = Join-Path $root "packages"
 $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
@@ -106,8 +107,8 @@ function Resolve-ReleaseProfile {
         "win-x64"     { return @{ AppAsset = "winx64.zip";     SetupAsset = "setupwinx64.zip";     AppProfile = "winx64";     SetupProfile = "winx64";     AppFolder = "winx64";     SetupFolder = "setupwinx64" } }
         "win-x86"     { return @{ AppAsset = "winx86.zip";     SetupAsset = "setupwinx86.zip";     AppProfile = "winx86";     SetupProfile = "winx86";     AppFolder = "winx86";     SetupFolder = "setupwinx86" } }
         "win-arm64"   { return @{ AppAsset = "winarm64.zip";   SetupAsset = "setupwinarm64.zip";   AppProfile = "winarm64";   SetupProfile = "winarm64";   AppFolder = "winarm64";   SetupFolder = "setupwinarm64" } }
-        "linux-x64"   { return @{ AppAsset = "linx64.zip";     SetupAsset = "setuplinx64.zip";     AppProfile = "linx64";     SetupProfile = "linx64";     AppFolder = "linx64";     SetupFolder = "setuplinx64" } }
-        "linux-arm64" { return @{ AppAsset = "linarm64.zip";   SetupAsset = "setuplinarm64.zip";   AppProfile = "linarm64";   SetupProfile = "linarm64";   AppFolder = "linarm64";   SetupFolder = "setuplinarm64" } }
+        "linux-x64"   { return @{ AppAsset = "linuxx64.zip";     SetupAsset = "setuplinuxx64.zip";     AppProfile = "linuxx64";     SetupProfile = "linuxx64";     AppFolder = "linuxx64";     SetupFolder = "setuplinuxx64" } }
+        "linux-arm64" { return @{ AppAsset = "linuxarm64.zip";   SetupAsset = "setuplinuxarm64.zip";   AppProfile = "linuxarm64";   SetupProfile = "linuxarm64";   AppFolder = "linuxarm64";   SetupFolder = "setuplinuxarm64" } }
         "osx-x64"     { return @{ AppAsset = "macosx64.zip";   SetupAsset = "setupmacosx64.zip";   AppProfile = "macosx64";   SetupProfile = "macosx64";   AppFolder = "macosx64";   SetupFolder = "setupmacosx64" } }
         "osx-arm64"   { return @{ AppAsset = "macosarm64.zip"; SetupAsset = "setupmacosarm64.zip"; AppProfile = "macosarm64"; SetupProfile = "macosarm64"; AppFolder = "macosarm64"; SetupFolder = "setupmacosarm64" } }
         default { throw "Unsupported release runtime: $Rid" }

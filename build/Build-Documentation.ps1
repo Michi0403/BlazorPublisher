@@ -10,12 +10,6 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$namespaceRepairScript = Join-Path $PSScriptRoot "Repair-DocfxNamespacePages.ps1"
-if (-not (Test-Path -LiteralPath $namespaceRepairScript -PathType Leaf)) {
-    throw "PublisherStudio DocFX namespace repair script was not found: $namespaceRepairScript"
-}
-. $namespaceRepairScript
-
 function Set-Utf8TextFileIdempotent {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -67,7 +61,6 @@ $toolSource = "unavailable"
 $apiYamlCount = 0
 $apiHtmlCount = 0
 $apiNavigationGroupCount = 0
-$apiNamespacePageCount = 0
 $xmlCommentPolishCount = 0
 $articleSourceCount = @(
     Get-ChildItem -LiteralPath $docsRoot -Filter "*.md" -File -Recurse -ErrorAction SilentlyContinue |
@@ -2198,11 +2191,6 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
                     if ($apiNavigationGroupCount -eq 0) {
                         $warnings.Add("The DocFX site rendered successfully, but no API member-section navigation groups were discovered.")
                     }
-                    $apiNamespacePageCount = Repair-PublisherStudioDocfxNamespacePages -SiteRoot $siteRoot
-                    if ($apiNamespacePageCount -gt 0) {
-                        Write-Host "Materialized $apiNamespacePageCount missing DocFX namespace landing page(s)." -ForegroundColor Green
-                        $apiHtmlCount = @(Get-ChildItem -LiteralPath $apiHtmlRoot -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue).Count
-                    }
                     $websiteThemeAssetCount = Install-PublisherStudioWebsiteThemeAssets -SiteRoot $siteRoot
                     if ($websiteThemeAssetCount -eq 0) {
                         $warnings.Add("The DocFX site rendered successfully, but the cache-busted PublisherStudio website theme was not injected into any HTML page.")
@@ -2372,7 +2360,7 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
     if ($RequirePdf -and -not $pdfGenerated) {
         $pdfFailureDetails = @(
             $warnings |
-                Where-Object { $_ -match '(?i)(DocFX HTML|print-book|browser PDF|Microsoft Edge|Google Chrome|Chromium|DocFX PDF|Node\.js|Playwright)' } |
+                Where-Object { $_ -match '(?i)(DocFX|print-book|browser PDF|Microsoft Edge|Google Chrome|Chromium|Node\.js|Playwright)' } |
                 Select-Object -Last 6
         ) -join " | "
         if ([string]::IsNullOrWhiteSpace($pdfFailureDetails)) {
@@ -2418,7 +2406,6 @@ foreach ($publishRoot in $publishRoots) {
         apiYamlCount = $apiYamlCount
         apiHtmlCount = $apiHtmlCount
         apiNavigationGroupCount = $apiNavigationGroupCount
-        apiNamespacePageCount = $apiNamespacePageCount
         websiteThemeAssetCount = $websiteThemeAssetCount
         pdfBytes = $pdfFileSize
         pdfBytesBeforeCompression = $pdfBytesBeforeCompression

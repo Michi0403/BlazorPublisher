@@ -12,6 +12,7 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+& (Join-Path $root "build\Assert-PowerShellCompatibility.ps1")
 $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 $packageDirectory = Join-Path $root "packages"

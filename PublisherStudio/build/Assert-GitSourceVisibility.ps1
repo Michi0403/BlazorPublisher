@@ -17,6 +17,7 @@ $protectedPaths = @(
     'Update-GitHubPagesSnapshot.cmd',
     'build/Assert-GitSourceVisibility.ps1',
     'build/Build-Documentation.ps1',
+    'build/Repair-DocfxNamespacePages.ps1',
     'build/Update-GitHubPagesSnapshot.ps1',
     'build/Add-XmlDocumentation.py',
     'build/Assert-XmlDocumentationCoverage.py',
@@ -57,6 +58,7 @@ $protectedPaths = @(
     'CHANGELOG-v2.1.1.md',
     'CHANGELOG-v2.1.2.md',
     'CHANGELOG-v2.1.9.md',
+    'CHANGELOG-v2.1.9-pages-hotfix.md',
     'DOCUMENTATION-PUBLISHING-R4.md',
     'AGENTS.md',
     'src/PublisherStudio.InstallerConsole/README.md',
@@ -97,6 +99,7 @@ $protectedPaths = @(
     'tests/v211LocalGptInstallerHealing.test.mjs',
     'tests/v213LocalGptParityRepair.test.mjs',
     'tests/v219PagesReleaseCompletion.test.mjs',
+    'tests/v219PagesNamespaceRepair.test.mjs',
     'tests/applicationArchitecturePolicy.test.mjs',
     'tests/final14RenderModeGuard.test.mjs',
     'tests/final16BuildGuardRegressions.test.mjs',
@@ -134,7 +137,10 @@ $repositoryProtectedPaths = @(
     '.github/workflows/publish-shipped-docs.yml',
     '.github/scripts/prepare-pages-artifact.py',
     '.github/pages/publisherstudio-kawaii-docs.zip',
-    '.github/pages/README.md'
+    '.github/pages/README.md',
+    'docs/.nojekyll',
+    'docs/index.html',
+    'docs/documentation-status.json'
 )
 if (-not (Test-Path -LiteralPath $ignorePath -PathType Leaf)) { Fail "Missing $ignorePath" }
 $ignoreLines = @([System.IO.File]::ReadAllLines($ignorePath) | ForEach-Object { $_.Trim() })

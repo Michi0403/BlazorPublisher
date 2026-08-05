@@ -25,3 +25,6 @@ Run the maintained commands from `PublisherStudio/`:
 GitHub Pages automation is intentionally stored at repository root in [`.github/`](.github/), because GitHub Actions does not discover workflows nested inside the product directory. The workflow publishes the tracked, validated Kawaii documentation snapshot.
 
 See [`PublisherStudio/README.md`](PublisherStudio/README.md), [`PublisherStudio/RELEASE.md`](PublisherStudio/RELEASE.md), and [`PublisherStudio/VALIDATION.md`](PublisherStudio/VALIDATION.md).
+
+
+GitHub Pages publication is dual-path and deterministic: the validated snapshot is stored in `.github/pages/publisherstudio-kawaii-docs.zip`, while `/docs` is the matching `.nojekyll` branch-publication mirror. `PublisherStudio\Update-GitHubPagesSnapshot.cmd` replaces both together.

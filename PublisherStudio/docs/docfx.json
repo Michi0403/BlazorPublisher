@@ -39,7 +39,7 @@
     "globalMetadata": {
       "_appName": "PublisherStudio",
       "_appTitle": "PublisherStudio Documentation",
-      "_appFooter": "PublisherStudio 2.1.9 Â· generated documentation",
+      "_appFooter": "PublisherStudio 2.1.9 · generated documentation",
       "_enableSearch": true,
       "_disableContribution": true,
       "_disableTocFilter": false,
@@ -49,3 +49,8 @@
     }
   }
 }
+
+
+
+
+

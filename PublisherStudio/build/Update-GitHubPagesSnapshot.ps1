@@ -1,6 +1,7 @@
 param(
     [string]$DocumentationRoot = "",
-    [string]$OutputArchive = ""
+    [string]$OutputArchive = "",
+    [string]$BranchPagesRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -31,6 +32,12 @@ if ([string]::IsNullOrWhiteSpace($OutputArchive)) {
     $OutputArchive = Join-Path $repositoryRoot ".github\pages\publisherstudio-kawaii-docs.zip"
 }
 $OutputArchive = [IO.Path]::GetFullPath($OutputArchive)
+
+if ([string]::IsNullOrWhiteSpace($BranchPagesRoot)) {
+    $BranchPagesRoot = Join-Path $repositoryRoot "docs"
+}
+$BranchPagesRoot = [IO.Path]::GetFullPath($BranchPagesRoot)
+
 $validator = Join-Path $repositoryRoot ".github\scripts\prepare-pages-artifact.py"
 if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
     throw "Repository-root GitHub Pages validator was not found: $validator"
@@ -40,21 +47,39 @@ $python = Get-Command python -ErrorAction SilentlyContinue
 if ($null -eq $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
 if ($null -eq $python) { throw "Python was not found. Python 3 is required to validate the GitHub Pages snapshot." }
 
-$temporaryValidationRoot = Join-Path ([IO.Path]::GetTempPath()) ("PublisherStudio-Pages-" + [Guid]::NewGuid().ToString("N"))
-$temporaryArchive = "$OutputArchive.$([Guid]::NewGuid().ToString('N')).tmp"
+$operationId = [Guid]::NewGuid().ToString("N")
+$temporaryPreparedRoot = Join-Path ([IO.Path]::GetTempPath()) ("PublisherStudio-Pages-Prepared-" + $operationId)
+$temporaryVerificationRoot = Join-Path ([IO.Path]::GetTempPath()) ("PublisherStudio-Pages-Verify-" + $operationId)
+$temporaryArchive = "$OutputArchive.$operationId.tmp"
+$branchStage = Join-Path $repositoryRoot (".publisherstudio-pages-stage-" + $operationId)
+$archiveBackup = "$OutputArchive.$operationId.backup"
+$branchBackup = Join-Path $repositoryRoot (".publisherstudio-pages-backup-" + $operationId)
+$archiveInstalled = $false
+$branchInstalled = $false
+
 try {
-    & $python.Source $validator --source $DocumentationRoot --output $temporaryValidationRoot --expected-version $expectedVersion
-    if ($LASTEXITCODE -ne 0) { throw "Generated PublisherStudio documentation did not pass the GitHub Pages validator for version $expectedVersion." }
+    # Prepare a repaired, validated copy first. The source tree is never packaged directly.
+    & $python.Source $validator --source $DocumentationRoot --output $temporaryPreparedRoot --expected-version $expectedVersion
+    if ($LASTEXITCODE -ne 0) {
+        throw "Generated PublisherStudio documentation did not pass the GitHub Pages validator for version $expectedVersion."
+    }
+
+    # Runtime deployment metadata contains machine-local paths and is generated again by Actions.
+    Remove-Item -LiteralPath (Join-Path $temporaryPreparedRoot "github-pages-deployment.json") -Force -ErrorAction SilentlyContinue
+    if (-not (Test-Path -LiteralPath (Join-Path $temporaryPreparedRoot ".nojekyll") -PathType Leaf)) {
+        [IO.File]::WriteAllText((Join-Path $temporaryPreparedRoot ".nojekyll"), [string]::Empty, [Text.UTF8Encoding]::new($false))
+    }
 
     $archiveDirectory = Split-Path -Parent $OutputArchive
     New-Item -ItemType Directory -Path $archiveDirectory -Force | Out-Null
 
     Add-Type -AssemblyName System.IO.Compression -ErrorAction SilentlyContinue
     Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
-    $sourceRoot = $DocumentationRoot.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
-    $files = @(Get-ChildItem -LiteralPath $sourceRoot -File -Recurse | Sort-Object FullName)
-    if ($files.Count -eq 0) { throw "Generated PublisherStudio documentation directory is empty: $sourceRoot" }
+    $sourceRoot = $temporaryPreparedRoot.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+    $files = @(Get-ChildItem -LiteralPath $sourceRoot -File -Recurse -Force | Sort-Object FullName)
+    if ($files.Count -eq 0) { throw "Prepared PublisherStudio documentation directory is empty: $sourceRoot" }
 
+    Remove-Item -LiteralPath $temporaryArchive -Force -ErrorAction SilentlyContinue
     $archive = [IO.Compression.ZipFile]::Open($temporaryArchive, [IO.Compression.ZipArchiveMode]::Create)
     try {
         foreach ($file in $files) {
@@ -101,15 +126,72 @@ try {
     }
     finally { $verification.Dispose() }
 
-    Remove-Item -LiteralPath $temporaryValidationRoot -Recurse -Force -ErrorAction SilentlyContinue
-    & $python.Source $validator --archive $temporaryArchive --output $temporaryValidationRoot --expected-version $expectedVersion
-    if ($LASTEXITCODE -ne 0) { throw "The new PublisherStudio GitHub Pages snapshot did not pass final validation for version $expectedVersion." }
+    & $python.Source $validator --archive $temporaryArchive --output $temporaryVerificationRoot --expected-version $expectedVersion
+    if ($LASTEXITCODE -ne 0) {
+        throw "The new PublisherStudio GitHub Pages snapshot did not pass final validation for version $expectedVersion."
+    }
 
-    Remove-Item -LiteralPath $OutputArchive -Force -ErrorAction SilentlyContinue
-    [IO.File]::Move($temporaryArchive, $OutputArchive)
-    Write-Host "Updated repository-root PublisherStudio $expectedVersion GitHub Pages snapshot: $OutputArchive" -ForegroundColor Green
+    # Keep a branch-publishing mirror as a no-Jekyll fallback. This makes the repository
+    # work even when GitHub Pages is still configured for /docs instead of GitHub Actions.
+    Remove-Item -LiteralPath $branchStage -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path $branchStage -Force | Out-Null
+    foreach ($item in @(Get-ChildItem -LiteralPath $temporaryPreparedRoot -Force)) {
+        Copy-Item -LiteralPath $item.FullName -Destination $branchStage -Recurse -Force
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $branchStage "index.html") -PathType Leaf)) {
+        throw "Prepared branch Pages mirror does not contain index.html."
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $branchStage ".nojekyll") -PathType Leaf)) {
+        throw "Prepared branch Pages mirror does not contain .nojekyll."
+    }
+
+    # Replace archive and /docs mirror as one rollback-capable publication transaction.
+    Remove-Item -LiteralPath $archiveBackup -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $branchBackup -Recurse -Force -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $OutputArchive -PathType Leaf) {
+        [IO.File]::Move($OutputArchive, $archiveBackup)
+    }
+    if (Test-Path -LiteralPath $BranchPagesRoot -PathType Container) {
+        [IO.Directory]::Move($BranchPagesRoot, $branchBackup)
+    }
+
+    try {
+        [IO.File]::Move($temporaryArchive, $OutputArchive)
+        $archiveInstalled = $true
+        [IO.Directory]::Move($branchStage, $BranchPagesRoot)
+        $branchInstalled = $true
+    }
+    catch {
+        if ($branchInstalled -and (Test-Path -LiteralPath $BranchPagesRoot -PathType Container)) {
+            Remove-Item -LiteralPath $BranchPagesRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        if (Test-Path -LiteralPath $branchBackup -PathType Container) {
+            [IO.Directory]::Move($branchBackup, $BranchPagesRoot)
+        }
+        if ($archiveInstalled -and (Test-Path -LiteralPath $OutputArchive -PathType Leaf)) {
+            Remove-Item -LiteralPath $OutputArchive -Force -ErrorAction SilentlyContinue
+        }
+        if (Test-Path -LiteralPath $archiveBackup -PathType Leaf) {
+            [IO.File]::Move($archiveBackup, $OutputArchive)
+        }
+        throw
+    }
+
+    Remove-Item -LiteralPath $archiveBackup -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $branchBackup -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "Updated PublisherStudio $expectedVersion GitHub Pages snapshot and repository /docs mirror." -ForegroundColor Green
+    Write-Host "Snapshot: $OutputArchive" -ForegroundColor Green
+    Write-Host "Branch mirror: $BranchPagesRoot" -ForegroundColor Green
 }
 finally {
-    Remove-Item -LiteralPath $temporaryValidationRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $temporaryPreparedRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $temporaryVerificationRoot -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $temporaryArchive -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $branchStage -Recurse -Force -ErrorAction SilentlyContinue
+    if (-not $archiveInstalled -and (Test-Path -LiteralPath $archiveBackup -PathType Leaf) -and -not (Test-Path -LiteralPath $OutputArchive -PathType Leaf)) {
+        [IO.File]::Move($archiveBackup, $OutputArchive)
+    }
+    if (-not $branchInstalled -and (Test-Path -LiteralPath $branchBackup -PathType Container) -and -not (Test-Path -LiteralPath $BranchPagesRoot -PathType Container)) {
+        [IO.Directory]::Move($branchBackup, $BranchPagesRoot)
+    }
 }

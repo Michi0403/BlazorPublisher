@@ -72,3 +72,6 @@ The release lane validates architecture, localization, diagnostics, XML document
 PublisherStudio is licensed under Apache-2.0. DevExpress components require a valid DevExpress license on development and build machines. Generated public runtime-license assets are included in release output; private license material is never copied into the application.
 
 See `LICENSE`, `LICENSE.MD`, and `THIRD-PARTY-NOTICES.md`.
+
+
+The Pages updater maintains both the GitHub Actions snapshot and the repository-root `/docs` `.nojekyll` mirror, so publication does not depend on whether the repository is currently configured for Actions or branch-based Pages. Missing DocFX namespace landing pages are materialized before strict link validation.
